@@ -327,12 +327,16 @@ void main() {
             ],
           );
         }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
+        // Allow any fire-and-forget async work (triggered via `unawaited`) to complete.
+        // Without this, analytics events scheduled on the event queue may not run
+        // before assertions, causing flaky or failing tests.
+        await Future<void>.delayed(Duration.zero);
 
         expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
         expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
 
         expect(testFnCalled, equals(maxRetries + 1));
-        expect(fakeAnalytics.sentEvents, hasLength(9));
+        expect(fakeAnalytics.sentEvents, hasLength(12));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -340,6 +344,152 @@ void main() {
               label: 'gradle-random-event-label-failure',
               buildType: 'gradle',
               settings: 'androidGradlePluginVersion: null',
+            ),
+          ),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterTrackAndroidDependencies(
+              success: false,
+              label: 'gradle-random-event-label-failure',
+              isModule: false,
+              jdkVersion: 19,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+    );
+
+    testUsingContext(
+      'Can retry build and eventually succeed',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+
+        const failingCmd = FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-q',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            '-Ptarget=lib/main.dart',
+            '-Pbase-application-name=android.app.Application',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=false',
+            'assembleRelease',
+          ],
+          exitCode: 1,
+          stderr: '\nSome gradle message\n',
+        );
+
+        const successCmd = FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-q',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            '-Ptarget=lib/main.dart',
+            '-Pbase-application-name=android.app.Application',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=false',
+            'assembleRelease',
+          ],
+        );
+
+        const maxRetries = 2;
+
+        processManager.addCommand(failingCmd);
+        for (var i = 0; i < maxRetries - 1; i++) {
+          processManager.addCommand(failingCmd);
+        }
+
+        processManager.addCommand(successCmd);
+
+        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+        fileSystem
+            .directory('build')
+            .childDirectory('app')
+            .childDirectory('outputs')
+            .childDirectory('flutter-apk')
+            .childFile('app-release.apk')
+            .createSync(recursive: true);
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        var testFnCalled = 0;
+
+        await builder.buildGradleApp(
+          maxRetries: maxRetries,
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          configOnly: false,
+          localGradleErrors: <GradleHandledError>[
+            GradleHandledError(
+              test: (String line) {
+                if (line.contains('Some gradle message')) {
+                  testFnCalled++;
+                  return true;
+                }
+                return false;
+              },
+              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
+                return GradleBuildStatus.retry;
+              },
+              eventLabel: 'random-event-label',
+            ),
+          ],
+        );
+
+        // Allow any fire-and-forget async work (triggered via `unawaited`) to complete.
+        // Without this, analytics events scheduled on the event queue may not run
+        // before assertions, causing flaky or failing tests.
+        await Future<void>.delayed(Duration.zero);
+
+        expect(logger.statusText, contains('Retrying Gradle Build: #1, wait time: 100ms'));
+        expect(logger.statusText, contains('Retrying Gradle Build: #2, wait time: 200ms'));
+
+        expect(testFnCalled, equals(maxRetries));
+
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterTrackAndroidDependencies(
+              success: true,
+              label: 'gradle-random-event-label-success',
+              isModule: false,
+              jdkVersion: 19,
             ),
           ),
         );
@@ -423,10 +573,13 @@ void main() {
             ],
           );
         }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
-
+        // Allow any fire-and-forget async work (triggered via `unawaited`) to complete.
+        // Without this, analytics events scheduled on the event queue may not run
+        // before assertions, causing flaky or failing tests.
+        await Future<void>.delayed(Duration.zero);
         expect(handlerCalled, isTrue);
 
-        expect(fakeAnalytics.sentEvents, hasLength(3));
+        expect(fakeAnalytics.sentEvents, hasLength(4));
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -434,6 +587,17 @@ void main() {
               label: 'gradle-random-event-label-failure',
               buildType: 'gradle',
               settings: 'androidGradlePluginVersion: null',
+            ),
+          ),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.flutterTrackAndroidDependencies(
+              success: false,
+              label: 'gradle-random-event-label-failure',
+              isModule: false,
+              jdkVersion: 19,
             ),
           ),
         );
