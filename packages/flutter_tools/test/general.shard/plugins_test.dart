@@ -2323,7 +2323,7 @@ flutter:
     );
 
     testWithoutContext(
-      'Symlink failures instruct developers to have their project on the same drive as their SDK',
+      'Symlink failures explain same-drive and filesystem-support requirements',
       () async {
         final Platform platform = FakePlatform(operatingSystem: 'windows');
         final os = FakeOperatingSystemUtils('Microsoft Windows [Version 10.0.14972]');
@@ -2338,8 +2338,19 @@ flutter:
             source: pubCachePath,
             destination: ephemeralPackagePath,
           ),
+          throwsToolExit(message: 'Make sure your Flutter project and pub cache are on the same drive.'),
+        );
+        expect(
+          () => handleSymlinkException(
+            e,
+            platform: platform,
+            os: os,
+            source: pubCachePath,
+            destination: ephemeralPackagePath,
+          ),
           throwsToolExit(
-            message: 'Try moving your Flutter project to the same drive as your Flutter SDK',
+            message:
+                'This can also happen when symlinks are unsupported by the filesystem, such as on Windows ReFS Dev Drives.',
           ),
         );
       },
