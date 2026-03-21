@@ -39,8 +39,8 @@ class BottomSheetExample extends StatelessWidget {
                 height: 200,
                 child: Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: .center,
+                    mainAxisSize: .min,
                     children: <Widget>[
                       const Text('Modal BottomSheet'),
                       ElevatedButton(

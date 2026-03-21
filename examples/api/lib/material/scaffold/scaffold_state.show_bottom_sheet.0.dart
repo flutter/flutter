@@ -37,8 +37,8 @@ class ShowBottomSheetExample extends StatelessWidget {
               color: Colors.amber,
               child: Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: .center,
+                  mainAxisSize: .min,
                   children: <Widget>[
                     const Text('BottomSheet'),
                     ElevatedButton(

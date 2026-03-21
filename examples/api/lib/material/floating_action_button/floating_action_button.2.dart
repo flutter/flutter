@@ -28,10 +28,10 @@ class FloatingActionButtonExample extends StatelessWidget {
       return DecoratedBox(
         decoration: BoxDecoration(
           color: colorScheme.inverseSurface,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: .circular(4),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const .symmetric(horizontal: 8, vertical: 4),
           child: Text(
             title,
             style: TextStyle(color: colorScheme.onInverseSurface),
@@ -44,11 +44,11 @@ class FloatingActionButtonExample extends StatelessWidget {
       appBar: AppBar(title: const Text('FAB Additional Color Mappings')),
       body: Center(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[
             // Surface color mapping.
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FloatingActionButton.large(
                   foregroundColor: colorScheme.primary,
@@ -64,7 +64,7 @@ class FloatingActionButtonExample extends StatelessWidget {
             ),
             // Secondary color mapping.
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FloatingActionButton.large(
                   foregroundColor: colorScheme.onSecondaryContainer,
@@ -80,7 +80,7 @@ class FloatingActionButtonExample extends StatelessWidget {
             ),
             // Tertiary color mapping.
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FloatingActionButton.large(
                   foregroundColor: colorScheme.onTertiaryContainer,

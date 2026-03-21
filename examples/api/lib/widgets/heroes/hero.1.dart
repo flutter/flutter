@@ -80,7 +80,7 @@ class HeroExample extends StatelessWidget {
         builder: (BuildContext context) => Scaffold(
           appBar: AppBar(title: const Text('Second Page')),
           body: Align(
-            alignment: Alignment.bottomRight,
+            alignment: .bottomRight,
             child: Stack(
               children: <Widget>[
                 Hero(

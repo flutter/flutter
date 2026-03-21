@@ -60,7 +60,7 @@ class _TextFieldShiftEnterExampleState
                         'Press Shift+Enter for a new line\n'
                         'Press Enter to submit'
                   : 'Submitted text:\n\n${_submittedText!}',
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
           ),
         ),
@@ -95,7 +95,7 @@ class _TextFieldShiftEnterExampleState
                   ),
             },
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const .all(12),
               child: TextField(
                 focusNode: _focusNode,
                 autofocus: true,
@@ -105,7 +105,7 @@ class _TextFieldShiftEnterExampleState
                   labelText: 'Text',
                 ),
                 maxLines: null,
-                textInputAction: TextInputAction.done,
+                textInputAction: .done,
                 onSubmitted: (String? text) {
                   setState(() {
                     _submittedText = text;

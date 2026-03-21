@@ -39,7 +39,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     final Color evenItemColor = colorScheme.primary.withValues(alpha: 0.15);
 
     return ReorderableListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       itemCount: _items.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(

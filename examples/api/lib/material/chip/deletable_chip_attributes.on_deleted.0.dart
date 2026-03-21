@@ -48,7 +48,7 @@ class CastListState extends State<CastList> {
   Iterable<Widget> get actorWidgets {
     return _cast.map((Actor actor) {
       return Padding(
-        padding: const EdgeInsets.all(4.0),
+        padding: const .all(4.0),
         child: Chip(
           avatar: CircleAvatar(child: Text(actor.initials)),
           label: Text(actor.name),

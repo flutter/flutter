@@ -19,7 +19,7 @@ class ColorSchemeExample extends StatefulWidget {
 
 class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Color selectedColor = ColorSeed.baseColor.color;
-  Brightness selectedBrightness = Brightness.light;
+  Brightness selectedBrightness = .light;
   double selectedContrast = 0.0;
   static const List<DynamicSchemeVariant> schemeVariants =
       DynamicSchemeVariant.values;
@@ -57,9 +57,9 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.only(top: 5),
+            padding: const .only(top: 5),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               children: <Widget>[
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -122,7 +122,7 @@ class _SettingsState extends State<Settings> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 200),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const .all(20.0),
           child: ListView(
             children: <Widget>[
               Center(
@@ -152,7 +152,7 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
               Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
+                crossAxisAlignment: .center,
                 children: <Widget>[
                   const Text('Seed color: '),
                   ...List<Widget>.generate(ColorSeed.values.length, (
@@ -229,16 +229,16 @@ class ColorSchemeVariantColumn extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15),
+            padding: const .symmetric(vertical: 15),
             child: Text(
               schemeVariant.name == 'tonalSpot'
                   ? '${schemeVariant.name} (Default)'
                   : schemeVariant.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: .bold),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: const .symmetric(horizontal: 15),
             child: ColorSchemeView(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: selectedColor,
@@ -500,7 +500,7 @@ class ColorGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Card(
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: .antiAlias,
         child: Column(children: children),
       ),
     );
@@ -516,7 +516,7 @@ class ColorChip extends StatelessWidget {
 
   static Color contrastColor(Color color) {
     final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
-    return brightness == Brightness.dark ? Colors.white : Colors.black;
+    return brightness == .dark ? Colors.white : Colors.black;
   }
 
   @override
@@ -525,7 +525,7 @@ class ColorChip extends StatelessWidget {
     return ColoredBox(
       color: color,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: Row(
           children: <Expanded>[
             Expanded(

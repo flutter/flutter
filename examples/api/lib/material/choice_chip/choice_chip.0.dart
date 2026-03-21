@@ -38,8 +38,8 @@ class _ActionChoiceExampleState extends State<ActionChoiceExample> {
       appBar: AppBar(title: const Text('ActionChoice Sample')),
       body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: .start,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Text('Choose an item', style: textTheme.labelLarge),
             const SizedBox(height: 10.0),

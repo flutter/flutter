@@ -21,7 +21,7 @@ class FilledButtonApp extends StatelessWidget {
         appBar: AppBar(title: const Text('FilledButton Sample')),
         body: Center(
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: <Widget>[
               Column(
                 children: <Widget>[

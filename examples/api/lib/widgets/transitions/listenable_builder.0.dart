@@ -129,21 +129,21 @@ class ListenableBuilderExample extends StatelessWidget {
           child: SizedBox(
             width: 300,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const .all(8.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: <Widget>[
                   const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
+                    padding: .only(bottom: 8),
                     child: MyField(label: 'Company'),
                   ),
                   FocusListenerContainer(
-                    padding: const EdgeInsets.all(8),
+                    padding: const .all(8),
                     border: const RoundedRectangleBorder(
                       side: BorderSide(
                         strokeAlign: BorderSide.strokeAlignOutside,
                       ),
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      borderRadius: .all(Radius.circular(5)),
                     ),
                     // The border side will get wider when the subtree has focus.
                     focusedSide: const BorderSide(
@@ -154,7 +154,7 @@ class ListenableBuilderExample extends StatelessWidget {
                     // the subtree has focus.
                     focusedColor: Colors.blue.shade50,
                     child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: .start,
                       children: <Widget>[
                         Text('Owner:'),
                         MyField(label: 'First Name'),

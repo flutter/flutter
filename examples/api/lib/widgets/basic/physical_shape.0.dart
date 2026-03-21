@@ -30,9 +30,7 @@ class PhysicalShapeExample extends StatelessWidget {
     return PhysicalShape(
       elevation: 5.0,
       clipper: ShapeBorderClipper(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: .circular(10.0)),
       ),
       color: Colors.orange,
       child: const SizedBox.square(

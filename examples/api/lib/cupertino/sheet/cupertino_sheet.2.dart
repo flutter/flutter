@@ -113,7 +113,7 @@ class _RestorableSheetState extends State<RestorableSheet>
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Counter current value:'),
             Text('${_counter.value}'),
@@ -204,11 +204,11 @@ class _CounterSheetScaffoldState extends State<CounterSheetScaffold>
     return CupertinoPageScaffold(
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Text('Current Count: ${_counter.value}'),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 CupertinoButton(
                   onPressed: () {
@@ -274,7 +274,7 @@ class _MultiplicationPageState extends State<MultiplicationPage>
     return CupertinoPageScaffold(
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Current Count'),
             Text(_counter.value.toString()),

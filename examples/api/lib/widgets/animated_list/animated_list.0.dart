@@ -111,7 +111,7 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const .all(16.0),
           child: AnimatedList(
             key: _listKey,
             initialItemCount: _list.length,
@@ -200,7 +200,7 @@ class CardItem extends StatelessWidget {
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
     }
     return Padding(
-      padding: const EdgeInsets.all(2.0),
+      padding: const .all(2.0),
       child: SizeTransition(
         sizeFactor: animation,
         child: GestureDetector(

@@ -40,7 +40,7 @@ class _TextFieldTapRegionExampleState extends State<TextFieldTapRegionExample> {
       children: <Widget>[
         Center(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const .all(20.0),
             child: SizedBox(
               width: 150,
               height: 80,
@@ -224,7 +224,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
               onChanged: (String value) =>
                   widget.onChanged?.call(widget.fromString(value)),
               controller: controller,
-              textAlign: TextAlign.center,
+              textAlign: .center,
             ),
           ),
           const SizedBox(width: 12),
@@ -234,7 +234,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
           // on non-mobile platforms.
           TextFieldTapRegion(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 Expanded(
                   child: OutlinedButton(

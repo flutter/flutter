@@ -37,7 +37,7 @@ class _CheckboxExampleState extends State<CheckboxExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         Checkbox(
           tristate: true,

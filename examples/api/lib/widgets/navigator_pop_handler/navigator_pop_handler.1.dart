@@ -290,7 +290,7 @@ class _LinksPage extends StatelessWidget {
       backgroundColor: backgroundColor,
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[Text(title), ...buttons],
         ),
       ),
@@ -307,7 +307,7 @@ class _UnknownPage extends StatelessWidget {
       backgroundColor: Colors.grey.withBlue(180),
       body: const Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[Text('404')],
         ),
       ),

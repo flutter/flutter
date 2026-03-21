@@ -32,7 +32,7 @@ class RadioListTileExample extends StatefulWidget {
 }
 
 class _RadioListTileExampleState extends State<RadioListTileExample> {
-  SingingCharacter? _character = SingingCharacter.lafayette;
+  SingingCharacter? _character = .lafayette;
 
   @override
   Widget build(BuildContext context) {
