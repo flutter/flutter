@@ -58,6 +58,7 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               (const std::shared_ptr<impeller::RuntimeStage>&),
               (override));
   MOCK_METHOD(bool, MakeRenderContextCurrent, (), (override));
+  MOCK_METHOD(sk_sp<DlImage>, CreateImageFromTexture, (int64_t), (override));
 
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetWeakPtr() {
     return weak_factory_.GetWeakPtr();

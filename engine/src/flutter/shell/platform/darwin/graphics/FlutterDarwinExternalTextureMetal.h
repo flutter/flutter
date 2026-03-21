@@ -62,6 +62,12 @@
 
 - (void)onTextureUnregistered;
 
+/// Creates a DlImage snapshot from the texture's current content.
+/// The returned image is independent of the texture - it captures the
+/// current content and will not update when the texture changes.
+/// Returns nullptr if no pixel buffer is available.
+- (sk_sp<flutter::DlImage>)createDlImageWithAiksContext:(nonnull impeller::AiksContext*)aiksContext;
+
 @property(nonatomic, readonly) int64_t textureID;
 
 @end
