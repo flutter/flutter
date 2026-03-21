@@ -554,6 +554,41 @@ class AndroidSdk {
   String toString() => 'AndroidSdk: $directory';
 }
 
+extension AndroidSdkNdkHelpers on AndroidSdk {
+  /// Returns whether the Android SDK already contains the requested NDK version.
+  bool hasNdkVersion(String version) {
+    final Directory ndkDirectory = directory.childDirectory('ndk').childDirectory(version);
+    return ndkDirectory.childFile('source.properties').existsSync();
+  }
+
+  /// Installs a specific Android SDK component with sdkmanager.
+  Future<RunResult> installSdkComponent(
+    String component, {
+    Java? java,
+    ProcessUtils? processUtils,
+  }) async {
+    processUtils ??= globals.processUtils;
+    final String? executable = sdkManagerPath;
+    if (executable == null || !globals.processManager.canRun(executable)) {
+      throwToolExit(
+        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
+        'the cmdline-tools are installed to resolve this.',
+      );
+    }
+    return processUtils.run(<String>[
+      executable,
+      '--sdk_root=${directory.path}',
+      '--install',
+      component,
+    ], environment: java?.environment);
+  }
+
+  /// Installs the requested NDK version via sdkmanager.
+  Future<RunResult> installNdkVersion(String version, {Java? java, ProcessUtils? processUtils}) {
+    return installSdkComponent('ndk;$version', java: java, processUtils: processUtils);
+  }
+}
+
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion._(
     this.sdk, {
