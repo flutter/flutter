@@ -213,7 +213,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byKey(Key key, {bool skipOffstage = true}) =>
+  Finder byKey(Object key, {bool skipOffstage = true}) =>
       _KeyWidgetFinder(key, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets implementing a particular type.
@@ -1606,7 +1606,7 @@ class _TextContainingWidgetFinder extends _MatchTextFinder {
 class _KeyWidgetFinder extends MatchFinder {
   _KeyWidgetFinder(this.key, {super.skipOffstage});
 
-  final Key key;
+  final Object key;
 
   @override
   String get description => 'key $key';

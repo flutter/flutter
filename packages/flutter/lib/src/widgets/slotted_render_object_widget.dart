@@ -237,7 +237,7 @@ class SlottedRenderObjectElement<SlotType, ChildType extends RenderObject>
   );
 
   Map<SlotType, Element> _slotToChild = <SlotType, Element>{};
-  Map<Key, Element> _keyedChildren = <Key, Element>{};
+  Map<Object, Element> _keyedChildren = <Object, Element>{};
 
   @override
   SlottedContainerRenderObjectMixin<SlotType, ChildType> get renderObject =>
@@ -288,16 +288,16 @@ class SlottedRenderObjectElement<SlotType, ChildType extends RenderObject>
       'slots must be unique',
     );
 
-    final Map<Key, Element> oldKeyedElements = _keyedChildren;
-    _keyedChildren = <Key, Element>{};
+    final Map<Object, Element> oldKeyedElements = _keyedChildren;
+    _keyedChildren = <Object, Element>{};
     final Map<SlotType, Element> oldSlotToChild = _slotToChild;
     _slotToChild = <SlotType, Element>{};
 
-    Map<Key, List<Element>>? debugDuplicateKeys;
+    Map<Object, List<Element>>? debugDuplicateKeys;
 
     for (final SlotType slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       final Widget? widget = slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot);
-      final Key? newWidgetKey = widget?.key;
+      final Object? newWidgetKey = widget?.key;
 
       final Element? oldSlotChild = oldSlotToChild[slot];
       final Element? oldKeyChild = oldKeyedElements[newWidgetKey];
@@ -323,7 +323,7 @@ class SlottedRenderObjectElement<SlotType, ChildType extends RenderObject>
           assert(() {
             final Element? existingElement = _keyedChildren[newWidgetKey];
             if (existingElement != null) {
-              (debugDuplicateKeys ??= <Key, List<Element>>{})
+              (debugDuplicateKeys ??= <Object, List<Element>>{})
                   .putIfAbsent(newWidgetKey, () => <Element>[existingElement])
                   .add(newChild);
             }
@@ -341,11 +341,11 @@ class SlottedRenderObjectElement<SlotType, ChildType extends RenderObject>
     );
   }
 
-  bool _debugDuplicateKeys(Map<Key, List<Element>>? debugDuplicateKeys) {
+  bool _debugDuplicateKeys(Map<Object, List<Element>>? debugDuplicateKeys) {
     if (debugDuplicateKeys == null) {
       return true;
     }
-    for (final MapEntry<Key, List<Element>> duplicateKey in debugDuplicateKeys.entries) {
+    for (final MapEntry<Object, List<Element>> duplicateKey in debugDuplicateKeys.entries) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Multiple widgets used the same key in ${widget.runtimeType}.'),
         ErrorDescription(

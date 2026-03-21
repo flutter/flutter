@@ -70,7 +70,7 @@ class _StorageEntryIdentifier {
 class PageStorageBucket {
   static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
-    final Key? key = widget.key;
+    final Object? key = widget.key;
     if (key is PageStorageKey) {
       keys.add(key);
     }

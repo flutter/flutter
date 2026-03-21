@@ -1251,7 +1251,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   Offset _targetOffset = Offset.zero;
   AnimationController? _offsetAnimation;
 
-  Key get key => widget.key!;
+  Object get key => widget.key!;
   int get index => widget.index;
 
   bool get dragging => _dragging;
@@ -1737,7 +1737,7 @@ Offset _restrictAxis(Offset offset, Axis scrollDirection) {
 class _ReorderableItemGlobalKey extends GlobalObjectKey {
   const _ReorderableItemGlobalKey(this.subKey, this.index, this.state) : super(subKey);
 
-  final Key subKey;
+  final Object subKey;
   final int index;
   final SliverReorderableListState state;
 

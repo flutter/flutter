@@ -218,7 +218,7 @@ class AnimatedSwitcher extends StatefulWidget {
   ///
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
-    return FadeTransition(key: ValueKey<Key?>(child.key), opacity: animation, child: child);
+    return FadeTransition(key: ValueKey<Object?>(child.key), opacity: animation, child: child);
   }
 
   /// The layout builder used as the default value of [layoutBuilder].

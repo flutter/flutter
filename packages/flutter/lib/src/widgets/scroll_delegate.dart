@@ -233,7 +233,7 @@ abstract class SliverChildDelegate {
   }
 }
 
-class _SaltedValueKey extends ValueKey<Key> {
+class _SaltedValueKey extends ValueKey<Object> {
   const _SaltedValueKey(super.value);
 }
 
@@ -528,17 +528,10 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 
   @override
   int? findIndexByKey(Key key) {
-    if (findChildIndexCallback == null) {
-      return null;
-    }
-    final Key childKey;
-    if (key is _SaltedValueKey) {
-      final _SaltedValueKey saltedValueKey = key;
-      childKey = saltedValueKey.value;
-    } else {
-      childKey = key;
-    }
-    return findChildIndexCallback!(childKey);
+    return findChildIndexCallback?.call(switch (key) {
+      _SaltedValueKey(:final Key value) => value,
+      _ => key,
+    });
   }
 
   @override
@@ -722,11 +715,11 @@ class SliverChildListDelegate extends SliverChildDelegate {
   //
   // _keyToIndex[null] is used as current index during the lazy loading process
   // in [_findChildIndex]. _keyToIndex should never be used for looking up null key.
-  final Map<Key?, int>? _keyToIndex;
+  final Map<Object?, int>? _keyToIndex;
 
   bool get _isConstantInstance => _keyToIndex == null;
 
-  int? _findChildIndex(Key key) {
+  int? _findChildIndex(Object key) {
     if (_isConstantInstance) {
       return null;
     }
@@ -753,8 +746,8 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  int? findIndexByKey(Key key) {
-    final Key childKey;
+  int? findIndexByKey(Object key) {
+    final Object childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
       childKey = saltedValueKey.value;
