@@ -56,32 +56,36 @@ void testMain() {
       expect(boxes.single.direction, equals(ui.TextDirection.ltr));
     });
 
-    test('Renders tab as space instead of tofu', () async {
-      // Skia renders a tofu if the font does not have a glyph for a
-      // character. However, Flutter opts-in to a Skia feature to render
-      // tabs as a single space.
-      // See: https://github.com/flutter/flutter/issues/79153
-      Future<ui.Image> drawText(String text) {
-        const bounds = ui.Rect.fromLTRB(0, 0, 100, 100);
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder, bounds);
-        final ui.Paragraph paragraph = makeSimpleText(text);
+    test(
+      'Renders tab as space instead of tofu',
+      () async {
+        // Skia renders a tofu if the font does not have a glyph for a
+        // character. However, Flutter opts-in to a Skia feature to render
+        // tabs as a single space.
+        // See: https://github.com/flutter/flutter/issues/79153
+        Future<ui.Image> drawText(String text) {
+          const bounds = ui.Rect.fromLTRB(0, 0, 100, 100);
+          final recorder = ui.PictureRecorder();
+          final canvas = ui.Canvas(recorder, bounds);
+          final ui.Paragraph paragraph = makeSimpleText(text);
 
-        canvas.drawParagraph(paragraph, ui.Offset.zero);
-        final ui.Picture picture = recorder.endRecording();
-        return picture.toImage(100, 100);
-      }
+          canvas.drawParagraph(paragraph, ui.Offset.zero);
+          final ui.Picture picture = recorder.endRecording();
+          return picture.toImage(100, 100);
+        }
 
-      // The backspace character, \b, does not have a corresponding glyph and
-      // is rendered as a tofu.
-      final ui.Image tabImage = await drawText('>\t<');
-      final ui.Image spaceImage = await drawText('> <');
-      final ui.Image tofuImage = await drawText('>\b<');
+        // The backspace character, \b, does not have a corresponding glyph and
+        // is rendered as a tofu.
+        final ui.Image tabImage = await drawText('>\t<');
+        final ui.Image spaceImage = await drawText('> <');
+        final ui.Image tofuImage = await drawText('>\b<');
 
-      expect(await matchImage(tabImage, spaceImage), isTrue);
-      expect(await matchImage(tabImage, tofuImage), isFalse);
-    }, skip: isWimp || isSafari || isFirefox); // https://github.com/flutter/flutter/issues/175371
-    // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
+        expect(await matchImage(tabImage, spaceImage), isTrue);
+        expect(await matchImage(tabImage, tofuImage), isFalse);
+      },
+      skip: isWimp || isSafari || isFirefox,
+    ); // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
+    // TODO(jacksongardner): https://github.com/flutter/flutter/issues/183944
   }, skip: isSafari || isFirefox);
 }
 

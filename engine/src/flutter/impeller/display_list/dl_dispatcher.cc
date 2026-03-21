@@ -678,6 +678,11 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
   }
 }
 
+std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
+    const sk_sp<flutter::DlImage>& image) {
+  return GetCachedTexture(image.get(), GetContext(), image_cache_);
+}
+
 void DlDispatcherBase::drawVertices(
     const std::shared_ptr<flutter::DlVertices>& vertices,
     flutter::DlBlendMode dl_mode) {}
@@ -693,7 +698,7 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
     return;
   }
 
-  auto texture = image->impeller_texture();
+  auto texture = GetTexture(image);
   if (!texture) {
     return;
   }
@@ -722,7 +727,7 @@ void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
-      image->impeller_texture(),                       // image
+      GetTexture(image),                               // image
       src,                                             // source rect
       dst,                                             // destination rect
       render_with_attributes ? paint_ : Paint(),       // paint
@@ -739,7 +744,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(9u);
 
   NinePatchConverter converter = {};
-  converter.DrawNinePatch(image->impeller_texture(),
+  converter.DrawNinePatch(GetTexture(image),
                           Rect::MakeLTRB(center.GetLeft(), center.GetTop(),
                                          center.GetRight(), center.GetBottom()),
                           dst, ToSamplerDescriptor(filter), &GetCanvas(),
@@ -759,7 +764,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
   AUTO_DEPTH_WATCHER(1u);
 
   auto geometry =
-      DlAtlasGeometry(atlas->impeller_texture(),                        //
+      DlAtlasGeometry(GetTexture(atlas),                                //
                       xform,                                            //
                       tex,                                              //
                       colors,                                           //
@@ -932,17 +937,25 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        bool is_onscreen,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
-                                       IRect32 cull_rect)
-    : canvas_(renderer,
+                                       IRect32 cull_rect,
+                                       TextureCache* image_cache)
+    : DlDispatcherBase(image_cache),
+      canvas_(renderer,
               render_target,
               is_onscreen,
               has_root_backdrop_filter ||
                   RequiresReadbackForBlends(renderer, max_root_blend_mode),
               cull_rect),
-      renderer_(renderer) {}
+      renderer_(renderer) {
+  canvas_.SetImageCache(image_cache_);
+}
 
 Canvas& CanvasDlDispatcher::GetCanvas() {
   return canvas_;
+}
+
+std::shared_ptr<impeller::Context> CanvasDlDispatcher::GetContext() const {
+  return renderer_.GetContext();
 }
 
 void CanvasDlDispatcher::drawVertices(
@@ -1220,7 +1233,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     AiksContext& context,
     bool reset_host_buffer,
     bool generate_mips,
-    std::optional<PixelFormat> target_pixel_format) {
+    std::optional<PixelFormat> target_pixel_format,
+    TextureCache* image_cache) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1274,7 +1288,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
       /*is_onscreen=*/false,                     //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      impeller::IRect32::MakeSize(size)          //
+      impeller::IRect32::MakeSize(size),         //
+      image_cache                                //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
@@ -1300,7 +1315,8 @@ bool RenderToTarget(ContentContext& context,
                     const sk_sp<flutter::DisplayList>& display_list,
                     Rect cull_rect,
                     bool reset_host_buffer,
-                    bool is_onscreen) {
+                    bool is_onscreen,
+                    TextureCache* image_cache) {
   FirstPassDispatcher collector(context, impeller::Matrix(), cull_rect);
   display_list->Dispatch(collector, cull_rect);
 
@@ -1310,7 +1326,8 @@ bool RenderToTarget(ContentContext& context,
       /*is_onscreen=*/is_onscreen,               //
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
-      IRect32::RoundOut(cull_rect)               //
+      IRect32::RoundOut(cull_rect),              //
+      image_cache                                //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);

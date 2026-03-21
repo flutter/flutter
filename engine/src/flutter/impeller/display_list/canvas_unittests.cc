@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
-
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
@@ -13,8 +12,10 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
+#include "impeller/display_list/texture_cache.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
@@ -461,6 +462,34 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   };
 
   ASSERT_TRUE(Playground::OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
+  ContentContext context(GetContext(), nullptr);
+
+  TextureDescriptor desc;
+  desc.size = {100, 100};
+  desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  auto texture =
+      context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  auto dl_image = impeller::DlImageImpeller::Make(texture);
+
+  TextureCache cache;
+  auto cached_tex1 =
+      GetCachedTexture(dl_image.get(), context.GetContext(), &cache);
+  ASSERT_EQ(cached_tex1, texture);
+  ASSERT_EQ(cache.size(), 1u);
+
+  auto cached_tex2 =
+      GetCachedTexture(dl_image.get(), context.GetContext(), &cache);
+  ASSERT_EQ(cached_tex2, texture);
+  ASSERT_EQ(cache.size(), 1u);
+
+  // Test that passing nullptr for cache doesn't crash and returns the texture.
+  auto cached_tex3 =
+      GetCachedTexture(dl_image.get(), context.GetContext(), nullptr);
+  ASSERT_EQ(cached_tex3, texture);
 }
 
 }  // namespace testing
