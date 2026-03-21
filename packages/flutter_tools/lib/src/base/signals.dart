@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../base/process.dart';
 import '../globals.dart' as globals;
 import 'async_guard.dart';
 import 'io.dart';
+import 'process.dart';
 
 typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
 

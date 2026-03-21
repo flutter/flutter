@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../../src/macos/xcode.dart';
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
@@ -12,6 +11,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 

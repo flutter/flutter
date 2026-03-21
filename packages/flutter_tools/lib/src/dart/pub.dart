@@ -20,10 +20,10 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../git.dart';
 import '../project.dart';
 import '../version.dart';
+import 'package_map.dart';
 
 /// The [Pub] instance.
 Pub get pub => context.get<Pub>()!;

@@ -8,8 +8,8 @@ import 'package:dds/dap.dart' hide DapServer;
 
 import '../base/file_system.dart';
 import '../base/platform.dart';
-import '../debug_adapters/flutter_adapter.dart';
-import '../debug_adapters/flutter_adapter_args.dart';
+import 'flutter_adapter.dart';
+import 'flutter_adapter_args.dart';
 import 'flutter_test_adapter.dart';
 
 /// A DAP server that communicates over a [ByteStreamServerChannel], usually constructed from the processes stdin/stdout streams.

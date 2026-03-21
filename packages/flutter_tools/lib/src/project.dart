@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/convert.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
@@ -18,6 +17,7 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
+import 'convert.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'dart/package_map.dart';
