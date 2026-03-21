@@ -7,6 +7,7 @@ import 'dart:io' show HttpServer;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
+import 'package:glob/glob.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:test/test.dart';
@@ -290,6 +291,147 @@ void main() {
       expect(targetUri.scheme, 'http');
       expect(targetUri.host, 'localhost');
       expect(targetUri.port, 8080);
+    });
+  });
+
+  group('SourceProxyRule', () {
+    test('canHandle returns true for valid source', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'source': '/assets/**',
+        'target': 'http://localhost:8080',
+      });
+      expect(SourceProxyRule.canHandle(yaml), isTrue);
+    });
+
+    test('canHandle returns false for missing source', () {
+      final yaml = YamlMap.wrap(<String, String>{'target': 'http://localhost:8080'});
+      expect(SourceProxyRule.canHandle(yaml), isFalse);
+    });
+
+    test('canHandle returns false for empty source', () {
+      final yaml = YamlMap.wrap(<String, String>{'source': '', 'target': 'http://localhost:8080'});
+      expect(SourceProxyRule.canHandle(yaml), isFalse);
+    });
+
+    test('fromYaml creates a SourceProxyRule', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'source': '/assets/**',
+        'target': 'http://localhost:8080/data',
+        'replace': '/static_files',
+      });
+      final SourceProxyRule? rule = SourceProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(
+        rule.toString(),
+        '{source: /assets/**, target: http://localhost:8080/data, replace: /static_files}',
+      );
+    });
+
+    test('fromYaml returns null if target is missing', () {
+      final yaml = YamlMap.wrap(<String, String>{'source': '/assets/**'});
+      final SourceProxyRule? rule = SourceProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNull);
+      expect(
+        logger.errorText,
+        contains('[ProxyRule] Invalid target for source: /assets/**. target cannot be null'),
+      );
+    });
+
+    test('matches returns true when glob matches path', () {
+      final rule = SourceProxyRule(source: Glob('/assets/**.jpg'), target: 'http://localhost:8080');
+      expect(rule.matches('/assets/images/cat.jpg'), isTrue);
+      expect(rule.matches('/assets/cat.jpg'), isTrue);
+      expect(rule.matches('/assets/images/subfolder/cat.jpg'), isTrue);
+    });
+
+    test('matches returns false when glob does not match path', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/**/*.jpg'),
+        target: 'http://localhost:8080',
+      );
+      expect(rule.matches('/assets/images/dog.png'), isFalse);
+      expect(rule.matches('/assets/images/dog'), isFalse);
+      expect(rule.matches('/style.css'), isFalse);
+    });
+
+    test('replace correctly replaces with replacement string', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/**'),
+        target: 'http://localhost:8080',
+        replacement: '/static',
+      );
+      expect(rule.replace('/assets/images/image.jpg'), '/static');
+    });
+
+    test('replaces with glob `*` (asterisk) wildcard', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/img/*.jpg'),
+        target: 'http://localhost:8080',
+        replacement: '/static/images/placeholder.jpg',
+      );
+      expect(rule.replace('/assets/img/photo1.jpg'), '/static/images/placeholder.jpg');
+      expect(rule.replace('/assets/img/photo_test.jpg'), '/static/images/placeholder.jpg');
+      expect(rule.replace('/assets/img/photo_test.png'), '/assets/img/photo_test.png');
+    });
+
+    test('replaces with glob `?` (question mark) wildcard', () {
+      final rule = SourceProxyRule(
+        source: Glob('/assets/file?.txt'),
+        target: 'http://localhost:8080',
+        replacement: '/docs/backup.txt',
+      );
+      expect(rule.replace('/assets/file1.txt'), '/docs/backup.txt');
+      expect(rule.replace('/assets/fileA.txt'), '/docs/backup.txt');
+      expect(rule.replace('/assets/file10.txt'), '/assets/file10.txt');
+    });
+
+    test('replaces with glob `**` (double asterisk) for recursive matching', () {
+      final rule = SourceProxyRule(
+        source: Glob('**/templates/*.html'),
+        target: 'http://localhost:8080',
+        replacement: '/views/default.html',
+      );
+      expect(rule.replace('src/web/templates/home.html'), '/views/default.html');
+      expect(rule.replace('/templates/about.html'), '/views/default.html');
+      expect(rule.replace('/templates/js/script.js'), '/templates/js/script.js');
+    });
+
+    test('replaces with glob `[]` (character class) for specific character matching', () {
+      final rule = SourceProxyRule(
+        source: Glob('/data/[a-z].log'),
+        target: 'http://localhost:8080',
+        replacement: '/logs/debug.log',
+      );
+      expect(rule.replace('/data/a.log'), '/logs/debug.log');
+      expect(rule.replace('/data/z.log'), '/logs/debug.log');
+      expect(rule.replace('/data/1.log'), '/data/1.log');
+    });
+
+    test('replaces with glob `{}` (brace expansion) for multiple patterns', () {
+      final rule = SourceProxyRule(
+        source: Glob('/src/{styles,scripts}/**'),
+        target: 'http://localhost:8080',
+        replacement: '/dist/assets',
+      );
+      expect(rule.replace('/src/styles/main.css'), '/dist/assets');
+      expect(rule.replace('/src/scripts/app.js'), '/dist/assets');
+      expect(rule.replace('/src/images/logo.png'), '/src/images/logo.png');
+    });
+
+    test('replaces with a combination of glob syntaxes', () {
+      final rule = SourceProxyRule(
+        source: Glob('**/[a-c]*.{js,css}'),
+        target: 'http://localhost:8080',
+        replacement: '/bundle/vendor.min',
+      );
+      expect(rule.replace('lib/core/a_module.js'), '/bundle/vendor.min');
+      expect(rule.replace('styles/components/c_button.css'), '/bundle/vendor.min');
+      expect(rule.replace('utils/d_helper.js'), 'utils/d_helper.js');
+    }); 
+
+    test('replace returns original path for no replacement', () {
+      final rule = SourceProxyRule(source: Glob('/assets/**'), target: 'http://localhost:8080');
+      expect(rule.replace('/assets/images/image.jpg'), '/assets/images/image.jpg');
     });
   });
 
