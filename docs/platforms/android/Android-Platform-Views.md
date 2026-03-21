@@ -28,10 +28,11 @@ within their Flutter UI.
 
 # Approaches
 
-There are currently three different implementations of Android platform views:
+There are currently four different implementations of Android platform views:
 - [Virtual Display](Virtual-Display.md) (VD)
 - [Hybrid Composition](../Hybrid-Composition.md) (HC)
 - [Texture Layer Hybrid Composition](Texture-Layer-Hybrid-Composition.md) (TLHC)
+- [Hybrid Composition++](#hybrid-composition-1) (HCPP)
 
 Each has a different set of limitations and tradeoffs, as discussed below. The pages linked above give details about each implementation.
 
@@ -60,6 +61,40 @@ This mode, introduced in Flutter 3.0, attempted to address the limitations of th
 In most cases this combines the best aspects of Virtual Display and Hybrid Composition, and should be preferred when possible. One notable exception however is that if the platform view is, or contains, a [`SurfaceView`](https://developer.android.com/reference/android/view/SurfaceView) this mode will not work correctly, and the `SurfaceView` will be drawn at the wrong location and/or z-index.
 
 This display mode requires SDK 23 or later.
+
+## Hybrid Composition++
+
+This mode is a new hybrid composition strategy designed to solve compositing performance and synchronization issues seen in the original Hybrid Composition mode. It is currently available as an opt-in feature.
+
+### Requirements
+- **Android API 34 or later**: Required for native transaction synchronization capabilities.
+- **Vulkan Rendering**: The device must be capable of rendering with Vulkan.
+
+If these requirements are not met on the end-user device, Flutter will automatically fall back to the existing platform view strategy configured for the app.
+
+### Opting In
+Because HCPP acts as a global upgrade for how platform views are backed, it is enabled via configuration rather than standard Dart initialization methods (`initAndroidView`, etc.).
+
+You can enable HCPP using one of the following methods:
+
+1. **Command Line Flag (Run/Test)**:
+   Pass the `--enable-hcpp` flag to your `flutter run` or `flutter test` command:
+   ```bash
+   flutter run --enable-hcpp
+   ```
+   *Note: This flag is intended for local execution and testing. It cannot be passed to `flutter build` commands. For release builds, use the manifest configuration below.*
+
+2. **AndroidManifest.xml**:
+   Include a `<meta-data>` tag inside the `<application>` block of your `AndroidManifest.xml`:
+   ```xml
+   <meta-data
+       android:name="io.flutter.embedding.android.EnableHcpp"
+       android:value="true" />
+   ```
+
+### Limitations and Known Issues
+- **SurfaceView Compatibility**: Opting in is currently not recommended if your application contains a platform view which is or contains a native [`SurfaceView`](https://developer.android.com/reference/android/view/SurfaceView) (often used by video players or map plugins), due to clipping issues. This is tracked in https://github.com/flutter/flutter/issues/175546.
+- **Complex Overlay Stacking**: Transparent platform views will not display correctly in layout stacks structured as: Flutter canvas -> Platform View -> Overlay -> Transparent Platform View, when all four of these layers intersect.
 
 # Selecting a mode
 
