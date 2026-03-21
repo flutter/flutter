@@ -194,6 +194,119 @@ void main() {
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
         },
       );
+
+      testUsingContext(
+        '$CleanCommand cleans all Xcode schemes with --xcode-clean=workspace',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean', '--xcode-clean=workspace']);
+
+          expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
+          ]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
+        '$CleanCommand cleans only application schemes with --xcode-clean=app',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean', '--xcode-clean=app']);
+
+          expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'Runner', false),
+          ]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
+        '$CleanCommand skips Xcode cleaning with --xcode-clean=skip',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean', '--xcode-clean=skip']);
+
+          expect(xcodeProjectInterpreter.workspaces, isEmpty);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
+        '$CleanCommand throws when --scheme is used with --xcode-clean=skip',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+
+          expect(
+            () => runner.run(<String>['clean', '--xcode-clean=skip', '--scheme=Runner']),
+            throwsToolExit(message: '--scheme cannot be used with --xcode-clean=skip.'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
+        '$CleanCommand prefers --scheme over --xcode-clean=app',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean', '--xcode-clean=app', '--scheme=custom-scheme']);
+
+          expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
+            CleanWorkspaceCall('/ios/Runner.xcworkspace', 'custom-scheme', false),
+            CleanWorkspaceCall('/macos/Runner.xcworkspace', 'custom-scheme', false),
+          ]);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
     });
 
     group('Windows', () {
