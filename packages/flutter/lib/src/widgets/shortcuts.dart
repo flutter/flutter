@@ -924,8 +924,8 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   @protected
   KeyEventResult handleKeypress(BuildContext context, KeyEvent event) {
     // Marking some variables as "late" ensures that they aren't evaluated unless needed.
-    late final Intent? intent = _find(event, HardwareKeyboard.instance);
-    late final BuildContext? context = primaryFocus?.context;
+    final Intent? intent = _find(event, HardwareKeyboard.instance);
+    final BuildContext? context = primaryFocus?.context;
     late final Action<Intent>? action = Actions.maybeFind<Intent>(context!, intent: intent);
 
     if (intent != null && context != null && action != null) {
