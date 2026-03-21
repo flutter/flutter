@@ -380,9 +380,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     );
 
     final items = <MergeableMaterialItem>[];
+    final hasVisibleGap = widget.materialGapSize > 0 || widget.elevation > 0;
 
     for (var index = 0; index < widget.children.length; index += 1) {
-      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
+      if (_isChildExpanded(index) &&
+          index != 0 &&
+          !_isChildExpanded(index - 1) &&
+          hasVisibleGap) {
         items.add(
           MaterialGap(
             key: _SaltedKey<BuildContext, int>(context, index * 2 - 1),
@@ -471,7 +475,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         ),
       );
 
-      if (_isChildExpanded(index) && index != widget.children.length - 1) {
+      if (_isChildExpanded(index) &&
+          index != widget.children.length - 1 &&
+          hasVisibleGap) {
         items.add(
           MaterialGap(
             key: _SaltedKey<BuildContext, int>(context, index * 2 + 1),

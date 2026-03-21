@@ -1972,6 +1972,67 @@ void main() {
     }
   });
 
+  Future<void> pumpExpansionPanelListAndVerifyGaps(
+    WidgetTester tester, {
+    required double materialGapSize,
+    required double elevation,
+    required int expectedGapCount,
+  }) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            materialGapSize: materialGapSize,
+            elevation: elevation,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                isExpanded: true,
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+              ExpansionPanel(
+                canTapOnHeader: true,
+                body: const SizedBox.shrink(),
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final MergeableMaterial mergeableMaterial = tester.widget(find.byType(MergeableMaterial));
+    expect(mergeableMaterial.children.whereType<MaterialGap>().length, expectedGapCount);
+    expect(mergeableMaterial.children.whereType<MaterialSlice>().length, 2);
+  }
+
+  testWidgets(
+    'ExpansionPanelList does not insert MaterialGap when materialGapSize and elevation are both 0',
+    (WidgetTester tester) async {
+      await pumpExpansionPanelListAndVerifyGaps(tester, materialGapSize: 0, elevation: 0, expectedGapCount: 0);
+    },
+  );
+
+  testWidgets(
+    'ExpansionPanelList still inserts MaterialGap when materialGapSize is 0 but elevation > 0',
+    (WidgetTester tester) async {
+      await pumpExpansionPanelListAndVerifyGaps(tester, materialGapSize: 0, elevation: 2, expectedGapCount: 1);
+    },
+  );
+
+  testWidgets(
+    'ExpansionPanelList still inserts MaterialGap when elevation is 0 but materialGapSize > 0',
+    (WidgetTester tester) async {
+      await pumpExpansionPanelListAndVerifyGaps(tester, materialGapSize: 16, elevation: 0, expectedGapCount: 1);
+    },
+  );
+
   testWidgets(
     'Ensure IconButton splashColor and highlightColor are correctly set when canTapOnHeader is false',
     (WidgetTester tester) async {
