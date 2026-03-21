@@ -181,7 +181,7 @@ void main() {
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/app/Runner.app'},
               ],
             },
           }),
@@ -194,7 +194,7 @@ void main() {
           runningProcesses: [
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/asdf',
+              'executable': '/app/Runner.app/Runner',
             }),
           ],
         );
@@ -223,13 +223,119 @@ void main() {
         expect(fakeLLDB.attemptedToAttach, isTrue);
       });
 
+      testWithoutContext('attaches to main app instead of extension process', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/app/Runner.app'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+          runningProcesses: [
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 999,
+              'executable': '/app/Runner.app/PlugIns/Widgets.appex/Widgets',
+            }),
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/app/Runner.app/Runner',
+            }),
+          ],
+        );
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
+        );
+
+        expect(result, isTrue);
+        expect(fakeLLDB.attemptedToAttach, isTrue);
+        expect(fakeLLDB.appProcessId, 123);
+      });
+
+      testWithoutContext('handles trailing slash in installationURL', () async {
+        final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
+          installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'installedApplications': [
+                <String, Object?>{'installationURL': '/app/Runner.app/'},
+              ],
+            },
+          }),
+          launchResult: IOSCoreDeviceLaunchResult.fromJson(const <String, Object?>{
+            'info': <String, Object?>{'outcome': 'success'},
+            'result': <String, Object?>{
+              'process': <String, Object?>{'processIdentifier': 123},
+            },
+          }),
+          runningProcesses: [
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 999,
+              'executable': '/app/Runner.app/PlugIns/Widgets.appex/Widgets',
+            }),
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'processIdentifier': 123,
+              'executable': '/app/Runner.app/Runner',
+            }),
+          ],
+        );
+        final processManager = FakeProcessManager.any();
+        final logger = BufferLogger.test();
+        final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+        final fakeLLDB = FakeLLDB();
+        final launcher = IOSCoreDeviceLauncher(
+          coreDeviceControl: fakeCoreDeviceControl,
+          logger: logger,
+          xcodeDebug: FakeXcodeDebug(),
+          fileSystem: MemoryFileSystem.test(),
+          processUtils: processUtils,
+          lldb: fakeLLDB,
+        );
+
+        final bool result = await launcher.launchAppWithLLDBDebugger(
+          deviceId: 'device-id',
+          bundlePath: 'bundle-path',
+          bundleId: 'bundle-id',
+          launchArguments: <String>[],
+          shutdownHooks: FakeShutdownHooks(),
+        );
+
+        expect(result, isTrue);
+        expect(fakeLLDB.attemptedToAttach, isTrue);
+        expect(fakeLLDB.appProcessId, 123);
+      });
+
       testWithoutContext('fails on install', () async {
         final fakeCoreDeviceControl = FakeIOSCoreDeviceControl(
           installResult: IOSCoreDeviceInstallResult.fromJson(const <String, Object?>{
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/app/Runner.app'},
               ],
             },
           }),
@@ -242,7 +348,7 @@ void main() {
           runningProcesses: [
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/asdf',
+              'executable': '/app/Runner.app/Runner',
             }),
           ],
           installSuccess: false,
@@ -287,7 +393,7 @@ void main() {
           runningProcesses: [
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/asdf',
+              'executable': '/app/Runner.app/Runner',
             }),
           ],
         );
@@ -323,7 +429,7 @@ void main() {
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/app/Runner.app'},
               ],
             },
           }),
@@ -336,7 +442,7 @@ void main() {
           runningProcesses: [
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/asdf',
+              'executable': '/app/Runner.app/Runner',
             }),
           ],
           launchSuccess: false,
@@ -373,7 +479,7 @@ void main() {
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/app/Runner.app'},
               ],
             },
           }),
@@ -417,7 +523,7 @@ void main() {
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/app/Runner.app'},
               ],
             },
           }),
@@ -428,7 +534,9 @@ void main() {
             },
           }),
           runningProcesses: [
-            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{'executable': '/asdf'}),
+            IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
+              'executable': '/app/Runner.app/Runner',
+            }),
           ],
         );
 
@@ -463,7 +571,7 @@ void main() {
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/app/Runner.app'},
               ],
             },
           }),
@@ -476,7 +584,7 @@ void main() {
           runningProcesses: [
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/asdf',
+              'executable': '/app/Runner.app/Runner',
             }),
           ],
         );
@@ -3962,6 +4070,7 @@ class FakeLLDB extends Fake implements LLDB {
     required LLDBLogForwarder lldbLogForwarder,
   }) async {
     attemptedToAttach = true;
+    _processId = appProcessId;
     return attachSuccess;
   }
 
