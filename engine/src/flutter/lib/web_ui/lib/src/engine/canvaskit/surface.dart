@@ -72,6 +72,26 @@ abstract class CkSurface extends Surface {
   int get glContext => _glContext;
   int _glContext = -1;
 
+  /// The actual sample count of the WebGL default framebuffer.
+  ///
+  /// This is queried from the WebGL context after creation because browsers
+  /// may ignore the `antialias` hint and provide a multisampled framebuffer
+  /// regardless. Using a hardcoded value of 0 causes rendering failures on
+  /// Firefox.
+  ///
+  /// See also: https://github.com/flutter/flutter/issues/182722
+  @visibleForTesting
+  int get webGlSampleCount => _webGlSampleCount;
+  int _webGlSampleCount = 0;
+
+  /// The actual stencil bit depth of the WebGL default framebuffer.
+  ///
+  /// This is queried from the WebGL context after creation to match the
+  /// actual framebuffer configuration.
+  @visibleForTesting
+  int get webGlStencilBits => _webGlStencilBits;
+  int _webGlStencilBits = 0;
+
   /// The canvas object that this surface is rendering to.
   @visibleForTesting
   DomEventTarget get canvas => _canvas;
@@ -133,6 +153,19 @@ abstract class CkSurface extends Surface {
       majorVersion: webGLVersion.toDouble(),
     );
     _glContext = _getGlContext(options);
+
+    // Query the actual sample count and stencil bits from the WebGL context.
+    // The `antialias` attribute in WebGL context creation is only a hint;
+    // browsers (particularly Firefox) may provide a multisampled default
+    // framebuffer even when antialias is disabled. Using hardcoded values
+    // causes a mismatch between what Skia expects and the actual framebuffer
+    // configuration, leading to rendering failures such as black screens
+    // when compositing platform views (e.g., video elements).
+    //
+    // This mirrors the approach used by the skwasm backend in surface.cc.
+    // See also: https://github.com/flutter/flutter/issues/182722
+    _retrieveWebGlParams();
+
     _grContext = canvasKit.MakeGrContext(_glContext.toDouble());
     if (_grContext == null) {
       _failedToCreateGrContext = true;
@@ -140,11 +173,26 @@ abstract class CkSurface extends Surface {
     }
   }
 
+  /// Queries the actual WebGL parameters from the rendering context and stores
+  /// them in [_webGlSampleCount] and [_webGlStencilBits].
+  void _retrieveWebGlParams() {
+    final WebGLContext gl = _getWebGlRenderingContext();
+    _webGlSampleCount = gl.sampleCount;
+    _webGlStencilBits = gl.stencilSize;
+  }
+
   /// Creates the underlying GL context for the canvas.
   ///
   /// This method is implemented by subclasses to handle their specific
   /// canvas types.
   int _getGlContext(SkWebGLContextOptions options);
+
+  /// Returns the [WebGLContext] for the underlying canvas.
+  ///
+  /// This is used to query the actual WebGL parameters (sample count, stencil
+  /// bits) from the rendering context. Subclasses implement this to handle
+  /// their specific canvas types.
+  WebGLContext _getWebGlRenderingContext();
 
   /// Creates the Skia objects that are backed by the canvas.
   ///
@@ -164,8 +212,8 @@ abstract class CkSurface extends Surface {
       _currentSize.width.toDouble(),
       _currentSize.height.toDouble(),
       SkColorSpaceSRGB,
-      0,
-      0,
+      _webGlSampleCount,
+      _webGlStencilBits,
     );
     if (_skSurface == null) {
       throw Exception('Failed to initialize CanvasKit SkSurface.');
@@ -273,6 +321,11 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   @override
+  WebGLContext _getWebGlRenderingContext() {
+    return (canvas as DomOffscreenCanvas).getGlContext(webGLVersion);
+  }
+
+  @override
   SkSurface _createSoftwareSkSurface() {
     return canvasKit.MakeOffscreenSWCanvasSurface(canvas as DomOffscreenCanvas);
   }
@@ -308,6 +361,11 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
   @override
   int _getGlContext(SkWebGLContextOptions options) {
     return canvasKit.GetWebGLContext(canvas as DomHTMLCanvasElement, options).toInt();
+  }
+
+  @override
+  WebGLContext _getWebGlRenderingContext() {
+    return (canvas as DomHTMLCanvasElement).getGlContext(webGLVersion);
   }
 
   @override

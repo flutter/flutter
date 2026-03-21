@@ -932,6 +932,23 @@ extension type WebGLContext._(JSObject _) implements JSObject {
   @JS('STENCIL_BITS')
   external int get stencilBits;
 
+  /// Returns the actual number of samples used by the default framebuffer.
+  ///
+  /// Browsers may ignore the `antialias` hint when creating a WebGL context
+  /// and provide a multisampled default framebuffer regardless. This value
+  /// must be queried and used when creating SkSurfaces to avoid rendering
+  /// issues on browsers like Firefox.
+  ///
+  /// See also: https://github.com/flutter/flutter/issues/182722
+  int get sampleCount => getParameter(samples);
+
+  /// Returns the actual number of stencil bits in the default framebuffer.
+  ///
+  /// This value must be queried from the actual WebGL context rather than
+  /// hardcoded, as browsers may provide different stencil configurations
+  /// than what was requested.
+  int get stencilSize => getParameter(stencilBits);
+
   external JSAny? getExtension(String name);
 
   WebGLLoseContextExtension get loseContextExtension {

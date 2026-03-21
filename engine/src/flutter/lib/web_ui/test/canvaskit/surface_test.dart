@@ -139,6 +139,71 @@ void testMain() {
       final SkSurface? skSurface2 = surface.skSurface;
       expect(skSurface1, same(skSurface2));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182722
+    //
+    // Verifies that CkOnscreenSurface queries actual WebGL sample count and
+    // stencil bits from the context instead of using hardcoded values. Firefox
+    // may provide a multisampled default framebuffer even when antialias is
+    // disabled, causing black screen rendering when values are mismatched.
+    test('CkOnscreenSurface queries actual WebGL sample count and stencil bits', () async {
+      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
+      await surface.initialized;
+
+      // The surface must have WebGL support for this test to be meaningful.
+      expect(surface.supportsWebGl, isTrue);
+
+      // Verify that the sample count and stencil bits were queried from the
+      // actual WebGL context. They should be non-negative integers (typically
+      // 0 when antialias is off, but Firefox may return > 0).
+      expect(surface.webGlSampleCount, greaterThanOrEqualTo(0));
+      expect(surface.webGlStencilBits, greaterThanOrEqualTo(0));
+
+      // Verify the values match what the WebGL context actually reports.
+      final WebGLContext gl = (surface.canvas as DomHTMLCanvasElement)
+          .getGlContext(webGLVersion);
+      expect(surface.webGlSampleCount, equals(gl.sampleCount));
+      expect(surface.webGlStencilBits, equals(gl.stencilSize));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182722
+    test('CkOffscreenSurface queries actual WebGL sample count and stencil bits', () async {
+      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      expect(surface.supportsWebGl, isTrue);
+
+      expect(surface.webGlSampleCount, greaterThanOrEqualTo(0));
+      expect(surface.webGlStencilBits, greaterThanOrEqualTo(0));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/182722
+    //
+    // Verifies that WebGL params are re-queried when the context is recreated
+    // after a context loss event.
+    test('CkOnscreenSurface re-queries WebGL params after context loss', () async {
+      final surface = CkOnscreenSurface(OnscreenCanvasProvider());
+      await surface.initialized;
+
+      expect(surface.supportsWebGl, isTrue);
+
+      // Record the initial values.
+      final int initialSampleCount = surface.webGlSampleCount;
+      final int initialStencilBits = surface.webGlStencilBits;
+
+      // Trigger context loss and wait for recovery.
+      await surface.triggerContextLoss();
+      await surface.handledContextLossEvent;
+
+      // After context recovery, the WebGL params should still be valid
+      // (re-queried from the new context).
+      expect(surface.webGlSampleCount, greaterThanOrEqualTo(0));
+      expect(surface.webGlStencilBits, greaterThanOrEqualTo(0));
+
+      // In the same browser, the new context should have the same params.
+      expect(surface.webGlSampleCount, equals(initialSampleCount));
+      expect(surface.webGlStencilBits, equals(initialStencilBits));
+    });
   });
 }
 
