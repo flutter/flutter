@@ -153,15 +153,13 @@ class CleanCommand extends FlutterCommand {
       }
 
       final pluginSchemes = <String>{kFlutterGeneratedPluginSwiftPackageName};
-      for (final Object? plugin in platformPlugins) {
-        if (plugin is! Map<String, Object?>) {
-          continue;
-        }
-        final Object? name = plugin['name'];
-        if (name is String && name.isNotEmpty) {
-          pluginSchemes.add(name);
-        }
-      }
+      pluginSchemes.addAll(
+        platformPlugins
+            .whereType<Map<String, Object?>>()
+            .map((Map<String, Object?> plugin) => plugin['name'])
+            .whereType<String>()
+            .where((String name) => name.isNotEmpty),
+      );
       return pluginSchemes;
     } on FormatException catch (error) {
       globals.printTrace('Unable to parse ${pluginsDependenciesFile.path}: $error');
