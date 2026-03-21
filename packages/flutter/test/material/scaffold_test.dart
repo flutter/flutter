@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 // From bottom_sheet.dart.
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
