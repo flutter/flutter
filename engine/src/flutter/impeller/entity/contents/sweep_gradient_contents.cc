@@ -14,9 +14,14 @@
 
 namespace impeller {
 
-SweepGradientContents::SweepGradientContents() = default;
+SweepGradientContents::SweepGradientContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 SweepGradientContents::~SweepGradientContents() = default;
+
+const Geometry* SweepGradientContents::GetGeometry() const {
+  return geometry_;
+}
 
 void SweepGradientContents::SetCenterAndAngles(Point center,
                                                Degrees start_angle,

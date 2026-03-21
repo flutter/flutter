@@ -246,7 +246,7 @@ void SnapshotControllerImpeller::CacheRuntimeStage(
   if (!context) {
     return;
   }
-  impeller::RuntimeEffectContents runtime_effect;
+  impeller::RuntimeEffectContents runtime_effect(nullptr);
   runtime_effect.SetRuntimeStage(runtime_stage);
   runtime_effect.BootstrapShader(context->GetContentContext());
 }
