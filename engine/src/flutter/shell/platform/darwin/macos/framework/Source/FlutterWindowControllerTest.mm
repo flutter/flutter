@@ -126,6 +126,50 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
   EXPECT_NE(tooltipViewId, 0);
 }
 
+TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
+  IsolateScope isolate_scope(isolate());
+  FlutterEngine* engine = GetFlutterEngine();
+  int64_t engineId = reinterpret_cast<int64_t>(engine);
+
+  auto request = FlutterWindowCreationRequest{
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  int64_t parentViewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  EXPECT_EQ(parentViewId, 1);
+
+  auto position_callback = [](const FlutterWindowSize& child_size,
+                              const FlutterWindowRect& parent_rect,
+                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
+    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  request = FlutterWindowCreationRequest{
+      .has_constraints = true,
+      .constraints{
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .parent_view_id = parentViewId,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+      .on_get_window_position = position_callback,
+  };
+
+  const int64_t tooltipViewId =
+      InternalFlutter_WindowController_CreatePopupWindow(engineId, &request);
+  EXPECT_NE(tooltipViewId, 0);
+}
+
 TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
       .has_size = true,
@@ -347,5 +391,41 @@ TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraint
   CGSize maxSize = flutterView.maximumContentSize;
   EXPECT_LE(maxSize.width, 500);
   EXPECT_LE(maxSize.height, 400);
+}
+
+TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
+  NSWindow* parentWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
+                                                       styleMask:NSWindowStyleMaskTitled
+                                                         backing:NSBackingStoreBuffered
+                                                           defer:NO];
+  [parentWindow setReleasedWhenClosed:NO];
+  NSWindow* childWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 100, 100)
+                                                      styleMask:NSWindowStyleMaskBorderless
+                                                        backing:NSBackingStoreBuffered
+                                                          defer:NO];
+  [childWindow setReleasedWhenClosed:NO];
+
+  // Bottom left origin.
+  [parentWindow setFrame:NSMakeRect(100, 100, 800, 600) display:NO];
+  [childWindow setFrame:NSMakeRect(150, 150, 100, 100) display:NO];
+
+  // Establish the parent-child relationship required by GetOffsetInParent.
+  [parentWindow addChildWindow:childWindow ordered:NSWindowAbove];
+
+  FlutterWindowOffset offset =
+      InternalFlutter_Window_GetOffsetInParent((__bridge void*)childWindow);
+
+  // GetOffsetInParent has relative coordinates with top left origin.
+  NSRect parentContentRect = [parentWindow contentRectForFrameRect:parentWindow.frame];
+
+  double expectedX = 150 - parentContentRect.origin.x;
+  double expectedY = (parentContentRect.origin.y + parentContentRect.size.height) - (150 + 100);
+
+  EXPECT_NEAR(offset.x, expectedX, 0.001);
+  EXPECT_NEAR(offset.y, expectedY, 0.001);
+
+  [parentWindow removeChildWindow:childWindow];
+  [childWindow close];
+  [parentWindow close];
 }
 }  // namespace flutter::testing

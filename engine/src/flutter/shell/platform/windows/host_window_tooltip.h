@@ -18,7 +18,6 @@ class HostWindowTooltip : public HostWindow,
   HostWindowTooltip(WindowManager* window_manager,
                     FlutterWindowsEngine* engine,
                     const BoxConstraints& constraints,
-                    bool is_sized_to_content,
                     GetWindowPositionCallback get_position_callback,
                     HWND parent);
 

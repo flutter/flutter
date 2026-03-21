@@ -60,8 +60,7 @@ FlutterViewId WindowManager::CreateTooltipWindow(
     const TooltipWindowCreationRequest* request) {
   auto window = HostWindow::CreateTooltipWindow(
       this, engine_, request->preferred_constraints,
-      request->is_sized_to_content, request->get_position_callback,
-      request->parent);
+      request->get_position_callback, request->parent);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;

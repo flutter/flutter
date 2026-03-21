@@ -697,10 +697,6 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// The [preferredConstraints] are the constraints placed upon the size
   /// of the window.
   ///
-  /// If [isSizedToContent] is true, the tooltip will size itself to fit its content
-  /// within the given [preferredConstraints]. If false, the tooltip will use
-  /// the [preferredConstraints] as strict constraints for its size.
-  ///
   /// {@macro flutter.widgets.windowing.constraints}
   ///
   /// The [delegate] argument can be used to listen to the window's
@@ -713,7 +709,6 @@ abstract class TooltipWindowController extends BaseWindowController {
     required Rect anchorRect,
     required WindowPositioner positioner,
     BoxConstraints preferredConstraints = const BoxConstraints(),
-    bool isSizedToContent = true,
     TooltipWindowControllerDelegate? delegate,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
@@ -721,7 +716,6 @@ abstract class TooltipWindowController extends BaseWindowController {
     final TooltipWindowController controller = owner.createTooltipWindowController(
       parent: parent,
       preferredConstraints: preferredConstraints,
-      isSizedToContent: isSizedToContent,
       delegate: delegate ?? TooltipWindowControllerDelegate(),
       anchorRect: anchorRect,
       positioner: positioner,
@@ -871,24 +865,6 @@ abstract class PopupWindowController extends BaseWindowController {
   /// The popup will be destroyed if its parent is destroyed.
   BaseWindowController get parent;
 
-  /// Whether the window is currently activated.
-  ///
-  /// If `true` this means that the window is currently focused and
-  /// can receive user input.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  bool get isActivated;
-
-  /// Requests that the window receive focus.
-  ///
-  /// The platform may also give the window input focus and bring it to the
-  /// top of the window stack. However, this behavior is platform-dependent.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void activate();
-
   /// Request change to the constraints of the window.
   ///
   /// The [constraints] describes the new constraints that the window should
@@ -900,6 +876,66 @@ abstract class PopupWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setConstraints(BoxConstraints constraints);
+
+  /// Updates the position of the popup.
+  ///
+  /// This requests that the popup be repositioned according to the new [anchorRect] and/or [positioner].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
+
+  /// Returns the offset of the popup's top-left corner in the parent window client area.
+  ///
+  /// The offset is in logical coordinates.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  Offset get offsetInParent;
+
+  /// Request activations of the window hierarchy to which this popup belongs.
+  ///
+  /// The popup window will receive keyboard input when the closest regular
+  /// or dialog window is active and a focus node within this popup window
+  /// is focused.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void activate() {
+    BaseWindowController parent = this.parent;
+    while (true) {
+      if (parent is RegularWindowController) {
+        parent.activate();
+        break;
+      } else if (parent is DialogWindowController) {
+        parent.activate();
+        break;
+      } else if (parent is PopupWindowController) {
+        parent = parent.parent;
+      } else {
+        throw StateError('Unexpected controller in hierarchy $parent');
+      }
+    }
+  }
+
+  /// Whether the window this popup belongs to is currently activated.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  bool get isActivated {
+    BaseWindowController parent = this.parent;
+    while (true) {
+      if (parent is RegularWindowController) {
+        return parent.isActivated;
+      } else if (parent is DialogWindowController) {
+        return parent.isActivated;
+      } else if (parent is PopupWindowController) {
+        parent = parent.parent;
+      } else {
+        throw StateError('Unexpected controller in hierarchy $parent');
+      }
+    }
+  }
 }
 
 /// Delegate class for satellite window controller.
@@ -1195,7 +1231,6 @@ abstract class WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1286,7 +1321,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,

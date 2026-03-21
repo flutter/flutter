@@ -182,7 +182,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -191,7 +190,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
       owner: this,
       delegate: delegate,
       contentSizeConstraints: preferredConstraints,
-      isSizedToContent: isSizedToContent,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -764,7 +762,6 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     required WindowingOwnerWin32 owner,
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints contentSizeConstraints,
-    required bool isSizedToContent,
     required BaseWindowController parent,
     required Rect anchorRect,
     required WindowPositioner positioner,
@@ -782,7 +779,6 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       _owner.allocator,
       PlatformDispatcher.instance.engineId!,
       contentSizeConstraints,
-      isSizedToContent,
       _Win32PlatformInterface.getWindowHandle(
         PlatformDispatcher.instance.engineId!,
         parent.rootView.viewId,
@@ -1054,7 +1050,6 @@ class _Win32PlatformInterface {
     ffi.Allocator allocator,
     int engineId,
     BoxConstraints preferredConstraints,
-    bool isSizedToContent,
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
@@ -1071,7 +1066,6 @@ class _Win32PlatformInterface {
         allocator<_TooltipWindowCreationRequest>();
     try {
       request.ref.preferredConstraints.from(preferredConstraints);
-      request.ref.isSizedToContent = isSizedToContent;
       request.ref.parent = parent;
       request.ref.onGetWindowPosition = onGetWindowPosition;
       return _createTooltipWindow(engineId, request);
@@ -1244,8 +1238,6 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
 
 final class _TooltipWindowCreationRequest extends ffi.Struct {
   external _WindowConstraintsRequest preferredConstraints;
-  @ffi.Bool()
-  external bool isSizedToContent;
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<
