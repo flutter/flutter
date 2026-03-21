@@ -350,6 +350,7 @@ void main() {
               success: false,
               label: 'gradle-random-event-label-failure',
               isModule: false,
+              jdkVersion: 19
             ),
           ),
         );
@@ -454,6 +455,7 @@ void main() {
               success: false,
               label: 'gradle-random-event-label-failure',
               isModule: false,
+              jdkVersion: 19
             ),
           ),
         );
