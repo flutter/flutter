@@ -6,7 +6,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/file_system.dart';
 import '../web/compiler_config.dart';
-import './build_system.dart';
+import 'build_system.dart';
 
 /// Commonly used build [Target]s.
 abstract class BuildTargets {
