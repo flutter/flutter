@@ -42,6 +42,11 @@
 
     - If you already have a Flutter installation you will either need to remove it from your PATH, or use a full path whenever you are running `flutter` in this repository. If you have version solving errors when trying to run examples below, you are running a version of Flutter other than the one checked out here.
 
+    > **Notice**
+    > For VS Code users, adding the `bin` directory to the system PATH is optional,
+    > as the integrated terminal will automatically recognize the Flutter executable
+    > within this repository.
+
 1. `flutter update-packages`
 
    This will recursively fetch all the Dart packages that
