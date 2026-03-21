@@ -135,17 +135,21 @@ class DaemonInputStreamConverter {
     String jsonString = utf8.decode(combinedChunk).trim();
     if (jsonString.startsWith('[{') && jsonString.endsWith('}]')) {
       jsonString = jsonString.substring(1, jsonString.length - 1);
-      final Map<String, Object?>? value = castStringKeyedMap(json.decode(jsonString));
-      if (value != null) {
-        // Check if we need to consume another binary blob.
-        if (value[_binaryLengthKey] != null) {
-          remainingBinaryLength = value[_binaryLengthKey]! as int;
-          currentBinaryStream = StreamController<List<int>>();
-          state = _InputStreamParseState.binary;
-          _controller.add(DaemonMessage(value, currentBinaryStream.stream));
-        } else {
-          _controller.add(DaemonMessage(value));
+      try {
+        final Map<String, Object?>? value = castStringKeyedMap(json.decode(jsonString));
+        if (value != null) {
+          // Check if we need to consume another binary blob.
+          if (value[_binaryLengthKey] != null) {
+            remainingBinaryLength = value[_binaryLengthKey]! as int;
+            currentBinaryStream = StreamController<List<int>>();
+            state = _InputStreamParseState.binary;
+            _controller.add(DaemonMessage(value, currentBinaryStream.stream));
+          } else {
+            _controller.add(DaemonMessage(value));
+          }
         }
+      } on FormatException {
+        // Ignore malformed JSON lines and continue parsing subsequent messages.
       }
     }
 
