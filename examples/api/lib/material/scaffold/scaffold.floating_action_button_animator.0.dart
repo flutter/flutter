@@ -60,7 +60,7 @@ class _ScaffoldFloatingActionButtonAnimatorExampleState
       appBar: AppBar(title: const Text('FloatingActionButtonAnimator Sample')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             SegmentedButton<FabAnimator>(
               selected: _selectedFabAnimator,

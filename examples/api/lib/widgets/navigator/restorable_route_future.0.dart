@@ -91,7 +91,7 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
           Text('Last count: ${_lastCount.value}'),
           ElevatedButton(

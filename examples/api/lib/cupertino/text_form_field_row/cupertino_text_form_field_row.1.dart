@@ -14,7 +14,7 @@ class FormSectionApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: FromSectionExample(),
     );
   }
@@ -32,7 +32,7 @@ class FromSectionExample extends StatelessWidget {
       // Add safe area widget to place the CupertinoFormSection below the navigation bar.
       child: SafeArea(
         child: Form(
-          autovalidateMode: AutovalidateMode.always,
+          autovalidateMode: .always,
           onChanged: () {
             Form.maybeOf(primaryFocus!.context!)?.save();
           },

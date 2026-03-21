@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
       style: Theme.of(context).textTheme.headlineMedium!,
       child: Container(
         color: Colors.white,
-        alignment: Alignment.center,
+        alignment: .center,
         child: const Text('Home Page'),
       ),
     );
@@ -57,7 +57,7 @@ class CollectPersonalInfoPage extends StatelessWidget {
         },
         child: Container(
           color: Colors.lightBlue,
-          alignment: Alignment.center,
+          alignment: .center,
           child: const Text('Collect Personal Info Page'),
         ),
       ),
@@ -78,7 +78,7 @@ class ChooseCredentialsPage extends StatelessWidget {
         style: Theme.of(context).textTheme.headlineMedium!,
         child: Container(
           color: Colors.pinkAccent,
-          alignment: Alignment.center,
+          alignment: .center,
           child: const Text('Choose Credentials Page'),
         ),
       ),

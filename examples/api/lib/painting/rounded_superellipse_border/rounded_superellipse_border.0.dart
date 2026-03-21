@@ -45,10 +45,10 @@ class RoundedSuperellipseBorderExampleState
       home: CupertinoPageScaffold(
         child: Center(
           child: Container(
-            padding: const EdgeInsetsGeometry.all(10),
+            padding: const .all(10),
             constraints: const BoxConstraints(maxWidth: 600),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               spacing: 16,
               children: <Widget>[
                 // The border is drawn by this DecoratedBox.
@@ -62,7 +62,7 @@ class RoundedSuperellipseBorderExampleState
                 ),
 
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: .center,
                   children: <Widget>[
                     const Text('Shape: '),
                     CupertinoSwitch(
@@ -135,7 +135,7 @@ class SliderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Flex(
       direction: Axis.horizontal,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 50),

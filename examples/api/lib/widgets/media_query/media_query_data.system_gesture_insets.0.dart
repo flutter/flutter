@@ -39,7 +39,7 @@ class _SystemGestureInsetsExampleState
         title: const Text('Pad Slider to avoid systemGestureInsets'),
       ),
       body: Padding(
-        padding: EdgeInsets.only(
+        padding: .only(
           // only left and right padding are needed here
           left: systemGestureInsets.left,
           right: systemGestureInsets.right,

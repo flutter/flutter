@@ -38,7 +38,7 @@ class MoodyGradient extends StatelessWidget {
               Color(0xfff39060),
               Color(0xffffb56b),
             ], // Gradient from https://learnui.design/tools/gradient-generator.html
-            tileMode: TileMode.mirror,
+            tileMode: .mirror,
           ),
         ),
         child: const Center(

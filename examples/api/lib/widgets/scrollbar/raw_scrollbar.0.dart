@@ -59,7 +59,7 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
                   itemCount: 100,
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const .all(8.0),
                       child: Text('Scrollable 1 : Index $index'),
                     );
                   },
@@ -85,7 +85,7 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
                           ? Colors.amberAccent
                           : Colors.blueAccent,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const .all(8.0),
                         child: Text('Scrollable 2 : Index $index'),
                       ),
                     );

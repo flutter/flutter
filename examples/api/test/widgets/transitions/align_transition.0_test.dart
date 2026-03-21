@@ -20,7 +20,7 @@ void main() {
     expect(
       find.byWidgetPredicate(
         (Widget padding) =>
-            padding is Padding && padding.padding == const EdgeInsets.all(8.0),
+            padding is Padding && padding.padding == const .all(8.0),
       ),
       findsOneWidget,
     );
@@ -34,7 +34,7 @@ void main() {
     await tester.pumpWidget(const example.AlignTransitionExampleApp());
     final Finder paddingFinder = find.byWidgetPredicate(
       (Widget padding) =>
-          padding is Padding && padding.padding == const EdgeInsets.all(8.0),
+          padding is Padding && padding.padding == const .all(8.0),
     );
 
     expect(

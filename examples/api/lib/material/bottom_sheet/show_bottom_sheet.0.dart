@@ -48,7 +48,7 @@ class _BottomSheetExampleState extends State<BottomSheetExample> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           SegmentedButton<AnimationStyles>(
             selected: _animationStyleSelection,
@@ -87,8 +87,8 @@ class _BottomSheetExampleState extends State<BottomSheetExample> {
                   return SizedBox.expand(
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: .center,
+                        mainAxisSize: .min,
                         children: <Widget>[
                           const Text('Bottom sheet'),
                           ElevatedButton(

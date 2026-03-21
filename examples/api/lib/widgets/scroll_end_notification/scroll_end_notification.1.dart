@@ -99,12 +99,12 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
 
   @override
   Widget build(BuildContext context) {
-    const EdgeInsets horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
+    const EdgeInsets horizontalPadding = .symmetric(horizontal: 8);
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const .symmetric(horizontal: 4),
           child: NotificationListener<ScrollNotification>(
             onNotification: handleScrollNotification,
             child: Scrollbar(
@@ -154,7 +154,7 @@ class BigOrangeSliver extends StatelessWidget {
           child: ListTile(
             textColor: Colors.white,
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
+              padding: .symmetric(vertical: 32),
               child: Text('Aligned Item'),
             ),
           ),

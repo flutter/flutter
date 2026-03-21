@@ -33,24 +33,24 @@ void main() {
 
       // The buttons use the default widgets but with custom labels.
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
+        case .iOS:
           expect(
             find.byType(CupertinoTextSelectionToolbarButton),
             findsAtLeastNWidgets(1),
           );
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
+        case .android:
+        case .fuchsia:
           expect(
             find.byType(TextSelectionToolbarTextButton),
             findsAtLeastNWidgets(1),
           );
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
+        case .linux:
+        case .windows:
           expect(
             find.byType(DesktopTextSelectionToolbarButton),
             findsAtLeastNWidgets(1),
           );
-        case TargetPlatform.macOS:
+        case .macOS:
           expect(
             find.byType(CupertinoDesktopTextSelectionToolbarButton),
             findsAtLeastNWidgets(1),

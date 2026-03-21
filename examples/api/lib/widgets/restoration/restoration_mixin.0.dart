@@ -73,7 +73,7 @@ class _RestorableCounterState extends State<RestorableCounter>
       appBar: AppBar(title: const Text('Restorable Counter')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
             Text(

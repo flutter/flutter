@@ -91,7 +91,7 @@ class _SampleAppState extends State<SampleApp> {
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+          padding: const .symmetric(horizontal: 30.0, vertical: 20.0),
           // CompactLayout and OpenLayout are the two rendering widgets defined below.
           child: _compact
               ? const CompactLayout(children: body)

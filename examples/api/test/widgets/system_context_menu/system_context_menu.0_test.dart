@@ -20,8 +20,7 @@ void main() {
               data: mediaQueryData.copyWith(
                 // Faking this value, which is usually set to true only on
                 // devices running iOS 16+.
-                supportsShowingSystemContextMenu:
-                    defaultTargetPlatform == TargetPlatform.iOS,
+                supportsShowingSystemContextMenu: defaultTargetPlatform == .iOS,
               ),
               child: const example.SystemContextMenuExampleApp(),
             );
@@ -38,14 +37,14 @@ void main() {
       await tester.pumpAndSettle();
 
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
+        case .iOS:
           expect(find.byType(SystemContextMenu), findsOneWidget);
           expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
+        case .android:
+        case .fuchsia:
+        case .linux:
+        case .macOS:
+        case .windows:
           expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
           expect(find.byType(SystemContextMenu), findsNothing);
       }

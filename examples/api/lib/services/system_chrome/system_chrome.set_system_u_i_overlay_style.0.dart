@@ -30,7 +30,7 @@ class SystemOverlayStyleExample extends StatefulWidget {
 
 class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
   final math.Random _random = math.Random();
-  SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
+  SystemUiOverlayStyle _currentStyle = .light;
 
   void _changeColor() {
     final Color color = Color.fromRGBO(

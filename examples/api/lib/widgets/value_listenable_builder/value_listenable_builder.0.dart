@@ -35,7 +35,7 @@ class _ValueListenableBuilderExampleState
       appBar: AppBar(title: const Text('ValueListenableBuilder Sample')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
             ValueListenableBuilder<int>(
@@ -43,8 +43,8 @@ class _ValueListenableBuilderExampleState
                 // This builder will only get called when the _counter
                 // is updated.
                 return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: .center,
+                  crossAxisAlignment: .start,
                   children: <Widget>[
                     CountDisplay(count: value),
                     child!,
@@ -56,7 +56,7 @@ class _ValueListenableBuilderExampleState
               // expensive to build and does not depend on the value from
               // the notifier.
               child: const Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: .all(10.0),
                 child: SizedBox.square(
                   dimension: 40,
                   child: FlutterLogo(size: 40),
@@ -84,7 +84,7 @@ class CountDisplay extends StatelessWidget {
     return Container(
       width: 100,
       height: 100,
-      padding: const EdgeInsetsDirectional.all(10),
+      padding: const .all(10),
       child: Text('$count', style: Theme.of(context).textTheme.headlineMedium),
     );
   }

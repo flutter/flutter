@@ -22,9 +22,9 @@ class PageTransitionsThemeApp extends StatelessWidget {
         // ZoomPageTransitionsBuilder().
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-            TargetPlatform.linux: OpenUpwardsPageTransitionsBuilder(),
-            TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+            .iOS: CupertinoPageTransitionsBuilder(),
+            .linux: OpenUpwardsPageTransitionsBuilder(),
+            .macOS: FadeUpwardsPageTransitionsBuilder(),
           },
         ),
       ),

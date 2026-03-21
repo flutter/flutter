@@ -34,9 +34,9 @@ class CustomListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const .symmetric(vertical: 5.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: <Widget>[
           Expanded(flex: 2, child: thumbnail),
           Expanded(
@@ -68,17 +68,17 @@ class _VideoDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+      padding: const .fromLTRB(5.0, 0.0, 0.0, 0.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: <Widget>[
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0),
+            style: const TextStyle(fontWeight: .w500, fontSize: 14.0),
           ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+          const Padding(padding: .symmetric(vertical: 2.0)),
           Text(user, style: const TextStyle(fontSize: 10.0)),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
+          const Padding(padding: .symmetric(vertical: 1.0)),
           Text('$viewCount views', style: const TextStyle(fontSize: 10.0)),
         ],
       ),
@@ -94,7 +94,7 @@ class CustomListItemExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         itemExtent: 106.0,
         children: <CustomListItem>[
           CustomListItem(
