@@ -7,12 +7,15 @@
 /// @docImport 'page_view.dart';
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -402,6 +405,16 @@ class _RenderSingleChildViewport extends RenderBox
   void _hasScrolled() {
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+    // We need to update the state in [offset], which would normally be done during layout.
+    // However, we don’t need to relayout; this approach effectively behaves as if it were
+    // called during the layout phase.
+    WidgetsBinding.instance.scheduleFrameCallback((_) {
+      scheduleMicrotask(() {
+        assert(WidgetsBinding.instance.schedulerPhase == SchedulerPhase.midFrameMicrotasks);
+        offset.applyViewportDimension(_viewportExtent);
+        offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+      });
+    }, scheduleNewFrame: false);
   }
 
   @override
