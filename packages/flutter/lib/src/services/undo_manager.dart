@@ -91,10 +91,24 @@ class UndoManager {
   }
 
   void _setUndoState({bool canUndo = false, bool canRedo = false}) {
-    _channel.invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
-      'canUndo': canUndo,
-      'canRedo': canRedo,
-    });
+    _channel
+        .invokeMethod<void>('UndoManager.setUndoState', <String, bool>{
+          'canUndo': canUndo,
+          'canRedo': canRedo,
+        })
+        .then(
+          (_) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'services library',
+                context: ErrorDescription('while sending the UndoManager.setUndoState event'),
+              ),
+            );
+          },
+        );
   }
 
   UndoDirection _toUndoDirection(String direction) {

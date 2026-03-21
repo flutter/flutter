@@ -194,9 +194,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   void listenToFlutterViewEvents() {
-    viewChannel!.invokeMethod<void>('pipeTouchEvents');
+    viewChannel!.invokeMethod<void>('pipeTouchEvents'); // ignore: unawaited_futures
     Timer(const Duration(seconds: 3), () {
-      viewChannel!.invokeMethod<void>('stopTouchEvents');
+      viewChannel!.invokeMethod<void>('stopTouchEvents'); // ignore: unawaited_futures
     });
   }
 

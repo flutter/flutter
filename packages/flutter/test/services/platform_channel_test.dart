@@ -148,7 +148,7 @@ void main() {
         },
       );
       expect(
-        () => channel.invokeMethod<dynamic>('sayHello', 'hello'),
+        channel.invokeMethod<dynamic>('sayHello', 'hello'),
         throwsA(
           isA<PlatformException>()
               .having((PlatformException e) => e.code, 'code', equals('bad'))
@@ -168,7 +168,7 @@ void main() {
         (ByteData? message) async => null,
       );
       expect(
-        () => channel.invokeMethod<void>('sayHello', 'hello'),
+        channel.invokeMethod<void>('sayHello', 'hello'),
         throwsA(
           isA<MissingPluginException>().having(
             (MissingPluginException e) => e.message,

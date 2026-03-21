@@ -318,7 +318,21 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
     // Currently there's only ever one window, but the channel's format allows
     // more than one window's menu hierarchy to be defined.
     final windowMenu = <String, Object?>{'0': representation};
-    channel.invokeMethod<void>(_kMenuSetMethod, windowMenu);
+    channel
+        .invokeMethod<void>(_kMenuSetMethod, windowMenu)
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'widget library',
+                context: ErrorDescription('while setting the platform menu'),
+              ),
+            );
+          },
+        );
   }
 
   /// Defines the channel that the [DefaultPlatformMenuDelegate] uses to

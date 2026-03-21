@@ -951,10 +951,23 @@ abstract class _DarwinViewState<
       // cancel the focus on the previously focused platform view.
       return;
     }
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': controller.id},
-    );
+    SystemChannels.textInput
+        .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
+          'platformViewId': controller.id,
+        })
+        .then(
+          (_) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'widgets library',
+                context: ErrorDescription('while setting the platform view client'),
+              ),
+            );
+          },
+        );
   }
 }
 
@@ -1289,10 +1302,20 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!isFocused) {
       _controller?.clearFocus();
     }
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': _id},
-    );
+    SystemChannels.textInput
+        .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
+          'platformViewId': _id,
+        })
+        .catchError((Object error, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'widget library',
+              context: ErrorDescription('while handling framework focus changed on platform view'),
+            ),
+          );
+        });
   }
 
   void _handlePlatformFocusChanged(bool isFocused) {
