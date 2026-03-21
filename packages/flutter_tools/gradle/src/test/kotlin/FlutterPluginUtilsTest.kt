@@ -4,13 +4,17 @@
 
 package com.flutter.gradle
 
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Sources
+import com.android.build.api.variant.Variant
+import com.android.build.gradle.AbstractAppExtension
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -25,7 +29,10 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -1066,6 +1073,41 @@ class FlutterPluginUtilsTest {
 
         verify {
             mockTask.description = "Prints out all build variants for this Android project"
+        }
+    }
+
+    @Test
+    fun `test addTaskForGeneratingEngineShellArgumentManifest registers task correctly`() {
+        val project: Project = ProjectBuilder.builder().build()
+        val mockComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
+        val mockVariant = mockk<Variant>(relaxed = true)
+        val mockSources = mockk<Sources>(relaxed = true)
+
+        every { mockVariant.name } returns "debug"
+        every { mockVariant.sources } returns mockSources
+
+        val onVariantsLambda = slot<(Variant) -> Unit>()
+        every { mockComponents.onVariants(callback = capture(onVariantsLambda)) } returns Unit
+
+        project.extensions.add(AndroidComponentsExtension::class.java, "androidComponents", mockComponents)
+
+        val testArgs = "--trace-skia;--enable-impeller=true"
+        FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(project, testArgs)
+
+        // Manually trigger the callback that AGP would normally trigger to register task.
+        if (onVariantsLambda.isCaptured) {
+            onVariantsLambda.captured.invoke(mockVariant)
+        }
+
+        val task = project.tasks.findByName("debugGenerateEngineFlagsManifestTask") as? GenerateEngineFlagsManifestTask
+
+        assertNotNull(task, "The debugGenerateEngineFlagsManifestTask task should have been registered.")
+        assertEquals(testArgs, task?.shellArgs?.get())
+        verify {
+            mockSources.manifests?.addGeneratedManifestFile(
+                any<TaskProvider<GenerateEngineFlagsManifestTask>>(),
+                any<(GenerateEngineFlagsManifestTask) -> org.gradle.api.file.RegularFileProperty>()
+            )
         }
     }
 }

@@ -14,6 +14,7 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -840,6 +841,33 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    @JvmStatic
+    @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(
+        project: Project,
+        androidEngineShellArgs: String
+    ) {
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
+        androidComponents.onVariants { variant ->
+            val genTask =
+                project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
+                    description = "Generates manifest containing engine shell arguments"
+                    shellArgs.set(androidEngineShellArgs)
+                    manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/extra_manifest/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
+
+            variant.sources.manifests?.addGeneratedManifestFile(
+                genTask,
+                { it.manifestOutputFile }
+            )
         }
     }
 }

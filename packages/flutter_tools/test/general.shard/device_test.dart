@@ -1004,6 +1004,109 @@ void main() {
       expect(addedDevice.first.id, device1.id);
     });
   });
+
+  group('Get Android launch arguments from DebuggingOptions', () {
+    testWithoutContext('getAndroidLaunchArguments respects DebuggingOptions', () async {
+      final options = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        // ignore: avoid_redundant_argument_values
+        enableDartProfiling: true,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        traceSystrace: true,
+        traceToFile: 'path/to/trace.file',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.disabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        dartFlags: '--foo',
+        enableHcpp: true,
+        useTestFonts: true,
+        verboseSystemLogs: true,
+      );
+
+      final Set<String> launchArguments = options.getAndroidLaunchArguments();
+
+      expect(launchArguments, <String>{
+        '--enable-dart-profiling',
+        '--profile-startup',
+        '--enable-software-rendering',
+        '--skia-deterministic-rendering',
+        '--trace-skia',
+        '--trace-allowlist=foo',
+        '--trace-skia-allowlist=skia.a,skia.b',
+        '--trace-systrace',
+        '--trace-to-file=path/to/trace.file',
+        '--endless-trace-buffer',
+        '--profile-microtasks',
+        '--purge-persistent-cache',
+        '--enable-impeller=false',
+        '--enable-flutter-gpu',
+        '--enable-vulkan-validation',
+        '--enable-checked-mode',
+        '--verify-entry-points',
+        '--start-paused',
+        '--disable-service-auth-codes',
+        '--dart-flags=--foo',
+        '--enable-hcpp-and-surface-control',
+        '--use-test-fonts',
+        '--verbose-logging',
+      });
+    });
+
+    testWithoutContext(
+      'getAndroidLaunchArguments does not set --enable-checked-mode or --verify-entry-points when debugging is disabled',
+      () async {
+        final releaseDisabledOptions = DebuggingOptions.disabled(BuildInfo.debug);
+        expect(
+          releaseDisabledOptions.getAndroidLaunchArguments(),
+          isNot(contains('--enable-checked-mode=true')),
+        );
+        expect(
+          releaseDisabledOptions.getAndroidLaunchArguments(),
+          isNot(contains('--verify-entry-points=true')),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'getAndroidLaunchArguments does not set --enable-checked-mode or --verify-entry-points when debugging is enabled but the build mode is not debug',
+      () async {
+        final debugDisabledOptions = DebuggingOptions.disabled(BuildInfo.release);
+        expect(
+          debugDisabledOptions.getAndroidLaunchArguments(),
+          isNot(contains('--enable-checked-mode=true')),
+        );
+        expect(
+          debugDisabledOptions.getAndroidLaunchArguments(),
+          isNot(contains('--verify-entry-points=true')),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'getAndroidLaunchArguments does not set --enable-checked-mode or --verify-entry-points when debugging is disabled and the build mode is not debug',
+      () async {
+        final enabledOptions = DebuggingOptions.enabled(BuildInfo.release);
+        expect(
+          enabledOptions.getAndroidLaunchArguments(),
+          isNot(contains('--enable-checked-mode=true')),
+        );
+        expect(
+          enabledOptions.getAndroidLaunchArguments(),
+          isNot(contains('--verify-entry-points=true')),
+        );
+      },
+    );
+  });
 }
 
 class TestDeviceManager extends DeviceManager {

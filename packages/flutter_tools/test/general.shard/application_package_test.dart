@@ -268,6 +268,7 @@ void main() {
         userMessages: UserMessages(),
         androidSdk: sdk,
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        buildMode: BuildMode.debug,
       );
 
       expect(androidApk, isNull);
@@ -745,6 +746,145 @@ void main() {
       );
     }, overrides: overrides);
   });
+
+  group('fromApk handles engine shell arguments as expected', () {
+    late FakeAndroidSdk sdk;
+    late FakeAndroidSdkVersion sdkVersion;
+    late FakeProcessManager fakeProcessManager;
+    late BufferLogger testLogger;
+
+    setUp(() async {
+      sdk = FakeAndroidSdk();
+      sdkVersion = FakeAndroidSdkVersion();
+      fakeProcessManager = FakeProcessManager.empty();
+      testLogger = BufferLogger.test();
+    });
+
+    testUsingContext(
+      'fromAPK returns APK without engineShellArgs if the generated flags manifest cannot be found',
+      () async {
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isNull);
+      },
+    );
+
+    testUsingContext(
+      'fromApk returns APK with engineShellArgs if the generated flags manifest is found non-empty',
+      () async {
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        const androidEngineShellArgs = '--enable-impeller=true;--trace-startup;--verbose-logging';
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout:
+                _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
+                  androidEngineShellArgs,
+                ),
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isNotNull);
+        expect(apk.engineShellArgs, equals(androidEngineShellArgs.split(';').toSet()));
+      },
+    );
+
+    testUsingContext(
+      'fromApk returns APK without engineShellArgs if they are found empty in the manifest',
+      () async {
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout:
+                _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
+                  '',
+                ),
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isNull);
+      },
+    );
+  });
 }
 
 const _aaptDataWithExplicitEnabledAndMainLauncherActivity = '''
@@ -825,6 +965,52 @@ N: android=http://schemas.android.com/apk/res/android
             A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
           E: category (line=56)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
+
+String _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
+  String engineShellArgs,
+) {
+  return '''
+N: android=http://schemas.android.com/apk/res/android
+  E: manifest (line=7)
+    A: android:versionCode(0x0101021b)=(type 0x10)0x1
+    A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
+    A: package="io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
+    E: uses-sdk (line=12)
+      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x10
+      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x1b
+    E: uses-permission (line=21)
+      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
+    E: application (line=29)
+      A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
+      A: android:icon(0x01010002)=@0x7f010000
+      A: android:name(0x01010003)="io.flutter.app.FlutterApplication" (Raw: "io.flutter.app.FlutterApplication")
+      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
+      E: meta-data (line=44)
+        A: android:name(0x01010003)="androidEngineShellArgs" (Raw: "androidEngineShellArgs")
+        A: android:value(0x01010024)="$engineShellArgs" (Raw: "$engineShellArgs")
+      E: activity (line=34)
+        A: android:theme(0x01010000)=@0x1030009
+        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
+        A: android:enabled(0x0101000e)=(type 0x12)0x0
+        A: android:launchMode(0x0101001d)=(type 0x10)0x1
+        A: android:configChanges(0x0101001f)=(type 0x11)0x400035b4
+        A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
+        A: android:hardwareAccelerated(0x010102d3)=(type 0x12)0xffffffff
+        E: intent-filter (line=42)
+          E: action (line=43)
+            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
+          E: category (line=45)
+            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
+      E: activity (line=48)
+        A: android:theme(0x01010000)=@0x1030009
+        A: android:label(0x01010001)="app2" (Raw: "app2")
+        A: android:name(0x01010003)="io.flutter.examples.hello_world.MainActivity2" (Raw: "io.flutter.examples.hello_world.MainActivity2")
+        E: intent-filter (line=53)
+          E: action (line=54)
+            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
+          E: category (line=56)
+            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
+}
 
 const _aaptDataWithNoEnabledActivity = '''
 N: android=http://schemas.android.com/apk/res/android

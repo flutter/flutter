@@ -1261,6 +1261,41 @@ class DebuggingOptions {
     ];
   }
 
+  Set<String> getAndroidLaunchArguments() {
+    final androidShellArguments = <String>{
+      if (enableDartProfiling) ...<String>['--enable-dart-profiling'],
+      if (profileStartup) ...<String>['--profile-startup'],
+      if (enableSoftwareRendering) ...<String>['--enable-software-rendering'],
+      if (skiaDeterministicRendering) ...<String>['--skia-deterministic-rendering'],
+      if (traceSkia) ...<String>['--trace-skia'],
+      if (traceAllowlist != null) ...<String>['--trace-allowlist=${traceAllowlist!}'],
+      if (traceSkiaAllowlist != null) ...<String>['--trace-skia-allowlist=${traceSkiaAllowlist!}'],
+      if (traceSystrace) ...<String>['--trace-systrace'],
+      if (traceToFile != null) ...<String>['--trace-to-file=${traceToFile!}'],
+      if (endlessTraceBuffer) ...<String>['--endless-trace-buffer'],
+      if (profileMicrotasks) ...<String>['--profile-microtasks'],
+      if (purgePersistentCache) ...<String>['--purge-persistent-cache'],
+      if (enableImpeller == ImpellerStatus.enabled) ...<String>['--enable-impeller=true'],
+      if (enableImpeller == ImpellerStatus.disabled) ...<String>['--enable-impeller=false'],
+      if (enableFlutterGpu) ...<String>['--enable-flutter-gpu'],
+      if (enableVulkanValidation) ...<String>['--enable-vulkan-validation'],
+      if (debuggingEnabled) ...<String>[
+        if (buildInfo.isDebug) ...<String>[
+          ...<String>['--enable-checked-mode'],
+          ...<String>['--verify-entry-points'],
+        ],
+        if (startPaused) ...<String>['--start-paused'],
+        if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes'],
+        if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
+        if (enableHcpp) ...<String>['--enable-hcpp-and-surface-control'],
+        if (useTestFonts) ...<String>['--use-test-fonts'],
+        if (verboseSystemLogs) ...<String>['--verbose-logging'],
+      ],
+    };
+
+    return androidShellArguments;
+  }
+
   Map<String, Object?> toJson() => <String, Object?>{
     'debuggingEnabled': debuggingEnabled,
     'startPaused': startPaused,
