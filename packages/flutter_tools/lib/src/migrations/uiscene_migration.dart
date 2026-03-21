@@ -197,7 +197,10 @@ import UIKit
     // to no longer see this warning.
     if (!_project.defaultHostInfoPlist.existsSync()) {
       logger.printTrace('UIScene migration: unable to find Info.plist');
-      _printErrorMessage(withConfigInstructions: true);
+      _printErrorMessage(
+        withConfigInstructions: true,
+        missingInfoPlistPath: _project.defaultHostInfoPlist.path,
+      );
       return;
     }
 
@@ -296,13 +299,19 @@ import UIKit
     return false;
   }
 
-  void _printErrorMessage({bool withConfigInstructions = false}) {
+  void _printErrorMessage({bool withConfigInstructions = false, String? missingInfoPlistPath}) {
     final buffer = StringBuffer();
     buffer.writeln(
       'To ensure your app continues to launch on upcoming iOS versions, UIScene lifecycle '
       'support will soon be required. Please see https://flutter.dev/to/uiscene-migration '
       'for the migration guide.',
     );
+    if (missingInfoPlistPath != null) {
+      buffer.writeln(
+        'Flutter could not find the default iOS Info.plist at "$missingInfoPlistPath". If your '
+        'project moved or renamed the host Info.plist, you may need to migrate it manually.',
+      );
+    }
     if (withConfigInstructions) {
       buffer.writeln(
         'See https://flutter.dev/to/uiscene-migration/#hide-migration-warning for instructions to '
