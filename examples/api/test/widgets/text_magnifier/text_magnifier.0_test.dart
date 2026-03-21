@@ -98,10 +98,7 @@ void main() {
         matchesGoldenFile('text_magnifier.0_test.png'),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.android,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{.iOS, .android}),
     // This image is flaky. https://github.com/flutter/flutter/issues/144350
     skip: true,
   );
@@ -113,10 +110,7 @@ void main() {
     const String textToTapOn = 'ت';
 
     await tester.pumpWidget(
-      const example.TextMagnifierExampleApp(
-        textDirection: TextDirection.rtl,
-        text: text,
-      ),
+      const example.TextMagnifierExampleApp(textDirection: .rtl, text: text),
     );
 
     await showMagnifier(tester, text.indexOf(textToTapOn));

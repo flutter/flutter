@@ -51,7 +51,7 @@ void main() {
       findBorderShape(
         RoundedRectangleBorder(
           side: const BorderSide(color: Color(0xFFCAC4D0)),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: .circular(8),
         ),
       ),
       findsOne,
