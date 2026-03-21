@@ -191,4 +191,29 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('MergeSemantics with TextField prefix and suffix', (WidgetTester tester) async {
+    final controller = TextEditingController(text: '123');
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MergeSemantics(
+            child: Semantics(
+              label: 'Room Height',
+              child: TextField(
+                controller: controller,
+                decoration: const InputDecoration(prefixText: 'height', suffixText: 'feet'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byType(MergeSemantics));
+    final SemanticsData data = node.getSemanticsData();
+    expect(data.label, 'Room Height\nheight\nfeet');
+    expect(data.value, '123');
+  });
 }
