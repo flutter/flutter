@@ -1154,6 +1154,8 @@ version: 0.0.1
           logger: testLogger,
           analytics: fakeAnalytics,
           platform: FakePlatform(operatingSystem: 'macos'),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1194,6 +1196,8 @@ version: 0.0.1
           logger: testLogger,
           analytics: fakeAnalytics,
           platform: FakePlatform(operatingSystem: 'macos'),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1231,6 +1235,8 @@ version: 0.0.1
           logger: testLogger,
           analytics: fakeAnalytics,
           platform: FakePlatform(operatingSystem: 'macos'),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1269,6 +1275,8 @@ version: 0.0.1
           logger: testLogger,
           analytics: fakeAnalytics,
           platform: FakePlatform(operatingSystem: 'macos'),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1317,6 +1325,8 @@ flutter:
           logger: testLogger,
           analytics: fakeAnalytics,
           platform: FakePlatform(operatingSystem: 'macos'),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
