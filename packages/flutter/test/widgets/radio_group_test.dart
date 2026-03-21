@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
@@ -499,6 +500,51 @@ void main() {
     expect(state.groupValue, 0);
     expect(log, isEmpty);
   });
+
+  testWidgets('RadioGroup does not crash at zero area', (WidgetTester tester) async {
+    final focusNode1 = FocusNode();
+    final focusNode2 = FocusNode();
+    addTearDown(focusNode1.dispose);
+    addTearDown(focusNode2.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: RadioGroup<int>(
+              onChanged: (_) {},
+              child: Column(
+                children: [
+                  RawRadio<int>(
+                    value: 1,
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+                    toggleable: false,
+                    focusNode: focusNode1,
+                    autofocus: false,
+                    groupRegistry: TestRegistry<int>(),
+                    enabled: true,
+                    builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
+                        const Text('X'),
+                  ),
+                  RawRadio<int>(
+                    value: 2,
+                    mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+                    toggleable: false,
+                    focusNode: focusNode2,
+                    autofocus: false,
+                    groupRegistry: TestRegistry<int>(),
+                    enabled: true,
+                    builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
+                        const Text('Y'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RadioGroup<int>)), Size.zero);
+  });
 }
 
 class TestRadioGroup<T> extends StatefulWidget {
@@ -525,4 +571,20 @@ class TestRadioGroupState<T> extends State<TestRadioGroup<T>> {
       child: widget.child,
     );
   }
+}
+
+class TestRegistry<T> extends RadioGroupRegistry<T> {
+  final Set<RadioClient<T>> clients = <RadioClient<T>>{};
+  @override
+  T? groupValue;
+
+  @override
+  ValueChanged<T?> get onChanged =>
+      (T? newValue) => groupValue = newValue;
+
+  @override
+  void registerClient(RadioClient<T> radio) => clients.add(radio);
+
+  @override
+  void unregisterClient(RadioClient<T> radio) => clients.remove(radio);
 }

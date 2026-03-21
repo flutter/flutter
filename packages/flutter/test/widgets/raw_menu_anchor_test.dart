@@ -2946,6 +2946,38 @@ void main() {
 
     expect(overlayPosition!.anchorRect, tester.getRect(find.byType(Button)));
   });
+
+  testWidgets('RawMenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMenuAnchor(controller: controller, overlayBuilder: (_, _) => const Text('X')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMenuAnchor)), Size.zero);
+    controller.open();
+  });
+
+  testWidgets('RawMenuAnchorGroup does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMenuAnchorGroup(controller: controller, child: const Text('X')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMenuAnchorGroup)), Size.zero);
+    controller.open();
+  });
 }
 
 // Custom MenuController that extends the base MenuController
