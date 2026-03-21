@@ -80,6 +80,7 @@ static NSString* const kAutofillEditingValue = @"editingValue";
 static NSString* const kAutofillHints = @"hints";
 
 static NSString* const kAutocorrectionType = @"autocorrect";
+static NSString* const kEnableInlinePrediction = @"enableInlinePrediction";
 
 #pragma mark - Static Functions
 
@@ -863,6 +864,9 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     _smartQuotesType = UITextSmartQuotesTypeYes;
     _smartDashesType = UITextSmartDashesTypeYes;
     _selectionRects = [[NSArray alloc] init];
+    if (@available(iOS 17.0, *)) {
+      _inlinePredictionType = UITextInlinePredictionTypeDefault;
+    }
 
     if (@available(iOS 14.0, *)) {
       UIScribbleInteraction* interaction = [[UIScribbleInteraction alloc] initWithDelegate:self];
@@ -1100,6 +1104,20 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // The input field needs to be visible for the system autofill
   // to find it.
   self.isVisibleToAutofill = autofill || _secureTextEntry;
+
+  if (@available(iOS 17.0, *)) {
+    // iOS 17+ inline prediction. From TextInputConfiguration.toJson();
+    // deserialized as NSNumber. nil, missing key, or NSNull = use system default;
+    // YES = enable; NO = disable.
+    id enableInlinePrediction = configuration[kEnableInlinePrediction];
+    if (enableInlinePrediction == nil || enableInlinePrediction == [NSNull null]) {
+      self.inlinePredictionType = UITextInlinePredictionTypeDefault;
+    } else if ([enableInlinePrediction boolValue]) {
+      self.inlinePredictionType = UITextInlinePredictionTypeYes;
+    } else {
+      self.inlinePredictionType = UITextInlinePredictionTypeNo;
+    }
+  }
 }
 
 - (UITextContentType)textContentType {
@@ -1593,6 +1611,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   } else {
     [self updateEditingState];
   }
+}
+
+// iOS 17+ inline predictive text uses setAttributedMarkedText:selectedRange:.
+// Forward to the existing setMarkedText implementation by extracting the plain string.
+- (void)setAttributedMarkedText:(NSAttributedString*)attributedString
+                  selectedRange:(NSRange)selectedRange API_AVAILABLE(ios(17.0)) {
+  NSString* markedText = attributedString ? [attributedString string] : @"";
+  [self setMarkedText:markedText selectedRange:selectedRange];
 }
 
 - (void)unmarkText {

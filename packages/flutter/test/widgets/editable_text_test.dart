@@ -18279,6 +18279,7 @@ class _AccentColorTextEditingController extends TextEditingController {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+    TextStyle? composingStyle,
     SpellCheckConfiguration? spellCheckConfiguration,
   }) {
     final Color color = Theme.of(context).colorScheme.secondary;
@@ -18286,6 +18287,7 @@ class _AccentColorTextEditingController extends TextEditingController {
       context: context,
       style: TextStyle(color: color),
       withComposing: withComposing,
+      composingStyle: composingStyle,
     );
   }
 }
@@ -18314,11 +18316,13 @@ class _TextEditingControllerImpl extends ChangeNotifier implements TextEditingCo
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+    TextStyle? composingStyle,
   }) {
     return _innerController.buildTextSpan(
       context: context,
       style: style,
       withComposing: withComposing,
+      composingStyle: composingStyle,
     );
   }
 

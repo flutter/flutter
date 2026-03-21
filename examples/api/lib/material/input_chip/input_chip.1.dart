@@ -297,6 +297,7 @@ class ChipsInputEditingController<T> extends TextEditingController {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+    TextStyle? composingStyle,
   }) {
     final Iterable<WidgetSpan> chipWidgets = values.map(
       (T v) => WidgetSpan(child: chipBuilder(context, v)),

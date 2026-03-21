@@ -300,6 +300,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     required BuildContext context,
     TextStyle? style,
     required bool withComposing,
+    TextStyle? composingStyle,
   }) {
     assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
     // If the composing range is out of range for the current text, ignore it to
@@ -311,14 +312,15 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       return TextSpan(style: style, text: text);
     }
 
-    final TextStyle composingStyle =
-        style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
-        const TextStyle(decoration: TextDecoration.underline);
+    final TextStyle finalComposingStyle =
+        composingStyle ?? const TextStyle(decoration: TextDecoration.underline);
+    final TextStyle effectiveComposingStyle =
+        style?.merge(finalComposingStyle) ?? finalComposingStyle;
     return TextSpan(
       style: style,
       children: <TextSpan>[
         TextSpan(text: value.composing.textBefore(value.text)),
-        TextSpan(style: composingStyle, text: value.composing.textInside(value.text)),
+        TextSpan(style: effectiveComposingStyle, text: value.composing.textInside(value.text)),
         TextSpan(text: value.composing.textAfter(value.text)),
       ],
     );
@@ -916,6 +918,8 @@ class EditableText extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
     this.hintLocales,
+    this.enableInlinePrediction,
+    this.composingStyle,
   }) : assert(obscuringCharacter.length == 1),
        autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
@@ -2067,6 +2071,17 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
+  final bool? enableInlinePrediction;
+
+  /// Optional style for the composing (and inline prediction) region.
+  ///
+  /// When set, this style is used for the segment of text in the composing
+  /// range (e.g. IME composition and inline predictive text). When null,
+  /// the default is used ([TextDecoration.underline]). Applies to both IME
+  /// composition and inline prediction.
+  final TextStyle? composingStyle;
+
   /// The default value for [selectionHeightStyle].
   ///
   /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
@@ -2472,6 +2487,16 @@ class EditableText extends StatefulWidget {
     );
     properties.add(
       DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<bool?>(
+        'enableInlinePrediction',
+        enableInlinePrediction,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextStyle?>('composingStyle', composingStyle, defaultValue: null),
     );
   }
 }
@@ -5207,6 +5232,7 @@ class EditableTextState extends State<EditableText>
           ? const <String>[]
           : widget.contentInsertionConfiguration!.allowedMimeTypes,
       hintLocales: widget.hintLocales,
+      enableInlinePrediction: widget.enableInlinePrediction,
     );
   }
 
@@ -5923,6 +5949,7 @@ class EditableTextState extends State<EditableText>
       context: context,
       style: _style,
       withComposing: withComposing,
+      composingStyle: widget.composingStyle,
     );
   }
 }
