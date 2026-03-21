@@ -17,7 +17,7 @@ class CustomMultiChildLayoutApp extends StatelessWidget {
       home: Directionality(
         // TRY THIS: Try changing the direction here and hot-reloading to
         // see the layout change.
-        textDirection: TextDirection.ltr,
+        textDirection: .ltr,
         child: Scaffold(body: CustomMultiChildLayoutExample()),
       ),
     );
@@ -43,11 +43,11 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     final double columnWidth = size.width / colors.length;
-    Offset childPosition = Offset.zero;
+    Offset childPosition = .zero;
     switch (textDirection) {
-      case TextDirection.rtl:
+      case .rtl:
         childPosition += Offset(size.width, 0);
-      case TextDirection.ltr:
+      case .ltr:
         break;
     }
     for (final String color in colors.keys) {
@@ -60,13 +60,13 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
       // what it was in the previous layout. Each child starts at (0, 0) for the
       // first layout.
       switch (textDirection) {
-        case TextDirection.rtl:
+        case .rtl:
           positionChild(color, childPosition - Offset(currentSize.width, 0));
           childPosition += Offset(
             -currentSize.width,
             currentSize.height - overlap,
           );
-        case TextDirection.ltr:
+        case .ltr:
           positionChild(color, childPosition);
           childPosition += Offset(
             currentSize.width,
@@ -115,7 +115,7 @@ class CustomMultiChildLayoutExample extends StatelessWidget {
               color: entry.value,
               width: 100.0,
               height: 100.0,
-              alignment: Alignment.center,
+              alignment: .center,
               child: Text(entry.key),
             ),
           ),

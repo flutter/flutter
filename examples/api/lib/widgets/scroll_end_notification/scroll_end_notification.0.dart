@@ -87,7 +87,7 @@ class _ScrollEndNotificationExampleState
           controller: scrollController,
           thumbVisibility: true,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const .symmetric(horizontal: 8),
             child: NotificationListener<ScrollNotification>(
               onNotification: handleScrollNotification,
               child: CustomScrollView(

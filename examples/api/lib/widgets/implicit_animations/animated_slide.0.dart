@@ -25,7 +25,7 @@ class AnimatedSlideExample extends StatefulWidget {
 }
 
 class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
-  Offset offset = Offset.zero;
+  Offset offset = .zero;
 
   @override
   Widget build(BuildContext context) {
@@ -34,17 +34,17 @@ class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
     return Scaffold(
       appBar: AppBar(title: const Text('AnimatedSlide Sample')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const .all(16.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             Expanded(
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(50.0),
+                      alignment: .center,
+                      padding: const .all(50.0),
                       child: AnimatedSlide(
                         offset: offset,
                         duration: const Duration(milliseconds: 500),
@@ -77,7 +77,7 @@ class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: .spaceEvenly,
               children: <Widget>[
                 Text('X', style: textTheme.bodyMedium),
                 Expanded(

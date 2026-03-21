@@ -18,8 +18,8 @@ class PageTransitionsBuilderExampleApp extends StatelessWidget {
       theme: ThemeData(
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: <TargetPlatform, PageTransitionsBuilder>{
-            TargetPlatform.android: SlideRightPageTransitionsBuilder(),
-            TargetPlatform.iOS: SlideRightPageTransitionsBuilder(),
+            .android: SlideRightPageTransitionsBuilder(),
+            .iOS: SlideRightPageTransitionsBuilder(),
           },
         ),
       ),
@@ -40,7 +40,7 @@ class SlideRightPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     const Offset begin = Offset(1.0, 0.0);
-    const Offset end = Offset.zero;
+    const Offset end = .zero;
     final Animatable<Offset> tween = Tween<Offset>(
       begin: begin,
       end: end,

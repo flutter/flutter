@@ -40,10 +40,10 @@ class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         AnimatedPadding(
-          padding: EdgeInsets.all(padValue),
+          padding: .all(padValue),
           duration: const Duration(seconds: 2),
           curve: Curves.easeInOut,
           child: Container(

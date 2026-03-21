@@ -43,7 +43,7 @@ class SliverFillRemainingExample extends StatelessWidget {
           child: Container(
             color: Colors.orange[300],
             child: const Padding(
-              padding: EdgeInsets.all(50.0),
+              padding: .all(50.0),
               child: FlutterLogo(size: 100),
             ),
           ),

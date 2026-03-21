@@ -119,7 +119,7 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const .all(16.0),
           child: AnimatedGrid(
             key: _gridKey,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -218,7 +218,7 @@ class CardItem extends StatelessWidget {
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
     }
     return Padding(
-      padding: const EdgeInsets.all(2.0),
+      padding: const .all(2.0),
       child: ScaleTransition(
         scale: CurvedAnimation(
           parent: animation,

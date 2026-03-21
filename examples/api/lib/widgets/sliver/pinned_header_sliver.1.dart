@@ -81,7 +81,7 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
 
   @override
   Widget build(BuildContext context) {
-    const EdgeInsets horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
+    const EdgeInsets horizontalPadding = .symmetric(horizontal: 8);
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;
@@ -109,7 +109,7 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
                     child: Text(
                       'Settings',
                       style: textTheme.titleLarge!.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: .bold,
                         fontSize: 32,
                       ),
                     ),
@@ -144,7 +144,7 @@ class Header extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const .symmetric(vertical: 12),
       decoration: ShapeDecoration(
         color: opacity == 0
             ? colorScheme.surfaceContainer
@@ -157,7 +157,7 @@ class Header extends StatelessWidget {
           ),
         ),
       ),
-      alignment: Alignment.center,
+      alignment: .center,
       child: AnimatedOpacity(
         opacity: opacity,
         duration: const Duration(milliseconds: 300),
@@ -178,8 +178,8 @@ class TitleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: AlignmentDirectional.bottomStart,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      alignment: .bottomStart,
+      padding: const .symmetric(vertical: 8),
       child: child,
     );
   }

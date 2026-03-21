@@ -30,7 +30,7 @@ class _FloatingHeaderExampleState extends State<FloatingHeaderExample> {
     return const Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(4),
+          padding: .all(4),
           child: CustomScrollView(
             slivers: <Widget>[
               SliverFloatingHeader(
@@ -61,19 +61,19 @@ class ListHeader extends StatelessWidget {
 
     return Container(
       color: colorScheme.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const .symmetric(horizontal: 4),
       child: Material(
         color: colorScheme.primaryContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: .circular(8),
           side: BorderSide(width: 7, color: colorScheme.outline),
         ),
         child: Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          alignment: .center,
+          padding: const .symmetric(vertical: 16),
           child: Text(
             text,
-            textAlign: TextAlign.center,
+            textAlign: .center,
             style: theme.textTheme.headlineMedium!.copyWith(
               color: colorScheme.onPrimaryContainer,
             ),

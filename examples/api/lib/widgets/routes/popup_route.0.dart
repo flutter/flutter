@@ -66,9 +66,9 @@ class DismissibleDialog<T> extends PopupRoute<T> {
         // to fit to the size of the content.
         child: UnconstrainedBox(
           child: Container(
-            padding: const EdgeInsets.all(20.0),
+            padding: const .all(20.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: .circular(10),
               color: Colors.white,
             ),
             child: Column(

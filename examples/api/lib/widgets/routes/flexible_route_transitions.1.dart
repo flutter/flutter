@@ -34,7 +34,7 @@ class FlexibleRouteTransitionsApp extends StatelessWidget {
             // on iOS the default is the Cupertino sliding transition. Setting
             // it to use zoom on all platforms allows the example to show multiple
             // transitions in one app for all platforms.
-            TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+            .iOS: ZoomPageTransitionsBuilder(),
           },
         ),
       ),
@@ -240,7 +240,7 @@ class _MyPageScaffold extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             TextButton(
               onPressed: () {
@@ -428,7 +428,7 @@ class _VerticalPageTransition extends StatelessWidget {
         position: _primaryPositionAnimation,
         textDirection: textDirection,
         child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: const .vertical(top: Radius.circular(12)),
           child: child,
         ),
       ),

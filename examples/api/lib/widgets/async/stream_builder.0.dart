@@ -61,7 +61,7 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.displayMedium!,
-      textAlign: TextAlign.center,
+      textAlign: .center,
       child: Container(
         alignment: FractionalOffset.center,
         color: Colors.white,
@@ -86,15 +86,15 @@ class BidsStatus extends StatelessWidget {
           children = <Widget>[
             const Icon(Icons.error_outline, color: Colors.red, size: 60),
             Padding(
-              padding: const EdgeInsets.only(top: 16),
+              padding: const .only(top: 16),
               child: Text('Error: ${snapshot.error}'),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const .only(top: 8),
               child: Text(
                 'Stack trace: ${snapshot.stackTrace}',
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
               ),
             ),
           ];
@@ -103,10 +103,7 @@ class BidsStatus extends StatelessWidget {
             case ConnectionState.none:
               children = const <Widget>[
                 Icon(Icons.info, color: Colors.blue, size: 60),
-                Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text('Select a lot'),
-                ),
+                Padding(padding: .only(top: 16), child: Text('Select a lot')),
               ];
             case ConnectionState.waiting:
               children = const <Widget>[
@@ -115,7 +112,7 @@ class BidsStatus extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 16),
+                  padding: .only(top: 16),
                   child: Text('Awaiting bids...'),
                 ),
               ];
@@ -127,7 +124,7 @@ class BidsStatus extends StatelessWidget {
                   size: 60,
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: const .only(top: 16),
                   child: Text('\$${snapshot.data}'),
                 ),
               ];
@@ -135,7 +132,7 @@ class BidsStatus extends StatelessWidget {
               children = <Widget>[
                 const Icon(Icons.info, color: Colors.blue, size: 60),
                 Padding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: const .only(top: 16),
                   child: Text(
                     snapshot.hasData
                         ? '\$${snapshot.data} (closed)'
@@ -146,10 +143,7 @@ class BidsStatus extends StatelessWidget {
           }
         }
 
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
-        );
+        return Column(mainAxisAlignment: .center, children: children);
       },
     );
   }
