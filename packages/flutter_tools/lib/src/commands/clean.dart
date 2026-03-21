@@ -22,6 +22,13 @@ class CleanCommand extends FlutterCommand {
       'scheme',
       help: 'When cleaning Xcode schemes, clean only the specified scheme.',
     );
+    argParser.addFlag(
+      'include-example',
+      negatable: false,
+      help:
+          'Also clean the example directory, if one exists. '
+          'Useful when developing in a package project.',
+    );
   }
 
   final bool _verbose;
@@ -44,14 +51,34 @@ class CleanCommand extends FlutterCommand {
     // Do this before removing ephemeral directory, which would delete the xcworkspace.
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
-    if (xcode != null && xcode.isInstalledAndMeetsVersionCheck) {
+    final bool isXcodeInstalledAndMeetsVersionCheck =
+        xcode != null && xcode.isInstalledAndMeetsVersionCheck;
+    if (isXcodeInstalledAndMeetsVersionCheck) {
       await _cleanXcode(flutterProject.ios);
       await _cleanXcode(flutterProject.macos);
     }
 
     final Directory buildDir = globals.fs.directory(getBuildDirectory());
     deleteFile(buildDir);
+    _deleteProjectFiles(flutterProject);
 
+    if ((argResults?.wasParsed('include-example') ?? false) &&
+        boolArg('include-example') &&
+        flutterProject.hasExampleApp) {
+      final FlutterProject exampleProject = flutterProject.example;
+      if (isXcodeInstalledAndMeetsVersionCheck) {
+        await _cleanXcode(exampleProject.ios);
+        await _cleanXcode(exampleProject.macos);
+      }
+
+      deleteFile(exampleProject.directory.childDirectory(getBuildDirectory()));
+      _deleteProjectFiles(exampleProject);
+    }
+
+    return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  void _deleteProjectFiles(FlutterProject flutterProject) {
     deleteFile(flutterProject.dartTool);
 
     deleteFile(flutterProject.android.ephemeralDirectory);
@@ -68,8 +95,6 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.macos.ephemeralDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
     deleteFile(flutterProject.flutterPluginsDependenciesFile);
-
-    return const FlutterCommandResult(ExitStatus.success);
   }
 
   Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
