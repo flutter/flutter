@@ -160,7 +160,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                      double y,
                      FlutterPointerDeviceKind device_kind,
                      int32_t device_id,
-                     FlutterPointerMouseButtons button,
+                     uint64_t button,
                      uint32_t rotation,
                      uint32_t pressure) override;
 
@@ -169,7 +169,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                    double y,
                    FlutterPointerDeviceKind device_kind,
                    int32_t device_id,
-                   FlutterPointerMouseButtons button) override;
+                   uint64_t button) override;
 
   // |WindowBindingHandlerDelegate|
   void OnPointerLeave(double x,
