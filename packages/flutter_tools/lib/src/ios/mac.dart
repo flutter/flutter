@@ -743,9 +743,25 @@ Future<void> removeExtendedAttributes(
   // Remove specific extended attributes that cause code signing failures.
   // We remove com.apple.FinderInfo and com.apple.provenance, but preserve
   // com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage build directories.
-  const attributesToRemove = <String>{'com.apple.FinderInfo', 'com.apple.provenance'};
+  const Set<String> attributesToRemove = <String>{'com.apple.FinderInfo', 'com.apple.provenance'};
 
-  for (final attribute in attributesToRemove) {
+  final RunResult listedAttributes = await processUtils.run(<String>[
+    'xattr',
+    '-r',
+    projectDirectory.path,
+  ]);
+  if (listedAttributes.exitCode != 0) {
+    logger.printTrace('Failed to list extended attributes for ${projectDirectory.path}');
+    return;
+  }
+
+  final Set<String> presentAttributes = listedAttributes.stdout
+      .split('\n')
+      .map<String>((String line) => line.trim())
+      .where((String line) => line.isNotEmpty && !line.endsWith(':'))
+      .toSet();
+
+  for (final String attribute in attributesToRemove.intersection(presentAttributes)) {
     final bool success = await processUtils.exitsHappy(<String>[
       'xattr',
       '-r',
