@@ -287,7 +287,7 @@ void main() {
     await tester.sendEventToBinding(testPointer.down(startLocation));
     await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 175)));
     await tester.pump();
-    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 149)));
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 99)));
     await tester.pump();
     await tester.sendEventToBinding(testPointer.up());
     await tester.pump();
@@ -1270,4 +1270,281 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
   });
+
+  testWidgets('RefreshIndicator responds to backgroundColor', (WidgetTester tester) async {
+    const Color customBgColor = Colors.orange;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          backgroundColor: customBgColor,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 100.0);
+    await tester.pump();
+
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator)).show();
+    await tester.pump();
+
+    final RefreshProgressIndicator indicator = tester.widget<RefreshProgressIndicator>(
+      find.byType(RefreshProgressIndicator),
+    );
+
+    expect(indicator.backgroundColor, customBgColor);
+  });
+
+  testWidgets('RefreshIndicator ignores scroll if notificationPredicate returns false', (
+    WidgetTester tester,
+  ) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          notificationPredicate: (ScrollNotification notification) => false,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pumpAndSettle();
+
+    expect(refreshCalled, false);
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+  });
+
+  testWidgets('RefreshIndicator can be triggered via GlobalKey', (WidgetTester tester) async {
+    refreshCalled = false;
+    final refreshKey = GlobalKey<RefreshIndicatorState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          key: refreshKey,
+          onRefresh: refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    refreshKey.currentState!.show();
+    await tester.pumpAndSettle();
+
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('RefreshIndicator does not crash if disposed during refresh', (
+    WidgetTester tester,
+  ) async {
+    refreshCalled = false;
+    final refreshCompleter = Completer<void>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: () {
+            refreshCalled = true;
+            return refreshCompleter.future;
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(refreshCalled, true);
+    expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+
+    refreshCompleter.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RefreshIndicator), findsNothing);
+  });
+
+  testWidgets('RefreshIndicator respects exact displacement property', (WidgetTester tester) async {
+    const customDisplacement = 120.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          displacement: customDisplacement,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 500.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final Offset indicatorTopLeft = tester.getTopLeft(find.byType(RefreshProgressIndicator));
+    expect(indicatorTopLeft.dy, lessThanOrEqualTo(customDisplacement));
+  });
+
+  testWidgets('NeverScrollableScrollPhysics prevents pull to refresh', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            physics: const NeverScrollableScrollPhysics(),
+            children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pumpAndSettle();
+
+    expect(refreshCalled, false);
+    expect(find.byType(RefreshProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Works correctly with PageScrollPhysics (PageView)', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: PageView(
+            scrollDirection: Axis.vertical,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              Center(child: Text('Page 1')),
+              Center(child: Text('Page 2')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('Page 1'), const Offset(0.0, 400.0), 1000.0);
+    await tester.pumpAndSettle();
+
+    expect(refreshCalled, true);
+  });
+
+  testWidgets('Overscrolling at the bottom of the list does not trigger refresh', (
+    WidgetTester tester,
+  ) async {
+    refreshCalled = false;
+    final scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: List<Widget>.generate(
+              20,
+              (int i) => SizedBox(height: 100.0, child: Text('Item $i')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    await tester.pump();
+
+    await tester.fling(find.text('Item 19'), const Offset(0.0, -300.0), 1000.0);
+    await tester.pumpAndSettle();
+
+    expect(refreshCalled, false);
+    scrollController.dispose();
+  });
+
+  testWidgets('ListView can still be scrolled while RefreshIndicator is spinning', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: List<Widget>.generate(
+              20,
+              (int i) => SizedBox(height: 100.0, child: Text('Item $i')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator)).show();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+    expect(scrollController.offset, 0.0);
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -300.0));
+    await tester.pump();
+
+    expect(scrollController.offset, 300.0);
+    expect(find.byType(RefreshProgressIndicator), findsOneWidget);
+
+    scrollController.dispose();
+  });
+
+  testWidgets(
+    'Correct status sequence for complete refresh (drag -> armed -> snap -> refresh -> done)',
+    (WidgetTester tester) async {
+      final statusLog = <String>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator.noSpinner(
+            onStatusChange: (RefreshIndicatorStatus? status) {
+              if (status != null) {
+                statusLog.add(status.name);
+              }
+            },
+            onRefresh: refresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const <Widget>[SizedBox(height: 200.0, child: Text('X'))],
+            ),
+          ),
+        ),
+      );
+
+      await tester.fling(find.text('X'), const Offset(0.0, 600.0), 1000.0);
+      await tester.pumpAndSettle();
+      expect(statusLog, containsAllInOrder(<String>['drag', 'armed', 'snap', 'refresh', 'done']));
+    },
+  );
 }

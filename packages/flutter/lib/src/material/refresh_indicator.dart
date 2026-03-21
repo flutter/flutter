@@ -24,6 +24,9 @@ const double _kDragContainerExtentPercentage = 0.25;
 // displacement; max displacement = _kDragSizeFactorLimit * displacement.
 const double _kDragSizeFactorLimit = 1.5;
 
+// The threshold at which the indicator is "armed" and ready to trigger a refresh when released.
+const double _kArmedThreshold = 1.0 / _kDragSizeFactorLimit; // ~0.66
+
 // When the scroll ends, the duration of the refresh indicator's animation
 // to the RefreshIndicator's displacement.
 const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
@@ -159,9 +162,9 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.onStatusChange,
     required this.child,
   }) : _indicatorType = _IndicatorType.material,
-       onStatusChange = null,
        assert(elevation >= 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
@@ -193,9 +196,9 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.onStatusChange,
     required this.child,
   }) : _indicatorType = _IndicatorType.adaptive,
-       onStatusChange = null,
        assert(elevation >= 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
@@ -346,6 +349,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   static final Animatable<double> _oneToZeroTween = Tween<double>(begin: 1.0, end: 0.0);
 
+  double _lastOverscroll = 0.0;
+
   @protected
   @override
   void initState() {
@@ -384,6 +389,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     super.dispose();
   }
 
+  /// Configures the animation that interpolates the indicator's color.
   void _setupColorTween() {
     // Reset the current value color.
     _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
@@ -397,148 +403,237 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         ColorTween(
           begin: color.withAlpha(0),
           end: color.withAlpha(color.alpha),
-        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
+        ).chain(CurveTween(curve: const Interval(0.0, _kArmedThreshold))),
       );
     }
   }
 
+  /// Determines if the scroll notification was triggered by a user drag.
+  bool _isScrollTriggeredByUser(ScrollNotification notification) {
+    if (notification is ScrollStartNotification && notification.dragDetails != null) {
+      return true;
+    }
+    if (notification is ScrollUpdateNotification && notification.dragDetails != null) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Determines if the scrollable is exactly at the top or bottom edge.
+  bool _isAtScrollEdge(ScrollMetrics metrics) {
+    final bool isAtTopEdge =
+        metrics.axisDirection == AxisDirection.up && metrics.extentAfter == 0.0;
+    final bool isAtBottomEdge =
+        metrics.axisDirection == AxisDirection.down && metrics.extentBefore == 0.0;
+    return isAtTopEdge || isAtBottomEdge;
+  }
+
+  /// Checks if conditions are met to start the refresh indicator animation.
   bool _shouldStart(ScrollNotification notification) {
     // If the notification.dragDetails is null, this scroll is not triggered by
     // user dragging. It may be a result of ScrollController.jumpTo or ballistic scroll.
     // In this case, we don't want to trigger the refresh indicator.
-    return ((notification is ScrollStartNotification && notification.dragDetails != null) ||
-            (notification is ScrollUpdateNotification &&
-                notification.dragDetails != null &&
-                widget.triggerMode == RefreshIndicatorTriggerMode.anywhere)) &&
-        ((notification.metrics.axisDirection == AxisDirection.up &&
-                notification.metrics.extentAfter == 0.0) ||
-            (notification.metrics.axisDirection == AxisDirection.down &&
-                notification.metrics.extentBefore == 0.0)) &&
-        _status == null &&
-        _start(notification.metrics.axisDirection);
+    final bool isUserDrag = _isScrollTriggeredByUser(notification);
+    final bool isAtEdge = _isAtScrollEdge(notification.metrics);
+
+    if (!isUserDrag || !isAtEdge || _status != null) {
+      return false;
+    }
+
+    if (widget.triggerMode == RefreshIndicatorTriggerMode.onEdge &&
+        notification is! ScrollStartNotification) {
+      return false;
+    }
+
+    return _start(notification.metrics.axisDirection);
   }
 
+  /// Evaluates whether the indicator should currently be displayed at the top or bottom based on axis direction.
+  bool? _getIndicatorAtTop(AxisDirection direction) {
+    return switch (direction) {
+      AxisDirection.down || AxisDirection.up => true,
+      AxisDirection.left || AxisDirection.right => null,
+    };
+  }
+
+  /// Handles drag offset changes for scroll update notifications.
+  void _handleScrollUpdateNotification(ScrollUpdateNotification notification) {
+    final double delta = notification.scrollDelta ?? 0.0;
+
+    if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
+      final ScrollPosition position = Scrollable.of(notification.context!).position;
+
+      if (delta != 0.0 && _lastOverscroll.abs() > 0.0) {
+        final bool isCanceling =
+            (notification.metrics.axisDirection == AxisDirection.down && delta > 0.0) ||
+            (notification.metrics.axisDirection == AxisDirection.up && delta < 0.0);
+
+        if (isCanceling && _dragOffset! > 0.0) {
+          final double consumedDelta = math.min(delta.abs(), _dragOffset!);
+          final double correction = delta > 0.0 ? consumedDelta : -consumedDelta;
+
+          position.correctBy(-correction);
+
+          _updateDragOffset(notification.metrics.axisDirection, correction);
+        } else {
+          _updateDragOffset(notification.metrics.axisDirection, delta);
+        }
+
+        _checkDragOffset(notification.metrics.viewportDimension);
+      } else {
+        _updateDragOffset(notification.metrics.axisDirection, notification.scrollDelta!);
+        _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: false);
+      }
+    }
+
+    if (_status == RefreshIndicatorStatus.armed && notification.dragDetails == null) {
+      // On iOS start the refresh when the Scrollable bounces back from the
+      // overscroll (ScrollNotification indicating this don't have dragDetails
+      // because the scroll activity is not directly triggered by a drag).
+      _show();
+    }
+  }
+
+  /// Handles drag offset changes for overscroll notifications. Only Android sends these notifications,
+  /// so this is only called on Android. On iOS, the refresh is triggered in response to a ScrollUpdateNotification
+  /// when the scroll activity changes from a drag to a ballistic scroll.
+  void _handleOverscrollNotification(OverscrollNotification notification) {
+    final double overscroll = notification.overscroll;
+    _lastOverscroll = overscroll;
+
+    if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
+      _updateDragOffset(notification.metrics.axisDirection, notification.overscroll);
+      _checkDragOffset(notification.metrics.viewportDimension);
+    }
+  }
+
+  /// Handles completion or cancellation of the drag gesture when scrolling ends.
+  void _handleScrollEndNotification(ScrollEndNotification notification) {
+    _lastOverscroll = 0.0;
+    switch (_status) {
+      case RefreshIndicatorStatus.armed:
+        _show();
+
+      case RefreshIndicatorStatus.drag:
+        _dismiss(RefreshIndicatorStatus.canceled);
+      case RefreshIndicatorStatus.canceled:
+      case RefreshIndicatorStatus.done:
+      case RefreshIndicatorStatus.refresh:
+      case RefreshIndicatorStatus.snap:
+      case null:
+        // do nothing
+        break;
+    }
+  }
+
+  /// Accumulates the drag distance based on the scroll direction.
+  void _updateDragOffset(AxisDirection direction, double delta) {
+    if (direction == AxisDirection.down) {
+      _dragOffset = _dragOffset! - delta;
+    } else if (direction == AxisDirection.up) {
+      _dragOffset = _dragOffset! + delta;
+    }
+  }
+
+  /// Main handler for all scroll notifications. Routes to specific handlers based on notification type.
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
+
     if (_shouldStart(notification)) {
       setState(() {
         _status = RefreshIndicatorStatus.drag;
-        widget.onStatusChange?.call(_status);
       });
+      widget.onStatusChange?.call(_status);
       return false;
     }
-    final bool? indicatorAtTopNow = switch (notification.metrics.axisDirection) {
-      AxisDirection.down || AxisDirection.up => true,
-      AxisDirection.left || AxisDirection.right => null,
-    };
+
+    final bool? indicatorAtTopNow = _getIndicatorAtTop(notification.metrics.axisDirection);
+
+    // If the scroll direction changes mid-drag, cancel the current drag operation.
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
         _dismiss(RefreshIndicatorStatus.canceled);
       }
     } else if (notification is ScrollUpdateNotification) {
-      if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
-        if (notification.metrics.axisDirection == AxisDirection.down) {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
-        } else if (notification.metrics.axisDirection == AxisDirection.up) {
-          _dragOffset = _dragOffset! + notification.scrollDelta!;
-        }
-        _checkDragOffset(notification.metrics.viewportDimension);
-      }
-      if (_status == RefreshIndicatorStatus.armed && notification.dragDetails == null) {
-        // On iOS start the refresh when the Scrollable bounces back from the
-        // overscroll (ScrollNotification indicating this don't have dragDetails
-        // because the scroll activity is not directly triggered by a drag).
-        _show();
-      }
+      _handleScrollUpdateNotification(notification);
     } else if (notification is OverscrollNotification) {
-      if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
-        if (notification.metrics.axisDirection == AxisDirection.down) {
-          _dragOffset = _dragOffset! - notification.overscroll;
-        } else if (notification.metrics.axisDirection == AxisDirection.up) {
-          _dragOffset = _dragOffset! + notification.overscroll;
-        }
-        _checkDragOffset(notification.metrics.viewportDimension);
-      }
+      _handleOverscrollNotification(notification);
     } else if (notification is ScrollEndNotification) {
-      switch (_status) {
-        case RefreshIndicatorStatus.armed:
-          if (_positionController.value < 1.0) {
-            _dismiss(RefreshIndicatorStatus.canceled);
-          } else {
-            _show();
-          }
-        case RefreshIndicatorStatus.drag:
-          _dismiss(RefreshIndicatorStatus.canceled);
-        case RefreshIndicatorStatus.canceled:
-        case RefreshIndicatorStatus.done:
-        case RefreshIndicatorStatus.refresh:
-        case RefreshIndicatorStatus.snap:
-        case null:
-          // do nothing
-          break;
-      }
+      _handleScrollEndNotification(notification);
     }
+
     return false;
   }
 
+  /// Handles overscroll indicator notification to selectively allow or disallow the standard glow/stretch effects.
   bool _handleIndicatorNotification(OverscrollIndicatorNotification notification) {
     if (notification.depth != 0 || !notification.leading) {
       return false;
     }
-    if (_status == RefreshIndicatorStatus.drag) {
+    if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
       notification.disallowIndicator();
       return true;
     }
     return false;
   }
 
+  /// Initializes state when a drag interaction starts.
   bool _start(AxisDirection direction) {
     assert(_status == null);
     assert(_isIndicatorAtTop == null);
     assert(_dragOffset == null);
-    switch (direction) {
-      case AxisDirection.down:
-      case AxisDirection.up:
-        _isIndicatorAtTop = true;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        _isIndicatorAtTop = null;
-        // we do not support horizontal scroll views.
-        return false;
+
+    _isIndicatorAtTop = _getIndicatorAtTop(direction);
+    if (_isIndicatorAtTop == null) {
+      // Does not support a horizontal refresh indicator.
+      return false;
     }
+
     _dragOffset = 0.0;
     _scaleController.value = 0.0;
     _positionController.value = 0.0;
     return true;
   }
 
-  void _checkDragOffset(double containerExtent) {
+  /// Calculates the visual position of the indicator based on the drag offset.
+  /// Also transitions status from `drag` to `armed` if pulled far enough.
+  void _checkDragOffset(double containerExtent, {bool canBeDisarmed = true}) {
     assert(_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed);
+
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
-    if (_status == RefreshIndicatorStatus.armed) {
-      newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
+
+    if (_status == RefreshIndicatorStatus.armed && !canBeDisarmed) {
+      newValue = math.max(newValue, _kArmedThreshold);
     }
+
     _positionController.value = clampDouble(newValue, 0.0, 1.0); // This triggers various rebuilds.
-    if (_status == RefreshIndicatorStatus.drag &&
-        _valueColor.value!.alpha == _effectiveValueColor.alpha) {
+
+    // Transition from `drag` to `armed` if the drag offset exceeds the armed threshold, and back to `drag` if it goes below.
+    if (_status == RefreshIndicatorStatus.drag && _positionController.value >= _kArmedThreshold) {
       _status = RefreshIndicatorStatus.armed;
+      widget.onStatusChange?.call(_status);
+    } else if (_status == RefreshIndicatorStatus.armed &&
+        _positionController.value < _kArmedThreshold) {
+      _status = RefreshIndicatorStatus.drag;
       widget.onStatusChange?.call(_status);
     }
   }
 
-  // Stop showing the refresh indicator.
+  /// Stops showing the refresh indicator and resets the state.
   Future<void> _dismiss(RefreshIndicatorStatus newMode) async {
     await Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
     assert(newMode == RefreshIndicatorStatus.canceled || newMode == RefreshIndicatorStatus.done);
+
     setState(() {
       _status = newMode;
-      widget.onStatusChange?.call(_status);
     });
+    widget.onStatusChange?.call(_status);
+
     switch (_status!) {
       case RefreshIndicatorStatus.done:
         await _scaleController.animateTo(1.0, duration: _kIndicatorScaleDuration);
@@ -550,40 +645,47 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       case RefreshIndicatorStatus.snap:
         assert(false);
     }
+
     if (mounted && _status == newMode) {
       _dragOffset = null;
       _isIndicatorAtTop = null;
       setState(() {
         _status = null;
       });
+      widget.onStatusChange?.call(_status);
     }
   }
 
+  /// Triggers the visual transition to the snap position and calls the onRefresh callback.
   void _show() {
     assert(_status != RefreshIndicatorStatus.refresh);
     assert(_status != RefreshIndicatorStatus.snap);
+
     final completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
+
     _status = RefreshIndicatorStatus.snap;
     widget.onStatusChange?.call(_status);
-    _positionController
-        .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-        .then<void>((void value) {
-          if (mounted && _status == RefreshIndicatorStatus.snap) {
-            setState(() {
-              // Show the indeterminate progress indicator.
-              _status = RefreshIndicatorStatus.refresh;
-            });
 
-            final Future<void> refreshResult = widget.onRefresh();
-            refreshResult.whenComplete(() {
-              if (mounted && _status == RefreshIndicatorStatus.refresh) {
-                completer.complete();
-                _dismiss(RefreshIndicatorStatus.done);
-              }
-            });
+    _positionController.animateTo(_kArmedThreshold, duration: _kIndicatorSnapDuration).then<void>((
+      void value,
+    ) {
+      if (mounted && _status == RefreshIndicatorStatus.snap) {
+        setState(() {
+          // Show the indeterminate progress indicator.
+          _status = RefreshIndicatorStatus.refresh;
+        });
+        widget.onStatusChange?.call(_status);
+
+        final Future<void> refreshResult = widget.onRefresh();
+        refreshResult.whenComplete(() {
+          if (mounted && _status == RefreshIndicatorStatus.refresh) {
+            completer.complete();
+            _dismiss(RefreshIndicatorStatus.done);
           }
         });
+      }
+    });
   }
 
   /// Show the refresh indicator and run the refresh callback as if it had
@@ -616,6 +718,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+
     final Widget child = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
@@ -623,6 +726,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         child: widget.child,
       ),
     );
+
     assert(() {
       if (_status == null) {
         assert(_dragOffset == null);
