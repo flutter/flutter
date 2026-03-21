@@ -145,9 +145,8 @@ enum _MediaQueryAspect {
 /// {@macro flutter.widgets.media_query.MediaQuery.useSpecific}
 ///
 /// To obtain the entire current [MediaQueryData] for a given [BuildContext],
-/// use the [MediaQuery.of] function. This can be useful if you are going to use
-/// [copyWith] to replace the [MediaQueryData] with one with an updated
-/// property.
+/// use the [MediaQuery.of] function. This allows for one or more properties
+/// to be updated using [copyWith].
 ///
 /// ## Insets and Padding
 ///
@@ -498,11 +497,10 @@ class MediaQueryData {
   /// The parts of the display that are partially obscured by system UI,
   /// typically by the hardware display "notches" or the system status bar.
   ///
-  /// If you consumed this padding (e.g. by building a widget that envelops or
+  /// If this padding is consumed (e.g. by building a widget that envelops or
   /// accounts for this padding in its layout in such a way that children are
-  /// no longer exposed to this padding), you should remove this padding
-  /// for subsequent descendants in the widget tree by inserting a new
-  /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
+  /// no longer exposed to this padding), then the [MediaQuery.removePadding] constructor
+  /// should be used to remove this padding for descendants in the widget tree.
   ///
   /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
@@ -561,8 +559,8 @@ class MediaQueryData {
   /// to avoid having the left and right edges of the [Slider] from appearing
   /// within the area reserved for system gesture navigation.
   ///
-  /// By default, [Slider]s expand to fill the available width. So, we pad the
-  /// left and right sides.
+  /// By default, [Slider]s expand to fill the available width, so this property
+  /// is used to pad the left and right sides.
   ///
   /// ** See code in examples/api/lib/widgets/media_query/media_query_data.system_gesture_insets.0.dart **
   /// {@end-tool}
@@ -1178,19 +1176,18 @@ class MediaQueryData {
 
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
-/// For example, to learn the size of the current view (e.g.,
-/// the [FlutterView] containing your app), you can use [MediaQuery.sizeOf]:
-/// `MediaQuery.sizeOf(context)`.
+/// For example, [MediaQuery.sizeOf] obtains the size of the current view
+/// using the ancestor MediaQuery's [data].
 ///
 /// Querying the current media using specific methods (for example,
-/// [MediaQuery.sizeOf] or [MediaQuery.paddingOf]) will cause your widget to
+/// [MediaQuery.sizeOf] or [MediaQuery.paddingOf]) will cause the widget to
 /// rebuild automatically whenever that specific property changes.
 ///
 /// {@template flutter.widgets.media_query.MediaQuery.useSpecific}
-/// Querying using [MediaQuery.of] will cause your widget to rebuild
+/// Querying using [MediaQuery.of] will cause the widget to rebuild
 /// automatically whenever _any_ field of the [MediaQueryData] changes (e.g., if
-/// the user rotates their device). Therefore, unless you are concerned with the
-/// entire [MediaQueryData] object changing, prefer using the specific methods
+/// the user rotates their device). When a widget only requires a subset of these fields,
+/// prefer using the specific methods
 /// (for example: [MediaQuery.sizeOf] and [MediaQuery.paddingOf]), as it will
 /// rebuild more efficiently.
 ///
@@ -1198,14 +1195,14 @@ class MediaQueryData {
 /// similar to [MediaQuery.sizeOf] will throw an exception. Alternatively, the
 /// "maybe-" variant methods (such as [MediaQuery.maybeOf] and
 /// [MediaQuery.maybeSizeOf]) can be used, which return null, instead of
-/// throwing, when no [MediaQuery] is in scope.
+/// throwing, if no [MediaQuery] is in scope.
 /// {@endtemplate}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
 ///
 /// See also:
 ///
-///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep
+///  * The [runApp] function, which introduces a [MediaQuery] and keeps
 ///    it up to date with the current screen metrics as they change.
 ///  * [MediaQueryData], the data structure that represents the metrics.
 class MediaQuery extends InheritedModel<_MediaQueryAspect> {
@@ -1472,10 +1469,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// The data from the closest instance of this class that encloses the given
   /// context.
   ///
-  /// You can use this function to query the entire set of data held in the
-  /// current [MediaQueryData] object. When any of that information changes,
-  /// your widget will be scheduled to be rebuilt, keeping your widget
-  /// up-to-date.
+  /// When any [MediaQueryData] information changes, a rebuild is scheduled for
+  /// the provided `context`, to ensure that the widget stays up-to-date.
   ///
   /// Since it is typical that the widget only requires a subset of properties
   /// of the [MediaQueryData] object, prefer using the more specific methods
@@ -1511,16 +1506,10 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// The data from the closest instance of this class that encloses the given
   /// context, if any.
   ///
-  /// Use this function if you want to allow situations where no [MediaQuery] is
-  /// in scope. Prefer using [MediaQuery.of] in situations where a media query
-  /// is always expected to exist.
+  /// Returns `null` if no [MediaQuery] is in scope.
   ///
-  /// If there is no [MediaQuery] in scope, then this function will return null.
-  ///
-  /// You can use this function to query the entire set of data held in the
-  /// current [MediaQueryData] object. When any of that information changes,
-  /// your widget will be scheduled to be rebuilt, keeping your widget
-  /// up-to-date.
+  /// When any [MediaQueryData] information changes, a rebuild is scheduled for
+  /// the provided `context`, to ensure that the widget stays up-to-date.
   ///
   /// Since it is typical that the widget only requires a subset of properties
   /// of the [MediaQueryData] object, prefer using the more specific methods
