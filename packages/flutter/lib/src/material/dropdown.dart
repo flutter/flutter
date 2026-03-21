@@ -1862,6 +1862,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(
+         errorBuilder == null || decoration?.errorText == null,
+         'Declaring both errorBuilder and decoration.errorText is not supported.',
+       ),
        decoration = decoration ?? const InputDecoration(),
        super(
          initialValue: initialValue ?? value,

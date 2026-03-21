@@ -1723,6 +1723,21 @@ void main() {
     expect(find.text('**validation error**'), findsOneWidget);
   });
 
+  testWidgets(
+    'TextFormField asserts when both errorBuilder and decoration.errorText are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => TextFormField(
+          decoration: const InputDecoration(errorText: 'Decoration error'),
+          errorBuilder: (BuildContext context, String errorText) {
+            return Text(errorText);
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
   group('context menu', () {
     testWidgets(
       'iOS uses the system context menu by default if supported',

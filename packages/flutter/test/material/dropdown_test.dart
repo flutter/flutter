@@ -4974,4 +4974,21 @@ void main() {
       'Currently, selectedItemBuilder returns a list of length 1, but items has length 2.',
     );
   });
+
+  testWidgets(
+    'DropdownButtonFormField asserts when both errorBuilder and decoration.errorText are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => DropdownButtonFormField<String>(
+          items: const <DropdownMenuItem<String>>[],
+          onChanged: (String? value) {},
+          decoration: const InputDecoration(errorText: 'Decoration error'),
+          errorBuilder: (BuildContext context, String errorText) {
+            return Text(errorText);
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
 }
