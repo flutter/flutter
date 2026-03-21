@@ -4724,6 +4724,38 @@ void main() {
     expect(editableText.cursorHeight, cursorHeight);
   });
 
+  testWidgets('DropdownMenu.scrollPadding is passed through to EditableText', (
+    WidgetTester tester,
+  ) async {
+    const scrollPadding = EdgeInsets.all(30.0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            scrollPadding: scrollPadding,
+            dropdownMenuEntries: menuChildren,
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, scrollPadding);
+  });
+
+  testWidgets('DropdownMenu.scrollPadding defaults to EdgeInsets.all(20.0)', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenu<TestMenu>(dropdownMenuEntries: menuChildren)),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.scrollPadding, const EdgeInsets.all(20.0));
+  });
+
   testWidgets('DropdownMenu accepts a MenuController', (WidgetTester tester) async {
     final menuController = MenuController();
     await tester.pumpWidget(
