@@ -59,8 +59,8 @@ abstract class SliderComponentShape {
   /// {@template flutter.material.SliderComponentShape.paint.enableAnimation}
   /// The `enableAnimation` argument is an animation triggered when the [Slider]
   /// is enabled, and it reverses when the slider is disabled. The [Slider] is
-  /// enabled when [Slider.onChanged] is not null.Use this to paint intermediate
-  /// frames for this shape when the slider changes enabled state.
+  /// enabled when [Slider.onChanged] is not null. Use this to paint
+  /// intermediate frames for this shape when the slider changes enabled state.
   /// {@endtemplate}
   ///
   /// {@template flutter.material.SliderComponentShape.paint.isDiscrete}

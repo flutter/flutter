@@ -141,6 +141,7 @@ class _WindowsTable extends StatelessWidget {
         controller: tooltip,
       ),
       PopupWindowController() => null,
+      SatelliteWindowController() => null,
     };
   }
 
@@ -150,6 +151,7 @@ class _WindowsTable extends StatelessWidget {
       DialogWindowController() => 'Dialog',
       TooltipWindowController() => 'Tooltip',
       PopupWindowController() => 'Popup',
+      SatelliteWindowController() => 'Satellite',
     };
   }
 
@@ -241,6 +243,7 @@ class _WindowCreatorCard extends StatelessWidget {
                               ),
                               title: 'Modeless Dialog',
                               preferredSize: windowSettings.dialogSize,
+                              decorated: windowSettings.dialogDecorated,
                             ),
                           ),
                         );
