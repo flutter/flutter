@@ -397,7 +397,7 @@ static void fl_compositor_opengl_get_frame_size(FlCompositor* compositor,
 
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window,
+                                            FlGdkSurface* surface,
                                             gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
@@ -408,51 +408,36 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width, height;
-  gint64 expiry_time =
-      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
-  while (true) {
-    width = gdk_window_get_width(window) * scale_factor;
-    height = gdk_window_get_height(window) * scale_factor;
-    if (!wait_for_frame) {
-      break;
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+#if FLUTTER_LINUX_GTK4
+  double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
+  cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+  size_t width = static_cast<size_t>((x2 - x1) * scale_factor);
+  size_t height = static_cast<size_t>((y2 - y1) * scale_factor);
+  if (width == 0 || height == 0) {
+    width = fl_gtk_surface_get_width(surface) * scale_factor;
+    height = fl_gtk_surface_get_height(surface) * scale_factor;
+  }
+#else
+  size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+  size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+#endif
+  if (wait_for_frame) {
+    gint64 expiry_time =
+        g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
+    while (fl_framebuffer_get_width(self->framebuffer) != width ||
+           fl_framebuffer_get_height(self->framebuffer) != height) {
+      if (g_get_monotonic_time() > expiry_time) {
+        g_warning(
+            "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
+            width, height, fl_framebuffer_get_width(self->framebuffer),
+            fl_framebuffer_get_height(self->framebuffer));
+        break;
+      }
+      g_mutex_unlock(&self->frame_mutex);
+      fl_task_runner_wait(self->task_runner, expiry_time);
+      g_mutex_lock(&self->frame_mutex);
     }
-
-    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
-    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
-    if (framebuffer_width == width && framebuffer_height == height) {
-      break;
-    }
-
-    if (g_get_monotonic_time() > expiry_time) {
-      g_warning(
-          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
-          width, height, framebuffer_width, framebuffer_height);
-      break;
-    }
-
-//   gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
-// #if FLUTTER_LINUX_GTK4
-//   // In GTK4, the draw surface is the toplevel. Use the Cairo clip
-//   // extents to get the drawing area size for this widget.
-//   double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
-//   cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
-//   size_t width = static_cast<size_t>(x2 - x1);
-//   size_t height = static_cast<size_t>(y2 - y1);
-//   if (width == 0 || height == 0) {
-//     width = fl_gtk_surface_get_width(surface);
-//     height = fl_gtk_surface_get_height(surface);
-//   }
-// #else
-//   size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
-//   size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
-// #endif
-//   while (fl_framebuffer_get_width(self->framebuffer) != width ||
-//          fl_framebuffer_get_height(self->framebuffer) != height) {
-    g_mutex_unlock(&self->frame_mutex);
-    fl_task_runner_wait(self->task_runner, expiry_time);
-    g_mutex_lock(&self->frame_mutex);
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {

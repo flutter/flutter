@@ -31,7 +31,7 @@ struct _FlCompositorClass {
 
   gboolean (*render)(FlCompositor* compositor,
                      cairo_t* cr,
-                     GdkWindow* window,
+                     FlGdkSurface* surface,
                      gboolean wait_for_frame);
 };
 
@@ -71,7 +71,7 @@ void fl_compositor_get_frame_size(FlCompositor* compositor,
  * fl_compositor_render:
  * @compositor: an #FlCompositor.
  * @cr: a Cairo rendering context.
- * @window: window being rendered into.
+ * @surface: surface being rendered into.
  * @wait_for_frame: if the available frame is not the size of the window block
  * until a new frame is received.
  *
@@ -81,7 +81,7 @@ void fl_compositor_get_frame_size(FlCompositor* compositor,
  */
 gboolean fl_compositor_render(FlCompositor* compositor,
                               cairo_t* cr,
-                              GdkWindow* window,
+                              FlGdkSurface* surface,
                               gboolean wait_for_frame);
 
 G_END_DECLS

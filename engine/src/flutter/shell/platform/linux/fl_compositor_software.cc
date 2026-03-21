@@ -87,7 +87,7 @@ static void fl_compositor_software_get_frame_size(FlCompositor* compositor,
 
 static gboolean fl_compositor_software_render(FlCompositor* compositor,
                                               cairo_t* cr,
-                                              GdkWindow* window,
+                                              FlGdkSurface* surface,
                                               gboolean wait_for_frame) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
@@ -98,13 +98,24 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
   if (wait_for_frame) {
     gint64 expiry_time =
         g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
     while (true) {
-      size_t width = gdk_window_get_width(window) * scale_factor;
-      size_t height = gdk_window_get_height(window) * scale_factor;
+#if FLUTTER_LINUX_GTK4
+      double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
+      cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+      size_t width = static_cast<size_t>(x2 - x1);
+      size_t height = static_cast<size_t>(y2 - y1);
+      if (width == 0 || height == 0) {
+        width = fl_gtk_surface_get_width(surface);
+        height = fl_gtk_surface_get_height(surface);
+      }
+#else
+      size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+      size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+#endif
       if (self->width == width && self->height == height) {
         break;
       }
@@ -121,18 +132,6 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
       fl_task_runner_wait(self->task_runner, expiry_time);
       g_mutex_lock(&self->frame_mutex);
     }
-//   gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
-// #if FLUTTER_LINUX_GTK4
-//   size_t width = fl_gtk_surface_get_width(surface);
-//   size_t height = fl_gtk_surface_get_height(surface);
-// #else
-//   size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
-//   size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
-// #endif
-//   while (self->width != width || self->height != height) {
-//     g_mutex_unlock(&self->frame_mutex);
-//     fl_task_runner_wait(self->task_runner);
-//     g_mutex_lock(&self->frame_mutex);
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
