@@ -1933,6 +1933,15 @@ abstract class SemanticsUpdateBuilder {
   ///  * [SemanticsValidationResult], that describes possible values for the
   ///    `validationResult` argument.
   ///  * [SemanticsHitTestBehavior], which describes how hit testing behaves.
+  ///
+  /// When `mergesDescendants` is true, a descendant's tap action was absorbed
+  /// into this node's semantics configuration. This can happen when using
+  /// [MergeSemantics] or when a [Semantics] container absorbs a child
+  /// [GestureDetector]'s tap handler. The node's rect may cover a larger area
+  /// than the actual tappable widget within it, so pointer coordinates may not
+  /// hit the inner render object. On the web, [ClickDebouncer] uses this to
+  /// send [SemanticsAction.tap] directly instead of flushing pointer events,
+  /// avoiding coordinate miss-hits.
   void updateNode({
     required int id,
     required SemanticsFlags flags,
@@ -1977,6 +1986,7 @@ abstract class SemanticsUpdateBuilder {
     required Locale? locale,
     required String minValue,
     required String maxValue,
+    bool mergesDescendants = false,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -2060,6 +2070,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required Locale? locale,
     required String minValue,
     required String maxValue,
+    bool mergesDescendants = false,
   }) {
     assert(_matrix4IsValid(transform));
     assert(

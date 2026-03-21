@@ -337,6 +337,7 @@ class SemanticsNodeUpdate {
     required this.locale,
     required this.minValue,
     required this.maxValue,
+    this.absorbedChildSemantics = false,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -467,6 +468,13 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final String maxValue;
+
+  /// Whether a descendant's tap action was absorbed into this node.
+  ///
+  /// When true, the node's rect may cover a larger area than the actual
+  /// tappable widget within it. This happens with [MergeSemantics] or when a
+  /// [Semantics] container absorbs a child [GestureDetector]'s tap handler.
+  final bool absorbedChildSemantics;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -1769,6 +1777,14 @@ class SemanticsObject {
   bool get hasChildren =>
       _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty;
 
+  /// Whether a descendant's tap action was absorbed into this node.
+  ///
+  /// When true, this node's rect may cover a larger area than the actual
+  /// tappable widget within it, so pointer events at arbitrary coordinates
+  /// within the rect may not hit the underlying tappable render object.
+  bool get absorbedChildSemantics => _absorbedChildSemantics;
+  bool _absorbedChildSemantics = false;
+
   /// Whether this object represents an editable text field.
   bool get isTextField => flags.isTextField;
 
@@ -2004,6 +2020,8 @@ class SemanticsObject {
       locale = update.locale;
       _markLocaleDirty();
     }
+
+    _absorbedChildSemantics = update.absorbedChildSemantics;
 
     // Apply updates to the DOM.
     _updateRole();

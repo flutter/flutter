@@ -2940,6 +2940,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
   bool get mergeAllDescendantsIntoThisNode => _mergeAllDescendantsIntoThisNode;
   bool _mergeAllDescendantsIntoThisNode = _kEmptyConfig.isMergingSemanticsOfDescendants;
 
+  /// Whether a descendant's tap action was absorbed into this node.
+  ///
+  /// When true, the node's rect may cover a larger area than the actual
+  /// tappable widget within it. This happens with [MergeSemantics] or when a
+  /// [Semantics] container absorbs a child [GestureDetector]'s tap handler.
+  /// On the web, [ClickDebouncer] uses this to send [SemanticsAction.tap]
+  /// directly instead of flushing pointer events, avoiding coordinate
+  /// miss-hits on the inner tappable widget.
+  bool absorbedChildSemantics = false;
+
   // CHILDREN
 
   /// Contains the children in inverse hit test order (i.e. paint order).
@@ -4128,6 +4138,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       locale: data.locale,
       minValue: data.minValue ?? '',
       maxValue: data.maxValue ?? '',
+      mergesDescendants: absorbedChildSemantics,
     );
     _dirty = false;
   }

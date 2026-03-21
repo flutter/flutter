@@ -286,32 +286,40 @@ class ClickDebouncer {
   /// Forwards the event to the framework, unless it is deduplicated because
   /// the corresponding pointer down/up events were recently flushed to the
   /// framework already.
-  void onClick(DomEvent click, int viewId, int semanticsNodeId, bool isListening) {
+  ///
+  /// [absorbedChildSemantics] indicates whether a descendant's tap action was
+  /// absorbed into this node's semantics configuration (e.g. [MergeSemantics]
+  /// wrapping a tappable child, or [Semantics] with `container: true`
+  /// absorbing a child [GestureDetector]'s tap handler). When true,
+  /// [SemanticsAction.tap] is sent directly instead of flushing pointer
+  /// events, because the node's DOM element covers a larger area than the
+  /// actual tappable widget and pointer coordinates may miss the inner render
+  /// object. When false, pointer events are flushed so that
+  /// [TapRegionSurface] can detect outside taps (e.g. to dismiss
+  /// [MenuAnchor]).
+  void onClick(
+    DomEvent click,
+    int viewId,
+    int semanticsNodeId,
+    bool isListening, {
+    bool absorbedChildSemantics = false,
+  }) {
     assert(click.type == 'click');
 
     if (!isDebouncing) {
-      // There's no pending queue of pointer events that are being debounced. It
-      // is a standalone click event. Unless pointer down/up were flushed
-      // recently and if the node is currently listening to event, forward to
-      // the framework.
       if (isListening && _shouldSendClickEventToFramework(click)) {
         _sendSemanticsTapToFramework(click, viewId, semanticsNodeId);
       }
       return;
     }
 
-    if (isListening) {
-      // There's a pending queue of pointer events. Prefer sending the tap action
-      // instead of pointer events, because the pointer events may not land on the
-      // combined semantic node and miss the click/tap.
+    if (absorbedChildSemantics && isListening) {
       final DebounceState state = _state!;
       _state = null;
       state.timer.cancel();
       _sendSemanticsTapToFramework(click, viewId, semanticsNodeId);
     } else {
-      // The semantic node is not listening to taps. Flush the pointer events
-      // for the framework to figure out what to do with them. It's possible
-      // the framework is interested in gestures other than taps.
+      click.stopPropagation();
       _flush();
     }
   }

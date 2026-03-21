@@ -711,6 +711,8 @@ class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
 
   final List<engine.SemanticsNodeUpdate> _nodeUpdates = <engine.SemanticsNodeUpdate>[];
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
   void updateNode({
     required int id,
     required SemanticsFlags flags,
@@ -755,6 +757,7 @@ class SemanticsUpdateBuilder {
     required Locale? locale,
     required String minValue,
     required String maxValue,
+    bool mergesDescendants = false,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -804,6 +807,7 @@ class SemanticsUpdateBuilder {
         locale: locale,
         minValue: minValue,
         maxValue: maxValue,
+        absorbedChildSemantics: mergesDescendants,
       ),
     );
   }
