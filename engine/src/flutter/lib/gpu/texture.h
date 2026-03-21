@@ -61,7 +61,8 @@ extern bool InternalFlutterGpu_Texture_Initialize(
     int texture_type,
     bool enable_render_target_usage,
     bool enable_shader_read_usage,
-    bool enable_shader_write_usage);
+    bool enable_shader_write_usage,
+    bool enae_mip_map);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_Texture_SetCoordinateSystem(

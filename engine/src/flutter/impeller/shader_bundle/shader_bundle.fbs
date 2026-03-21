@@ -49,6 +49,17 @@ enum UniformDataType:uint32 {
   kSampledImage,
 }
 
+enum ShaderFloatType:uint32 {
+  kUnknown,
+  kFloat,
+  kVec2,
+  kVec3,
+  kVec4,
+  kMat2,
+  kMat3,
+  kMat4,
+}
+
 // This contains the same attribute reflection data as
 // impeller::ShaderStageIOSlot.
 table ShaderInput {
@@ -71,6 +82,7 @@ table ShaderUniformStructField {
   total_size_in_bytes: uint64;
   // Zero indicates that this field is not an array element.
   array_elements: uint64;
+  float_type: ShaderFloatType = kUnknown;
 }
 
 table ShaderUniformStruct {

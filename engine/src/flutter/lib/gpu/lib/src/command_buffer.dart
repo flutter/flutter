@@ -20,6 +20,13 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
     return RenderPass._(_gpuContext, this, renderTarget);
   }
 
+  void generateMipmap(Texture texture) {
+    String? error = _generateMipmap(texture);
+    if (error != null) {
+      throw Exception(error);
+    }
+  }
+
   void submit({CompletionCallback? completionCallback}) {
     String? error = _submit(completionCallback);
     if (error != null) {
@@ -37,4 +44,9 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_CommandBuffer_Submit',
   )
   external String? _submit(CompletionCallback? completionCallback);
+
+  @Native<Handle Function(Pointer<Void>, Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_CommandBuffer_GenerateMipmap',
+  )
+  external String? _generateMipmap(Texture texture);
 }

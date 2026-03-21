@@ -556,6 +556,31 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
       uniform_struct_field.element_size_in_bytes = struct_member.size;
       uniform_struct_field.total_size_in_bytes = struct_member.byte_length;
       uniform_struct_field.array_elements = struct_member.array_elements;
+      if (struct_member.float_type.has_value()) {
+        auto float_type = struct_member.float_type.value();
+        if (float_type == "ShaderFloatType::kFloat") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kFloat;
+        } else if (float_type == "ShaderFloatType::kVec2") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kVec2;
+        } else if (float_type == "ShaderFloatType::kVec3") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kVec3;
+        } else if (float_type == "ShaderFloatType::kVec4") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kVec4;
+        } else if (float_type == "ShaderFloatType::kMat2") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kMat2;
+        } else if (float_type == "ShaderFloatType::kMat3") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kMat3;
+        } else if (float_type == "ShaderFloatType::kMat4") {
+          uniform_struct_field.float_type =
+              fb::shaderbundle::ShaderFloatType::kMat4;
+        }
+      }
       uniform_struct.fields.push_back(uniform_struct_field);
     }
     uniform_struct.size_in_bytes = size_in_bytes;

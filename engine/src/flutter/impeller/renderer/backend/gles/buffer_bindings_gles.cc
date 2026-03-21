@@ -406,7 +406,8 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     }
 
     if (!member.float_type.has_value()) {
-      VALIDATION_LOG << "Float uniform should have a float type.";
+      VALIDATION_LOG << "Float uniform should have a float type for key: "
+                     << member.name;
       return false;
     }
 

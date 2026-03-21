@@ -25,6 +25,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
+    this.enableMipmap,
   ) : _gpuContext = gpuContext,
       _coordinateSystem = coordinateSystem {
     if (sampleCount != 1 && sampleCount != 4) {
@@ -42,6 +43,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableRenderTargetUsage,
       enableShaderReadUsage,
       enableShaderWriteUsage,
+      enableMipmap,
     );
   }
 
@@ -64,6 +66,9 @@ base class Texture extends NativeFieldWrapperClass1 {
   ///
   /// Note that this is distinct from [enableRenderTargetUsage].
   final bool enableShaderWriteUsage;
+
+  /// Whether the texture has mipmaps enabled.
+  final bool enableMipmap;
 
   TextureCoordinateSystem _coordinateSystem;
   TextureCoordinateSystem get coordinateSystem {
@@ -135,6 +140,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       Bool,
       Bool,
       Bool,
+      Bool,
     )
   >(symbol: 'InternalFlutterGpu_Texture_Initialize')
   external bool _initialize(
@@ -149,6 +155,7 @@ base class Texture extends NativeFieldWrapperClass1 {
     bool enableRenderTargetUsage,
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,
+    bool enableMipmap,
   );
 
   @Native<Void Function(Handle, Int)>(

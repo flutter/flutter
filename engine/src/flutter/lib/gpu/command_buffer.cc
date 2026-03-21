@@ -5,7 +5,9 @@
 #include "flutter/lib/gpu/command_buffer.h"
 
 #include "dart_api.h"
+#include "flutter/lib/gpu/texture.h"
 #include "fml/make_copyable.h"
+#include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "lib/ui/ui_dart_state.h"
@@ -30,7 +32,21 @@ std::shared_ptr<impeller::CommandBuffer> CommandBuffer::GetCommandBuffer() {
 
 void CommandBuffer::AddRenderPass(
     std::shared_ptr<impeller::RenderPass> render_pass) {
-  encodables_.push_back(std::move(render_pass));
+  encodables_.push_back(
+      [pass = std::move(render_pass)]() { return pass->EncodeCommands(); });
+}
+
+bool CommandBuffer::GenerateMipmap(
+    const std::shared_ptr<impeller::Texture>& texture) {
+  encodables_.push_back([command_buffer = command_buffer_, texture]() {
+    auto blit_pass = command_buffer->CreateBlitPass();
+    if (!blit_pass) {
+      return false;
+    }
+    blit_pass->GenerateMipmap(texture);
+    return blit_pass->EncodeCommands();
+  });
+  return true;
 }
 
 bool CommandBuffer::Submit() {
@@ -50,7 +66,7 @@ bool CommandBuffer::Submit(
                            completion_callback = completion_callback,
                            encodables = encodables_]() mutable {
           for (auto& encodable : encodables) {
-            encodable->EncodeCommands();
+            encodable();
           }
 
           context->GetCommandQueue()->Submit({command_buffer},
@@ -61,7 +77,7 @@ bool CommandBuffer::Submit(
   }
 
   for (auto& encodable : encodables_) {
-    encodable->EncodeCommands();
+    encodable();
   }
 
   auto status = context_->GetCommandQueue()->Submit({command_buffer_},
@@ -135,6 +151,16 @@ Dart_Handle InternalFlutterGpu_CommandBuffer_Submit(
   bool success = wrapper->Submit(ui_task_completion_callback);
   if (!success) {
     return tonic::ToDart("Failed to submit CommandBuffer");
+  }
+  return Dart_Null();
+}
+
+Dart_Handle InternalFlutterGpu_CommandBuffer_GenerateMipmap(
+    flutter::gpu::CommandBuffer* wrapper,
+    flutter::gpu::Texture* texture) {
+  bool success = wrapper->GenerateMipmap(texture->GetTexture());
+  if (!success) {
+    return tonic::ToDart("Failed to encode mipmap generation");
   }
   return Dart_Null();
 }
