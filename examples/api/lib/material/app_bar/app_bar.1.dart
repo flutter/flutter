@@ -47,7 +47,7 @@ class _AppBarExampleState extends State<AppBarExample> {
       ),
       body: GridView.builder(
         itemCount: _items.length,
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           childAspectRatio: 2.0,
@@ -60,15 +60,15 @@ class _AppBarExampleState extends State<AppBarExample> {
               child: Text(
                 'Scroll to see the Appbar in effect.',
                 style: Theme.of(context).textTheme.labelLarge,
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
             );
           }
           return Container(
-            alignment: Alignment.center,
+            alignment: .center,
             // tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: .circular(20.0),
               color: _items[index].isOdd ? oddItemColor : evenItemColor,
             ),
             child: Text('Item $index'),
@@ -77,10 +77,10 @@ class _AppBarExampleState extends State<AppBarExample> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const .all(8),
           child: OverflowBar(
-            overflowAlignment: OverflowBarAlignment.center,
-            alignment: MainAxisAlignment.center,
+            overflowAlignment: .center,
+            alignment: .center,
             overflowSpacing: 5.0,
             children: <Widget>[
               ElevatedButton.icon(

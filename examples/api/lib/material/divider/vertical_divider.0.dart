@@ -28,13 +28,13 @@ class DividerExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const .all(10),
       child: Row(
         children: <Widget>[
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: .circular(10),
                 color: Colors.deepPurpleAccent,
               ),
             ),
@@ -49,7 +49,7 @@ class DividerExample extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: .circular(10),
                 color: Colors.deepOrangeAccent,
               ),
             ),

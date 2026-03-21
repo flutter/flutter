@@ -14,7 +14,7 @@ class CupertinoRadioApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: Text('CupertinoRadio Example'),
@@ -35,7 +35,7 @@ class CupertinoRadioExample extends StatefulWidget {
 }
 
 class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
-  SingingCharacter? _character = SingingCharacter.lafayette;
+  SingingCharacter? _character = .lafayette;
 
   @override
   Widget build(BuildContext context) {

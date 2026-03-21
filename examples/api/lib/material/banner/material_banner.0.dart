@@ -25,7 +25,7 @@ class MaterialBannerExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('The MaterialBanner is below')),
       body: const MaterialBanner(
-        padding: EdgeInsets.all(20),
+        padding: .all(20),
         content: Text('Hello, I am a Material Banner'),
         leading: Icon(Icons.agriculture_outlined),
         backgroundColor: Color(0xFFE0E0E0),

@@ -87,12 +87,12 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding: const .symmetric(vertical: 20),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: .min,
+                    mainAxisAlignment: .center,
                     children: <Widget>[
                       DropdownMenu<ColorLabel>(
                         initialSelection: ColorLabel.green,
@@ -136,14 +136,14 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: .min,
+                    mainAxisAlignment: .center,
                     children: <Widget>[
                       Text(
                         'You selected a ${selectedColor?.label} ${selectedIcon?.label}',
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        padding: const .symmetric(horizontal: 5),
                         child: Icon(
                           selectedIcon?.icon,
                           color: selectedColor?.color,

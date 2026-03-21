@@ -35,7 +35,7 @@ class _IndicatorAnimationExampleState extends State<IndicatorAnimationExample> {
   Set<TabIndicatorAnimation> _animationStyleSelection = <TabIndicatorAnimation>{
     TabIndicatorAnimation.linear,
   };
-  TabIndicatorAnimation _tabIndicatorAnimation = TabIndicatorAnimation.linear;
+  TabIndicatorAnimation _tabIndicatorAnimation = .linear;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class _IndicatorAnimationExampleState extends State<IndicatorAnimationExample> {
           bottom: TabBar(
             indicatorAnimation: _tabIndicatorAnimation,
             isScrollable: true,
-            tabAlignment: TabAlignment.start,
+            tabAlignment: .start,
             tabs: const <Widget>[
               Tab(text: 'Short Tab'),
               Tab(text: 'Very Very Very Long Tab'),

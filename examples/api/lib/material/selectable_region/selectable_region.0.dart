@@ -21,7 +21,7 @@ class SelectableRegionExampleApp extends StatelessWidget {
           appBar: AppBar(title: const Text('SelectableRegion Sample')),
           body: const Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 Text('Select this icon', style: TextStyle(fontSize: 30)),
                 SizedBox(height: 10),
@@ -178,7 +178,7 @@ class _RenderSelectableAdapter extends RenderProxyBox
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    SelectionResult result = SelectionResult.none;
+    SelectionResult result = .none;
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:

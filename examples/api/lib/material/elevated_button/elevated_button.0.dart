@@ -38,7 +38,7 @@ class _ElevatedButtonExampleState extends State<ElevatedButtonExample> {
 
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
           ElevatedButton(
             style: style,
