@@ -9,7 +9,9 @@ on:
     branches: main
     types: [labeled]
 
-permissions: write-all
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   cherrypick_to_release:
@@ -58,7 +60,7 @@ jobs:
         working-directory: ./engine
         id: create-pr
         run: |
-          git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/engine cp-engine-${CHANNEL}-${COMMIT_SHA}
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/flutteractionsbot/engine" cp-engine-${CHANNEL}-${COMMIT_SHA}
           {
             echo 'PR_URL<<EOF'
             gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ../PULL_REQUEST_CP_TEMPLATE.md --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/engine --head flutteractionsbot:cp-engine-${CHANNEL}-${COMMIT_SHA}
