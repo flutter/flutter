@@ -7,7 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -623,7 +623,7 @@ void main() {
   });
 
   testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
-    Future<void> test(Decoration decoration) async {
+    Future<void> test(Decoration decoration, [String? suffix]) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -634,21 +634,24 @@ void main() {
                 child: Container(
                   clipBehavior: Clip.hardEdge,
                   decoration: decoration,
-                  child: ColoredBox(color: Colors.yellow.withOpacity(0.5)),
+                  child: const ColoredBox(color: Color(0x80FFEB3B)),
                 ),
               ),
             ),
           ),
         ),
       );
+      final fileName = suffix == null
+      ? 'container_test.getClipPath.${decoration.runtimeType}.png'
+      : 'container_test.getClipPath.${decoration.runtimeType}.$suffix.png';
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'),
+        matchesGoldenFile(fileName),
       );
     }
 
     await test(const BoxDecoration());
-    await test(const UnderlineTabIndicator());
+    await test(const ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.all(Radius.circular(10.0)))), 'rounded');
     await test(const ShapeDecoration(shape: StadiumBorder()));
     await test(const FlutterLogoDecoration());
   });
@@ -660,7 +663,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(decoration: const BoxDecoration(color: Colors.black)),
+        child: Container(decoration: const BoxDecoration(color: Color(0xFF000000))),
       ),
     );
 
@@ -673,7 +676,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(foregroundDecoration: const BoxDecoration(color: Colors.black)),
+        child: Container(foregroundDecoration: const BoxDecoration(color: Color(0xFF000000))),
       ),
     );
 
@@ -686,7 +689,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(color: Colors.black),
+        child: Container(color: const Color(0xFF000000)),
       ),
     );
 
@@ -761,8 +764,8 @@ void main() {
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
-        color: Colors.red,
-        boxShadow: <BoxShadow>[BoxShadow(color: Colors.blue, spreadRadius: 10, blurRadius: 20.0)],
+        color: Color(0xFFF44336),
+        boxShadow: <BoxShadow>[BoxShadow(color: Color(0xFF2196F3), spreadRadius: 10, blurRadius: 20.0)],
       ),
       child: const SizedBox(width: 50, height: 50),
     );
