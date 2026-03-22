@@ -538,6 +538,59 @@ void main() {
     checkOptionHighlight(tester, 'northern white rhinoceros', null);
   });
 
+  testWidgets('Tab moves focus to the next enabled widget when options are shown', (
+    WidgetTester tester,
+  ) async {
+    final firstFieldFocusNode = FocusNode();
+    final autocompleteFocusNode = FocusNode();
+    final trailingAutocompleteFocusNode = FocusNode();
+    addTearDown(firstFieldFocusNode.dispose);
+    addTearDown(autocompleteFocusNode.dispose);
+    addTearDown(trailingAutocompleteFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              TextFormField(focusNode: firstFieldFocusNode),
+              Autocomplete<String>(
+                focusNode: autocompleteFocusNode,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+              ),
+              TextFormField(enabled: false),
+              TextFormField(enabled: false),
+              Autocomplete<String>(
+                focusNode: trailingAutocompleteFocusNode,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    firstFieldFocusNode.requestFocus();
+    await tester.pump();
+    expect(firstFieldFocusNode.hasFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(autocompleteFocusNode.hasFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(trailingAutocompleteFocusNode.hasFocus, isTrue);
+  });
+
   group('optionsViewOpenDirection', () {
     testWidgets('default (down)', (WidgetTester tester) async {
       await tester.pumpWidget(

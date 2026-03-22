@@ -287,6 +287,7 @@ class _AutocompleteOptionsListState<T extends Object> extends State<_Autocomplet
           button: true,
           child: InkWell(
             key: GlobalObjectKey(option),
+            canRequestFocus: false,
             onTap: () {
               widget.onSelected(option);
             },
