@@ -1297,7 +1297,20 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _autoScroller.stopAutoScroll();
       return result;
     }
-    if (_selectionStartsInScrollable && event.globalPosition.isFinite) {
+    if (_selectionStartsInScrollable) {
+      // The root cause fix in _inferPositionRelatedToOrigin ensures that nested
+      // child scrollables receive a position outside their bounds (Offset(-1,-1))
+      // when selection starts outside the parent, so _selectionStartsInScrollable
+      // is accurate. If _selectionStartsInScrollable is true, globalPosition must
+      // always be finite here.
+      assert(
+        event.globalPosition.isFinite,
+        '_ScrollableSelectionContainerDelegate should never call '
+        'startAutoScrollIfNecessary with a non-finite globalPosition. '
+        'A non-finite position indicates the event was synthesized by a parent '
+        'delegate for out-of-bounds selection, in which case '
+        '_selectionStartsInScrollable should be false.',
+      );
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
