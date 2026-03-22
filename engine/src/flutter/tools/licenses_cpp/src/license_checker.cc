@@ -28,12 +28,12 @@ namespace fs = std::filesystem;
 const char* LicenseChecker::kHeaderLicenseRegex = "(?i)(license|copyright)";
 
 namespace {
-// TODO(): Move this into the data directory.
+// TODO(gaaclarke): Move this into the data directory.
 const std::array<std::string_view, 9> kLicenseFileNames = {
     "LICENSE", "LICENSE.TXT", "LICENSE.txt",  "LICENSE.md", "LICENSE.MIT",
     "COPYING", "License.txt", "docs/FTL.TXT", "README.ijg"};
 
-// TODO(): Move this into the data directory
+// TODO(gaaclarke): Move this into the data directory
 //  These are directories that when they are found in third_party directories
 //  are ignored as package names.
 const std::array<std::string_view, 2> kThirdPartyIgnore = {"pkg",
