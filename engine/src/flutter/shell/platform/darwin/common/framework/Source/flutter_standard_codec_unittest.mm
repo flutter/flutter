@@ -359,3 +359,28 @@ TEST(FlutterStandardCodec, HandlesSubclasses) {
   ASSERT_TRUE([pair.left isEqual:decoded.left]);
   ASSERT_TRUE([pair.right isEqual:decoded.right]);
 }
+
+TEST(FlutterStandardCodec, ReaderDoesNotCrashOnTruncatedString) {
+  const uint8_t bytes[] = {0x07, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  NSData* data = [NSData dataWithBytes:bytes length:sizeof(bytes)];
+  FlutterStandardReader* reader =
+      [[FlutterStandardReader alloc] initWithData:data];
+  id result = [reader readValue];
+  ASSERT_TRUE(result == nil || [result isKindOfClass:[NSString class]]);
+}
+
+TEST(FlutterStandardCodec, MessageCodecDoesNotCrashOnTruncatedString) {
+  const uint8_t bytes[] = {0x07, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  NSData* message = [NSData dataWithBytes:bytes length:sizeof(bytes)];
+  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
+  id decoded = [codec decode:message];
+  ASSERT_TRUE(decoded == nil || [decoded isKindOfClass:[NSString class]]);
+}
+
+TEST(FlutterStandardCodec, ReaderDoesNotCrashOnStringExactlyAtBufferEnd) {
+  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
+  NSData* full = [codec encode:@"hello"];
+  NSData* truncated = [full subdataWithRange:NSMakeRange(0, full.length - 1)];
+  id decoded = [codec decode:truncated];
+  ASSERT_TRUE(decoded == nil || [decoded isKindOfClass:[NSString class]]);
+}

@@ -65,6 +65,12 @@ uint32_t FlutterStandardCodecHelperReadSize(unsigned long* location,
 static CFDataRef ReadDataNoCopy(unsigned long* location,
                                 unsigned long length,
                                 CFDataRef data) {
+  CFIndex data_length = CFDataGetLength(data);
+  if ((CFIndex)*location > data_length ||
+      length > (unsigned long)(data_length - (CFIndex)*location)) {
+    *location += length;
+    return nil;
+  }
   CFDataRef result = CFDataCreateWithBytesNoCopy(
       kCFAllocatorDefault, CFDataGetBytePtr(data) + *location, length,
       kCFAllocatorNull);
@@ -76,6 +82,9 @@ CFStringRef FlutterStandardCodecHelperReadUTF8(unsigned long* location,
                                                CFDataRef data) {
   uint32_t size = FlutterStandardCodecHelperReadSize(location, data);
   CFDataRef bytes = ReadDataNoCopy(location, size, data);
+  if (!bytes) {
+    return nil;
+  }
   CFStringRef result = CFStringCreateFromExternalRepresentation(
       kCFAllocatorDefault, bytes, kCFStringEncodingUTF8);
   return static_cast<CFStringRef>(CFAutorelease(result));
