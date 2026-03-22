@@ -10,7 +10,6 @@ on:
     types: [labeled]
 
 permissions:
-  pull-requests: write
   contents: read
 
 jobs:
