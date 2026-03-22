@@ -199,6 +199,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
+    this.resetOnBlur = false,
     this.keyboardType,
     this.textStyle,
     this.textAlign = TextAlign.start,
@@ -224,7 +225,8 @@ class DropdownMenu<T> extends StatefulWidget {
     this.cursorHeight,
     this.restorationId,
     this.menuController,
-  }) : assert(filterCallback == null || enableFilter),
+  }) : assert(!resetOnBlur || focusNode != null, 'resetOnBlur requires a focusNode to detect focus changes.'),
+       assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
              (inputDecorationTheme is InputDecorationTheme ||
@@ -368,6 +370,15 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
+
+  /// Whether to revert the text field to the currently selected value when the
+  /// widget loses focus or is submitted (e.g., pressing Enter).
+  ///
+  /// If true, any unselected manual input will be discarded and replaced by
+  /// the last selected label when the user navigates away or submits the field.
+  ///
+  /// Defaults to false.
+  final bool resetOnBlur;
 
   /// The type of keyboard to use for editing the text.
   ///
@@ -732,6 +743,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   FocusNode? _localTrailingIconButtonFocusNode;
   FocusNode get _trailingIconButtonFocusNode =>
       widget.trailingIconFocusNode ?? (_localTrailingIconButtonFocusNode ??= FocusNode());
+  T? _lastSelectedValue;
 
   @override
   void initState() {
@@ -748,13 +760,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         text: filteredEntries[index].label,
         selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
       );
+      _lastSelectedValue = widget.initialSelection;
     }
     refreshLeadingPadding();
     _controller = widget.menuController ?? MenuController();
+    if (widget.focusNode != null) {
+      widget.focusNode!.addListener(_handleFocusChange);
+    }
   }
 
   @override
   void dispose() {
+    if (widget.focusNode != null) {
+      widget.focusNode!.removeListener(_handleFocusChange);
+    }
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocusNode.dispose();
@@ -800,10 +819,19 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           text: filteredEntries[index].label,
           selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
         );
+        _lastSelectedValue = widget.initialSelection;
       }
     }
     if (oldWidget.menuController != widget.menuController) {
       _controller = widget.menuController ?? MenuController();
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      if (oldWidget.focusNode != null) {
+        oldWidget.focusNode!.removeListener(_handleFocusChange);
+      }
+      if (widget.focusNode != null) {
+        widget.focusNode!.addListener(_handleFocusChange);
+      }
     }
   }
 
@@ -1009,6 +1037,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                         text: entry.label,
                         selection: TextSelection.collapsed(offset: entry.label.length),
                       );
+                      _lastSelectedValue = entry.value;
                       widget.onSelected?.call(entry.value);
                       return;
                     }
@@ -1017,6 +1046,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
                     currentHighlight = widget.enableSearch ? i : null;
+                    _lastSelectedValue = entry.value;
                     widget.onSelected?.call(entry.value);
                     _enableFilter = false;
                     if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
@@ -1109,19 +1139,67 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     setState(() {});
   }
 
-  void _handleSubmitted() {
-    if (currentHighlight != null) {
-      final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
-      if (entry.enabled) {
-        _effectiveTextEditingController.value = TextEditingValue(
-          text: entry.label,
-          selection: TextSelection.collapsed(offset: entry.label.length),
-        );
-        widget.onSelected?.call(entry.value);
+  void _handleFocusChange() {
+    // This method is only called when widget.focusNode is not null
+    assert(widget.focusNode != null);
+    if (!widget.focusNode!.hasFocus && widget.resetOnBlur) {
+      final String textBeforeRestore = _effectiveTextEditingController.text;
+      final T? restoredValue = _restoreSelectionFromText();
+      if (_effectiveTextEditingController.text != textBeforeRestore) {
+        widget.onSelected?.call(restoredValue);
       }
+      if (!widget.enableSearch) {
+        currentHighlight = null;
+      }
+      _controller.close();
+    }
+  }
+
+  T? _restoreSelectionFromText() {
+    final String currentText = _effectiveTextEditingController.text;
+    if (_lastSelectedValue == null) {
+      return null;
+    }
+
+    final int index = widget.dropdownMenuEntries.indexWhere(
+      (DropdownMenuEntry<T> entry) => entry.value == _lastSelectedValue,
+    );
+
+    if (index == -1) {
+      return null;
+    }
+
+    final DropdownMenuEntry<T> entry = widget.dropdownMenuEntries[index];
+    if (entry.label == currentText) {
+      return _lastSelectedValue;
+    }
+
+    _effectiveTextEditingController.value = TextEditingValue(
+      text: entry.label,
+      selection: TextSelection.collapsed(offset: entry.label.length),
+    );
+    return _lastSelectedValue;
+  }
+
+  void _handleSubmitted() {
+    if (widget.resetOnBlur) {
+      final T? restoredValue = _restoreSelectionFromText();
+      widget.onSelected?.call(restoredValue);
     } else {
-      if (_controller.isOpen) {
-        widget.onSelected?.call(null);
+      if (currentHighlight != null) {
+        final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
+        if (entry.enabled) {
+          _effectiveTextEditingController.value = TextEditingValue(
+            text: entry.label,
+            selection: TextSelection.collapsed(offset: entry.label.length),
+          );
+          _lastSelectedValue = entry.value;
+          widget.onSelected?.call(entry.value);
+        }
+      } else {
+        if (_controller.isOpen) {
+          widget.onSelected?.call(null);
+        }
       }
     }
     if (!widget.enableSearch) {
@@ -1225,6 +1303,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
+      onClose: () {},
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final DropdownMenuDecorationBuilder decorationBuilder =
