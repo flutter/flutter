@@ -12,8 +12,9 @@ namespace testing {
 
 TEST(UberSDFContentsTest, ApplyColorFilter) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
-  auto contents = UberSDFContents::MakeRect(
-      Color::Red(), 0.0f, false, std::make_unique<FillRectGeometry>(rect));
+  FillRectGeometry geometry(rect);
+  auto contents =
+      UberSDFContents::MakeRect(Color::Red(), 0.0f, false, &geometry);
 
   ASSERT_EQ(contents->GetColor(), Color::Red());
 

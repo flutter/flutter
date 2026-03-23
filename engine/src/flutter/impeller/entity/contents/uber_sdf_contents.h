@@ -24,20 +24,20 @@ class UberSDFContents : public ColorSourceContents {
       Color color,
       Scalar stroke_width,
       bool stroked,
-      std::unique_ptr<FillRectGeometry> geometry);
+      const FillRectGeometry* geometry);
 
   static std::unique_ptr<UberSDFContents> MakeCircle(
       Color color,
       Scalar stroke_width,
       bool stroked,
-      std::unique_ptr<CircleGeometry> geometry);
+      const CircleGeometry* geometry);
 
   UberSDFContents(Type type,
                   Rect rect,
                   Color color,
                   Scalar stroke_width,
                   bool stroked,
-                  std::unique_ptr<Geometry> geometry);
+                  const Geometry* geometry);
 
   ~UberSDFContents() override;
 
@@ -59,7 +59,7 @@ class UberSDFContents : public ColorSourceContents {
   Color color_;
   Scalar stroke_width_ = 0.0f;
   bool stroked_ = false;
-  std::unique_ptr<Geometry> geometry_;
+  const Geometry* geometry_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 

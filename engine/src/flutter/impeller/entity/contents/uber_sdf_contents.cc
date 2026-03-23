@@ -22,23 +22,23 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
     Color color,
     Scalar stroke_width,
     bool stroked,
-    std::unique_ptr<FillRectGeometry> geometry) {
+    const FillRectGeometry* geometry) {
   Rect rect = geometry->GetRect();
   return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      Type::kRect, rect, color, stroke_width, stroked, std::move(geometry)));
+      Type::kRect, rect, color, stroke_width, stroked, geometry));
 }
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
     Color color,
     Scalar stroke_width,
     bool stroked,
-    std::unique_ptr<CircleGeometry> geometry) {
+    const CircleGeometry* geometry) {
   Point center = geometry->GetCenter();
   Scalar radius = geometry->GetRadius();
   Rect rect = Rect::MakeXYWH(center.x - radius, center.y - radius, radius * 2,
                              radius * 2);
   return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      Type::kCircle, rect, color, stroke_width, stroked, std::move(geometry)));
+      Type::kCircle, rect, color, stroke_width, stroked, geometry));
 }
 
 UberSDFContents::UberSDFContents(Type type,
@@ -46,13 +46,13 @@ UberSDFContents::UberSDFContents(Type type,
                                  Color color,
                                  Scalar stroke_width,
                                  bool stroked,
-                                 std::unique_ptr<Geometry> geometry)
+                                 const Geometry* geometry)
     : type_(type),
       rect_(rect),
       color_(color),
       stroke_width_(stroke_width),
       stroked_(stroked),
-      geometry_(std::move(geometry)) {}
+      geometry_(geometry) {}
 
 UberSDFContents::~UberSDFContents() = default;
 
@@ -101,7 +101,7 @@ std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
 }
 
 const Geometry* UberSDFContents::GetGeometry() const {
-  return geometry_.get();
+  return geometry_;
 }
 
 Color UberSDFContents::GetColor() const {

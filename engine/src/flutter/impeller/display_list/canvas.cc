@@ -828,12 +828,12 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
       expand_size += paint.stroke.width / 2.0f;
     }
 
-    auto geometry = std::make_unique<FillRectGeometry>(rect);
-    geometry->SetAntialiasPadding(expand_size);
+    FillRectGeometry geometry(rect);
+    geometry.SetAntialiasPadding(expand_size);
 
     auto contents = UberSDFContents::MakeRect(
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/paint.style == Paint::Style::kStroke, std::move(geometry));
+        /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1031,18 +1031,17 @@ void Canvas::DrawCircle(const Point& center,
   if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
     const bool is_stroked = paint.style == Paint::Style::kStroke;
 
-    std::unique_ptr<CircleGeometry> geometry;
+    std::optional<CircleGeometry> geometry;
     if (is_stroked) {
-      geometry =
-          std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+      geometry.emplace(center, radius, paint.stroke.width);
     } else {
-      geometry = std::make_unique<CircleGeometry>(center, radius);
+      geometry.emplace(center, radius);
     }
     geometry->SetAntialiasPadding(1.0f);
 
     auto contents = UberSDFContents::MakeCircle(
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/is_stroked, std::move(geometry));
+        /*stroked=*/is_stroked, &geometry.value());
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
