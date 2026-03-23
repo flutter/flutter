@@ -43,9 +43,9 @@
 'a: text input':
   - changed-files:
     - all-globs-to-any-file:
-      - '**/*text*'
-      - '!**/*context*'
-      - '!**/*texture*'
+      - '**/*[tT]ext*'
+      - '!**/*[cC]ontext*'
+      - '!**/*[tT]exture*'
 
 'd: api docs':
   - changed-files:

@@ -22,6 +22,7 @@ static std::weak_ptr<MockGLES> g_mock_gles;
 static std::vector<const char*> g_extensions;
 
 static const char* g_version;
+static std::string g_extensions_string;
 
 template <typename T, typename U>
 struct CheckSameSignature : std::false_type {};
@@ -65,6 +66,9 @@ const unsigned char* mockGetString(GLenum name) {
       return reinterpret_cast<const unsigned char*>(kMockVendor);
     case GL_VERSION:
       return reinterpret_cast<const unsigned char*>(g_version);
+    case GL_EXTENSIONS:
+      return reinterpret_cast<const unsigned char*>(
+          g_extensions_string.c_str());
     case GL_SHADING_LANGUAGE_VERSION:
       return reinterpret_cast<const unsigned char*>(
           kMockShadingLanguageVersion);
@@ -253,6 +257,21 @@ void mockObjectLabelKHR(GLenum identifier,
 static_assert(CheckSameSignature<decltype(mockObjectLabelKHR),  //
                                  decltype(glObjectLabelKHR)>::value);
 
+void mockTexSubImage2D(GLenum target,
+                       GLint level,
+                       GLint xoffset,
+                       GLint yoffset,
+                       GLsizei width,
+                       GLsizei height,
+                       GLenum format,
+                       GLenum type,
+                       const void* pixels) {
+  CallMockMethod(&IMockGLESImpl::TexSubImage2D, target, level, xoffset, yoffset,
+                 width, height, format, type, pixels);
+}
+static_assert(CheckSameSignature<decltype(mockTexSubImage2D),  //
+                                 decltype(glTexSubImage2D)>::value);
+
 GLboolean mockIsTexture(GLuint texture) {
   return CallMockMethod(&IMockGLESImpl::IsTexture, texture);
 }
@@ -302,14 +321,32 @@ void mockDiscardFramebufferEXT(GLenum target,
 static_assert(CheckSameSignature<decltype(mockDiscardFramebufferEXT),  //
                                  decltype(glDiscardFramebufferEXT)>::value);
 
+void mockInvalidateFramebuffer(GLenum target,
+                               GLsizei numAttachments,
+                               const GLenum* attachments) {
+  return CallMockMethod(&IMockGLESImpl::InvalidateFramebuffer, target,
+                        numAttachments, attachments);
+}
+
+static_assert(CheckSameSignature<decltype(mockInvalidateFramebuffer),  //
+                                 decltype(glInvalidateFramebuffer)>::value);
+
 // static
 std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
-    const std::optional<std::vector<const char*>>& extensions) {
+    const std::optional<std::vector<const char*>>& extensions,
+    const char* version_string) {
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
   g_extensions = extensions.value_or(kExtensions);
-  g_version = "OpenGL ES 3.0";
+  g_extensions_string.clear();
+  for (const auto& ext : g_extensions) {
+    if (!g_extensions_string.empty()) {
+      g_extensions_string += " ";
+    }
+    g_extensions_string += ext;
+  }
+  g_version = version_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES());
   mock_gles->impl_ = std::move(impl);
   g_mock_gles = mock_gles;
@@ -324,6 +361,13 @@ std::shared_ptr<MockGLES> MockGLES::Init(
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
   g_extensions = extensions.value_or(kExtensions);
+  g_extensions_string.clear();
+  for (const auto& ext : g_extensions) {
+    if (!g_extensions_string.empty()) {
+      g_extensions_string += " ";
+    }
+    g_extensions_string += ext;
+  }
   g_version = version_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES(std::move(resolver)));
   g_mock_gles = mock_gles;
@@ -373,6 +417,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockUniformMatrix4fv);
   } else if (strcmp(name, "glGenTextures") == 0) {
     return reinterpret_cast<void*>(mockGenTextures);
+  } else if (strcmp(name, "glTexSubImage2D") == 0) {
+    return reinterpret_cast<void*>(mockTexSubImage2D);
   } else if (strcmp(name, "glObjectLabelKHR") == 0) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
   } else if (strcmp(name, "glGenBuffers") == 0) {
@@ -389,6 +435,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockBindFramebuffer);
   } else if (strcmp(name, "glDiscardFramebufferEXT") == 0) {
     return reinterpret_cast<void*>(mockDiscardFramebufferEXT);
+  } else if (strcmp(name, "glInvalidateFramebuffer") == 0) {
+    return reinterpret_cast<void*>(mockInvalidateFramebuffer);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

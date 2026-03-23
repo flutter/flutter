@@ -316,6 +316,8 @@ if (enable_unittests) {
 
     if (test_enable_gl) {
       sources += [
+        "//flutter/impeller/renderer/backend/gles/test/mock_gles.cc",
+        "//flutter/impeller/renderer/backend/gles/test/mock_gles.h",
         "tests/embedder_test_backingstore_producer_gl.cc",
         "tests/embedder_test_backingstore_producer_gl.h",
         "tests/embedder_test_compositor_gl.cc",
@@ -323,9 +325,11 @@ if (enable_unittests) {
         "tests/embedder_test_context_gl.cc",
         "tests/embedder_test_context_gl.h",
         "tests/embedder_test_gl.cc",
+        "tests/embedder_test_surface_gl_impeller.cc",
       ]
 
       public_deps += [
+        "//flutter/impeller/renderer/backend/gles",
         "//flutter/testing:opengl",
         "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
       ]

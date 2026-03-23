@@ -23,9 +23,6 @@ using PathCreator = std::function<fml::StatusOr<flutter::DlPath>()>;
 ///
 ///             This object is typically the entrypoint in the Impeller type
 ///             rendering subsystem.
-///
-/// A text frame should not be reused in multiple places within a single frame,
-/// as internally it is used as a cache for various glyph properties.
 class TextFrame {
  public:
   TextFrame();
@@ -49,7 +46,7 @@ class TextFrame {
   /// @brief      The conservative bounding box for this text frame.
   ///
   /// @return     The bounds rectangle. If there are no glyphs in this text
-  ///             frame and empty Rectangle is returned instead.
+  ///             frame an empty Rectangle is returned instead.
   ///
   Rect GetBounds() const;
 
@@ -68,16 +65,21 @@ class TextFrame {
   const std::vector<TextRun>& GetRuns() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Returns the paint color this text frame was recorded with.
+  /// @brief      Returns whether any glyph in any run in this TextFrame
+  ///             is colored and so would be cached with color already
+  ///             baked in to the colored glyph.
   ///
-  ///             Non-bitmap/COLR fonts always use a black text color here, but
+  ///             Non-bitmap/COLR fonts only store an alpha bitmap, but
   ///             COLR fonts can potentially use the paint color in the glyph
-  ///             atlas, so this color must be considered as part of the cache
-  ///             key.
+  ///             atlas, so the color the text is being rendered with must
+  ///             be considered as part of the cache key.
   bool HasColor() const;
 
   //----------------------------------------------------------------------------
   /// @brief      The type of atlas this run should be place in.
+  ///
+  ///             This return value depends primarily on the HasColor
+  ///             property.
   GlyphAtlas::Type GetAtlasType() const;
 
   /// @brief If this text frame contains a single glyph (such as for an Icon),
@@ -89,19 +91,11 @@ class TextFrame {
 
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
-  Point GetOffset() const;
-
  private:
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
   const PathCreator path_creator_;
-};
-
-struct RenderableText {
-  const std::shared_ptr<TextFrame> text_frame;
-  const Matrix origin_transform;
-  const std::optional<GlyphProperties> properties;
 };
 
 }  // namespace impeller

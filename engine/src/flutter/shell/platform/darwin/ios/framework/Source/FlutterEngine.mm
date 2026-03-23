@@ -1686,6 +1686,29 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
+/// Returns YES if the Flutter plugin responds to any legacy app lifecycle selectors.
+/// These selectors correspond to UIApplicationDelegate methods that have scene-based
+/// equivalents and require migration to FlutterSceneLifeCycleDelegate.
+static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
+    NSObject<FlutterPlugin>* delegate) {
+  SEL selectors[] = {
+    @selector(applicationDidBecomeActive:),
+    @selector(applicationWillResignActive:),
+    @selector(applicationWillEnterForeground:),
+    @selector(applicationDidEnterBackground:),
+    @selector(application:continueUserActivity:restorationHandler:),
+    @selector(application:performActionForShortcutItem:completionHandler:),
+    @selector(application:openURL:options:),
+    @selector(application:performFetchWithCompletionHandler:),
+  };
+  for (SEL sel : selectors) {
+    if ([delegate respondsToSelector:sel]) {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 - (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
   id<UIApplicationDelegate> appDelegate = FlutterSharedApplication.application.delegate;
   if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
@@ -1693,11 +1716,17 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
         (id<FlutterAppLifeCycleProvider>)appDelegate;
     [lifeCycleProvider addApplicationLifeCycleDelegate:delegate];
   }
-  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)]) {
-    // TODO(vashworth): If the plugin doesn't conform to the FlutterSceneLifeCycleDelegate,
-    // print a warning pointing to documentation: https://github.com/flutter/flutter/issues/175956
-    // [FlutterLogger logWarning:[NSString stringWithFormat:@"Plugin %@ has not migrated to
-    // scenes.", self.key]];
+  if (![delegate conformsToProtocol:@protocol(FlutterSceneLifeCycleDelegate)] &&
+      FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(delegate)) {
+    [FlutterLogger
+        logWarning:
+            [NSString stringWithFormat:
+                          @"Plugin %@ uses deprecated application lifecycle events. Please contact "
+                          @"plugin maintainers and request UIScene lifecycle support. This will be "
+                          @"required in a future version of Flutter. See "
+                          @"https://docs.flutter.dev/release/breaking-changes/"
+                          @"uiscenedelegate#migration-guide-for-flutter-plugins",
+                          self.key]];
   }
 }
 
@@ -1712,6 +1741,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
   return [self.flutterEngine lookupKeyForAsset:asset fromPackage:package];
+}
+
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [self.flutterEngine valuePublishedByPlugin:pluginKey];
 }
 
 @end

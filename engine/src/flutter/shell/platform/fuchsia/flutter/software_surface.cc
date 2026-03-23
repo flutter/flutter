@@ -14,7 +14,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "include/core/SkImageInfo.h"
 
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
