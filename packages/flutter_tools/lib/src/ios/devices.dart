@@ -1831,11 +1831,11 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
     idevicesyslogProcess = await _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected);
   }
 
-  /// Connects the already-launched [idevicesyslogProcess] output to [linesController].
-  ///
-  /// Called synchronously when the first listener subscribes (via onListen).
-  /// `start()` must have been awaited before any listener subscribes so that
-  /// [idevicesyslogProcess] is available.
+  // Connects the already-launched [idevicesyslogProcess] output to [linesController].
+  //
+  // Called synchronously when the first listener subscribes (via onListen).
+  // `start()` must have been awaited before any listener subscribes so that
+  // [idevicesyslogProcess] is available.
   void _connectSyslogOutput() {
     if (!useSyslogLogging) {
       return;
