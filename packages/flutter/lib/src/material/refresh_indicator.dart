@@ -512,7 +512,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     _lastOverscroll = 0.0;
     switch (_status) {
       case RefreshIndicatorStatus.armed:
-        _show();
+        if (_positionController.value < 1.0) {
+          _dismiss(RefreshIndicatorStatus.canceled);
+        } else {
+          _show();
+        }
 
       case RefreshIndicatorStatus.drag:
         _dismiss(RefreshIndicatorStatus.canceled);
