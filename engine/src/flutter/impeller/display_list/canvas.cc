@@ -1940,6 +1940,9 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
   bool can_apply_mask_filter = geometry->CanApplyMaskFilter();
 
   if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value()) {
+    // If there's a mask blur and we need to apply the color filter on the GPU,
+    // we need to be careful to only apply the color filter to the source
+    // colors. CreateMaskBlur is able to handle this case.
     FillRectGeometry out_rect(Rect{});
     auto filter = paint.mask_blur_descriptor->CreateMaskBlur(
         paint, geometry, contents, needs_color_filter, &out_rect);
