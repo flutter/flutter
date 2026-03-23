@@ -1940,8 +1940,9 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
   bool can_apply_mask_filter = geometry->CanApplyMaskFilter();
 
   if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value()) {
+    FillRectGeometry out_rect(Rect{});
     auto filter = paint.mask_blur_descriptor->CreateMaskBlur(
-        paint, geometry, contents, needs_color_filter);
+        paint, geometry, contents, needs_color_filter, &out_rect);
     entity.SetContents(std::move(filter));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
     return;

@@ -395,7 +395,8 @@ std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const Paint& paint,
     const Geometry* geometry,
     std::shared_ptr<ColorSourceContents> contents,
-    bool needs_color_filter) const {
+    bool needs_color_filter,
+    FillRectGeometry* out_rect) const {
   // If it's a solid color then we can just get  away with doing one Gaussian
   // blur. The color filter will always be applied on the CPU.
   if (contents->IsSolidColor()) {
@@ -420,10 +421,10 @@ std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (!expanded_bounds.has_value()) {
     expanded_bounds = Rect();
   }
-  FillRectGeometry out_rect(expanded_bounds.value());
+  *out_rect = FillRectGeometry(expanded_bounds.value());
 
   std::shared_ptr<ColorSourceContents> expanded_contents =
-      paint.CreateContents(&out_rect);
+      paint.CreateContents(out_rect);
   std::shared_ptr<Contents> final_contents = expanded_contents;
 
   /// 4. Apply the user set color filter on the GPU, if applicable.
