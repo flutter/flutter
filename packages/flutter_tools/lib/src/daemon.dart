@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show stderr;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -148,8 +149,8 @@ class DaemonInputStreamConverter {
             _controller.add(DaemonMessage(value));
           }
         }
-      } on Object {
-        // Ignore malformed daemon JSON lines and continue parsing subsequent messages.
+      } on Object catch (error) {
+        stderr.writeln('Ignoring malformed daemon JSON line: $jsonString\n$error');
       }
     }
 
