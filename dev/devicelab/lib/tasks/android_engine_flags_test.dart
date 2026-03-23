@@ -192,7 +192,9 @@ TaskFunction _testCommandLineFlagPrecedence() {
       });
 
       section('Insert metadata for test flag into the manifest');
-      final metadataKeyPairs = <(String, String?)>[('io.flutter.embedding.android.TestFlag', null)];
+      final metadataKeyPairs = <(String, String)>[
+        ('io.flutter.embedding.android.TestFlag', 'true'),
+      ];
 
       addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
 
