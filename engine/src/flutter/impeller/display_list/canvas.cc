@@ -1939,61 +1939,10 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
 
   bool can_apply_mask_filter = geometry->CanApplyMaskFilter();
 
-  if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value() &&
-      contents->IsSolidColor()) {
-    auto filter = FilterContents::MakeGaussianBlur(
-        FilterInput::Make(contents), paint.mask_blur_descriptor->sigma,
-        paint.mask_blur_descriptor->sigma, Entity::TileMode::kDecal,
-        /*bounds=*/std::nullopt, paint.mask_blur_descriptor->style, geometry);
-    entity.SetContents(std::move(filter));
-    AddRenderEntityToCurrentPass(entity, reuse_depth);
-    return;
-  }
-
   if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value()) {
-    // If there's a mask blur and we need to apply the color filter on the GPU,
-    // we need to be careful to only apply the color filter to the source
-    // colors. CreateMaskBlur is able to handle this case.
-    // 1. Create a white mask of the original geometry.
-    auto mask = std::make_shared<SolidColorContents>(geometry);
-    mask->SetColor(Color::White());
-
-    // 2. Blur the mask.
-    auto blurred_mask = FilterContents::MakeGaussianBlur(
-        FilterInput::Make(mask), paint.mask_blur_descriptor->sigma,
-        paint.mask_blur_descriptor->sigma, Entity::TileMode::kDecal,
-        /*bounds=*/std::nullopt, paint.mask_blur_descriptor->style, geometry);
-
-    // 3. Get expanded bounds.
-    std::optional<Rect> expanded_bounds = blurred_mask->GetCoverage({});
-    if (!expanded_bounds.has_value()) {
-      expanded_bounds = Rect();
-    }
-    FillRectGeometry out_rect(expanded_bounds.value());
-
-    // 4. Create expanded color source contents.
-    std::shared_ptr<ColorSourceContents> expanded_contents =
-        paint.CreateContents(&out_rect);
-    std::shared_ptr<Contents> final_contents = expanded_contents;
-
-    // 5. Apply color filter to expanded contents if needed.
-    if (needs_color_filter) {
-      if (paint.color_filter) {
-        final_contents = WrapWithGPUColorFilter(
-            paint.color_filter, FilterInput::Make(std::move(final_contents)),
-            ColorFilterContents::AbsorbOpacity::kYes);
-      }
-      if (paint.invert_colors) {
-        final_contents =
-            WrapWithInvertColors(FilterInput::Make(std::move(final_contents)),
-                                 ColorFilterContents::AbsorbOpacity::kYes);
-      }
-    }
-
-    // 6. Composite the color source with the blurred mask.
-    entity.SetContents(ColorFilterContents::MakeBlend(
-        BlendMode::kSrcIn,
-        {FilterInput::Make(blurred_mask), FilterInput::Make(final_contents)}));
+    auto filter = paint.mask_blur_descriptor->CreateMaskBlur(
+        paint, geometry, contents, needs_color_filter);
+    entity.SetContents(std::move(filter));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
     return;
   }

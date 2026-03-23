@@ -391,6 +391,61 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
       {FilterInput::Make(blurred_mask), FilterInput::Make(texture_contents)});
 }
 
+std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
+    const Paint& paint,
+    const Geometry* geometry,
+    std::shared_ptr<ColorSourceContents> contents,
+    bool needs_color_filter) const {
+  // If it's a solid color then we can just get  away with doing one Gaussian
+  // blur. The color filter will always be applied on the CPU.
+  if (contents->IsSolidColor()) {
+    return FilterContents::MakeGaussianBlur(
+        FilterInput::Make(contents), sigma, sigma, Entity::TileMode::kDecal,
+        /*bounds=*/std::nullopt, style, geometry);
+  }
+
+  /// 1. Create an opaque white mask of the original geometry.
+  auto mask = std::make_shared<SolidColorContents>(geometry);
+  mask->SetColor(Color::White());
+
+  /// 2. Blur the mask.
+  auto blurred_mask = FilterContents::MakeGaussianBlur(
+      FilterInput::Make(mask), sigma, sigma, Entity::TileMode::kDecal,
+      /*bounds=*/std::nullopt, style, geometry);
+
+  /// 3. Replace the geometry of the original color source with a rectangle that
+  ///    covers the full region of the blurred mask. Note that geometry is in
+  ///    local bounds.
+  std::optional<Rect> expanded_bounds = blurred_mask->GetCoverage({});
+  if (!expanded_bounds.has_value()) {
+    expanded_bounds = Rect();
+  }
+  FillRectGeometry out_rect(expanded_bounds.value());
+
+  std::shared_ptr<ColorSourceContents> expanded_contents =
+      paint.CreateContents(&out_rect);
+  std::shared_ptr<Contents> final_contents = expanded_contents;
+
+  /// 4. Apply the user set color filter on the GPU, if applicable.
+  if (needs_color_filter) {
+    if (paint.color_filter) {
+      final_contents = WrapWithGPUColorFilter(
+          paint.color_filter, FilterInput::Make(std::move(final_contents)),
+          ColorFilterContents::AbsorbOpacity::kYes);
+    }
+    if (paint.invert_colors) {
+      final_contents =
+          WrapWithInvertColors(FilterInput::Make(std::move(final_contents)),
+                               ColorFilterContents::AbsorbOpacity::kYes);
+    }
+  }
+
+  /// 5. Composite the color source with the blurred mask.
+  return ColorFilterContents::MakeBlend(
+      BlendMode::kSrcIn,
+      {FilterInput::Make(blurred_mask), FilterInput::Make(final_contents)});
+}
+
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const FilterInput::Ref& input,
     bool is_solid_color,

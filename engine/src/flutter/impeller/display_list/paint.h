@@ -64,6 +64,12 @@ struct Paint {
         const FilterInput::Ref& input,
         bool is_solid_color,
         const Matrix& ctm) const;
+
+    std::shared_ptr<Contents> CreateMaskBlur(
+        const Paint& paint,
+        const Geometry* geometry,
+        std::shared_ptr<ColorSourceContents> contents,
+        bool needs_color_filter) const;
   };
 
   Color color = Color::Black();
