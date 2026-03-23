@@ -21,6 +21,10 @@ Color _scaleAlpha(Color x, double factor) {
   return x.withValues(alpha: (x.a * factor).clamp(0, 1));
 }
 
+ColorSpace _widerColorSpace(ColorSpace a, ColorSpace b) {
+  return a == ColorSpace.displayP3 || b == ColorSpace.displayP3 ? ColorSpace.displayP3 : a;
+}
+
 class Color {
   const Color(int value)
     : this._fromARGBC(value >> 24, value >> 16, value >> 8, value, ColorSpace.sRGB);
@@ -158,13 +162,24 @@ class Color {
       if (x == null) {
         return _scaleAlpha(y, t);
       } else {
-        assert(x.colorSpace == y.colorSpace);
+        final Color a;
+        final Color b;
+        final ColorSpace resultColorSpace;
+        if (x.colorSpace == y.colorSpace) {
+          a = x;
+          b = y;
+          resultColorSpace = x.colorSpace;
+        } else {
+          resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
+          a = x.withValues(colorSpace: resultColorSpace);
+          b = y.withValues(colorSpace: resultColorSpace);
+        }
         return Color.from(
-          alpha: _lerpDouble(x.a, y.a, t).clamp(0, 1),
-          red: _lerpDouble(x.r, y.r, t).clamp(0, 1),
-          green: _lerpDouble(x.g, y.g, t).clamp(0, 1),
-          blue: _lerpDouble(x.b, y.b, t).clamp(0, 1),
-          colorSpace: x.colorSpace,
+          alpha: _lerpDouble(a.a, b.a, t).clamp(0, 1),
+          red: _lerpDouble(a.r, b.r, t).clamp(0, 1),
+          green: _lerpDouble(a.g, b.g, t).clamp(0, 1),
+          blue: _lerpDouble(a.b, b.b, t).clamp(0, 1),
+          colorSpace: resultColorSpace,
         );
       }
     }

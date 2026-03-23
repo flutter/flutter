@@ -1491,6 +1491,41 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.all());
 
+    // Regression test for https://github.com/flutter/flutter/pull/180753
+    testWidgets(
+      'Soft keyboard key events do not change focus highlight mode on Android.',
+      (WidgetTester tester) async {
+        await setupWidget(tester);
+
+        FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+        await tester.tap(find.byType(Container), warnIfMissed: false);
+        await tester.pump();
+
+        expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+
+        // Simulates a soft keyboard key event.
+        const kAndroidSoftKeyboardFlag = 0x00000002;
+        const kAndroidVirtualKeyboardDeviceId = -1;
+        final Map<String, dynamic> data = {
+          ...KeyEventSimulator.getKeyData(LogicalKeyboardKey.backspace, platform: 'android'),
+          'flags': kAndroidSoftKeyboardFlag,
+          'deviceId': kAndroidVirtualKeyboardDeviceId,
+          'source': 0x00000101,
+          'repeatCount': 0,
+        };
+
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.keyEvent.name,
+          SystemChannels.keyEvent.codec.encodeMessage(data),
+          (ByteData? data) {},
+        );
+
+        expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+      skip: kIsWeb, // [intended] web incompatible with Android key events.
+    );
+
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
       await setupWidget(tester);
       var callCount = 0;

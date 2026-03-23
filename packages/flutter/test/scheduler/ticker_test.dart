@@ -165,18 +165,18 @@ void main() {
     expect(ticker.isActive, isTrue);
     expect(tickCount, equals(0));
 
-    setAppLifeCycleState(AppLifecycleState.paused);
+    await setAppLifeCycleState(AppLifecycleState.paused);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isTrue);
 
     ticker.stop();
 
-    setAppLifeCycleState(AppLifecycleState.resumed);
+    await setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
   testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
-    setAppLifeCycleState(AppLifecycleState.paused);
+    await setAppLifeCycleState(AppLifecycleState.paused);
 
     var tickCount = 0;
     void handleTick(Duration duration) {
@@ -195,7 +195,7 @@ void main() {
     expect(tickCount, equals(0));
     expect(ticker.isTicking, isFalse);
 
-    setAppLifeCycleState(AppLifecycleState.resumed);
+    await setAppLifeCycleState(AppLifecycleState.resumed);
 
     await tester.pump(const Duration(milliseconds: 10));
 

@@ -53,9 +53,11 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
     FlutterBinaryMessageHandler handler,
     NSObject<FlutterTaskQueue>* taskQueue) {
   if (taskQueue) {
-    NSCAssert([messenger respondsToSelector:@selector(setMessageHandlerOnChannel:
-                                                            binaryMessageHandler:taskQueue:)],
-              @"");
+    NSCAssert(
+        [messenger
+            respondsToSelector:@selector(
+                                   setMessageHandlerOnChannel:binaryMessageHandler:taskQueue:)],
+        @"");
     return [messenger setMessageHandlerOnChannel:name
                             binaryMessageHandler:handler
                                        taskQueue:taskQueue];

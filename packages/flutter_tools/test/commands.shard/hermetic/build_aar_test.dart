@@ -63,6 +63,12 @@ flutter:
         fileSystem: fs,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
 
       expect(
@@ -118,6 +124,12 @@ flutter:
         fileSystem: fs,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
 
       await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);
