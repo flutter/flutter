@@ -10,6 +10,41 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
+/// Describes how a sliver's clip reacts to the area overlapped by other slivers.
+///
+/// Slivers may overlap, for example when a pinned [SliverAppBar] is stacked
+/// on top of other content. This enum defines whether the content underneath
+/// that overlap should be clipped out, and if so, how the shape of the clip
+/// handles the dynamic boundary of the overlapping region.
+///
+/// See also:
+///  * [SliverClipRRect.clipOverlap], which uses this behavior.
+enum ClipOverlapBehavior {
+  /// The clip ignores any overlap.
+  ///
+  /// Content covered by overlapping slivers will not be clipped out by this
+  /// mechanism and may render underneath them if they are semi-transparent.
+  none,
+
+  /// The clip strictly follows the straight edge of the overlapping sliver.
+  ///
+  /// The clip rectangle is truncated along the axis of the scroll view so that
+  /// it never intrudes into the overlap area.
+  ///
+  /// If the clip is shaped with rounded corners (like in [SliverClipRRect]),
+  /// those corners will appear cut off (squared off) if they intersect the
+  /// overlapping boundary.
+  followEdge,
+
+  /// The entire shape of the clip shifts inwards to preserve its form.
+  ///
+  /// Instead of simply slicing off the overlapped portion, the clip
+  /// area is shrunk while preserving features like rounded corners. As the
+  /// item scrolls underneath the overlap, the corners will visibly slide down
+  /// so they are never hidden or prematurely sheared by the overlap boundary.
+  preserveShape,
+}
+
 /// A sliver that clips its child using a rectangle.
 ///
 /// By default, it clips the child to its bounds. It can also clip based on a
@@ -102,7 +137,7 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior
-      ..clipOverlap = clipOverlap;
+      ..clipOverlap = clipOverlap ? ClipOverlapBehavior.followEdge : ClipOverlapBehavior.none;
   }
 
   @override
@@ -119,11 +154,8 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
 /// A sliver render object that clips its child.
 class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   /// Creates a sliver render object for clipping.
-  RenderSliverClipRect({
-    super.clipper,
-    super.clipBehavior = Clip.hardEdge,
-    super.clipOverlap = true,
-  });
+  RenderSliverClipRect({super.clipper, super.clipBehavior = Clip.hardEdge, bool clipOverlap = true})
+    : super(clipOverlap: clipOverlap ? ClipOverlapBehavior.followEdge : ClipOverlapBehavior.none);
 
   @override
   Rect buildClip() {
@@ -143,7 +175,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
           bottom ?? newClip.bottom,
         );
 
-    if (clipOverlap && constraints.overlap > 0) {
+    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0) {
       final double clipOrigin = getClipOriginForOverlap(clipExtent);
       newClip = switch (applyGrowthDirectionToAxisDirection(
         constraints.axisDirection,
@@ -195,14 +227,62 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 ///
 /// This widget is particularly useful when used in a [CustomScrollView] with
 /// pinned slivers (like [SliverAppBar] with [SliverAppBar.pinned] set to true).
-/// When [clipOverlap] is true (the default), it automatically clips the portion
-/// of the child that is overlapped by the pinned sliver, preventing the child
-/// from being visible underneath a semi-transparent or translucent pinned header.
+/// The [clipOverlap] parameter controls how the clip reacts to the area that
+/// overlaps with a preceding pinned sliver:
+///
+///  * [ClipOverlapBehavior.followEdge] (default): the clip rectangle is
+///    truncated at the overlap boundary. Rounded corners that fall within the
+///    overlapped region are squared off.
+///  * [ClipOverlapBehavior.preserveShape]: the entire rounded rectangle shifts
+///    inward so that corners are never hidden by the overlap. This produces a
+///    smoother visual when items scroll underneath a pinned header.
+///  * [ClipOverlapBehavior.none]: the overlap is ignored and no additional
+///    clipping is applied.
+///
+/// {@tool snippet}
+///
+/// This example shows a [CustomScrollView] with a pinned [SliverAppBar] and a
+/// [SliverClipRRect] wrapping a list. As items scroll behind the translucent
+/// app bar, they are clipped with rounded corners that stay visible thanks to
+/// [ClipOverlapBehavior.preserveShape].
+///
+/// ```dart
+/// CustomScrollView(
+///   slivers: <Widget>[
+///     SliverAppBar(
+///       pinned: true,
+///       expandedHeight: 200.0,
+///       backgroundColor: Colors.blue.withAlpha(128), // Semi-transparent
+///       flexibleSpace: const FlexibleSpaceBar(
+///         title: Text('SliverClipRRect'),
+///       ),
+///     ),
+///     SliverClipRRect(
+///       borderRadius: BorderRadius.circular(16.0),
+///       sliver: SliverList(
+///         delegate: SliverChildBuilderDelegate(
+///           (BuildContext context, int index) {
+///             return Container(
+///               height: 100.0,
+///               color: index.isEven ? Colors.grey[200] : Colors.grey[300],
+///               child: Center(child: Text('Item $index')),
+///             );
+///           },
+///           childCount: 20,
+///         ),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [SliverClipRect], which clips a sliver with a rectangle.
 ///  * [ClipRRect], which clips a box widget with a rounded rectangle.
+///  * [ClipOverlapBehavior], which describes the available overlap-clipping
+///    strategies.
 ///  * [CustomClipper], for creating custom clips.
 class SliverClipRRect extends SingleChildRenderObjectWidget {
   /// Creates a sliver that clips its child using a rounded rectangle.
@@ -212,7 +292,7 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
     this.borderRadius = BorderRadius.zero,
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
-    this.clipOverlap = true,
+    this.clipOverlap = ClipOverlapBehavior.followEdge,
   }) : super(child: sliver);
 
   /// The border radius of the rounded corners.
@@ -223,18 +303,31 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
   /// This value is ignored if [clipper] is non-null.
   final BorderRadiusGeometry borderRadius;
 
-  /// If non-null, determines which clip to use.
+  /// If non-null, determines which clip to use instead of the default
+  /// rounded rectangle derived from [borderRadius].
+  ///
+  /// When a clipper is provided, [borderRadius] is ignored.
   final CustomClipper<RRect>? clipper;
 
   /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   final Clip clipBehavior;
 
-  /// Whether to automatically clip the portion of the child that is overlapped
-  /// by preceding pinned slivers.
+  /// How the clip reacts to the area overlapped by preceding pinned slivers.
   ///
-  /// If true, the clip rect will be adjusted to exclude the area defined by
-  /// [SliverConstraints.overlap].
-  final bool clipOverlap;
+  /// When set to [ClipOverlapBehavior.followEdge] (the default), the clip
+  /// rectangle is truncated at the overlap boundary defined by
+  /// [SliverConstraints.overlap]. Rounded corners that intersect this boundary
+  /// will appear squared off.
+  ///
+  /// When set to [ClipOverlapBehavior.preserveShape], the entire rounded
+  /// rectangle is shifted inward so that corners remain fully visible,
+  /// producing a smoother visual effect as items scroll under a pinned header.
+  ///
+  /// When set to [ClipOverlapBehavior.none], no overlap clipping is applied
+  /// and content may render underneath translucent pinned slivers.
+  ///
+  /// See [ClipOverlapBehavior] for details on each mode.
+  final ClipOverlapBehavior clipOverlap;
 
   @override
   RenderSliverClipRRect createRenderObject(BuildContext context) {
@@ -267,7 +360,13 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
       DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null),
     );
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
-    properties.add(DiagnosticsProperty<bool>('clipOverlap', clipOverlap, defaultValue: true));
+    properties.add(
+      EnumProperty<ClipOverlapBehavior>(
+        'clipOverlap',
+        clipOverlap,
+        defaultValue: ClipOverlapBehavior.followEdge,
+      ),
+    );
   }
 }
 
@@ -282,7 +381,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
     BorderRadiusGeometry borderRadius = BorderRadius.zero,
     super.clipper,
     super.clipBehavior = Clip.antiAlias,
-    super.clipOverlap = true,
+    super.clipOverlap = ClipOverlapBehavior.followEdge,
     TextDirection? textDirection,
   }) : _borderRadius = borderRadius,
        _textDirection = textDirection;
@@ -322,10 +421,14 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
         clipper?.getClip(maxPaintRect.size) ??
         borderRadius.resolve(textDirection).toRRect(maxPaintRect);
 
-    if (clipOverlap) {
-      final double insideClipExtent = switch (constraints.axis) {
-        Axis.horizontal => newClip.middleRect.width,
-        Axis.vertical => newClip.middleRect.height,
+    if (clipOverlap != ClipOverlapBehavior.none) {
+      final double insideClipExtent = switch ((constraints.axis, clipOverlap)) {
+        (Axis.horizontal, ClipOverlapBehavior.none) ||
+        (Axis.horizontal, ClipOverlapBehavior.followEdge) => newClip.outerRect.width,
+        (Axis.vertical, ClipOverlapBehavior.none) ||
+        (Axis.vertical, ClipOverlapBehavior.followEdge) => newClip.outerRect.height,
+        (Axis.horizontal, ClipOverlapBehavior.preserveShape) => newClip.middleRect.width,
+        (Axis.vertical, ClipOverlapBehavior.preserveShape) => newClip.middleRect.height,
       };
       final double clipOrigin = getClipOriginForOverlap(insideClipExtent);
 
@@ -400,7 +503,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     RenderSliver? sliver,
     CustomClipper<T>? clipper,
     Clip clipBehavior = Clip.antiAlias,
-    bool clipOverlap = true,
+    ClipOverlapBehavior clipOverlap = ClipOverlapBehavior.followEdge,
   }) : _clipper = clipper,
        _clipBehavior = clipBehavior,
        _clipOverlap = clipOverlap,
@@ -438,9 +541,9 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   }
 
   /// Whether to clip starting from the overlap area.
-  bool get clipOverlap => _clipOverlap;
-  bool _clipOverlap;
-  set clipOverlap(bool value) {
+  ClipOverlapBehavior get clipOverlap => _clipOverlap;
+  ClipOverlapBehavior _clipOverlap;
+  set clipOverlap(ClipOverlapBehavior value) {
     if (_clipOverlap != value) {
       _clipOverlap = value;
       markNeedsPaint();
@@ -497,7 +600,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     required double mainAxisPosition,
     required double crossAxisPosition,
   }) {
-    if (clipOverlap && constraints.overlap > 0 && mainAxisPosition < constraints.overlap) {
+    if (clipOverlap != ClipOverlapBehavior.none && mainAxisPosition < constraints.overlap) {
       return false;
     }
 
@@ -558,6 +661,12 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     properties.add(DiagnosticsProperty<CustomClipper<T>>('clipper', clipper, defaultValue: null));
     properties.add(DiagnosticsProperty<T?>('clip', _clip));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
-    properties.add(DiagnosticsProperty<bool>('clipOverlap', clipOverlap, defaultValue: true));
+    properties.add(
+      EnumProperty<ClipOverlapBehavior>(
+        'clipOverlap',
+        clipOverlap,
+        defaultValue: ClipOverlapBehavior.followEdge,
+      ),
+    );
   }
 }
