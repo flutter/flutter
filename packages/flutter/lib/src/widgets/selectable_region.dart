@@ -3352,23 +3352,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-      // if (forward == false && selectables[newIndex].boundingBoxes.isNotEmpty) {
-      //   final Rect lastRect = MatrixUtils.transformRect(
-      //     selectables[newIndex].getTransformTo(null),
-      //     selectables[newIndex].boundingBoxes.last,
-      //   );
-      //   if (isEnd) {
-      //     final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
-      //       globalPosition: lastRect.centerRight,
-      //     );
-      //     dispatchSelectionEventToChild(selectables[newIndex], synthesizedEvent);
-      //   } else {
-      //     final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
-      //       globalPosition: lastRect.centerLeft,
-      //     );
-      //     dispatchSelectionEventToChild(selectables[newIndex], synthesizedEvent);
-      //   }
-      // } looks like removing this is the right thing to do!!
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
