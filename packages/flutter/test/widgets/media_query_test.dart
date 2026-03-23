@@ -14,6 +14,7 @@ import 'widgets_app_tester.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
+
   final void Function(BuildContext) method;
   final MediaQueryData data;
 }
@@ -667,7 +668,7 @@ void main() {
   testWidgets('MediaQueryData.applyDisplayCornerRadii applies specified display corner radii', (
     WidgetTester tester,
   ) async {
-    final data = MediaQueryData(displayCornerRadii: BorderRadius.circular(33));
+    const data = MediaQueryData(displayCornerRadii: BorderRadius.all(Radius.circular(33)));
 
     late MediaQueryData updatedData;
 
@@ -677,7 +678,9 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context).applyDisplayCornerRadii(BorderRadius.circular(99)),
+              data: MediaQuery.of(
+                context,
+              ).applyDisplayCornerRadii(const BorderRadius.all(Radius.circular(99))),
               child: Builder(
                 builder: (BuildContext context) {
                   updatedData = MediaQuery.of(context);
@@ -713,7 +716,7 @@ void main() {
     expect(updatedData.letterSpacingOverride, data.letterSpacingOverride);
     expect(updatedData.wordSpacingOverride, data.wordSpacingOverride);
     expect(updatedData.paragraphSpacingOverride, data.paragraphSpacingOverride);
-    expect(updatedData.displayCornerRadii, BorderRadius.circular(99));
+    expect(updatedData.displayCornerRadii, const BorderRadius.all(Radius.circular(99)));
 
     await tester.pumpWidget(
       MediaQuery(

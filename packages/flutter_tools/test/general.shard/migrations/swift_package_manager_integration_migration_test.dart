@@ -3592,9 +3592,10 @@ const unmigratedFileReferenceSection = '''
 String migratedFileReferenceSection(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
   var pluginFileReferences = '';
   if (includePlugin) {
+    final pluginLeadingPath = platform == FlutterDarwinPlatform.ios ? '../../' : '../../../';
     pluginFileReferences =
         '		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = ${_relativeEphemeralPath(platform)}/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };\n'
-        '		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = ../../${platform.name}/$pluginName; sourceTree = "<group>"; };\n';
+        '		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = $pluginLeadingPath${platform.name}/$pluginName; sourceTree = "<group>"; };\n';
   }
   return '/* Begin PBXFileReference section */\n'
       '		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };\n'
@@ -3662,6 +3663,7 @@ String migratedFileReferenceAsJson(FlutterDarwinPlatform platform, {bool include
       "sourceTree": "<group>"
     }''';
   if (includePlugin) {
+    final pluginLeadingPath = platform == FlutterDarwinPlatform.ios ? '../../' : '../../../';
     migratedJson =
         '''
 $migratedJson,
@@ -3673,7 +3675,7 @@ $migratedJson,
       "sourceTree": "<group>"
     },
     "78DABEA22ED26510000E7860": {
-      "path": "../../${platform.name}/$pluginName",
+      "path": "$pluginLeadingPath${platform.name}/$pluginName",
       "isa": "PBXFileReference",
       "name": "flutter",
       "lastKnownFileType": "wrapper",
@@ -4358,6 +4360,9 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   bool usesSwiftPackageManager;
+
+  @override
+  Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
 
   @override
   Directory get ephemeralDirectory =>

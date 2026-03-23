@@ -186,7 +186,7 @@ void main() {
 
     testWidgets('push unknown route when onUnknownRoute is null', (WidgetTester tester) async {
       final key = GlobalKey<NavigatorState>();
-      expectFlutterError(
+      await expectFlutterError(
         key: key,
         tester: tester,
         widget: MaterialApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
@@ -210,7 +210,7 @@ void main() {
 
     testWidgets('push unknown route when onUnknownRoute returns null', (WidgetTester tester) async {
       final key = GlobalKey<NavigatorState>();
-      expectFlutterError(
+      await expectFlutterError(
         key: key,
         tester: tester,
         widget: MaterialApp(

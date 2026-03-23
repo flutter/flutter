@@ -3829,4 +3829,90 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Same option in RawAutocomplete should be selectable again after text is cleared', (
+    WidgetTester tester,
+  ) async {
+    final textCtrl = TextEditingController();
+    addTearDown(textCtrl.dispose);
+    final textFocus = FocusNode();
+    addTearDown(textFocus.dispose);
+    final listItem = <String>['test', 'abc', 'dexter'];
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Row(
+          children: <Widget>[
+            Expanded(
+              child: RawAutocomplete<String>(
+                textEditingController: textCtrl,
+                focusNode: textFocus,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return listItem.where((String e) => e.contains(textEditingValue.text));
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TestTextField(controller: textEditingController, focusNode: focusNode);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return ListView.builder(
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return GestureDetector(
+                            onTap: () => onSelected(option),
+                            child: Text(option),
+                          );
+                        },
+                      );
+                    },
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                textCtrl.clear();
+              },
+              child: const Text('Clear'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.enterText(find.byType(TestTextField), '');
+    await tester.pumpAndSettle();
+    expect(find.text('test'), findsOneWidget);
+
+    // Select option 'test'
+    await tester.tap(find.text('test'));
+    await tester.pumpAndSettle();
+    expect(textCtrl.text, 'test');
+
+    // Clear text
+    await tester.tap(find.text('Clear'));
+    textFocus.unfocus();
+    await tester.pumpAndSettle();
+    expect(textCtrl.text, '');
+
+    // Select 'test' again
+    await tester.tap(find.byType(TestTextField));
+    await tester.pumpAndSettle();
+    expect(find.text('test'), findsWidgets);
+    await tester.tap(find.text('test').last);
+    await tester.pumpAndSettle();
+
+    // The text field should be updated to 'test'.
+    expect(textCtrl.text, 'test');
+  });
 }

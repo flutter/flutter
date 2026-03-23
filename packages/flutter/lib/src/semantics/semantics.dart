@@ -4272,7 +4272,25 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (!attached) {
       return;
     }
-    SystemChannels.accessibility.send(event.toMap(nodeId: id));
+    SystemChannels.accessibility
+        .send(event.toMap(nodeId: id))
+        .then(
+          (dynamic _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'semantics library',
+                context: ErrorDescription('while sending accessibility event'),
+                informationCollector: () => <DiagnosticsNode>[
+                  DiagnosticsProperty<SemanticsEvent>('event', event),
+                  DiagnosticsProperty<SemanticsNode>('node', this),
+                ],
+              ),
+            );
+          },
+        );
   }
 
   bool _debugIsActionBlocked(SemanticsAction action) {

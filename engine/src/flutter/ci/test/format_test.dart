@@ -324,4 +324,27 @@ void main() {
       gnFile.writeAsStringSync(originalContent);
     }
   });
+
+  test('Can fix C++ formatting errors with non-ASCII content', () {
+    final ccNonAsciiContentPair = FileContentPair(
+      'int main\u221E(){return 0;}\n',
+      'int main\u221E() {\n  return 0;\n}\n',
+    );
+    final fixture = TestFileFixture(target.FormatCheck.clang);
+    final ccFile = io.File('${repoDir.path}/non_ascii_test.cc');
+    ccFile.writeAsStringSync(ccNonAsciiContentPair.original);
+    fixture.files.add(ccFile);
+    try {
+      fixture.gitAdd();
+      io.Process.runSync(formatterPath, <String>[
+        '--check',
+        'clang',
+        '--fix',
+      ], workingDirectory: repoDir.path);
+
+      expect(ccFile.readAsStringSync(), ccNonAsciiContentPair.formatted);
+    } finally {
+      fixture.gitRemove();
+    }
+  });
 }

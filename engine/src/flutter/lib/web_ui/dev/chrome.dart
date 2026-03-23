@@ -110,6 +110,8 @@ class Chrome extends Browser {
           '--no-default-browser-check',
           '--disable-default-apps',
           '--disable-translate',
+          '--password-store=basic',
+          '--use-mock-keychain',
           '--remote-debugging-port=$kDevtoolsPort',
 
           // SwiftShader support on ARM macs is disabled until they upgrade to a newer
@@ -387,8 +389,12 @@ Future<void> setupChromiumTab(Uri url, Completer<String> exceptionCompleter) asy
   final chromeConnection = wip.ChromeConnection('localhost', kDevtoolsPort);
   final wip.ChromeTab? chromeTab = await chromeConnection.getTab(
     (wip.ChromeTab chromeTab) => chromeTab.url == url.toString(),
+    retryFor: const Duration(seconds: 5),
   );
-  final wip.WipConnection wipConnection = await chromeTab!.connect();
+  if (chromeTab == null) {
+    throw Exception('Chrome failed to open a tab for $url');
+  }
+  final wip.WipConnection wipConnection = await chromeTab.connect();
 
   await wipConnection.runtime.enable();
 
