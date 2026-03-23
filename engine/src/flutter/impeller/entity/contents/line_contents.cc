@@ -150,6 +150,7 @@ bool LineContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_;
+  frag_info.cap_type = (geometry_->GetCap() == Cap::kRound) ? 1.0f : 0.0f;
 
   Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
 

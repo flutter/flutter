@@ -9,6 +9,7 @@ precision mediump float;
 
 uniform FragInfo {
   vec4 color;
+  float cap_type;  // 0.0 for butt/square, 1.0 for round
 }
 frag_info;
 
@@ -36,7 +37,18 @@ float CalculateLine() {
     return 0.0;
   }
 
-  return lookup(min(d.x, d.z)) * lookup(min(d.y, d.w));
+  if (frag_info.cap_type == 1.0) {
+    if (min(d.y, d.w) < 1.0) {
+      float u = 1.0 - min(d.x, d.z);
+      float v = 1.0 - min(d.y, d.w);
+      float R = sqrt(u * u + v * v);
+      return lookup(clamp(1.0 - R, 0.0, 1.0));
+    } else {
+      return lookup(min(d.x, d.z));
+    }
+  } else {
+    return lookup(min(d.x, d.z)) * lookup(min(d.y, d.w));
+  }
 }
 
 void main() {
