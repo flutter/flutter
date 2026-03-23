@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: missing_whitespace_between_adjacent_strings
+
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -185,13 +187,15 @@ void main() {
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--lsp',
-          '--sdk',
+          'language-server',
+          '--dart-sdk',
           'Artifact.engineDartSdkPath',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
         ],
         stdin: IOSink(stdin.sink),
-        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+        stdout:
+            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
             'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
             'Content-Length: 119\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/foo","diagnostics":[]}}'
             'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
@@ -224,11 +228,11 @@ void main() {
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--lsp',
-          '--sdk',
+          'language-server',
+          '--dart-sdk',
           'Artifact.engineDartSdkPath',
-          '--suppress-analytics',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
         ],
         stdin: IOSink(stdin.sink),
         stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}',
@@ -267,20 +271,20 @@ void main() {
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--lsp',
-          '--sdk',
+          'language-server',
+          '--dart-sdk',
           'Artifact.engineDartSdkPath',
-          '--suppress-analytics',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
         ],
         stdin: IOSink(stdin.sink),
-        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+        stdout:
+            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
             'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
             'Content-Length: 249\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/foo","diagnostics":[{"range":{"start":{"line":99,"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500","message":"It\'s an error."}]}}'
             'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
       ),
     ]);
-
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
@@ -319,20 +323,20 @@ void main() {
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--lsp',
-          '--sdk',
+          'language-server',
+          '--dart-sdk',
           'Artifact.engineDartSdkPath',
-          '--suppress-analytics',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
         ],
         stdin: IOSink(stdin.sink),
-        stdout: 'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
+        stdout:
+            'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
             'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
             'Content-Length: 249\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/bar","diagnostics":[{"range":{"start":{"line":99,"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500","message":"It\'s an error."}]}}'
             'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
       ),
     ]);
-
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
@@ -375,22 +379,21 @@ void main() {
       FakeCommand(
         command: const <String>[
           'Artifact.engineDartSdkPath/bin/dart',
-          'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
-          '--lsp',
-          '--sdk',
+          'language-server',
+          '--dart-sdk',
           'Artifact.engineDartSdkPath',
-          '--suppress-analytics',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
         ],
         stdin: IOSink(stdin.sink),
-        stdout: 'The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/\n'
+        stdout:
+            'The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/\n'
             'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
             'Content-Length: 93\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"begin"}}}'
             'Content-Length: 249\r\n\r\n{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{"uri":"file:///directoryA/bar","diagnostics":[{"range":{"start":{"line":99,"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500","message":"It\'s an error."}]}}'
             'Content-Length: 91\r\n\r\n{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze","value":{"kind":"end"}}}',
-
       ),
     ]);
-
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(

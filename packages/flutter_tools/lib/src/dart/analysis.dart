@@ -51,48 +51,45 @@ class AnalysisServer {
   var _didServerErrorOccur = false;
 
   var _id = 0;
-  int? _initializeId;
-  Completer<void>? _initializeCompleter;
+  final _outstandingRequests = <int, Completer<Map<String, Object?>>>{};
 
   Future<void> start() async {
-    final String snapshot = _fileSystem.path.join(
-      sdkPath,
-      'bin',
-      'snapshots',
-      'analysis_server.dart.snapshot',
-    );
     final command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
-      snapshot,
-      '--lsp',
-      '--sdk',
+      'language-server',
+      '--dart-sdk',
       sdkPath,
+      '--disable-server-feature-completion',
+      '--disable-server-feature-search',
       if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];
 
     _logger.printTrace('dart ${command.skip(1).join(' ')}');
-    _process = await _processManager.start(command);
+    final Process process = _process = await _processManager.start(command);
+    _onExit = process.exitCode;
     // This callback hookup can't throw.
-    unawaited(_process!.exitCode.whenComplete(() => _process = null));
+    unawaited(process.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream = _process!.stderr.transform(utf8LineDecoder);
+    final Stream<String> errorStream = process.stderr.transform(utf8LineDecoder);
     errorStream.listen(_handleError);
 
-    _process!.stdout.listen(_handleServerResponseRaw);
+    process.stdout.listen(_handleServerResponseRaw);
 
-    _initializeId = ++_id;
-    _initializeCompleter = Completer<void>();
-    _sendCommandWithId(_initializeId!, 'initialize', <String, Object?>{
-      'processId': pid,
-      'rootUri': _fileSystem.directory(directories.first).uri.toString(),
-      'capabilities': <String, Object?>{
-        'window': <String, Object?>{'workDoneProgress': true},
-      },
-    });
-
-    await _initializeCompleter!.future;
-    _sendNotification('initialized', <String, Object?>{});
+    await Future.any<void>([
+      sendRequest('initialize', <String, Object?>{
+        'processId': pid,
+        'rootUri': _fileSystem.directory(directories.first).uri.toString(),
+        'workspaceFolders': [
+          for (final dir in directories)
+            {'name': dir, 'uri': _fileSystem.directory(dir).uri.toString()},
+        ],
+        'capabilities': <String, Object?>{
+          'window': <String, Object?>{'workDoneProgress': true},
+        },
+      }).then((_) => _sendNotification('initialized', <String, Object?>{})),
+      _onExit!,
+    ]);
   }
 
   final _logs = <String>[];
@@ -123,15 +120,26 @@ class AnalysisServer {
 
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
 
-  Future<int?> get onExit async => _process?.exitCode;
+  Future<int?> get onExit async => _onExit;
+  Future<int?>? _onExit;
 
-  /// Tells the analysis server to register services with a DTD instance at [dtdUri].
-  void connectToDtd({required Uri dtdUri}) {
-    _sendCommand('dart/connectToDtd', {'uri': dtdUri.toString()});
+  void _writeMessage({required String message}) {
+    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
   }
 
-  void _sendCommand(String method, Map<String, Object?> params) {
-    _sendCommandWithId(++_id, method, params);
+  Future<Map<String, Object?>> sendRequest(String method, Map<String, Object?> params) async {
+    final int id = ++_id;
+    final Completer<Map<String, Object?>> completer = _outstandingRequests[id] =
+        Completer<Map<String, Object?>>();
+    final String message = json.encode(<String, Object?>{
+      'jsonrpc': '2.0',
+      'id': id,
+      'method': method,
+      'params': params,
+    });
+    _writeMessage(message: message);
+    _logger.printTrace('==> $message');
+    return completer.future;
   }
 
   void _sendNotification(String method, Map<String, Object?> params) {
@@ -140,7 +148,7 @@ class AnalysisServer {
       'method': method,
       'params': params,
     });
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    _writeMessage(message: message);
     _logger.printTrace('==> $message');
   }
 
@@ -150,18 +158,7 @@ class AnalysisServer {
       'id': id,
       'result': result,
     });
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
-    _logger.printTrace('==> $message');
-  }
-
-  void _sendCommandWithId(int id, String method, Map<String, Object?> params) {
-    final String message = json.encode(<String, Object?>{
-      'jsonrpc': '2.0',
-      'id': ++id,
-      'method': method,
-      'params': params,
-    });
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    _writeMessage(message: message);
     _logger.printTrace('==> $message');
   }
 
@@ -227,17 +224,15 @@ class AnalysisServer {
     final Object? response = json.decode(line);
 
     if (response is Map<String, Object?>) {
-      if (response.containsKey('result') || response.containsKey('error')) {
-        final Object? id = response['id'];
-        if (id == _initializeId) {
-          if (response.containsKey('result')) {
-            _initializeCompleter?.complete();
-          } else {
-            final Map<String, Object?> error = castStringKeyedMap(response['error'])!;
-            _initializeCompleter?.completeError(
-              error['message'] ?? 'Unknown error during initialize',
-            );
-          }
+      final Object? id = response['id'];
+      final Completer<Map<String, Object?>>? completer = _outstandingRequests.remove(id);
+      if (completer != null) {
+        if (response case {'result': final Map<String, Object?> result}) {
+          completer.complete(result);
+        } else if (response case {'error': final Map<String, Object?> error}) {
+          completer.completeError(error['message'] ?? error);
+        } else {
+          completer.completeError('Response for unknown request received: $response');
         }
       }
 
@@ -295,7 +290,15 @@ class AnalysisServer {
   void _handleAnalysisIssues(Map<String, Object?> params) {
     // {"method":"textDocument/publishDiagnostics","params":{"uri":"file:///.../lib/main.dart","diagnostics":[]}}
     final Uri uri = Uri.parse(params['uri']! as String);
-    final String file = uri.toFilePath();
+    final String file;
+    try {
+      file = uri.toFilePath();
+    } on UnsupportedError {
+      _logger.printTrace(
+        'URI in analysis issues message is not a valid file URI: ${params['uri']}. Ignoring.',
+      );
+      return;
+    }
     final diagnosticsList = params['diagnostics']! as List<Object?>;
 
     final List<AnalysisError> errors = diagnosticsList
@@ -347,7 +350,6 @@ class AnalysisError implements Comparable<AnalysisError> {
     AnalysisSeverity.info || AnalysisSeverity.none => writtenError.severity,
   };
 
-  String get type => writtenError.type;
   String get code => writtenError.code;
 
   @override
@@ -355,12 +357,6 @@ class AnalysisError implements Comparable<AnalysisError> {
     // Sort in order of file path, error location, severity, and message.
     if (writtenError.file != other.writtenError.file) {
       return writtenError.file.compareTo(other.writtenError.file);
-    }
-
-    if (writtenError.offset != other.writtenError.offset &&
-        writtenError.offset != -1 &&
-        other.writtenError.offset != -1) {
-      return writtenError.offset - other.writtenError.offset;
     }
 
     if (writtenError.startLine != other.writtenError.startLine) {
@@ -399,41 +395,12 @@ class AnalysisError implements Comparable<AnalysisError> {
 class WrittenError {
   WrittenError._({
     required this.severity,
-    required this.type,
     required this.message,
     required this.code,
     required this.file,
     required this.startLine,
     required this.startColumn,
-    required this.offset,
   });
-
-  ///  {
-  ///      "severity":"INFO",
-  ///      "type":"TODO",
-  ///      "location":{
-  ///          "file":"/Users/.../lib/test.dart",
-  ///          "offset":362,
-  ///          "length":72,
-  ///          "startLine":15,
-  ///         "startColumn":4
-  ///      },
-  ///      "message":"...",
-  ///      "hasFix":false
-  ///  }
-  static WrittenError fromJson(Map<String, Object?> json) {
-    final location = json['location']! as Map<String, Object?>;
-    return WrittenError._(
-      severity: json['severity']! as String,
-      type: json['type']! as String,
-      message: json['message']! as String,
-      code: json['code']! as String,
-      file: location['file']! as String,
-      startLine: location['startLine']! as int,
-      startColumn: location['startColumn']! as int,
-      offset: location['offset']! as int,
-    );
-  }
 
   static WrittenError fromLsp(Map<String, Object?> json, String file) {
     final range = json['range']! as Map<String, Object?>;
@@ -441,26 +408,22 @@ class WrittenError {
     final severity = json['severity'] as int?;
     return WrittenError._(
       severity: _lspSeverityMap[severity] ?? 'INFO',
-      type: 'ANALYSIS', // LSP doesn't have a direct equivalent to 'type'
       message: json['message']! as String,
       code: (json['code'] ?? '').toString(),
       file: file,
-      // LSP is 0-indexed, legacy is 1-indexed.
+      // LSP is 0-indexed.
       startLine: (start['line']! as int) + 1,
       startColumn: (start['character']! as int) + 1,
-      offset: -1, // LSP doesn't provide offset
     );
   }
 
   final String severity;
-  final String type;
   final String message;
   final String code;
 
   final String file;
   final int startLine;
   final int startColumn;
-  final int offset;
 
   static final _severityMap = <String, AnalysisSeverity>{
     'INFO': AnalysisSeverity.info,

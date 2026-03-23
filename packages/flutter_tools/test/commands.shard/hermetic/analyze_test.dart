@@ -77,6 +77,20 @@ void main() {
       }
     });
 
+    String buildResponse({required String message}) {
+      return 'Content-Length: ${message.length}\r\n\r\n$message';
+    }
+
+    final headerRegExp = RegExp(r'Content-Length:\s(\d+)(\r\n|\n){2}', caseSensitive: false);
+    String stripLspHeader({required String message}) {
+      final Match? match = headerRegExp.firstMatch(message);
+      if (match == null) {
+        throw StateError('Unexpected message format: $message');
+      }
+      final int messageLength = int.parse(match.group(1)!);
+      return message.replaceFirst(headerRegExp, '').substring(0, messageLength);
+    }
+
     testUsingContext(
       'SIGABRT throws Exception',
       () async {
@@ -86,11 +100,11 @@ void main() {
             // artifact paths are from Artifacts.test() and stable
             command: <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
               '--suppress-analytics',
             ],
             exitCode: SIGABRT,
@@ -124,30 +138,34 @@ void main() {
             // artifact paths are from Artifacts.test() and stable
             command: const <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
               '--suppress-analytics',
             ],
             stdin: sink,
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
+            //completer: completer,
+            stdout: buildResponse(message: '{"id":1, "result":{}}'),
           ),
         ]);
-        await runner.run(<String>['analyze', '--flutter-repo']);
-        final setAnalysisRootsCommand =
-            jsonDecode(
-                  await streamController.stream
-                      .transform(utf8.decoder)
-                      .transform(const LineSplitter())
-                      .elementAt(1),
-                )
-                as Map<String, Object?>;
-        expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
-        final params = setAnalysisRootsCommand['params']! as Map<String, Object?>;
-        expect(params['included'], <String?>[Cache.flutterRoot]);
-        expect(params['excluded'], isEmpty);
+        try {
+          await runner.run(<String>['analyze', '--flutter-repo']);
+        } on Object {}
+        final String rawRequest = stripLspHeader(
+          message: await streamController.stream
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())
+              .join('\n'),
+        );
+
+        final initializeCommand = jsonDecode(rawRequest) as Map<String, Object?>;
+        expect(initializeCommand['method'], 'initialize');
+        final params = initializeCommand['params']! as Map<String, Object?>;
+        expect(params['workspaceFolders'], <String?>[
+          fileSystem.directory(Cache.flutterRoot).uri.toString(),
+        ]);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -184,22 +202,19 @@ void main() {
   });
 
   testWithoutContext('AnalysisError from json write correct', () {
+    const file = '/Users/.../lib/test.dart';
     final json = <String, dynamic>{
-      'severity': 'INFO',
-      'type': 'TODO',
-      'location': <String, dynamic>{
-        'file': '/Users/.../lib/test.dart',
-        'offset': 362,
-        'length': 72,
-        'startLine': 15,
-        'startColumn': 4,
+      'severity': 3,
+      'range': <String, dynamic>{
+        'start': <String, dynamic>{'line': 14, 'character': 3},
       },
+      'file': file,
       'message': 'Prefer final for variable declarations if they are not reassigned.',
       'code': 'var foo = 123;',
       'hasFix': false,
     };
     expect(
-      WrittenError.fromJson(json).toString(),
+      WrittenError.fromLsp(json, file).toString(),
       '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)',
     );
   });
