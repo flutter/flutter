@@ -1939,6 +1939,17 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
 
   bool can_apply_mask_filter = geometry->CanApplyMaskFilter();
 
+  if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value() &&
+      contents->IsSolidColor()) {
+    auto filter = FilterContents::MakeGaussianBlur(
+        FilterInput::Make(contents), paint.mask_blur_descriptor->sigma,
+        paint.mask_blur_descriptor->sigma, Entity::TileMode::kDecal,
+        /*bounds=*/std::nullopt, paint.mask_blur_descriptor->style, geometry);
+    entity.SetContents(std::move(filter));
+    AddRenderEntityToCurrentPass(entity, reuse_depth);
+    return;
+  }
+
   if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value()) {
     // If there's a mask blur and we need to apply the color filter on the GPU,
     // we need to be careful to only apply the color filter to the source
