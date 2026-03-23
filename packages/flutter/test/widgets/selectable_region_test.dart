@@ -6619,7 +6619,14 @@ void main() {
       TestWidgetsApp(
         home: SelectableRegion(
           selectionControls: emptyTextSelectionControls,
-          child: const Text(text, style: TextStyle(height: 1.4)),
+          child: const Text(
+            text,
+            style: TextStyle(
+              // This is needed to reproduce the issue. This causes the
+              // line height to differ from the character height.
+              height: 1.4,
+            ),
+          ),
         ),
       ),
     );
