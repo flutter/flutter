@@ -224,6 +224,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.cursorHeight,
     this.restorationId,
     this.menuController,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
@@ -685,6 +686,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// An optional controller that allows opening and closing of the menu from
   /// other widgets.
   final MenuController? menuController;
+
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -1307,6 +1311,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               inputFormatters: widget.inputFormatters,
               decoration: textFieldDecoration,
               restorationId: widget.restorationId,
+              scrollPadding: widget.scrollPadding,
             ),
           ),
         );
