@@ -3263,7 +3263,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     final startIndex = oppositeEdgeIndex != -1 ? oppositeEdgeIndex : 0;
     int? step;
 
-    // for (var index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
     for (
       var index = startIndex;
       index >= 0 && index < selectables.length && !hasFoundEdgeIndex;
