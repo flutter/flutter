@@ -6,13 +6,52 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
+/// Builds a [CustomScrollView] with a pinned 100px header followed by a
+/// [SliverClipRect] and filler content. Suitable for all overlap-clipping tests.
+Widget _buildOverlapScenario({
+  required ScrollController controller,
+  bool clipOverlap = true,
+  CustomClipper<Rect>? clipper,
+  Axis scrollDirection = Axis.vertical,
+  bool reverse = false,
+  double childExtent = 100,
+}) {
+  final isHorizontal = scrollDirection == Axis.horizontal;
+  
+  return TestWidgetsApp(
+    home: CustomScrollView(
+      controller: controller,
+      scrollDirection: scrollDirection,
+      reverse: reverse,
+      slivers: <Widget>[
+        const SliverPersistentHeader(delegate: _SliverPersistentHeaderDelegate(), pinned: true),
+        SliverClipRect(
+          clipOverlap: clipOverlap,
+          clipper: clipper,
+          sliver: SliverToBoxAdapter(
+            child: Container(
+              height: isHorizontal ? 100 : childExtent,
+              width: isHorizontal ? childExtent : null,
+              color: const Color(0xFF2196F3),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(height: isHorizontal ? null : 1000, width: isHorizontal ? 1000 : null),
+        ),
+      ],
+    ),
+  );
+}
+
 void main() {
   group('SliverClipRect', () {
-    testWidgets('renders its child correctly', (WidgetTester tester) async {
+    testWidgets('renders its child', (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xffffffff),
-          builder: (_, _) => const CustomScrollView(
+        const TestWidgetsApp(
+          home: CustomScrollView(
             slivers: <Widget>[
               SliverClipRect(sliver: SliverToBoxAdapter(child: Text('Hello World'))),
             ],
@@ -23,165 +62,37 @@ void main() {
       expect(find.text('Hello World'), findsOneWidget);
     });
 
-    testWidgets('applies custom clipper regarding HitTest', (WidgetTester tester) async {
+    testWidgets('hit test respects custom clipper', (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xffffffff),
-          builder: (_, _) => CustomScrollView(
+        TestWidgetsApp(
+          home: CustomScrollView(
             slivers: <Widget>[
               SliverClipRect(
                 clipper: const _HalfHeightClipper(),
                 sliver: SliverToBoxAdapter(
-                  child: Container(
-                    height: 100,
-                    color: const Color(0xFFF44336),
-                    key: const Key('target'),
-                  ),
+                  child: Container(height: 100, color: const Color(0xFFF44336)),
                 ),
               ),
             ],
           ),
         ),
       );
-
-      await tester.tapAt(const Offset(400, 25));
-      await tester.pump();
 
       final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
-      final resultSuccess = SliverHitTestResult();
-      final bool hitTop = renderSliver.hitTest(
-        resultSuccess,
-        mainAxisPosition: 25,
-        crossAxisPosition: 400,
-      );
-      expect(hitTop, isTrue, reason: 'Should hit inside the clipped area');
-
-      final resultFail = SliverHitTestResult();
-      final bool hitBottom = renderSliver.hitTest(
-        resultFail,
-        mainAxisPosition: 75, // > 50 (height / 2)
-        crossAxisPosition: 400,
-      );
-      expect(hitBottom, isFalse, reason: 'Should NOT hit outside the clipped area');
-    });
-
-    testWidgets('clips overlap correctly when passing under a Pinned Sliver', (
-      WidgetTester tester,
-    ) async {
-      // Scenario:
-      // - SliverAppBar: Pinned, Height 100.
-      // - SliverClipRect containing a generic Item (Height 100).
-      // - We scroll UP by 50 pixels.
-      // - Result: The item is effectively at position -50.
-      // - But because of the Pinned header, the first 50 pixels of the viewport are the Header.
-      // - The Item starts "visually" at 0 (relative to the sliver), but 50px are hidden by overlap.
-
-      await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xffffffff),
-          builder: (_, _) => CustomScrollView(
-            slivers: <Widget>[
-              const _TestPersistentHeader(),
-              SliverClipRect(
-                sliver: SliverToBoxAdapter(
-                  child: Container(
-                    height: 100,
-                    color: const Color(0xFF2196F3),
-                    child: const Center(child: Text('Item')),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
-            ],
-          ),
-        ),
-      );
-
-      // Scroll up by 50 pixels
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-      scrollable.position.jumpTo(50.0);
-      await tester.pump();
-
-      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
-
-      // Verify constraints
-      // The scroll offset is 50. The header is 100.
-      // The "layout" position of this sliver starts at the top of the scroll view?
-      // Actually, in Slivers, mainAxisPosition is relative to the sliver itself.
-      // The overlap constraint should be 50 (amount of header covering this sliver).
-      expect(renderSliver.constraints.overlap, equals(50.0));
-
-      // 1. Hit test in the overlapped area (e.g., 25px from the top of the sliver).
-      // This is physically under the SliverAppBar.
-      final overlapHit = SliverHitTestResult();
-      final bool hitInOverlap = renderSliver.hitTest(
-        overlapHit,
-        mainAxisPosition: 25.0,
-        crossAxisPosition: 100.0,
-      );
 
       expect(
-        hitInOverlap,
-        isFalse,
-        reason: 'Should NOT hit in the overlapped (hidden) area when clipOverlap is true',
-      );
-
-      // 2. Hit test in the visible area (e.g., 75px from the top of the sliver).
-      final visibleHit = SliverHitTestResult();
-      final bool hitInVisible = renderSliver.hitTest(
-        visibleHit,
-        mainAxisPosition: 75.0,
-        crossAxisPosition: 100.0,
-      );
-
-      expect(hitInVisible, isTrue, reason: 'Should hit in the visible area');
-    });
-
-    testWidgets('allows hits in overlap area if clipOverlap is false', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xffffffff),
-          builder: (_, _) => CustomScrollView(
-            slivers: <Widget>[
-              const _TestPersistentHeader(),
-              SliverClipRect(
-                clipOverlap: false, // DISABLE OVERLAP CLIPPING
-                sliver: SliverToBoxAdapter(
-                  child: Container(height: 100, color: const Color(0xFF2196F3)),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
-            ],
-          ),
-        ),
-      );
-
-      // Scroll up by 50 pixels
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-      scrollable.position.jumpTo(50.0);
-      await tester.pump();
-
-      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
-
-      expect(renderSliver.constraints.overlap, equals(50.0));
-
-      // Hit test in the overlapped area.
-      final overlapHit = SliverHitTestResult();
-      final bool hitInOverlap = renderSliver.hitTest(
-        overlapHit,
-        mainAxisPosition: 25.0,
-        crossAxisPosition: 100.0,
-      );
-
-      expect(
-        hitInOverlap,
+        renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 25, crossAxisPosition: 400),
         isTrue,
-        reason: 'Should hit in the overlapped area if clipping is disabled',
+        reason: 'Should hit inside the clipped area',
+      );
+      expect(
+        renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 75, crossAxisPosition: 400),
+        isFalse,
+        reason: 'Should NOT hit outside the clipped area',
       );
     });
 
-    testWidgets('updates properties correctly', (WidgetTester tester) async {
-      // Verify that changing properties updates the render object
+    testWidgets('updates properties', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -194,10 +105,9 @@ void main() {
       );
 
       final RenderSliverClipRect renderObject = tester.renderObject(find.byType(SliverClipRect));
-      expect(renderObject.clipOverlap, isTrue);
+      expect(renderObject.clipOverlap, ClipOverlapBehavior.followEdge);
       expect(renderObject.clipBehavior, Clip.hardEdge);
 
-      // Update widget
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -213,86 +123,167 @@ void main() {
         ),
       );
 
-      expect(renderObject.clipOverlap, isFalse);
+      expect(renderObject.clipOverlap, ClipOverlapBehavior.none);
       expect(renderObject.clipBehavior, Clip.antiAlias);
     });
 
-    testWidgets('works correctly with horizontal axis', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xffffffff),
-          builder: (_, _) => CustomScrollView(
-            scrollDirection: Axis.horizontal,
-            slivers: <Widget>[
-              SliverClipRect(
-                clipper: const _HalfWidthClipper(),
-                sliver: SliverToBoxAdapter(
-                  child: Container(width: 100, height: 100, color: const Color(0xFFF44336)),
-                ),
+    // ---- Overlap hit testing: (clipOverlap × axis × reverse) matrix ----
+
+    group('overlap hit testing', () {
+      final overlapTestCases =
+          <({String name, bool clipOverlap, Axis axis, bool reverse, bool expectHitInOverlap})>[
+            (
+              name: 'clipOverlap blocks overlap hits (vertical)',
+              clipOverlap: true,
+              axis: Axis.vertical,
+              reverse: false,
+              expectHitInOverlap: false,
+            ),
+            (
+              name: 'clipOverlap disabled allows overlap hits (vertical)',
+              clipOverlap: false,
+              axis: Axis.vertical,
+              reverse: false,
+              expectHitInOverlap: true,
+            ),
+            (
+              name: 'clipOverlap blocks overlap hits (horizontal)',
+              clipOverlap: true,
+              axis: Axis.horizontal,
+              reverse: false,
+              expectHitInOverlap: false,
+            ),
+            (
+              name: 'clipOverlap disabled allows overlap hits (horizontal)',
+              clipOverlap: false,
+              axis: Axis.horizontal,
+              reverse: false,
+              expectHitInOverlap: true,
+            ),
+            (
+              name: 'clipOverlap disabled allows overlap hits (vertical reverse)',
+              clipOverlap: false,
+              axis: Axis.vertical,
+              reverse: true,
+              expectHitInOverlap: true,
+            ),
+            (
+              name: 'clipOverlap blocks overlap hits (horizontal reverse)',
+              clipOverlap: true,
+              axis: Axis.horizontal,
+              reverse: true,
+              expectHitInOverlap: false,
+            ),
+          ];
+
+      for (final testCase in overlapTestCases) {
+        testWidgets(testCase.name, (WidgetTester tester) async {
+          final controller = ScrollController();
+          await tester.pumpWidget(
+            _buildOverlapScenario(
+              controller: controller,
+              clipOverlap: testCase.clipOverlap,
+              scrollDirection: testCase.axis,
+              reverse: testCase.reverse,
+            ),
+          );
+
+          controller.jumpTo(50);
+          await tester.pump();
+
+          final RenderSliverClipRect renderSliver = tester.renderObject(
+            find.byType(SliverClipRect),
+          );
+          expect(renderSliver.constraints.overlap, 50.0);
+
+          final crossAxis = testCase.axis == Axis.horizontal ? 50.0 : 100.0;
+
+          expect(
+            renderSliver.hitTest(
+              SliverHitTestResult(),
+              mainAxisPosition: 25.0,
+              crossAxisPosition: crossAxis,
+            ),
+            testCase.expectHitInOverlap ? isTrue : isFalse,
+          );
+
+          if (!testCase.expectHitInOverlap) {
+            expect(
+              renderSliver.hitTest(
+                SliverHitTestResult(),
+                mainAxisPosition: 75.0,
+                crossAxisPosition: crossAxis,
               ),
-            ],
-          ),
-        ),
-      );
-
-      final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
-
-      // Hit test inside the clipped area (left half)
-      final resultSuccess = SliverHitTestResult();
-      final bool hitLeft = renderSliver.hitTest(
-        resultSuccess,
-        mainAxisPosition: 25, // < 50
-        crossAxisPosition: 50,
-      );
-      expect(hitLeft, isTrue, reason: 'Should hit inside the clipped area');
-
-      // Hit test outside the clipped area (right half)
-      final resultFail = SliverHitTestResult();
-      final bool hitRight = renderSliver.hitTest(
-        resultFail,
-        mainAxisPosition: 75, // > 50
-        crossAxisPosition: 50,
-      );
-      expect(hitRight, isFalse, reason: 'Should NOT hit outside the clipped area');
+              isTrue,
+              reason: 'Should hit in visible area',
+            );
+          }
+        });
+      }
     });
 
-    testWidgets('works correctly with reverse axis', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xffffffff),
-          builder: (_, _) => CustomScrollView(
-            reverse: true,
-            slivers: <Widget>[
-              SliverClipRect(
-                clipper: const _HalfHeightClipper(),
-                sliver: SliverToBoxAdapter(
-                  child: Container(height: 100, color: const Color(0xFFF44336)),
+    // ---- Custom clipper with axis/reverse ----
+
+    group('custom clipper hit testing', () {
+      testWidgets('respects half-width clipper with horizontal axis', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              slivers: <Widget>[
+                SliverClipRect(
+                  clipper: const _HalfWidthClipper(),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(width: 100, height: 100, color: const Color(0xFFF44336)),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
 
-      final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
+        final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
+        expect(
+          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 25, crossAxisPosition: 50),
+          isTrue,
+          reason: 'Should hit inside the clipped area',
+        );
+        expect(
+          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 75, crossAxisPosition: 50),
+          isFalse,
+          reason: 'Should NOT hit outside the clipped area',
+        );
+      });
 
-      // Hit test inside the clipped area (top half in local coords)
-      final resultSuccess = SliverHitTestResult();
-      final bool hitTop = renderSliver.hitTest(
-        resultSuccess,
-        mainAxisPosition: 75, // >= 50 (clip is not reversed)
-        crossAxisPosition: 400,
-      );
-      expect(hitTop, isTrue, reason: 'Should hit inside the clipped area');
+      testWidgets('respects half-height clipper with reverse axis', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: CustomScrollView(
+              reverse: true,
+              slivers: <Widget>[
+                SliverClipRect(
+                  clipper: const _HalfHeightClipper(),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(height: 100, color: const Color(0xFFF44336)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
 
-      // Hit test outside the clipped area (bottom half in local coords)
-      final resultFail = SliverHitTestResult();
-      final bool hitBottom = renderSliver.hitTest(
-        resultFail,
-        mainAxisPosition: 25, // < 50
-        crossAxisPosition: 400,
-      );
-      expect(hitBottom, isFalse, reason: 'Should NOT hit outside the clipped area');
+        final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
+        expect(
+          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 75, crossAxisPosition: 400),
+          isTrue,
+          reason: 'Should hit inside the clipped area',
+        );
+        expect(
+          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 25, crossAxisPosition: 400),
+          isFalse,
+          reason: 'Should NOT hit outside the clipped area',
+        );
+      });
     });
   });
 }
@@ -301,9 +292,7 @@ class _HalfHeightClipper extends CustomClipper<Rect> {
   const _HalfHeightClipper();
 
   @override
-  Rect getClip(Size size) {
-    return Rect.fromLTWH(0, 0, size.width, size.height / 2);
-  }
+  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
   @override
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
@@ -313,27 +302,17 @@ class _HalfWidthClipper extends CustomClipper<Rect> {
   const _HalfWidthClipper();
 
   @override
-  Rect getClip(Size size) {
-    return Rect.fromLTWH(0, 0, size.width / 2, size.height);
-  }
+  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width / 2, size.height);
 
   @override
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
-}
-
-class _TestPersistentHeader extends StatelessWidget {
-  const _TestPersistentHeader();
-
-  @override
-  Widget build(BuildContext context) =>
-      const SliverPersistentHeader(delegate: _SliverPersistentHeaderDelegate(), pinned: true);
 }
 
 class _SliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _SliverPersistentHeaderDelegate();
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      SizedBox(height: maxExtent, child: const Text('Header'));
+      SizedBox(height: maxExtent, width: maxExtent, child: const Text('Header'));
 
   @override
   double get maxExtent => 100;
