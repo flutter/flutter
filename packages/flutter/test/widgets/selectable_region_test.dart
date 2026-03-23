@@ -6610,6 +6610,78 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+  testWidgets(
+    'selects backwards across multiple Text widgets and WidgetSpans via mouse drag',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/166462.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: emptyTextSelectionControls,
+            child: Column(
+              children: List<Widget>.generate(5, (int index) {
+                return Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      WidgetSpan(child: Text('${index + 1}. ')),
+                      TextSpan(text: 'Item ${index + 1}'),
+                    ],
+                  ),
+                  key: ValueKey<int>(index),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Start at the bottom right of the last item.
+      final Offset dragStart = tester.getBottomRight(find.byKey(const ValueKey<int>(4)));
+      // End at the top left of the first item.
+      final Offset dragEnd = tester.getTopLeft(find.byKey(const ValueKey<int>(0)));
+
+      final TestGesture gesture = await tester.startGesture(
+        dragStart,
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Drag backwards up to the top left.
+      await gesture.moveTo(dragEnd);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      for (var i = 0; i < 5; i += 1) {
+        final Iterable<RenderParagraph> paragraphs = tester.renderObjectList<RenderParagraph>(
+          find.descendant(of: find.byKey(ValueKey<int>(i)), matching: find.byType(RichText)),
+        );
+
+        // The inner widget (WidgetSpan) contains the index text.
+        final RenderParagraph innerParagraph = paragraphs.firstWhere(
+          (RenderParagraph p) => p.text.toPlainText().contains('${i + 1}. '),
+        );
+
+        // The outer widget contains the placeholder character and the item text.
+        final RenderParagraph outerParagraph = paragraphs.firstWhere(
+          (RenderParagraph p) => p.text.toPlainText().contains('Item ${i + 1}'),
+        );
+
+        // Check the WidgetSpan's inner text first.
+        expect(innerParagraph.selections, isNotEmpty);
+        expect(innerParagraph.selections.first.start, 0);
+        expect(innerParagraph.selections.first.end, innerParagraph.text.toPlainText().length);
+
+        // Then check the outer text.
+        expect(outerParagraph.selections, isNotEmpty);
+        expect(outerParagraph.selections.first.start, 1);
+        expect(outerParagraph.selections.first.end, outerParagraph.text.toPlainText().length);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {

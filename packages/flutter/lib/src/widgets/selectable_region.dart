@@ -3223,30 +3223,57 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       (isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1),
     );
     var newIndex = -1;
-    var hasFoundEdgeIndex = false;
     SelectionResult? result;
-    for (var index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
+
+    // If we already have an opposite edge initialized, start our sweep from there
+    // to ensure all items between the two edges are properly visited.
+    final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
+    final startIndex = oppositeEdgeIndex != -1 ? oppositeEdgeIndex : 0;
+
+    int? step;
+    var hasFoundEdgeIndex = false;
+
+    for (var index = startIndex; index >= 0 && index < selectables.length; index += step ?? 1) {
       final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
+
       switch (childResult) {
-        case SelectionResult.next:
-        case SelectionResult.none:
-          newIndex = index;
         case SelectionResult.end:
-          newIndex = index;
-          result = SelectionResult.end;
-          hasFoundEdgeIndex = true;
-        case SelectionResult.previous:
-          hasFoundEdgeIndex = true;
-          if (index == 0) {
-            newIndex = 0;
-            result = SelectionResult.previous;
-          }
-          result ??= SelectionResult.end;
         case SelectionResult.pending:
-          newIndex = index;
-          result = SelectionResult.pending;
+        case SelectionResult.none:
           hasFoundEdgeIndex = true;
+          newIndex = index;
+          result = childResult;
+        case SelectionResult.next:
+          if (step == -1) {
+            hasFoundEdgeIndex = true;
+            newIndex = index + 1;
+            result = SelectionResult.end;
+          } else {
+            step = 1;
+            if (index == selectables.length - 1) {
+              hasFoundEdgeIndex = true;
+              newIndex = index;
+              result = childResult;
+            }
+          }
+        case SelectionResult.previous:
+          if (step == 1) {
+            hasFoundEdgeIndex = true;
+            newIndex = index - 1;
+            result = SelectionResult.end;
+          } else {
+            step = -1;
+            if (index == 0) {
+              hasFoundEdgeIndex = true;
+              newIndex = 0;
+              result = childResult;
+            }
+          }
+      }
+
+      if (hasFoundEdgeIndex) {
+        break;
       }
     }
 
@@ -3325,6 +3352,23 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // 2. the selectable returns previous when looking forward.
     // 2. the selectable returns next when looking backward.
     while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
+      // if (forward == false && selectables[newIndex].boundingBoxes.isNotEmpty) {
+      //   final Rect lastRect = MatrixUtils.transformRect(
+      //     selectables[newIndex].getTransformTo(null),
+      //     selectables[newIndex].boundingBoxes.last,
+      //   );
+      //   if (isEnd) {
+      //     final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forEnd(
+      //       globalPosition: lastRect.centerRight,
+      //     );
+      //     dispatchSelectionEventToChild(selectables[newIndex], synthesizedEvent);
+      //   } else {
+      //     final SelectionEdgeUpdateEvent synthesizedEvent = SelectionEdgeUpdateEvent.forStart(
+      //       globalPosition: lastRect.centerLeft,
+      //     );
+      //     dispatchSelectionEventToChild(selectables[newIndex], synthesizedEvent);
+      //   }
+      // } looks like removing this is the right thing to do!!
       currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
       switch (currentSelectableResult) {
         case SelectionResult.end:
