@@ -482,7 +482,7 @@ class IOSSimulator extends Device {
       // the VM service URI that the app emits on startup.
       // See https://github.com/flutter/flutter/issues/181771.
       if (logReader is SharedIOSDeviceLogReader) {
-        await logReader.start();
+        await logReader.startProcess();
       }
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         logReader,
@@ -852,7 +852,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   String get name => device.name;
 
   @override
-  Future<void> start() async {
+  Future<void> startProcess() async {
     if (_started) {
       return;
     }

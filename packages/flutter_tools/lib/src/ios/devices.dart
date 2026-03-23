@@ -995,11 +995,11 @@ class IOSDevice extends Device {
         deviceLogReader.debuggerStream = iosDeployDebugger;
       }
     }
-    // Start the log reader process before subscribing to its stream so we
+    // Launch the log reader process before subscribing to its stream so we
     // don't miss the VM service URI the app emits on startup.
     // See https://github.com/flutter/flutter/issues/181771.
     if (deviceLogReader is SharedIOSDeviceLogReader) {
-      await deviceLogReader.start();
+      await deviceLogReader.startProcess();
     }
     // Don't port forward if debugging with a wireless device.
     return ProtocolDiscovery.vmService(
@@ -1456,12 +1456,12 @@ abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
     }
   }
 
-  /// Start the underlying log reader process(es).
+  /// Launches the underlying log reader process(es).
   ///
   /// Must be awaited before subscribing to [logLines] to avoid a race
   /// condition where the app launches and emits the VM service URI before the
   /// log reader process has started. See https://github.com/flutter/flutter/issues/181771.
-  Future<void> start();
+  Future<void> startProcess();
 }
 
 /// Listens to multiple logging sources to get the logs from the physical iOS device.
@@ -1820,7 +1820,7 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   /// of the process output to the log stream is deferred to [_connectSyslogOutput],
   /// which is called synchronously when the first listener subscribes.
   @override
-  Future<void> start() async {
+  Future<void> startProcess() async {
     if (_sysLogStarted) {
       return;
     }
