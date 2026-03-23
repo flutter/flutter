@@ -544,9 +544,13 @@ void main() {
     final firstFieldFocusNode = FocusNode();
     final autocompleteFocusNode = FocusNode();
     final trailingAutocompleteFocusNode = FocusNode();
+    final autocompleteController = TextEditingController();
+    final trailingAutocompleteController = TextEditingController();
     addTearDown(firstFieldFocusNode.dispose);
     addTearDown(autocompleteFocusNode.dispose);
     addTearDown(trailingAutocompleteFocusNode.dispose);
+    addTearDown(autocompleteController.dispose);
+    addTearDown(trailingAutocompleteController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -556,20 +560,30 @@ void main() {
               TextFormField(focusNode: firstFieldFocusNode),
               Autocomplete<String>(
                 focusNode: autocompleteFocusNode,
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  return kOptions.where((String option) {
-                    return option.contains(textEditingValue.text.toLowerCase());
-                  });
+                textEditingController: autocompleteController,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['apple'],
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TextFormField(controller: textEditingController, focusNode: focusNode);
                 },
               ),
               TextFormField(enabled: false),
               TextFormField(enabled: false),
               Autocomplete<String>(
                 focusNode: trailingAutocompleteFocusNode,
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  return kOptions.where((String option) {
-                    return option.contains(textEditingValue.text.toLowerCase());
-                  });
+                textEditingController: trailingAutocompleteController,
+                optionsBuilder: (TextEditingValue textEditingValue) => <String>['banana'],
+                fieldViewBuilder: (
+                  BuildContext context,
+                  TextEditingController textEditingController,
+                  FocusNode focusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TextFormField(controller: textEditingController, focusNode: focusNode);
                 },
               ),
             ],
