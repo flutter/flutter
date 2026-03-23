@@ -816,9 +816,9 @@ std::optional<Rect> GaussianBlurFilterContents::GetFilterSourceCoverage(
   Vector2 scaled_sigma = {ScaleSigma(sigma_.x), ScaleSigma(sigma_.y)};
   Vector2 blur_radius = {CalculateBlurRadius(scaled_sigma.x),
                          CalculateBlurRadius(scaled_sigma.y)};
-  Vector3 blur_radii =
-      effect_transform.Basis() * Vector3{blur_radius.x, blur_radius.y, 0.0};
-  return output_limit.Expand(Point(blur_radii.x, blur_radii.y));
+  Vector2 transformed_blur_radius =
+      effect_transform.TransformDirection(blur_radius).Abs();
+  return output_limit.Expand(transformed_blur_radius);
 }
 
 std::optional<Rect> GaussianBlurFilterContents::GetFilterCoverage(
