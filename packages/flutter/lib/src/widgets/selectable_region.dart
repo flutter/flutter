@@ -3229,21 +3229,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // If we already have an opposite edge initialized, start our sweep from there
     // to ensure all items between the two edges are properly visited.
     final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
-    final startIndex = oppositeEdgeIndex != -1 ? oppositeEdgeIndex : 0;
-    int? step;
+    var index = oppositeEdgeIndex != -1 ? oppositeEdgeIndex : 0;
 
-    for (
-      var index = startIndex;
-      index >= 0 && index < selectables.length && !hasFoundEdgeIndex;
-      index += step ?? 1
-    ) {
+    while (index >= 0 && index < selectables.length) {
       final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:
           if (forward == null) {
             forward = true;
-            step = 1;
             newIndex = index;
           } else if (!forward) {
             hasFoundEdgeIndex = true;
@@ -3266,7 +3260,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           }
           if (forward == null) {
             forward = false;
-            step = -1;
+            newIndex = index;
           } else if (forward) {
             hasFoundEdgeIndex = true;
             result = SelectionResult.end;
@@ -3278,6 +3272,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           result = SelectionResult.pending;
           hasFoundEdgeIndex = true;
       }
+      if (hasFoundEdgeIndex) {
+        break;
+      }
+      index += forward == null ? 1 : (forward ? 1 : -1);
     }
 
     if (newIndex == -1) {
