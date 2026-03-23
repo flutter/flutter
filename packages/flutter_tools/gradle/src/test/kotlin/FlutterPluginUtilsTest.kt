@@ -4,11 +4,10 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Sources
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AbstractAppExtension
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
