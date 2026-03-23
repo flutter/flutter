@@ -942,7 +942,7 @@ class _GdkWindow extends _GObject {
     return states;
   }
 
-  /// FIXME
+  /// Move the window to place it relative to the given rectangle according to the specified anchors.
   void moveToRect({
     required int x,
     required int y,

@@ -129,7 +129,6 @@ static gboolean redraw_cb(gpointer user_data) {
     GtkWidget* toplevel =
         gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
     if (GTK_IS_WINDOW(toplevel)) {
-      // FIXME: Breaking the positioner
       // Resize to smallest size, so that the window will shrink to fit the new
       // size of the render area.
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
