@@ -237,7 +237,7 @@ class LegacyCanvasKitRemover extends ArtifactSet {
 
   @override
   Future<bool> isUpToDate(FileSystem fileSystem) async =>
-      !(await _getLegacyCanvasKitDirectory(fileSystem).exists());
+      !_getLegacyCanvasKitDirectory(fileSystem).existsSync();
 
   @override
   Future<void> update(

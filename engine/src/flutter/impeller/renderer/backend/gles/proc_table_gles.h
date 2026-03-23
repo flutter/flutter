@@ -265,8 +265,9 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(UniformBlockBinding);               \
   PROC(BindBufferRange);                   \
   PROC(WaitSync);                          \
-  PROC(RenderbufferStorageMultisample)     \
-  PROC(BlitFramebuffer);
+  PROC(RenderbufferStorageMultisample);    \
+  PROC(BlitFramebuffer);                   \
+  PROC(InvalidateFramebuffer);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
