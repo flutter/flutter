@@ -3218,7 +3218,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Ideally, this method should only be called twice at the beginning of the
   /// drag selection, once for start edge update event, once for end edge update
   /// event.
-  SelectionResult _initSelectionA(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
+  SelectionResult _initSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
     assert(
       (isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1),
     );
@@ -3277,81 +3277,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           newIndex = index;
           result = SelectionResult.pending;
           hasFoundEdgeIndex = true;
-      }
-    }
-
-    if (newIndex == -1) {
-      assert(selectables.isEmpty);
-      return SelectionResult.none;
-    }
-    if (isEnd) {
-      currentSelectionEndIndex = newIndex;
-    } else {
-      currentSelectionStartIndex = newIndex;
-    }
-    _flushInactiveSelections();
-    // The result can only be null if the loop went through the entire list
-    // without any of the selection returned end or previous. In this case, the
-    // caller of this method needs to find the next selectable in their list.
-    return result ?? SelectionResult.next;
-  }
-
-  SelectionResult _initSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
-    assert(
-      (isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1),
-    );
-    var newIndex = -1;
-    SelectionResult? result;
-
-    // If we already have an opposite edge initialized, start our sweep from there
-    // to ensure all items between the two edges are properly visited.
-    final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
-    final startIndex = oppositeEdgeIndex != -1 ? oppositeEdgeIndex : 0;
-
-    int? step;
-    var hasFoundEdgeIndex = false;
-
-    for (var index = startIndex; index >= 0 && index < selectables.length; index += step ?? 1) {
-      final Selectable child = selectables[index];
-      final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
-
-      switch (childResult) {
-        case SelectionResult.end:
-        case SelectionResult.pending:
-        case SelectionResult.none:
-          hasFoundEdgeIndex = true;
-          newIndex = index;
-          result = childResult;
-        case SelectionResult.next:
-          if (step == -1) {
-            hasFoundEdgeIndex = true;
-            newIndex = index + 1;
-            result = SelectionResult.end;
-          } else {
-            step = 1;
-            if (index == selectables.length - 1) {
-              hasFoundEdgeIndex = true;
-              newIndex = index;
-              result = childResult;
-            }
-          }
-        case SelectionResult.previous:
-          if (step == 1) {
-            hasFoundEdgeIndex = true;
-            newIndex = index - 1;
-            result = SelectionResult.end;
-          } else {
-            step = -1;
-            if (index == 0) {
-              hasFoundEdgeIndex = true;
-              newIndex = 0;
-              result = childResult;
-            }
-          }
-      }
-
-      if (hasFoundEdgeIndex) {
-        break;
       }
     }
 
