@@ -6653,6 +6653,7 @@ void main() {
   testWidgets('selects all text including trailing newline using mouse drag', (
     WidgetTester tester,
   ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154253.
     const text = 'Hello world\n';
     await tester.pumpWidget(
       TestWidgetsApp(
