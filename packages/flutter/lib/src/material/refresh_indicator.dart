@@ -162,9 +162,9 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
-    this.onStatusChange,
     required this.child,
   }) : _indicatorType = _IndicatorType.material,
+       onStatusChange = null,
        assert(elevation >= 0.0);
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
@@ -196,9 +196,9 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
-    this.onStatusChange,
     required this.child,
   }) : _indicatorType = _IndicatorType.adaptive,
+       onStatusChange = null,
        assert(elevation >= 0.0);
 
   /// Creates a [RefreshIndicator] with no spinner and calls `onRefresh` when
@@ -572,7 +572,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (notification.depth != 0 || !notification.leading) {
       return false;
     }
-    if (_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed) {
+    if (_status == RefreshIndicatorStatus.drag) {
       notification.disallowIndicator();
       return true;
     }
@@ -675,7 +675,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           // Show the indeterminate progress indicator.
           _status = RefreshIndicatorStatus.refresh;
         });
-        widget.onStatusChange?.call(_status);
 
         final Future<void> refreshResult = widget.onRefresh();
         refreshResult.whenComplete(() {
