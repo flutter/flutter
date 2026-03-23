@@ -242,11 +242,9 @@ TEST(GaussianBlurFilterContentsTest, FilterSourceCoverageNegativeScale) {
   std::optional<Rect> coverage = contents->GetFilterSourceCoverage(
       /*effect_transform=*/Matrix::MakeScale({-2.0, 2.0, 1.0}),
       /*output_limit=*/Rect::MakeLTRB(100, 100, 200, 200));
-  EXPECT_TRUE(coverage.has_value());
-  if (coverage.has_value()) {
-    EXPECT_RECT_NEAR(coverage.value(),
-                     Rect::MakeLTRB(100 - 2, 100 - 2, 200 + 2, 200 + 2));
-  }
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_RECT_NEAR(coverage.value(),
+                   Rect::MakeLTRB(100 - 2, 100 - 2, 200 + 2, 200 + 2));
 }
 
 TEST(GaussianBlurFilterContentsTest, CalculateSigmaValues) {
