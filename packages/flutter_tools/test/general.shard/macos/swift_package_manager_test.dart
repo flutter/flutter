@@ -5,6 +5,9 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/logger.dart' show BufferLogger;
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -14,6 +17,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 const _doubleIndent = '        ';
 
@@ -29,11 +33,15 @@ void main() {
         group('generatePluginsSwiftPackage', () {
           testWithoutContext('skip if no dependencies and not already migrated', () async {
             final fs = MemoryFileSystem();
+            final processManager = FakeProcessManager.any();
+            final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -42,6 +50,8 @@ void main() {
 
           testWithoutContext('generate if no dependencies and already migrated', () async {
             final fs = MemoryFileSystem();
+            final processManager = FakeProcessManager.any();
+            final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('''
@@ -51,6 +61,8 @@ void main() {
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
 
@@ -128,6 +140,8 @@ $_doubleIndent
             'generate if no dependencies, no Flutter dependency, and already migrated',
             () async {
               final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
               final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
               project.xcodeProjectInfoFile.createSync(recursive: true);
               project.xcodeProjectInfoFile.writeAsStringSync('''
@@ -137,6 +151,8 @@ $_doubleIndent
               final spm = SwiftPackageManager(
                 fileSystem: fs,
                 templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
               );
               await spm.generatePluginsSwiftPackage(
                 <Plugin>[],
@@ -181,6 +197,8 @@ $_doubleIndent
 
           testWithoutContext('generate with single dependency', () async {
             final fs = MemoryFileSystem();
+            final processManager = FakeProcessManager.any();
+            final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
 
             final validPlugin1 = FakePlugin(
@@ -193,6 +211,8 @@ $_doubleIndent
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
             );
             await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
 
@@ -244,6 +264,8 @@ let package = Package(
 
           testWithoutContext('generate with multiple dependencies', () async {
             final fs = MemoryFileSystem();
+            final processManager = FakeProcessManager.any();
+            final logger = BufferLogger.test();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final nonPlatformCompatiblePlugin = FakePlugin(
               name: 'invalid_plugin_due_to_incompatible_platform',
@@ -278,6 +300,8 @@ let package = Package(
             final spm = SwiftPackageManager(
               fileSystem: fs,
               templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
             );
             await spm.generatePluginsSwiftPackage(
               <Plugin>[
@@ -345,6 +369,195 @@ let package = Package(
     ]
 )
 ''');
+          });
+
+          testWithoutContext('generate with plugin with dependency on plugin', () async {
+            final fs = MemoryFileSystem();
+            final logger = BufferLogger.test();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+            final buildSourcePackagesPath = '/build/${platform.name}/SourcePackages';
+            final validPlugin1 = FakePlugin(
+              name: 'valid_plugin_1',
+              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+            );
+            const plugin1ManifestContents = '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let package = Package(
+    name: "valid_plugin_1",
+    platforms: [
+        .iOS("13.0")
+    ],
+    products: [
+        .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])
+    ],
+    dependencies: [
+        .package(name: "valid_plugin_2", path: "../valid_plugin_2"),
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
+        .package(name: "valid_plugin_3", path: "../valid_plugin_3")
+    ],
+    targets: [
+        .target(
+            name: "valid-plugin-1",
+            dependencies: [
+                .product(name: "valid-plugin-2", package: "valid_plugin_2"),
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
+                .product(name: "valid-plugin-3", package: "valid_plugin_3")
+            ],
+            path: "../Classes",
+        )
+    ]
+)
+''';
+            final File plugin1ManifestFile = fs.file(
+              '${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift',
+            );
+            plugin1ManifestFile
+              ..createSync(recursive: true)
+              ..writeAsStringSync(plugin1ManifestContents);
+            final File plugin1CopiedManifest = fs.file(
+              '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1/Package.swift',
+            );
+
+            final validPlugin2 = FakePlugin(
+              name: 'valid_plugin_2',
+              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+            );
+            fs
+                .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                .createSync(recursive: true);
+
+            final validPlugin3 = FakePlugin(
+              name: 'valid_plugin_3',
+              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+            );
+            fs
+                .file('${validPlugin3.path}/${platform.name}/${validPlugin3.name}/Package.swift')
+                .createSync(recursive: true);
+
+            final processManager = FakeProcessManager.list([
+              FakeCommand(
+                command: [
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  validPlugin1.path,
+                  '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
+                ],
+                onRun: (_) {
+                  plugin1CopiedManifest
+                    ..createSync(recursive: true)
+                    ..writeAsStringSync(plugin1ManifestContents);
+                },
+              ),
+            ]);
+
+            final spm = SwiftPackageManager(
+              fileSystem: fs,
+              templateRenderer: const MustacheTemplateRenderer(),
+              processUtils: ProcessUtils(processManager: processManager, logger: logger),
+              config: FakeConfig(),
+            );
+            await spm.generatePluginsSwiftPackage(
+              <Plugin>[validPlugin1, validPlugin2, validPlugin3],
+              platform,
+              project,
+            );
+
+            final supportedPlatform = platform == FlutterDarwinPlatform.ios
+                ? '.iOS("13.0")'
+                : '.macOS("10.15")';
+            expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+              exists,
+            );
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0').targetSync(),
+              '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1',
+            );
+            expect(plugin1CopiedManifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let package = Package(
+    name: "valid_plugin_1",
+    platforms: [
+        .iOS("13.0")
+    ],
+    products: [
+        .library(name: "valid-plugin-1", targets: ["valid-plugin-1"])
+    ],
+    dependencies: [
+        .package(name: "valid_plugin_2", path: "../valid_plugin_2-1.0.0"),
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
+        .package(name: "valid_plugin_3", path: "../valid_plugin_3-1.0.0")
+    ],
+    targets: [
+        .target(
+            name: "valid-plugin-1",
+            dependencies: [
+                .product(name: "valid-plugin-2", package: "valid_plugin_2"),
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
+                .product(name: "valid-plugin-3", package: "valid_plugin_3")
+            ],
+            path: "../Classes",
+        )
+    ]
+)
+''');
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0'),
+              exists,
+            );
+            expect(
+              project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0').targetSync(),
+              '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+            );
+            expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
+        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1-1.0.0"),
+        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2-1.0.0"),
+        .package(name: "valid_plugin_3", path: "../.packages/valid_plugin_3-1.0.0"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage",
+            dependencies: [
+                .product(name: "valid-plugin-1", package: "valid_plugin_1"),
+                .product(name: "valid-plugin-2", package: "valid_plugin_2"),
+                .product(name: "valid-plugin-3", package: "valid_plugin_3"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ]
+        )
+    ]
+)
+''');
+            expect(processManager, hasNoRemainingExpectations);
           });
         });
       });
@@ -415,6 +628,9 @@ class FakePlugin extends Fake implements Plugin {
     if (!hasSwiftPackage) {
       return null;
     }
+    if (overridePath != null) {
+      return '$overridePath/$platform/$name';
+    }
     return '$path/$platform/$name';
   }
 
@@ -428,3 +644,8 @@ class FakePlugin extends Fake implements Plugin {
 }
 
 class FakePluginPlatform extends Fake implements PluginPlatform {}
+
+class FakeConfig extends Fake implements Config {
+  @override
+  Object? getValue(String key) => null;
+}
