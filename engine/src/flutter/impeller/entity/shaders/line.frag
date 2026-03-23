@@ -39,9 +39,7 @@ float CalculateLine() {
 
   if (frag_info.cap_type == 1.0) {
     if (min(d.y, d.w) < 1.0) {
-      float u = 1.0 - min(d.x, d.z);
-      float v = 1.0 - min(d.y, d.w);
-      float R = sqrt(u * u + v * v);
+      float R = distance(vec2(min(d.x, d.z), min(d.y, d.w)), vec2(1.0));
       return lookup(clamp(1.0 - R, 0.0, 1.0));
     } else {
       return lookup(min(d.x, d.z));
