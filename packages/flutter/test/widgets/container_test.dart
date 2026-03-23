@@ -623,7 +623,7 @@ void main() {
   });
 
   testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
-    Future<void> test(Decoration decoration, [String? suffix]) async {
+    Future<void> test(Decoration decoration, String goldenFileName) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -641,19 +641,16 @@ void main() {
           ),
         ),
       );
-      final fileName = suffix == null
-      ? 'container_test.getClipPath.${decoration.runtimeType}.png'
-      : 'container_test.getClipPath.${decoration.runtimeType}.$suffix.png';
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile(fileName),
+        matchesGoldenFile('container_test.getClipPath.$goldenFileName.png'),
       );
     }
 
-    await test(const BoxDecoration());
-    await test(const ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.all(Radius.circular(10.0)))), 'rounded');
-    await test(const ShapeDecoration(shape: StadiumBorder()));
-    await test(const FlutterLogoDecoration());
+    await test(const BoxDecoration(), 'BoxDecoration');
+    await test(const _MockUnderlineDecoration(), 'MockUnderlineDecoration');
+    await test(const ShapeDecoration(shape: StadiumBorder()), 'ShapeDecoration');
+    await test(const FlutterLogoDecoration(), 'FlutterLogoDecoration');
   });
 
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
@@ -824,4 +821,44 @@ class _MockCanvas extends Fake implements Canvas {
 
   @override
   void drawRect(Rect rect, Paint paint) {}
+}
+
+/// A mock [Decoration] that draws a horizontal line at the bottom of its bounds.
+///
+/// This class is designed to replicate the rendering behavior of an
+/// `UnderlineTabIndicator` for tests. It ensures that core
+/// rendering and clipping logic can be verified without introducing a
+/// dependency on the Material library.
+
+class _MockUnderlineDecoration extends Decoration {
+  const _MockUnderlineDecoration();
+
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return Path()..addRect(rect);
+  }
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return _MockUnderlinePainter();
+  }
+}
+
+class _MockUnderlinePainter extends BoxPainter {
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    // This perfectly mimics the default UnderlineTabIndicator math.
+    // A 2-pixel thick line drawn across the bottom edge of the rect.
+    final Rect rect = offset & (configuration.size ?? Size.zero);
+    final paint = Paint()
+      ..color = const Color(0xFFFFFFFF)
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.square;
+
+    // The line is drawn slightly offset by half the stroke width to match how borders render.
+    final start = Offset(rect.left, rect.bottom - (paint.strokeWidth / 2.0));
+    final end = Offset(rect.right, rect.bottom - (paint.strokeWidth / 2.0));
+
+    canvas.drawLine(start, end, paint);
+  }
 }
