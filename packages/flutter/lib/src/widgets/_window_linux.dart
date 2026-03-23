@@ -90,6 +90,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
     required RegularWindowControllerDelegate delegate,
   }) {
     final controller = RegularWindowControllerLinux(
@@ -98,6 +99,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
     );
     _windows[controller.rootView.viewId] = controller._window;
     return controller;
@@ -111,6 +113,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) {
     final controller = DialogWindowControllerLinux(
       owner: this,
@@ -119,6 +122,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredConstraints: preferredConstraints,
       parent: parent,
       title: title,
+      decorated: decorated,
     );
     _windows[controller.rootView.viewId] = controller._window;
     return controller;
@@ -189,6 +193,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        _window = _GtkWindow(_GtkWindowType.toplevel),
@@ -217,6 +222,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (title != null) {
       setTitle(title);
     }
+    _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     final view = _FlView(engine);
     final int viewId = view.getId();
@@ -358,6 +364,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        _parent = parent,
@@ -396,6 +403,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (title != null) {
       setTitle(title);
     }
+    _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     final view = _FlView(engine);
     final int viewId = view.getId();
@@ -734,6 +742,11 @@ class _GtkWindow extends _GtkContainer {
     _gtkWindowSetTypeHint(instance, hint.index);
   }
 
+  /// Sets if this window has decorations (titlebar, borders, shadow).
+  void setDecorated(bool decorated) {
+    _gtkWindowSetDecorated(instance, decorated);
+  }
+
   /// Sets the title of the window.
   void setTitle(String title) {
     final ffi.Pointer<ffi.Uint8> titleBuffer = _stringToNative(title);
@@ -854,6 +867,11 @@ class _GtkWindow extends _GtkContainer {
     ffi.Pointer<ffi.NativeType> window,
     ffi.Pointer<ffi.Uint8> title,
   );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Bool)>(
+    symbol: 'gtk_window_set_decorated',
+  )
+  external static void _gtkWindowSetDecorated(ffi.Pointer<ffi.NativeType> window, bool decorated);
 
   @ffi.Native<ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<ffi.NativeType>)>(
     symbol: 'gtk_window_get_title',
