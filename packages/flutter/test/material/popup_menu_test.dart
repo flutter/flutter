@@ -4520,7 +4520,7 @@ void main() {
   });
 
   testWidgets("Popup menu child's InkWell borderRadius", (WidgetTester tester) async {
-    final borderRadius = BorderRadius.circular(20);
+    const borderRadius = BorderRadius.all(Radius.circular(20));
 
     Widget buildPopupMenu({required BorderRadius? borderRadius}) {
       return MaterialApp(
@@ -4776,7 +4776,7 @@ void main() {
               onSelected: (String result) {},
               child: const Text('Menu Button'),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                PopupMenuDivider(radius: BorderRadius.circular(5)),
+                const PopupMenuDivider(radius: BorderRadius.all(Radius.circular(5))),
               ],
             ),
           ),
@@ -4886,21 +4886,21 @@ void main() {
       expect(scrollView.padding, popupMenuTheme.menuPadding);
     }
 
-    final popupMenuTheme1 = PopupMenuThemeData(
+    const popupMenuTheme1 = PopupMenuThemeData(
       elevation: 10,
       color: Colors.red,
       shadowColor: Colors.black,
       surfaceTintColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      menuPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+      menuPadding: EdgeInsets.all(10),
     );
-    final popupMenuTheme2 = PopupMenuThemeData(
+    const popupMenuTheme2 = PopupMenuThemeData(
       elevation: 20,
       color: Colors.blue,
       shadowColor: Colors.white,
       surfaceTintColor: Colors.black,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      menuPadding: const EdgeInsets.all(20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+      menuPadding: EdgeInsets.all(20),
     );
 
     // Show the menu with the first theme.

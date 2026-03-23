@@ -123,10 +123,21 @@ You can run the tests in a specific file, e.g.:
 $ flutter test test/general.shard/utils_test.dart
 ```
 
-### Forcing snapshot regeneration
+### Forcing Flutter Tools Snapshot Regeneration
 
-To force the Flutter Tools snapshot to be regenerated, delete the following
-files:
-```shell
-$ rm ../../bin/cache/flutter_tools.stamp ../../bin/cache/flutter_tools.snapshot
+To force the Flutter Tools snapshot to be regenerated, delete these files:
+
+- `flutter_tools.stamp`
+- `flutter_tools.snapshot`
+
+**On macOS/Linux:**
+
+```bash
+rm ../../bin/cache/flutter_tools.stamp ../../bin/cache/flutter_tools.snapshot
+```
+
+**On Windows:**
+
+```bat
+del ..\..\bin\cache\flutter_tools.stamp ..\..\bin\cache\flutter_tools.snapshot
 ```
