@@ -171,7 +171,10 @@ void main() {
     expect(m3.elevation, 6);
     expect(m3.shadowColor, const Color(0x00000000)); // Colors.transparent
     expect(m3.surfaceTintColor, Colors.transparent);
-    expect(m3.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)));
+    expect(
+      m3.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28))),
+    );
     expect(m3.headerBackgroundColor, const Color(0x00000000)); // Colors.transparent
     expect(m3.headerForegroundColor, colorScheme.onSurfaceVariant);
     expect(m3.headerHeadlineStyle, textTheme.headlineLarge);

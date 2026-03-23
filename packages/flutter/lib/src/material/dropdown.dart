@@ -1401,7 +1401,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
-    _isMenuExpanded = false;
     _dropdownRoute = null;
     _lastOrientation = null;
   }
@@ -1505,6 +1504,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     focusNode.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
+      if (mounted) {
+        setState(() {
+          _isMenuExpanded = false;
+        });
+      }
       if (!mounted || newValue == null) {
         return;
       }
@@ -1512,7 +1516,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
 
     widget.onTap?.call();
-    _isMenuExpanded = true;
+    setState(() {
+      _isMenuExpanded = true;
+    });
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1856,6 +1862,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(
+         errorBuilder == null || decoration?.errorText == null,
+         'Declaring both errorBuilder and decoration.errorText is not supported.',
+       ),
        decoration = decoration ?? const InputDecoration(),
        super(
          initialValue: initialValue ?? value,
