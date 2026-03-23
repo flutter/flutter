@@ -39,15 +39,20 @@ import java.util.concurrent.Future;
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
-  // Flags to only be set internally by default. Match values in flutter::switches.
+  // Flags to only be set internally by default. Match values in flutter::switches:
   private static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
   private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME =
       "aot-vmservice-shared-library-name";
 
-  // Resource names used for components of the precompiled snapshot.
+  // Resource names used for components of the precompiled snapshot:
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
+
+  // Manifest metadata key for engine flags specified via the command line
+  // that have been injected into the application merged manifest.
+  private static final String ANDROID_ENGINE_SHELL_ARGS_KEY = "androidEngineShellArgs";
+  private static final String ANDROID_ENGINE_SHELL_ARGS_DELIMITER = ";";
 
   private static FlutterLoader instance;
 
@@ -296,9 +301,8 @@ public class FlutterLoader {
               + File.separator
               + DEFAULT_LIBRARY);
 
-      // Add engine flags provided by metadata in the application manifest. These settings will take
-      // precedent over any defaults set below, but will be overridden if additionally set by the
-      // command line.
+      // Add engine flags provided by metadata in the application manifest. These settings will
+      // be overridden if additionally set by the command line or via Intent.
       ApplicationInfo applicationInfo =
           applicationContext
               .getPackageManager()
@@ -403,9 +407,23 @@ public class FlutterLoader {
         }
       }
 
-      // Add any remaining engine flags provided by the command line. These settings will take
+      // Add engine flags specified by the command line. These settings will take precedent
+      // over any flag configurations specified by appplication manifest metadata.
+      if (applicationMetaData.containsKey(ANDROID_ENGINE_SHELL_ARGS_KEY)) {
+        String androidEngineShellArgsValue =
+            applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
+        String[] androidEngineShellArgs =
+            androidEngineShellArgsValue.split(ANDROID_ENGINE_SHELL_ARGS_DELIMITER);
+        for (String arg : androidEngineShellArgs) {
+          shellArgs.add(arg);
+        }
+      }
+
+      // Add any engine flags specified via Intent extras. These settings will take
       // precedent over any flag settings specified by application manifest
-      // metadata and any defaults set below.
+      // metadata.
+      // TODO(camsim99): Remove support for setting engine flags via Intent extras:
+      // https://github.com/flutter/flutter/issues/180686.
       if (args != null) {
         for (String arg : args) {
           FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
