@@ -124,7 +124,7 @@ TaskFunction _testIllegalFlagInReleaseMode() {
         );
       });
 
-      section('Insert metadata only allowed in release mode for testing into AndroidManifest.xml');
+      section('Insert metadata only allowed in debug mode for testing into AndroidManifest.xml');
       final metadataKeyPairs = <(String, String)>[
         ('io.flutter.embedding.android.UseTestFonts', 'true'),
       ];
