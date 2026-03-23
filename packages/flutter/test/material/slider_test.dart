@@ -5628,10 +5628,10 @@ void main() {
 // A slider value indicator that's a circle with a fixed size and
 // does not animate at all.
 //
-// This allows us to test whether `Slider` removes the value indicator painter
-// when animation is dismissed (a more strict requirement than "painting
-// nothing"). The default value indicator shapes is not suitable for this job
-// since they do not paint anything when animation is dismissed.
+// This allows test cases to verify whether a `Slider` removes the value
+// indicator painter after the animation is dismissed (a more strict requirement
+// than "painting nothing"). The default value indicator shape is not suitable
+// for this job since it does not paint anything when animation is dismissed.
 class _FixedSizeCircle extends SliderComponentShape {
   const _FixedSizeCircle();
 
