@@ -297,6 +297,58 @@ void main() {
     expect(refreshCalled, false);
   });
 
+  testWidgets('RefreshIndicator - list does not scroll when canceling refresh', (
+    WidgetTester tester,
+  ) async {
+    refreshCalled = false;
+    final scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const <Widget>[
+              SizedBox(height: 200.0, child: Text('X')),
+              SizedBox(height: 1000.0),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset startLocation = tester.getCenter(
+      find.text('X'),
+      warnIfMissed: true,
+      callee: 'drag',
+    );
+    final testPointer = TestPointer();
+    await tester.sendEventToBinding(testPointer.down(startLocation));
+
+    // Drag down to reveal the RefreshIndicator
+    await tester.sendEventToBinding(testPointer.move(startLocation + const Offset(0.0, 150.0)));
+    await tester.pump();
+
+    // Verify the list hasn't scrolled
+    expect(scrollController.offset, 0.0);
+
+    await tester.sendEventToBinding(testPointer.move(startLocation));
+    await tester.pump();
+    expect(scrollController.offset, 0.0);
+
+    // Finish the drag
+    await tester.sendEventToBinding(testPointer.up());
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(refreshCalled, false);
+    scrollController.dispose();
+  });
+
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(

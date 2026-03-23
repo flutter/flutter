@@ -410,13 +410,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
   /// Determines if the scroll notification was triggered by a user drag.
   bool _isScrollTriggeredByUser(ScrollNotification notification) {
-    if (notification is ScrollStartNotification && notification.dragDetails != null) {
-      return true;
-    }
-    if (notification is ScrollUpdateNotification && notification.dragDetails != null) {
-      return true;
-    }
-    return false;
+    return switch (notification) {
+      ScrollStartNotification(:final dragDetails) => dragDetails != null,
+      ScrollUpdateNotification(:final dragDetails) => dragDetails != null,
+      _ => false,
+    };
   }
 
   /// Determines if the scrollable is exactly at the top or bottom edge.
@@ -481,7 +479,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
         _checkDragOffset(notification.metrics.viewportDimension);
       } else {
-        _updateDragOffset(notification.metrics.axisDirection, notification.scrollDelta!);
+        _updateDragOffset(notification.metrics.axisDirection, delta);
         _checkDragOffset(notification.metrics.viewportDimension, canBeDisarmed: false);
       }
     }
