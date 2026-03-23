@@ -152,7 +152,35 @@ void main() {
                   'No development certificates available to code sign app for device deployment',
             ),
           );
-          expect(logger.errorText, contains(noCertificatesInstruction));
+          expect(
+            logger.errorText,
+            contains('''
+════════════════════════════════════════════════════════════════════════════════
+No valid code signing certificates were found
+You can connect to your Apple Developer account by signing in with your Apple ID
+in Xcode and create an iOS Development Certificate as well as a Provisioning\u0020
+Profile for your project by:
+  1- Open the Flutter project's Xcode target with
+       open ios/Runner.xcworkspace
+  2- Select the 'Runner' project in the navigator then the 'Runner' target
+     in the project settings
+  3- Make sure a 'Development Team' is selected under Signing & Capabilities > Team.\u0020
+     You may need to:
+         - Log in with your Apple ID in Xcode first
+         - Ensure you have a valid unique Bundle ID
+         - Register your device with your Apple Developer Account
+         - Let Xcode automatically provision a profile for your app
+  4- Build or run your project again
+  5- Trust your newly created Development Certificate on your iOS device
+     via Settings > General > Device Management > [your new certificate] > Trust
+
+For more information, please visit:
+  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/
+  AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
+
+Or run on an iOS simulator without code signing
+════════════════════════════════════════════════════════════════════════════════'''),
+          );
         },
       );
 
@@ -1511,7 +1539,7 @@ void main() {
         );
         await settings.selectSettings();
 
-        expect(logger.errorText, contains(noCertificatesInstruction));
+        expect(logger.errorText, contains(noCertificatesInstruction()));
         expect(
           logger.warningText,
           contains('Code-signing setup canceled. Your changes have not been saved.'),
@@ -2050,6 +2078,101 @@ void main() {
         expect(processManager, hasNoRemainingExpectations);
       });
     });
+  });
+
+  testWithoutContext('getProvisioningProfileFromConfig', () async {
+    final logger = BufferLogger.test();
+    final config = Config.test();
+    final fileSystem = MemoryFileSystem.test();
+    const profileBaseName = '1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+    const profileFilePath = '/path/to/profiles/$profileBaseName';
+    fileSystem.file(profileFilePath).createSync(recursive: true);
+    config.setValue('ios-signing-profile', profileFilePath);
+
+    final File profilePlist = fileSystem.file(
+      '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+    );
+    final File cert = fileSystem.file(
+      '/.tmp_rand0/provisioning_profile_certificates/UUID1234_0.cer',
+    );
+
+    final plistParser = FakePlistParser(
+      parsedValues: <Map<String, Object>>[
+        <String, Object>{
+          'Name': 'Company Development',
+          'ExpirationDate': '2026-02-20T16:04:31Z',
+          'IsXcodeManaged': false,
+          'DeveloperCertificates': <List<int>>[
+            <int>[0, 1, 2, 3],
+          ],
+          'TeamIdentifier': <String>['ABCDE1F2DH'],
+          'UUID': 'UUID1234',
+        },
+      ],
+    );
+    final processManager = FakeProcessManager.list([
+      FakeCommand(
+        command: const [
+          'security',
+          'cms',
+          '-D',
+          '-i',
+          profileFilePath,
+          '-o',
+          '/.tmp_rand0/provisioning_profiles/decoded_profile_$profileBaseName.plist',
+        ],
+        onRun: (List<String> command) => profilePlist.createSync(recursive: true),
+      ),
+      FakeCommand(
+        command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
+        stdout:
+            'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+      ),
+    ]);
+
+    final settings = XcodeCodeSigningSettings(
+      config: config,
+      logger: logger,
+      platform: FakePlatform(operatingSystem: 'macos'),
+      fileSystem: fileSystem,
+      fileSystemUtils: FakeFileSystemUtils(),
+      processUtils: ProcessUtils(processManager: processManager, logger: logger),
+      terminal: FakeTerminal(stdinHasTerminal: false),
+      plistParser: plistParser,
+    );
+    final validCodeSigningIdentities = <String>[
+      'Apple Development: Company Development (12ABCD234E)',
+    ];
+
+    expect(await settings.getProvisioningProfileFromConfig(validCodeSigningIdentities), isNotNull);
+    expect(logger.errorText, isEmpty);
+    expect(logger.warningText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('getIdentityFromCertFromConfig', () async {
+    final logger = BufferLogger.test();
+    final config = Config.test();
+    final fileSystem = MemoryFileSystem.test();
+    config.setValue('ios-signing-cert', 'Apple Development: Company Development (12ABCD234E)');
+
+    final settings = XcodeCodeSigningSettings(
+      config: config,
+      logger: logger,
+      platform: FakePlatform(operatingSystem: 'macos'),
+      fileSystem: fileSystem,
+      fileSystemUtils: FakeFileSystemUtils(),
+      processUtils: ProcessUtils(processManager: FakeProcessManager.empty(), logger: logger),
+      terminal: FakeTerminal(stdinHasTerminal: false),
+      plistParser: FakePlistParser(),
+    );
+    final validCodeSigningIdentities = <String>[
+      'Apple Development: Company Development (12ABCD234E)',
+    ];
+
+    expect(await settings.getIdentityFromCertFromConfig(validCodeSigningIdentities), isNotNull);
+    expect(logger.errorText, isEmpty);
+    expect(logger.warningText, isEmpty);
   });
 }
 

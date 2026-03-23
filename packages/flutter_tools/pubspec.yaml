@@ -13,7 +13,7 @@ dependencies:
   analyzer: 10.1.0
   archive: 3.6.1
   args: 2.7.0
-  dds: 5.1.0
+  dds: 5.2.0
   dwds: 26.2.5
   code_builder: 4.11.1
   collection: 1.19.1
@@ -129,4 +129,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 5ebg2m
+# PUBSPEC CHECKSUM: d2lbnk

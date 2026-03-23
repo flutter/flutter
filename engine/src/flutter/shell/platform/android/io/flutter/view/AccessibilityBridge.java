@@ -1914,7 +1914,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // TODO(goderbauer): Send this event only once (!) for changed subtrees,
     //     see https://github.com/flutter/flutter/issues/14534
-    sendWindowContentChangeEvent(0);
+    sendWindowContentChangeEvent(0, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
 
     for (SemanticsNode object : updated) {
       if (object.didScroll()) {
@@ -1982,7 +1982,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         sendAccessibilityEvent(event);
       }
       if (object.hasFlag(Flag.IS_LIVE_REGION) && object.didChangeLabel()) {
-        sendWindowContentChangeEvent(object.id);
+        sendWindowContentChangeEvent(object.id, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+      }
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_36 && object.didChangeCheckedState()) {
+        sendWindowContentChangeEvent(object.id, AccessibilityEvent.CONTENT_CHANGE_TYPE_CHECKED);
       }
       if (accessibilityFocusedSemanticsNode != null
           && accessibilityFocusedSemanticsNode.id == object.id
@@ -2150,16 +2153,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * Creates a {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} and sends the event to
    * Android's accessibility system.
    *
-   * <p>It sets the content change types to {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
-   * when supported by the API level.
-   *
    * <p>The given {@code virtualViewId} should be a {@link SemanticsNode} below which the content
    * has changed.
    */
-  private void sendWindowContentChangeEvent(int virtualViewId) {
+  private void sendWindowContentChangeEvent(int virtualViewId, int changeType) {
     AccessibilityEvent event =
         obtainAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-    event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+    event.setContentChangeTypes(changeType);
     sendAccessibilityEvent(event);
   }
 
@@ -2283,7 +2283,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     accessibilityFocusedSemanticsNode = null;
     hoveredObject = null;
-    sendWindowContentChangeEvent(0);
+    sendWindowContentChangeEvent(0, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
   }
 
   /**
@@ -2644,6 +2644,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         return false;
       }
       return label == null || !label.equals(previousLabel);
+    }
+
+    private boolean didChangeCheckedState() {
+      if (!hadPreviousConfig) {
+        return false;
+      }
+      return (hasFlag(Flag.IS_CHECKED) != hadFlag(Flag.IS_CHECKED))
+          || (hasFlag(Flag.IS_CHECK_STATE_MIXED) != hadFlag(Flag.IS_CHECK_STATE_MIXED))
+          || (hasFlag(Flag.IS_TOGGLED) != hadFlag(Flag.IS_TOGGLED));
     }
 
     private void log(@NonNull String indent, boolean recursive) {
