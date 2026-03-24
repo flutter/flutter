@@ -3,14 +3,14 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
-    // 1. Swizzle NSScreen.canRepresent(_:)
+    // 1. Swizzle NSScreen.canRepresent(_:) to force FALSE for P3
     let screenMethod = class_getInstanceMethod(NSScreen.self, #selector(NSScreen.canRepresent(_:)))
     let swizzledMethod = class_getInstanceMethod(NSScreen.self, #selector(NSScreen.swizzled_canRepresent(_:)))
     if let screenMethod = screenMethod, let swizzledMethod = swizzledMethod {
         method_exchangeImplementations(screenMethod, swizzledMethod)
     }
 
-    // 2. Swizzle NSScreen.colorSpace
+    // 2. Swizzle NSScreen.colorSpace to force standard sRGB
     let colorSpaceMethod = class_getInstanceMethod(NSScreen.self, #selector(getter: NSScreen.colorSpace))
     let swizzledColorSpaceMethod = class_getInstanceMethod(NSScreen.self, #selector(getter: NSScreen.swizzled_colorSpace))
     if let colorSpaceMethod = colorSpaceMethod, let swizzledColorSpaceMethod = swizzledColorSpaceMethod {
@@ -24,11 +24,12 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
-    // Force the FlutterView to enable wide gamut immediately.
+    // 3. Force the FlutterView to disable wide gamut (force normal sRGB)
     if let flutterView = flutterViewController.value(forKey: "flutterView") as? NSView {
         let selector = Selector(("setEnableWideGamut:"))
         if flutterView.responds(to: selector) {
-            flutterView.perform(selector, with: true)
+            // Passing 'false' here forces the engine to use standard 8-bit sRGB IOSurfaces
+            flutterView.perform(selector, with: false)
         }
     }
 
@@ -39,12 +40,13 @@ class MainFlutterWindow: NSWindow {
 extension NSScreen {
     @objc func swizzled_canRepresent(_ gamut: NSDisplayGamut) -> Bool {
         if gamut == .p3 {
-            return true
+            return false // Specifically deny P3 support
         }
+        // Use the original implementation for other checks
         return self.swizzled_canRepresent(gamut)
     }
 
     @objc var swizzled_colorSpace: NSColorSpace? {
-        return NSColorSpace.displayP3
+        return NSColorSpace.sRGB // Return standard sRGB instead of P3 or DeviceRGB
     }
 }
