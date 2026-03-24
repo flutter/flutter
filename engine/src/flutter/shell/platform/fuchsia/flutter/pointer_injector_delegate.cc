@@ -34,7 +34,7 @@ namespace {
 }  // namespace
 
 bool PointerInjectorDelegate::HandlePlatformMessage(
-    rapidjson::Value request,
+    const rapidjson::Document& request,
     fml::RefPtr<flutter::PlatformMessageResponse> response) {
   if (!registry_->is_bound()) {
     FML_LOG(WARNING)

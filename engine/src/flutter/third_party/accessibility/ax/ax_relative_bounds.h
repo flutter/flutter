@@ -32,7 +32,7 @@ namespace ui {
 // to its immediate containing node.
 struct AX_BASE_EXPORT AXRelativeBounds final {
   AXRelativeBounds();
-  virtual ~AXRelativeBounds();
+  ~AXRelativeBounds();
 
   AXRelativeBounds(const AXRelativeBounds& other);
   AXRelativeBounds& operator=(AXRelativeBounds other);

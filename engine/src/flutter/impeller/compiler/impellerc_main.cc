@@ -46,6 +46,26 @@ std::shared_ptr<Compiler> CreateCompiler(
                                     reflector_options);
 }
 
+void OutputVerboseErrorFile(const std::string& verbose_error_messages,
+                            const Switches& switches) {
+  auto error_mapping = std::make_shared<fml::NonOwnedMapping>(
+      reinterpret_cast<const uint8_t*>(verbose_error_messages.data()),
+      verbose_error_messages.size(), [](auto, auto) {});
+  std::filesystem::path output_path =
+      std::filesystem::path(fml::CreateTemporaryDirectory()) /
+      "impellerc_verbose_error.txt";
+
+  if (fml::WriteAtomically(*switches.working_directory,
+                           Utf8FromPath(output_path).c_str(), *error_mapping)) {
+    std::cerr << "Full \"" << InferShaderNameFromPath(switches.source_file_name)
+              << "\" error output written to " << output_path << std::endl;
+  } else {
+    std::cerr << "Failed to write full \""
+              << InferShaderNameFromPath(switches.source_file_name)
+              << "\" error output to " << output_path << std::endl;
+  }
+}
+
 bool OutputIPLR(const std::vector<std::shared_ptr<Compiler>>& compilers,
                 const Switches& switches) {
   FML_DCHECK(switches.iplr);
@@ -211,7 +231,25 @@ bool Main(const fml::CommandLine& command_line) {
     } else {
       std::cerr << "Compilation failed for target: "
                 << TargetPlatformToString(platform) << std::endl;
-      std::cerr << compiler->GetErrorMessages() << std::endl;
+
+      std::string verbose_error_messages = compiler->GetVerboseErrorMessages();
+      if (verbose_error_messages.empty()) {
+        // No verbose error messages. Output the regular error messages.
+        std::cerr << compiler->GetErrorMessages();
+      } else {
+        if (switches.verbose) {
+          // Verbose messages are available and the --verbose flag was set.
+          // Directly output the verbose error messages.
+          std::cerr << verbose_error_messages;
+        } else {
+          // Verbose messages are available and the --verbose flag was not set.
+          // Output the regular error messages and write the verbose error
+          // messages to a file.
+          std::cerr << compiler->GetErrorMessages();
+          OutputVerboseErrorFile(verbose_error_messages, switches);
+        }
+      }
+
       return false;
     }
   }

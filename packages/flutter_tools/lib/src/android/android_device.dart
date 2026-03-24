@@ -687,9 +687,9 @@ class AndroidDevice extends Device {
           'dart-flags',
           debuggingOptions.dartFlags,
         ],
-        if (debuggingOptions.enableSurfaceControl) ...<String>[
+        if (debuggingOptions.enableHcpp) ...<String>[
           '--ez',
-          'enable-surface-control',
+          'enable-hcpp-and-surface-control',
           'true',
         ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
