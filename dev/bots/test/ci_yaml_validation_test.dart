@@ -34,6 +34,13 @@ void main() {
     expect(ciYaml.platforms, contains(platformName));
   }
 
+  void checkTargetProperties(_CiYamlTarget target) {
+    final YamlMap properties = target.properties;
+
+    expect(properties['leak_tracking'], anyOf('true', 'false', isNull));
+    expect(properties['test_randomization_off'], anyOf('true', 'false', isNull));
+  }
+
   group('framework', () {
     final _CiYaml ciYaml = _CiYaml.parse(p.join(flutterRoot, '.ci.yaml'));
 
@@ -45,6 +52,10 @@ void main() {
 
         test('validate platform name', () {
           checkTargetPlatform(target.name, ciYaml);
+        });
+
+        test('validate properties', () {
+          checkTargetProperties(target);
         });
 
         if (target.runIf != null && target.runIf!.isNotEmpty) {
@@ -92,6 +103,10 @@ void main() {
           checkTargetPlatform(target.name, ciYaml);
         });
 
+        test('validate properties', () {
+          checkTargetProperties(target);
+        });
+
         if (target.runIf != null && target.runIf!.isNotEmpty) {
           test('must include .ci.yaml', () {
             expect(
@@ -133,7 +148,12 @@ void main() {
 /// [2]: https://github.com/flutter/cocoon/blob/main/CI_YAML.md
 /// [3]: https://github.com/flutter/cocoon/blob/main/app_dart/lib/src/model/ci_yaml/ci_yaml.dart
 final class _CiYamlTarget {
-  _CiYamlTarget({required this.name, required this.span, required this.runIf});
+  _CiYamlTarget({
+    required this.name,
+    required this.span,
+    required this.runIf,
+    required this.properties,
+  });
 
   factory _CiYamlTarget.fromYamlMap(YamlMap map) {
     return _CiYamlTarget(
@@ -146,6 +166,7 @@ final class _CiYamlTarget {
         }
         return runIf.cast<String>().toList();
       }(),
+      properties: map['properties'] as YamlMap,
     );
   }
 
@@ -157,6 +178,9 @@ final class _CiYamlTarget {
 
   /// Which lines were present in a `runIf` block, if any.
   final List<String>? runIf;
+
+  /// Properties of the target.
+  final YamlMap properties;
 }
 
 final class _CiYaml {
