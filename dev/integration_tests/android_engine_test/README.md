@@ -11,7 +11,7 @@ and compare the screenshots against golden images.
 > tools, and only useful when the documentation and naming stays up to date and
 > is clearly actionable.
 >
-> Please take extra care when updating the test suite to also update the REAMDE.
+> Please take extra care when updating the test suite to also update the README.
 
 ## How it runs on CI (LUCI)
 
@@ -63,6 +63,19 @@ $ flutter run lib/external_texture/surface_producer_smiley_face_main.dart
 
 # Run the test
 $ flutter drive lib/external_texture/surface_producer_smiley_face_main.dart
+```
+
+### `external_texture/surface_texture_image_smiley_face`
+
+This app displays a full screen rectangular deformed smiley face with a yellow
+background. It tests `getImageFromTexture` API in dart:ui.
+
+```sh
+# Run the app
+$ flutter run lib/external_texture/surface_texture_image_smiley_face_main.dart
+
+# Run the test
+$ flutter drive lib/external_texture/surface_texture_image_smiley_face_main.dart
 ```
 
 ### `external_texture/surface_texture_smiley_face`

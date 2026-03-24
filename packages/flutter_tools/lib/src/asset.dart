@@ -1064,28 +1064,8 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    result.removeWhere((_Asset asset, List<_Asset> variants) {
-      if (!asset.matchesFlavor(flavor)) {
-        _logger.printTrace(
-          'Skipping assets entry "${asset.entryUri.path}" since '
-          'its configured flavor(s) did not match the provided flavor (if any).\n'
-          'Configured flavors: ${asset.flavors.join(', ')}\n',
-        );
-        return true;
-      }
-      if (!asset.matchesPlatform(targetPlatform)) {
-        _logger.printTrace(
-          'Skipping assets entry "${asset.entryUri.path}" since '
-          'its configured platform(s) did not match the target platform.\n'
-          'Configured platforms: ${asset.platforms.join(', ')}\n'
-          'Target platform: ${targetPlatform.osName}\n',
-        );
-        return true;
-      }
-      return false;
-    });
-
-    for (final Uri shaderUri in flutterManifest.shaders) {
+    for (final AssetsEntry shaderEntry in flutterManifest.shaders) {
+      final Uri shaderUri = shaderEntry.uri;
       for (final AssetsEntry assetEntry in flutterManifest.assets) {
         final String assetPath = assetEntry.uri.path;
         final String shaderPath = shaderUri.path;
@@ -1116,11 +1096,32 @@ class ManifestAssetBundle implements AssetBundle {
         packageName: packageName,
         attributedPackage: attributedPackage,
         assetKind: AssetKind.shader,
-        flavors: <String>{},
-        platforms: <String>{},
-        transformers: <AssetTransformerEntry>[],
+        flavors: shaderEntry.flavors,
+        platforms: shaderEntry.platforms,
+        transformers: shaderEntry.transformers,
       );
     }
+
+    result.removeWhere((_Asset asset, List<_Asset> variants) {
+      if (!asset.matchesFlavor(flavor)) {
+        _logger.printWarning(
+          'Skipping assets entry "${asset.entryUri.path}" since '
+          'its configured flavor(s) did not match the provided flavor (if any).\n'
+          'Configured flavors: ${asset.flavors.join(', ')}\n',
+        );
+        return true;
+      }
+      if (!asset.matchesPlatform(targetPlatform)) {
+        _logger.printWarning(
+          'Skipping assets entry "${asset.entryUri.path}" since '
+          'its configured platform(s) did not match the target platform.\n'
+          'Configured platforms: ${asset.platforms.join(', ')}\n'
+          'Target platform: ${targetPlatform.osName}\n',
+        );
+        return true;
+      }
+      return false;
+    });
 
     // Add assets referenced in the fonts section of the manifest.
     for (final Font font in flutterManifest.fonts) {

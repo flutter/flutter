@@ -118,9 +118,8 @@ Widget buildImageCacheResized(
 ) {
   return Center(
     child: RepaintBoundary(
-      child: SizedBox(
-        width: 250,
-        height: 250,
+      child: SizedBox.square(
+        dimension: 250.0,
         child: Center(
           child: Image.memory(
             Uint8List.fromList(kTransparentImage),

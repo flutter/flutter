@@ -143,4 +143,8 @@ void PlaygroundImplMTL::SetGPUDisabled(bool disabled) const {
   is_gpu_disabled_sync_switch_->SetSwitch(disabled);
 }
 
+RuntimeStageBackend PlaygroundImplMTL::GetRuntimeStageBackend() const {
+  return RuntimeStageBackend::kMetal;
+}
+
 }  // namespace impeller

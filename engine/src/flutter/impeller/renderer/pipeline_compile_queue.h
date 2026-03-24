@@ -45,7 +45,7 @@ class PipelineCompileQueue final
   static std::shared_ptr<PipelineCompileQueue> Create(
       std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);
 
-  virtual ~PipelineCompileQueue();
+  ~PipelineCompileQueue();
 
   PipelineCompileQueue(const PipelineCompileQueue&) = delete;
 

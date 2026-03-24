@@ -69,7 +69,8 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, readonly) UIView* keyboardView;
 @property(nonatomic, assign) UIView* cachedFirstResponder;
 @property(nonatomic, readonly) CGRect keyboardRect;
-@property(nonatomic, readonly) BOOL pendingInputHiderRemoval;
+@property(nonatomic, readonly) BOOL pendingAutofillRemoval;
+@property(nonatomic, readonly) BOOL pendingInputViewRemoval;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 
@@ -2723,17 +2724,115 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   // Verify initial state.
   [self setClientId:123 configuration:config];
   XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
-  XCTAssertFalse(textInputPlugin.pendingInputHiderRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
 
   // Retain autofill context.
   [self setClientClear];
   XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
-  XCTAssertTrue(textInputPlugin.pendingInputHiderRemoval);
+  XCTAssertTrue(textInputPlugin.pendingAutofillRemoval);
 
   // Consume autofill context.
   [self commitAutofillContextAndVerify];
   XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
-  XCTAssertFalse(textInputPlugin.pendingInputHiderRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+}
+
+- (void)testSetClientResetsPendingAutofillRemoval {
+  // When autofill context exists and clearClient sets pendingAutofillRemoval,
+  // a subsequent setClient should reset the flag because a new client is
+  // connecting and the deferred removal is no longer needed.
+  NSMutableDictionary* field = self.mutablePasswordTemplateCopy;
+  [field setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"password" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+           forKey:@"autofill"];
+  [field setValue:@[ field ] forKey:@"fields"];
+
+  // Set up autofill context.
+  [self setClientId:123 configuration:field];
+  XCTAssertGreaterThan(textInputPlugin.autofillContext.count, 0ul);
+
+  // clearClient with autofill context sets pendingAutofillRemoval.
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingAutofillRemoval);
+
+  // A new setClient resets the pending autofill removal flag.
+  [self setClientId:456 configuration:self.mutableTemplateCopy];
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+}
+
+- (void)testPendingInputViewRemovalAfterClearClient {
+  // When autofillContext is empty and the view is first responder,
+  // clearClient should set pendingInputViewRemoval,
+  // and hideTextInput should consume it.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  // Verify initial state.
+  [self setClientId:123 configuration:config];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+
+  // Stub isFirstResponder to simulate the view being first responder.
+  // In the test environment, becomeFirstResponder does not work.
+  id mockActiveView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockActiveView isFirstResponder]).andReturn(YES);
+
+  // clearClient with no autofill context sets pendingInputViewRemoval.
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+
+  // hideTextInput consumes the flag and removes the view.
+  [self setTextInputHide];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertNil(textInputPlugin.activeView.superview);
+}
+
+- (void)testHideBeforeClearClientRemovesViewImmediately {
+  // When hideTextInput is called before clearTextInputClient,
+  // the view is no longer first responder. clearClient should
+  // remove the view immediately since no keyboard dismiss animation is needed.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  [self setClientId:123 configuration:config];
+  [self setTextInputShow];
+  XCTAssertNotNil(textInputPlugin.activeView.superview);
+
+  // Hide first: resignFirstResponder, but no removeFromSuperview.
+  [self setTextInputHide];
+  XCTAssertNotNil(textInputPlugin.activeView.superview);
+
+  // clearClient after hide: view is not first responder,
+  // so removeFromSuperview should happen immediately.
+  [self setClientClear];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertNil(textInputPlugin.activeView.superview);
+}
+
+- (void)testSetClientResetsPendingInputViewRemoval {
+  // When clearClient sets pendingInputViewRemoval (no autofill, first responder),
+  // a subsequent setClient should reset the flag because a new client is
+  // connecting and the deferred removal is no longer needed.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  // Field 1: setClient → show → clearClient (sets pendingInputViewRemoval).
+  [self setClientId:123 configuration:config];
+  [self setTextInputShow];
+
+  // Stub isFirstResponder to simulate the view being first responder.
+  // In the test environment, becomeFirstResponder does not work.
+  id mockActiveView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockActiveView isFirstResponder]).andReturn(YES);
+
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingInputViewRemoval);
+
+  // Field 2: setClient resets the stale flag.
+  [self setClientId:456 configuration:config];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
 }
 
 - (void)testPasswordAutofillHack {
