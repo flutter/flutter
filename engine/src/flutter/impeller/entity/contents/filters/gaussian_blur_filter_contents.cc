@@ -165,11 +165,8 @@ Quad CalculateSnapshotUVs(
   FML_DCHECK(input_snapshot.transform.IsTranslationScaleOnly());
   if (source_expanded_coverage_hint.has_value() &&
       input_snapshot_coverage.has_value()) {
-    // Only process the uvs where the blur is happening, not the whole texture.
-    std::optional<Rect> uvs =
-        MakeReferenceUVs(input_snapshot_coverage.value(),
-                         source_expanded_coverage_hint.value())
-            .Intersection(Rect::MakeSize(Size(1, 1)));
+    std::optional<Rect> uvs = MakeReferenceUVs(
+        input_snapshot_coverage.value(), source_expanded_coverage_hint.value());
     FML_DCHECK(uvs.has_value());
     if (uvs.has_value()) {
       blur_uvs[0] = uvs->GetLeftTop();
@@ -591,6 +588,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
     const std::shared_ptr<CommandBuffer>& command_buffer,
     const RenderTarget& input_pass,
     const SamplerDescriptor& sampler_descriptor,
+    Entity::TileMode tile_mode,
     const BlurParameters& blur_info,
     std::optional<RenderTarget> destination_target,
     const Quad& blur_uvs) {
@@ -620,15 +618,16 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
         GaussianBlurFragmentShader::FragInfo frag_info;
-        frag_info.unpremultiply = blur_info.apply_unpremultiply;
+        frag_info.unpremultiply = blur_info.apply_unpremultiply ? 1.0 : 0.0;
+        frag_info.tile_mode = static_cast<Scalar>(tile_mode);
         GaussianBlurFragmentShader::BindFragInfo(
             pass, data_host_buffer.EmplaceUniform(frag_info));
 
         std::array<VS::PerVertexData, 4> vertices = {
-            VS::PerVertexData{blur_uvs[0], blur_uvs[0]},
-            VS::PerVertexData{blur_uvs[1], blur_uvs[1]},
-            VS::PerVertexData{blur_uvs[2], blur_uvs[2]},
-            VS::PerVertexData{blur_uvs[3], blur_uvs[3]},
+            VS::PerVertexData{Point(0, 0), blur_uvs[0]},
+            VS::PerVertexData{Point(1, 0), blur_uvs[1]},
+            VS::PerVertexData{Point(0, 1), blur_uvs[2]},
+            VS::PerVertexData{Point(1, 1), blur_uvs[3]},
         };
         pass.SetVertexBuffer(CreateVertexBuffer(vertices, data_host_buffer));
 
@@ -914,7 +913,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   fml::StatusOr<RenderTarget> pass1_out = MakeDownsampleSubpass(
       renderer, command_buffer_1, input_snapshot->texture,
-      input_snapshot->sampler_descriptor, downsample_pass_args, tile_mode_);
+      input_snapshot->sampler_descriptor, downsample_pass_args,
+      bounds_.has_value() ? tile_mode_ : Entity::TileMode::kDecal);
 
   if (!pass1_out.ok()) {
     return std::nullopt;
@@ -933,7 +933,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   fml::StatusOr<RenderTarget> pass2_out = MakeBlurSubpass(
       renderer, command_buffer_2, /*input_pass=*/pass1_out.value(),
-      input_snapshot->sampler_descriptor,
+      input_snapshot->sampler_descriptor, tile_mode_,
       BlurParameters{
           .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
           .blur_sigma = blur_info.scaled_sigma.y *
@@ -963,7 +963,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   fml::StatusOr<RenderTarget> pass3_out = MakeBlurSubpass(
       renderer, command_buffer_3, /*input_pass=*/pass2_out.value(),
-      input_snapshot->sampler_descriptor,
+      input_snapshot->sampler_descriptor, tile_mode_,
       BlurParameters{
           .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
           .blur_sigma = blur_info.scaled_sigma.x *
@@ -1018,7 +1018,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 }
 
 Scalar GaussianBlurFilterContents::CalculateBlurRadius(Scalar sigma) {
-  return static_cast<Radius>(Sigma(sigma)).radius;
+  return static_cast<Radius>(Sigma(sigma)).radius * kKernelRadiusPerSigma;
 }
 
 Quad GaussianBlurFilterContents::CalculateUVs(

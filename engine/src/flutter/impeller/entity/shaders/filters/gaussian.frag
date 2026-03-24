@@ -22,6 +22,7 @@ kernel_samples;
 
 uniform FragInfo {
   float unpremultiply;
+  float tile_mode;
 }
 frag_info;
 
@@ -29,7 +30,8 @@ f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
     return texture(tex, coords);
   }
-  return IPHalfSampleDecal(tex, coords);
+  return IPHalfSampleWithTileMode(tex, coords, frag_info.tile_mode,
+                                  frag_info.tile_mode);
 }
 
 in vec2 v_texture_coords;
