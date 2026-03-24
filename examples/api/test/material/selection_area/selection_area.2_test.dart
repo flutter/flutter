@@ -97,7 +97,7 @@ void main() {
       expect(paragraph1.selections.length, 1);
       expect(
         paragraph1.selections[0],
-        const TextSelection(baseOffset: 4, extentOffset: 27),
+        const TextSelection(baseOffset: 4, extentOffset: 28),
       );
       // Bulleted list.
       for (final RenderParagraph paragraphBullet in bullets) {
@@ -263,7 +263,7 @@ void main() {
         ((paragraph3ResultingSpan.children![0] as TextSpan).children![0]
                 as TextSpan)
             .text,
-        'This is some text in ano',
+        'This is some text in anot',
       );
       expect(
         (paragraph3ResultingSpan.children![0] as TextSpan).children![0].style,
