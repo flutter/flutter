@@ -15,31 +15,31 @@ A Dart implementation of the [Mustache](https://mustache.github.io/) templating 
 
 Add `mustache_template` to your `pubspec.yaml`:
 
-yaml
+```yaml
 dependencies:
   mustache_template: ^2.0.0
-
+```
 
 ## Usage
 
 ### Basic Variable Interpolation
 
 <?code-excerpt "lib/main.dart (basic-variable)"?>
-dart
+```dart
 /// Demonstrates basic variable interpolation.
 void basicVariableExample() {
   final template = Template('Hello {{name}}!');
   final output = template.renderString({'name': 'World'});
   print(output); // Output: Hello World!
 }
-
+```
 
 ### Sections
 
 Sections render blocks of text based on the value of a key. They can be used for conditionals and loops.
 
 <?code-excerpt "lib/main.dart (sections)"?>
-dart
+```dart
 /// Demonstrates sections for conditionals and loops.
 void sectionsExample() {
   // Conditional section
@@ -66,14 +66,14 @@ Hello, {{name}}!
     ],
   }));
 }
-
+```
 
 ### Inverted Sections
 
 Inverted sections render when a key is false, null, or an empty list.
 
 <?code-excerpt "lib/main.dart (inverted-sections)"?>
-dart
+```dart
 /// Demonstrates inverted sections for handling empty or false values.
 void invertedSectionsExample() {
   final template = Template('''
@@ -95,14 +95,14 @@ No items found.
     'items': <String>[],
   }));
 }
-
+```
 
 ### Lambdas
 
 Lambdas allow dynamic content generation.
 
 <?code-excerpt "lib/main.dart (lambdas)"?>
-dart
+```dart
 /// Demonstrates lambda functions for dynamic content.
 void lambdasExample() {
   final template = Template('{{#bold}}Hello{{/bold}}');
@@ -111,14 +111,14 @@ void lambdasExample() {
   });
   print(output); // Output: <b>Hello</b>
 }
-
+```
 
 ### Partials
 
 Partials allow template composition by including other templates.
 
 <?code-excerpt "lib/main.dart (partials)"?>
-dart
+```dart
 /// Demonstrates partials for template composition.
 void partialsExample() {
   final baseTemplate = Template(
@@ -136,7 +136,7 @@ void partialsExample() {
   );
   print(baseTemplate.renderString({}));
 }
-
+```
 
 ## Example
 
