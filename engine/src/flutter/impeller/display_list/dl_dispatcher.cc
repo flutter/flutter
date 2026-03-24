@@ -598,15 +598,17 @@ void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
                                           const Paint& paint) {
   DlRect rect;
 
-  // We can't "optimize" a path into a rectangle if it's open.
+  // Rectangular paths can be "optimized" if they are filled (not stroked), or
+  // if they are stroked and explicitly closed.
   bool closed;
-  if (path.IsRect(&rect, &closed) && closed) {
+  if (path.IsRect(&rect, &closed) &&
+      (paint.style == Paint::Style::kFill || closed)) {
     canvas.DrawRect(rect, paint);
     return;
   }
 
   DlRoundRect rrect;
-  if (path.IsRoundRect(&rrect) && rrect.GetRadii().AreAllCornersSame()) {
+  if (path.IsRoundRect(&rrect)) {
     canvas.DrawRoundRect(rrect, paint);
     return;
   }
