@@ -347,8 +347,8 @@ enum StackFit {
 ///
 /// So if the alignment x and y properties are -1.0, then the non-positioned
 /// children remain in the upper-left corner (the top-start). If the
-/// alignment x and y properties are 0.0 (the default), then the
-/// non-positioned children are centered within the stack.
+/// alignment x and y properties are 0.0, then the non-positioned children
+/// are centered within the stack.
 ///
 /// Next, the positioned children are laid out. If a child has top and bottom
 /// values that are both non-null, the child is given a fixed height determined
