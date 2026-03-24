@@ -615,7 +615,7 @@ void main() async {
     },
     // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
     skip:
-        !(impellerEnabled && gpu.gpuContext.doesSupportOffscreenMSAA) ||
+        !(impellerEnabled && flutterGpuEnabled && gpu.gpuContext.doesSupportOffscreenMSAA) ||
         impellerBackend == 'opengles',
   );
 
@@ -636,7 +636,7 @@ void main() async {
         );
       }
     },
-    skip: !(impellerEnabled && !gpu.gpuContext.doesSupportOffscreenMSAA),
+    skip: !(impellerEnabled && flutterGpuEnabled && !gpu.gpuContext.doesSupportOffscreenMSAA),
   );
 
   // Renders a hollow green triangle pointing downwards.
