@@ -444,7 +444,7 @@ TEST_P(GaussianBlurFilterContentsTest,
       // when comparing results with rrect_blur. That's why this is not
       // Rect::MakeXYWH(98.f, 78.f, 204.0f, 204.f).
       EXPECT_TRUE(RectNear(contents_coverage.value(),
-                           Rect::MakeXYWH(94.f, 74.f, 212.0f, 212.f)));
+                           Rect::MakeXYWH(92.f, 72.f, 216.0f, 216.f)));
     }
   }
 }
