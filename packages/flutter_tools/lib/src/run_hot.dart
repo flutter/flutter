@@ -1693,6 +1693,6 @@ class ReasonForCancelling {
 
   @override
   String toString() {
-    return '$message.\nTry performing a hot restart instead.';
+    return '$message.\nTry performing a hot restart instead..';
   }
 }
