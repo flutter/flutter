@@ -1,5 +1,6 @@
 import Cocoa
 import FlutterMacOS
+import Foundation
 
 class MainFlutterWindow: NSWindow {
   private static var swizzled = false
@@ -15,15 +16,14 @@ class MainFlutterWindow: NSWindow {
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     // Force the FlutterView to enable wide gamut (force Display P3)
-    if let flutterView = flutterViewController.value(forKey: "flutterView") as? NSView {
-        let selector = Selector(("setEnableWideGamut:"))
-        if flutterView.responds(to: selector) {
-            // Safely call the private BOOL method using a C-style function pointer
-            typealias SetWideGamutFunc = @convention(c) (NSView, Selector, Bool) -> Void
-            let imp = flutterView.method(for: selector)
-            let fn = unsafeBitCast(imp, to: SetWideGamutFunc.self)
-            fn(flutterView, selector, true) // Pass 'true' for wide-gamut P3
-        }
+    let flutterView = flutterViewController.view
+    // Use NSSelectorFromString to avoid "no method declared" compiler warnings for private selectors
+    let wideGamutSelector = NSSelectorFromString("setEnableWideGamut:")
+    if flutterView.responds(to: wideGamutSelector) {
+        typealias SetWideGamutFunc = @convention(c) (NSView, Selector, Bool) -> Void
+        let imp = flutterView.method(for: wideGamutSelector)
+        let fn = unsafeBitCast(imp, to: SetWideGamutFunc.self)
+        fn(flutterView, wideGamutSelector, true)
     }
 
     super.awakeFromNib()
@@ -33,31 +33,37 @@ class MainFlutterWindow: NSWindow {
     guard !swizzled else { return }
     swizzled = true
 
-    // Swizzle NSScreen.canRepresentDisplayGamut:
-    let canRepresentSelector = Selector(("canRepresentDisplayGamut:"))
-    if let original = class_getInstanceMethod(NSScreen.self, canRepresentSelector),
-       let swizzled = class_getInstanceMethod(NSScreen.self, #selector(NSScreen.swizzled_canRepresent(_:))) {
+    // Swizzle NSScreen.canRepresent(_:)
+    // #selector resolves to the correct Objective-C "canRepresentDisplayGamut:" selector
+    let originalCanRepresent = #selector(NSScreen.canRepresent(_:))
+    let swizzledCanRepresent = #selector(NSScreen.swizzled_canRepresentDisplayGamut(_:))
+    
+    if let original = class_getInstanceMethod(NSScreen.self, originalCanRepresent),
+       let swizzled = class_getInstanceMethod(NSScreen.self, swizzledCanRepresent) {
         method_exchangeImplementations(original, swizzled)
     }
 
     // Swizzle NSScreen.colorSpace
-    if let original = class_getInstanceMethod(NSScreen.self, #selector(getter: NSScreen.colorSpace)),
-       let swizzled = class_getInstanceMethod(NSScreen.self, #selector(getter: NSScreen.swizzled_colorSpace)) {
+    let originalColorSpace = #selector(getter: NSScreen.colorSpace)
+    let swizzledColorSpace = #selector(getter: NSScreen.swizzled_colorSpace)
+    
+    if let original = class_getInstanceMethod(NSScreen.self, originalColorSpace),
+       let swizzled = class_getInstanceMethod(NSScreen.self, swizzledColorSpace) {
         method_exchangeImplementations(original, swizzled)
     }
   }
 }
 
 extension NSScreen {
-    @objc func swizzled_canRepresent(_ gamut: NSDisplayGamut) -> Bool {
+    @objc(swizzled_canRepresentDisplayGamut:)
+    func swizzled_canRepresentDisplayGamut(_ gamut: NSDisplayGamut) -> Bool {
         if gamut == .p3 {
-            return true // Force P3 support reporting
+            return true
         }
-        // This calls the original implementation due to the exchange
-        return self.swizzled_canRepresent(gamut)
+        return self.swizzled_canRepresentDisplayGamut(gamut)
     }
 
     @objc var swizzled_colorSpace: NSColorSpace? {
-        return NSColorSpace.displayP3 // Force P3 color space
+        return NSColorSpace.displayP3
     }
 }
