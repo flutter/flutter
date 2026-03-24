@@ -1676,8 +1676,9 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void onFocusReceived() {
+  bool onFocusReceived() {
     latestMethodCall = 'onFocusReceived';
+    return true;
   }
 }
 

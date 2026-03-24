@@ -307,8 +307,9 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void onFocusReceived() {
+  bool onFocusReceived() {
     latestMethodCall = 'onFocusReceived';
+    return true;
   }
 
   @override

@@ -4064,10 +4064,12 @@ class EditableTextState extends State<EditableText>
   }
 
   @override
-  void onFocusReceived() {
+  bool onFocusReceived() {
     if (mounted && !_hasFocus && widget.focusNode.canRequestFocus) {
       widget.focusNode.requestFocus();
+      return true;
     }
+    return false;
   }
 
   @override

@@ -1767,7 +1767,8 @@ void main() {
 
     expect(focusNode.hasFocus, isFalse);
 
-    editableText.onFocusReceived();
+    final bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
     await tester.pump();
 
     expect(focusNode.hasFocus, isTrue);
@@ -1806,7 +1807,8 @@ void main() {
 
     expect(focusNode.hasFocus, isFalse);
 
-    editableText.onFocusReceived();
+    final bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
     await tester.pump();
 
     expect(focusNode.hasFocus, isTrue);
@@ -1851,7 +1853,8 @@ void main() {
       ),
     );
 
-    editableText.onFocusReceived();
+    final bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isFalse);
     await tester.pump();
 
     expect(focusNode.hasFocus, isFalse);
@@ -1914,16 +1917,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // The text field is hidden by the new route, so it should not regain focus.
-    editableText.onFocusReceived();
+    bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isFalse);
     await tester.pump();
-    expect(editableText.widget.focusNode.hasFocus, isFalse); // Fails!
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
 
     // Pop the route.
     navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
 
     // The text field is visible again, so it should regain focus this time.
-    editableText.onFocusReceived();
+    acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
     await tester.pump();
     expect(editableText.widget.focusNode.hasFocus, isTrue);
   }, skip: true); // https://github.com/flutter/flutter/issues/46235
@@ -1950,7 +1955,7 @@ void main() {
                   controller: controller,
                   focusNode: focusNode,
                   style: textStyle,
-                  autofocus: true,
+                  // autofocus: true,
                   cursorColor: cursorColor,
                 ),
                 for (var i = 0; i < 50; i++)
@@ -1962,7 +1967,10 @@ void main() {
       ),
     );
 
-    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.widget.focusNode.hasFocus, isTrue);
     editableText.connectionClosed();
     await tester.pump();
@@ -1975,7 +1983,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // The text field is unmounted, so it should not regain focus.
-    editableText.onFocusReceived();
+    bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isFalse);
     await tester.pump();
     expect(editableText.widget.focusNode.hasFocus, isFalse);
 
@@ -1984,7 +1993,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // The text field is visible again, so it should regain focus this time.
-    editableText.onFocusReceived();
+    editableText = tester.state(find.byType(EditableText));
+    acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
     await tester.pump();
     expect(editableText.widget.focusNode.hasFocus, isTrue);
   });

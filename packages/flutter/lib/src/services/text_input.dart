@@ -1373,7 +1373,9 @@ mixin TextInputClient {
   ///
   /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
   /// field and refocus it before autofilling.
-  void onFocusReceived() {}
+  ///
+  /// Returns true if the client acquired focus, false otherwise.
+  bool onFocusReceived() => false;
 
   /// Platform notified framework of closed connection.
   ///
@@ -2162,9 +2164,9 @@ class TextInput {
         final args = methodCall.arguments as List<dynamic>;
         final clientId = args[0] as int;
         if (_lastConnection != null && _lastConnection!._id == clientId) {
-          _lastConnection!._client.onFocusReceived();
+          return _lastConnection!._client.onFocusReceived();
         }
-        return;
+        return false;
     }
     if (_currentConnection == null) {
       return;

@@ -205,8 +205,9 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void onFocusReceived() {
+  bool onFocusReceived() {
     latestMethodCall = 'onFocusReceived';
+    return true;
   }
 
   @override
