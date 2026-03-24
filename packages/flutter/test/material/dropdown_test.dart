@@ -27,6 +27,7 @@ import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+
 void onChanged<T>(T _) {}
 
 final Type dropdownButtonType = DropdownButton<String>(
@@ -4205,7 +4206,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: const BorderRadius.all(Radius.circular(radius)),
               value: 'One',
               items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
                 String value,
@@ -4310,7 +4311,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: DropdownButtonFormField<String>(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: const BorderRadius.all(Radius.circular(radius)),
               initialValue: 'One',
               items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
                 String value,
@@ -4666,7 +4667,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: DropdownButtonFormField<String>(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: const BorderRadius.all(Radius.circular(radius)),
               initialValue: 'One',
               items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
                 String value,
@@ -4684,7 +4685,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-    expect(renderClip.borderRadius, BorderRadius.circular(radius));
+    expect(renderClip.borderRadius, const BorderRadius.all(Radius.circular(radius)));
   });
 
   testWidgets('Size of DropdownButton with padding', (WidgetTester tester) async {
@@ -4973,4 +4974,21 @@ void main() {
       'Currently, selectedItemBuilder returns a list of length 1, but items has length 2.',
     );
   });
+
+  testWidgets(
+    'DropdownButtonFormField asserts when both errorBuilder and decoration.errorText are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => DropdownButtonFormField<String>(
+          items: const <DropdownMenuItem<String>>[],
+          onChanged: (String? value) {},
+          decoration: const InputDecoration(errorText: 'Decoration error'),
+          errorBuilder: (BuildContext context, String errorText) {
+            return Text(errorText);
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
 }

@@ -21,7 +21,7 @@ jobs:
         id: check_timing
         run: |
           # Get push time (commit date of the head SHA)
-          PUSH_TIME=$(gh api repos/${{ github.repository }}/commits/${{ github.event.pull_request.head.sha }} --jq '.commit.committer.date')
+          PUSH_TIME='${{ github.event.pull_request.updated_at }}'
           echo "Push time: $PUSH_TIME"
 
           # Get latest CICD labeling event time from the last 100 events
