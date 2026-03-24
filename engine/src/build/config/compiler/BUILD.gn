@@ -1103,6 +1103,7 @@ config("symbols") {
     }
   } else {
     cflags = [ "-g2" ]
+    asmflags = [ "-g" ]
     if (is_apple) {
       swiftflags = [ "-g" ]
     }
@@ -1115,12 +1116,14 @@ config("minimal_symbols") {
     ldflags = [ "/DEBUG" ]
   } else {
     cflags = [ "-g1" ]
+    asmflags = [ "-g" ]
   }
 }
 
 config("no_symbols") {
   if (!is_win) {
     cflags = [ "-g0" ]
+    asmflags = [ "-g0" ]
   }
 }
 

@@ -62,6 +62,38 @@ void main() {
     );
   }, overrides: {ProcessManager: () => processManager});
 
+  for (final positionalArguments in <List<String>>[
+    <String>['3.19.0'],
+    <String>['3.19.0', 'extra'],
+    <String>['more', 'additional', 'arguments'],
+  ]) {
+    testUsingContext(
+      'Downgrade exits on unexpected positional arguments: ${positionalArguments.join(' ')}',
+      () async {
+        final fakeFlutterVersion = FakeFlutterVersion();
+        final command = DowngradeCommand(
+          persistentToolState: PersistentToolState.test(
+            directory: fileSystem.currentDirectory,
+            logger: bufferLogger,
+          ),
+          terminal: terminal,
+          stdio: stdio,
+          flutterVersion: fakeFlutterVersion,
+          logger: bufferLogger,
+        );
+
+        expect(
+          createTestCommandRunner(command).run(<String>['downgrade', ...positionalArguments]),
+          throwsToolExit(
+            message: downgradePositionalArgumentErrorMessage(positionalArguments),
+            exitCode: 2,
+          ),
+        );
+      },
+      overrides: {ProcessManager: () => processManager},
+    );
+  }
+
   testUsingContext('Downgrade exits on no recorded version', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'beta');
     fileSystem.currentDirectory
