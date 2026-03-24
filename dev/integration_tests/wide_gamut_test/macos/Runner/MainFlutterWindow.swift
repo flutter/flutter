@@ -19,7 +19,8 @@ class MainFlutterWindow: NSWindow {
         let selector = Selector(("setEnableWideGamut:"))
         if flutterView.responds(to: selector) {
             // Safely call the private BOOL method using a C-style function pointer
-            typealias SetWideGamutFunc = @convention(c) (NSView, SEL, Bool) -> Void
+            // Swift uses 'Selector' to represent the Objective-C 'SEL' type
+            typealias SetWideGamutFunc = @convention(c) (NSView, Selector, Bool) -> Void
             let imp = flutterView.method(for: selector)
             let fn = unsafeBitCast(imp, to: SetWideGamutFunc.self)
             fn(flutterView, selector, false) // Pass 'false' for normal sRGB
