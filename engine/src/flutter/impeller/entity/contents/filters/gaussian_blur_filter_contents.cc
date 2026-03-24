@@ -802,7 +802,7 @@ Scalar GaussianBlurFilterContents::CalculateScale(Scalar sigma) {
     // This constant was picked by looking at the results to make sure no
     // shimmering was introduced at the highest sigma values that downscale to
     // 1/16th.
-    static constexpr int32_t kEighthDownsampleKernalWidthMax = 41;
+    static constexpr int32_t kEighthDownsampleKernalWidthMax = 71;
     result = kernel_size_plus <= kEighthDownsampleKernalWidthMax ? rounded_plus
                                                                  : rounded;
   }
@@ -1069,7 +1069,12 @@ KernelSamples GenerateBlurInfo(BlurParameters parameters) {
   // wholistic remedy for this.  A proper downsample size should not make this
   // required. Or we can increase the kernel size.
   if (result.sample_count > KernelSamples::kMaxKernelSize) {
-    result.sample_count = KernelSamples::kMaxKernelSize;
+    result.sample_count =
+        KernelSamples::kMaxKernelSize - 1;  // Needs to be odd.
+    // If the sample count is clamped, we need to artificially clamp the blur
+    // radius so that the kernel remains symmetric around the center point.
+    parameters.blur_radius =
+        x_offset + ((result.sample_count - 1) / 2) * parameters.step_size;
   }
 
   Scalar tally = 0.0f;
