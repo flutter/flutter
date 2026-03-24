@@ -621,6 +621,11 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     if (parentWindow != null && view != null) {
       offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
     }
+    // This is only applied in GTK3 the first time the tooltip is shown as GTK3
+    // only sends updates when the popup surface configure event is
+    // received. Since GTK3 does not set the [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
+    // on the positioner it is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure).
+    // This means if a Linux tooltip is resized it will not be repositioned.
     _window.getWindow().moveToRect(
       x: _anchorRect.left.toInt() + offset.$1,
       y: _anchorRect.top.toInt() + offset.$2,
