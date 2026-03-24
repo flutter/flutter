@@ -222,6 +222,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createCoreMockProjectFiles();
 
@@ -247,6 +253,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createCoreMockProjectFiles();
 
@@ -274,6 +286,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       fileSystem.file('pubspec.yaml').createSync();
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
@@ -305,6 +323,12 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createMinimalMockProjectFiles();
 
@@ -345,6 +369,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createMinimalMockProjectFiles();
 
@@ -384,6 +414,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createMinimalMockProjectFiles();
 
@@ -424,6 +460,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createMinimalMockProjectFiles();
 
@@ -463,6 +505,12 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         fileSystem: fileSystem,
         logger: logger,
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
 
       processManager.addCommands(<FakeCommand>[
@@ -513,6 +561,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand1,
@@ -554,6 +608,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand1,
@@ -594,6 +654,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       createMinimalMockProjectFiles();
       processManager.addCommands(<FakeCommand>[
@@ -632,6 +698,12 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand1,
@@ -713,6 +785,12 @@ void main() {
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         createMinimalMockProjectFiles();
 
@@ -761,6 +839,12 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         createMinimalMockProjectFiles();
 
@@ -830,6 +914,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -874,6 +964,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -925,6 +1021,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -981,6 +1083,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1022,6 +1130,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1081,6 +1195,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1131,6 +1251,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1175,6 +1301,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1236,6 +1368,12 @@ void main() {
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1283,6 +1421,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1328,6 +1472,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
 
         createMinimalMockProjectFiles();
@@ -1374,6 +1524,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1418,6 +1574,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1464,6 +1626,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1519,6 +1687,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1566,6 +1740,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1617,6 +1797,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
 
         processManager.addCommands(<FakeCommand>[
@@ -1677,6 +1863,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           fileSystem: fileSystem,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,

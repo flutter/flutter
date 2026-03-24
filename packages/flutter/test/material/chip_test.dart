@@ -244,7 +244,7 @@ void main() {
       getMaterial(tester).shape,
       RoundedRectangleBorder(
         side: BorderSide(color: lightTheme.colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
       ),
     );
     expect(getIconData(tester).color, lightTheme.colorScheme.primary);
@@ -275,7 +275,7 @@ void main() {
       getMaterial(tester).shape,
       RoundedRectangleBorder(
         side: BorderSide(color: darkTheme.colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
       ),
     );
     expect(getIconData(tester).color, darkTheme.colorScheme.primary);
