@@ -5397,7 +5397,7 @@ targets:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
-        ["devicelab", "hostonly", "mac"]
+        ["devicelab", "hostonly", "mac", "arm64"]
       task_name: wide_gamut_macos
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
