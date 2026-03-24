@@ -15,7 +15,8 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   final Offset localOffset =
       paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) +
       Offset(0.0, paragraph.preferredLineHeight);
-  return paragraph.localToGlobal(localOffset) + const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
+  return paragraph.localToGlobal(localOffset) +
+      const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
 }
 
 void main() {
@@ -89,14 +90,12 @@ void main() {
       );
       // Drag to select from paragraph 1 position 4 to paragraph 3 position 25.
       final TestGesture gesture = await tester.startGesture(
-      textOffsetToPosition(paragraph1, 4),
+        textOffsetToPosition(paragraph1, 4),
         kind: PointerDeviceKind.mouse,
       );
       addTearDown(gesture.removePointer);
       await tester.pump();
-      await gesture.moveTo(
-        textOffsetToPosition(paragraph3, 25),
-      );
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 25));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
