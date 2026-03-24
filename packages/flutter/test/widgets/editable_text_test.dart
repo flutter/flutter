@@ -1926,7 +1926,7 @@ void main() {
     editableText.onFocusReceived();
     await tester.pump();
     expect(editableText.widget.focusNode.hasFocus, isTrue);
-  }, skip: true);
+  }, skip: true); // https://github.com/flutter/flutter/issues/46235
 
   testWidgets('does not refocus when scrolled away in a ListView', (WidgetTester tester) async {
     final focusNode = FocusNode(debugLabel: 'EditableText Node');
