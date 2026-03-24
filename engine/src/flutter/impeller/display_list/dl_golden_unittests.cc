@@ -111,6 +111,35 @@ TEST_P(DlGoldenTest, Bug147807) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DlGoldenTest, FractionalDilation) {
+  SetWindowSize(impeller::ISize(256, 256));
+  Point content_scale = GetContentScale();
+  auto draw = [content_scale](DlCanvas* canvas,
+                              const std::vector<sk_sp<DlImage>>& images) {
+    canvas->DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+    canvas->Scale(content_scale.x, content_scale.y);
+
+    // 224x224 square; dilation 3.95 px makes the morphology coverage size
+    // 231.9 - fractional 0.9 is the worst case from the truncation bug.
+    // https://github.com/flutter/flutter/issues/184072.
+    const DlRect rect = DlRect::MakeLTRB(16, 16, 240, 240);
+
+    DlPaint layer_paint;
+    layer_paint.setImageFilter(DlImageFilter::MakeDilate(3.95f, 3.95f));
+    canvas->SaveLayer(rect.Expand(8.0f), &layer_paint);
+    canvas->DrawRect(rect, DlPaint().setColor(DlColor::kRed()));
+    canvas->Restore();
+
+    canvas->DrawRect(rect, DlPaint().setColor(DlColor::kBlack()));
+  };
+
+  DisplayListBuilder builder;
+  std::vector<sk_sp<DlImage>> images;
+  draw(&builder, images);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 void DrawBlurGrid(DlCanvas* canvas) {
   DlPaint paint;
