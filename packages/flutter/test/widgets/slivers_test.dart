@@ -1612,7 +1612,7 @@ void main() {
   });
 
   testWidgets('RenderSliverFixedExtentBoxAdaptor.layoutDimensions reflects the current constraints', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(

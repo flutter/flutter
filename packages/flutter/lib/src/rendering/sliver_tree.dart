@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
-import 'sliver.dart';
 import 'sliver_fixed_extent_list.dart';
 import 'sliver_multi_box_adaptor.dart';
 

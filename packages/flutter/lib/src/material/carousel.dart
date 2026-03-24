@@ -814,11 +814,6 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     return maxExtent;
   }
 
-  @override
-  void performLayout() {
-    super.performLayout();
-  }
-
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
