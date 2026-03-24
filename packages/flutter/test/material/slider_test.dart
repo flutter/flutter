@@ -2870,10 +2870,12 @@ void main() {
     skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
-  group('Value indicator appears when it should:', () {
+  // Regression test for https://github.com/flutter/flutter/issues/180767
+  group('Value indicator appears and disappears when it should:', () {
     final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData baseSliderTheme = baseTheme.sliderTheme.copyWith(
       valueIndicatorColor: Colors.red,
+      valueIndicatorShape: const _FixedSizeCircle(),
     );
     var value = 0.45;
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
@@ -2916,11 +2918,11 @@ void main() {
           valueIndicatorBox,
           isVisible
               ? (paints
-                  ..path(color: theme.valueIndicatorColor)
+                  ..circle(color: theme.valueIndicatorColor)
                   ..paragraph())
               : isNot(
                   paints
-                    ..path(color: theme.valueIndicatorColor)
+                    ..circle(color: theme.valueIndicatorColor)
                     ..paragraph(),
                 ),
         );
@@ -2935,6 +2937,8 @@ void main() {
       expectIndicatorVisible(visibleWhenDragged);
 
       await gesture.up();
+      await tester.pumpAndSettle();
+      expectIndicatorVisible(visibleWhenReleased);
 
       // Reset state to avoid state leak.
       await tester.pumpWidget(Container());
@@ -5619,4 +5623,49 @@ void main() {
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
+}
+
+// A slider value indicator that's a circle with a fixed size and
+// does not animate at all.
+//
+// This allows test cases to verify whether a `Slider` removes the value
+// indicator painter after the animation is dismissed (a more strict requirement
+// than "painting nothing"). The default value indicator shape is not suitable
+// for this job since it does not paint anything when animation is dismissed.
+class _FixedSizeCircle extends SliderComponentShape {
+  const _FixedSizeCircle();
+
+  static const circleDiameter = 40.0;
+
+  @override
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter? labelPainter,
+    double? textScaleFactor,
+  }) => const Size.square(circleDiameter);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final paint = Paint()
+      ..color = sliderTheme.valueIndicatorColor ?? Colors.purple
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, circleDiameter / 2, paint);
+    labelPainter.paint(canvas, center);
+  }
 }
