@@ -190,11 +190,6 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
     super.dispose();
   }
 
-  // TODO(Piinks): This should be made a public getter on the super class.
-  // Multiple subclasses are making use of it now, yak shave that refactor
-  // separately.
-  late SliverLayoutDimensions _currentLayoutDimensions;
-
   @override
   void performLayout() {
     assert(
@@ -203,12 +198,6 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
       'The current axis direction is: ${constraints.axisDirection}.',
     );
     _updateAnimationCache();
-    _currentLayoutDimensions = SliverLayoutDimensions(
-      scrollOffset: constraints.scrollOffset,
-      precedingScrollExtent: constraints.precedingScrollExtent,
-      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-      crossAxisExtent: constraints.crossAxisExtent,
-    );
     super.performLayout();
   }
 
@@ -240,7 +229,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         break;
       }
 
-      itemExtent = itemExtentBuilder(index, _currentLayoutDimensions);
+      itemExtent = itemExtentBuilder(index, layoutDimensions);
       if (itemExtent == null) {
         break;
       }
@@ -272,7 +261,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
     // We animate only a portion of children that would be visible/in the cache
     // extent, unless all children would fit on the screen.
     while (currentIndex <= lastIndex && currentPosition < targetPosition) {
-      final double itemExtent = itemExtentBuilder(currentIndex, _currentLayoutDimensions)!;
+      final double itemExtent = itemExtentBuilder(currentIndex, layoutDimensions)!;
       totalAnimatingOffset += itemExtent;
       currentPosition += itemExtent;
       currentIndex++;
@@ -306,7 +295,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         break;
       }
 
-      itemExtent = itemExtentBuilder(currentIndex, _currentLayoutDimensions);
+      itemExtent = itemExtentBuilder(currentIndex, layoutDimensions);
       if (itemExtent == null) {
         break;
       }
@@ -386,10 +375,10 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
       final int parentIndex = math.max(segment.leadingIndex - 1, 0);
       final double leadingOffset =
           indexToLayoutOffset(0.0, parentIndex) +
-          (parentIndex == 0 ? 0.0 : itemExtentBuilder(parentIndex, _currentLayoutDimensions)!);
+          (parentIndex == 0 ? 0.0 : itemExtentBuilder(parentIndex, layoutDimensions)!);
       final double trailingOffset =
           indexToLayoutOffset(0.0, segment.trailingIndex) +
-          itemExtentBuilder(segment.trailingIndex, _currentLayoutDimensions)!;
+          itemExtentBuilder(segment.trailingIndex, layoutDimensions)!;
       final rect = Rect.fromPoints(
         Offset(0.0, leadingOffset),
         Offset(constraints.crossAxisExtent, trailingOffset),
