@@ -133,12 +133,12 @@ static gboolean redraw_cb(gpointer user_data) {
       // size of the render area.
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
     }
-    return FALSE;
+    return G_SOURCE_REMOVE;
   }
 
   gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
 
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 // Signal handler for GtkWidget::delete-event

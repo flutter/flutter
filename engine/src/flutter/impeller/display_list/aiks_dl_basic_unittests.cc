@@ -712,6 +712,7 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     builder.DrawPaint(background_paint);
 
     flutter::DlPaint paint;
+
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
     paint.setStrokeWidth(stroke_width + stroke_width_fine);
