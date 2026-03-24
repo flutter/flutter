@@ -824,7 +824,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+  if (renderer_.GetContext()->GetFlags().use_sdfs) {
     Scalar expand_size = kAntialiasPadding;
     if (paint.style == Paint::Style::kStroke) {
       expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
@@ -840,10 +840,23 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
     const Geometry* geom = contents->GetGeometry();
 
-    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
-                                            /*reuse_depth=*/false,
-                                            /*override_contents=*/
-                                            std::move(contents));
+    if (paint.color_source) {
+      std::shared_ptr<Contents> color_source_contents =
+          paint.CreateContents(geom);
+      std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
+          BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                              FilterInput::Make(color_source_contents)});
+
+      final_contents = paint.WithFilters(std::move(final_contents));
+
+      entity.SetContents(std::move(final_contents));
+      AddRenderEntityToCurrentPass(entity, /*reuse_depth=*/false);
+    } else {
+      AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                              /*reuse_depth=*/false,
+                                              /*override_contents=*/
+                                              std::move(contents));
+    }
     return;
   }
 
@@ -1031,7 +1044,7 @@ void Canvas::DrawCircle(const Point& center,
     }
   }
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+  if (renderer_.GetContext()->GetFlags().use_sdfs) {
     const bool is_stroked = paint.style == Paint::Style::kStroke;
 
     std::optional<CircleGeometry> geometry;
@@ -1051,10 +1064,23 @@ void Canvas::DrawCircle(const Point& center,
 
     const Geometry* geom = contents->GetGeometry();
 
-    AddRenderEntityWithFiltersToCurrentPass(
-        entity, geom, paint,
-        /*reuse_depth=*/false,
-        /*override_contents=*/std::move(contents));
+    if (paint.color_source) {
+      std::shared_ptr<Contents> color_source_contents =
+          paint.CreateContents(geom);
+      std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
+          BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                              FilterInput::Make(color_source_contents)});
+
+      final_contents = paint.WithFilters(std::move(final_contents));
+
+      entity.SetContents(std::move(final_contents));
+      AddRenderEntityToCurrentPass(entity, /*reuse_depth=*/false);
+    } else {
+      AddRenderEntityWithFiltersToCurrentPass(
+          entity, geom, paint,
+          /*reuse_depth=*/false,
+          /*override_contents=*/std::move(contents));
+    }
     return;
   }
 
