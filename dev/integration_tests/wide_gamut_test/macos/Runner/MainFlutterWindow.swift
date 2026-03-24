@@ -14,16 +14,15 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
-    // Force the FlutterView to enable wide gamut (force normal sRGB)
+    // Force the FlutterView to enable wide gamut (force Display P3)
     if let flutterView = flutterViewController.value(forKey: "flutterView") as? NSView {
         let selector = Selector(("setEnableWideGamut:"))
         if flutterView.responds(to: selector) {
             // Safely call the private BOOL method using a C-style function pointer
-            // Swift uses 'Selector' to represent the Objective-C 'SEL' type
             typealias SetWideGamutFunc = @convention(c) (NSView, Selector, Bool) -> Void
             let imp = flutterView.method(for: selector)
             let fn = unsafeBitCast(imp, to: SetWideGamutFunc.self)
-            fn(flutterView, selector, false) // Pass 'false' for normal sRGB
+            fn(flutterView, selector, true) // Pass 'true' for wide-gamut P3
         }
     }
 
@@ -52,13 +51,13 @@ class MainFlutterWindow: NSWindow {
 extension NSScreen {
     @objc func swizzled_canRepresent(_ gamut: NSDisplayGamut) -> Bool {
         if gamut == .p3 {
-            return false // Specifically deny P3 support
+            return true // Force P3 support reporting
         }
         // This calls the original implementation due to the exchange
         return self.swizzled_canRepresent(gamut)
     }
 
     @objc var swizzled_colorSpace: NSColorSpace? {
-        return NSColorSpace.sRGB // Return standard sRGB
+        return NSColorSpace.displayP3 // Force P3 color space
     }
 }
