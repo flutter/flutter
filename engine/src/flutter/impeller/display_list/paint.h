@@ -70,7 +70,7 @@ struct Paint {
         const Geometry* geometry,
         std::shared_ptr<ColorSourceContents> contents,
         bool needs_color_filter,
-        FillRectGeometry* out_rect) const;
+        FillRectGeometry* out_geom) const;
   };
 
   Color color = Color::Black();

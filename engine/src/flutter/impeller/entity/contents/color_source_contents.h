@@ -50,6 +50,9 @@ class ColorSourceContents : public Contents {
 
   ~ColorSourceContents() override;
 
+  //----------------------------------------------------------------------------
+  /// @brief  Get the geometry that this contents will use to render.
+  ///
   virtual const Geometry* GetGeometry() const = 0;
 
   //----------------------------------------------------------------------------

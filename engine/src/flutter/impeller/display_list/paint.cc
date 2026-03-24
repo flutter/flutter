@@ -396,7 +396,7 @@ std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const Geometry* geometry,
     std::shared_ptr<ColorSourceContents> contents,
     bool needs_color_filter,
-    FillRectGeometry* out_rect) const {
+    FillRectGeometry* out_geom) const {
   // If it's a solid color then we can just get  away with doing one Gaussian
   // blur. The color filter will always be applied on the CPU.
   if (contents->IsSolidColor()) {
@@ -417,14 +417,14 @@ std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   /// 3. Replace the geometry of the original color source with a rectangle that
   ///    covers the full region of the blurred mask. Note that geometry is in
   ///    local bounds.
-  std::optional<Rect> expanded_bounds = blurred_mask->GetCoverage({});
-  if (!expanded_bounds.has_value()) {
-    expanded_bounds = Rect();
+  std::optional<Rect> expanded_local_bounds = blurred_mask->GetCoverage({});
+  if (!expanded_local_bounds.has_value()) {
+    expanded_local_bounds = Rect();
   }
-  *out_rect = FillRectGeometry(expanded_bounds.value());
+  *out_geom = FillRectGeometry(expanded_local_bounds.value());
 
   std::shared_ptr<ColorSourceContents> expanded_contents =
-      paint.CreateContents(out_rect);
+      paint.CreateContents(out_geom);
   std::shared_ptr<Contents> final_contents = expanded_contents;
 
   /// 4. Apply the user set color filter on the GPU, if applicable.
