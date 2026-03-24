@@ -1818,12 +1818,12 @@ void main() {
 
       await tester.pumpWidget(
         buildInputDecorator(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             filled: true,
-            fillColor: const Color(0xFF00FF00),
+            fillColor: Color(0xFF00FF00),
             labelText: labelText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
               gapPadding: 0.0,
             ),
           ),
@@ -2211,14 +2211,14 @@ void main() {
                 alignment: Alignment.center,
                 child: Directionality(
                   textDirection: textDirection,
-                  child: RepaintBoundary(
+                  child: const RepaintBoundary(
                     child: InputDecorator(
                       isFocused: true,
                       isEmpty: true,
                       decoration: InputDecoration(
                         labelText: labelText,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
                           gapPadding: 0.0,
                         ),
                       ),
@@ -10222,10 +10222,12 @@ void main() {
     });
 
     testWidgets('border', (WidgetTester tester) async {
-      final borderRadius = BorderRadius.circular(6.0);
-      final InputBorder border = OutlineInputBorder(borderRadius: borderRadius);
+      const borderRadius = BorderRadius.all(Radius.circular(6.0));
+      const InputBorder border = OutlineInputBorder(borderRadius: borderRadius);
       await tester.pumpWidget(
-        buildInputDecorator(localInputDecorationTheme: InputDecorationThemeData(border: border)),
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(border: border),
+        ),
       );
 
       // The real instance of border is created based on the given border.
@@ -10312,19 +10314,19 @@ void main() {
     const overlayColor = Color(0xff0000ff);
     const shadowColor = Color(0xff0ff0ff);
     const elevation = 4.0;
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0));
-    final iconButtonStyle = ButtonStyle(
-      backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
-      foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
-      overlayColor: const MaterialStatePropertyAll<Color>(overlayColor),
-      shadowColor: const MaterialStatePropertyAll<Color>(shadowColor),
-      elevation: const MaterialStatePropertyAll<double>(elevation),
+    const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
+    const iconButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll<Color>(backgroundColor),
+      foregroundColor: MaterialStatePropertyAll<Color>(foregroundColor),
+      overlayColor: MaterialStatePropertyAll<Color>(overlayColor),
+      shadowColor: MaterialStatePropertyAll<Color>(shadowColor),
+      elevation: MaterialStatePropertyAll<double>(elevation),
       shape: MaterialStatePropertyAll<OutlinedBorder>(shape),
     );
 
     await tester.pumpWidget(
       IconButtonTheme(
-        data: IconButtonThemeData(style: iconButtonStyle),
+        data: const IconButtonThemeData(style: iconButtonStyle),
         child: buildInputDecorator(
           decoration: InputDecoration(
             prefixIcon: IconButton(onPressed: () {}, icon: const Icon(prefixIcon)),
@@ -10360,19 +10362,19 @@ void main() {
     const overlayColor = Color(0xff0000ff);
     const shadowColor = Color(0xff0ff0ff);
     const elevation = 4.0;
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0));
-    final iconButtonStyle = ButtonStyle(
-      backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
-      foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
-      overlayColor: const MaterialStatePropertyAll<Color>(overlayColor),
-      shadowColor: const MaterialStatePropertyAll<Color>(shadowColor),
-      elevation: const MaterialStatePropertyAll<double>(elevation),
+    const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
+    const iconButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll<Color>(backgroundColor),
+      foregroundColor: MaterialStatePropertyAll<Color>(foregroundColor),
+      overlayColor: MaterialStatePropertyAll<Color>(overlayColor),
+      shadowColor: MaterialStatePropertyAll<Color>(shadowColor),
+      elevation: MaterialStatePropertyAll<double>(elevation),
       shape: MaterialStatePropertyAll<OutlinedBorder>(shape),
     );
 
     await tester.pumpWidget(
       IconButtonTheme(
-        data: IconButtonThemeData(style: iconButtonStyle),
+        data: const IconButtonThemeData(style: iconButtonStyle),
         child: buildInputDecorator(
           decoration: InputDecoration(
             suffixIcon: IconButton(onPressed: () {}, icon: const Icon(suffixIcon)),
@@ -14629,16 +14631,16 @@ void main() {
               alignment: Alignment.center,
               child: Directionality(
                 textDirection: textDirection,
-                child: RepaintBoundary(
+                child: const RepaintBoundary(
                   child: InputDecorator(
                     isFocused: true,
                     isEmpty: true,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF00FF00),
+                      fillColor: Color(0xFF00FF00),
                       labelText: 'label text',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
                         gapPadding: 0.0,
                       ),
                     ),
@@ -15245,12 +15247,12 @@ void main() {
 
       await tester.pumpWidget(
         buildInputDecoratorM2(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             filled: true,
-            fillColor: const Color(0xFF00FF00),
+            fillColor: Color(0xFF00FF00),
             labelText: labelText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
               gapPadding: 0.0,
             ),
           ),

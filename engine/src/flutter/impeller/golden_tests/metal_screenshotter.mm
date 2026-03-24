@@ -8,6 +8,7 @@
 #include "impeller/renderer/backend/metal/context_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #define GLFW_INCLUDE_NONE
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "third_party/glfw/include/GLFW/glfw3.h"
 
 namespace impeller {
@@ -22,6 +23,20 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     AiksContext& aiks_context,
     const std::shared_ptr<Texture> texture) {
   @autoreleasepool {
+    std::shared_ptr<Context> context = aiks_context.GetContext();
+    fml::AutoResetWaitableEvent latch;
+    if (auto cmd_buffer = context->CreateCommandBuffer()) {
+      if (context->GetCommandQueue()
+              ->Submit({cmd_buffer},
+                       [&latch](CommandBuffer::Status status) {
+                         FML_CHECK(status == CommandBuffer::Status::kCompleted);
+                         latch.Signal();
+                       })
+              .ok()) {
+        latch.Wait();
+      }
+    }
+
     id<MTLTexture> metal_texture =
         std::static_pointer_cast<TextureMTL>(texture)->GetMTLTexture();
 
@@ -32,7 +47,6 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     CGColorSpaceRelease(color_space);
     FML_CHECK(ciImage);
 
-    std::shared_ptr<Context> context = playground_->GetContext();
     std::shared_ptr<ContextMTL> context_mtl =
         std::static_pointer_cast<ContextMTL>(context);
     CIContext* cicontext =

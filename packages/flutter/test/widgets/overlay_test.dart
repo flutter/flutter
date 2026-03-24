@@ -1966,6 +1966,30 @@ void main() {
     expect(outsideView, isNull);
     expect(insideView, isNull);
   });
+
+  testWidgets('Overlay does not crash at zero area', (WidgetTester tester) async {
+    final overlayEntry1 = OverlayEntry(builder: (_) => const Text('X'));
+    final overlayEntry2 = OverlayEntry(builder: (_) => const Text('Y'));
+    addTearDown(
+      () => overlayEntry1
+        ..remove()
+        ..dispose(),
+    );
+    addTearDown(
+      () => overlayEntry2
+        ..remove()
+        ..dispose(),
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: Overlay(initialEntries: [overlayEntry1, overlayEntry2])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Overlay)), Size.zero);
+  });
 }
 
 class StatefulTestWidget extends StatefulWidget {

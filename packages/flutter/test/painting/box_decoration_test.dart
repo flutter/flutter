@@ -83,7 +83,7 @@ void main() {
 
   test('BoxDecoration.getClipPath with borderRadius', () {
     const double radius = 10;
-    final decoration = BoxDecoration(borderRadius: BorderRadius.circular(radius));
+    const decoration = BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(radius)));
     const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(

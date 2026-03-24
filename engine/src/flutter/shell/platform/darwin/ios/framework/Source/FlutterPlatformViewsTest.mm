@@ -457,6 +457,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                        blurRadius:5
                                      cornerRadius:0
+                            isRoundedSuperellipse:NO
                                  visualEffectView:visualEffectView1];
 
     [clippingView applyBlurBackdropFilters:@[ platformViewFilter1 ]];
@@ -469,6 +470,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                        blurRadius:5
                                      cornerRadius:0
+                            isRoundedSuperellipse:NO
                                  visualEffectView:visualEffectView2];
     [clippingView applyBlurBackdropFilters:@[ platformViewFilter2 ]];
 
@@ -1565,6 +1567,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                      blurRadius:5
                                    cornerRadius:0
+                          isRoundedSuperellipse:NO
                                visualEffectView:visualEffectView];
   XCTAssertNotNil(platformViewFilter);
 }
@@ -1576,6 +1579,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                      blurRadius:5
                                    cornerRadius:0
+                          isRoundedSuperellipse:NO
                                visualEffectView:visualEffectView];
   XCTAssertNil(platformViewFilter);
 }
@@ -1600,6 +1604,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                      blurRadius:5
                                    cornerRadius:0
+                          isRoundedSuperellipse:NO
                                visualEffectView:editedUIVisualEffectView];
   XCTAssertNil(platformViewFilter);
 }
@@ -1625,6 +1630,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                      blurRadius:5
                                    cornerRadius:0
+                          isRoundedSuperellipse:NO
                                visualEffectView:editedUIVisualEffectView];
   XCTAssertNil(platformViewFilter);
 }
@@ -1708,6 +1714,89 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   auto radii = clipRRect.GetRadii();
 
   XCTAssertEqual(visualEffectView.layer.cornerRadius, radii.top_left.width);
+  XCTAssertEqual(visualEffectView.layer.cornerCurve, kCACornerCurveCircular);
+}
+
+- (void)testApplyBackdropFilterRespectsClipRSuperellipse {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/GetDefaultTaskRunner(),
+                               /*raster=*/GetDefaultTaskRunner(),
+                               /*ui=*/GetDefaultTaskRunner(),
+                               /*io=*/GetDefaultTaskRunner());
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+
+  // Push a rounded superellipse clip
+  auto clipRect = flutter::DlRect::MakeXYWH(2, 2, 6, 6);
+  auto clipRSE = flutter::DlRoundSuperellipse::MakeRectXY(clipRect, 3, 3);
+  stack.PushPlatformViewClipRSuperellipse(clipRSE);
+
+  // Push a backdrop filter
+  auto filter = flutter::DlBlurImageFilter::Make(5, 2, flutter::DlTileMode::kClamp);
+  stack.PushBackdropFilter(filter,
+                           flutter::DlRect::MakeXYWH(0, 0, screenScale * 10, screenScale * 10));
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(10, 10), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  NSArray<UIVisualEffectView*>* filters = childClippingView.backdropFilterSubviews;
+  XCTAssertEqual(filters.count, 1u);
+
+  UIVisualEffectView* visualEffectView = filters[0];
+  auto radii = clipRSE.GetRadii();
+
+  XCTAssertEqual(visualEffectView.layer.cornerRadius, radii.top_left.width);
+  XCTAssertEqual(visualEffectView.layer.cornerCurve, kCACornerCurveContinuous);
 }
 
 - (void)testBackdropFilterVisualEffectSubviewBackgroundColor {
@@ -1721,6 +1810,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
                                        blurRadius:5
                                      cornerRadius:0
+                            isRoundedSuperellipse:NO
                                  visualEffectView:visualEffectView];
     CGColorRef visualEffectSubviewBackgroundColor = nil;
     for (UIView* view in [platformViewFilter backdropFilterView].subviews) {
@@ -3397,8 +3487,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
-    // TODO(hellohuanlin): find a solution for iOS 26,
-    // https://github.com/flutter/flutter/issues/175099.
+    // We use a different workaround for iOS 26 and it is tested separately.
+    // See:
+    // testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView.
   } else if (@available(iOS 18.2, *)) {
     shouldReAddDelayingRecognizer = YES;
   }
@@ -3413,7 +3504,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 }
 
 - (void)
-    testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldNotRemoveAndAddBackDelayingRecognizerForNestedWrapperWebView {
+    testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldRemoveAndAddBackDelayingRecognizerForNestedWrapperWebView {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -3467,8 +3558,22 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
 
-  XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
-  XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+  BOOL shouldReAddDelayingRecognizer = NO;
+  if (@available(iOS 26.0, *)) {
+    // We use a different workaround for iOS 26 and it is tested separately.
+    // See:
+    // testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView.
+  } else if (@available(iOS 18.2, *)) {
+    shouldReAddDelayingRecognizer = YES;
+  }
+  if (shouldReAddDelayingRecognizer) {
+    // Since we remove and add back delayingRecognizer, it would be reordered to the last.
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
+  } else {
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+  }
 }
 
 - (void)

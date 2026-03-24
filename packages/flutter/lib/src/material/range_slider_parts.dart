@@ -1569,7 +1569,7 @@ class _DropSliderValueIndicatorPathPainter {
   BorderRadius _adjustBorderRadius(Rect rect) {
     const rectness = 0.0;
     return BorderRadius.lerp(
-      BorderRadius.circular(_upperRectRadius),
+      const BorderRadius.all(Radius.circular(_upperRectRadius)),
       BorderRadius.all(Radius.circular(rect.shortestSide / 2.0)),
       1.0 - rectness,
     )!;
