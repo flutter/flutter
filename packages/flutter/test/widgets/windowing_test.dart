@@ -161,7 +161,7 @@ class _StubPopupWindowController extends PopupWindowController {
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
 
   @override
-  Offset get offsetInParent => Offset.zero;
+  Offset get offsetFromParent => Offset.zero;
 }
 
 class _StubSatelliteWindowController extends SatelliteWindowController {

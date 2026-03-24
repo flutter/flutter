@@ -862,12 +862,12 @@ abstract class PopupWindowController extends BaseWindowController {
     );
   }
 
-  /// Creates an empty [TooltipWindowController].
+  /// Creates an empty [PopupWindowController].
   ///
   /// This method is only intended to be used by subclasses of the
-  /// [TooltipWindowController].
+  /// [PopupWindowController].
   ///
-  /// Users who want to instantiate a new [TooltipWindowController] should
+  /// Users who want to instantiate a new [PopupWindowController] should
   /// always use the factory method to create a controller that is valid
   /// for their particular platform.
   ///
@@ -890,8 +890,6 @@ abstract class PopupWindowController extends BaseWindowController {
   /// satisfy. If the constraints disagree with the current size of the window,
   /// the platform might resize the window to satisfy the new constraints.
   ///
-  /// The platform is free to ignore this request.
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setConstraints(BoxConstraints constraints);
@@ -910,7 +908,7 @@ abstract class PopupWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  Offset get offsetInParent;
+  Offset get offsetFromParent;
 
   /// Request activations of the window hierarchy to which this popup belongs.
   ///
@@ -1161,8 +1159,6 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// with the current constraints placed upon the window, the platform might
   /// clamp the size within the constraints.
   ///
-  /// The platform is free to ignore this request.
-  ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setSize(Size size);
@@ -1172,8 +1168,6 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// The [constraints] describes the new constraints that the window should
   /// satisfy. If the constraints disagree with the current size of the window,
   /// the platform might resize the window to satisfy the new constraints.
-  ///
-  /// The platform is free to ignore this request.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

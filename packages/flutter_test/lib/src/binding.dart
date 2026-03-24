@@ -695,7 +695,7 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
   }
 
   @override
-  ui.Offset get offsetInParent => Offset.zero;
+  ui.Offset get offsetFromParent => Offset.zero;
 }
 
 class _TestSatelliteWindowController extends SatelliteWindowController

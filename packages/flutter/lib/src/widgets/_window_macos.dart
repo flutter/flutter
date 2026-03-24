@@ -418,7 +418,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   }
 
   @override
-  Offset get offsetInParent {
+  Offset get offsetFromParent {
     return _MacOSPlatformInterface.getOffsetInParent(getWindowHandle()).toOffset();
   }
 

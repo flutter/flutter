@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Tracks global rect of an [Element].
+/// Tracks the global rect of an [Element].
 class ElementPositionTracker {
   ElementPositionTracker({required this.element}) {
     _ElementPositionTrackerManager.instance.add(this);
