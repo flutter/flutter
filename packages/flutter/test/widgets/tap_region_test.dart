@@ -1241,4 +1241,16 @@ void main() {
       reason: 'Button tap was not consumed by a TapRegion on a non-current route',
     );
   });
+
+  testWidgets('TapRegionSurface does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TapRegionSurface(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TapRegionSurface)), Size.zero);
+  });
 }
