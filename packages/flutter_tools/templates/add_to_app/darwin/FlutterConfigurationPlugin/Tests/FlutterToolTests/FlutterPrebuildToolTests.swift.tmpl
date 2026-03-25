@@ -1,0 +1,80 @@
+import Foundation
+import Testing
+
+@testable import FlutterToolHelper
+
+@Test(
+  "Copy Flutter.framework for iOS",
+  arguments: [
+    ("iphonesimulator", "ios-arm64_x86_64-simulator"),
+    ("iphoneos", "ios-arm64"),
+  ]
+)
+func copyFlutterFrameworkForIOS(
+  platformName: String,
+  expectedArch: String
+) async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+
+  let targetBuildMode = "Debug"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
+  let xcframework =
+    "\(flutterPluginRegistrantPath)/\(targetBuildMode)/Frameworks/Flutter.xcframework"
+  let buildDir = "/Build/Products/Debug-\(platformName)"
+
+  fileManager.filesExist[xcframework] = true
+  fileManager.filesInDirectory[xcframework] = [
+    URL(fileURLWithPath: "\(xcframework)/ios-arm64"),
+    URL(fileURLWithPath: "\(xcframework)/ios-arm64_x86_64-simulator"),
+  ]
+  processManager.expectedURL = "/usr/bin/rsync"
+  processManager.expectedArguments = [
+    "-av", "--delete", "--filter", "- .DS_Store/",
+    "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+    "\(xcframework)/\(expectedArch)/Flutter.framework", buildDir,
+  ]
+  try FlutterPrebuildToolHelper.copyFlutterFramework(
+    targetBuildMode: targetBuildMode,
+    env: [
+      "FLUTTER_PLUGIN_REGISTRANT_PATH": flutterPluginRegistrantPath,
+      "PLATFORM_NAME": platformName, "SDKROOT": "\(platformName)26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test
+func copyFlutterFrameworkForMacOS() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+
+  let targetBuildMode = "Debug"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
+  let xcframework =
+    "\(flutterPluginRegistrantPath)/\(targetBuildMode)/Frameworks/FlutterMacOS.xcframework"
+  let buildDir = "/Build/Products/Debug"
+
+  fileManager.filesExist[xcframework] = true
+  fileManager.filesInDirectory[xcframework] = [
+    URL(fileURLWithPath: "\(xcframework)/macos-arm64_x86_64")
+  ]
+  processManager.expectedURL = "/usr/bin/rsync"
+  processManager.expectedArguments = [
+    "-av", "--delete", "--filter", "- .DS_Store/",
+    "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+    "\(xcframework)/macos-arm64_x86_64/FlutterMacOS.framework", buildDir,
+  ]
+  try FlutterPrebuildToolHelper.copyFlutterFramework(
+    targetBuildMode: targetBuildMode,
+    env: [
+      "FLUTTER_PLUGIN_REGISTRANT_PATH": flutterPluginRegistrantPath,
+      "PLATFORM_NAME": "macosx", "SDKROOT": "macosx",
+      "BUILT_PRODUCTS_DIR": buildDir,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}

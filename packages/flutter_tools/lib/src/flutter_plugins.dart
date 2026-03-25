@@ -550,7 +550,7 @@ import Foundation
 import {{name}}
 {{/methodChannelPlugins}}
 
-func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   {{#methodChannelPlugins}}
   {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
 {{/methodChannelPlugins}}

@@ -595,12 +595,23 @@ class DebugIosLLDBInit extends Target {
         }
       }
       if (!anyLLDBInitFound) {
-        printXcodeWarning(
+        final String? buildScript = environment.defines[kXcodeBuildScript];
+        if (buildScript == kXcodeBuildScriptValueNativeBuild) {
+          printXcodeWarning(
           'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
           'ensure debug mode works, please complete instructions found in '
           '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
           'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
         );
+        } else {
+          printXcodeWarning(
+            'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+            'ensure debug mode works, please complete instructions found in '
+            '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
+            'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+          );
+        }
+
       }
     }
     return;

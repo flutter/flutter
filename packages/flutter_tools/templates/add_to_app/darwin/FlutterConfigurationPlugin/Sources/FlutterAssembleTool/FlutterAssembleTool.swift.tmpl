@@ -1,0 +1,42 @@
+//  Generated file. Do not edit.
+
+import FlutterToolHelper
+import Foundation
+
+@main
+struct FlutterAssembleTool {
+  static func main() {
+    let env = ProcessInfo.processInfo.environment
+    do {
+      let fileManager = FileManager.default
+      let processManager = FlutterProcessManager()
+      let mode = try FlutterToolHelper.parseFlutterBuildMode(env: env)
+      let targetPlatform = try FlutterToolHelper.targetPlatform(env: env)
+      try FlutterAssembleToolHelper.verifyFlutterFramework(
+        targetBuildMode: mode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+      try FlutterAssembleToolHelper.assemble(
+        command: "build-native",
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager,
+        processManager: processManager
+      )
+    } catch XcodeErrorAndExit.error(let errorMessages) {
+      for line in errorMessages {
+        FlutterToolHelper.xcodeError(message: line)
+      }
+      exit(EXIT_FAILURE)
+    } catch {
+      FlutterToolHelper.xcodeError(
+        message: "Failed to run FlutterAssembleTool: \(error.localizedDescription)"
+      )
+      exit(EXIT_FAILURE)
+    }
+  }
+}
+
+extension FileManager: FlutterToolsFileManager {}

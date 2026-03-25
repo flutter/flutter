@@ -1,0 +1,21 @@
+
+Showing All Messages
+PackagePlugin.SwiftSourceModuleTarget(
+    id: "1",
+    name: "google_maps_flutter_ios_library",
+    kind: PackagePlugin.ModuleKind.generic,
+    directory: /Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios_library/Sources/google_maps_flutter_ios_library,
+    directoryURL: file:///Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios_library/Sources/google_maps_flutter_ios_library/,
+    dependencies: [
+        PackagePlugin.TargetDependency.product(
+            PackagePlugin.LibraryProduct(id: "0",
+            name: "google-maps-flutter-ios",
+            targets: [
+                PackagePlugin.ClangSourceModuleTarget(
+                    id: "0",
+                    name: "google_maps_flutter_ios",
+                    kind: PackagePlugin.ModuleKind.generic,
+                    directory: /Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios/ios/google_maps_flutter_ios/Sources/google_maps_flutter_ios,
+                    directoryURL: file:///Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios/ios/google_maps_flutter_ios/Sources/google_maps_flutter_ios/,
+                    dependencies: [], moduleName: "google_maps_flutter_ios", sourceFiles: PackagePlugin.FileList(files: [PackagePlugin.File(url: file:///Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios/ios/google_maps_flutter_ios/Sources/google_maps_flutter_ios/Resources/PrivacyInfo.xcprivacy, type: PackagePlugin.FileType.resource)]), preprocessorDefinitions: [], headerSearchPaths: ["include/google_maps_flutter_ios"], publicHeadersDirectory: Optional(/Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios/ios/google_maps_flutter_ios/Sources/google_maps_flutter_ios/include), publicHeadersDirectoryURL: Optional(file:///Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios/ios/google_maps_flutter_ios/Sources/google_maps_flutter_ios/include/), linkedLibraries: [], linkedFrameworks: [], pluginGeneratedSources: [], pluginGeneratedResources: [])], kind: PackagePlugin.LibraryProduct.Kind.static))], moduleName: "google_maps_flutter_ios_library", sourceFiles: PackagePlugin.FileList(files: [PackagePlugin.File(url: file:///Users/vashworth/Development/packages/packages/google_maps_flutter/google_maps_flutter_ios_library/Sources/google_maps_flutter_ios_library/google_maps_flutter_ios_library.swift, type: PackagePlugin.FileType.source)]), compilationConditions: [], linkedLibraries: [], linkedFrameworks: [], pluginGeneratedSources: [], pluginGeneratedResources: [])
+

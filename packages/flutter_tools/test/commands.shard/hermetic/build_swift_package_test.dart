@@ -139,6 +139,10 @@ void main() {
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        late final flutterSwiftPackageTools = FlutterSwiftPackageTools(
+          utils: testUtils,
+          generateTests: false,
+        );
         // Plugin A represents a SwiftPM plugin
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
@@ -167,6 +171,7 @@ void main() {
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
           cocoapodDependencies: cocoapodDependencies,
+          flutterSwiftPackageTools: flutterSwiftPackageTools,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
@@ -196,7 +201,8 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
+        .package(name: "PluginA", path: "Sources/Packages/PluginA"),
+        .package(name: "FlutterConfigurationPlugin", path: "../FlutterConfigurationPlugin")
     ],
     targets: [
         .target(
@@ -1897,6 +1903,10 @@ let package = Package(
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        late final flutterSwiftPackageTools = FlutterSwiftPackageTools(
+          utils: testUtils,
+          generateTests: false,
+        );
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
         pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
@@ -1909,6 +1919,7 @@ let package = Package(
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
           cocoapodDependencies: cocoapodDependencies,
+          flutterSwiftPackageTools: flutterSwiftPackageTools,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
@@ -1938,7 +1949,8 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
+        .package(name: "PluginA", path: "Sources/Packages/PluginA"),
+        .package(name: "FlutterConfigurationPlugin", path: "../FlutterConfigurationPlugin")
     ],
     targets: [
         .target(

@@ -1,0 +1,54 @@
+//  Generated file. Do not edit.
+
+import FlutterToolHelper
+import Foundation
+
+@main
+struct FlutterPrebuildTool {
+  static func main() throws {
+    let env = ProcessInfo.processInfo.environment
+    do {
+      let mode = try FlutterToolHelper.parseFlutterBuildMode(env: env)
+      let fileManager = FileManager.default
+      let processManager = FlutterProcessManager()
+      try FlutterPrebuildToolHelper.copyFlutterFramework(
+        targetBuildMode: mode,
+        env: env,
+        fileManager: fileManager,
+        processManager: processManager
+      )
+
+      let registrantPath = try FlutterToolHelper.findOrExit(
+        env: env,
+        key: "FLUTTER_PLUGIN_REGISTRANT_PATH"
+      )
+
+      try FlutterToolHelper.updateSymlink(
+        targetBuildMode: mode,
+        currentLinkName: "Package.swift",
+        newLinkTarget: "./\(mode)/Package.swift",
+        flutterPluginRegistrantPath: registrantPath,
+        fileManager: fileManager
+      )
+      try FlutterToolHelper.updateSymlink(
+        targetBuildMode: mode,
+        currentLinkName: "Sources",
+        newLinkTarget: "./\(mode)",
+        flutterPluginRegistrantPath: registrantPath,
+        fileManager: fileManager
+      )
+    } catch XcodeErrorAndExit.error(let errorMessages) {
+      for line in errorMessages {
+        FlutterToolHelper.xcodeError(message: line)
+      }
+      exit(EXIT_FAILURE)
+    } catch {
+      FlutterToolHelper.xcodeError(
+        message: "Failed to run FlutterPrebuildTool: \(error.localizedDescription)"
+      )
+      exit(EXIT_FAILURE)
+    }
+  }
+}
+
+extension FileManager: FlutterToolsFileManager {}

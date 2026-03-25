@@ -16,6 +16,8 @@ import '../build_system/build_system.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
+import '../features.dart';
+import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
@@ -26,6 +28,7 @@ import 'build_bundle.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
 import 'build_macos_framework.dart';
+import 'build_swift_package.dart';
 import 'build_web.dart';
 import 'darwin_add_to_app.dart';
 
@@ -95,6 +98,37 @@ class BuildCommand extends FlutterCommand {
         ),
       ),
     );
+    _addSubcommand(
+      BuildSwiftPackage(
+        logger: logger,
+        analytics: analytics,
+        artifacts: globals.artifacts!,
+        buildSystem: buildSystem,
+        cache: globals.cache,
+        featureFlags: featureFlags,
+        fileSystem: fileSystem,
+        flutterVersion: globals.flutterVersion,
+        platform: platform,
+        processManager: globals.processManager,
+        templateRenderer: globals.templateRenderer,
+        xcode: globals.xcode,
+        codesign: DarwinAddToAppCodesigning(
+          logger: logger,
+          xcodeCodeSigningSettings: XcodeCodeSigningSettings(
+            config: config,
+            logger: logger,
+            platform: platform,
+            processUtils: processUtils,
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            terminal: terminal,
+            plistParser: plistParser,
+          ),
+        ),
+        verboseHelp: verboseHelp,
+      ),
+    );
+
     _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(

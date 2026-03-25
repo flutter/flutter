@@ -1,0 +1,248 @@
+import Foundation
+import Testing
+
+@testable import FlutterToolHelper
+
+@Test(
+  "Verify build mode in framework Info.plist",
+  arguments: [
+    (FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphonesimulator", "Debug", "debug"),
+    (FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphonesimulator", "Release", "debug"),
+    (FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphoneos", "Debug", "debug"),
+    (FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphoneos", "Release", "release"),
+    (FlutterPlatform.macos, "FlutterMacOS.framework/Resources/Info.plist", "macosx", "Debug", "debug"),
+    (FlutterPlatform.macos, "FlutterMacOS.framework/Resources/Info.plist", "macosx", "Release", "release"),
+  ]
+)
+func verifyFlutterFrameworkSuccess(
+  targetPlatform: FlutterPlatform,
+  infoPlistPath: String,
+  sdk: String,
+  targetBuildMode: String,
+  expectedBuildMode: String
+) async throws {
+  let buildDir = "/Build/Products/\(targetBuildMode)-\(sdk)"
+  let frameworksDir = "MyApp.app/Frameworks"
+
+  let fileManager = MockFileManager()
+  let plistContent = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>BuildMode</key>
+      <string>\(expectedBuildMode)</string>
+    </dict>
+    </plist>
+    """
+  fileManager.fileContents["\(buildDir)/\(infoPlistPath)"] = Data(plistContent.utf8)
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistPath)"] = Data(plistContent.utf8)
+
+  try FlutterAssembleToolHelper.verifyFlutterFramework(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": "\(sdk)26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+    ],
+    fileManager: fileManager
+  )
+}
+
+@Test(
+  "Verify build mode in framework Info.plist",
+  arguments: [
+    (FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphoneos", "Debug", "release"),
+    (FlutterPlatform.macos, "FlutterMacOS.framework/Resources/Info.plist", "macosx", "Debug", "release"),
+  ]
+)
+func verifyFlutterFrameworkThrows(
+  targetPlatform: FlutterPlatform,
+  infoPlistPath: String,
+  sdk: String,
+  targetBuildMode: String,
+  expectedBuildMode: String
+) async throws {
+  let buildDir = "/Build/Products/\(targetBuildMode)-\(sdk)"
+  let frameworksDir = "MyApp.app/Frameworks"
+
+  let fileManager = MockFileManager()
+  let plistContent = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>BuildMode</key>
+      <string>\(expectedBuildMode)</string>
+    </dict>
+    </plist>
+    """
+  fileManager.fileContents["\(buildDir)/\(infoPlistPath)"] = Data(plistContent.utf8)
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistPath)"] = Data(plistContent.utf8)
+
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.verifyFlutterFramework(
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: [
+        "SDKROOT": "\(sdk)26.2",
+        "BUILT_PRODUCTS_DIR": buildDir,
+        "TARGET_BUILD_DIR": buildDir,
+        "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      ],
+      fileManager: fileManager
+    )
+  }
+}
+
+@Test(
+  "Calling flutter assemble",
+  arguments: [
+    (FlutterPlatform.ios, "/path/to/flutter_app", "/path/to/flutter_app"),
+    (FlutterPlatform.ios, "../flutter_app", "/path/to/native_app/../flutter_app"),
+    (FlutterPlatform.macos, "/path/to/flutter_app", "/path/to/flutter_app"),
+  ]
+)
+func assemble(
+  targetPlatform: FlutterPlatform,
+  flutterAppPath: String,
+  resolvedAppPath: String
+) async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let xcodeAppPath = "/path/to/native_app"
+  let flutterRoot = "/path/to/flutter"
+  fileManager.filesExist[resolvedAppPath] = true
+  fileManager.filesExist[flutterRoot] = true
+  let exportedEnv = """
+    #!/bin/sh
+    # This is a generated file; do not edit or check into version control.
+    export "FLUTTER_ROOT=\(flutterRoot)"
+    export "FLUTTER_APPLICATION_PATH=\(flutterAppPath)"
+    export "FLUTTER_TARGET=lib/main.dart"
+    export "FLUTTER_BUILD_DIR=build"
+    export "FLUTTER_BUILD_NAME=1.0.0"
+    export "FLUTTER_BUILD_NUMBER=1"
+    export "DART_OBFUSCATION=false"
+    export "TRACK_WIDGET_CREATION=true"
+    export "TREE_SHAKE_ICONS=false"
+    export "PACKAGE_CONFIG=.dart_tool/package_config.json"
+    """
+  fileManager.fileContents["\(resolvedAppPath)/\(targetPlatform)/Flutter/flutter_export_environment.sh"] =
+    Data(exportedEnv.utf8)
+  processManager.expectedURL = "\(flutterRoot)/bin/dart"
+  processManager.expectedArguments = [
+    "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart",
+    "build-native", targetPlatform.rawValue,
+  ]
+  try FlutterAssembleToolHelper.assemble(
+    command: "build-native",
+    targetPlatform: targetPlatform,
+    env: ["FLUTTER_APPLICATION_PATH": flutterAppPath, "SRCROOT": xcodeAppPath],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test
+func assembleFlutterAppPathNotSet() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  try FlutterAssembleToolHelper.assemble(
+    command: "build-native",
+    targetPlatform: .ios,
+    env: [:],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test
+func assembleFlutterAppPathEmpty() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  try FlutterAssembleToolHelper.assemble(
+    command: "build-native",
+    targetPlatform: .ios,
+    env: ["FLUTTER_APPLICATION_PATH": ""],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test
+func assembleFlutterAppNotExists() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+
+  let flutterAppPath = "/path/to/flutter_app"
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.assemble(
+      command: "build-native",
+      targetPlatform: .ios,
+      env: ["FLUTTER_APPLICATION_PATH": flutterAppPath],
+      fileManager: fileManager,
+      processManager: processManager
+    )
+  }
+}
+
+@Test
+func assembleUsesMergedEnv() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let xcodeAppPath = "/path/to/native_app"
+  let flutterRootFromFlutterEnv = "/path/to/flutter"
+  let flutterRootFromXcodeEnv = "/path/to/some/other/flutter"
+  let flutterAppPath = "/path/to/flutter_app"
+  let targetPlatform = FlutterPlatform.ios
+  fileManager.filesExist[flutterAppPath] = true
+  fileManager.filesExist[flutterRootFromXcodeEnv] = true
+  let exportedEnv = """
+    #!/bin/sh
+    # This is a generated file; do not edit or check into version control.
+    export "FLUTTER_ROOT=\(flutterRootFromFlutterEnv)"
+    export "FLUTTER_APPLICATION_PATH=\(flutterAppPath)"
+    export "FLUTTER_TARGET=lib/main.dart"
+    export "FLUTTER_BUILD_DIR=build"
+    export "FLUTTER_BUILD_NAME=1.0.0"
+    export "FLUTTER_BUILD_NUMBER=1"
+    export "DART_OBFUSCATION=false"
+    export "TRACK_WIDGET_CREATION=true"
+    export "TREE_SHAKE_ICONS=false"
+    export "PACKAGE_CONFIG=.dart_tool/package_config.json"
+    """
+  fileManager.fileContents["\(flutterAppPath)/\(targetPlatform)/Flutter/flutter_export_environment.sh"] =
+    Data(exportedEnv.utf8)
+  processManager.expectedURL = "\(flutterRootFromXcodeEnv)/bin/dart"
+  processManager.expectedArguments = [
+    "\(flutterRootFromXcodeEnv)/packages/flutter_tools/bin/xcode_backend.dart",
+    "build-native", targetPlatform.rawValue,
+  ]
+  processManager.validateEnvironment = true
+  processManager.expectedEnv = [
+    "FLUTTER_APPLICATION_PATH": flutterAppPath,
+    "SRCROOT": xcodeAppPath,
+    "FLUTTER_ROOT": flutterRootFromXcodeEnv,
+    "FLUTTER_TARGET": "lib/main.dart",
+    "FLUTTER_BUILD_DIR": "build",
+    "FLUTTER_BUILD_NAME": "1.0.0",
+    "FLUTTER_BUILD_NUMBER": "1",
+    "DART_OBFUSCATION": "false",
+    "TRACK_WIDGET_CREATION": "true",
+    "TREE_SHAKE_ICONS": "false",
+    "PACKAGE_CONFIG": ".dart_tool/package_config.json",
+  ]
+  try FlutterAssembleToolHelper.assemble(
+    command: "build-native",
+    targetPlatform: targetPlatform,
+    env: [
+      "FLUTTER_APPLICATION_PATH": flutterAppPath, "SRCROOT": xcodeAppPath,
+      "FLUTTER_ROOT": flutterRootFromXcodeEnv,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}

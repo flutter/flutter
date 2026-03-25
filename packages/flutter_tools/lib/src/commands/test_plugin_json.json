@@ -1,0 +1,272 @@
+{
+  "cLanguageStandard" : null,
+  "cxxLanguageStandard" : null,
+  "dependencies" : [
+    {
+      "fileSystem" : [
+        {
+          "identity" : "flutterframework",
+          "nameForTargetDependencyResolutionOnly" : "FlutterFramework",
+          "path" : "/Users/vashworth/Development/experiment/flutter/swift_pm_add2app/build/ios/SwiftPackages/FlutterPluginRegistrant/Sources/Packages/FlutterFramework",
+          "productFilter" : null,
+          "traits" : [
+            {
+              "name" : "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fileSystem" : [
+        {
+          "identity" : "image_picker_ios",
+          "nameForTargetDependencyResolutionOnly" : "image_picker_ios",
+          "path" : "/Users/vashworth/Development/experiment/flutter/swift_pm_add2app/build/ios/SwiftPackages/FlutterPluginRegistrant/Sources/Packages/image_picker_ios",
+          "productFilter" : null,
+          "traits" : [
+            {
+              "name" : "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fileSystem" : [
+        {
+          "identity" : "shared_preferences_foundation",
+          "nameForTargetDependencyResolutionOnly" : "shared_preferences_foundation",
+          "path" : "/Users/vashworth/Development/experiment/flutter/swift_pm_add2app/build/ios/SwiftPackages/FlutterPluginRegistrant/Sources/Packages/shared_preferences_foundation",
+          "productFilter" : null,
+          "traits" : [
+            {
+              "name" : "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fileSystem" : [
+        {
+          "identity" : "flutterconfigurationplugin",
+          "nameForTargetDependencyResolutionOnly" : "FlutterConfigurationPlugin",
+          "path" : "/Users/vashworth/Development/experiment/flutter/swift_pm_add2app/build/ios/SwiftPackages/FlutterConfigurationPlugin",
+          "productFilter" : null,
+          "traits" : [
+            {
+              "name" : "default"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sourceControl" : [
+        {
+          "identity" : "swift-algorithms",
+          "location" : {
+            "remote" : [
+              {
+                "urlString" : "https://github.com/apple/swift-algorithms"
+              }
+            ]
+          },
+          "productFilter" : null,
+          "requirement" : {
+            "range" : [
+              {
+                "lowerBound" : "1.2.0",
+                "upperBound" : "2.0.0"
+              }
+            ]
+          },
+          "traits" : [
+            {
+              "name" : "default"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "name" : "FlutterPluginRegistrant",
+  "packageKind" : {
+    "root" : [
+      "/Users/vashworth/Development/experiment/flutter/swift_pm_add2app/build/ios/SwiftPackages/FlutterPluginRegistrant"
+    ]
+  },
+  "pkgConfig" : null,
+  "platforms" : [
+    {
+      "options" : [
+
+      ],
+      "platformName" : "ios",
+      "version" : "13.0"
+    },
+    {
+      "options" : [
+
+      ],
+      "platformName" : "macos",
+      "version" : "10.15"
+    }
+  ],
+  "products" : [
+    {
+      "name" : "FlutterPluginRegistrant",
+      "settings" : [
+
+      ],
+      "targets" : [
+        "FlutterPluginRegistrant"
+      ],
+      "type" : {
+        "library" : [
+          "static"
+        ]
+      }
+    }
+  ],
+  "providers" : null,
+  "swiftLanguageVersions" : null,
+  "targets" : [
+    {
+      "dependencies" : [
+        {
+          "product" : [
+            "FlutterFramework",
+            "FlutterFramework",
+            null,
+            null
+          ]
+        },
+        {
+          "target" : [
+            "App",
+            null
+          ]
+        },
+        {
+          "product" : [
+            "image-picker-ios",
+            "image_picker_ios",
+            null,
+            {
+              "platformNames" : [
+                "ios"
+              ]
+            }
+          ]
+        },
+        {
+          "product" : [
+            "shared-preferences-foundation",
+            "shared_preferences_foundation",
+            null,
+            {
+              "platformNames" : [
+                "ios",
+                "macos"
+              ]
+            }
+          ]
+        },
+        {
+          "target" : [
+            "flutter_beep",
+            {
+              "platformNames" : [
+                "ios"
+              ]
+            }
+          ]
+        },
+        {
+          "target" : [
+            "sqlite3",
+            {
+              "platformNames" : [
+                "ios"
+              ]
+            }
+          ]
+        }
+      ],
+      "exclude" : [
+
+      ],
+      "name" : "FlutterPluginRegistrant",
+      "packageAccess" : true,
+      "resources" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "type" : "regular"
+    },
+    {
+      "dependencies" : [
+
+      ],
+      "exclude" : [
+
+      ],
+      "name" : "App",
+      "packageAccess" : false,
+      "path" : "Sources/Frameworks/App.xcframework",
+      "resources" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "type" : "binary"
+    },
+    {
+      "dependencies" : [
+
+      ],
+      "exclude" : [
+
+      ],
+      "name" : "flutter_beep",
+      "packageAccess" : false,
+      "path" : "Sources/Frameworks/CocoaPods/flutter_beep.xcframework",
+      "resources" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "type" : "binary"
+    },
+    {
+      "dependencies" : [
+
+      ],
+      "exclude" : [
+
+      ],
+      "name" : "sqlite3",
+      "packageAccess" : false,
+      "path" : "Sources/Frameworks/NativeAssets/sqlite3.xcframework",
+      "resources" : [
+
+      ],
+      "settings" : [
+
+      ],
+      "type" : "binary"
+    }
+  ],
+  "toolsVersion" : {
+    "_version" : "5.9.0"
+  },
+  "traits" : [
+
+  ]
+}
