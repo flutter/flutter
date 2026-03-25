@@ -315,8 +315,12 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _window.setGeometryHints(
       minWidth: constraints.minWidth.toInt(),
       minHeight: constraints.minHeight.toInt(),
-      maxWidth: constraints.maxWidth.isInfinite ? 0x7fffffff : constraints.maxWidth.toInt(),
-      maxHeight: constraints.maxHeight.isInfinite ? 0x7fffffff : constraints.maxHeight.toInt(),
+      maxWidth: constraints.maxWidth.isInfinite
+          ? _kMaxWindowDimensions
+          : constraints.maxWidth.toInt(),
+      maxHeight: constraints.maxHeight.isInfinite
+          ? _kMaxWindowDimensions
+          : constraints.maxHeight.toInt(),
     );
   }
 
