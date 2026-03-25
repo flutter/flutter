@@ -161,7 +161,7 @@ static void init_touch(FlView* self) {
 
 static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
   GdkDevice* device = gdk_event_get_source_device(event);
-  if (device == NULL) {
+  if (device == nullptr) {
     return kFlutterPointerDeviceKindMouse;
   }
 
