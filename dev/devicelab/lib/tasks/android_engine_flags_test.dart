@@ -37,21 +37,28 @@ TaskFunction androidEngineFlagsTest(String buildMode) {
   };
 }
 
+Future<String> _createTestProject(Directory tempDir) async {
+  section('Create new Flutter Android app');
+  const projectName = 'androidfluttershellargstest';
+  final String projectPath = path.join(tempDir.path, projectName);
+
+  await inDirectory(tempDir, () async {
+    await flutter(
+      'create',
+      options: <String>['--platforms', 'android', '--org', 'io.flutter.devicelab', projectName],
+    );
+  });
+
+  return projectPath;
+}
+
 TaskFunction _testInvalidFlag(String buildMode) {
   return () async {
-    section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(
       'android_flutter_shell_args_test.',
     );
-    const projectName = 'androidfluttershellargstest';
-
     try {
-      await inDirectory(tempDir, () async {
-        await flutter(
-          'create',
-          options: <String>['--platforms', 'android', '--org', 'io.flutter.devicelab', projectName],
-        );
-      });
+      final String testProjectPath = await _createTestProject(tempDir);
 
       section('Insert metadata with valid and invalid flags into AndroidManifest.xml');
       final metadataKeyPairs = <(String, String)>[
@@ -61,13 +68,13 @@ TaskFunction _testInvalidFlag(String buildMode) {
         ),
         ('io.flutter.embedding.android.ImpellerLazyShaderInitialization', 'true'),
       ];
-      addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
+      addMetadataToManifest(testProjectPath, metadataKeyPairs);
 
       section('Run Flutter Android app with modified manifest');
       final foundInvalidAotLibraryLog = Completer<bool>();
       late Process run;
 
-      await inDirectory(path.join(tempDir.path, projectName), () async {
+      await inDirectory(testProjectPath, () async {
         run = await startFlutter('run', options: <String>['--$buildMode', '--verbose']);
       });
 
@@ -110,31 +117,23 @@ TaskFunction _testInvalidFlag(String buildMode) {
 
 TaskFunction _testIllegalFlagInReleaseMode() {
   return () async {
-    section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(
       'android_flutter_shell_args_test.',
     );
-    const projectName = 'androidfluttershellargstest';
-
     try {
-      await inDirectory(tempDir, () async {
-        await flutter(
-          'create',
-          options: <String>['--platforms', 'android', '--org', 'io.flutter.devicelab', projectName],
-        );
-      });
+      final String testProjectPath = await _createTestProject(tempDir);
 
       section('Insert metadata only allowed in debug mode for testing into AndroidManifest.xml');
       final metadataKeyPairs = <(String, String)>[
         ('io.flutter.embedding.android.UseTestFonts', 'true'),
       ];
-      addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
+      addMetadataToManifest(testProjectPath, metadataKeyPairs);
 
       section('Run Flutter Android app with modified manifest');
       final foundUseTestFontsLog = Completer<bool>();
       late Process run;
 
-      await inDirectory(path.join(tempDir.path, projectName), () async {
+      await inDirectory(testProjectPath, () async {
         run = await startFlutter('run', options: <String>['--release', '--verbose']);
       });
 
@@ -177,33 +176,25 @@ TaskFunction _testIllegalFlagInReleaseMode() {
 
 TaskFunction _testCommandLineFlagPrecedence() {
   return () async {
-    section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(
       'android_flutter_shell_args_test.',
     );
-    const projectName = 'androidfluttershellargstest';
-
     try {
-      await inDirectory(tempDir, () async {
-        await flutter(
-          'create',
-          options: <String>['--platforms', 'android', '--org', 'io.flutter.devicelab', projectName],
-        );
-      });
+      final String testProjectPath = await _createTestProject(tempDir);
 
       section('Insert metadata for test flag into the manifest');
       final metadataKeyPairs = <(String, String)>[
         ('io.flutter.embedding.android.TestFlag', 'true'),
       ];
 
-      addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
+      addMetadataToManifest(testProjectPath, metadataKeyPairs);
 
       section('Run Flutter Android app with modified manifest and --test-flag');
       final commandLinePrecedenceCompleter = Completer<bool>();
       var foundManifestLogBeforeCommandLineLog = false;
       late Process run;
 
-      await inDirectory(path.join(tempDir.path, projectName), () async {
+      await inDirectory(testProjectPath, () async {
         run = await startFlutter('run', options: <String>['--test-flag', '--verbose']);
       });
 
