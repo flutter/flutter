@@ -65,8 +65,14 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # Write the engine version out so downstream tools know what to look for.
 # Use a temporary file and atomic move to prevent race conditions during parallel flutter executions.
 $esTmp = "$flutterRoot/bin/cache/engine.stamp.tmp.$PID"
-Set-Content -Path $esTmp -Value $engineVersion -Encoding Ascii
-Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
+try {
+    Set-Content -Path $esTmp -Value $engineVersion -Encoding Ascii
+    Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
+} finally {
+    if (Test-Path -Path $esTmp) {
+        Remove-Item -Path $esTmp -Force
+    }
+}
 
 # The realm on CI is passed in.
 if ($env:FLUTTER_REALM) {
