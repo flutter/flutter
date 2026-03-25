@@ -760,7 +760,7 @@ public class FlutterLoaderTest {
   public void itSetsEnableSoftwareRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableSoftwareRendering",
-        true,
+        defaultFlagTestValue,
         "--enable-software-rendering");
   }
 
