@@ -381,6 +381,89 @@ void main() {
       expect(testRoot.binCacheEngineRealm, _hasFileContentsMatching('flutter_archives_v2'));
     });
   });
+
+  group('concurrent execution', () {
+    setUp(() {
+      initGitRepoWithBlankInitialCommit();
+      environment['FLUTTER_PREBUILT_ENGINE_VERSION'] = '123abc';
+    });
+
+    test('writes to engine.stamp atomically without truncation', () async {
+      // Run the script once first to ensure the file exists.
+      runUpdateEngineVersion();
+
+      final stampFile = testRoot.binCacheEngineStamp;
+      expect(stampFile.readAsStringSync().trim(), '123abc');
+
+      bool isRunning = true;
+      int emptyReads = 0;
+      int totalReads = 0;
+
+      // Start a tight read loop
+      final readFuture = Future(() async {
+        while (isRunning) {
+          try {
+            final content = stampFile.readAsStringSync();
+            totalReads++;
+            if (content.trim().isEmpty) {
+              emptyReads++;
+            }
+          } on io.FileSystemException {
+            // Ignore FileSystemExceptions (e.g., Windows sharing violations).
+            // A true atomic replacement might still cause a sharing violation on Windows
+            // if Dart is reading the file at the exact microsecond it's being replaced.
+            // What we strictly care about for this race condition is that a SUCCESSFUL
+            // read NEVER returns an empty string (which indicates non-atomic truncation).
+          }
+          await Future<void>.delayed(Duration.zero);
+        }
+      });
+
+      // Spawn multiple writers in parallel
+      const int numWriters = 20;
+      final List<Future<io.ProcessResult>> writers = [];
+
+      for (int i = 0; i < numWriters; i++) {
+        final String executable;
+        final List<String> args;
+        if (const LocalPlatform().isWindows) {
+          executable = 'powershell';
+          args = <String>[testRoot.binInternalUpdateEngineVersion.path];
+        } else if (usePowershellOnPosix) {
+          executable = 'pwsh';
+          args = <String>[testRoot.binInternalUpdateEngineVersion.path];
+        } else {
+          executable = testRoot.binInternalUpdateEngineVersion.path;
+          args = <String>[];
+        }
+
+        writers.add(io.Process.run(
+          executable,
+          args,
+          environment: environment,
+          workingDirectory: testRoot.root.absolute.path,
+          includeParentEnvironment: false,
+        ));
+      }
+
+      final results = await Future.wait(writers);
+
+      // Stop the reader
+      isRunning = false;
+      await readFuture;
+
+      for (final result in results) {
+        expect(result.exitCode, 0, reason: 'Writer process failed: ${result.stderr}');
+      }
+
+      // Assert that we never read an empty file during concurrent writes
+      expect(
+        emptyReads,
+        0,
+        reason: 'Race condition detected: engine.stamp was empty $emptyReads times out of $totalReads reads',
+      );
+    });
+  });
 }
 
 /// A FrUT, or "Flutter Root"-Under Test (parallel to a SUT, System Under Test).
