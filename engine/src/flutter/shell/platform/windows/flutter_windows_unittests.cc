@@ -726,14 +726,11 @@ TEST_F(WindowsTest, EngineId) {
   EXPECT_EQ(engine, FlutterDesktopEngineForId(*engineId));
 }
 
-TEST_F(WindowsTest, EnableIAccessibleEx) {
-  bool use_ex_mode = false;
+TEST_F(WindowsTest, EnableIAccessible) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
-  if (use_ex_mode) {
-    builder.SetAccessibilityMode(
-        FlutterDesktopAccessibilityMode::IAccessibleExMode);
-  }
+  builder.SetAccessibilityMode(
+      FlutterDesktopAccessibilityMode::IAccessibleMode);
   builder.SetDartEntrypoint("sendSemanticsTree");
 
   // Setup: a signal for when we have send out all of our semantics updates
@@ -764,29 +761,62 @@ TEST_F(WindowsTest, EnableIAccessibleEx) {
   LRESULT lres = SendMessage(hwnd, WM_GETOBJECT, 0, OBJID_CLIENT);
   ASSERT_NE(lres, 0);
 
-  if (use_ex_mode) {
-    // In IAccessibleEx mode, the object returned from WM_GETOBJECT should
-    // support IAccessibleEx.
-    IAccessibleEx* accessible_ex = nullptr;
-    HRESULT hr =
-        ObjectFromLresult(lres, IID_IAccessibleEx, 0, (void**)&accessible_ex);
-    ASSERT_TRUE(SUCCEEDED(hr));
-    ASSERT_NE(accessible_ex, nullptr);
-    accessible_ex->Release();
-  } else {
-    // In IAccessible mode, the object returned from WM_GETOBJECT should support
-    // IAccessible but not IAccessibleEx.
-    IAccessible* accessible = nullptr;
-    HRESULT hr =
-        ObjectFromLresult(lres, IID_IAccessible, 0, (void**)&accessible);
-    ASSERT_TRUE(SUCCEEDED(hr));
-    ASSERT_NE(accessible, nullptr);
+  // In IAccessible mode, the object returned from WM_GETOBJECT should support
+  // IAccessible but not IAccessibleEx.
+  IAccessible* accessible = nullptr;
+  HRESULT hr = ObjectFromLresult(lres, IID_IAccessible, 0, (void**)&accessible);
+  ASSERT_TRUE(SUCCEEDED(hr));
+  ASSERT_NE(accessible, nullptr);
 
-    IAccessibleEx* accessible_ex = nullptr;
-    hr = ObjectFromLresult(lres, IID_IAccessibleEx, 0, (void**)&accessible_ex);
-    ASSERT_TRUE(FAILED(hr));
-    ASSERT_EQ(accessible_ex, nullptr);
+  IAccessibleEx* accessible_ex = nullptr;
+  hr = ObjectFromLresult(lres, IID_IAccessibleEx, 0, (void**)&accessible_ex);
+  ASSERT_TRUE(FAILED(hr));
+  ASSERT_EQ(accessible_ex, nullptr);
+}
+
+TEST_F(WindowsTest, EnableIAccessibleEx) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetAccessibilityMode(
+      FlutterDesktopAccessibilityMode::IAccessibleExMode);
+  builder.SetDartEntrypoint("sendSemanticsTree");
+
+  // Setup: a signal for when we have send out all of our semantics updates
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  // Setup: Create a view
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  auto view = FlutterDesktopViewControllerGetView(controller.get());
+  ASSERT_NE(view, nullptr);
+
+  // Setup: UpdateSemanticsEnabled will trigger the semantics updates
+  // to get sent.
+  auto windows_view = reinterpret_cast<FlutterWindowsView*>(view);
+  windows_view->OnUpdateSemanticsEnabled(true);
+
+  while (!done) {
+    PumpMessage();
   }
+
+  HWND hwnd = FlutterDesktopViewGetHWND(view);
+  ASSERT_NE(hwnd, nullptr);
+
+  LRESULT lres = SendMessage(hwnd, WM_GETOBJECT, 0, OBJID_CLIENT);
+  ASSERT_NE(lres, 0);
+
+  // In IAccessibleEx mode, the object returned from WM_GETOBJECT should
+  // support IAccessibleEx.
+  IAccessibleEx* accessible_ex = nullptr;
+  HRESULT hr =
+      ObjectFromLresult(lres, IID_IAccessibleEx, 0, (void**)&accessible_ex);
+  ASSERT_TRUE(SUCCEEDED(hr));
+  ASSERT_NE(accessible_ex, nullptr);
+  accessible_ex->Release();
 }
 
 }  // namespace testing
