@@ -1024,10 +1024,6 @@ class _GdkWindow extends _GObject {
 
 /// Wraps GdkRectangle.
 final class _GdkRectangle extends ffi.Struct {
-  factory _GdkRectangle() {
-    return ffi.Struct.create();
-  }
-
   @ffi.Int()
   external int x;
 
