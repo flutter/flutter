@@ -9,12 +9,13 @@ library;
 import 'dart:ui' show VoidCallback;
 
 import 'package:meta/meta.dart';
-import 'package:ui_primitives/ui_primitives.dart' as ui_primitives;
+import 'package:ui_primitives/ui_primitives.dart';
 
 import 'assertions.dart';
 import 'debug.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
+import 'ui_primitives.dart';
 
 export 'dart:ui' show VoidCallback;
 

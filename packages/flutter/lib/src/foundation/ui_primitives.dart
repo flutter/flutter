@@ -11,7 +11,11 @@ export 'package:ui_primitives/ui_primitives.dart'
         DiagnosticsNode,
         DiagnosticsSerializationDelegate,
         DiagnosticsTreeStyle,
-        TextTreeConfiguration;
+        ErrorDescription,
+        TextTreeConfiguration,
+        ValueListenable,
+        ValueNotifier,
+        VoidCallback;
 
 // TODO: consider renaming FlutterError to UiError
 typedef FlutterError = ui_primitives.UiError;

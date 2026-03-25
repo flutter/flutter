@@ -6,7 +6,6 @@
 library;
 
 import 'package:meta/meta.dart';
-import 'package:ui_primitives/ui_primitives.dart' as ui_primitives;
 
 import 'basic_types.dart';
 import 'constants.dart';
@@ -16,8 +15,6 @@ import 'stack_frame.dart';
 import 'ui_primitives.dart';
 
 export 'basic_types.dart' show IterableFilter;
-export 'diagnostics.dart'
-    show DiagnosticLevel, DiagnosticPropertiesBuilder, DiagnosticsNode, DiagnosticsTreeStyle;
 export 'stack_frame.dart' show StackFrame;
 
 // Examples can assume:
@@ -224,43 +221,6 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   String valueToString({TextTreeConfiguration? parentConfiguration}) {
     return value.join();
   }
-}
-
-/// An explanation of the problem and its cause, any information that may help
-/// track down the problem, background information, etc.
-///
-/// Use [ErrorDescription] for any part of an error message where neither
-/// [ErrorSummary] or [ErrorHint] is appropriate.
-///
-/// In debug builds, values interpolated into the `message` are
-/// expanded and placed into [value], which is of type [List<Object>].
-/// This allows IDEs to examine values interpolated into error messages.
-///
-/// See also:
-///
-///  * [ErrorSummary], which provides a short (one line) description of the
-///    problem that was detected.
-///  * [ErrorHint], which provides specific, non-obvious advice that may be
-///    applicable.
-///  * [ErrorSpacer], which renders as a blank line.
-///  * [FlutterError], which is the most common place to use an
-///    [ErrorDescription].
-class ErrorDescription extends _ErrorDiagnostic {
-  /// A lint enforces that this constructor can only be called with a string
-  /// literal to match the limitations of the Dart Kernel transformer that
-  /// optionally extracts out objects referenced using string interpolation in
-  /// the message passed in.
-  ///
-  /// The message will display with the same text regardless of whether the
-  /// kernel transformer is used. The kernel transformer is required so that
-  /// debugging tools can provide interactive displays of objects described by
-  /// the error.
-  ErrorDescription(super.message) : super(level: DiagnosticLevel.info);
-
-  /// Calls to the default constructor may be rewritten to use this constructor
-  /// in debug mode using a kernel transformer.
-  // ignore: unused_element
-  ErrorDescription._fromParts(super.messageParts) : super._fromParts(level: DiagnosticLevel.info);
 }
 
 /// A short (one line) description of the problem that was detected.
