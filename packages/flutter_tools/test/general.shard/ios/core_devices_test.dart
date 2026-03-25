@@ -229,7 +229,7 @@ void main() {
             'info': <String, Object?>{'outcome': 'success'},
             'result': <String, Object?>{
               'installedApplications': [
-                <String, Object?>{'installationURL': '/asdf'},
+                <String, Object?>{'installationURL': '/path/to/MyApp.app'},
               ],
             },
           }),
@@ -240,15 +240,18 @@ void main() {
             },
           }),
           runningProcesses: [
-            // Extension process — lower PID, would be picked first without the fix
+            // Extension process with a lower PID — must be skipped to ensure LLDB
+            // attaches to the main app rather than one of its embedded extensions,
+            // even when the extension appears first in the process list.
+            // See https://github.com/flutter/flutter/issues/183263.
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/asdf/PlugIns/SomethingExtension.appex/SomethingExtension',
+              'executable': '/path/to/MyApp.app/PlugIns/SomethingExtension.appex/SomethingExtension',
             }),
             // Main app process
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 124,
-              'executable': '/asdf',
+              'executable': '/path/to/MyApp.app',
             }),
           ],
         );
