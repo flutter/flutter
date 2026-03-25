@@ -32,6 +32,11 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.41 Changes
 
+### [3.41.6](https://github.com/flutter/flutter/releases/tag/3.41.6)
+- [flutter/184025](https://github.com/flutter/flutter/pull/184025) Include a fix from Skia that ensures that the correct atlas for the glyph mask format is used consistently.
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) Visual issues with circles appearing jagged. Especially on thin stroked circles and circles with small radii.
+- [flutter/183887](https://github.com/flutter/flutter/issues/183887) During SCREEN_OFF event a deadlock preventing new frames causing an ANR can occur on android devices running the Android 16 March Security update.
+
 ### [3.41.5](https://github.com/flutter/flutter/releases/tag/3.41.5)
 - [flutter/182708](https://github.com/flutter/flutter/issues/182708) When using Impeller on any platform, bur artifacts in circles rendering at 45 degree angles.
 
