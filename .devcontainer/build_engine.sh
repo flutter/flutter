@@ -11,3 +11,6 @@ cd /builds/flutter/engine/src
 # Build RELEASE engine x86
 ./flutter/tools/gn --runtime-mode release --embedder-for-target --no-build-embedder-examples --enable-fontconfig
 ninja -C out/host_release flutter_linux_gtk
+
+# Build full local engine
+# ninja -C out/host_release
