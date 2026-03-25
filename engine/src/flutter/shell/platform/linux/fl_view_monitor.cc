@@ -24,7 +24,9 @@ G_DEFINE_TYPE(FlViewMonitor, fl_view_monitor, G_TYPE_OBJECT)
 
 static void first_frame_cb(FlViewMonitor* self) {
   flutter::IsolateScope scope(self->isolate);
-  self->on_first_frame();
+  if (self->on_first_frame) {
+    self->on_first_frame();
+  }
 }
 
 static void fl_view_monitor_dispose(GObject* object) {
