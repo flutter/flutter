@@ -305,13 +305,13 @@ mergeInto(LibraryManager.library, {
     };
 
     // GL Context
-    _skwasm_getGlContextForCanvas = function (canvas, surfaceHandle) {
+    _skwasm_getGlContextForCanvas = function (canvas, antialias, surfaceHandle) {
       var contextAttributes = {
         majorVersion: 2,
         alpha: true,
         depth: true,
         stencil: true,
-        antialias: false,
+        antialias: antialias,
         premultipliedAlpha: true,
         preserveDrawingBuffer: false,
         powerPreference: 'default',

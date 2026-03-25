@@ -234,6 +234,7 @@ TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESBGRA) {
 TEST(BlitCommandGLESTest,
      BlitCopyTextureToBufferCommandGLESUnsupportedPixelFormats) {
   auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  auto& mock_gles_impl_ref = *mock_gles_impl;
 
   std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
   auto reactor = std::make_shared<TestReactorGLES>();
@@ -242,21 +243,25 @@ TEST(BlitCommandGLESTest,
 
   std::shared_ptr<DeviceBufferGLES> dest_buffer = CreateBuffer(reactor);
 
-  std::shared_ptr<TextureGLES> source_texture_bgra =
-      CreateTexture(reactor, PixelFormat::kB8G8R8A8UNormInt);
-  BlitCopyTextureToBufferCommandGLES command_for_bgra =
-      CreateCopyTextureToBufferCommand(source_texture_bgra, dest_buffer);
+  std::shared_ptr<TextureGLES> source_texture_D32FloatS8Uint =
+      CreateTexture(reactor, PixelFormat::kD32FloatS8UInt);
+  BlitCopyTextureToBufferCommandGLES command_for_D32FloatS8Uint =
+      CreateCopyTextureToBufferCommand(source_texture_D32FloatS8Uint,
+                                       dest_buffer);
 
-  std::shared_ptr<TextureGLES> source_texture_rgba16 =
-      CreateTexture(reactor, PixelFormat::kR16G16B16A16Float);
-  BlitCopyTextureToBufferCommandGLES command_for_rgba16 =
-      CreateCopyTextureToBufferCommand(source_texture_rgba16, dest_buffer);
+  std::shared_ptr<TextureGLES> source_texture_R8G8UNormInt =
+      CreateTexture(reactor, PixelFormat::kR8G8UNormInt);
+  BlitCopyTextureToBufferCommandGLES command_for_R8G8UNormInt =
+      CreateCopyTextureToBufferCommand(source_texture_R8G8UNormInt,
+                                       dest_buffer);
 
-  // GL does not support texture with bgra pixel format.
-  EXPECT_FALSE(command_for_bgra.Encode(*reactor));
+  EXPECT_CALL(mock_gles_impl_ref, CheckFramebufferStatus(_)).Times(0);
+
+  // GL does not support texture with an unsupported pixel format.
+  EXPECT_FALSE(command_for_D32FloatS8Uint.Encode(*reactor));
 
   // GL does not support texture with another unsupported pixel format.
-  EXPECT_FALSE(command_for_rgba16.Encode(*reactor));
+  EXPECT_FALSE(command_for_R8G8UNormInt.Encode(*reactor));
 }
 
 }  // namespace testing

@@ -80,6 +80,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     addEnableImpellerFlag(verboseHelp: verboseHelp);
     addMachineOutputFlag(verboseHelp: verboseHelp);
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
+    addEnableHcppFlag(verboseHelp: verboseHelp);
 
     argParser
       ..addFlag(
@@ -484,6 +485,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
+      enableHcpp: boolArg('enable-hcpp'),
       uninstallApp: boolArg('uninstall'),
     );
 
