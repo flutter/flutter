@@ -392,18 +392,18 @@ void main() {
       // Run the script once first to ensure the file exists.
       runUpdateEngineVersion();
 
-      final stampFile = testRoot.binCacheEngineStamp;
+      final File stampFile = testRoot.binCacheEngineStamp;
       expect(stampFile.readAsStringSync().trim(), '123abc');
 
-      bool isRunning = true;
-      int emptyReads = 0;
-      int totalReads = 0;
+      var isRunning = true;
+      var emptyReads = 0;
+      var totalReads = 0;
 
       // Start a tight read loop
-      final readFuture = Future(() async {
+      final readFuture = Future<void>(() async {
         while (isRunning) {
           try {
-            final content = stampFile.readAsStringSync();
+            final String content = stampFile.readAsStringSync();
             totalReads++;
             if (content.trim().isEmpty) {
               emptyReads++;
@@ -420,10 +420,10 @@ void main() {
       });
 
       // Spawn multiple writers in parallel
-      const int numWriters = 20;
-      final List<Future<io.ProcessResult>> writers = [];
+      const numWriters = 20;
+      final writers = <Future<io.ProcessResult>>[];
 
-      for (int i = 0; i < numWriters; i++) {
+      for (var i = 0; i < numWriters; i++) {
         final String executable;
         final List<String> args;
         if (const LocalPlatform().isWindows) {
@@ -437,16 +437,18 @@ void main() {
           args = <String>[];
         }
 
-        writers.add(io.Process.run(
-          executable,
-          args,
-          environment: environment,
-          workingDirectory: testRoot.root.absolute.path,
-          includeParentEnvironment: false,
-        ));
+        writers.add(
+          io.Process.run(
+            executable,
+            args,
+            environment: environment,
+            workingDirectory: testRoot.root.absolute.path,
+            includeParentEnvironment: false,
+          ),
+        );
       }
 
-      final results = await Future.wait(writers);
+      final List<io.ProcessResult> results = await Future.wait<io.ProcessResult>(writers);
 
       // Stop the reader
       isRunning = false;
@@ -460,7 +462,8 @@ void main() {
       expect(
         emptyReads,
         0,
-        reason: 'Race condition detected: engine.stamp was empty $emptyReads times out of $totalReads reads',
+        reason:
+            'Race condition detected: engine.stamp was empty $emptyReads times out of $totalReads reads',
       );
     });
   });
