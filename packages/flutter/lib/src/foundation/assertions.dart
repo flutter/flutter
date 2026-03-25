@@ -384,6 +384,7 @@ class FlutterErrorDetails with Diagnosticable {
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
+    this.contextElement,
   });
 
   /// Creates a copy of the error details but with the given fields replaced
@@ -396,6 +397,7 @@ class FlutterErrorDetails with Diagnosticable {
     bool? silent,
     StackTrace? stack,
     IterableFilter<String>? stackFilter,
+    Object? contextElement,
   }) {
     return FlutterErrorDetails(
       context: context ?? this.context,
@@ -405,6 +407,7 @@ class FlutterErrorDetails with Diagnosticable {
       silent: silent ?? this.silent,
       stack: stack ?? this.stack,
       stackFilter: stackFilter ?? this.stackFilter,
+      contextElement: contextElement ?? this.contextElement,
     );
   }
 
@@ -568,6 +571,12 @@ class FlutterErrorDetails with Diagnosticable {
   /// error handler to see the errors even in release builds.
   final bool silent;
 
+  /// The object that was being processed when the exception was fired.
+  ///
+  /// For widget lifecycle errors, this is typically an [Element] or a
+  /// [RenderObject].
+  final Object? contextElement;
+
   /// Converts the [exception] to a string.
   ///
   /// This applies some additional logic to make [AssertionError] exceptions
@@ -654,6 +663,7 @@ class FlutterErrorDetails with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Object>('contextElement', contextElement, defaultValue: null));
     final DiagnosticsNode verb = ErrorDescription(
       'thrown${context != null ? ErrorDescription(" $context") : ""}',
     );

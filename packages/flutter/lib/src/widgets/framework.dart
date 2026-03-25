@@ -2757,9 +2757,9 @@ final class BuildScope {
           if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(element)),
           element.describeElement('The element being rebuilt at the time was'),
         ],
+        contextElement: element,
       );
-    }
-    if (isTimelineTracked) {
+    }    if (isTimelineTracked) {
       FlutterTimeline.finishSync();
     }
   }
@@ -5830,6 +5830,7 @@ abstract class ComponentElement extends Element {
           informationCollector: () => <DiagnosticsNode>[
             if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
           ],
+          contextElement: this,
         ),
       );
     } finally {
@@ -5849,6 +5850,7 @@ abstract class ComponentElement extends Element {
           informationCollector: () => <DiagnosticsNode>[
             if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
           ],
+          contextElement: this,
         ),
       );
       // _Make sure the old child subtree are deactivated and disposed.
@@ -6718,7 +6720,7 @@ abstract class RenderObjectElement extends Element {
             ),
           ]);
         } on FlutterError catch (error) {
-          _reportException(ErrorSummary('while looking for parent data.'), error, error.stackTrace);
+          _reportException(ErrorSummary('while looking for parent data.'), error, error.stackTrace, contextElement: this);
         }
       }
       return true;
@@ -6893,7 +6895,7 @@ abstract class RenderObjectElement extends Element {
         // while still allowing debuggers to break on exception. Since the tree
         // is in a broken state, adding the ErrorWidget would likely cause more
         // exceptions, which is not good for the debugging experience.
-        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace, contextElement: this);
       }
       return true;
     }());
@@ -6933,6 +6935,7 @@ abstract class RenderObjectElement extends Element {
                 'a $RenderTreeRootElement to serve as the root of the render tree.',
               ),
             ]),
+            contextElement: this,
           ),
         );
       }
@@ -7251,6 +7254,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
               ),
               DiagnosticsDebugCreator(DebugCreator(newChild)),
             ]),
+            contextElement: newChild,
           ),
         );
       }
@@ -7387,6 +7391,7 @@ FlutterErrorDetails _reportException(
   Object exception,
   StackTrace? stack, {
   InformationCollector? informationCollector,
+  Object? contextElement,
 }) {
   final details = FlutterErrorDetails(
     exception: exception,
@@ -7394,6 +7399,7 @@ FlutterErrorDetails _reportException(
     library: 'widgets library',
     context: context,
     informationCollector: informationCollector,
+    contextElement: contextElement,
   );
   FlutterError.reportError(details);
   return details;
@@ -7452,4 +7458,10 @@ class _NullWidget extends Widget {
 
   @override
   Element createElement() => throw UnimplementedError();
+}
+
+/// Extension that adds the [element] property to [FlutterErrorDetails].
+extension FlutterErrorDetailsElement on FlutterErrorDetails {
+  /// The [Element] that was being processed when the exception was fired.
+  Element? get element => contextElement is Element ? contextElement as Element : null;
 }

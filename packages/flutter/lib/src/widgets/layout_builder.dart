@@ -240,6 +240,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             informationCollector: () => <DiagnosticsNode>[
               if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
             ],
+            contextElement: this,
           ),
         );
       }
@@ -255,6 +256,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             informationCollector: () => <DiagnosticsNode>[
               if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
             ],
+            contextElement: this,
           ),
         );
         _child = updateChild(null, built, slot);
@@ -492,6 +494,7 @@ FlutterErrorDetails _reportException(
   Object exception,
   StackTrace stack, {
   InformationCollector? informationCollector,
+  Object? contextElement,
 }) {
   final details = FlutterErrorDetails(
     exception: exception,
@@ -499,6 +502,7 @@ FlutterErrorDetails _reportException(
     library: 'widgets library',
     context: context,
     informationCollector: informationCollector,
+    contextElement: contextElement,
   );
   FlutterError.reportError(details);
   return details;
