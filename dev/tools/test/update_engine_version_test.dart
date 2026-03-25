@@ -411,7 +411,7 @@ void main() {
           } on io.FileSystemException {
             // Ignore FileSystemExceptions (e.g., Windows sharing violations).
             // A true atomic replacement might still cause a sharing violation on Windows
-            // if Dart is reading the file at the exact microsecond it's being replaced.
+            // if Dart is reading the file at the exact moment it's being replaced.
             // What we strictly care about for this race condition is that a SUCCESSFUL
             // read NEVER returns an empty string (which indicates non-atomic truncation).
           }
@@ -455,7 +455,14 @@ void main() {
       await readFuture;
 
       for (final result in results) {
-        expect(result.exitCode, 0, reason: 'Writer process failed: ${result.stderr}');
+        expect(
+          result.exitCode,
+          0,
+          reason:
+              'Writer process failed with exit code ${result.exitCode}:\n'
+              'STDOUT:\n${result.stdout}\n'
+              'STDERR:\n${result.stderr}',
+        );
       }
 
       // Assert that we never read an empty file during concurrent writes

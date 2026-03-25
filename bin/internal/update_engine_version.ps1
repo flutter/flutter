@@ -63,14 +63,27 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 }
 
 # Write the engine version out so downstream tools know what to look for.
-# Use a temporary file and atomic move to prevent race conditions during parallel flutter executions.
+# Use a temporary file and a retry logic to minimize chances of a race condition during
+# parallel flutter executions.
 $esTmp = "$flutterRoot/bin/cache/engine.stamp.tmp.$PID"
 try {
     Set-Content -Path $esTmp -Value $engineVersion -Encoding Ascii
-    Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
+    $retryCount = 0
+    while ($true) {
+        try {
+            Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
+            break
+        } catch {
+            if ($retryCount -ge 2) {
+                throw
+            }
+            $retryCount++
+            Start-Sleep -Milliseconds 50
+        }
+    }
 } finally {
     if (Test-Path -Path $esTmp) {
-        Remove-Item -Path $esTmp -Force
+        Remove-Item -Path $esTmp -Force -ErrorAction SilentlyContinue
     }
 }
 
