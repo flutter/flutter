@@ -301,8 +301,6 @@ public class FlutterLoader {
               + File.separator
               + DEFAULT_LIBRARY);
 
-      // Add engine flags provided by metadata in the application manifest. These settings will
-      // be overridden if additionally set by the command line or via Intent.
       ApplicationInfo applicationInfo =
           applicationContext
               .getPackageManager()
@@ -313,6 +311,8 @@ public class FlutterLoader {
       boolean isLeakVMSet = false;
 
       if (applicationMetaData != null) {
+        // Add engine flags provided by metadata in the application manifest. These settings will
+        // be overridden if additionally set by the command line or via Intent.
         for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
           String metadataKey = flag.metadataKey;
           if (!applicationMetaData.containsKey(metadataKey)) {
@@ -405,17 +405,17 @@ public class FlutterLoader {
             shellArgs.add(arg);
           }
         }
-      }
 
-      // Add engine flags specified by the command line. These settings will take precedent
-      // over any flag configurations specified by appplication manifest metadata.
-      if (applicationMetaData.containsKey(ANDROID_ENGINE_SHELL_ARGS_KEY)) {
-        String androidEngineShellArgsValue =
-            applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
-        String[] androidEngineShellArgs =
-            androidEngineShellArgsValue.split(ANDROID_ENGINE_SHELL_ARGS_DELIMITER);
-        for (String arg : androidEngineShellArgs) {
-          shellArgs.add(arg);
+        // Add engine flags specified by the command line. These settings will take precedent
+        // over any flag configurations specified by appplication manifest metadata.
+        if (applicationMetaData.containsKey(ANDROID_ENGINE_SHELL_ARGS_KEY)) {
+          String androidEngineShellArgsValue =
+              applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
+          String[] androidEngineShellArgs =
+              androidEngineShellArgsValue.split(ANDROID_ENGINE_SHELL_ARGS_DELIMITER);
+          for (String arg : androidEngineShellArgs) {
+            shellArgs.add(arg);
+          }
         }
       }
 

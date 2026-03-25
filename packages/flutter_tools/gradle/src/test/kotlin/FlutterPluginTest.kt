@@ -334,6 +334,12 @@ class FlutterPluginTest {
             listOf()
         every { project.extraProperties } returns mockk()
         every { project.file(flutterExtension.source!!) } returns mockk()
+                val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
+        val mockDebugBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
+        every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+        every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
 
         // Mocks required to test FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest
         mockkStatic(FlutterPluginUtils::class)
