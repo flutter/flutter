@@ -97,6 +97,7 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
     : _verboseHelp = verboseHelp,
       _buildSystem = buildSystem {
+    requiresPubspecYaml();
     argParser.addMultiOption(
       'define',
       abbr: 'd',
