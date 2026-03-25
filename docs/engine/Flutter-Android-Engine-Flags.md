@@ -67,7 +67,7 @@ command line flag corresponds to the metadata key
 
 For flags that take values, set the numeric, string, or boolean value (without
 the leading `--flag=` prefix). For those that do not take values, specify a
-boolean value to determine if the flag is used or not.
+boolean value to indicate if the flag should be used or not.
 
 ### Examples
 
