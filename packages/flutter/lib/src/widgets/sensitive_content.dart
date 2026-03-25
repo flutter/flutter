@@ -311,6 +311,14 @@ class SensitiveContentHost {
 /// obscured regardless of the [sensitivity] set. To programmatically check if
 /// a device supports this widget, call [SensitiveContentService.isSupported].
 ///
+/// {@tool dartpad}
+/// This example shows how to wrap account details in a [SensitiveContent] widget
+/// and change the [ContentSensitivity] used for the current screen during screen
+/// sharing.
+///
+/// ** See code in examples/api/lib/widgets/sensitive_content/sensitive_content.0.dart **
+/// {@end-tool}
+///
 /// It is possible for a frame to be projected before the screen is updated to match
 /// the widget's `sensitivityLevel`, potentially revealing sensitive information during
 /// that frame. For example, when navigating from a page with no `SensitiveContent` to a

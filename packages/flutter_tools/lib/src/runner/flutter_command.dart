@@ -406,6 +406,18 @@ abstract class FlutterCommand extends Command<void> {
           'skwasm renderer, use "--no-cross-origin-isolation".',
       hide: !verboseHelp,
     );
+    usesBaseHrefOption();
+  }
+
+  void usesBaseHrefOption() {
+    argParser.addOption(
+      'base-href',
+      help:
+          'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is made to web/index.html file if this flag is not provided. '
+          'The value must start and end with "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
+    );
   }
 
   void usesTargetOption() {
