@@ -893,7 +893,7 @@ class _GtkWidget extends _GObject {
       dest.elementAt(1),
     );
     final (int, int)? result = translated
-        ? (dest.elementAt(0).value, dest.elementAt(1).value)
+        ? (dest[0], dest[1])
         : null;
     _gFree(dest);
     return result;
