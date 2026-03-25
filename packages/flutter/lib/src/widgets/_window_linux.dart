@@ -684,13 +684,14 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     WindowPositionerConstraintAdjustment adjustment,
   ) {
     return <_GdkAnchorHint>{
-    if (adjustment.flipX)_GdkAnchorHint.flipX,
-    if (adjustment.flipY) _GdkAnchorHint.flipY,
-    if (adjustment.slideX) _GdkAnchorHint.slideX,
-    if (adjustment.slideY) _GdkAnchorHint.slideY,
-    if (adjustment.resizeX) _GdkAnchorHint.resizeX,
-    if (adjustment.resizeY) _GdkAnchorHint.resizeY,
-    };}
+      if (adjustment.flipX) _GdkAnchorHint.flipX,
+      if (adjustment.flipY) _GdkAnchorHint.flipY,
+      if (adjustment.slideX) _GdkAnchorHint.slideX,
+      if (adjustment.slideY) _GdkAnchorHint.slideY,
+      if (adjustment.resizeX) _GdkAnchorHint.resizeX,
+      if (adjustment.resizeY) _GdkAnchorHint.resizeY,
+    };
+  }
 
   @override
   @internal
@@ -882,19 +883,19 @@ class _GtkWidget extends _GObject {
   }
 
   (int, int)? translateCoordinates(_GtkWidget destWidget, (int, int) src) {
-    final ffi.Pointer<ffi.Int> destX = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
-    final ffi.Pointer<ffi.Int> destY = _gMalloc0(ffi.sizeOf<ffi.Int>()).cast<ffi.Int>();
+    final ffi.Pointer<ffi.Int> dest = _gMalloc0(ffi.sizeOf<ffi.Int>() * 2).cast<ffi.Int>();
     final bool translated = _gtkWidgetTranslateCoordinates(
       instance,
       destWidget.instance,
       src.$1,
       src.$2,
-      destX,
-      destY,
+      dest.elementAt(0),
+      dest.elementAt(1),
     );
-    final (int, int)? result = translated ? (destX.value, destY.value) : null;
-    _gFree(destX);
-    _gFree(destY);
+    final (int, int)? result = translated
+        ? (dest.elementAt(0).value, dest.elementAt(1).value)
+        : null;
+    _gFree(dest);
     return result;
   }
 
