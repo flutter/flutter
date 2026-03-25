@@ -225,18 +225,24 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     final view = _FlView(engine);
+    _viewMonitor = _FlViewMonitor(
+      view,
+      onFirstFrame: () {
+        _window.present();
+      },
+    );
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     view.show();
     _window.add(view);
-    _window.present();
   }
 
   final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
+  late final _FlViewMonitor _viewMonitor;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -249,6 +255,8 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (_destroyed) {
       return;
     }
+    _viewMonitor.close();
+    _viewMonitor.unref();
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
@@ -406,19 +414,25 @@ class DialogWindowControllerLinux extends DialogWindowController {
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     final view = _FlView(engine);
+    _viewMonitor = _FlViewMonitor(
+      view,
+      onFirstFrame: () {
+        _window.present();
+      },
+    );
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     view.show();
     _window.add(view);
-    _window.present();
   }
 
   final WindowingOwnerLinux _owner;
   final DialogWindowControllerDelegate _delegate;
   final _GtkWindow _window;
   final BaseWindowController? _parent;
+  late final _FlViewMonitor _viewMonitor;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -431,6 +445,8 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (_destroyed) {
       return;
     }
+    _viewMonitor.close();
+    _viewMonitor.unref();
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
@@ -966,6 +982,39 @@ class _FlView extends _GtkWidget {
 
   @ffi.Native<ffi.Int64 Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'fl_view_get_id')
   external static int _flViewGetId(ffi.Pointer<ffi.NativeType> view);
+}
+
+/// Wraps FlViewMonitor (helper object for handling signals from FlView).
+class _FlViewMonitor extends _GObject {
+  /// Create a new FlViewMonitor.
+  factory _FlViewMonitor(_FlView view, {VoidCallback? onFirstFrame}) {
+    void noop() {}
+    return _FlViewMonitor._internal(
+      view.instance,
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onFirstFrame ?? noop),
+    );
+  }
+
+  _FlViewMonitor._internal(ffi.Pointer<ffi.NativeType> view, this._onFirstFrameFunction)
+    : super(_flViewMonitorNew(view, _onFirstFrameFunction.nativeFunction));
+
+  final ffi.NativeCallable<ffi.Void Function()> _onFirstFrameFunction;
+
+  /// Close all FFI resources used in the monitor.
+  void close() {
+    _onFirstFrameFunction.close();
+  }
+
+  @ffi.Native<
+    ffi.Pointer<ffi.NativeType> Function(
+      ffi.Pointer<ffi.NativeType>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+    )
+  >(symbol: 'fl_view_monitor_new')
+  external static ffi.Pointer<ffi.NativeType> _flViewMonitorNew(
+    ffi.Pointer<ffi.NativeType> view,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onFirstFrame,
+  );
 }
 
 /// Wraps FlWindowMonitor (helper object for handling signals from GtkWindow).
