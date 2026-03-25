@@ -667,26 +667,17 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   }
 
   _GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
-    switch (anchor) {
-      case WindowPositionerAnchor.center:
-        return _GdkGravity.center;
-      case WindowPositionerAnchor.top:
-        return _GdkGravity.north;
-      case WindowPositionerAnchor.bottom:
-        return _GdkGravity.south;
-      case WindowPositionerAnchor.left:
-        return _GdkGravity.west;
-      case WindowPositionerAnchor.right:
-        return _GdkGravity.east;
-      case WindowPositionerAnchor.topLeft:
-        return _GdkGravity.northWest;
-      case WindowPositionerAnchor.bottomLeft:
-        return _GdkGravity.southWest;
-      case WindowPositionerAnchor.topRight:
-        return _GdkGravity.northEast;
-      case WindowPositionerAnchor.bottomRight:
-        return _GdkGravity.southEast;
-    }
+    return switch (anchor) {
+      WindowPositionerAnchor.center => _GdkGravity.center,
+      WindowPositionerAnchor.top => _GdkGravity.north,
+      WindowPositionerAnchor.bottom => _GdkGravity.south,
+      WindowPositionerAnchor.left => _GdkGravity.west,
+      WindowPositionerAnchor.right => _GdkGravity.east,
+      WindowPositionerAnchor.topLeft => _GdkGravity.northWest,
+      WindowPositionerAnchor.bottomLeft => _GdkGravity.southWest,
+      WindowPositionerAnchor.topRight => _GdkGravity.northEast,
+      WindowPositionerAnchor.bottomRight => _GdkGravity.southEast,
+    };
   }
 
   Set<_GdkAnchorHint> _constraintAdjustmentToHints(
