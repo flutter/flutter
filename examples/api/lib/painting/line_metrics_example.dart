@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
 
 void main() {
@@ -13,121 +14,84 @@ class LineMetricsExampleApp extends StatelessWidget {
     return const MaterialApp(
       home: Scaffold(
         body: Center(
-          child: LineMetricsDemo(),
+          child: LineMetricsRenderDemo(),
         ),
       ),
     );
   }
 }
 
-class LineMetricsDemo extends StatelessWidget {
-  const LineMetricsDemo({super.key});
+class LineMetricsRenderDemo extends LeafRenderObjectWidget {
+  const LineMetricsRenderDemo({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return LineMetricsBuilder(
-      text: "This is a multi-line example demonstrating how computeLineMetrics can be used in Flutter for custom line decorations.",
-      style: const TextStyle(fontSize: 18, color: Colors.black),
-      maxWidth: 300,
-      builder: (context, lines, painter) {
-        return CustomPaint(
-          size: const Size(300, 200),
-          painter: LinePainter(lines, painter),
-        );
-      },
-    );
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderLineMetricsDemo();
   }
 }
 
-typedef LineMetricsWidgetBuilder = Widget Function(
-  BuildContext context,
-  List<ui.LineMetrics> lines,
-  TextPainter painter,
-);
+class RenderLineMetricsDemo extends RenderBox {
+  late RenderParagraph _paragraph;
 
-class LineMetricsBuilder extends StatefulWidget {
-  final String text;
-  final TextStyle style;
-  final double maxWidth;
-  final LineMetricsWidgetBuilder builder;
-
-  const LineMetricsBuilder({
-    super.key,
-    required this.text,
-    required this.style,
-    required this.maxWidth,
-    required this.builder,
-  });
-
-  @override
-  State<LineMetricsBuilder> createState() => _LineMetricsBuilderState();
-}
-
-class _LineMetricsBuilderState extends State<LineMetricsBuilder> {
-  final TextPainter _painter = TextPainter(
+  RenderLineMetricsDemo() {
+  _paragraph = RenderParagraph(
+    const TextSpan(
+      text: 'This is a multi-line example demonstrating computeLineMetrics on RenderParagraph.',
+      style: TextStyle(fontSize: 18, color: Colors.black),
+    ),
     textDirection: TextDirection.ltr,
   );
 
-  List<ui.LineMetrics> _lines = [];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _compute();
-  }
-
-  @override
-  void didUpdateWidget(covariant LineMetricsBuilder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.text != widget.text ||
-        oldWidget.style != widget.style ||
-        oldWidget.maxWidth != widget.maxWidth) {
-      _compute();
-    }
-  }
-
-  void _compute() {
-    _painter.text = TextSpan(
-      text: widget.text,
-      style: widget.style,
-    );
-
-    _painter.layout(maxWidth: widget.maxWidth);
-    _lines = _painter.computeLineMetrics();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _lines, _painter);
-  }
+  adoptChild(_paragraph); 
 }
 
-class LinePainter extends CustomPainter {
-  final List<ui.LineMetrics> lines;
-  final TextPainter painter;
-
-  LinePainter(this.lines, this.painter);
+  @override
+  void performLayout() {
+    _paragraph.layout(constraints, parentUsesSize: true);
+    size = _paragraph.size;
+  }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    painter.paint(canvas, Offset.zero);
+  void paint(PaintingContext context, Offset offset) {
+    _paragraph.paint(context, offset);
 
-    final paint = Paint()
+    final List<ui.LineMetrics> lines = _paragraph.computeLineMetrics();
+
+    final Canvas canvas = context.canvas;
+    final Paint paint = Paint()
       ..color = Colors.red
       ..strokeWidth = 2;
 
     for (final line in lines) {
-      final y = line.baseline + 2;
+      final y = offset.dy + line.baseline + 2;
 
       canvas.drawLine(
-        Offset(0, y),
-        Offset(line.width, y),
+        Offset(offset.dx, y),
+        Offset(offset.dx + line.width, y),
         paint,
       );
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _paragraph.attach(owner);
+  }
+
+  @override
+  void detach() {
+    _paragraph.detach();
+    super.detach();
+  }
+
+  @override
+  void redepthChildren() {
+    _paragraph.redepthChildren();
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    visitor(_paragraph);
+  }
 }
