@@ -2491,7 +2491,15 @@ class TextEditingChannel {
       const JSONMethodCodec().encodeMethodCall(
         MethodCall('TextInputClient.onFocusReceived', <dynamic>[clientId]),
       ),
-      _emptyCallback,
+      (ByteData? data) {
+        if (data == null) {
+          return;
+        }
+        final result = const JSONMethodCodec().decodeEnvelope(data) as bool;
+        if (!result) {
+          printWarning('Text input client did not acquire focus after platform focus received.');
+        }
+      },
     );
   }
 }
