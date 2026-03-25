@@ -1253,4 +1253,16 @@ void main() {
     );
     expect(tester.getSize(find.byType(TapRegionSurface)), Size.zero);
   });
+
+  testWidgets('TapRegion does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TapRegion(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TapRegion)), Size.zero);
+  });
 }
