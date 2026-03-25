@@ -1334,7 +1334,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'test-flag',
       hide: !verboseHelp,
-      help: 'No-op flag for testing purposes; use for testing only.',
+      help: 'No-op flag for testing purposes; use for testing flag priorities only.',
     );
   }
 
