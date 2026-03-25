@@ -37,11 +37,15 @@ import 'value_listenable_builder.dart';
 
 /// The signature of a method that provides a [BuildContext] and
 /// [ScrollController] for building a widget that may overflow the draggable
-/// [Axis] of the containing [DraggableScrollableSheet].
+/// [Axis] of the containing area.
 ///
-/// Users should apply the [scrollController] to a [ScrollView] subclass, such
-/// as a [SingleChildScrollView], [ListView] or [GridView], to have the whole
-/// sheet be draggable.
+/// This builder is used when a widget is expected to have a scrollable child
+/// widget, and a vertical gesture needs to trigger scrolling and some other behavior
+/// during that same gesture.
+///
+/// For example, users  of [DraggableScrollableSheet] should apply the [scrollController]
+/// to a [ScrollView] subclass, such as a [SingleChildScrollView], [ListView] or
+/// [GridView], to have the whole sheet be draggable.
 typedef ScrollableWidgetBuilder =
     Widget Function(BuildContext context, ScrollController scrollController);
 

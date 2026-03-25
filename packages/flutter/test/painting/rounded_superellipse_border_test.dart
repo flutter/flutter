@@ -206,7 +206,7 @@ void main() {
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);
   });
 
-  testWidgets('RoundedSuperellipseBorder looks correct', (WidgetTester tester) async {
+  group('RoundedSuperellipseBorder looks correct', () {
     Widget containerWithBorder(Size size, BorderRadiusGeometry radius) {
       return Center(
         child: Container(
@@ -223,62 +223,113 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(containerWithBorder(const Size(120, 300), BorderRadius.zero));
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.all_zero.png'),
-    );
+    testWidgets('for all zero corners', (WidgetTester tester) async {
+      await tester.pumpWidget(containerWithBorder(const Size(120, 300), BorderRadius.zero));
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('painting.rounded_superellipse_border.all_zero.png'),
+      );
+    });
 
-    await tester.pumpWidget(
-      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(36))),
-    );
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.all_circular.png'),
-    );
+    testWidgets('for all circular corners', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(36))),
+      );
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('painting.rounded_superellipse_border.all_circular.png'),
+      );
+    });
 
-    await tester.pumpWidget(
-      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.elliptical(20, 50))),
-    );
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.all_elliptical.png'),
-    );
-
-    await tester.pumpWidget(
-      containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(600))),
-    );
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.clamping_uniform.png'),
-    );
-
-    await tester.pumpWidget(
-      containerWithBorder(
-        const Size(120, 300),
-        const BorderRadius.only(
-          topLeft: Radius.elliptical(1000, 1000),
-          topRight: Radius.elliptical(0, 1000),
-          bottomRight: Radius.elliptical(800, 1000),
-          bottomLeft: Radius.elliptical(100, 500),
+    testWidgets('for all elliptical corners', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        containerWithBorder(
+          const Size(120, 300),
+          const BorderRadius.all(Radius.elliptical(20, 50)),
         ),
-      ),
-    );
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.clamping_non_uniform.png'),
-    );
+      );
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('painting.rounded_superellipse_border.all_elliptical.png'),
+      );
+    });
 
-    // Regression test for https://github.com/flutter/flutter/issues/170593
-    await tester.pumpWidget(
-      containerWithBorder(
-        const Size(120, 300),
-        const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-      ),
-    );
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('painting.rounded_superellipse_border.regression_1.png'),
-    );
+    testWidgets('for clamping uniform corners', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        containerWithBorder(const Size(120, 300), const BorderRadius.all(Radius.circular(600))),
+      );
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('painting.rounded_superellipse_border.clamping_uniform.png'),
+      );
+    });
+
+    testWidgets('for clamping non-uniform corners', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        containerWithBorder(
+          const Size(120, 300),
+          const BorderRadius.only(
+            topLeft: Radius.elliptical(1000, 1000),
+            topRight: Radius.elliptical(0, 1000),
+            bottomRight: Radius.elliptical(800, 1000),
+            bottomLeft: Radius.elliptical(100, 500),
+          ),
+        ),
+      );
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('painting.rounded_superellipse_border.clamping_non_uniform.png'),
+      );
+    });
+
+    testWidgets('for non-uniform sharp corners', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/170593
+      await tester.pumpWidget(
+        containerWithBorder(
+          const Size(120, 300),
+          const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+        ),
+      );
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('painting.rounded_superellipse_border.regression_1.png'),
+      );
+    });
+
+    testWidgets('for very large ratio', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/179875
+      await tester.pumpWidget(
+        ClipRect(
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            alignment: Alignment.topRight,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(50.0),
+                child: Container(
+                  width: 1e5,
+                  height: 500,
+                  decoration: const ShapeDecoration(
+                    color: Color.fromARGB(255, 120, 120, 120),
+                    shape: RoundedSuperellipseBorder(
+                      side: BorderSide(color: Color.fromARGB(255, 255, 0, 0)),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(100),
+                        bottomRight: Radius.circular(30),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await expectLater(
+        find.byType(ClipRect),
+        matchesGoldenFile('painting.rounded_superellipse_border.long.png'),
+      );
+    });
   });
 }

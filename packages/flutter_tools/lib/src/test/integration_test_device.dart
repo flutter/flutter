@@ -141,8 +141,10 @@ class IntegrationTestTestDevice implements TestDevice {
       if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {
         globals.printTrace('Could not stop the Integration Test app.');
       }
-      if (!await device.uninstallApp(applicationPackage, userIdentifier: userIdentifier)) {
-        globals.printTrace('Could not uninstall the Integration Test app.');
+      if (debuggingOptions.uninstallApp) {
+        if (!await device.uninstallApp(applicationPackage, userIdentifier: userIdentifier)) {
+          globals.printTrace('Could not uninstall the Integration Test app.');
+        }
       }
     }
 

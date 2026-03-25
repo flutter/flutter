@@ -60,8 +60,8 @@ export 'dart:ui' show VoidCallback;
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.
 abstract class Listenable {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const Listenable();
 
   /// Return a [Listenable] that triggers when any of the given [Listenable]s
@@ -92,12 +92,14 @@ abstract class Listenable {
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
 abstract class ValueListenable<T> extends Listenable {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const ValueListenable();
 
-  /// The current value of the object. When the value changes, the callbacks
-  /// registered with [addListener] will be invoked.
+  /// The current value of the object.
+  ///
+  /// When the value changes, the callbacks registered with [addListener] will be
+  /// invoked.
   T get value;
 }
 
@@ -360,9 +362,10 @@ mixin class ChangeNotifier implements Listenable {
     }
   }
 
-  /// Discards any resources used by the object. After this is called, the
-  /// object is not in a usable state and should be discarded (calls to
-  /// [addListener] will throw after the object is disposed).
+  /// Discards any resources used by the object.
+  ///
+  /// After this is called, the object is not in a usable state and should be
+  /// discarded (calls to [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
   ///

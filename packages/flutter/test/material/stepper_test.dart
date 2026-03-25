@@ -1706,6 +1706,263 @@ void main() {
       expect(tester.getSize(find.byType(Stepper)), Size.zero);
     }
   });
+
+  testWidgets('Stepper custom headerPadding for vertical stepper', (WidgetTester tester) async {
+    // Default header padding is 24.0 horizontal, 0.0 vertical.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    final Rect defaultTitleRect = tester.getRect(find.text('Step 1'));
+
+    // Custom padding: horizontal 12.0 (reduces left by 12.0), vertical 8.0 (increases top by 8.0).
+    const EdgeInsetsGeometry customPadding = EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            headerPadding: customPadding,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    final Rect customTitleRect = tester.getRect(find.text('Step 1'));
+
+    expect(customTitleRect.left, lessThan(defaultTitleRect.left));
+    expect(defaultTitleRect.left - customTitleRect.left, moreOrLessEquals(12.0));
+    expect(defaultTitleRect.top, equals(24.0));
+    expect(customTitleRect.top, greaterThan(defaultTitleRect.top));
+    expect(customTitleRect.top, equals(32.0));
+    expect(customTitleRect.top - defaultTitleRect.top, moreOrLessEquals(8.0));
+  });
+
+  testWidgets('Stepper custom headerPadding for horizontal stepper', (WidgetTester tester) async {
+    // Default header padding is 24.0 horizontal, 0.0 vertical.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    final Rect defaultTitleRect = tester.getRect(find.text('Step 1'));
+
+    // Custom padding: horizontal 16.0 (reduces left by 8.0 from default 24.0),
+    // vertical 8.0 (increases top by 8.0).
+    const EdgeInsetsGeometry customPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            headerPadding: customPadding,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    final Rect customTitleRect = tester.getRect(find.text('Step 1'));
+
+    expect(customTitleRect.left, lessThan(defaultTitleRect.left));
+    expect(defaultTitleRect.left - customTitleRect.left, moreOrLessEquals(8.0));
+    expect(defaultTitleRect.top, equals(24.0));
+    expect(customTitleRect.top, greaterThan(defaultTitleRect.top));
+    expect(customTitleRect.top, equals(32.0));
+    expect(customTitleRect.top - defaultTitleRect.top, moreOrLessEquals(8.0));
+  });
+
+  testWidgets('Stepper custom contentPadding for horizontal stepper', (WidgetTester tester) async {
+    const EdgeInsetsGeometry customPadding = EdgeInsets.all(16.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            contentPadding: customPadding,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    final Stepper stepper = tester.widget<Stepper>(find.byType(Stepper));
+    expect(stepper.contentPadding, customPadding);
+
+    // The content is in a ListView, verify its padding
+    final ListView listView = tester.widget<ListView>(
+      find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)),
+    );
+    expect(listView.padding, customPadding);
+  });
+
+  testWidgets('Stepper custom contentPadding for vertical stepper', (WidgetTester tester) async {
+    const EdgeInsetsGeometry customPadding = EdgeInsetsDirectional.only(
+      start: 48.0,
+      end: 16.0,
+      bottom: 16.0,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            contentPadding: customPadding,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    // Find the Padding widget that wraps the step content and verify the effective padding.
+    const expected = EdgeInsets.only(left: 48.0, right: 16.0, bottom: 16.0);
+
+    final Iterable<Padding> paddings = tester.widgetList<Padding>(
+      find.ancestor(of: find.text('Content 1'), matching: find.byType(Padding)),
+    );
+
+    expect(paddings.any((Padding p) => p.padding.resolve(TextDirection.ltr) == expected), isTrue);
+  });
+
+  testWidgets('Stepper default contentPadding for horizontal stepper', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            type: StepperType.horizontal,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    final Stepper stepper = tester.widget<Stepper>(find.byType(Stepper));
+    expect(stepper.contentPadding, isNull);
+
+    // Verify the default padding is applied to ListView
+    final ListView listView = tester.widget<ListView>(
+      find.descendant(of: find.byType(Stepper), matching: find.byType(ListView)),
+    );
+    expect(listView.padding, const EdgeInsets.all(24.0));
+  });
+
+  testWidgets('Stepper vertical contentPadding includes stepIconMargin start value', (
+    WidgetTester tester,
+  ) async {
+    const customIconMargin = EdgeInsets.only(left: 16.0, right: 8.0);
+    const customContentPadding = EdgeInsetsDirectional.only(start: 40.0, end: 20.0, bottom: 16.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepIconMargin: customIconMargin,
+            contentPadding: customContentPadding,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    // Find the Padding widget that wraps the step content
+    final Finder contentPadding = find.ancestor(
+      of: find.text('Content 1'),
+      matching: find.byType(Padding),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(contentPadding.first);
+    final EdgeInsetsGeometry resolvedPadding = paddingWidget.padding;
+
+    // The effective padding should be customContentPadding + stepIconMargin.left
+    // start: 40.0 + 16.0 = 56.0
+    const expectedPadding = EdgeInsets.only(
+      left: 56.0, // 40.0 + 16.0 (marginLeft)
+      right: 20.0,
+      bottom: 16.0,
+    );
+
+    expect(resolvedPadding.resolve(TextDirection.ltr), expectedPadding);
+  });
+
+  testWidgets('Stepper vertical default contentPadding includes stepIconMargin start value', (
+    WidgetTester tester,
+  ) async {
+    const customIconMargin = EdgeInsets.only(left: 10.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            stepIconMargin: customIconMargin,
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    // Find the Padding widget that wraps the step content
+    final Finder contentPadding = find.ancestor(
+      of: find.text('Content 1'),
+      matching: find.byType(Padding),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(contentPadding.first);
+    final EdgeInsetsGeometry resolvedPadding = paddingWidget.padding;
+
+    // Default padding is start: 60.0, end: 24.0, bottom: 24.0
+    // Plus stepIconMargin.left: 10.0
+    // Expected start: 60.0 + 10.0 = 70.0
+    const expectedPadding = EdgeInsets.only(
+      left: 70.0, // 60.0 + 10.0 (marginLeft)
+      right: 24.0,
+      bottom: 24.0,
+    );
+
+    expect(resolvedPadding.resolve(TextDirection.ltr), expectedPadding);
+  });
+
+  testWidgets('Stepper vertical contentPadding without stepIconMargin uses default', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            steps: const <Step>[Step(title: Text('Step 1'), content: Text('Content 1'))],
+          ),
+        ),
+      ),
+    );
+
+    // Find the Padding widget that wraps the step content
+    final Finder contentPadding = find.ancestor(
+      of: find.text('Content 1'),
+      matching: find.byType(Padding),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(contentPadding.first);
+    final EdgeInsetsGeometry resolvedPadding = paddingWidget.padding;
+
+    // Default padding without stepIconMargin
+    const expectedPadding = EdgeInsets.only(left: 60.0, right: 24.0, bottom: 24.0);
+
+    expect(resolvedPadding.resolve(TextDirection.ltr), expectedPadding);
+  });
 }
 
 class _TappableColorWidget extends StatefulWidget {

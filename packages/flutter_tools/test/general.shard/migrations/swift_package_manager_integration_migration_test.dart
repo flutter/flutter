@@ -16,7 +16,9 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
+const pluginName = 'my_plugin';
 const supportedPlatforms = <FlutterDarwinPlatform>[
   FlutterDarwinPlatform.ios,
   FlutterDarwinPlatform.macos,
@@ -115,7 +117,7 @@ void main() {
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, FlutterDarwinPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios, schemeMigrated: false);
         project._projectInfo = null;
 
         final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -143,7 +145,7 @@ void main() {
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, FlutterDarwinPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios, schemeMigrated: false);
         project.xcodeWorkspace = null;
 
         final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -171,7 +173,7 @@ void main() {
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, FlutterDarwinPlatform.ios);
+        _createProjectFiles(project, FlutterDarwinPlatform.ios, schemeMigrated: false);
         project._projectInfo = XcodeProjectInfo(<String>[], <String>[], <String>[], testLogger);
 
         final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -201,7 +203,12 @@ void main() {
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, FlutterDarwinPlatform.ios, createSchemeFile: false);
+        _createProjectFiles(
+          project,
+          FlutterDarwinPlatform.ios,
+          createSchemeFile: false,
+          schemeMigrated: false,
+        );
 
         final projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
@@ -299,7 +306,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
               );
-              _createProjectFiles(project, platform);
+              _createProjectFiles(project, platform, schemeMigrated: false);
               project.xcodeProjectSchemeFile().writeAsStringSync('');
 
               final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -330,7 +337,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
               );
-              _createProjectFiles(project, platform);
+              _createProjectFiles(project, platform, schemeMigrated: false);
               project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -369,7 +376,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
               );
-              _createProjectFiles(project, platform);
+              _createProjectFiles(project, platform, schemeMigrated: false);
               project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -408,7 +415,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
               );
-              _createProjectFiles(project, platform);
+              _createProjectFiles(project, platform, schemeMigrated: false);
               project.xcodeProjectSchemeFile().writeAsStringSync('''
          <BuildableReference
             BuildableIdentifier = "primary"
@@ -445,7 +452,7 @@ void main() {
               fileSystem: memoryFileSystem,
               logger: testLogger,
             );
-            _createProjectFiles(project, platform);
+            _createProjectFiles(project, platform, schemeMigrated: false);
             project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildableReference(platform));
 
             final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -474,7 +481,7 @@ void main() {
               fileSystem: memoryFileSystem,
               logger: testLogger,
             );
-            _createProjectFiles(project, platform);
+            _createProjectFiles(project, platform, schemeMigrated: false);
             project.xcodeProjectSchemeFile().writeAsStringSync(
               '${_validBuildActions(platform)} <an opening without a close>',
             );
@@ -502,7 +509,7 @@ void main() {
               fileSystem: memoryFileSystem,
               logger: testLogger,
             );
-            _createProjectFiles(project, platform);
+            _createProjectFiles(project, platform, schemeMigrated: false);
             project.xcodeProjectSchemeFile().writeAsStringSync(
               _validBuildActions(platform, hasBuildEntries: false),
             );
@@ -511,6 +518,9 @@ void main() {
               _plutilOutput(_allSectionsMigratedAsJson(platform)),
               _plutilOutput(_allSectionsMigratedAsJson(platform)),
             ]);
+            project.xcodeProjectInfoFile.writeAsStringSync(
+              _projectSettings(_allSectionsMigrated(platform)),
+            );
             final projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
@@ -536,7 +546,7 @@ void main() {
               fileSystem: memoryFileSystem,
               logger: testLogger,
             );
-            _createProjectFiles(project, platform);
+            _createProjectFiles(project, platform, schemeMigrated: false);
             project.xcodeProjectSchemeFile().writeAsStringSync(
               _validBuildActions(platform, hasPreActions: true),
             );
@@ -544,6 +554,9 @@ void main() {
               _plutilOutput(_allSectionsMigratedAsJson(platform)),
               _plutilOutput(_allSectionsMigratedAsJson(platform)),
             ]);
+            project.xcodeProjectInfoFile.writeAsStringSync(
+              _projectSettings(_allSectionsMigrated(platform)),
+            );
             final projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
@@ -571,13 +584,16 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
               );
-              _createProjectFiles(project, platform);
+              _createProjectFiles(project, platform, schemeMigrated: false);
               project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
 
               final plistParser = FakePlistParser.multiple(<String>[
                 _plutilOutput(_allSectionsMigratedAsJson(platform)),
                 _plutilOutput(_allSectionsMigratedAsJson(platform)),
               ]);
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(_allSectionsMigrated(platform)),
+              );
               final projectMigration = SwiftPackageManagerIntegrationMigration(
                 project,
                 platform,
@@ -629,7 +645,7 @@ void main() {
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
         );
         await projectMigration.migrate();
-        expect(testLogger.traceText, contains('project.pbxproj already migrated. Skipping...'));
+        expect(testLogger.traceText, isEmpty);
       });
 
       group('fails if parsing project.pbxproj', () {
@@ -785,6 +801,111 @@ void main() {
           expect(
             () => projectMigration.migrate(),
             throwsToolExit(message: 'Duplicate id found for XCLocalSwiftPackageReference'),
+          );
+        });
+
+        testWithoutContext('for FlutterGeneratedPluginSwiftPackage PBXFileReference', () async {
+          final memoryFileSystem = MemoryFileSystem();
+          final testLogger = BufferLogger.test();
+          final project = FakeXcodeProject(
+            platform: FlutterDarwinPlatform.ios.name,
+            fileSystem: memoryFileSystem,
+            logger: testLogger,
+          );
+          _createProjectFiles(project, FlutterDarwinPlatform.ios);
+          project.xcodeProjectInfoFile.writeAsStringSync('78E0A7A72DC9AD7400C4905E');
+
+          final projectMigration = SwiftPackageManagerIntegrationMigration(
+            project,
+            FlutterDarwinPlatform.ios,
+            BuildInfo.debug,
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+            logger: testLogger,
+            fileSystem: memoryFileSystem,
+            plistParser: FakePlistParser(),
+          );
+          expect(
+            () => projectMigration.migrate(),
+            throwsToolExit(
+              message: 'Duplicate id found for FlutterGeneratedPluginSwiftPackage PBXFileReference',
+            ),
+          );
+        });
+
+        group('for plugin', () {
+          late MemoryFileSystem memoryFileSystem;
+          setUp(() {
+            memoryFileSystem = MemoryFileSystem.test();
+          });
+
+          testUsingContext(
+            'PBXFileReference',
+            () async {
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: FlutterDarwinPlatform.ios.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+                projectDir: memoryFileSystem.currentDirectory
+                    .childDirectory('my_app')
+                    .childDirectory('example'),
+              );
+              _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
+              project.xcodeProjectInfoFile.writeAsStringSync('78DABEA22ED26510000E7860');
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                FlutterDarwinPlatform.ios,
+                BuildInfo.debug,
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                logger: testLogger,
+                fileSystem: memoryFileSystem,
+                plistParser: FakePlistParser(),
+              );
+              expect(
+                () => projectMigration.migrate(),
+                throwsToolExit(message: 'Duplicate id found for $pluginName PBXFileReference'),
+              );
+            },
+            overrides: <Type, Generator>{
+              FileSystem: () => memoryFileSystem,
+              ProcessManager: () => FakeProcessManager.any(),
+            },
+          );
+
+          testUsingContext(
+            'FlutterFramework PBXFileReference',
+            () async {
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: FlutterDarwinPlatform.ios.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+                projectDir: memoryFileSystem.currentDirectory
+                    .childDirectory('my_app')
+                    .childDirectory('example'),
+              );
+              _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
+              project.xcodeProjectInfoFile.writeAsStringSync('784666492D4C4C64000A1A5F');
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                FlutterDarwinPlatform.ios,
+                BuildInfo.debug,
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                logger: testLogger,
+                fileSystem: memoryFileSystem,
+                plistParser: FakePlistParser(),
+              );
+              expect(
+                () => projectMigration.migrate(),
+                throwsToolExit(message: 'Duplicate id found for FlutterFramework PBXFileReference'),
+              );
+            },
+            overrides: <Type, Generator>{
+              FileSystem: () => memoryFileSystem,
+              ProcessManager: () => FakeProcessManager.any(),
+            },
           );
         });
       });
@@ -1003,7 +1124,7 @@ void main() {
                 ..._allSectionsMigratedAsJson(platform),
               ];
               settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                  unmigratedFileReferenceAsJson;
+                  unmigratedFileReferenceAsJson(platform);
 
               final projectMigration = SwiftPackageManagerIntegrationMigration(
                 project,
@@ -1012,7 +1133,7 @@ void main() {
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1042,7 +1163,7 @@ void main() {
                 ..._allSectionsMigratedAsJson(platform),
               ];
               settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                  unmigratedFileReferenceAsJson;
+                  unmigratedFileReferenceAsJson(platform);
 
               final projectMigration = SwiftPackageManagerIntegrationMigration(
                 project,
@@ -1051,7 +1172,7 @@ void main() {
                 xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
-                plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1080,7 +1201,7 @@ void main() {
                 ..._allSectionsMigratedAsJson(platform),
               ];
               settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                  unmigratedFileReferenceAsJson;
+                  unmigratedFileReferenceAsJson(platform);
 
               final plistParser = FakePlistParser.multiple(<String>[
                 _plutilOutput(settingsAsJsonBeforeMigration),
@@ -1110,6 +1231,75 @@ void main() {
                 _projectSettings(settingsBeforeMigration),
               );
               expect(plistParser.hasRemainingExpectations, isFalse);
+            });
+
+            group('for plugin', () {
+              late MemoryFileSystem memoryFileSystem;
+              setUp(() {
+                memoryFileSystem = MemoryFileSystem.test();
+              });
+
+              testUsingContext(
+                'successfully added',
+                () async {
+                  final testLogger = BufferLogger.test();
+                  final project = FakeXcodeProject(
+                    platform: platform.name,
+                    fileSystem: memoryFileSystem,
+                    logger: testLogger,
+                    projectDir: memoryFileSystem.currentDirectory
+                        .childDirectory('my_app')
+                        .childDirectory('example'),
+                  );
+                  _createProjectFiles(project, platform, isExampleApp: true);
+
+                  final settingsBeforeMigration = <String>[
+                    ..._allSectionsMigrated(platform, includePlugin: true),
+                  ];
+                  settingsBeforeMigration[_fileReferenceSectionIndex] =
+                      unmigratedFileReferenceSection;
+                  project.xcodeProjectInfoFile.writeAsStringSync(
+                    _projectSettings(settingsBeforeMigration),
+                  );
+                  final settingsAsJsonBeforeMigration = <String>[
+                    ..._allSectionsMigratedAsJson(platform, includePlugin: true),
+                  ];
+                  settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
+                      unmigratedFileReferenceAsJson(platform);
+
+                  final plistParser = FakePlistParser.multiple(<String>[
+                    _plutilOutput(settingsAsJsonBeforeMigration),
+                    _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
+                  ]);
+
+                  final projectMigration = SwiftPackageManagerIntegrationMigration(
+                    project,
+                    platform,
+                    BuildInfo.debug,
+                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                    logger: testLogger,
+                    fileSystem: memoryFileSystem,
+                    plistParser: plistParser,
+                  );
+                  await projectMigration.migrate();
+                  expect(testLogger.errorText, isEmpty);
+                  expect(
+                    testLogger.traceText.contains('PBXFileReference already migrated. Skipping...'),
+                    isFalse,
+                  );
+                  settingsBeforeMigration[_fileReferenceSectionIndex] =
+                      migratedFileReferenceSection(platform, includePlugin: true);
+                  expect(
+                    project.xcodeProjectInfoFile.readAsStringSync(),
+                    _projectSettings(settingsBeforeMigration),
+                  );
+                  expect(plistParser.hasRemainingExpectations, isFalse);
+                },
+                overrides: <Type, Generator>{
+                  FileSystem: () => memoryFileSystem,
+                  ProcessManager: () => FakeProcessManager.any(),
+                },
+              );
             });
           });
 
@@ -1696,6 +1886,80 @@ void main() {
                 _projectSettings(expectedSettings),
               );
               expect(plistParser.hasRemainingExpectations, isFalse);
+            });
+
+            group('for plugin', () {
+              late MemoryFileSystem memoryFileSystem;
+              setUp(() {
+                memoryFileSystem = MemoryFileSystem.test();
+              });
+
+              testUsingContext(
+                'successfully added',
+                () async {
+                  final testLogger = BufferLogger.test();
+                  final project = FakeXcodeProject(
+                    platform: platform.name,
+                    fileSystem: memoryFileSystem,
+                    logger: testLogger,
+                    projectDir: memoryFileSystem.currentDirectory
+                        .childDirectory('my_app')
+                        .childDirectory('example'),
+                  );
+                  _createProjectFiles(project, platform, isExampleApp: true);
+
+                  final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+                  settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
+                  project.xcodeProjectInfoFile.writeAsStringSync(
+                    _projectSettings(settingsBeforeMigration),
+                  );
+
+                  final settingsAsJsonBeforeMigration = <String>[
+                    ..._allSectionsUnmigratedAsJson(platform),
+                  ];
+
+                  final expectedSettings = <String>[
+                    ..._allSectionsMigrated(platform, includePlugin: true),
+                  ];
+                  expectedSettings[_groupSectionIndex] = migratedGroupSection(
+                    platform,
+                    includePlugin: true,
+                  );
+                  expectedSettings[_fileReferenceSectionIndex] = migratedFileReferenceSection(
+                    platform,
+                    includePlugin: true,
+                  );
+                  final plistParser = FakePlistParser.multiple(<String>[
+                    _plutilOutput(settingsAsJsonBeforeMigration),
+                    _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
+                  ]);
+
+                  final projectMigration = SwiftPackageManagerIntegrationMigration(
+                    project,
+                    platform,
+                    BuildInfo.debug,
+                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                    logger: testLogger,
+                    fileSystem: memoryFileSystem,
+                    plistParser: plistParser,
+                  );
+                  await projectMigration.migrate();
+                  expect(testLogger.errorText, isEmpty);
+                  expect(
+                    testLogger.traceText.contains('PBXGroup already migrated. Skipping...'),
+                    isFalse,
+                  );
+                  expect(
+                    project.xcodeProjectInfoFile.readAsStringSync(),
+                    _projectSettings(expectedSettings),
+                  );
+                  expect(plistParser.hasRemainingExpectations, isFalse);
+                },
+                overrides: <Type, Generator>{
+                  FileSystem: () => memoryFileSystem,
+                  ProcessManager: () => FakeProcessManager.any(),
+                },
+              );
             });
           });
 
@@ -2721,95 +2985,6 @@ void main() {
             });
           });
 
-          testWithoutContext('migrates only PBXFileReference and PBXGroup', () async {
-            final memoryFileSystem = MemoryFileSystem();
-            final testLogger = BufferLogger.test();
-            final project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: memoryFileSystem,
-              logger: testLogger,
-            );
-            _createProjectFiles(project, platform);
-
-            final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
-            settingsBeforeMigration[_fileReferenceSectionIndex] = unmigratedFileReferenceSection;
-            settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
-            project.xcodeProjectInfoFile.writeAsStringSync(
-              _projectSettings(settingsBeforeMigration),
-            );
-
-            final settingsAsJsonBeforeMigration = <String>[..._allSectionsMigratedAsJson(platform)];
-            settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                unmigratedFileReferenceAsJson;
-            settingsAsJsonBeforeMigration[_groupSectionIndex] = unmigratedGroupSectionAsJson(
-              platform,
-            );
-
-            final plistParser = FakePlistParser.multiple(<String>[
-              _plutilOutput(settingsAsJsonBeforeMigration),
-              _plutilOutput(_allSectionsMigratedAsJson(platform)),
-            ]);
-
-            final projectMigration = SwiftPackageManagerIntegrationMigration(
-              project,
-              platform,
-              BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-            );
-            await projectMigration.migrate();
-            expect(testLogger.errorText, isEmpty);
-            expect(
-              testLogger.traceText.contains('PBXBuildFile already migrated. Skipping...'),
-              isTrue,
-            );
-            expect(
-              testLogger.traceText.contains('PBXFileReference already migrated. Skipping...'),
-              isFalse,
-            );
-            expect(
-              testLogger.traceText.contains(
-                'PBXFrameworksBuildPhase already migrated. Skipping...',
-              ),
-              isTrue,
-            );
-            expect(
-              testLogger.traceText.contains('PBXGroup already migrated. Skipping...'),
-              isFalse,
-            );
-            expect(
-              testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
-              isTrue,
-            );
-            expect(
-              testLogger.traceText.contains('PBXProject already migrated. Skipping...'),
-              isTrue,
-            );
-            expect(
-              testLogger.traceText.contains(
-                'XCLocalSwiftPackageReference already migrated. Skipping...',
-              ),
-              isTrue,
-            );
-            expect(
-              testLogger.traceText.contains(
-                'XCSwiftPackageProductDependency already migrated. Skipping...',
-              ),
-              isTrue,
-            );
-            settingsBeforeMigration[_fileReferenceSectionIndex] = migratedFileReferenceSection(
-              platform,
-            );
-            settingsBeforeMigration[_groupSectionIndex] = migratedGroupSection(platform);
-            expect(
-              project.xcodeProjectInfoFile.readAsStringSync(),
-              _projectSettings(settingsBeforeMigration),
-            );
-            expect(plistParser.hasRemainingExpectations, isFalse);
-          });
-
           testWithoutContext('throw if settings not updated correctly', () async {
             final memoryFileSystem = MemoryFileSystem();
             final testLogger = BufferLogger.test();
@@ -2847,17 +3022,7 @@ void main() {
             );
             expect(
               testLogger.errorText,
-              contains(
-                'PBXFileReference for FlutterGeneratedPluginSwiftPackage was not migrated or was migrated incorrectly.',
-              ),
-            );
-            expect(
-              testLogger.errorText,
               contains('PBXFrameworksBuildPhase was not migrated or was migrated incorrectly.'),
-            );
-            expect(
-              testLogger.errorText,
-              contains('PBXGroup was not migrated or was migrated incorrectly.'),
             );
             expect(
               testLogger.errorText,
@@ -2878,6 +3043,187 @@ void main() {
               contains(
                 'XCSwiftPackageProductDependency was not migrated or was migrated incorrectly.',
               ),
+            );
+          });
+
+          testWithoutContext(
+            'migrates FlutterGeneratedPluginSwiftPackage file and group when already partially migrated',
+            () async {
+              final memoryFileSystem = MemoryFileSystem();
+              final testLogger = BufferLogger.test();
+              final project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+              _createProjectFiles(project, platform);
+
+              final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
+              settingsBeforeMigration[_fileReferenceSectionIndex] = unmigratedFileReferenceSection;
+              settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
+              project.xcodeProjectInfoFile.writeAsStringSync(
+                _projectSettings(settingsBeforeMigration),
+              );
+              final settingsAsJsonBeforeMigration = <String>[
+                ..._allSectionsMigratedAsJson(platform),
+              ];
+              settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
+                  unmigratedFileReferenceAsJson(platform);
+              settingsAsJsonBeforeMigration[_groupSectionIndex] = unmigratedGroupSectionAsJson(
+                platform,
+              );
+
+              final plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(settingsAsJsonBeforeMigration),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
+
+              final projectMigration = SwiftPackageManagerIntegrationMigration(
+                project,
+                platform,
+                BuildInfo.debug,
+                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                logger: testLogger,
+                fileSystem: memoryFileSystem,
+                plistParser: plistParser,
+              );
+              await projectMigration.migrate();
+              expect(
+                testLogger.traceText,
+                'Runner.xcscheme already migrated. Skipping...\n'
+                'Updating project settings...\n'
+                'Validating project settings...\n',
+              );
+              expect(testLogger.errorText, isEmpty);
+              expect(
+                project.xcodeProjectInfoFile.readAsStringSync(),
+                _projectSettings([..._allSectionsMigrated(platform)]),
+              );
+              expect(plistParser.hasRemainingExpectations, isFalse);
+            },
+          );
+
+          group('migrates plugin when already partially migrated', () {
+            late MemoryFileSystem memoryFileSystem;
+            setUp(() {
+              memoryFileSystem = MemoryFileSystem.test();
+            });
+
+            testUsingContext(
+              'successfully added',
+              () async {
+                final testLogger = BufferLogger.test();
+                final project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                  projectDir: memoryFileSystem.currentDirectory
+                      .childDirectory('my_app')
+                      .childDirectory('example'),
+                );
+                _createProjectFiles(project, platform, isExampleApp: true);
+
+                final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
+                project.xcodeProjectInfoFile.writeAsStringSync(
+                  _projectSettings(settingsBeforeMigration),
+                );
+                final settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsMigratedAsJson(platform),
+                ];
+
+                final expectedSettings = <String>[
+                  ..._allSectionsMigrated(platform, includePlugin: true),
+                ];
+                final plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
+                ]);
+
+                final projectMigration = SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: plistParser,
+                );
+                await projectMigration.migrate();
+                expect(
+                  testLogger.traceText,
+                  'Runner.xcscheme already migrated. Skipping...\n'
+                  'PBXFileReference for 78E0A7A72DC9AD7400C4905E already migrated. Skipping...\n'
+                  'PBXGroup for 78E0A7A72DC9AD7400C4905E already migrated. Skipping...\n'
+                  'Updating project settings...\n'
+                  'Validating project settings...\n',
+                );
+                expect(testLogger.errorText, isEmpty);
+                expect(
+                  project.xcodeProjectInfoFile.readAsStringSync(),
+                  _projectSettings(expectedSettings),
+                );
+                expect(plistParser.hasRemainingExpectations, isFalse);
+              },
+              overrides: <Type, Generator>{
+                FileSystem: () => memoryFileSystem,
+                ProcessManager: () => FakeProcessManager.any(),
+              },
+            );
+
+            testUsingContext(
+              'failure does not throw',
+              () async {
+                final testLogger = BufferLogger.test();
+                final project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                  projectDir: memoryFileSystem.currentDirectory
+                      .childDirectory('my_app')
+                      .childDirectory('example'),
+                );
+                _createProjectFiles(project, platform, isExampleApp: true);
+
+                final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
+                project.xcodeProjectInfoFile.writeAsStringSync(
+                  _projectSettings(settingsBeforeMigration),
+                );
+                final settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsMigratedAsJson(platform),
+                ];
+
+                final plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(['something went wrong']),
+                ]);
+
+                final projectMigration = SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: plistParser,
+                );
+                await projectMigration.migrate();
+                expect(testLogger.errorText, isEmpty);
+                expect(
+                  testLogger.traceText,
+                  contains(
+                    "An error occurred when adding the plugin's Swift package to the Xcode project",
+                  ),
+                );
+                expect(
+                  project.xcodeProjectInfoFile.readAsStringSync(),
+                  _projectSettings(settingsBeforeMigration),
+                );
+                expect(plistParser.hasRemainingExpectations, isFalse);
+              },
+              overrides: <Type, Generator>{
+                FileSystem: () => memoryFileSystem,
+                ProcessManager: () => FakeProcessManager.any(),
+              },
             );
           });
         });
@@ -2928,7 +3274,7 @@ void main() {
           fileSystem: memoryFileSystem,
           logger: testLogger,
         );
-        _createProjectFiles(project, platform);
+        _createProjectFiles(project, platform, schemeMigrated: false);
 
         final String originalProjectInfo = _projectSettings(_allSectionsUnmigrated(platform));
         project.xcodeProjectInfoFile.writeAsStringSync(originalProjectInfo);
@@ -2960,18 +3306,44 @@ void main() {
 }
 
 void _createProjectFiles(
-  FakeXcodeProject project,
+  FakeXcodeProject xcodeProject,
   FlutterDarwinPlatform platform, {
   bool createSchemeFile = true,
   String? scheme,
+  bool isExampleApp = false,
+  bool schemeMigrated = true,
 }) {
-  project.parent.directory.createSync(recursive: true);
-  project.hostAppRoot.createSync(recursive: true);
-  project.xcodeProjectInfoFile.createSync(recursive: true);
-  project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
-  if (createSchemeFile) {
-    project.xcodeProjectSchemeFile(scheme: scheme).createSync(recursive: true);
-    project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
+  final FakeFlutterProject flutterProject = xcodeProject.parent;
+  flutterProject.directory.createSync(recursive: true);
+  xcodeProject.hostAppRoot.createSync(recursive: true);
+  xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
+  xcodeProject.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+  if (schemeMigrated) {
+    xcodeProject.xcodeProjectSchemeFile(scheme: scheme).createSync(recursive: true);
+    xcodeProject.xcodeProjectSchemeFile().writeAsStringSync(
+      _validBuildActions(platform, hasFrameworkScript: true),
+    );
+  } else if (createSchemeFile) {
+    xcodeProject.xcodeProjectSchemeFile(scheme: scheme).createSync(recursive: true);
+    xcodeProject.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
+  }
+  if (isExampleApp) {
+    final Directory pluginProjectDir = flutterProject.directory.parent;
+    pluginProjectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: $pluginName
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: MyPlugin
+''');
+    xcodeProject.relativeSwiftPackagesDirectory
+        .childLink(pluginName)
+        .createSync(
+          pluginProjectDir.childDirectory(platform.name).childDirectory(pluginName).path,
+          recursive: true,
+        );
   }
 }
 
@@ -3071,12 +3443,12 @@ const _projectSectionIndex = 5;
 const _localSwiftPackageReferenceSectionIndex = 6;
 const _swiftPackageProductDependencySectionIndex = 7;
 
-List<String> _allSectionsMigrated(FlutterDarwinPlatform platform) {
+List<String> _allSectionsMigrated(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
   return <String>[
     migratedBuildFileSection,
-    migratedFileReferenceSection(platform),
+    migratedFileReferenceSection(platform, includePlugin: includePlugin),
     migratedFrameworksBuildPhaseSection(platform),
-    migratedGroupSection(platform),
+    migratedGroupSection(platform, includePlugin: includePlugin),
     migratedNativeTargetSection(platform),
     migratedProjectSection(platform),
     migratedLocalSwiftPackageReferenceSection(),
@@ -3084,12 +3456,15 @@ List<String> _allSectionsMigrated(FlutterDarwinPlatform platform) {
   ];
 }
 
-List<String> _allSectionsMigratedAsJson(FlutterDarwinPlatform platform) {
+List<String> _allSectionsMigratedAsJson(
+  FlutterDarwinPlatform platform, {
+  bool includePlugin = false,
+}) {
   return <String>[
     migratedBuildFileSectionAsJson,
-    migratedFileReferenceAsJson(platform),
+    migratedFileReferenceAsJson(platform, includePlugin: includePlugin),
     migratedFrameworksBuildPhaseSectionAsJson(platform),
-    migratedGroupSectionAsJson(platform),
+    migratedGroupSectionAsJson(platform, includePlugin: includePlugin),
     migratedNativeTargetSectionAsJson(platform),
     migratedProjectSectionAsJson(platform),
     migratedLocalSwiftPackageReferenceSectionAsJson,
@@ -3113,7 +3488,7 @@ List<String> _allSectionsUnmigrated(FlutterDarwinPlatform platform) {
 List<String> _allSectionsUnmigratedAsJson(FlutterDarwinPlatform platform) {
   return <String>[
     unmigratedBuildFileSectionAsJson,
-    unmigratedFileReferenceAsJson,
+    unmigratedFileReferenceAsJson(platform),
     unmigratedFrameworksBuildPhaseSectionAsJson(platform),
     unmigratedGroupSectionAsJson(platform),
     unmigratedNativeTargetSectionAsJson(platform),
@@ -3213,17 +3588,42 @@ const unmigratedFileReferenceSection = '''
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 ''';
-String migratedFileReferenceSection(FlutterDarwinPlatform platform) {
-  return '''
-/* Begin PBXFileReference section */
-		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
-		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ${_relativeEphemeralPath(platform)}/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
-/* End PBXFileReference section */
-''';
+
+String migratedFileReferenceSection(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
+  var pluginFileReferences = '';
+  if (includePlugin) {
+    final pluginLeadingPath = platform == FlutterDarwinPlatform.ios ? '../../' : '../../../';
+    pluginFileReferences =
+        '		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = ${_relativeEphemeralPath(platform)}/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };\n'
+        '		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = $pluginLeadingPath${platform.name}/$pluginName; sourceTree = "<group>"; };\n';
+  }
+  return '/* Begin PBXFileReference section */\n'
+      '		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };\n'
+      '		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };\n'
+      '		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ${_relativeEphemeralPath(platform)}/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };\n'
+      '$pluginFileReferences'
+      '/* End PBXFileReference section */\n';
 }
 
-const unmigratedFileReferenceAsJson = '''
+String unmigratedFileReferenceAsJson(
+  FlutterDarwinPlatform platform, {
+  bool includeFlutterGeneratedPluginSwiftPackage = false,
+}) {
+  var flutterGeneratedPluginSwiftPackage = '';
+  if (includeFlutterGeneratedPluginSwiftPackage) {
+    flutterGeneratedPluginSwiftPackage =
+        '''
+   "78E0A7A72DC9AD7400C4905E": {
+      "path": "${_relativeEphemeralPath(platform)}/Packages/FlutterGeneratedPluginSwiftPackage",
+      "isa": "PBXFileReference",
+      "name": "flutter",
+      "lastKnownFileType": "wrapper",
+      "sourceTree": "<group>"
+    },
+''';
+  }
+  return '''
+$flutterGeneratedPluginSwiftPackage
     "1498D2321E8E86230040F4C2": {
       "path": "GeneratedPluginRegistrant.h",
       "isa": "PBXFileReference",
@@ -3237,8 +3637,11 @@ const unmigratedFileReferenceAsJson = '''
       "sourceTree": "<group>",
       "fileEncoding": "4"
     }''';
-String migratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
-  return '''
+}
+
+String migratedFileReferenceAsJson(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
+  var migratedJson =
+      '''
     "1498D2321E8E86230040F4C2": {
       "path": "GeneratedPluginRegistrant.h",
       "isa": "PBXFileReference",
@@ -3259,6 +3662,27 @@ String migratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
       "lastKnownFileType": "wrapper",
       "sourceTree": "<group>"
     }''';
+  if (includePlugin) {
+    final pluginLeadingPath = platform == FlutterDarwinPlatform.ios ? '../../' : '../../../';
+    migratedJson =
+        '''
+$migratedJson,
+    "784666492D4C4C64000A1A5F": {
+      "path": "${_relativeEphemeralPath(platform)}/Packages/.packages/FlutterFramework",
+      "isa": "PBXFileReference",
+      "name": "flutter",
+      "lastKnownFileType": "wrapper",
+      "sourceTree": "<group>"
+    },
+    "78DABEA22ED26510000E7860": {
+      "path": "$pluginLeadingPath${platform.name}/$pluginName",
+      "isa": "PBXFileReference",
+      "name": "flutter",
+      "lastKnownFileType": "wrapper",
+      "sourceTree": "<group>"
+    }''';
+  }
+  return migratedJson;
 }
 
 // PBXFrameworksBuildPhase
@@ -3359,18 +3783,30 @@ String unmigratedGroupSection(FlutterDarwinPlatform platform, {bool missingChild
   ].join('\n');
 }
 
-String migratedGroupSection(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
+String migratedGroupSection(
+  FlutterDarwinPlatform platform, {
+  bool missingChildren = false,
+  bool includePlugin = false,
+}) {
   return <String>[
     '/* Begin PBXGroup section */',
     '		${_flutterGroupIdentifier(platform)} /* Flutter */ = {',
     if (missingChildren) ...<String>[
       '			children = (',
       '				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,',
+      if (includePlugin) ...[
+        '				78DABEA22ED26510000E7860 /* $pluginName */,',
+        '				784666492D4C4C64000A1A5F /* FlutterFramework */,',
+      ],
       '			);',
       '			isa = PBXGroup;',
     ] else ...<String>[
       '			isa = PBXGroup;',
       '			children = (',
+      if (includePlugin) ...[
+        '				78DABEA22ED26510000E7860 /* $pluginName */,',
+        '				784666492D4C4C64000A1A5F /* FlutterFramework */,',
+      ],
       '				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,',
       '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,',
       '				9740EEB21CF90195004384FC /* Debug.xcconfig */,',
@@ -3388,6 +3824,7 @@ String migratedGroupSection(FlutterDarwinPlatform platform, {bool missingChildre
 String unmigratedGroupSectionAsJson(
   FlutterDarwinPlatform platform, {
   bool missingChildren = false,
+  bool includeFlutterGeneratedPluginSwiftPackage = false,
 }) {
   return <String>[
     '    "${_flutterGroupIdentifier(platform)}" : {',
@@ -3395,6 +3832,7 @@ String unmigratedGroupSectionAsJson(
     '      "name": "Flutter",',
     if (!missingChildren) ...<String>[
       '        "children": [',
+      if (includeFlutterGeneratedPluginSwiftPackage) '            "78E0A7A72DC9AD7400C4905E",',
       '            "3B3967151E833CAA004F5970",',
       '            "9740EEB21CF90195004384FC",',
       '            "7AFA3C8E1D35360C0083082E",',
@@ -3406,20 +3844,35 @@ String unmigratedGroupSectionAsJson(
   ].join('\n');
 }
 
-String migratedGroupSectionAsJson(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
+String migratedGroupSectionAsJson(
+  FlutterDarwinPlatform platform, {
+  bool missingChildren = false,
+  bool includePlugin = false,
+}) {
   return <String>[
     '    "${_flutterGroupIdentifier(platform)}" : {',
     '      "isa": "PBXGroup",',
     '      "name": "Flutter",',
     '        "children": [',
-    if (missingChildren) ...<String>['            "78E0A7A72DC9AD7400C4905E",'] else ...<String>[
+    if (missingChildren) ...<String>[
       '            "78E0A7A72DC9AD7400C4905E",',
+      if (includePlugin) ...[
+        '            "78DABEA22ED26510000E7860",',
+        '            "784666492D4C4C64000A1A5F",',
+      ],
+    ] else ...<String>[
+      '            "78E0A7A72DC9AD7400C4905E",',
+      if (includePlugin) ...[
+        '            "78DABEA22ED26510000E7860",',
+        '            "784666492D4C4C64000A1A5F",',
+      ],
       '            "3B3967151E833CAA004F5970",',
       '            "9740EEB21CF90195004384FC",',
       '            "7AFA3C8E1D35360C0083082E",',
       '            "9740EEB31CF90195004384FC"',
+
+      '      ],',
     ],
-    '      ],',
     '      "sourceTree": "<group>"',
     '    }',
   ].join('\n');
@@ -3872,8 +4325,12 @@ class FakeXcodeProject extends Fake implements IosProject {
     required String platform,
     required this.logger,
     this.usesSwiftPackageManager = true,
-  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory(platform),
-       parent = FakeFlutterProject(fileSystem: fileSystem);
+    Directory? projectDir,
+  }) : hostAppRoot = projectDir ?? fileSystem.directory('app_name').childDirectory(platform),
+       parent = FakeFlutterProject(
+         fileSystem: fileSystem,
+         appName: projectDir != null ? projectDir.basename : 'app_name',
+       );
 
   final Logger logger;
   late XcodeProjectInfo? _projectInfo = XcodeProjectInfo(
@@ -3905,6 +4362,13 @@ class FakeXcodeProject extends Fake implements IosProject {
   bool usesSwiftPackageManager;
 
   @override
+  Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
+
+  @override
+  Directory get ephemeralDirectory =>
+      hostAppRoot.childDirectory('Flutter').childDirectory('ephemeral');
+
+  @override
   Directory get flutterPluginSwiftPackageDirectory => hostAppRoot
       .childDirectory('Flutter')
       .childDirectory('ephemeral')
@@ -3922,6 +4386,21 @@ class FakeXcodeProject extends Fake implements IosProject {
   }
 
   @override
+  Directory get relativeSwiftPackagesDirectory => hostAppRoot
+      .childDirectory('Flutter')
+      .childDirectory('ephemeral')
+      .childDirectory('Packages')
+      .childDirectory('.packages');
+
+  @override
+  Directory get flutterFrameworkSwiftPackageDirectory => hostAppRoot
+      .childDirectory('Flutter')
+      .childDirectory('ephemeral')
+      .childDirectory('Packages')
+      .childDirectory('.packages')
+      .childDirectory('FlutterFramework');
+
+  @override
   Future<XcodeProjectInfo?> projectInfo() async {
     return _projectInfo;
   }
@@ -3937,8 +4416,8 @@ class FakeXcodeProject extends Fake implements IosProject {
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required MemoryFileSystem fileSystem})
-    : directory = fileSystem.directory('app_name');
+  FakeFlutterProject({required MemoryFileSystem fileSystem, required String appName})
+    : directory = fileSystem.directory(appName);
 
   @override
   Directory directory;

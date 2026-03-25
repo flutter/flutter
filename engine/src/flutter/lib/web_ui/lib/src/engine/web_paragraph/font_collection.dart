@@ -72,70 +72,19 @@ class WebFontCollection implements FlutterFontCollection {
   static final RegExp startWithDigit = RegExp(r'\b\d');
 
   /// Registers assets to Flutter Web Engine.
-  ///
-  /// Browsers and browsers versions differ significantly on how a valid font
-  /// family name should be formatted. Notable issues are:
-  ///
-  /// Safari 12 and Firefox crash if you create a [DomFontFace] with a font
-  /// family that is not correct CSS syntax. Font family names with invalid
-  /// characters are accepted on these browsers, when wrapped it in
-  /// quotes.
-  ///
-  /// Additionally, for Safari 12 to work [DomFontFace] name should be
-  /// loaded correctly on the first try.
-  ///
-  /// A font in Chrome is not usable other than inside a '<p>' tag, if a
-  /// [DomFontFace] is loaded wrapped with quotes. Unlike Safari 12 if a
-  /// valid version of the font is also loaded afterwards it will show
-  /// that font normally.
-  ///
-  /// In Safari 13 the [DomFontFace] should be loaded with unquoted family
-  /// names.
-  ///
-  /// In order to avoid all these browser compatibility issues this method:
-  /// * Detects the family names that might cause a conflict.
-  /// * Loads it with the quotes.
-  /// * Loads it again without the quotes.
-  /// * For all the other family names [DomFontFace] is loaded only once.
-  ///
-  /// See also:
-  ///
-  /// * https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Valid_family_names
-  /// * https://drafts.csswg.org/css-fonts-3/#font-family-prop
   Future<FontLoadError?> _loadFontAsset(
     String family,
     String asset,
     Map<String, String> descriptors,
   ) async {
-    final fontFaces = <DomFontFace>[];
-    final errors = <FontLoadError>[];
     try {
-      if (startWithDigit.hasMatch(family) || notPunctuation.stringMatch(family) != family) {
-        // Load a font family name with special characters once here wrapped in
-        // quotes.
-        fontFaces.add(await _loadFontFace("'$family'", asset, descriptors));
-      }
+      // Right now, this is only used in Chrome which accepts unquoted font family names.
+      // However, in the future, we should examine other browsers and see if they require
+      // quoting for certain font family names.
+      final DomFontFace fontFace = await _loadFontFace(family, asset, descriptors);
+      domDocument.fonts!.add(fontFace);
     } on FontLoadError catch (error) {
-      errors.add(error);
-    }
-    try {
-      // Load all fonts, without quoted family names.
-      fontFaces.add(await _loadFontFace(family, asset, descriptors));
-    } on FontLoadError catch (error) {
-      errors.add(error);
-    }
-    if (fontFaces.isEmpty) {
-      // We failed to load either font face. Return the first error.
-      return errors.first;
-    }
-
-    try {
-      // Since we can't use tear-offs for interop members, this code is faster
-      // and easier to read with a for loop instead of forEach.
-      // ignore: prefer_foreach
-      for (final font in fontFaces) {
-        domDocument.fonts!.add(font);
-      }
+      return error;
     } catch (e) {
       return FontInvalidDataError(asset);
     }

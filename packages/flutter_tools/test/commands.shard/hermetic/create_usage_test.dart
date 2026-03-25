@@ -130,6 +130,27 @@ void main() {
               'templates',
               'plugin_cocoapods',
             ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_swift_package_manager',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_cocoapods',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_spm',
+            ),
           ];
           for (final templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
@@ -281,6 +302,14 @@ void main() {
         ),
       },
     );
+
+    testUsingContext('plugin_ffi template is marked as deprecated in help', () {
+      final command = CreateCommand();
+      final String? templateHelp =
+          command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
+      expect(templateHelp, contains('(deprecated)'));
+      expect(templateHelp, contains('Use "package_ffi" instead.'));
+    });
   });
 }
 

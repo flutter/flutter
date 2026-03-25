@@ -9,6 +9,7 @@
 library;
 
 import 'dart:convert' show jsonDecode;
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
@@ -209,9 +211,9 @@ void main() {
       final groupIds = <String>['Group A', 'Group B', 'Group C'];
       final keys = List<GlobalKey>.generate(3, (_) => GlobalKey());
       final inputFields = <Widget>[
-        TextFormField(key: keys[0], groupId: groupIds[0]),
-        CupertinoTextField(key: keys[1], groupId: groupIds[1]),
-        TextField(key: keys[2], groupId: groupIds[2]),
+        TestTextField(key: keys[0], groupId: groupIds[0]),
+        TestTextField(key: keys[1], groupId: groupIds[1]),
+        TestTextField(key: keys[2], groupId: groupIds[2]),
       ];
 
       await tester.pumpWidget(
@@ -242,9 +244,9 @@ void main() {
       (WidgetTester tester) async {
         final keys = List<GlobalKey>.generate(3, (_) => GlobalKey());
         final inputFields = <Widget>[
-          TextFormField(key: keys[0]),
-          CupertinoTextField(key: keys[1]),
-          TextField(key: keys[2]),
+          TestTextField(key: keys[0]),
+          TestTextField(key: keys[1]),
+          TestTextField(key: keys[2]),
         ];
 
         await tester.pumpWidget(
@@ -5662,6 +5664,9 @@ void main() {
           'fontWeightIndex': 5,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5704,6 +5709,9 @@ void main() {
           'fontWeightIndex': FontWeight.bold.index,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5721,6 +5729,8 @@ void main() {
       fontSize: 20.0,
       fontFamily: 'Raleway',
       fontWeight: FontWeight.w700,
+      letterSpacing: 1.0,
+      wordSpacing: 2.0,
     );
     var currentTextStyle = textStyle1;
 
@@ -5782,6 +5792,9 @@ void main() {
           'fontWeightIndex': 6,
           'textAlignIndex': 4,
           'textDirectionIndex': 1,
+          'letterSpacing': 1.0,
+          'wordSpacing': 2.0,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -9102,9 +9115,8 @@ void main() {
                     builder: (BuildContext innerContext) {
                       return Align(
                         alignment: Alignment.topLeft,
-                        child: SizedBox(
-                          width: 200,
-                          height: 200,
+                        child: SizedBox.square(
+                          dimension: 200.0,
                           child: EditableText(
                             maxLines: null,
                             controller: controller,
@@ -9179,9 +9191,8 @@ void main() {
       MaterialApp(
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: 200,
-            height: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: SingleChildScrollView(
               controller: outerController,
               child: EditableText(
@@ -9224,9 +9235,8 @@ void main() {
         MaterialApp(
           home: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: SizedBox.square(
+              dimension: 200,
               child: EditableText(
                 maxLines: null,
                 controller: controller,
@@ -13036,9 +13046,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: SizedBox(
-            height: 600.0,
-            width: 600.0,
+          child: SizedBox.square(
+            dimension: 600.0,
             child: EditableText(
               controller: controller,
               scrollController: scrollController,
@@ -17176,7 +17185,7 @@ void main() {
             SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 600)),
-                SliverToBoxAdapter(child: SizedBox(height: 44, child: TextField())),
+                SliverToBoxAdapter(child: SizedBox(height: 44, child: TestTextField())),
                 SliverToBoxAdapter(child: SizedBox(height: 500)),
               ],
             ),
@@ -17184,10 +17193,63 @@ void main() {
         ),
       ),
     );
+
     await tester.pumpWidget(widget);
+    expect(find.byType(EditableText), findsNothing);
     await tester.showKeyboard(find.byType(EditableText, skipOffstage: false));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, 75.0);
+    expect(find.byType(EditableText), findsOneWidget);
+    // Verify scroll offset.
+    final RenderSliverMainAxisGroup groupRenderer = tester.renderObject(
+      find.byType(SliverMainAxisGroup),
+    );
+    final RenderSliver sliverWithTextField = tester.renderObject(
+      find.ancestor(of: find.byType(TestTextField), matching: find.byType(SliverToBoxAdapter)),
+    );
+
+    // Calculate scroll offset of the sliver containing the input field relative to
+    // the parent SliverMainAxisGroup.
+    final double childScrollOffset = groupRenderer.childScrollOffset(sliverWithTextField)!;
+    // The sliver before the input field has a height of 600, so the scroll offset of the sliver
+    // with the input field is 600.
+    expect(childScrollOffset, 600.0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+
+    // Calculate offset of EditableText relative to its SliverToBoxAdapter parent.
+    // This value varies depending on the padding added by decorators. TestTextField
+    // does not have any additional padding so this should be 0.0.
+    final double editableOffsetInParentSliver = renderEditable
+        .localToGlobal(Offset.zero, ancestor: sliverWithTextField)
+        .dy;
+    expect(editableOffsetInParentSliver, 0.0);
+
+    // Calculate the height of the caret and selection handle. The input field
+    // should be scrolled so that the bottom of the selection handle is visible.
+    final double lineHeight = renderEditable.preferredLineHeight;
+    final double handleHeight = state.selectionOverlay!.selectionControls!
+        .getHandleSize(lineHeight)
+        .height;
+    final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
+    final Offset anchor = state.selectionOverlay!.selectionControls!.getHandleAnchor(
+      TextSelectionHandleType.collapsed,
+      lineHeight,
+    );
+    final double handleCenter = handleHeight / 2 - anchor.dy;
+    final double bottomSpacing = math.max(
+      handleCenter + interactiveHandleHeight / 2,
+      state.widget.scrollPadding.bottom,
+    );
+
+    final Rect caretRect = renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+    final double caretBottomFromEditableTop = caretRect.bottom + bottomSpacing;
+
+    // Calculate the total scroll offset required to bring the bottom of the
+    // selection handle to the bottom of the viewport.
+    final double totalTargetY =
+        childScrollOffset + editableOffsetInParentSliver + caretBottomFromEditableTop;
+    expect(scrollController.offset, totalTargetY - scrollController.position.viewportDimension);
   });
 
   testWidgets(
@@ -17693,7 +17755,7 @@ void main() {
         cursorColor: cursorColor,
         backgroundCursorColor: const Color(0xFF424242), // grey.
         focusNode: focusNode,
-        selectionControls: _fakeTextSelectionHandleControls,
+        selectionControls: testTextSelectionHandleControls,
         contextMenuBuilder: (context, editableTextState) {
           return const SizedBox.shrink();
         },
@@ -17766,7 +17828,7 @@ void main() {
         cursorColor: cursorColor,
         backgroundCursorColor: const Color(0xFF424242), // grey.
         focusNode: focusNode,
-        selectionControls: _fakeTextSelectionHandleControls,
+        selectionControls: testTextSelectionHandleControls,
         contextMenuBuilder: (context, editableTextState) {
           return const SizedBox.shrink();
         },
@@ -18279,28 +18341,3 @@ class FakeFlutterView extends TestFlutterView {
   @override
   final int viewId;
 }
-
-class _FakeTextSelectionHandleControls extends TextSelectionControls
-    with TextSelectionHandleControls {
-  @override
-  Widget buildHandle(
-    BuildContext context,
-    TextSelectionHandleType type,
-    double textLineHeight, [
-    VoidCallback? onTap,
-  ]) {
-    return const SizedBox.shrink();
-  }
-
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    return Offset.zero;
-  }
-
-  @override
-  Size getHandleSize(double textLineHeight) {
-    return Size.zero;
-  }
-}
-
-final TextSelectionControls _fakeTextSelectionHandleControls = _FakeTextSelectionHandleControls();

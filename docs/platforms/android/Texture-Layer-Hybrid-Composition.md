@@ -8,7 +8,7 @@ It was introduced in Flutter 3.0 to combine the best aspects of Virtual Display 
 
 # Approach
 
-TLHC uses a [custom `FrameLayout`](https://github.com/flutter/engine/blob/7025645c52bfaeb1cc67be5ca842b65772c89c8e/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java#L35-L46), which is placed in the native view hierarchy as normal, but [redirects drawing](https://github.com/flutter/engine/blob/7025645c52bfaeb1cc67be5ca842b65772c89c8e/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java#L299-L309) to a canvas that backs a Flutter [`Texture`](https://api.flutter.dev/flutter/widgets/Texture-class.html) in order to compose with the rest of the Flutter UI as normal (without the layering and threading complexities of Hybrid Composition).
+TLHC uses a [custom `FrameLayout`](https://github.com/flutter/flutter/blob/91b2d41a66d1c540233b819525553afc0fa1f58d/engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java#L29-L39), which is placed in the native view hierarchy as normal, but [redirects drawing](https://github.com/flutter/flutter/blob/91b2d41a66d1c540233b819525553afc0fa1f58d/engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewWrapper.java#L178-L187) to a canvas that backs a Flutter [`Texture`](https://api.flutter.dev/flutter/widgets/Texture-class.html) in order to compose with the rest of the Flutter UI as normal (without the layering and threading complexities of Hybrid Composition).
 
 # Limitations
 

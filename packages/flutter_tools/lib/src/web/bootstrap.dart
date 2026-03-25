@@ -539,7 +539,6 @@ require.config({
 });
 // Create the main module loaded below.
 define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
-  dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
   dart_sdk.dart.nativeNonNullAsserts($nativeNullAssertions);
 

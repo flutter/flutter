@@ -6,6 +6,8 @@
 #
 # bin/cache/engine.stamp <-- SHA of the commit that engine artifacts were built
 # bin/cache/engine.realm <-- optional; ; whether the SHA is from presubmit builds or staging (bringup: true).
+#
+# *DOES NOT* update engine.version.
 
 # ---------------------------------- NOTE ---------------------------------- #
 #

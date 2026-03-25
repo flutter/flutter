@@ -1818,12 +1818,12 @@ void main() {
 
       await tester.pumpWidget(
         buildInputDecorator(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             filled: true,
-            fillColor: const Color(0xFF00FF00),
+            fillColor: Color(0xFF00FF00),
             labelText: labelText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
               gapPadding: 0.0,
             ),
           ),
@@ -2003,6 +2003,88 @@ void main() {
       );
     });
 
+    group('OutlineInputBorder strokeAlign', () {
+      const borderWidth = 4.0;
+      const borderRadius = 12.0;
+      const inputDecoratorWidth = 800.0;
+      const inputDecoratorHeight = 56.0;
+
+      Future<void> testStrokeAlign({
+        required WidgetTester tester,
+        required double strokeAlign,
+        required RRect expectedRRect,
+      }) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFF00FF00),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
+                borderSide: BorderSide(width: borderWidth, strokeAlign: strokeAlign),
+              ),
+            ),
+          ),
+        );
+
+        final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+        expect(
+          box,
+          paints
+            ..rrect(style: PaintingStyle.stroke, strokeWidth: borderWidth, rrect: expectedRRect),
+        );
+      }
+
+      testWidgets('strokeAlignOutside should draw border outside bounds', (
+        WidgetTester tester,
+      ) async {
+        await testStrokeAlign(
+          tester: tester,
+          strokeAlign: BorderSide.strokeAlignOutside,
+          expectedRRect: RRect.fromLTRBR(
+            -borderWidth / 2,
+            -borderWidth / 2,
+            inputDecoratorWidth + borderWidth / 2,
+            inputDecoratorHeight + borderWidth / 2,
+            const Radius.circular(borderRadius + borderWidth / 2),
+          ),
+        );
+      });
+
+      testWidgets('strokeAlignCenter should draw border between bounds', (
+        WidgetTester tester,
+      ) async {
+        await testStrokeAlign(
+          tester: tester,
+          strokeAlign: BorderSide.strokeAlignCenter,
+          expectedRRect: RRect.fromLTRBR(
+            0,
+            0,
+            inputDecoratorWidth,
+            inputDecoratorHeight,
+            const Radius.circular(borderRadius),
+          ),
+        );
+      });
+
+      testWidgets('strokeAlignInside should draw border inside bounds', (
+        WidgetTester tester,
+      ) async {
+        await testStrokeAlign(
+          tester: tester,
+          strokeAlign: BorderSide.strokeAlignInside,
+          expectedRRect: RRect.fromLTRBR(
+            borderWidth / 2,
+            borderWidth / 2,
+            inputDecoratorWidth - borderWidth / 2,
+            inputDecoratorHeight - borderWidth / 2,
+            const Radius.circular(borderRadius - borderWidth / 2),
+          ),
+        );
+      });
+    });
+
     testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (
       WidgetTester tester,
     ) async {
@@ -2129,14 +2211,14 @@ void main() {
                 alignment: Alignment.center,
                 child: Directionality(
                   textDirection: textDirection,
-                  child: RepaintBoundary(
+                  child: const RepaintBoundary(
                     child: InputDecorator(
                       isFocused: true,
                       isEmpty: true,
                       decoration: InputDecoration(
                         labelText: labelText,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
                           gapPadding: 0.0,
                         ),
                       ),
@@ -3193,9 +3275,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecorator(
               isEmpty: true,
               decoration: InputDecoration(labelText: longStringA),
@@ -3211,9 +3292,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecorator(
               isFocused: true,
               isEmpty: true,
@@ -8127,7 +8207,13 @@ void main() {
       ),
     );
 
-    final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    // Find the _RenderDecoration render object (which may be wrapped by Semantics)
+    RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    // If wrapped by Semantics, walk down to find the actual _RenderDecoration
+    while (renderer.debugDescribeChildren().length == 1 &&
+        renderer.debugDescribeChildren().first.name == 'child') {
+      renderer = renderer.debugDescribeChildren().first.value! as RenderObject;
+    }
     final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
       (DiagnosticsNode node) => node.name!,
     );
@@ -10136,10 +10222,12 @@ void main() {
     });
 
     testWidgets('border', (WidgetTester tester) async {
-      final borderRadius = BorderRadius.circular(6.0);
-      final InputBorder border = OutlineInputBorder(borderRadius: borderRadius);
+      const borderRadius = BorderRadius.all(Radius.circular(6.0));
+      const InputBorder border = OutlineInputBorder(borderRadius: borderRadius);
       await tester.pumpWidget(
-        buildInputDecorator(localInputDecorationTheme: InputDecorationThemeData(border: border)),
+        buildInputDecorator(
+          localInputDecorationTheme: const InputDecorationThemeData(border: border),
+        ),
       );
 
       // The real instance of border is created based on the given border.
@@ -10226,19 +10314,19 @@ void main() {
     const overlayColor = Color(0xff0000ff);
     const shadowColor = Color(0xff0ff0ff);
     const elevation = 4.0;
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0));
-    final iconButtonStyle = ButtonStyle(
-      backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
-      foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
-      overlayColor: const MaterialStatePropertyAll<Color>(overlayColor),
-      shadowColor: const MaterialStatePropertyAll<Color>(shadowColor),
-      elevation: const MaterialStatePropertyAll<double>(elevation),
+    const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
+    const iconButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll<Color>(backgroundColor),
+      foregroundColor: MaterialStatePropertyAll<Color>(foregroundColor),
+      overlayColor: MaterialStatePropertyAll<Color>(overlayColor),
+      shadowColor: MaterialStatePropertyAll<Color>(shadowColor),
+      elevation: MaterialStatePropertyAll<double>(elevation),
       shape: MaterialStatePropertyAll<OutlinedBorder>(shape),
     );
 
     await tester.pumpWidget(
       IconButtonTheme(
-        data: IconButtonThemeData(style: iconButtonStyle),
+        data: const IconButtonThemeData(style: iconButtonStyle),
         child: buildInputDecorator(
           decoration: InputDecoration(
             prefixIcon: IconButton(onPressed: () {}, icon: const Icon(prefixIcon)),
@@ -10274,19 +10362,19 @@ void main() {
     const overlayColor = Color(0xff0000ff);
     const shadowColor = Color(0xff0ff0ff);
     const elevation = 4.0;
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0));
-    final iconButtonStyle = ButtonStyle(
-      backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
-      foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
-      overlayColor: const MaterialStatePropertyAll<Color>(overlayColor),
-      shadowColor: const MaterialStatePropertyAll<Color>(shadowColor),
-      elevation: const MaterialStatePropertyAll<double>(elevation),
+    const shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0)));
+    const iconButtonStyle = ButtonStyle(
+      backgroundColor: MaterialStatePropertyAll<Color>(backgroundColor),
+      foregroundColor: MaterialStatePropertyAll<Color>(foregroundColor),
+      overlayColor: MaterialStatePropertyAll<Color>(overlayColor),
+      shadowColor: MaterialStatePropertyAll<Color>(shadowColor),
+      elevation: MaterialStatePropertyAll<double>(elevation),
       shape: MaterialStatePropertyAll<OutlinedBorder>(shape),
     );
 
     await tester.pumpWidget(
       IconButtonTheme(
-        data: IconButtonThemeData(style: iconButtonStyle),
+        data: const IconButtonThemeData(style: iconButtonStyle),
         child: buildInputDecorator(
           decoration: InputDecoration(
             suffixIcon: IconButton(onPressed: () {}, icon: const Icon(suffixIcon)),
@@ -14388,7 +14476,13 @@ void main() {
         ),
       );
 
-      final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+      // Find the _RenderDecoration render object (which may be wrapped by Semantics)
+      RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+      // If wrapped by Semantics, walk down to find the actual _RenderDecoration
+      while (renderer.debugDescribeChildren().length == 1 &&
+          renderer.debugDescribeChildren().first.name == 'child') {
+        renderer = renderer.debugDescribeChildren().first.value! as RenderObject;
+      }
       final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
         (DiagnosticsNode node) => node.name!,
       );
@@ -14537,16 +14631,16 @@ void main() {
               alignment: Alignment.center,
               child: Directionality(
                 textDirection: textDirection,
-                child: RepaintBoundary(
+                child: const RepaintBoundary(
                   child: InputDecorator(
                     isFocused: true,
                     isEmpty: true,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF00FF00),
+                      fillColor: Color(0xFF00FF00),
                       labelText: 'label text',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
                         gapPadding: 0.0,
                       ),
                     ),
@@ -15153,12 +15247,12 @@ void main() {
 
       await tester.pumpWidget(
         buildInputDecoratorM2(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             filled: true,
-            fillColor: const Color(0xFF00FF00),
+            fillColor: Color(0xFF00FF00),
             labelText: labelText,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
               gapPadding: 0.0,
             ),
           ),
@@ -15409,9 +15503,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecoratorM2(
               // isFocused: false (default)
               isEmpty: true,
@@ -15430,9 +15523,8 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: buildInputDecoratorM2(
               isFocused: true,
               isEmpty: true,

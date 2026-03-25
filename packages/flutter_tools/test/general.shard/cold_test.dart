@@ -258,6 +258,7 @@ class TestFlutterDevice extends FlutterDevice {
     required this.exception,
     required ResidentCompiler generator,
   }) : super(
+         targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,

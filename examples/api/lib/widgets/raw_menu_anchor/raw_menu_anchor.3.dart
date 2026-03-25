@@ -52,9 +52,8 @@ class RawMenuAnchorSubmenuAnimationExample extends StatelessWidget {
               for (int i = 0; i < 4; i++)
                 Menu(
                   panelBuilder: (BuildContext context, AnimationStatus status) {
-                    return SizedBox(
-                      height: 120,
-                      width: 120,
+                    return SizedBox.square(
+                      dimension: 120,
                       child: Center(
                         child: Text(
                           'Panel $i:\n${status.name}',
@@ -224,7 +223,10 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(8),
                       shadowColor: colorScheme.shadow,
                       child: SizeTransition(
-                        axisAlignment: position.dx < 0 ? 1 : -1,
+                        alignment: AlignmentDirectional(
+                          -1.0,
+                          position.dx < 0 ? 1.0 : -1.0,
+                        ),
                         sizeFactor: animation,
                         fixedCrossAxisSizeFactor: 1.0,
                         child: widget.panelBuilder(context, animationStatus),

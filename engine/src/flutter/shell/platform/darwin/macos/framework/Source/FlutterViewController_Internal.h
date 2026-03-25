@@ -56,6 +56,12 @@
 - (void)updateSemantics:(nonnull const FlutterSemanticsUpdate2*)update;
 
 /**
+ * Updates the wide gamut surface format based on the current screen's
+ * display gamut. Should be called when the window moves to a different screen.
+ */
+- (void)updateWideGamutForScreen;
+
+/**
  * Removes this controller from the engine. The controller is removed from the engine
  * on dealloc, however in multi-window scenario the controller needs to be unregistered
  * from the engine eagerly - because the FlutterView needs to be removed from the

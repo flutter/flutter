@@ -1371,6 +1371,14 @@ typedef struct {
   double rotation;
   /// The identifier of the view that received the pointer event.
   FlutterViewId view_id;
+  /// The pressure of the current pointer, where 0.0 is the default value.
+  double pressure;
+  /// The minimum bound of the pressure of the current pointer, where 0.0 is the
+  /// default minimum bound.
+  double pressure_min;
+  /// The maximum bound of the pressure of the current pointer, where 0.0 is the
+  /// default maximum bound.
+  double pressure_max;
 } FlutterPointerEvent;
 
 typedef enum {
@@ -2793,6 +2801,10 @@ typedef struct {
   /// `PlatformDispatcher.instance.engineId`. Can be used in native code to
   /// retrieve the engine instance that is running the Dart code.
   int64_t engine_id;
+
+  /// If true, the engine will decode images in wide gamut color spaces
+  /// (Display P3) when supported. If false, images are decoded to sRGB.
+  bool enable_wide_gamut;
 } FlutterProjectArgs;
 
 typedef struct {

@@ -10,6 +10,11 @@
 
 namespace {
 using ::testing::Return;
+
+MATCHER_P(ScalarEq, a, "") {
+  *result_listener << "isn't equal to " << a;
+  return abs(arg - a) <= impeller::kEhCloseEnough;
+}
 }  // namespace
 
 namespace flutter {
@@ -316,55 +321,112 @@ TEST(DisplayListPathBuilder, AddRoundSuperellipse) {
     ::testing::InSequence sequence;
 
     EXPECT_CALL(mock_receiver, MoveTo(DlPoint(46, 10), true));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(97.3149f, 9.99998f)),
-                                       PointEq(DlPoint(95.8867f, 9.99486f)),
-                                       PointEq(DlPoint(97.1856f, 10.2338f))));
+
+    // 1
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(94.8672, 9.99998)),
+                                       PointEq(DlPoint(95.7708, 10.0493)),
+                                       ScalarEq(3.63127851)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(96.6558, 10.0976)),
+                                       PointEq(DlPoint(97.1856, 10.2338)),
+                                       ScalarEq(1.22087204)))
+        .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(97.9096f, 10.367f)),
-                                       PointEq(DlPoint(98.5976f, 11.6373f)),
-                                       PointEq(DlPoint(99.1213f, 13.8076f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(99.5784f, 15.7987f)),
-                                       PointEq(DlPoint(99.8618f, 18.4156f)),
-                                       PointEq(DlPoint(99.9232f, 21.2114f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(100.011f, 25.1954f)),
-                                       PointEq(DlPoint(100.0f, 29.7897f)),
-                                       PointEq(DlPoint(100.0f, 51.7857f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(100.0f, 77.1657f)),
-                                       PointEq(DlPoint(100.018f, 82.4668f)),
-                                       PointEq(DlPoint(99.872f, 87.0638f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(99.7697f, 90.2897f)),
-                                       PointEq(DlPoint(99.2973f, 93.3092f)),
-                                       PointEq(DlPoint(98.5355f, 95.6066f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(97.6834f, 98.0734f)),
-                                       PointEq(DlPoint(96.5625f, 99.532f)),
-                                       PointEq(DlPoint(95.3799f, 99.7131f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(93.4105f, 100.015f)),
-                                       PointEq(DlPoint(93.4217f, 100.0f)),
-                                       PointEq(DlPoint(50.0f, 100.0f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(15.2626f, 100.0f)),
-                                       PointEq(DlPoint(15.2716f, 100.014f)),
-                                       PointEq(DlPoint(13.6961f, 99.7323f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(12.75f, 99.5632f)),
-                                       PointEq(DlPoint(11.8533f, 98.2018f)),
-                                       PointEq(DlPoint(11.1716f, 95.8995f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.5569f, 93.7323f)),
-                                       PointEq(DlPoint(10.1777f, 90.8822f)),
-                                       PointEq(DlPoint(10.0993f, 87.8409f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(9.98623f, 83.4541f)),
-                                       PointEq(DlPoint(10.0f, 78.5304f)),
-                                       PointEq(DlPoint(10.0f, 51.5385f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.0f, 28.4025f)),
-                                       PointEq(DlPoint(9.99311f, 24.1822f)),
-                                       PointEq(DlPoint(10.0496f, 20.4221f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.0888f, 17.8153f)),
-                                       PointEq(DlPoint(10.2785f, 15.3723f)),
-                                       PointEq(DlPoint(10.5858f, 13.5147f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.9349f, 11.5114f)),
-                                       PointEq(DlPoint(11.3936f, 10.3388f)),
-                                       PointEq(DlPoint(11.8762f, 10.2158f))));
-    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(12.7422f, 9.99527f)),
-                                       PointEq(DlPoint(11.79f, 10.0f)),
-                                       PointEq(DlPoint(46.0f, 10.0f))));
-    EXPECT_CALL(mock_receiver, LineTo(DlPoint(46, 10)));
+                                       PointEq(DlPoint(98.5976, 11.6373)),
+                                       PointEq(DlPoint(99.1213, 13.8076))));
+
+    // 2
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(99.5784, 15.7987)),
+                                       PointEq(DlPoint(99.8618, 18.4156)),
+                                       PointEq(DlPoint(99.9232, 21.2114))));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(99.9636, 23.0102)),
+                                       PointEq(DlPoint(99.9805, 25.6229)),
+                                       ScalarEq(1.17059147)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(PointEq(DlPoint(100, 28.6213)),
+                        PointEq(DlPoint(100, 51.7857)), ScalarEq(2.12785244)))
+        .WillOnce(Return(true));
+
+    // 3
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(100, 78.514)),
+                                       PointEq(DlPoint(99.9675, 81.9736)),
+                                       ScalarEq(2.12785244)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(99.9393, 84.9882)),
+                                       PointEq(DlPoint(99.872, 87.0638)),
+                                       ScalarEq(1.17059147)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(99.7697, 90.2897)),
+                                       PointEq(DlPoint(99.2973, 93.3092)),
+                                       PointEq(DlPoint(98.5355, 95.6066))));
+
+    // 4
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(97.6834, 98.0734)),
+                                       PointEq(DlPoint(96.5625, 99.532)),
+                                       PointEq(DlPoint(95.3799, 99.7131))));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(94.5196, 99.8799)),
+                                       PointEq(DlPoint(93.1037, 99.9395)),
+                                       ScalarEq(1.16898668)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(PointEq(DlPoint(91.6668, 100)),
+                        PointEq(DlPoint(50, 100)), ScalarEq(3.63127851)))
+        .WillOnce(Return(true));
+
+    // 5
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(16.6667, 100)),
+                                       PointEq(DlPoint(15.5171, 99.9435)),
+                                       ScalarEq(3.63127851)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(14.3843, 99.8879)),
+                                       PointEq(DlPoint(13.6961, 99.7323)),
+                                       ScalarEq(1.16898668)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(12.75, 99.5632)),
+                                       PointEq(DlPoint(11.8533, 98.2018)),
+                                       PointEq(DlPoint(11.1716, 95.8995))));
+
+    // 6
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.5569, 93.7323)),
+                                       PointEq(DlPoint(10.1777, 90.8822)),
+                                       PointEq(DlPoint(10.0993, 87.8409))));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(10.0462, 85.8435)),
+                                       PointEq(DlPoint(10.0244, 82.8947)),
+                                       ScalarEq(1.2416352)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(PointEq(DlPoint(10, 79.594)),
+                        PointEq(DlPoint(10, 51.5385)), ScalarEq(1.77972043)))
+        .WillOnce(Return(true));
+
+    // 7
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(10, 27.4909)),
+                                       PointEq(DlPoint(10.0122, 24.6616)),
+                                       ScalarEq(1.77972043)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(10.0231, 22.1342)),
+                                       PointEq(DlPoint(10.0496, 20.4221)),
+                                       ScalarEq(1.2416352)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.0888, 17.8153)),
+                                       PointEq(DlPoint(10.2785, 15.3723)),
+                                       PointEq(DlPoint(10.5858, 13.5147))));
+
+    // 8
+    EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.9349, 11.5114)),
+                                       PointEq(DlPoint(11.3936, 10.3388)),
+                                       PointEq(DlPoint(11.8762, 10.2158))));
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(12.2295, 10.0901)),
+                                       PointEq(DlPoint(12.8195, 10.0455)),
+                                       ScalarEq(1.22087204)))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(PointEq(DlPoint(13.4216, 10)), PointEq(DlPoint(46, 10)),
+                        ScalarEq(3.63127851)))
+        .WillOnce(Return(true));
+
+    EXPECT_CALL(mock_receiver, LineTo(PointEq(DlPoint(46, 10))));
     EXPECT_CALL(mock_receiver, Close());
   }
 

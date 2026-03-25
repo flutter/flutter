@@ -193,9 +193,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 hoverColor: const Color(0xff00ff00),
                 splashColor: const Color(0xffff0000),
@@ -233,9 +232,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
                   if (states.contains(WidgetState.hovered)) {
@@ -281,9 +279,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 focusNode: focusNode,
                 hoverColor: const Color(0xff00ff00),
@@ -325,9 +322,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 focusNode: focusNode,
                 overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
@@ -377,9 +373,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Container(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
@@ -427,9 +422,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 splashFactory: NoSplash.splashFactory,
                 focusNode: focusNode,
@@ -517,9 +511,8 @@ void main() {
             child: Center(
               child: Focus(
                 focusNode: focusNode,
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
+                child: SizedBox.square(
+                  dimension: 100,
                   child: InkWell(
                     hoverColor: const Color(0xff00ff00),
                     splashColor: splashColor,
@@ -566,9 +559,8 @@ void main() {
             child: Center(
               child: Focus(
                 focusNode: focusNode,
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
+                child: SizedBox.square(
+                  dimension: 100,
                   child: InkWell(
                     overlayColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
                       if (states.contains(WidgetState.hovered)) {
@@ -613,9 +605,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkResponse(
                 focusNode: focusNode,
                 radius: 20,
@@ -644,12 +635,11 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 focusNode: focusNode,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
                 focusColor: const Color(0xff0000ff),
                 onTap: () {},
               ),
@@ -682,12 +672,11 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: MouseRegion(
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   hoverColor: const Color(0xff00ff00),
                   onTap: () {},
                 ),
@@ -728,13 +717,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: MouseRegion(
                 child: InkWell(
                   focusNode: focusNode,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   customBorder: const CircleBorder(),
                   hoverColor: const Color(0xff00ff00),
                   onTap: () {},
@@ -780,12 +768,11 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: MouseRegion(
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   customBorder: const CircleBorder(),
                   hoverColor: const Color(0xff00ff00),
                   onTap: () {},
@@ -836,9 +823,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkResponse(
                 focusNode: focusNode,
                 radius: radius,
@@ -876,13 +862,12 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkResponse(
                 focusNode: focusNode,
                 highlightShape: shape,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
                 focusColor: const Color(0xff0000ff),
                 onTap: () {},
               ),
@@ -918,9 +903,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 focusNode: focusNode,
                 borderRadius: borderRadius,
@@ -933,7 +917,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(10)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(10))));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = getInkFeatures(tester);
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
@@ -949,7 +933,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(30)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(30))));
     await tester.pumpAndSettle();
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
     expect(
@@ -971,9 +955,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: MouseRegion(
                 child: InkWell(
                   focusNode: focusNode,
@@ -988,7 +971,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(20))));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = getInkFeatures(tester);
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
@@ -1011,7 +994,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(40))));
     await tester.pumpAndSettle();
     expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
@@ -1039,9 +1022,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Align(
               alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100,
                 child: MouseRegion(
                   child: InkWell(
                     focusNode: focusNode,
@@ -1056,7 +1038,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(20))));
     await tester.pumpAndSettle();
 
     final RenderObject inkFeatures = getInkFeatures(tester);
@@ -1092,7 +1074,7 @@ void main() {
         ),
     );
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(40))));
     await tester.pumpAndSettle();
     expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
@@ -1131,9 +1113,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 focusNode: focusNode,
                 hoverColor: const Color(0xff00ff00),
@@ -1530,9 +1511,8 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: InkWell(
               autofocus: true,
               onTap: () {},
@@ -1559,9 +1539,8 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: SizedBox(
-            width: 100,
-            height: 100,
+          child: SizedBox.square(
+            dimension: 100,
             child: InkWell(
               focusNode: focusNode,
               onHover: (bool value) {
@@ -1816,9 +1795,8 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100,
                 child: InkWell(
                   key: parentKey,
                   onTap: () {},
@@ -1828,14 +1806,12 @@ void main() {
                       height: 50,
                       child: Row(
                         children: <Widget>[
-                          SizedBox(
-                            width: 50,
-                            height: 50,
+                          SizedBox.square(
+                            dimension: 50,
                             child: InkWell(key: leftKey, onTap: () {}),
                           ),
-                          SizedBox(
-                            width: 50,
-                            height: 50,
+                          SizedBox.square(
+                            dimension: 50,
                             child: InkWell(key: rightKey, onTap: () {}),
                           ),
                         ],
@@ -2015,15 +1991,13 @@ void main() {
               child: GestureDetector(
                 onHorizontalDragStart: (_) {},
                 child: Center(
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
+                  child: SizedBox.square(
+                    dimension: 100,
                     child: InkWell(
                       onTap: () {},
                       child: Center(
-                        child: SizedBox(
-                          width: 50,
-                          height: 50,
+                        child: SizedBox.square(
+                          dimension: 50,
                           child: InkWell(key: innerKey, onTap: () {}),
                         ),
                       ),
@@ -2071,9 +2045,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 onTap: enabled ? () {} : null,
                 onHover: (bool value) {
@@ -2133,9 +2106,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 onTap: enabled ? () {} : null,
                 onHover: (bool value) {},
@@ -2413,9 +2385,8 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100,
               child: InkWell(
                 overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
                   if (states.contains(WidgetState.hovered)) {

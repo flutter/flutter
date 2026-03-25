@@ -1,0 +1,200 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+void main() {
+  // Runtime variable (should NOT be migrated)
+  CacheExtentStyle myStyle = CacheExtentStyle.viewport;
+  // ignore: unused_local_variable
+  Viewport runtimeViewport = Viewport(
+    offset: ViewportOffset.fixed(0.0),
+    cacheExtent: 200.0,
+    cacheExtentStyle: myStyle,
+    slivers: const <Widget>[],
+  );
+
+  // ignore: unused_local_variable
+  ShrinkWrappingViewport runtimeShrinkWrappingViewport = ShrinkWrappingViewport(
+    offset: ViewportOffset.fixed(0.0),
+    cacheExtent: 200.0,
+    cacheExtentStyle: myStyle,
+    slivers: const <Widget>[],
+  );
+
+  // ignore: abstract_class_instantiation, unused_local_variable
+  TwoDimensionalScrollView runtimeTwoDimensionalScrollView =
+      TwoDimensionalScrollView(
+        delegate: TwoDimensionalChildBuilderDelegate(
+          builder: (context, _) => null,
+        ),
+        cacheExtent: 200.0,
+        cacheExtentStyle: myStyle,
+      );
+
+  // ignore: abstract_class_instantiation, unused_local_variable
+  TwoDimensionalViewport runtimeTwoDimensionalViewport = TwoDimensionalViewport(
+    verticalOffset: ViewportOffset.fixed(0.0),
+    horizontalOffset: ViewportOffset.fixed(0.0),
+    verticalAxisDirection: AxisDirection.down,
+    horizontalAxisDirection: AxisDirection.right,
+    delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+    mainAxis: Axis.vertical,
+    childManager: null as TwoDimensionalChildManager,
+    cacheExtent: 200.0,
+    cacheExtentStyle: myStyle,
+  );
+
+  // Viewport
+  Viewport viewport = Viewport(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), offset: ViewportOffset.fixed(0.0),
+    slivers: const <Widget>[],
+  );
+
+  viewport = Viewport(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), offset: ViewportOffset.fixed(0.0),
+    slivers: const <Widget>[],
+  );
+
+  viewport = Viewport(
+    scrollCacheExtent: ScrollCacheExtent.viewport(0.5), offset: ViewportOffset.fixed(0.0),
+    slivers: const <Widget>[],
+  );
+
+  // ShrinkWrappingViewport
+  ShrinkWrappingViewport shrinkWrappingViewport = ShrinkWrappingViewport(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), offset: ViewportOffset.fixed(0.0),
+    slivers: const <Widget>[],
+  );
+
+  shrinkWrappingViewport = ShrinkWrappingViewport(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), offset: ViewportOffset.fixed(0.0),
+    slivers: const <Widget>[],
+  );
+
+  shrinkWrappingViewport = ShrinkWrappingViewport(
+    scrollCacheExtent: ScrollCacheExtent.viewport(0.5), offset: ViewportOffset.fixed(0.0),
+    slivers: const <Widget>[],
+  );
+
+  // TwoDimensionalScrollView (abstract)
+  // ignore: abstract_class_instantiation
+  TwoDimensionalScrollView twoDimensionalScrollView = TwoDimensionalScrollView(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+  );
+
+  // ignore: abstract_class_instantiation
+  twoDimensionalScrollView = TwoDimensionalScrollView(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+  );
+
+  // ignore: abstract_class_instantiation
+  twoDimensionalScrollView = TwoDimensionalScrollView(
+    scrollCacheExtent: ScrollCacheExtent.viewport(0.5), delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+  );
+
+  // TwoDimensionalViewport (abstract)
+  // ignore: abstract_class_instantiation
+  TwoDimensionalViewport twoDimensionalViewport = TwoDimensionalViewport(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), verticalOffset: ViewportOffset.fixed(0.0),
+    horizontalOffset: ViewportOffset.fixed(0.0),
+    verticalAxisDirection: AxisDirection.down,
+    horizontalAxisDirection: AxisDirection.right,
+    delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+    mainAxis: Axis.vertical,
+    childManager: null as TwoDimensionalChildManager,
+  );
+
+  // ignore: abstract_class_instantiation
+  twoDimensionalViewport = TwoDimensionalViewport(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), verticalOffset: ViewportOffset.fixed(0.0),
+    horizontalOffset: ViewportOffset.fixed(0.0),
+    verticalAxisDirection: AxisDirection.down,
+    horizontalAxisDirection: AxisDirection.right,
+    delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+    mainAxis: Axis.vertical,
+    childManager: null as TwoDimensionalChildManager,
+  );
+
+  // ignore: abstract_class_instantiation
+  twoDimensionalViewport = TwoDimensionalViewport(
+    scrollCacheExtent: ScrollCacheExtent.viewport(0.5), verticalOffset: ViewportOffset.fixed(0.0),
+    horizontalOffset: ViewportOffset.fixed(0.0),
+    verticalAxisDirection: AxisDirection.down,
+    horizontalAxisDirection: AxisDirection.right,
+    delegate: TwoDimensionalChildBuilderDelegate(builder: (context, _) => null),
+    mainAxis: Axis.vertical,
+    childManager: null as TwoDimensionalChildManager,
+  );
+  // ScrollView (abstract, but testing fix)
+  // ignore: abstract_class_instantiation
+  ScrollView scrollView = ScrollView(scrollCacheExtent: ScrollCacheExtent.pixels(200.0));
+
+  // ListView
+  ListView listView = ListView(scrollCacheExtent: ScrollCacheExtent.pixels(200.0), children: const <Widget>[]);
+
+  listView = ListView.builder(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), itemBuilder: (BuildContext context, int index) => const Text(''),
+  );
+
+  listView = ListView.separated(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), itemBuilder: (BuildContext context, int index) => const Text(''),
+    separatorBuilder: (BuildContext context, int index) => const Divider(),
+    itemCount: 10,
+  );
+
+  listView = ListView.custom(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), childrenDelegate: SliverChildListDelegate(const <Widget>[]),
+  );
+
+  // GridView
+  GridView gridView = GridView(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+    ),
+    children: const <Widget>[],
+  );
+
+  gridView = GridView.builder(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+    ),
+    itemBuilder: (BuildContext context, int index) => const Text(''),
+  );
+
+  gridView = GridView.custom(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+    ),
+    childrenDelegate: SliverChildListDelegate(const <Widget>[]),
+  );
+
+  gridView = GridView.count(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), crossAxisCount: 2,
+    children: const <Widget>[],
+  );
+
+  gridView = GridView.extent(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), maxCrossAxisExtent: 200.0,
+    children: const <Widget>[],
+  );
+
+  // CustomScrollView
+  CustomScrollView customScrollView = CustomScrollView(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), slivers: const <Widget>[],
+  );
+
+  // ReorderableListView
+  ReorderableListView reorderableListView = ReorderableListView(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), children: const <Widget>[],
+    onReorder: (int oldIndex, int newIndex) {},
+  );
+
+  reorderableListView = ReorderableListView.builder(
+    scrollCacheExtent: ScrollCacheExtent.pixels(200.0), itemBuilder: (BuildContext context, int index) => const Text(''),
+    itemCount: 10,
+    onReorder: (int oldIndex, int newIndex) {},
+  );
+}

@@ -20,7 +20,7 @@ class StubNestedCommandExtension extends CommandExtension {
     CommandHandlerFactory handlerFactory,
   ) async {
     final stubCommand = command as StubNestedCommand;
-    handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
+    await handlerFactory.waitForElement(finderFactory.createFinder(stubCommand.finder));
     for (var index = 0; index < stubCommand.times; index++) {
       await handlerFactory.handleCommand(Tap(stubCommand.finder), prober, finderFactory);
     }
@@ -50,7 +50,7 @@ class StubProberCommandExtension extends CommandExtension {
   ) async {
     final stubCommand = command as StubProberCommand;
     final Finder finder = finderFactory.createFinder(stubCommand.finder);
-    handlerFactory.waitForElement(finder);
+    await handlerFactory.waitForElement(finder);
     for (var index = 0; index < stubCommand.times; index++) {
       await prober.tap(finder);
     }

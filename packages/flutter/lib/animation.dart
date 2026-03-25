@@ -47,7 +47,7 @@
 /// section). Before the animation triggers, the animation status is "dismissed"
 /// and the value is 0.0. As the value runs from 0.0 to 1.0 to fade in the
 /// widget, the status changes to "forward". When the widget is fully faded in
-/// at an animation value of 1.0 the status is "completed". When the animation
+/// at an animation value of 1.0, the status is "completed". When the animation
 /// triggers again to fade the widget back out, the animation status changes to
 /// "reverse" and the animation value runs back to 0.0. At that point the widget
 /// is fully faded out and the animation status switches back to "dismissed"

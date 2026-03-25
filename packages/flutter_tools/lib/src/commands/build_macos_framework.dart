@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -19,9 +18,11 @@ import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart'
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../version.dart';
 import 'build_ios_framework.dart';
+import 'darwin_add_to_app.dart';
 
 /// Produces a .framework for integration into a host macOS app. The .framework
 /// contains the Flutter engine and framework code as well as plugins. It can
@@ -35,6 +36,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.logger,
     super.cache,
     super.platform,
+    required super.codesign,
   });
 
   @override
@@ -73,6 +75,15 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     );
 
     final List<BuildInfo> buildInfos = await getBuildInfos();
+
+    final String? codesignIdentity = await codesign.getCodesignIdentity(
+      buildInfo: buildInfos.first,
+      codesignEnabled: boolArg(FlutterOptions.kCodesign),
+      codesignIdentityOption: stringArg(FlutterOptions.kCodesignIdentity),
+      identityFile: outputDirectory.childFile('.codesign_identity'),
+      xcodeProject: project.macos,
+    );
+
     for (final buildInfo in buildInfos) {
       globals.printStatus('Building macOS frameworks in ${buildInfo.mode.cliName} mode...');
       // Create the build-mode specific metadata.
@@ -97,13 +108,13 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       if (boolArg('cocoapods')) {
         produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       } else {
-        await _produceFlutterFramework(buildInfo, modeDirectory);
+        await _produceFlutterFramework(buildInfo, modeDirectory, codesignIdentity);
       }
 
       final Directory buildOutput = modeDirectory.childDirectory('macos');
 
       // Build aot, create App.framework. Make XCFrameworks.
-      await _produceAppFramework(buildInfo, modeDirectory, buildOutput);
+      await _produceAppFramework(buildInfo, modeDirectory, buildOutput, codesignIdentity);
 
       // Build and copy plugins.
       await processPodsIfNeeded(
@@ -113,31 +124,33 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         forceCocoaPodsOnly: true,
       );
       if (boolArg('plugins') && hasPlugins(project)) {
-        await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);
+        await _producePlugins(
+          xcodeBuildConfiguration,
+          buildOutput,
+          modeDirectory,
+          buildInfo.mode,
+          codesignIdentity,
+        );
       }
 
       globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
-      // Copy the native assets.
-      final Directory nativeAssetsDirectory = globals.fs
-          .directory(getBuildDirectory())
-          .childDirectory('native_assets/macos/');
-      if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
-          'rsync',
-          '-av',
-          '--filter',
-          '- .DS_Store',
-          '--filter',
-          '- native_assets.yaml',
-          '--filter',
-          '- native_assets.json',
-          nativeAssetsDirectory.path,
-          modeDirectory.path,
-        ]);
-        if (rsyncResult.exitCode != 0) {
-          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
-        }
+      // Package native assets.
+      final Iterable<String> frameworkNames = BuildFrameworkCommand.findCodeAssetFrameworkNames(
+        buildOutput,
+      );
+      for (final frameworkName in frameworkNames) {
+        final Directory frameworkDirectory = buildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
+        await BuildFrameworkCommand.produceXCFramework(
+          <Directory>[frameworkDirectory],
+          frameworkName.replaceAll('.framework', ''),
+          modeDirectory,
+          globals.processManager,
+          codesignIdentity,
+          buildInfo.mode,
+        );
       }
 
       // Delete the intermediaries since they would have been copied into our
@@ -232,6 +245,7 @@ end
     BuildInfo buildInfo,
     Directory outputBuildDirectory,
     Directory macosBuildOutput,
+    String? codesignIdentity,
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     try {
@@ -288,11 +302,17 @@ end
       'App',
       outputBuildDirectory,
       globals.processManager,
+      codesignIdentity,
+      buildInfo.mode,
     );
     appFramework.deleteSync(recursive: true);
   }
 
-  Future<void> _produceFlutterFramework(BuildInfo buildInfo, Directory modeDirectory) async {
+  Future<void> _produceFlutterFramework(
+    BuildInfo buildInfo,
+    Directory modeDirectory,
+    String? codesignIdentity,
+  ) async {
     final Status status = globals.logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterMacOSXcframework,
@@ -311,6 +331,14 @@ end
         flutterFrameworkCopy,
         followLinks: false,
       );
+      if (codesignIdentity != null) {
+        await DarwinAddToAppCodesigning.codesignFlutterXCFramework(
+          codesignIdentity: codesignIdentity,
+          xcframework: flutterFrameworkCopy,
+          processManager: globals.processManager,
+          buildMode: buildInfo.mode,
+        );
+      }
     } finally {
       status.stop();
     }
@@ -320,6 +348,8 @@ end
     String xcodeBuildConfiguration,
     Directory buildOutput,
     Directory modeDirectory,
+    BuildMode mode,
+    String? codesignIdentity,
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
@@ -364,9 +394,14 @@ end
             binaryName,
             modeDirectory,
             globals.processManager,
+            codesignIdentity,
+            mode,
           );
         }
       }
+
+      // Copy vendored frameworks from CocoaPods plugins.
+      await copyVendoredFrameworks(modeDirectory, project.macos.hostAppRoot, globals.plistParser);
     } finally {
       status.stop();
     }
