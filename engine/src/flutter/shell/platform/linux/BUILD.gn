@@ -100,7 +100,6 @@ source_set("flutter_linux_sources") {
              "fl_task_runner.h",
              "fl_view_monitor.h",
              "fl_view_private.h",
-             "fl_view_monitor.h",
              "fl_window_monitor.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
