@@ -683,27 +683,14 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
   Set<_GdkAnchorHint> _constraintAdjustmentToHints(
     WindowPositionerConstraintAdjustment adjustment,
   ) {
-    final hints = <_GdkAnchorHint>{};
-    if (adjustment.flipX) {
-      hints.add(_GdkAnchorHint.flipX);
-    }
-    if (adjustment.flipY) {
-      hints.add(_GdkAnchorHint.flipY);
-    }
-    if (adjustment.slideX) {
-      hints.add(_GdkAnchorHint.slideX);
-    }
-    if (adjustment.slideY) {
-      hints.add(_GdkAnchorHint.slideY);
-    }
-    if (adjustment.resizeX) {
-      hints.add(_GdkAnchorHint.resizeX);
-    }
-    if (adjustment.resizeY) {
-      hints.add(_GdkAnchorHint.resizeY);
-    }
-    return hints;
-  }
+    return <_GdkAnchorHint>{
+    if (adjustment.flipX)_GdkAnchorHint.flipX,
+    if (adjustment.flipY) _GdkAnchorHint.flipY,
+    if (adjustment.slideX) _GdkAnchorHint.slideX,
+    if (adjustment.slideY) _GdkAnchorHint.slideY,
+    if (adjustment.resizeX) _GdkAnchorHint.resizeX,
+    if (adjustment.resizeY) _GdkAnchorHint.resizeY,
+    };}
 
   @override
   @internal
