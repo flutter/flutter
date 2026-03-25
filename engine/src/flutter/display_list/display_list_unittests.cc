@@ -5094,9 +5094,7 @@ TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
@@ -5110,9 +5108,7 @@ TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRoundRect) {
@@ -5127,9 +5123,7 @@ TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRoundRect) {
   expected.DrawRoundRect(rrect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRectRoundRectPathPromoteToDrawRect) {
@@ -5144,9 +5138,7 @@ TEST_F(DisplayListTest, DrawRectRoundRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
@@ -5161,9 +5153,7 @@ TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectRRectPromoteToClipRect) {
