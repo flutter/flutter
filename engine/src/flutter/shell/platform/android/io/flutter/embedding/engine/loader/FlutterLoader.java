@@ -414,7 +414,36 @@ public class FlutterLoader {
           String[] androidEngineShellArgs =
               androidEngineShellArgsValue.split(ANDROID_ENGINE_SHELL_ARGS_DELIMITER);
           for (String arg : androidEngineShellArgs) {
+          FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
+          if (flag == null) {
+            // TODO(camsim99): Reject unknown flags specified on the command line:
+            // https://github.com/flutter/flutter/issues/182557.
             shellArgs.add(arg);
+            continue;
+          } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
+            Log.w(
+                TAG,
+                "For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.");
+            continue;
+          } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
+              || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
+            // Perform security check for path containing application's compiled Dart
+            // code and potentially user-provided compiled native code.
+            String aotSharedLibraryPath =
+                arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
+            maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
+            continue;
+          } else if (!flag.allowedInRelease && isRelease) {
+            // Flag is not allowed in release builds.
+            Log.e(
+                TAG,
+                "Command line argument "
+                    + arg
+                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
+            continue;
+          }
+
+          shellArgs.add(arg);
           }
         }
       }

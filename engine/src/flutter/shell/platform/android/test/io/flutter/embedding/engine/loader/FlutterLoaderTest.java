@@ -1154,7 +1154,7 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itDoesSetRecognizedCommandLineArgument() {
+  public void itDoesSetRecognizedIntentExtra() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metadata = new Bundle();
@@ -1187,9 +1187,40 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void ifFlagSetViaManifestAndCommandLineThenCommandLineTakesPrecedence() {
+  public void itDoesNotSetEngineShellArgWhenDisallowedInReleaseMode() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    String disallowedArg = "--enable-opengl-gpu-tracing";
+
+    // Inject engine shell args into the manifest.
+    Bundle metadata = new Bundle();
+    metadata.putString("androidEngineShellArgs", disallowedArg);
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null, true);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertFalse(arguments.contains(disallowedArg));
+  }
+  @Test
+  public void ifFlagSetViaManifestAndIntentExtraThenIntentExtraTakesPrecedence() {
     String expectedImpellerArgFromMetadata = "--enable-impeller=true";
-    String expectedImpellerArgFromCommandLine = "--enable-impeller=false";
+    String expectedImpellerArgFromIntentExtra = "--enable-impeller=false";
 
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
@@ -1203,7 +1234,7 @@ public class FlutterLoaderTest {
     assertFalse(flutterLoader.initialized());
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(
-        ctx, new String[] {expectedImpellerArgFromCommandLine});
+        ctx, new String[] {expectedImpellerArgFromIntentExtra});
     shadowOf(getMainLooper()).idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -1218,14 +1249,14 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
 
-    // Verify that the command line argument takes precedence over the manifest metadata.
+    // Verify that the Intent extras argument takes precedence over the manifest metadata.
     assertTrue(
         arguments.indexOf(expectedImpellerArgFromMetadata)
-            < arguments.indexOf(expectedImpellerArgFromCommandLine));
+            < arguments.indexOf(expectedImpellerArgFromIntentExtra));
   }
 
   @Test
-  public void ifAOTSharedLibraryNameSetViaManifestAndCommandLineThenCommandLineTakesPrecedence()
+  public void ifAOTSharedLibraryNameSetViaManifestAndIntentExtraThenIntentExtraTakesPrecedence()
       throws IOException {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
@@ -1244,7 +1275,7 @@ public class FlutterLoaderTest {
     String expectedAotSharedLibraryNameFromMetadata =
         "--aot-shared-library-name="
             + pathWithDirectInternalStoragePath1.toFile().getCanonicalPath();
-    String expectedAotSharedLibraryNameFromCommandLine =
+    String expectedAotSharedLibraryNameFromIntentExtra =
         "--aot-shared-library-name="
             + pathWithDirectInternalStoragePath2.toFile().getCanonicalPath();
 
@@ -1261,7 +1292,7 @@ public class FlutterLoaderTest {
     flutterLoader.startInitialization(ctx, settings);
     flutterLoader.ensureInitializationComplete(
         ctx,
-        new String[] {expectedAotSharedLibraryNameFromCommandLine, "--enable-opengl-gpu-tracing"});
+        new String[] {expectedAotSharedLibraryNameFromIntentExtra, "--enable-opengl-gpu-tracing"});
     shadowOf(getMainLooper()).idle();
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
@@ -1276,19 +1307,19 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
 
-    // Verify that the command line argument takes precedence over the manifest metadata.
+    // Verify that the Intent extras takes precedence over the manifest metadata.
     assertTrue(
-        arguments.indexOf(expectedAotSharedLibraryNameFromCommandLine)
+        arguments.indexOf(expectedAotSharedLibraryNameFromIntentExtra)
             < arguments.indexOf(expectedAotSharedLibraryNameFromMetadata));
 
-    // Verify other command line arguments are still passed through.
+    // Verify other Intent extras are still passed through.
     assertTrue(
         "Expected argument --enable-opengl-gpu-tracing was not found in the arguments passed to FlutterJNI.init",
         arguments.contains("--enable-opengl-gpu-tracing"));
   }
 
   @Test
-  public void itDoesNotSetCommandLineFlagWhenDisallowedInReleaseMode() {
+  public void itDoesNotSetIntentExtraFlagWhenDisallowedInReleaseMode() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     String expectedArg = "--verbose-logging";
@@ -1316,6 +1347,74 @@ public class FlutterLoaderTest {
             + expectedArg
             + "' was found in the arguments passed to FlutterJNI.init",
         arguments.contains(expectedArg));
+  }
+
+  @Test
+  public void itSetsSingleEngineShellArgFromManifestMetadata() {
+    testEngineShellArgsFromManifestMetadata(new String[] {"--enable-impeller=true"});
+  }
+
+  @Test
+  public void itSetsMultipleEngineShellArgsFromManifestMetadata() {
+    testEngineShellArgsFromManifestMetadata(
+        new String[] {"--enable-impeller=true", "--enable-vulkan-validation"});
+  }
+
+  @Test
+  public void itSetsNoEngineShellArgsFromManifestMetadata() {
+    testEngineShellArgsFromManifestMetadata(new String[] {});
+  }
+
+  private void testEngineShellArgsFromManifestMetadata(String[] expectedArgs) {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Inject engine shell args into the manifest.
+    String expectedArgsJoined = String.join(";", expectedArgs);
+    metadata.putString("androidEngineShellArgs", expectedArgsJoined);
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    if (expectedArgs.length == 0) {
+      // If there are no expected args, then we expect shellArgs from
+      // FlutterJNI.init to not contain any of the shell args.
+      for (String expectedArg : expectedArgs) {
+        assertFalse(
+            "Unexpected argument '"
+                + expectedArg
+                + "' was found in the arguments passed to FlutterJNI.init",
+            arguments.contains(expectedArg));
+      }
+    } else {
+      // If there are expected args, then we expect shellArgs from
+      // FlutterJNI.init to contain all of the shell args.
+      for (String expectedArg : expectedArgs) {
+        assertTrue(
+            "Expected argument '"
+                + expectedArg
+                + "' was not found in the arguments passed to FlutterJNI.init",
+            arguments.contains(expectedArg));
+      }
+    }
   }
 
   private void testFlagFromMetadataPresentInReleaseMode(

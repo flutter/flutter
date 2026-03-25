@@ -580,8 +580,6 @@ class AndroidDevice extends Device {
           previousEngineShellArguments.length != androidShellArguments.length;
     }
 
-    print('CAMILLE previousEngineShellArguments: $previousEngineShellArguments');
-    print('CAMILLE androidShellArguments: $androidShellArguments');
     if (!prebuiltApplication ||
         shouldRegenerateEngineShellArgsManifest ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
