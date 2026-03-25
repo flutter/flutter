@@ -1307,8 +1307,9 @@ void DisplayListBuilder::DrawPath(const DlPath& path, const DlPaint& paint) {
     return;
   }
 
-  if (path.IsOval(&rect)) {
-    DrawOval(rect, paint);
+  DlRect oval_bounds;
+  if (path.IsOval(&oval_bounds)) {
+    DrawOval(oval_bounds, paint);
     return;
   }
 
