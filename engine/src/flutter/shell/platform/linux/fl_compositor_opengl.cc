@@ -193,7 +193,7 @@ static void composite_layer(FlCompositorOpenGL* self,
   size_t texture_width = fl_framebuffer_get_width(framebuffer);
   size_t texture_height = fl_framebuffer_get_height(framebuffer);
   glUniform2f(self->offset_location, (2 * x / width) - 1.0,
-              (2 * y / width) - 1.0);
+              (2 * y / height) - 1.0);
   glUniform2f(self->scale_location, texture_width / width,
               texture_height / height);
 
