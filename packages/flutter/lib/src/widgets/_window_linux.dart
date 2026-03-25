@@ -824,7 +824,7 @@ class _GtkWindow extends _GtkContainer {
   Size getSize() {
     final ffi.Pointer<ffi.Int> size = _gMalloc0(ffi.sizeOf<ffi.Int>() * 2).cast<ffi.Int>();
     _gtkWindowGetSize(instance, size.elementAt(0), size.elementAt(1));
-    final result = Size(size.elementAt(0).value.toDouble(), size.elementAt(1).value.toDouble());
+    final result = Size(size[0].toDouble(), size[1].toDouble());
     _gFree(size);
     return result;
   }
