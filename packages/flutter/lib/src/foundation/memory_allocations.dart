@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'assertions.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
+import 'ui_primitives.dart';
 
 const bool _kMemoryAllocations = bool.fromEnvironment('flutter.memory_allocations');
 

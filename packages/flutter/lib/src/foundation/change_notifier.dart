@@ -9,6 +9,7 @@ library;
 import 'dart:ui' show VoidCallback;
 
 import 'package:meta/meta.dart';
+import 'package:ui_primitives/ui_primitives.dart' as ui_primitives;
 
 import 'assertions.dart';
 import 'debug.dart';
@@ -539,7 +540,7 @@ class _MergingListenable extends Listenable {
 ///
 /// For mutable data types, consider extending [ChangeNotifier] directly and
 /// calling [notifyListeners] manually when changes occur.
-class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
+class ValueNotifier<T> extends ChangeNotifier implements ui_primitives.ValueNotifier<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {
