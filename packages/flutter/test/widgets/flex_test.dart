@@ -15,17 +15,16 @@ void main() {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: SizedBox(
-          width: 300.0,
-          height: 300.0,
+        child: SizedBox.square(
+          dimension: 300.0,
           child: Flex(
             direction: direction,
             mainAxisAlignment: mainAxisAlignment,
             spacing: spacing,
             children: const <Widget>[
-              SizedBox(width: 50.0, height: 50.0),
-              SizedBox(width: 50.0, height: 50.0),
-              SizedBox(width: 50.0, height: 50.0),
+              SizedBox.square(dimension: 50.0),
+              SizedBox.square(dimension: 50.0),
+              SizedBox.square(dimension: 50.0),
             ],
           ),
         ),

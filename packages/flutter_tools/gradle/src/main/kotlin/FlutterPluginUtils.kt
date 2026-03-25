@@ -6,9 +6,9 @@ package com.flutter.gradle
 
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
@@ -403,20 +403,19 @@ object FlutterPluginUtils {
      *  For ApplicationExtension use `getAndroidApplicationExtension`.
      *  For LibraryExtension use `getAndroidLibraryExtension`.
      */
-    internal fun getAndroidExtension(project: Project): BaseExtension {
+    internal fun getLegacyAndroidExtension(project: Project): BaseExtension {
         // Common supertype of the android extension types.
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
+    internal fun getAndroidExtension(project: Project): CommonExtension<*, *, *, *, *, *> =
+        project.extensions.findByType(CommonExtension::class.java)!!
+
     internal fun getAndroidLibraryExtension(project: Project): LibraryExtension = project.extensions.getByType(LibraryExtension::class.java)
 
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
-
-    // Avoid new usages this class is not part of the public AGP DSL.
-    private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
-        project.extensions.findByType(AbstractAppExtension::class.java)
 
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
@@ -425,7 +424,7 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
 
     /**
      * Returns:
@@ -535,7 +534,7 @@ object FlutterPluginUtils {
             //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
             @Suppress("USELESS_ELVIS")
             val projectNdkVersion: String =
-                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
+                getLegacyAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -566,7 +565,7 @@ object FlutterPluginUtils {
                     //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
                     @Suppress("USELESS_ELVIS")
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
+                        getLegacyAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
@@ -618,7 +617,7 @@ object FlutterPluginUtils {
         flutterSdkRootPath: String
     ) {
         // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
+        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
             gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
         if (forcingNotRequired) {
@@ -661,7 +660,10 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
-    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
+    internal fun isFlutterAppProject(project: Project): Boolean =
+        project.extensions.findByType(
+            ApplicationExtension::class.java
+        ) != null
 
     /**
      * Ensures that the dependencies required by the Flutter project are available.
@@ -771,15 +773,18 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintBuildVariants")
     internal fun addTaskForPrintBuildVariants(project: Project) {
-        // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
-        // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
-        //                 the groovy `flutter.android` lines.
-        val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        val variantNames = project.objects.listProperty(String::class.java)
+
+        androidComponents.onVariants { variant ->
+            variantNames.add(variant.name)
+        }
+
         project.tasks.register("printBuildVariants") {
             description = "Prints out all build variants for this Android project"
             doLast {
-                androidExtension.applicationVariants.forEach { variant ->
-                    println("BuildVariant: ${variant.name}")
+                variantNames.get().forEach { name ->
+                    println("BuildVariant: $name")
                 }
             }
         }

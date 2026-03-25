@@ -200,9 +200,8 @@ class MovableBall extends StatelessWidget {
         child: const Center(child: Text('BALL')),
       ),
     );
-    const Widget dashedBall = SizedBox(
-      width: kBallSize,
-      height: kBallSize,
+    const Widget dashedBall = SizedBox.square(
+      dimension: kBallSize,
       child: CustomPaint(painter: DashOutlineCirclePainter()),
     );
     if (position == ballPosition) {

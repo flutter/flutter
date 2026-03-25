@@ -13,6 +13,10 @@ config("harfbuzz_flags") {
       "-Wno-missing-field-initializers",
       "-Wno-unused-variable",
       "-Wno-sign-compare",
+
+      # Workaround for an incompatibility with current versions of Clang
+      # (see https://github.com/harfbuzz/harfbuzz/issues/5738)
+      "-Wno-array-bounds",
     ]
   }
 

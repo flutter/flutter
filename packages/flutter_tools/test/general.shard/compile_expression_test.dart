@@ -35,8 +35,8 @@ void main() {
     frontendServerStdIn = MemoryIOSink();
     fileSystem = MemoryFileSystem.test()
       ..file(Artifact.flutterPatchedSdkPath.toString()).createSync();
-    generator = ResidentCompiler(
-      targetPlatform: .unsupported,
+    generator = const ResidentCompilerFactory().create(
+      targetPlatform: .tester,
       buildInfo: BuildInfo.debug,
       artifacts: Artifacts.test(fileSystem: fileSystem),
       processManager: processManager,
