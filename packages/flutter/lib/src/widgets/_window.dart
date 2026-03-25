@@ -777,7 +777,7 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// This requests that the tooltip be repositioned according to the new [anchorRect] and/or [positioner].
   ///
   /// On Linux due to a platform limitation this has no effect and only the
-  /// positoner passed in the constructor is used. This means that tooltips
+  /// positioner passed in the constructor is used. This means that tooltips
   /// that resize on Linux will remain in their original location.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
