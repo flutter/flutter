@@ -12,6 +12,7 @@ export 'package:ui_primitives/ui_primitives.dart'
         DiagnosticsSerializationDelegate,
         DiagnosticsTreeStyle,
         ErrorDescription,
+        Listenable,
         TextTreeConfiguration,
         ValueListenable,
         ValueNotifier,
