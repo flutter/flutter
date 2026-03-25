@@ -14,9 +14,11 @@ class SensitiveContentApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Directionality(
-      textDirection: TextDirection.ltr,
-      child: SensitiveContentExample(),
+    return WidgetsApp(
+      color: const Color(0xFF000000),
+      builder: (BuildContext context, Widget? child) {
+        return const SensitiveContentExample();
+      },
     );
   }
 }
@@ -31,11 +33,7 @@ class SensitiveContentExample extends StatefulWidget {
 
 class _SensitiveContentExampleState extends State<SensitiveContentExample> {
   static const List<ContentSensitivity> _availableSensitivities =
-      <ContentSensitivity>[
-        ContentSensitivity.notSensitive,
-        ContentSensitivity.autoSensitive,
-        ContentSensitivity.sensitive,
-      ];
+      ContentSensitivity.values;
 
   final SensitiveContentService _sensitiveContentService =
       SensitiveContentService();
