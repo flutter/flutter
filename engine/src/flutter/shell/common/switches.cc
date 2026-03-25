@@ -515,7 +515,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
 
   settings.enable_surface_control = command_line.HasOption(
-      FlagForSwitch(Switch::EnableAndroidSurfaceControl));
+      FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl));
 
   constexpr std::string_view kMergedThreadEnabled = "enabled";
   constexpr std::string_view kMergedThreadDisabled = "disabled";
@@ -556,6 +556,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
   settings.impeller_antialiased_lines =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
+  settings.impeller_use_sdfs =
+      command_line.HasOption(FlagForSwitch(Switch::ImpellerUseSDFs));
 
   return settings;
 }

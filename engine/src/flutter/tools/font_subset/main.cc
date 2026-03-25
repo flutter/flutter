@@ -67,23 +67,32 @@ template <typename T, typename = void>
 struct HarfBuzzSubset {
   // This is the HarfBuzz 3.0 interface.
   static HarfbuzzWrappers::HbFacePtr Make(hb_face_t* face, T input) {
-    // The prior version of harfbuzz automatically dropped layout tables,
-    // but in the new version they are kept by default. So re-add them to the
-    // drop list to retain the same behaviour.
-    if (!hb_ot_var_has_data(face) || hb_ot_var_get_axis_count(face) == 0) {
-      // we can only drop GSUB/GPOS/GDEF for non variable fonts, they may be
-      // needed for variable fonts (guessing we need to keep all of these, but
-      // in Material Symbols Icon variable fonts if we drop the GSUB table (they
-      // do not have GPOS/DEF) then the Fill=1,Weight=100 variation is rendered
-      // incorrect. (and other variations are probably less noticibly
-      // incorrect))
+    bool is_variable =
+        hb_ot_var_has_data(face) && hb_ot_var_get_axis_count(face) > 0;
+
+    if (!is_variable) {
+      // We can only drop GSUB/GPOS/GDEF for non-variable fonts.
       hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
                  HB_TAG('G', 'S', 'U', 'B'));
       hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
                  HB_TAG('G', 'P', 'O', 'S'));
       hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
                  HB_TAG('G', 'D', 'E', 'F'));
+    } else {
+      // For variable fonts with GSUB-based axes (like the 'fill' axis in
+      // Material Symbols), subsetting by codepoint alone drops glyphs
+      // that are only reachable through GSUB feature variation records.
+      //
+      // Retain all glyph IDs from the original font so that GSUB
+      // substitution targets for all axis values remain intact.
+      unsigned int glyph_count = hb_face_get_glyph_count(face);
+      if (glyph_count > 0) {
+        hb_set_t* glyph_set =
+            hb_subset_input_set(input, HB_SUBSET_SETS_GLYPH_INDEX);
+        hb_set_add_range(glyph_set, 0, glyph_count - 1);
+      }
     }
+
     return HarfbuzzWrappers::HbFacePtr(hb_subset_or_fail(face, input));
   }
 };

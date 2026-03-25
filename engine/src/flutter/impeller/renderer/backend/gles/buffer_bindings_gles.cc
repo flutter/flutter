@@ -334,6 +334,9 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   absl::flat_hash_map<std::string, std::pair<GLint, GLuint>>::iterator it =
       ubo_locations_.find(metadata->name);
   if (it == ubo_locations_.end()) {
+    // This should only happen if we have GLESv3 but are using v2 shaders,
+    // as GLESv3 shaders compiled by impeller always have
+    // **named** uniform buffer blocks
     return BindUniformBufferV2(gl, buffer, metadata, device_buffer_gles);
   }
   const auto& [block_index, binding_point] = it->second;

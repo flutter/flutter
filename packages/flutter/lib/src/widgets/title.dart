@@ -16,7 +16,7 @@ class Title extends StatefulWidget {
   /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).
   /// [color] and [child] are required arguments.
   Title({super.key, this.title = '', required this.color, required this.child})
-    : assert(color.alpha == 0xFF);
+    : assert((color.a * 255.0).round().clamp(0, 255) == 0xFF);
 
   /// A one-line description of this app for use in the window manager.
   final String title;

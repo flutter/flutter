@@ -1604,6 +1604,84 @@ void main() {
     expect(controller.indexIsChanging, false);
   });
 
+  testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
+    final controller = TabController(length: 3, vsync: const TestVSync());
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TabBarView(
+          controller: controller,
+          children: List<ListView>.generate(3, (int pageIndex) {
+            return ListView(
+              key: Key('list_$pageIndex'),
+              children: List<Widget>.generate(100, (int listIndex) {
+                return Row(
+                  children: <Widget>[
+                    Container(
+                      key: Key('${pageIndex}_${listIndex}_0'),
+                      color: Colors.red,
+                      width: 200,
+                      height: 10,
+                    ),
+                    Container(
+                      key: Key('${pageIndex}_${listIndex}_1'),
+                      color: Colors.blue,
+                      width: 200,
+                      height: 10,
+                    ),
+                    Container(
+                      key: Key('${pageIndex}_${listIndex}_2'),
+                      color: Colors.green,
+                      width: 200,
+                      height: 10,
+                    ),
+                  ],
+                );
+              }),
+            );
+          }),
+        ),
+      ),
+    );
+
+    final Finder targetMidRightPage0 = find.byKey(const Key('0_25_2'));
+    final Finder targetMidRightPage1 = find.byKey(const Key('1_25_2'));
+    final Finder targetMidLeftPage1 = find.byKey(const Key('1_25_0'));
+
+    expect(find.byKey(const Key('list_0')), findsOneWidget);
+    expect(find.byKey(const Key('list_1')), findsNothing);
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    await tester.ensureVisible(targetMidRightPage0);
+    await tester.pumpAndSettle();
+    expect(targetMidRightPage0, findsOneWidget);
+    expect(targetMidRightPage1, findsNothing);
+    expect(targetMidLeftPage1, findsNothing);
+
+    controller.index = 1;
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('list_0')), findsNothing);
+    expect(find.byKey(const Key('list_1')), findsOneWidget);
+    await tester.ensureVisible(targetMidRightPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+
+    await tester.ensureVisible(targetMidLeftPage1);
+    await tester.pumpAndSettle();
+
+    expect(targetMidRightPage0, findsNothing);
+    expect(targetMidRightPage1, findsOneWidget);
+    expect(targetMidLeftPage1, findsOneWidget);
+  });
+
   testWidgets('TabBarView controller sets animation duration', (WidgetTester tester) async {
     const animationDuration = Duration(milliseconds: 100);
     final tabs = <String>['A', 'B', 'C'];
@@ -6584,7 +6662,7 @@ void main() {
               }
               return Colors.black54;
             }),
-            splashBorderRadius: BorderRadius.circular(radius),
+            splashBorderRadius: const BorderRadius.all(Radius.circular(radius)),
             tabs: const <Widget>[Tab(child: Text(''))],
           ),
         ),
@@ -6610,7 +6688,7 @@ void main() {
         ),
       ),
     );
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 
   testWidgets('No crash if TabBar build called before didUpdateWidget with SliverAppBar', (

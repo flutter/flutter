@@ -26,6 +26,8 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
 
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
+
  private:
   struct Data;
 
