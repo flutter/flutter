@@ -1398,4 +1398,16 @@ void main() {
     expect(outsideCalls, equals(<String>['region']));
     handle.dispose();
   });
+
+  testWidgets('TapRegionSurface does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TapRegionSurface(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TapRegionSurface)), Size.zero);
+  });
 }
