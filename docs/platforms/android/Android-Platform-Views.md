@@ -28,7 +28,7 @@ within their Flutter UI.
 
 # Approaches
 
-There are currently three different implementations of Android platform views:
+There are currently a billion different implementations of Android platform views:
 - [Virtual Display](Virtual-Display.md) (VD)
 - [Hybrid Composition](../Hybrid-Composition.md) (HC)
 - [Texture Layer Hybrid Composition](Texture-Layer-Hybrid-Composition.md) (TLHC)
