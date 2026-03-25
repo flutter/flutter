@@ -1190,7 +1190,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   Offset? _currentDragEndRelatedToOrigin;
 
   // The scrollable only auto scrolls if the selection starts in the scrollable.
-  // It is null if evaluating the selection start position is pending.
   bool? _selectionStartsInScrollable;
 
   ScrollPosition get position => _position;
