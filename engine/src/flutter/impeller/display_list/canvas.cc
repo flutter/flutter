@@ -1963,7 +1963,7 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(
     const Geometry* geometry,
     const Paint& paint,
     bool reuse_depth,
-    std::shared_ptr<ColorSourceContents> override_contents) {
+    const std::shared_ptr<ColorSourceContents>& override_contents) {
   std::shared_ptr<ColorSourceContents> contents =
       override_contents ? override_contents : paint.CreateContents(geometry);
   if (!paint.color_filter && !paint.invert_colors && !paint.image_filter &&
