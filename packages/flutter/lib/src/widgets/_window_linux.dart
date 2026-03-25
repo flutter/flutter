@@ -241,19 +241,25 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     _view = _FlView(engine);
+    _viewMonitor = _FlViewMonitor(
+      _view,
+      onFirstFrame: () {
+        _window.present();
+      },
+    );
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     _view.show();
     _window.add(_view);
-    _window.present();
   }
 
   final WindowingOwnerLinux _owner;
   final RegularWindowControllerDelegate _delegate;
   final _GtkWindow _window;
   late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -266,6 +272,8 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (_destroyed) {
       return;
     }
+    _viewMonitor.close();
+    _viewMonitor.unref();
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
@@ -424,13 +432,18 @@ class DialogWindowControllerLinux extends DialogWindowController {
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     _view = _FlView(engine);
+    _viewMonitor = _FlViewMonitor(
+      _view,
+      onFirstFrame: () {
+        _window.present();
+      },
+    );
     final int viewId = _view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
     );
     _view.show();
     _window.add(_view);
-    _window.present();
   }
 
   final WindowingOwnerLinux _owner;
@@ -438,6 +451,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
   final _GtkWindow _window;
   final BaseWindowController? _parent;
   late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
   late final _FlWindowMonitor _windowMonitor;
   bool _destroyed = false;
 
@@ -450,6 +464,8 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (_destroyed) {
       return;
     }
+    _viewMonitor.close();
+    _viewMonitor.unref();
     _window.destroy();
     _windowMonitor.close();
     _windowMonitor.unref();
