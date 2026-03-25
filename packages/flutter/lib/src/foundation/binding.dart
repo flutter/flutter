@@ -31,6 +31,7 @@ import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
 import 'timeline.dart';
+import 'ui_primitives.dart';
 
 export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow, clampDouble;
 

@@ -6,6 +6,7 @@ import 'dart:io';
 import 'assertions.dart';
 import 'constants.dart';
 import 'platform.dart' as platform;
+import 'ui_primitives.dart';
 
 export 'platform.dart' show TargetPlatform;
 

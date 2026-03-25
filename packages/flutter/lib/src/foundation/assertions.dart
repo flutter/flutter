@@ -11,11 +11,9 @@ import 'basic_types.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
 import 'error_dumper.dart';
-import 'stack_frame.dart';
 import 'ui_primitives.dart';
 
 export 'basic_types.dart' show IterableFilter;
-export 'stack_frame.dart' show StackFrame;
 
 // Examples can assume:
 // late String runtimeType;
@@ -44,122 +42,6 @@ typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 ///
 ///   * [FlutterError.demangleStackTrace], which shows an example implementation.
 typedef StackTraceDemangler = StackTrace Function(StackTrace details);
-
-/// Partial information from a stack frame for stack filtering purposes.
-///
-/// See also:
-///
-///  * [RepetitiveStackFrameFilter], which uses this class to compare against [StackFrame]s.
-@immutable
-class PartialStackFrame {
-  /// Creates a new [PartialStackFrame] instance.
-  const PartialStackFrame({required this.package, required this.className, required this.method});
-
-  /// An `<asynchronous suspension>` line in a stack trace.
-  static const PartialStackFrame asynchronousSuspension = PartialStackFrame(
-    package: '',
-    className: '',
-    method: 'asynchronous suspension',
-  );
-
-  /// The package to match, e.g. `package:flutter/src/foundation/assertions.dart`,
-  /// or `dart:ui/window.dart`.
-  final Pattern package;
-
-  /// The class name for the method.
-  ///
-  /// On web, this is ignored, since class names are not available.
-  ///
-  /// On all platforms, top level methods should use the empty string.
-  final String className;
-
-  /// The method name for this frame line.
-  ///
-  /// On web, private methods are wrapped with `[]`.
-  final String method;
-
-  /// Tests whether the [StackFrame] matches the information in this
-  /// [PartialStackFrame].
-  bool matches(StackFrame stackFrame) {
-    final stackFramePackage =
-        '${stackFrame.packageScheme}:${stackFrame.package}/${stackFrame.packagePath}';
-    // Ideally this wouldn't be necessary.
-    // TODO(dnfield): https://github.com/dart-lang/sdk/issues/40117
-    if (kIsWeb) {
-      return package.allMatches(stackFramePackage).isNotEmpty &&
-          stackFrame.method == (method.startsWith('_') ? '[$method]' : method);
-    }
-    return package.allMatches(stackFramePackage).isNotEmpty &&
-        stackFrame.method == method &&
-        stackFrame.className == className;
-  }
-}
-
-/// A class that filters stack frames for additional filtering on
-/// [FlutterError.defaultStackFilter].
-abstract class StackFilter {
-  /// This constructor enables subclasses to provide const constructors so that
-  /// they can be used in const expressions.
-  const StackFilter();
-
-  /// Filters the list of [StackFrame]s by updating corresponding indices in
-  /// `reasons`.
-  ///
-  /// To elide a frame or number of frames, set the string.
-  void filter(List<StackFrame> stackFrames, List<String?> reasons);
-}
-
-/// A [StackFilter] that filters based on repeating lists of
-/// [PartialStackFrame]s.
-///
-/// See also:
-///
-///   * [FlutterError.addDefaultStackFilter], a method to register additional
-///     stack filters for [FlutterError.defaultStackFilter].
-///   * [StackFrame], a class that can help with parsing stack frames.
-///   * [PartialStackFrame], a class that helps match partial method information
-///     to a stack frame.
-class RepetitiveStackFrameFilter extends StackFilter {
-  /// Creates a new RepetitiveStackFrameFilter.
-  const RepetitiveStackFrameFilter({required this.frames, required this.replacement});
-
-  /// The shape of this repetitive stack pattern.
-  final List<PartialStackFrame> frames;
-
-  /// The number of frames in this pattern.
-  int get numFrames => frames.length;
-
-  /// The string to replace the frames with.
-  ///
-  /// If the same replacement string is used multiple times in a row, the
-  /// [FlutterError.defaultStackFilter] will insert a repeat count after this
-  /// line rather than repeating it.
-  final String replacement;
-
-  List<String> get _replacements => List<String>.filled(numFrames, replacement);
-
-  @override
-  void filter(List<StackFrame> stackFrames, List<String?> reasons) {
-    for (var index = 0; index < stackFrames.length - numFrames; index += 1) {
-      if (_matchesFrames(stackFrames.skip(index).take(numFrames).toList())) {
-        reasons.setRange(index, index + numFrames, _replacements);
-        index += numFrames - 1;
-      }
-    }
-  }
-
-  bool _matchesFrames(List<StackFrame> stackFrames) {
-    if (stackFrames.length < numFrames) {
-      return false;
-    }
-    for (var index = 0; index < stackFrames.length; index++) {
-      if (!frames[index].matches(stackFrames[index])) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
 
 abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// This constructor provides a reliable hook for a kernel transformer to find
