@@ -15,6 +15,7 @@ import 'assertions.dart';
 import 'memory_allocations.dart';
 import 'platform.dart';
 import 'print.dart';
+import 'ui_primitives.dart';
 
 export 'dart:ui' show Brightness;
 

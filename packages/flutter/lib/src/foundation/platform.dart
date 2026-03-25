@@ -9,6 +9,7 @@ library;
 import '_platform_io.dart' if (dart.library.js_interop) '_platform_web.dart' as platform;
 import 'assertions.dart';
 import 'constants.dart';
+import 'ui_primitives.dart';
 
 /// The [TargetPlatform] that matches the platform on which the framework is
 /// currently executing.

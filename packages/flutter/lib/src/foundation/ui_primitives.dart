@@ -18,6 +18,39 @@ export 'package:ui_primitives/ui_primitives.dart'
         ValueNotifier,
         VoidCallback;
 
-// TODO: consider renaming FlutterError to UiError
+/// Error class used to report Flutter-specific assertion failures and
+/// contract violations.
+///
+/// See also:
+///
+///  * <https://docs.flutter.dev/testing/errors>, more information about error
+///    handling in Flutter.
 typedef FlutterError = ui_primitives.UiError;
+
+/// Class for information provided to [FlutterExceptionHandler] callbacks.
+///
+/// {@tool snippet}
+/// This is an example of using [UiErrorDetails] when calling
+/// [UiError.reportError].
+///
+/// ```dart
+/// void main() {
+///   try {
+///     // Try to do something!
+///   } catch (error) {
+///     // Catch & report error.
+///     FlutterError.reportError(FlutterErrorDetails(
+///       exception: error,
+///       library: 'Flutter test framework',
+///       context: ErrorSummary('while running async test code'),
+///     ));
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///   * [UiError.onError], which is called whenever the Flutter framework
+///     catches an error.
 typedef FlutterErrorDetails = ui_primitives.UiErrorDetails;
