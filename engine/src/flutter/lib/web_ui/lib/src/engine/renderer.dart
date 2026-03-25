@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    // ignore: deprecated_web_configuration
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
