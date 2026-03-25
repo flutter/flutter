@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
+import 'widgets_app_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -1349,6 +1350,99 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('Starting selection in empty padding of scrollable should not crash', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/115787
+    const text = 'Some selectable text children';
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const SingleChildScrollView(padding: EdgeInsets.all(50.0), child: Text(text)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Offset paddingOffset =
+        tester.getTopLeft(find.byType(SingleChildScrollView)) + const Offset(20.0, 20.0);
+    final Offset textCenter = tester.getCenter(find.text(text));
+
+    final TestGesture gesture = await tester.startGesture(paddingOffset);
+    addTearDown(gesture.removePointer);
+
+    // Simulate long press.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Drag into the text content.
+    await gesture.moveTo(textCenter);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Fast drag starting in padding correctly triggers auto-scroll', (
+    WidgetTester tester,
+  ) async {
+    final String text =
+        'Some selectable text children that is long enough to make it scrollable \n' * 20;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: SizedBox(
+            height: 200.0,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(top: 50.0),
+              child: Text(text),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    expect(position.pixels, 0.0);
+
+    // Get a point inside the padding (which is inside the scrollable).
+    final Offset scrollableTopLeft = tester.getTopLeft(find.byType(SingleChildScrollView));
+    final Offset paddingStartOffset =
+        scrollableTopLeft + const Offset(50.0, 20.0); // Inside padding.
+
+    // Get a point outside the bottom of the scrollable to trigger downward auto-scrolling.
+    final Offset dragEndOffset =
+        tester.getBottomLeft(find.byType(SingleChildScrollView)) + const Offset(50.0, 100.0);
+
+    // Start gesture perfectly on padding.
+    final TestGesture gesture = await tester.startGesture(paddingStartOffset);
+    addTearDown(gesture.removePointer);
+
+    // Simulate long press.
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // First drag update is far ALREADY OUTSIDE the scrollable.
+    // Emulates a very fast drag movement (so the first EdgeUpdate frame is processed outside).
+    await gesture.moveTo(dragEndOffset);
+    await tester.pump();
+
+    // Let auto-scroller run for a few frames.
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // If _selectionStartsInScrollable was correctly preserved as TRUE,
+    // the scrollable will have started auto-scrolling downwards.
+    expect(position.pixels, greaterThan(0.0));
+    await gesture.up();
+  });
 
   group('Complex cases', () {
     testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
