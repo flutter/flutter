@@ -191,7 +191,10 @@ void main() {
     expect(button.color, theme.colorScheme.surfaceContainer);
     expect(button.shadowColor, theme.colorScheme.shadow);
     expect(button.surfaceTintColor, Colors.transparent);
-    expect(button.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
+    expect(
+      button.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+    );
     expect(button.elevation, 3.0);
 
     /// The last DefaultTextStyle widget under popupItemKey is the

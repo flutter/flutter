@@ -898,6 +898,9 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
   gn_args['flutter_prebuilt_dart_sdk'] = True
 
+  if get_host_os() == 'mac':
+    gn_args.update(setup_apple_sdks())
+
 
 def parse_args(args):
   args = args[1:]

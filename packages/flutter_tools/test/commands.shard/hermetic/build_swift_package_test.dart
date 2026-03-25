@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_swift_package.dart';
+import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -28,15 +29,16 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
+const _flutterAppPath = '/path/to/my_flutter_app';
+const _flutterRoot = '/path/to/flutter';
 const String _engineVersion = '1234567890abcdef1234567890abcdef12345678';
 const String _iosSdkRoot =
     '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk';
 
 void main() {
-  const flutterRoot = '/path/to/flutter';
-  const flutterAppPath = '/path/to/my_flutter_app';
-  const flutterAppDartToolPath = '$flutterAppPath/.dart_tool';
+  const flutterAppDartToolPath = '$_flutterAppPath/.dart_tool';
   const flutterAppBuildPath = '$flutterAppDartToolPath/flutter_build';
   const commandFilePath =
       '/path/to/flutter/packages/flutter_tools/lib/src/commands/build_swift_package.dart';
@@ -44,14 +46,18 @@ void main() {
   const debugModeDirectoryPath = '$pluginRegistrantSwiftPackagePath/Debug';
   const debugFrameworksDirectoryPath = '$debugModeDirectoryPath/Frameworks';
   const debugNativeAssetsDirectoryPath = '$debugFrameworksDirectoryPath/NativeAssets';
+  const debugCocoaPodsDirectoryPath = '$debugFrameworksDirectoryPath/CocoaPods';
   const debugPackagesDirectoryPath = '$debugModeDirectoryPath/Packages';
   const releaseModeDirectoryPath = '$pluginRegistrantSwiftPackagePath/Release';
   const releaseFrameworksDirectoryPath = '$releaseModeDirectoryPath/Frameworks';
   const releaseNativeAssetsDirectoryPath = '$releaseFrameworksDirectoryPath/NativeAssets';
   const cacheDirectoryPath = 'output/.cache';
+  const debugCocoapodCache = '$cacheDirectoryPath/Debug/CocoaPods';
   const pluginsDirectoryPath = '$pluginRegistrantSwiftPackagePath/Plugins';
   const flutterCachePath = '/path/to/flutter/bin/cache';
   const engineArtifactPath = '$flutterCachePath/artifacts/engine/ios/Flutter.xcframework';
+  const codesignIdentity = 'Apple Development: Company (TEAM_ID)';
+  const codesignIdentityFile = '$cacheDirectoryPath/.codesign_identity';
 
   group('BuildSwiftPackage', () {
     // TODO(vashworth): Test args validation for BuildSwiftPackage once command has been added as
@@ -66,7 +72,7 @@ void main() {
         analytics: FakeAnalytics(),
         artifacts: FakeArtifacts(engineArtifactPath),
         buildSystem: FakeBuildSystem(),
-        cache: FakeCache(fs, flutterRoot),
+        cache: FakeCache(fs, _flutterRoot),
         fileSystem: fs,
         flutterVersion: FakeFlutterVersion(),
         logger: logger,
@@ -76,6 +82,7 @@ void main() {
         xcode: FakeXcode(),
         featureFlags: FakeFeatureFlags(),
         verboseHelp: false,
+        codesign: FakeDarwinAddToAppCodesigning(),
       );
       final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
       swiftPackageOutput.createSync(recursive: true);
@@ -101,14 +108,14 @@ void main() {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -128,23 +135,44 @@ void main() {
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        late final cocoapodDependencies = CocoaPodPluginDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+        // Plugin A represents a SwiftPM plugin
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
         pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
 
+        // Plugin B represents a CocoaPod plugin
+        final pluginB = FakePlugin(
+          name: 'PluginB',
+          darwinPlatform: targetPlatform,
+          supportsSwiftPM: false,
+        );
+        fs
+            .directory('$debugCocoaPodsDirectoryPath/PluginB.xcframework')
+            .createSync(recursive: true);
+
+        // Plugin C represents a Native Asset
+        fs
+            .directory('$debugNativeAssetsDirectoryPath/PluginC.xcframework')
+            .createSync(recursive: true);
+
         await package.generateSwiftPackage(
           modeDirectory: modeDirectory,
-          plugins: [pluginA],
+          plugins: [pluginA, pluginB],
           xcodeBuildConfiguration: 'Debug',
           pluginSwiftDependencies: pluginSwiftDependencies,
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
+          cocoapodDependencies: cocoapodDependencies,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
 
         expect(logger.traceText, isEmpty);
-        expect(processManager.hasRemainingExpectations, false);
+        expect(processManager, hasNoRemainingExpectations);
         final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
         expect(generatedPackageManifest, exists);
         expect(generatedPackageManifest.readAsStringSync(), '''
@@ -176,12 +204,22 @@ let package = Package(
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "PluginA", package: "PluginA"),
-                .target(name: "App")
+                .target(name: "PluginC"),
+                .target(name: "App"),
+                .target(name: "PluginB")
             ]
+        ),
+        .binaryTarget(
+            name: "PluginC",
+            path: "Sources/Frameworks/NativeAssets/PluginC.xcframework"
         ),
         .binaryTarget(
             name: "App",
             path: "Sources/Frameworks/App.xcframework"
+        ),
+        .binaryTarget(
+            name: "PluginB",
+            path: "Sources/Frameworks/CocoaPods/PluginB.xcframework"
         )
     ]
 )
@@ -198,11 +236,15 @@ import Flutter
 import UIKit
 
 import PluginA
+import PluginB
 
 @objc public class GeneratedPluginRegistrant: NSObject {
     @objc public static func register(with registry: FlutterPluginRegistry) {
         if let pluginAPlugin = registry.registrar(forPlugin: "PluginAPlugin") {
             PluginAPlugin.register(with: pluginAPlugin)
+        }
+        if let pluginBPlugin = registry.registrar(forPlugin: "PluginBPlugin") {
+            PluginBPlugin.register(with: pluginBPlugin)
         }
     }
 }
@@ -234,14 +276,14 @@ import PluginA
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -253,8 +295,73 @@ import PluginA
         await flutterFrameworkDependency.generateArtifacts(
           buildMode: BuildMode.debug,
           xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('generateArtifacts and codesign', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
+        final Directory flutterXCFramework = xcframeworkOutput.childDirectory(
+          'Flutter.xcframework',
+        );
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: [
+              'rsync',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store/',
+              '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+              engineArtifactPath,
+              xcframeworkOutput.path,
+            ],
+          ),
+          FakeCommand(
+            command: ['codesign', '-d', flutterXCFramework.path],
+            stderr: '${flutterXCFramework.path}: code object is not signed at all',
+          ),
+          FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '--timestamp=none',
+              flutterXCFramework.path,
+            ],
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final flutterFrameworkDependency = FlutterFrameworkDependency(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await flutterFrameworkDependency.generateArtifacts(
+          buildMode: BuildMode.debug,
+          xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: codesignIdentity,
+        );
+        expect(processManager, hasNoRemainingExpectations);
       });
 
       testWithoutContext('generateSwiftPackage', () async {
@@ -267,14 +374,14 @@ import PluginA
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -341,14 +448,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -393,14 +500,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -468,14 +575,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -510,14 +617,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -571,7 +678,7 @@ let package = Package(
         final logger = BufferLogger.test();
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
-        final Directory appDirectory = fs.directory(flutterAppPath)..createSync(recursive: true);
+        final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
 
         fs.currentDirectory = appDirectory;
 
@@ -619,12 +726,12 @@ let package = Package(
             expectations: [
               BuildExpectations(
                 expectedTargetName: 'debug_macos_bundle_flutter_assets',
-                expectedProjectDirPath: flutterAppPath,
+                expectedProjectDirPath: _flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/macosx',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
-                expectedFlutterRootDirPath: flutterRoot,
+                expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
@@ -640,14 +747,14 @@ let package = Package(
               ),
             ],
           ),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -662,8 +769,9 @@ let package = Package(
           packageConfigPath: '$flutterAppDartToolPath/package_config.json',
           targetFile: 'lib/main.dart',
           xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -673,7 +781,7 @@ let package = Package(
         final logger = BufferLogger.test();
         final Directory xcframeworkOutput = fs.directory(releaseFrameworksDirectoryPath);
         final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
-        final Directory appDirectory = fs.directory(flutterAppPath)..createSync(recursive: true);
+        final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
 
         fs.currentDirectory = appDirectory;
 
@@ -726,12 +834,12 @@ let package = Package(
             expectations: [
               BuildExpectations(
                 expectedTargetName: 'release_macos_bundle_flutter_assets',
-                expectedProjectDirPath: flutterAppPath,
+                expectedProjectDirPath: _flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Release/macosx',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
-                expectedFlutterRootDirPath: flutterRoot,
+                expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
@@ -747,14 +855,14 @@ let package = Package(
               ),
             ],
           ),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -769,8 +877,135 @@ let package = Package(
           packageConfigPath: '$flutterAppDartToolPath/package_config.json',
           targetFile: 'lib/main.dart',
           xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
+        expect(logger.warningText, isEmpty);
+      });
+
+      testWithoutContext('generateArtifacts and codesign', () async {
+        final fs = MemoryFileSystem.test();
+
+        final logger = BufferLogger.test();
+        final Directory xcframeworkOutput = fs.directory(releaseFrameworksDirectoryPath);
+        final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
+        final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
+
+        fs.currentDirectory = appDirectory;
+
+        final Directory generatedAppFramework = cacheDirectory.childDirectory(
+          'Release/macosx/App.framework',
+        )..createSync(recursive: true);
+        generatedAppFramework.childFile('Resources/flutter_assets/NativeAssetsManifest.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '{"native-assets":{"macos_x64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]},"macos_arm64":{"package:my_native_asset/my_native_asset.dylib":["absolute","my_native_asset.framework/my_native_asset"]}}}',
+          );
+        final Directory nativeAssetFramework = cacheDirectory.childDirectory(
+          'Release/macosx/native_assets/my_native_asset.framework',
+        )..createSync(recursive: true);
+        final Directory nativeAssetDsym = cacheDirectory.childDirectory(
+          'Release/macosx/native_assets/my_native_asset.framework.dSYM',
+        )..createSync(recursive: true);
+
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              generatedAppFramework.path,
+              '-output',
+              '$releaseFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+          const FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '$releaseFrameworksDirectoryPath/App.xcframework',
+            ],
+          ),
+          FakeCommand(
+            command: [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              nativeAssetFramework.path,
+              '-debug-symbols',
+              nativeAssetDsym.path,
+              '-output',
+              '$releaseNativeAssetsDirectoryPath/my_native_asset.xcframework',
+            ],
+          ),
+          const FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '$releaseNativeAssetsDirectoryPath/my_native_asset.xcframework',
+            ],
+          ),
+        ]);
+        const FlutterDarwinPlatform targetPlatform = .macos;
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(
+            expectations: [
+              BuildExpectations(
+                expectedTargetName: 'release_macos_bundle_flutter_assets',
+                expectedProjectDirPath: _flutterAppPath,
+                expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
+                expectedOutputDirPath: '$cacheDirectoryPath/Release/macosx',
+                expectedBuildDirPath: '$flutterAppBuildPath/',
+                expectedCacheDirPath: flutterCachePath,
+                expectedFlutterRootDirPath: _flutterRoot,
+                expectedEngineVersion: _engineVersion,
+                expectedDefines: <String, String>{
+                  'TargetFile': 'lib/main.dart',
+                  'TargetPlatform': 'darwin',
+                  'DarwinArchs': 'x86_64 arm64',
+                  'BuildMode': 'release',
+                  'DartObfuscation': 'false',
+                  'TrackWidgetCreation': 'false',
+                  'TreeShakeIcons': 'true',
+                  'BuildSwiftPackage': 'true',
+                },
+                expectedGenerateDartPluginRegistry: true,
+              ),
+            ],
+          ),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final appAndNativeAssetsDependencies = AppFrameworkAndNativeAssetsDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await appAndNativeAssetsDependencies.generateArtifacts(
+          buildInfo: BuildInfo.release,
+          cacheDirectory: cacheDirectory,
+          packageConfigPath: '$flutterAppDartToolPath/package_config.json',
+          targetFile: 'lib/main.dart',
+          xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: codesignIdentity,
+        );
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -780,7 +1015,7 @@ let package = Package(
         final logger = BufferLogger.test();
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
-        final Directory appDirectory = fs.directory(flutterAppPath)..createSync(recursive: true);
+        final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
 
         fs.currentDirectory = appDirectory;
 
@@ -836,12 +1071,12 @@ let package = Package(
             expectations: [
               BuildExpectations(
                 expectedTargetName: 'debug_ios_bundle_flutter_assets',
-                expectedProjectDirPath: flutterAppPath,
+                expectedProjectDirPath: _flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
-                expectedFlutterRootDirPath: flutterRoot,
+                expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
@@ -858,12 +1093,12 @@ let package = Package(
               ),
               BuildExpectations(
                 expectedTargetName: 'debug_ios_bundle_flutter_assets',
-                expectedProjectDirPath: flutterAppPath,
+                expectedProjectDirPath: _flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
-                expectedFlutterRootDirPath: flutterRoot,
+                expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
@@ -880,14 +1115,14 @@ let package = Package(
               ),
             ],
           ),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -902,9 +1137,10 @@ let package = Package(
           packageConfigPath: '$flutterAppDartToolPath/package_config.json',
           targetFile: 'lib/main.dart',
           xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: null,
         );
 
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(
           logger.warningText,
           contains('The asset "my_native_asset" does not support iOS Simulator (iphonesimulator)'),
@@ -919,7 +1155,7 @@ let package = Package(
           final logger = BufferLogger.test();
           final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
           final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
-          final Directory appDirectory = fs.directory(flutterAppPath)..createSync(recursive: true);
+          final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
 
           fs.currentDirectory = appDirectory;
 
@@ -969,12 +1205,12 @@ let package = Package(
               expectations: [
                 BuildExpectations(
                   expectedTargetName: 'debug_ios_bundle_flutter_assets',
-                  expectedProjectDirPath: flutterAppPath,
+                  expectedProjectDirPath: _flutterAppPath,
                   expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                   expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
                   expectedBuildDirPath: '$flutterAppBuildPath/',
                   expectedCacheDirPath: flutterCachePath,
-                  expectedFlutterRootDirPath: flutterRoot,
+                  expectedFlutterRootDirPath: _flutterRoot,
                   expectedEngineVersion: _engineVersion,
                   expectedDefines: <String, String>{
                     'TargetFile': 'lib/main.dart',
@@ -991,12 +1227,12 @@ let package = Package(
                 ),
                 BuildExpectations(
                   expectedTargetName: 'debug_ios_bundle_flutter_assets',
-                  expectedProjectDirPath: flutterAppPath,
+                  expectedProjectDirPath: _flutterAppPath,
                   expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                   expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
                   expectedBuildDirPath: '$flutterAppBuildPath/',
                   expectedCacheDirPath: flutterCachePath,
-                  expectedFlutterRootDirPath: flutterRoot,
+                  expectedFlutterRootDirPath: _flutterRoot,
                   expectedEngineVersion: _engineVersion,
                   expectedDefines: <String, String>{
                     'TargetFile': 'lib/main.dart',
@@ -1013,14 +1249,14 @@ let package = Package(
                 ),
               ],
             ),
-            cache: FakeCache(fs, flutterRoot),
+            cache: FakeCache(fs, _flutterRoot),
             fileSystem: fs,
-            flutterRoot: flutterRoot,
+            flutterRoot: _flutterRoot,
             flutterVersion: FakeFlutterVersion(),
             logger: logger,
             platform: FakePlatform(),
             processManager: processManager,
-            project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+            project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
             templateRenderer: const MustacheTemplateRenderer(),
             xcode: FakeXcode(),
           );
@@ -1035,6 +1271,7 @@ let package = Package(
               packageConfigPath: '$flutterAppDartToolPath/package_config.json',
               targetFile: 'lib/main.dart',
               xcframeworkOutput: xcframeworkOutput,
+              codesignIdentity: null,
             ),
             throwsToolExit(
               message:
@@ -1044,7 +1281,7 @@ let package = Package(
             ),
           );
 
-          expect(processManager.hasRemainingExpectations, isFalse);
+          expect(processManager, hasNoRemainingExpectations);
           expect(logger.warningText, isEmpty);
         },
       );
@@ -1061,14 +1298,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1107,14 +1344,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1160,6 +1397,462 @@ let package = Package(
         expect(simulatorReleaseTarget.name, 'debug_ios_bundle_flutter_assets');
       });
     });
+
+    group('CocoaPodPluginDependencies', () {
+      testWithoutContext('generateArtifacts', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final Directory podsDirectory = fs.directory('$_flutterAppPath/${targetPlatform.name}/Pods')
+          ..createSync(recursive: true);
+        _createPodFingerprintFiles(fs: fs, platformName: targetPlatform.name);
+        final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
+        const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
+        const iphoneosCocoapodPluginPath =
+            '$iphoneosDirPath/Debug-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
+        const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
+        const simulatorCocoapodPluginPath =
+            '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
+        const cocoapodPluginXCFrameworkPath =
+            '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
+        final File identityFile = fs.file(codesignIdentityFile);
+        identityFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
+
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphoneos',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$iphoneosDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(iphoneosCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphonesimulator',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$simulatorDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(simulatorCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              iphoneosCocoapodPluginPath,
+              '-framework',
+              simulatorCocoapodPluginPath,
+              '-output',
+              cocoapodPluginXCFrameworkPath,
+            ],
+            onRun: (command) {
+              fs.directory(cocoapodPluginXCFrameworkPath).createSync(recursive: true);
+            },
+          ),
+        ]);
+
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: null,
+          codesignIdentityFile: identityFile,
+        );
+
+        // Run again to verify fingerprinter caches
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: null,
+          codesignIdentityFile: identityFile,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('generateArtifacts static', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final Directory podsDirectory = fs.directory('$_flutterAppPath/${targetPlatform.name}/Pods')
+          ..createSync(recursive: true);
+        _createPodFingerprintFiles(fs: fs, platformName: targetPlatform.name);
+        final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
+        const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
+        const iphoneosCocoapodPluginPath =
+            '$iphoneosDirPath/Debug-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
+        const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
+        const simulatorCocoapodPluginPath =
+            '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
+        const cocoapodPluginXCFrameworkPath =
+            '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphoneos',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$iphoneosDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+              'MACH_O_TYPE=staticlib',
+            ],
+            onRun: (command) {
+              fs.directory(iphoneosCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphonesimulator',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$simulatorDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+              'MACH_O_TYPE=staticlib',
+            ],
+            onRun: (command) {
+              fs.directory(simulatorCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              iphoneosCocoapodPluginPath,
+              '-framework',
+              simulatorCocoapodPluginPath,
+              '-output',
+              cocoapodPluginXCFrameworkPath,
+            ],
+            onRun: (command) {
+              fs.directory(cocoapodPluginXCFrameworkPath).createSync(recursive: true);
+            },
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphoneos',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$iphoneosDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(iphoneosCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphonesimulator',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$simulatorDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(simulatorCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              iphoneosCocoapodPluginPath,
+              '-framework',
+              simulatorCocoapodPluginPath,
+              '-output',
+              cocoapodPluginXCFrameworkPath,
+            ],
+            onRun: (command) {
+              fs.directory(cocoapodPluginXCFrameworkPath).createSync(recursive: true);
+            },
+          ),
+        ]);
+
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: true,
+          codesignIdentity: null,
+          codesignIdentityFile: fs.file(codesignIdentityFile),
+        );
+
+        // Run again to verify fingerprinter does not match when static changes
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: null,
+          codesignIdentityFile: fs.file(codesignIdentityFile),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('generateArtifacts and codesign', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final Directory podsDirectory = fs.directory('$_flutterAppPath/${targetPlatform.name}/Pods')
+          ..createSync(recursive: true);
+        _createPodFingerprintFiles(fs: fs, platformName: targetPlatform.name);
+        final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
+        const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
+        const iphoneosCocoapodPluginPath =
+            '$iphoneosDirPath/Debug-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
+        const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
+        const simulatorCocoapodPluginPath =
+            '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
+        const cocoapodPluginXCFrameworkPath =
+            '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
+        final File identityFile = fs.file(codesignIdentityFile);
+        identityFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(codesignIdentity);
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphoneos',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$iphoneosDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(iphoneosCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'iphonesimulator',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$simulatorDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(simulatorCocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              iphoneosCocoapodPluginPath,
+              '-framework',
+              simulatorCocoapodPluginPath,
+              '-output',
+              cocoapodPluginXCFrameworkPath,
+            ],
+            onRun: (command) {
+              fs.directory(cocoapodPluginXCFrameworkPath).createSync(recursive: true);
+            },
+          ),
+          const FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--sign',
+              codesignIdentity,
+              '--timestamp=none',
+              cocoapodPluginXCFrameworkPath,
+            ],
+          ),
+        ]);
+
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: codesignIdentity,
+          codesignIdentityFile: identityFile,
+        );
+
+        // Run again to verify fingerprinter caches
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: codesignIdentity,
+          codesignIdentityFile: identityFile,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('generateDependencies', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        fs
+            .directory('$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework')
+            .createSync(recursive: true);
+        const FlutterDarwinPlatform targetPlatform = .ios;
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        final (
+          List<SwiftPackageTargetDependency> targetDependencies,
+          List<SwiftPackageTarget> packageTargets,
+        ) = cocoapodDependencies.generateDependencies(
+          xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+        );
+        expect(targetDependencies.length, 1);
+        expect(packageTargets.length, 1);
+        expect(targetDependencies[0].format(), contains('.target(name: "cocoapod_plugin")'));
+        expect(packageTargets[0].format(), '''
+.binaryTarget(
+            name: "cocoapod_plugin",
+            path: "Sources/Frameworks/CocoaPods/cocoapod_plugin.xcframework"
+        )''');
+        expect(processManager, hasNoRemainingExpectations);
+      });
+    });
   });
 
   group('macos', () {
@@ -1173,14 +1866,14 @@ let package = Package(
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1200,6 +1893,10 @@ let package = Package(
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        late final cocoapodDependencies = CocoaPodPluginDependencies(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
         pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
@@ -1211,12 +1908,13 @@ let package = Package(
           pluginSwiftDependencies: pluginSwiftDependencies,
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
+          cocoapodDependencies: cocoapodDependencies,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
 
         expect(logger.traceText, isEmpty);
-        expect(processManager.hasRemainingExpectations, false);
+        expect(processManager, hasNoRemainingExpectations);
         final File generatedPackageManifest = modeDirectory.childFile('Package.swift');
         expect(generatedPackageManifest, exists);
         expect(generatedPackageManifest.readAsStringSync(), '''
@@ -1289,14 +1987,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1341,14 +2039,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1421,14 +2119,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1463,14 +2161,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1524,7 +2222,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         final logger = BufferLogger.test();
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         final Directory cacheDirectory = fs.directory(cacheDirectoryPath);
-        final Directory appDirectory = fs.directory(flutterAppPath)..createSync(recursive: true);
+        final Directory appDirectory = fs.directory(_flutterAppPath)..createSync(recursive: true);
 
         fs.currentDirectory = appDirectory;
 
@@ -1587,12 +2285,12 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
             expectations: [
               BuildExpectations(
                 expectedTargetName: 'debug_ios_bundle_flutter_assets',
-                expectedProjectDirPath: flutterAppPath,
+                expectedProjectDirPath: _flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphoneos',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
-                expectedFlutterRootDirPath: flutterRoot,
+                expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
@@ -1609,12 +2307,12 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
               ),
               BuildExpectations(
                 expectedTargetName: 'debug_ios_bundle_flutter_assets',
-                expectedProjectDirPath: flutterAppPath,
+                expectedProjectDirPath: _flutterAppPath,
                 expectedPackageConfigPath: '$flutterAppDartToolPath/package_config.json',
                 expectedOutputDirPath: '$cacheDirectoryPath/Debug/iphonesimulator',
                 expectedBuildDirPath: '$flutterAppBuildPath/',
                 expectedCacheDirPath: flutterCachePath,
-                expectedFlutterRootDirPath: flutterRoot,
+                expectedFlutterRootDirPath: _flutterRoot,
                 expectedEngineVersion: _engineVersion,
                 expectedDefines: <String, String>{
                   'TargetFile': 'lib/main.dart',
@@ -1631,14 +2329,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
               ),
             ],
           ),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1653,8 +2351,9 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           packageConfigPath: '$flutterAppDartToolPath/package_config.json',
           targetFile: 'lib/main.dart',
           xcframeworkOutput: xcframeworkOutput,
+          codesignIdentity: null,
         );
-        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
         expect(logger.warningText, isEmpty);
       });
 
@@ -1670,14 +2369,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1716,14 +2415,14 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           analytics: FakeAnalytics(),
           artifacts: FakeArtifacts(engineArtifactPath),
           buildSystem: FakeBuildSystem(),
-          cache: FakeCache(fs, flutterRoot),
+          cache: FakeCache(fs, _flutterRoot),
           fileSystem: fs,
-          flutterRoot: flutterRoot,
+          flutterRoot: _flutterRoot,
           flutterVersion: FakeFlutterVersion(),
           logger: logger,
           platform: FakePlatform(),
           processManager: processManager,
-          project: FakeFlutterProject(directory: fs.directory(flutterAppPath)),
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -1750,6 +2449,147 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         expect(macosDebugTarget.name, 'debug_macos_bundle_flutter_assets');
         expect(macosProfileTarget.name, 'profile_macos_bundle_flutter_assets');
         expect(macosReleaseTarget.name, 'release_macos_bundle_flutter_assets');
+      });
+    });
+
+    group('CocoaPodPluginDependencies', () {
+      testWithoutContext('generateArtifacts', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        const FlutterDarwinPlatform targetPlatform = .macos;
+        final Directory podsDirectory = fs.directory('$_flutterAppPath/${targetPlatform.name}/Pods')
+          ..createSync(recursive: true);
+        _createPodFingerprintFiles(fs: fs, platformName: targetPlatform.name);
+        final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
+        const macosCacheDirPath = '$debugCocoapodCache/macosx';
+        const cocoapodPluginPath =
+            '$macosCacheDirPath/Debug/cocoapod_plugin/cocoapod_plugin.framework';
+        const cocoapodPluginXCFrameworkPath =
+            '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
+        final File identityFile = fs.file(codesignIdentityFile);
+        identityFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
+        final processManager = FakeProcessManager.list([
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-alltargets',
+              '-sdk',
+              'macosx',
+              '-configuration',
+              'Debug',
+              'SYMROOT=$macosCacheDirPath',
+              'ONLY_ACTIVE_ARCH=NO',
+              'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
+            ],
+            onRun: (command) {
+              fs.directory(cocoapodPluginPath).createSync(recursive: true);
+            },
+            workingDirectory: podsDirectory.path,
+          ),
+
+          FakeCommand(
+            command: const [
+              'xcrun',
+              'xcodebuild',
+              '-create-xcframework',
+              '-framework',
+              cocoapodPluginPath,
+              '-output',
+              cocoapodPluginXCFrameworkPath,
+            ],
+            onRun: (command) {
+              fs.directory(cocoapodPluginXCFrameworkPath).createSync(recursive: true);
+            },
+          ),
+        ]);
+
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: null,
+          codesignIdentityFile: identityFile,
+        );
+
+        // Run again to verify fingerprinter caches
+        await cocoapodDependencies.generateArtifacts(
+          buildInfo: BuildInfo.debug,
+          cacheDirectory: fs.directory(cacheDirectoryPath),
+          xcframeworkOutput: xcframeworkOutput,
+          buildStatic: false,
+          codesignIdentity: null,
+          codesignIdentityFile: identityFile,
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('generateDependencies', () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        fs
+            .directory('$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework')
+            .createSync(recursive: true);
+        const FlutterDarwinPlatform targetPlatform = .macos;
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+        final cocoapodDependencies = CocoaPodPluginDependenciesSkipPodProcessing(
+          targetPlatform: targetPlatform,
+          utils: testUtils,
+        );
+
+        final (
+          List<SwiftPackageTargetDependency> targetDependencies,
+          List<SwiftPackageTarget> packageTargets,
+        ) = cocoapodDependencies.generateDependencies(
+          xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
+        );
+        expect(targetDependencies.length, 1);
+        expect(packageTargets.length, 1);
+        expect(targetDependencies[0].format(), contains('.target(name: "cocoapod_plugin")'));
+        expect(packageTargets[0].format(), '''
+.binaryTarget(
+            name: "cocoapod_plugin",
+            path: "Sources/Frameworks/CocoaPods/cocoapod_plugin.xcframework"
+        )''');
+        expect(processManager, hasNoRemainingExpectations);
       });
     });
   });
@@ -1784,6 +2624,20 @@ let package = Package(
 ''';
 }
 
+/// Creates Pod directory, Podfile, Podfile.lock, and Manifest.lock. Returns the Pods directory.
+void _createPodFingerprintFiles({required FileSystem fs, required String platformName}) {
+  fs.file('$_flutterAppPath/$platformName/Podfile').createSync(recursive: true);
+  fs.file('$_flutterAppPath/$platformName/Podfile.lock').createSync(recursive: true);
+  fs.file('$_flutterAppPath/$platformName/Pods/Manifest.lock').createSync(recursive: true);
+  fs.file('$_flutterRoot/packages/flutter_tools/bin/podhelper.rb').createSync(recursive: true);
+  fs
+      .file('$_flutterRoot/packages/flutter_tools/lib/src/commands/build_swift_package.dart')
+      .createSync(recursive: true);
+  fs
+      .file('$_flutterAppPath/$platformName/Runner.xcodeproj/project.pbxproj')
+      .createSync(recursive: true);
+}
+
 class FakeAnalytics extends Fake implements Analytics {}
 
 class FakeXcode extends Fake implements Xcode {
@@ -1791,6 +2645,9 @@ class FakeXcode extends Fake implements Xcode {
   Future<String> sdkLocation(EnvironmentType environmentType) async {
     return _iosSdkRoot;
   }
+
+  @override
+  List<String> xcrunCommand() => ['xcrun'];
 }
 
 class FakeFlutterVersion extends Fake implements FlutterVersion {
@@ -1900,6 +2757,74 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   Directory get dartTool => directory.childDirectory('.dart_tool');
+
+  @override
+  late final ios = FakeIosProject(directory: directory);
+
+  @override
+  late final macos = FakeMacosProject(directory: directory);
+}
+
+class FakeIosProject extends Fake implements IosProject {
+  FakeIosProject({required this.directory});
+
+  final Directory directory;
+
+  @override
+  Directory get hostAppRoot {
+    return directory.childDirectory('ios');
+  }
+
+  @override
+  File get podfile => hostAppRoot.childFile('Podfile');
+
+  @override
+  File get podfileLock => hostAppRoot.childFile('Podfile.lock');
+
+  @override
+  File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
+
+  @override
+  Directory get xcodeProject => hostAppRoot.childDirectory('Runner.xcodeproj');
+
+  @override
+  File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  @override
+  File get flutterPluginSwiftPackageManifest => hostAppRoot.childFile(
+    'Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
+  );
+}
+
+class FakeMacosProject extends Fake implements MacOSProject {
+  FakeMacosProject({required this.directory});
+
+  final Directory directory;
+
+  @override
+  Directory get hostAppRoot {
+    return directory.childDirectory('macos');
+  }
+
+  @override
+  File get podfile => hostAppRoot.childFile('Podfile');
+
+  @override
+  File get podfileLock => hostAppRoot.childFile('Podfile.lock');
+
+  @override
+  File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
+
+  @override
+  Directory get xcodeProject => hostAppRoot.childDirectory('Runner.xcodeproj');
+
+  @override
+  File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  @override
+  File get flutterPluginSwiftPackageManifest => hostAppRoot.childFile(
+    'Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
+  );
 }
 
 class FakePlugin extends Fake implements Plugin {
@@ -1933,3 +2858,15 @@ class FakePlugin extends Fake implements Plugin {
 }
 
 class FakeFeatureFlags extends Fake implements FeatureFlags {}
+
+class CocoaPodPluginDependenciesSkipPodProcessing extends CocoaPodPluginDependencies {
+  CocoaPodPluginDependenciesSkipPodProcessing({
+    required super.targetPlatform,
+    required super.utils,
+  });
+
+  @override
+  Future<void> processPods(XcodeBasedProject xcodeProject, BuildInfo buildInfo) async {}
+}
+
+class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesigning {}

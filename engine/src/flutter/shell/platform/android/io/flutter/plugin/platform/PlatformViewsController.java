@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.MutableContextWrapper;
 import android.os.Build;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -331,6 +332,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               (FrameLayout.LayoutParams) viewWrapper.getLayoutParams();
           layoutParams.topMargin = physicalTop;
           layoutParams.leftMargin = physicalLeft;
+          layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
           viewWrapper.setLayoutParams(layoutParams);
         }
 
@@ -389,6 +391,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           final ViewGroup.LayoutParams viewWrapperLayoutParams = viewWrapper.getLayoutParams();
           viewWrapperLayoutParams.width = physicalWidth;
           viewWrapperLayoutParams.height = physicalHeight;
+          if (viewWrapperLayoutParams instanceof FrameLayout.LayoutParams) {
+            ((FrameLayout.LayoutParams) viewWrapperLayoutParams).gravity =
+                Gravity.LEFT | Gravity.TOP;
+          }
           viewWrapper.setLayoutParams(viewWrapperLayoutParams);
 
           final View embeddedView = platformView.getView();
@@ -626,7 +632,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     viewWrapper.resizeRenderTarget(physicalWidth, physicalHeight);
 
     final FrameLayout.LayoutParams viewWrapperLayoutParams =
-        new FrameLayout.LayoutParams(physicalWidth, physicalHeight);
+        new FrameLayout.LayoutParams(physicalWidth, physicalHeight, Gravity.LEFT | Gravity.TOP);
 
     // Size and position the view wrapper.
     final int physicalTop = toPhysicalPixels(request.logicalTop);

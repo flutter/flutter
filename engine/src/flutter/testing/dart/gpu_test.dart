@@ -512,57 +512,67 @@ void main() async {
   }, skip: !impellerEnabled);
 
   // Renders a green triangle pointing downwards.
-  test('Can render triangle', () async {
-    final RenderPassState state = createSimpleRenderPass();
-    drawTriangle(state, Colors.lime);
-    state.commandBuffer.submit();
+  test(
+    'Can render triangle',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
+      drawTriangle(state, Colors.lime);
+      state.commandBuffer.submit();
 
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
-  }, skip: !impellerEnabled);
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
 
   // Renders a green triangle pointing downwards using polygon mode line.
-  test('Can render triangle with polygon mode line.', () async {
-    final RenderPassState state = createSimpleRenderPass();
+  test(
+    'Can render triangle with polygon mode line.',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
 
-    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    state.renderPass.bindPipeline(pipeline);
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
 
-    // Configure blending with defaults (just to test the bindings).
-    state.renderPass.setColorBlendEnable(true);
-    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+      // Configure blending with defaults (just to test the bindings).
+      state.renderPass.setColorBlendEnable(true);
+      state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
 
-    // Set polygon mode.
-    state.renderPass.setPolygonMode(gpu.PolygonMode.line);
+      // Set polygon mode.
+      state.renderPass.setPolygonMode(gpu.PolygonMode.line);
 
-    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-    final gpu.BufferView vertices = transients.emplace(
-      float32(<double>[
-        -0.5, 0.5, //
-        0.0, -0.5, //
-        0.5, 0.5, //
-      ]),
-    );
-    final gpu.BufferView vertInfoData = transients.emplace(
-      float32(<double>[
-        1, 0, 0, 0, // mvp
-        0, 1, 0, 0, // mvp
-        0, 0, 1, 0, // mvp
-        0, 0, 0, 1, // mvp
-        0, 1, 0, 1, // color
-      ]),
-    );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[
+          -0.5, 0.5, //
+          0.0, -0.5, //
+          0.5, 0.5, //
+        ]),
+      );
+      final gpu.BufferView vertInfoData = transients.emplace(
+        float32(<double>[
+          1, 0, 0, 0, // mvp
+          0, 1, 0, 0, // mvp
+          0, 0, 1, 0, // mvp
+          0, 0, 0, 1, // mvp
+          0, 1, 0, 1, // color
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices, 3);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
-    state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      state.renderPass.bindUniform(vertInfo, vertInfoData);
+      state.renderPass.draw();
 
-    state.commandBuffer.submit();
+      state.commandBuffer.submit();
 
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_polygon_mode.png');
-  }, skip: !impellerEnabled);
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_polygon_mode.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
 
   // Renders a green triangle pointing downwards, with 4xMSAA.
   test(
@@ -575,7 +585,10 @@ void main() async {
       final ui.Image image = state.renderTexture.asImage();
       await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_msaa.png');
     },
-    skip: !(impellerEnabled && gpu.gpuContext.doesSupportOffscreenMSAA),
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip:
+        !(impellerEnabled && gpu.gpuContext.doesSupportOffscreenMSAA) ||
+        impellerBackend == 'opengles',
   );
 
   test(
@@ -599,212 +612,247 @@ void main() async {
   );
 
   // Renders a hollow green triangle pointing downwards.
-  test('Can render hollowed out triangle using stencil ops', () async {
-    final RenderPassState state = createSimpleRenderPass();
+  test(
+    'Can render hollowed out triangle using stencil ops',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
 
-    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    state.renderPass.bindPipeline(pipeline);
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
 
-    // Configure blending with defaults (just to test the bindings).
-    state.renderPass.setColorBlendEnable(true);
-    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+      // Configure blending with defaults (just to test the bindings).
+      state.renderPass.setColorBlendEnable(true);
+      state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
 
-    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-    final gpu.BufferView vertices = transients.emplace(
-      float32(<double>[
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[
+          -0.5, 0.5, //
+          0.0, -0.5, //
+          0.5, 0.5, //
+        ]),
+      );
+      final gpu.BufferView innerClipVertInfo = transients.emplace(
+        float32(<double>[
+          0.5, 0, 0, 0, // mvp
+          0, 0.5, 0, 0, // mvp
+          0, 0, 0.5, 0, // mvp
+          0, 0, 0, 1, // mvp
+          0, 1, 0, 1, // color
+        ]),
+      );
+      final gpu.BufferView outerGreenVertInfo = transients.emplace(
+        float32(<double>[
+          1, 0, 0, 0, // mvp
+          0, 1, 0, 0, // mvp
+          0, 0, 1, 0, // mvp
+          0, 0, 0, 1, // mvp
+          0, 1, 0, 1, // color
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices, 3);
+
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+
+      // First, punch out a scaled down triangle in the stencil buffer.
+      // Since the stencil buffer is initialized to 0, we set the stencil ref to 1
+      // and the compare to `equial`, which will result in the stencil test
+      // failing. But on failure, we increment the stencil in order to punch out
+      // the triangle.
+
+      state.renderPass.bindUniform(vertInfo, innerClipVertInfo);
+      state.renderPass.setStencilReference(1);
+      state.renderPass.setStencilConfig(
+        gpu.StencilConfig(
+          compareFunction: gpu.CompareFunction.equal,
+          stencilFailureOperation: gpu.StencilOperation.incrementClamp,
+        ),
+      );
+      state.renderPass.draw();
+
+      // Next, render the outer triangle with the stencil ref set to zero, so that
+      // the stencil test passes everywhere except where the inner triangle was
+      // punched out.
+
+      state.renderPass.setStencilReference(0);
+      // Set the stencil config to turn off the increment. For this golden test
+      // we technically don't need to do this, but we do it here just to exercise
+      // the API.
+      state.renderPass.setStencilConfig(
+        gpu.StencilConfig(compareFunction: gpu.CompareFunction.equal),
+      );
+      state.renderPass.bindUniform(vertInfo, outerGreenVertInfo);
+      state.renderPass.draw();
+
+      state.commandBuffer.submit();
+
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_stencil.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
+
+  test(
+    'Drawing respects cull mode',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
+
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
+
+      state.renderPass.setColorBlendEnable(true);
+      state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      // Counter-clockwise triangle.
+      final triangle = <double>[
         -0.5, 0.5, //
         0.0, -0.5, //
         0.5, 0.5, //
-      ]),
-    );
-    final gpu.BufferView innerClipVertInfo = transients.emplace(
-      float32(<double>[
-        0.5, 0, 0, 0, // mvp
-        0, 0.5, 0, 0, // mvp
-        0, 0, 0.5, 0, // mvp
-        0, 0, 0, 1, // mvp
-        0, 1, 0, 1, // color
-      ]),
-    );
-    final gpu.BufferView outerGreenVertInfo = transients.emplace(
-      float32(<double>[
-        1, 0, 0, 0, // mvp
-        0, 1, 0, 0, // mvp
-        0, 0, 1, 0, // mvp
-        0, 0, 0, 1, // mvp
-        0, 1, 0, 1, // color
-      ]),
-    );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+      ];
+      final gpu.BufferView vertices = transients.emplace(float32(triangle));
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      void drawTriangle(Vector4 color) {
+        final gpu.BufferView vertInfoUboFront = transients.emplace(
+          unlitUBO(Matrix4.identity(), color),
+        );
 
-    // First, punch out a scaled down triangle in the stencil buffer.
-    // Since the stencil buffer is initialized to 0, we set the stencil ref to 1
-    // and the compare to `equial`, which will result in the stencil test
-    // failing. But on failure, we increment the stencil in order to punch out
-    // the triangle.
+        final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+        state.renderPass.bindVertexBuffer(vertices, 3);
+        state.renderPass.bindUniform(vertInfo, vertInfoUboFront);
+        state.renderPass.draw();
+      }
 
-    state.renderPass.bindUniform(vertInfo, innerClipVertInfo);
-    state.renderPass.setStencilReference(1);
-    state.renderPass.setStencilConfig(
-      gpu.StencilConfig(
-        compareFunction: gpu.CompareFunction.equal,
-        stencilFailureOperation: gpu.StencilOperation.incrementClamp,
-      ),
-    );
-    state.renderPass.draw();
+      // Draw the green rectangle.
+      // Defaults to clockwise winding order. So frontface culling should not
+      // impact the green triangle.
+      state.renderPass.setCullMode(gpu.CullMode.frontFace);
+      drawTriangle(Colors.lime);
 
-    // Next, render the outer triangle with the stencil ref set to zero, so that
-    // the stencil test passes everywhere except where the inner triangle was
-    // punched out.
+      // Backface cull a red triangle.
+      state.renderPass.setCullMode(gpu.CullMode.backFace);
+      drawTriangle(Colors.red);
 
-    state.renderPass.setStencilReference(0);
-    // Set the stencil config to turn off the increment. For this golden test
-    // we technically don't need to do this, but we do it here just to exercise
-    // the API.
-    state.renderPass.setStencilConfig(
-      gpu.StencilConfig(compareFunction: gpu.CompareFunction.equal),
-    );
-    state.renderPass.bindUniform(vertInfo, outerGreenVertInfo);
-    state.renderPass.draw();
+      // Invert the winding mode and frontface cull a red rectangle.
+      state.renderPass.setWindingOrder(gpu.WindingOrder.counterClockwise);
+      state.renderPass.setCullMode(gpu.CullMode.frontFace);
+      drawTriangle(Colors.red);
 
-    state.commandBuffer.submit();
+      state.commandBuffer.submit();
 
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle_stencil.png');
-  }, skip: !impellerEnabled);
-
-  test('Drawing respects cull mode', () async {
-    final RenderPassState state = createSimpleRenderPass();
-
-    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    state.renderPass.bindPipeline(pipeline);
-
-    state.renderPass.setColorBlendEnable(true);
-    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
-
-    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-    // Counter-clockwise triangle.
-    final triangle = <double>[
-      -0.5, 0.5, //
-      0.0, -0.5, //
-      0.5, 0.5, //
-    ];
-    final gpu.BufferView vertices = transients.emplace(float32(triangle));
-
-    void drawTriangle(Vector4 color) {
-      final gpu.BufferView vertInfoUboFront = transients.emplace(
-        unlitUBO(Matrix4.identity(), color),
-      );
-
-      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
-      state.renderPass.bindVertexBuffer(vertices, 3);
-      state.renderPass.bindUniform(vertInfo, vertInfoUboFront);
-      state.renderPass.draw();
-    }
-
-    // Draw the green rectangle.
-    // Defaults to clockwise winding order. So frontface culling should not
-    // impact the green triangle.
-    state.renderPass.setCullMode(gpu.CullMode.frontFace);
-    drawTriangle(Colors.lime);
-
-    // Backface cull a red triangle.
-    state.renderPass.setCullMode(gpu.CullMode.backFace);
-    drawTriangle(Colors.red);
-
-    // Invert the winding mode and frontface cull a red rectangle.
-    state.renderPass.setWindingOrder(gpu.WindingOrder.counterClockwise);
-    state.renderPass.setCullMode(gpu.CullMode.frontFace);
-    drawTriangle(Colors.red);
-
-    state.commandBuffer.submit();
-
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_cull_mode.png');
-  }, skip: !impellerEnabled);
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_cull_mode.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
 
   // Renders a hexagon using line strip primitive type.
-  test('Can render hollow hexagon using line strip primitive type', () async {
-    final RenderPassState state = createSimpleRenderPass();
+  test(
+    'Can render hollow hexagon using line strip primitive type',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
 
-    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    state.renderPass.bindPipeline(pipeline);
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
 
-    // Configure blending with defaults (just to test the bindings).
-    state.renderPass.setColorBlendEnable(true);
-    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+      // Configure blending with defaults (just to test the bindings).
+      state.renderPass.setColorBlendEnable(true);
+      state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
 
-    // Set primitive type
-    state.renderPass.setPrimitiveType(gpu.PrimitiveType.lineStrip);
+      // Set primitive type
+      state.renderPass.setPrimitiveType(gpu.PrimitiveType.lineStrip);
 
-    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-    final gpu.BufferView vertices = transients.emplace(
-      float32(<double>[1.0, 0.0, 0.5, 0.8, -0.5, 0.8, -1.0, 0.0, -0.5, -0.8, 0.5, -0.8, 1.0, 0.0]),
-    );
-    final gpu.BufferView vertInfoData = transients.emplace(
-      float32(<double>[
-        1, 0, 0, 0, // mvp
-        0, 1, 0, 0, // mvp
-        0, 0, 1, 0, // mvp
-        0, 0, 0, 1, // mvp
-        0, 1, 0, 1, // color
-      ]),
-    );
-    state.renderPass.bindVertexBuffer(vertices, 7);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[
+          1.0,
+          0.0,
+          0.5,
+          0.8,
+          -0.5,
+          0.8,
+          -1.0,
+          0.0,
+          -0.5,
+          -0.8,
+          0.5,
+          -0.8,
+          1.0,
+          0.0,
+        ]),
+      );
+      final gpu.BufferView vertInfoData = transients.emplace(
+        float32(<double>[
+          1, 0, 0, 0, // mvp
+          0, 1, 0, 0, // mvp
+          0, 0, 1, 0, // mvp
+          0, 0, 0, 1, // mvp
+          0, 1, 0, 1, // color
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices, 7);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
-    state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      state.renderPass.bindUniform(vertInfo, vertInfoData);
+      state.renderPass.draw();
 
-    state.commandBuffer.submit();
+      state.commandBuffer.submit();
 
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_hexgon_line_strip.png');
-  }, skip: !impellerEnabled);
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_hexgon_line_strip.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
 
   // Renders the middle part triangle using scissor.
-  test('Can render portion of the triangle using scissor', () async {
-    final RenderPassState state = createSimpleRenderPass();
+  test(
+    'Can render portion of the triangle using scissor',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
 
-    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    state.renderPass.bindPipeline(pipeline);
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
 
-    // Configure blending with defaults (just to test the bindings).
-    state.renderPass.setColorBlendEnable(true);
-    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+      // Configure blending with defaults (just to test the bindings).
+      state.renderPass.setColorBlendEnable(true);
+      state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
 
-    // Set primitive type.
-    state.renderPass.setPrimitiveType(gpu.PrimitiveType.triangle);
+      // Set primitive type.
+      state.renderPass.setPrimitiveType(gpu.PrimitiveType.triangle);
 
-    // Set scissor.
-    state.renderPass.setScissor(gpu.Scissor(x: 25, width: 50, height: 100));
+      // Set scissor.
+      state.renderPass.setScissor(gpu.Scissor(x: 25, width: 50, height: 100));
 
-    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-    final gpu.BufferView vertices = transients.emplace(
-      float32(<double>[-1.0, -1.0, 0.0, 1.0, 1.0, -1.0]),
-    );
-    final gpu.BufferView vertInfoData = transients.emplace(
-      float32(<double>[
-        1, 0, 0, 0, // mvp
-        0, 1, 0, 0, // mvp
-        0, 0, 1, 0, // mvp
-        0, 0, 0, 1, // mvp
-        0, 1, 0, 1, // color
-      ]),
-    );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[-1.0, -1.0, 0.0, 1.0, 1.0, -1.0]),
+      );
+      final gpu.BufferView vertInfoData = transients.emplace(
+        float32(<double>[
+          1, 0, 0, 0, // mvp
+          0, 1, 0, 0, // mvp
+          0, 0, 1, 0, // mvp
+          0, 0, 0, 1, // mvp
+          0, 1, 0, 1, // color
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices, 3);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
-    state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      state.renderPass.bindUniform(vertInfo, vertInfoData);
+      state.renderPass.draw();
 
-    state.commandBuffer.submit();
+      state.commandBuffer.submit();
 
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_scissor.png');
-  }, skip: !impellerEnabled);
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_scissor.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
 
   test('RenderPass.setScissor doesnt throw for valid values', () async {
     final RenderPassState state = createSimpleRenderPass();
@@ -857,44 +905,49 @@ void main() async {
   }, skip: !impellerEnabled);
 
   // Renders the middle part triangle using viewport.
-  test('Can render portion of the triangle using viewport', () async {
-    final RenderPassState state = createSimpleRenderPass();
+  test(
+    'Can render portion of the triangle using viewport',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
 
-    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
-    state.renderPass.bindPipeline(pipeline);
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
 
-    // Configure blending with defaults (just to test the bindings).
-    state.renderPass.setColorBlendEnable(true);
-    state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
+      // Configure blending with defaults (just to test the bindings).
+      state.renderPass.setColorBlendEnable(true);
+      state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation());
 
-    // Set primitive type.
-    state.renderPass.setPrimitiveType(gpu.PrimitiveType.triangle);
+      // Set primitive type.
+      state.renderPass.setPrimitiveType(gpu.PrimitiveType.triangle);
 
-    // Set viewport.
-    state.renderPass.setViewport(gpu.Viewport(x: 25, width: 50, height: 100));
+      // Set viewport.
+      state.renderPass.setViewport(gpu.Viewport(x: 25, width: 50, height: 100));
 
-    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
-    final gpu.BufferView vertices = transients.emplace(
-      float32(<double>[-1.0, -1.0, 0.0, 1.0, 1.0, -1.0]),
-    );
-    final gpu.BufferView vertInfoData = transients.emplace(
-      float32(<double>[
-        1, 0, 0, 0, // mvp
-        0, 1, 0, 0, // mvp
-        0, 0, 1, 0, // mvp
-        0, 0, 0, 1, // mvp
-        0, 1, 0, 1, // color
-      ]),
-    );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[-1.0, -1.0, 0.0, 1.0, 1.0, -1.0]),
+      );
+      final gpu.BufferView vertInfoData = transients.emplace(
+        float32(<double>[
+          1, 0, 0, 0, // mvp
+          0, 1, 0, 0, // mvp
+          0, 0, 1, 0, // mvp
+          0, 0, 0, 1, // mvp
+          0, 1, 0, 1, // color
+        ]),
+      );
+      state.renderPass.bindVertexBuffer(vertices, 3);
 
-    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
-    state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      state.renderPass.bindUniform(vertInfo, vertInfoData);
+      state.renderPass.draw();
 
-    state.commandBuffer.submit();
+      state.commandBuffer.submit();
 
-    final ui.Image image = state.renderTexture.asImage();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_viewport.png');
-  }, skip: !impellerEnabled);
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_test_viewport.png');
+    },
+    // TODO(b-luk): https://github.com/flutter/flutter/issues/183530 Re-enable for opengles.
+    skip: !impellerEnabled || impellerBackend == 'opengles',
+  );
 }

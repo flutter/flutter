@@ -40,7 +40,13 @@ Future<void> main() async {
           'integration_test.podspec',
         );
 
-        await exec('pod', <String>['lib', 'lint', iosintegrationTestPodspec, '--use-libraries']);
+        await exec('pod', <String>[
+          'lib',
+          'lint',
+          iosintegrationTestPodspec,
+          '--use-libraries',
+          '--quick',
+        ]);
 
         final String macosintegrationTestPodspec = path.join(
           integrationTestPackage,
