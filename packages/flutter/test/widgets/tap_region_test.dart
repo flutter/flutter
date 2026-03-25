@@ -1265,4 +1265,16 @@ void main() {
     );
     expect(tester.getSize(find.byType(TapRegion)), Size.zero);
   });
+
+  testWidgets('TextFieldTapRegion does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: TextFieldTapRegion(child: Placeholder())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(TextFieldTapRegion)), Size.zero);
+  });
 }
