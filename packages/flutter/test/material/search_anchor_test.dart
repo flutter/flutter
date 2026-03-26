@@ -3889,7 +3889,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pumpWidget(const MaterialApp(home: Material(child: Text('disposed'))));
     expect(tester.takeException(), isNull);
-    ChangeNotifier.debugAssertNotDisposed(controller);
+    ValueNotifier.debugAssertNotDisposed(controller);
   });
 
   testWidgets('SearchAnchor gracefully closes its search view when disposed', (
@@ -3934,7 +3934,7 @@ void main() {
     // The search menu starts to close but is not disposed yet.
     final EditableText editableText = tester.widget(find.byType(EditableText));
     final TextEditingController controller = editableText.controller;
-    ChangeNotifier.debugAssertNotDisposed(controller);
+    ValueNotifier.debugAssertNotDisposed(controller);
 
     await tester.pumpAndSettle();
     // The search menu and the internal search controller are now disposed.
@@ -3942,7 +3942,7 @@ void main() {
     expect(find.byType(TextField), findsNothing);
     FlutterError? error;
     try {
-      ChangeNotifier.debugAssertNotDisposed(controller);
+      ValueNotifier.debugAssertNotDisposed(controller);
     } on FlutterError catch (e) {
       error = e;
     }

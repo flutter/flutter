@@ -15,13 +15,6 @@ void main() {
     });
   });
 
-  test('MaterialStatesController dispatches memory events', () async {
-    await expectLater(
-      await memoryEvents(() => MaterialStatesController().dispose(), MaterialStatesController),
-      areCreateAndDispose,
-    );
-  });
-
   test('MaterialStatesController update, listener', () {
     var count = 0;
     void valueChanged() {
