@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   remove_cicd_label:
+    name: remove_cicd_label
     if: contains(github.event.pull_request.labels.*.name, 'CICD')
     runs-on: ubuntu-latest
     steps:
