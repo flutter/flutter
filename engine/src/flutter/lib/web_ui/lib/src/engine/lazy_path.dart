@@ -74,10 +74,6 @@ abstract class DisposablePathMetricIterator implements Iterator<DisposablePathMe
   void dispose();
 }
 
-abstract class DisposablePathMetrics {
-  DisposablePathMetricIterator get iterator;
-}
-
 abstract class DisposablePathMetric {
   DisposablePathBuilder extractPath(double start, double end, {bool startWithMoveTo = true});
   ui.Tangent getTangentForOffset(double distance);
