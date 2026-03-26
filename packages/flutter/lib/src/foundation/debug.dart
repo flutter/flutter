@@ -11,15 +11,11 @@ library;
 
 import 'dart:ui' as ui show Brightness;
 
-import 'assertions.dart';
 import 'memory_allocations.dart';
 import 'platform.dart';
-import 'print.dart';
 import 'ui_primitives.dart';
 
 export 'dart:ui' show Brightness;
-
-export 'print.dart' show DebugPrintCallback;
 
 /// Returns true if none of the foundation library debug variables have been
 /// changed.

@@ -70,8 +70,6 @@ Future<void> main() async {
         },
       ),
     );
-    final x = console.join('\n');
-    print('!!!!!!!! $x');
     expect(
       console.join('\n'),
       matches(

@@ -5,6 +5,7 @@
 import 'package:ui_primitives/ui_primitives.dart' as ui_primitives;
 export 'package:ui_primitives/ui_primitives.dart'
     show
+        DebugPrintCallback,
         DiagnosticLevel,
         DiagnosticPropertiesBuilder,
         Diagnosticable,
@@ -20,7 +21,11 @@ export 'package:ui_primitives/ui_primitives.dart'
         TextTreeConfiguration,
         ValueListenable,
         ValueNotifier,
-        VoidCallback;
+        VoidCallback,
+        debugPrint,
+        debugPrintSynchronously,
+        debugPrintThrottled,
+        debugWordWrap;
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
