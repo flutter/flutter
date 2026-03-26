@@ -5,12 +5,14 @@
 package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.BuildType
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
+import com.flutter.gradle.FlutterPluginConstants.PLATFORM_ABI_LIST
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
@@ -133,51 +135,6 @@ class FlutterPlugin : Plugin<Project> {
 
         this.addFlutterTasks(project)
 
-        // By default, assembling APKs generates fat APKs if multiple platforms are passed.
-        // Configuring split per ABI allows to generate separate APKs for each abi.
-        // This is a noop when building a bundle.
-        if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
-            FlutterPluginUtils.getAndroidExtension(project).splits.abi {
-                isEnable = true
-                reset()
-                isUniversalApk = false
-            }
-        } else {
-            // When splits-per-abi is NOT enabled, configure abiFilters to control which
-            // native libraries are included in the APK.
-            //
-            // This is crucial: If a project includes third-party dependencies with x86 native libraries,
-            // without these abiFilters, Google Play would incorrectly identify the app as supporting x86.
-            // When users with x86 devices install the app, it would crash at runtime because Flutter's
-            // native libraries aren't available for x86. By filtering out x86 at build time, Google Play
-            // correctly excludes x86 devices from the compatible device list.
-            //
-            // NOTE: This code does NOT affect "add-to-app" scenarios because:
-            // 1. For 'flutter build aar': abiFilters have no effect since libflutter.so and libapp.so
-            //    are not packaged into AAR artifacts - they are only added as dependencies
-            //    in pom files.
-            // 2. For project dependencies (implementation(project(":flutter"))): The Flutter
-            //    Gradle Plugin is not applied to the main app subproject, so this apply()
-            //    method is never called.
-            //
-            // abiFilters cannot be added to templates because it would break builds when
-            // --splits-per-abi is used due to conflicting configuration. This approach
-            // adds them programmatically only when splits are not configured.
-            //
-            // If the user has specified abiFilters in their build.gradle file, those
-            // settings will take precedence over these defaults.
-            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(project)) {
-                FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                    buildType.ndk.abiFilters.clear()
-                    FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
-                        val abiValue: String =
-                            FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                                ?: throw GradleException("Invalid platform: $platform")
-                        buildType.ndk.abiFilters.add(abiValue)
-                    }
-                }
-            }
-        }
         val propDeferredComponentNames = "deferred-component-names"
         val deferredComponentNamesValue: String? =
             project.findProperty(propDeferredComponentNames) as? String
@@ -187,10 +144,8 @@ class FlutterPlugin : Plugin<Project> {
                     .split(',')
                     .map { ":$it" }
                     .toSet()
-            // TODO(gmackall): Unify the types we use for the android extension. This is yet
-            //   another type we need unfortunately.
             val androidExtensionAsApplicationExtension =
-                project.extensions.getByType(ApplicationExtension::class.java)
+                FlutterPluginUtils.getAndroidApplicationExtension(project)
             // TODO(gmackall): Should we clear here? I think this is equivalent to what we used to
             //    do, but unsure. Can't use a closure.
             androidExtensionAsApplicationExtension.dynamicFeatures.clear()
@@ -199,7 +154,7 @@ class FlutterPlugin : Plugin<Project> {
 
         FlutterPluginUtils.getTargetPlatforms(project).forEach { targetArch ->
             val abiValue: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
-            val androidExtension: BaseExtension = FlutterPluginUtils.getAndroidExtension(project)
+            val androidExtension: BaseExtension = FlutterPluginUtils.getLegacyAndroidExtension(project)
             androidExtension.splits.abi.include(abiValue!!)
         }
 
@@ -236,7 +191,7 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         BaseApplicationNameHandler.setBaseName(project)
-        val flutterProguardRules: String =
+        val flutterProguardRules =
             Paths
                 .get(
                     flutterRoot!!.absolutePath,
@@ -244,40 +199,29 @@ class FlutterPlugin : Plugin<Project> {
                     "flutter_tools",
                     "gradle",
                     "flutter_proguard_rules.pro"
-                ).toString()
+                ).toFile()
         // TODO(gmackall): reconsider getting the android extension every time
-        FlutterPluginUtils.getAndroidExtension(project).buildTypes {
-            // Add profile build type.
-            create("profile") {
-                initWith(getByName("debug"))
+        val debugBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("debug")
+        FlutterPluginUtils.getAndroidExtension(project).buildTypes.create(
+            "profile",
+            {
+                initWith(debugBuildType)
                 // TODO(gmackall): do we need to clear?
                 this.matchingFallbacks.clear()
                 this.matchingFallbacks.addAll(listOf("debug", "release"))
             }
-
-            // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
-            // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
-            // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
-            // increased app size due to this.
-            if (FlutterPluginUtils.shouldShrinkResources(project)) {
-                getByName("release") {
-                    isMinifyEnabled = true
-                    // Enables resource shrinking, which is performed by the Android Gradle plugin.
-                    // The resource shrinker can't be used for libraries.
-                    isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
-                    proguardFiles(
-                        FlutterPluginUtils
-                            .getAndroidExtension(project)
-                            .getDefaultProguardFile("proguard-android-optimize.txt"),
-                        flutterProguardRules
-                    )
-
-                    // Optionally adds custom Proguard rules as needed from `android/app/proguard-rules.pro`.
-                    // Starting AGP 9.0 Proguard files must exist to be added to the configuration.
-                    if (File("${project.projectDir}/proguard-rules.pro").exists()) {
-                        proguardFile("proguard-rules.pro")
-                    }
-                }
+        )
+        if (FlutterPluginUtils.shouldShrinkResources(project)) {
+            val releaseBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
+            releaseBuildType.isMinifyEnabled = true
+            releaseBuildType.isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
+            releaseBuildType.proguardFiles.add(
+                FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt")
+            )
+            releaseBuildType.proguardFiles.add(flutterProguardRules)
+            val proguardRulesPro = File("${project.projectDir}/proguard-rules.pro")
+            if (proguardRulesPro.exists()) {
+                releaseBuildType.proguardFiles.add(proguardRulesPro)
             }
         }
 
@@ -300,7 +244,7 @@ class FlutterPlugin : Plugin<Project> {
             }
             localEngineHost = engineHostOut.name
         }
-        FlutterPluginUtils.getAndroidExtension(project).buildTypes.all {
+        FlutterPluginUtils.getLegacyAndroidExtension(project).buildTypes.all {
             addFlutterDependencies(this)
         }
     }
@@ -361,7 +305,8 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
-        val androidExtension = FlutterPluginUtils.getAndroidExtension(projectToAddTasksTo)
+        // TODO(reidbaker): Migrate to getAndroidApplicationExtension and getAndroidLibraryExtension.
+        val androidExtension = FlutterPluginUtils.getLegacyAndroidExtension(projectToAddTasksTo)
         androidExtension.sourceSets.all {
             val sourceSet = this
             val jniLibsDir =
@@ -374,7 +319,8 @@ class FlutterPlugin : Plugin<Project> {
         val flutterPlugin = this
 
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
-            // TODO(gmackall): I think this can be BaseExtension, with findByType.
+            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
+            configureAbis(projectToAddTasksTo, appExtension)
             val android: AbstractAppExtension =
                 projectToAddTasksTo.extensions.findByName("android") as AbstractAppExtension
             android.applicationVariants.configureEach {
@@ -551,6 +497,65 @@ class FlutterPlugin : Plugin<Project> {
         private const val FLUTTER_BUILD_PREFIX: String = "flutterBuild"
 
         /**
+         * Configures flutter default abi support respecting flutter command line flags.
+         */
+        private fun configureAbis(
+            projectToAddTasksTo: Project,
+            androidExtension: ApplicationExtension
+        ) {
+            // By default, assembling APKs generates fat APKs if multiple platforms are passed.
+            // Configuring split per ABI allows to generate separate APKs for each abi.
+            // This is a noop when building a bundle.
+            if (FlutterPluginUtils.shouldProjectSplitPerAbi(projectToAddTasksTo)) {
+                androidExtension.splits.abi {
+                    isEnable = true
+                    reset()
+                    isUniversalApk = false
+                }
+            } else {
+                // When splits-per-abi is NOT enabled, configure abiFilters to control which
+                // native libraries are included in the APK.
+                //
+                //  If a project includes third-party dependencies with x86 native libraries,
+                // without these abiFilters, Google Play would incorrectly identify the app as supporting x86.
+                // When users with x86 devices install the app, it would crash at runtime because Flutter's
+                // native libraries aren't available for x86. By filtering out x86 at build time, Google Play
+                // correctly excludes x86 devices from the compatible device list.
+                //
+                // This code does NOT affect "add-to-app" scenarios because:
+                // 1. For 'flutter build aar': abiFilters have no effect since libflutter.so and libapp.so
+                //    are not packaged into AAR artifacts - they are only added as dependencies
+                //    in pom files.
+                // 2. For project dependencies (implementation(project(":flutter"))): The Flutter
+                //    Gradle Plugin is not applied to the main app subproject, so this apply()
+                //    method is never called.
+                //
+                // abiFilters cannot be added to templates because it would break builds when
+                // --splits-per-abi is used due to conflicting configuration. This approach
+                // adds them programmatically only when splits are not configured.
+                //
+                // If the user has specified abiFilters in their build.gradle file's DefaultConfig,
+                // those settings will take precedence over these defaults.
+                configureAbiWithoutSplits(projectToAddTasksTo, androidExtension)
+            }
+        }
+
+        /**
+         * Clears existing abi configuration and sets ABI's supported by flutter.
+         */
+        private fun configureAbiWithoutSplits(
+            projectToAddTasksTo: Project,
+            extension: ApplicationExtension
+        ) {
+            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
+                extension.defaultConfig.ndk {
+                    abiFilters.clear()
+                    abiFilters.addAll(PLATFORM_ABI_LIST)
+                }
+            }
+        }
+
+        /**
          * Finds a task by name, returning null if the task does not exist.
          */
         private fun findTaskOrNull(
@@ -719,10 +724,8 @@ class FlutterPlugin : Plugin<Project> {
                             into(abi ?: "null")
                         }
                         // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                        val buildDir =
-                            "${FlutterPluginUtils.getFlutterSourceDirectory(project)}/build"
                         val nativeAssetsDir =
-                            "$buildDir/native_assets/android/jniLibs/lib"
+                            "${flutterCompileTask.intermediateDir}/native_assets/jniLibs/lib"
                         from("$nativeAssetsDir/$abi") {
                             include("*.so")
                             into(abi ?: "null")

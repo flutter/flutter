@@ -137,6 +137,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
+        ),
+        FakeCommand(
           command: <String>[
             'codesign',
             '--force',
@@ -187,6 +190,9 @@ void main() {
         ),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
         ),
         FakeCommand(
           command: <String>[
@@ -259,6 +265,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkBinary.path],
+        ),
+        FakeCommand(
           command: <String>[
             'codesign',
             '--force',
@@ -328,6 +337,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -420,6 +438,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -527,6 +554,15 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -603,6 +639,15 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -668,6 +713,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),

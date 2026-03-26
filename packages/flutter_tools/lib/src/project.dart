@@ -1014,7 +1014,7 @@ See the link below for more information:
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///
-  /// If there is no manifest file, or the key is not present, returns `false`.
+  /// If there is no manifest file, or the key is not present, returns [_impellerEnabledByDefault].
   bool computeImpellerEnabled() {
     if (!appManifestFile.existsSync()) {
       return _impellerEnabledByDefault;

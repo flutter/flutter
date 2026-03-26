@@ -7,9 +7,12 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
@@ -336,6 +339,40 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
+  testWidgets('ExpansionTile expandedAlignment with directional test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                expandedAlignment: AlignmentDirectional.topEnd,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100),
+                  SizedBox(height: 100, width: 80),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+
+    // The expandedAlignment is used to define the alignment of the Column widget in
+    // expanded tile, not the alignment of the children inside the Column.
+    expect(columnRect.left, 0.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the right edge of Column from X-axis should be 100.0.
+    expect(columnRect.right, 100.0);
+  });
+
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const child0Key = Key('child0');
     const child1Key = Key('child1');
@@ -378,6 +415,57 @@ void main() {
 
     // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
     // the offset of the left edge of both the children from X-axis should be 700.0.
+    expect(child0Rect.left, 700.0);
+    expect(child1Rect.left, 700.0);
+  });
+
+  testWidgets('ExpansionTile expandedCrossAxisAlignment with directional expandedAlignment test', (
+    WidgetTester tester,
+  ) async {
+    const child0Key = Key('child0');
+    const child1Key = Key('child1');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                // Set the column's alignment to AlignmentDirectional.centerStart to test CrossAxisAlignment
+                // of children widgets. This helps distinguish the effect of expandedAlignment
+                // and expandedCrossAxisAlignment later in the test.
+                expandedAlignment: AlignmentDirectional.centerStart,
+                expandedCrossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100, key: child0Key),
+                  SizedBox(height: 100, width: 80, key: child1Key),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect child0Rect = tester.getRect(find.byKey(child0Key));
+    final Rect child1Rect = tester.getRect(find.byKey(child1Key));
+
+    // With `textDirection` set to `TextDirection.rtl`, `AlignmentDirectional.centerStart`
+    // resolves to `Alignment.centerRight`. The column of children should be aligned to the
+    // center right of the expanded tile.
+    expect(columnRect.right, 800.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
+    expect(columnRect.left, 700.0);
+
+    // With `textDirection` set to `TextDirection.rtl`, `CrossAxisAlignment.end` aligns children to the left.
+    // The offset of the left edge of both children from the X-axis should be 700.0.
     expect(child0Rect.left, 700.0);
     expect(child1Rect.left, 700.0);
   });
@@ -615,6 +703,74 @@ void main() {
 
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
+  });
+
+  testWidgets('ExpansionTile shows hover color with opaque backgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color hoverColor = Colors.green; // Green
+    const Color backgroundColor = Colors.blue; // Blue
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(hoverColor: hoverColor),
+        home: const Material(
+          child: ExpansionTile(title: Text('Title'), collapsedBackgroundColor: backgroundColor),
+        ),
+      ),
+    );
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // Hover the tile.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Title')));
+    await tester.pumpAndSettle();
+
+    expect(
+      materialFinder,
+      paints
+        ..rect(color: Colors.transparent)
+        ..rect(color: hoverColor),
+    );
+  });
+
+  testWidgets('ExpansionTile shows focus color with opaque backgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color focusColor = Colors.pink; // Green
+    const Color backgroundColor = Colors.amber; // Blue
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: focusColor),
+        home: const Material(
+          child: ExpansionTile(title: Text('Title'), collapsedBackgroundColor: backgroundColor),
+        ),
+      ),
+    );
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // Focus the tile.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    expect(
+      materialFinder,
+      paints
+        ..rect(color: Colors.transparent)
+        ..rect(color: focusColor),
+    );
   });
 
   testWidgets('ExpansionTile Border', (WidgetTester tester) async {
@@ -2072,5 +2228,32 @@ void main() {
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
+  });
+
+  testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(title: const Text('Tile'), statesController: controller),
+        ),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, controller);
+  });
+
+  testWidgets('ExpansionTile forwards null statesController to ListTile', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Tile'))),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, isNull);
   });
 }

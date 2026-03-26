@@ -37,6 +37,7 @@ import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
+import 'src/commands/running_apps.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
@@ -196,6 +197,12 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         verboseHelp: verboseHelp,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
+        config: globals.config,
+        platform: globals.platform,
+        fileSystemUtils: globals.fsUtils,
+        terminal: globals.terminal,
+        plistParser: globals.plistParser,
+        processUtils: globals.processUtils,
       ),
       ChannelCommand(verboseHelp: verboseHelp),
       CleanCommand(verbose: verbose),
@@ -244,6 +251,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         featureFlags: featureFlags,
       ),
       RunCommand(verboseHelp: verboseHelp),
+      RunningAppsCommand(logger: globals.logger, systemClock: globals.systemClock),
       ScreenshotCommand(fs: globals.fs),
       ShellCompletionCommand(),
       TestCommand(

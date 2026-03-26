@@ -13,6 +13,7 @@ class ZoomControls extends StatelessWidget {
   const ZoomControls({
     super.key,
     required TransformationController transformationController,
+    // ignore: prefer_initializing_formals
   }) : _transformationController = transformationController;
 
   final TransformationController _transformationController;

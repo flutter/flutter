@@ -2327,6 +2327,98 @@ void main() {
 
     expect(material.clipBehavior, Clip.hardEdge);
   });
+
+  testWidgets('scrolls correctly in RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: CarouselView(
+              itemExtent: 600.0,
+              children: [
+                Center(key: ValueKey(0), child: Text('Item 0')),
+                Center(key: ValueKey(1), child: Text('Item 1')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final Finder item0 = find.byKey(const ValueKey(0));
+    final double before = tester.getCenter(item0).dx;
+
+    await tester.drag(find.byType(CarouselView), const Offset(500, 0));
+    await tester.pumpAndSettle();
+
+    final double after = tester.getCenter(item0).dx;
+    expect(after, greaterThan(before));
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    expect(scrollable.axisDirection, AxisDirection.left);
+  });
+
+  testWidgets('scrolls correctly in RTL with reverse', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: CarouselView(
+              reverse: true,
+              itemExtent: 600.0,
+              children: [
+                Center(key: ValueKey(0), child: Text('Item 0')),
+                Center(key: ValueKey(1), child: Text('Item 1')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final Finder item0 = find.byKey(const ValueKey(0));
+    final double before = tester.getCenter(item0).dx;
+
+    await tester.drag(find.byType(CarouselView), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+
+    final double after = tester.getCenter(item0).dx;
+    expect(after, lessThan(before));
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    expect(scrollable.axisDirection, AxisDirection.right);
+  });
+
+  testWidgets('snaps back to item boundary after partial scroll', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 600.0,
+            itemSnapping: true,
+            children: [
+              SizedBox(key: ValueKey(0), width: 600, height: 600),
+              SizedBox(key: ValueKey(1), width: 600, height: 600),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(CarouselView), const Offset(-100, 0));
+
+    await tester.pumpAndSettle();
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+    expect(position.pixels, 0.0);
+  });
 }
 
 Finder getItem(int index) {

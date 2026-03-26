@@ -35,9 +35,8 @@ class PhysicalShapeExample extends StatelessWidget {
         ),
       ),
       color: Colors.orange,
-      child: const SizedBox(
-        height: 200.0,
-        width: 200.0,
+      child: const SizedBox.square(
+        dimension: 200.0,
         child: Center(
           child: Text(
             'Hello, World!',

@@ -17,6 +17,12 @@ if (enable_unittests) {
     "vec3_array_uniform.frag",
     "vec4_uniform.frag",
     "vec4_array_uniform.frag",
+    "mat2_uniform.frag",
+    "mat2_array_uniform.frag",
+    "mat3_uniform.frag",
+    "mat3_array_uniform.frag",
+    "mat4_uniform.frag",
+    "mat4_array_uniform.frag",
   ]
 
   group("uniforms") {
@@ -31,6 +37,7 @@ if (enable_unittests) {
       "--sksl",
       "--runtime-stage-metal",
       "--runtime-stage-gles",
+      "--runtime-stage-gles3",
       "--runtime-stage-vulkan",
     ]
     intermediates_subdir = "iplr"

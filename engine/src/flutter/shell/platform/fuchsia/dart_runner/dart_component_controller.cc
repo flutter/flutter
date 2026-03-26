@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dart_component_controller.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.h"
 
 #include <fcntl.h>
 #include <lib/async-loop/loop.h>
@@ -27,9 +27,9 @@
 
 #include "dart_api.h"
 #include "flutter/fml/logging.h"
-#include "runtime/dart/utils/files.h"
-#include "runtime/dart/utils/handle_exception.h"
-#include "runtime/dart/utils/tempfs.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exception.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/tempfs.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
@@ -37,8 +37,6 @@
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_error.h"
 #include "third_party/tonic/logging/dart_invoke.h"
-
-#include "builtin_libraries.h"
 
 using tonic::ToDart;
 

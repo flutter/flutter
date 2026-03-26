@@ -185,7 +185,7 @@ do
   test_package_paths+=( $(find "$fuchsia_out_dir" -name "$test_package") )
 done
 
-fx_build_dir="$FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)"
+fx_build_dir="$FUCHSIA_DIR/$(< $FUCHSIA_DIR/.fx-build-dir)"
 if [[ "$skip_fuchsia_emu" -eq 0 ]]
 then
   engine-info "Starting the Fuchsia terminal.x64 emulator... (to skip this, run with --skip-fuchsia-emu)"

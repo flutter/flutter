@@ -145,7 +145,7 @@ class BuildEvent extends UsageEvent {
     String? command,
     String? settings,
     String? eventError,
-    required Usage flutterUsage,
+    required super.flutterUsage,
     required String type,
   }) : _command = command,
        _settings = settings,
@@ -156,7 +156,6 @@ class BuildEvent extends UsageEvent {
          // parameter
          type,
          label: label,
-         flutterUsage: flutterUsage,
        );
 
   final String? _command;
@@ -211,8 +210,8 @@ class AnalyticsConfigEvent extends UsageEvent {
 
 /// An event that reports when the code size measurement is run via `--analyze-size`.
 class CodeSizeEvent extends UsageEvent {
-  CodeSizeEvent(String platform, {required Usage flutterUsage})
-    : super('code-size-analysis', platform, flutterUsage: flutterUsage);
+  CodeSizeEvent(String platform, {required super.flutterUsage})
+    : super('code-size-analysis', platform);
 }
 
 /// An event for tracking the usage of specific error handling fallbacks.

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <lib/async-loop/cpp/loop.h>
+#include <lib/async/default.h>
 #include <lib/inspect/component/cpp/component.h>
 #include <lib/syslog/cpp/log_settings.h>
 #include <lib/trace-provider/provider.h>
@@ -10,14 +11,12 @@
 
 #include <cstdlib>
 
-#include "fml/message_loop.h"
-#include "lib/async/default.h"
-#include "logging.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/shell/platform/fuchsia/flutter/logging.h"
+#include "flutter/shell/platform/fuchsia/flutter/runner.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/build_info.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 #include "platform/utils.h"
-#include "runner.h"
-#include "runtime/dart/utils/build_info.h"
-#include "runtime/dart/utils/root_inspect_node.h"
-#include "runtime/dart/utils/tempfs.h"
 
 int main(int argc, char const* argv[]) {
   fml::MessageLoop::EnsureInitializedForCurrentThread();

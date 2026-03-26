@@ -1692,7 +1692,9 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       widget.onOpened?.call();
-      _isMenuExpanded = true;
+      setState(() {
+        _isMenuExpanded = true;
+      });
       showMenu<T?>(
         context: context,
         elevation: widget.elevation,
@@ -1714,12 +1716,14 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         if (!mounted) {
           return null;
         }
+        setState(() {
+          _isMenuExpanded = false;
+        });
         if (newValue == null) {
           widget.onCanceled?.call();
           return null;
         }
         widget.onSelected?.call(newValue);
-        _isMenuExpanded = false;
       });
     }
   }

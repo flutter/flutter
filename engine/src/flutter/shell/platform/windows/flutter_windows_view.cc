@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 #include <chrono>
+#include <cmath>
 
 #include "flutter/common/constants.h"
 #include "flutter/fml/make_copyable.h"
@@ -18,6 +19,11 @@
 namespace flutter {
 
 namespace {
+// The windows API sends pressure as a normalized value between 0 and 1024
+// See
+// https://learn.microsoft.com/windows/win32/api/winuser/ns-winuser-pointer_pen_info
+static const int kMaxPenPressure = 1024;
+
 // The maximum duration to block the Windows event loop while waiting
 // for a window resize operation to complete.
 constexpr std::chrono::milliseconds kWindowResizeTimeout{100};
@@ -258,9 +264,14 @@ void FlutterWindowsView::OnPointerMove(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
                                        int32_t device_id,
+                                       uint32_t rotation,
+                                       uint32_t pressure,
                                        int modifiers_state) {
   engine_->keyboard_key_handler()->SyncModifiersIfNeeded(modifiers_state);
-  SendPointerMove(x, y, GetOrCreatePointerState(device_kind, device_id));
+  auto state = GetOrCreatePointerState(device_kind, device_id);
+  state->rotation = rotation;
+  state->pressure = pressure;
+  SendPointerMove(x, y, state);
 }
 
 void FlutterWindowsView::OnPointerDown(
@@ -268,10 +279,14 @@ void FlutterWindowsView::OnPointerDown(
     double y,
     FlutterPointerDeviceKind device_kind,
     int32_t device_id,
-    FlutterPointerMouseButtons flutter_button) {
+    FlutterPointerMouseButtons flutter_button,
+    uint32_t rotation,
+    uint32_t pressure) {
   if (flutter_button != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
     state->buttons |= flutter_button;
+    state->rotation = rotation;
+    state->pressure = pressure;
     SendPointerDown(x, y, state);
   }
 }
@@ -686,6 +701,11 @@ void FlutterWindowsView::SendPointerEventWithData(
   event.device = state->pointer_id;
   event.buttons = state->buttons;
   event.view_id = view_id_;
+  event.rotation = (double)state->rotation * (M_PI / 180);
+  event.pressure = state->pressure;
+  // Normalized between 0 and 1024 by the windows API
+  event.pressure_min = 0;
+  event.pressure_max = kMaxPenPressure;
 
   // Set metadata that's always the same regardless of the event.
   event.struct_size = sizeof(event);

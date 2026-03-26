@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -342,4 +343,11 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/166382
   Switch(activeThumbColor: Colors.red, value: false, onChanged: null);
   SwitchListTile(activeThumbColor: Colors.red, value: false, onChanged: null);
+
+  // Changes made in https://github.com/flutter/flutter/pull/179776
+  PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    },
+  );
 }
