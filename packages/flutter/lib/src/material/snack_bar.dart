@@ -428,7 +428,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// At a value of 0, the action will always overflow to a new line.
   ///
-  /// Defaults to 0.25.
+  /// Defaults to 0.50.
   final double? actionOverflowThreshold;
 
   /// (optional) Whether to include a "close" icon widget.
