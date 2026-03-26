@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// For information on the implementation of this shader, see the design doc:
+// https://docs.google.com/document/d/19I6ToHCMlSgSava-niFWzMLGJEAd-rYiBQEGOMu8IJg/edit?tab=t.0#heading=h.icnmwum4oznc
+
 precision mediump float;
 
 #include <impeller/color.glsl>
