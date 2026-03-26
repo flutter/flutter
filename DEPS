@@ -292,7 +292,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/WebAssembly/binaryen.git' + '@' + Var('dart_binaryen_rev'),
 
   'engine/src/flutter/third_party/dart/third_party/devtools':
-   {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:be1d7ba3dddc84a6c6b0d4dca9ab62b8b3b24d29'}]},
+   {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:d99fca28d369314ce351ea1ea7daef62ba72c1a9'}]},
 
   'engine/src/flutter/third_party/dart/third_party/perfetto/src':
    Var('chromium_git') + '/external/github.com/google/perfetto' + '@' + Var('dart_perfetto_rev'),
