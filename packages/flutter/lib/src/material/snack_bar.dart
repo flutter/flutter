@@ -693,8 +693,6 @@ class _SnackBarState extends State<SnackBar> {
             key: StandardComponentType.closeButton.key,
             icon: const Icon(Icons.close),
             iconSize: 24.0,
-            // constraints: const BoxConstraints(),
-            // padding: EdgeInsets.zero,
             color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
             onPressed: () => ScaffoldMessenger.of(
               context,
