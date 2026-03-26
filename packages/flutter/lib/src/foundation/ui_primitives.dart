@@ -15,6 +15,7 @@ export 'package:ui_primitives/ui_primitives.dart'
         DiagnosticsStackTrace,
         DiagnosticsTreeStyle,
         ErrorDescription,
+        ErrorHint,
         ErrorSpacer,
         ErrorSummary,
         Listenable,
@@ -28,9 +29,11 @@ export 'package:ui_primitives/ui_primitives.dart'
         ValueNotifier,
         VoidCallback,
         debugPrint,
+        debugPrintStack,
         debugPrintSynchronously,
         debugPrintThrottled,
-        debugWordWrap;
+        debugWordWrap,
+        describeIdentity;
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
