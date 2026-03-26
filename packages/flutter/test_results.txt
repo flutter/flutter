@@ -1424,3 +1424,442 @@ Try `flutter pub outdated` for more information.
 00:18 +1345 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_tap_test.dart: kTouchSlop is evaluated in the global coordinate space when scaled up
 00:18 +1346 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_tap_test.dart: kTouchSlop is evaluated in the global coordinate space when scaled down
 00:18 +1347 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_long_press_test.dart: gets local coordinates
+00:19 +1348 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/locking_test.dart: Pointer events are locked during reassemble
+00:19 +1349 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_long_press_test.dart: scaled up
+00:19 +1350 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_long_press_test.dart: scaled down
+00:19 +1351 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Recognizes serial taps
+00:19 +1352 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Wins over tap gesture below it in the tree
+00:19 +1353 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Wins over tap gesture above it in the tree
+00:19 +1354 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Pointer tap events
+00:19 +1355 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Pointer tap events
+00:19 +1356 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Pointer tap events
+00:19 +1357 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Fires cancel if competing recognizer declares victory
+00:19 +1358 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Pointer move events
+00:19 +1359 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Wins over double-tap recognizer below it in the tree
+00:19 +1360 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Pointer hover events
+00:19 +1361 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Wins over double-tap recognizer above it in the tree
+00:19 +1362 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Pointer cancel events
+00:19 +1363 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Fires cancel and resets for PointerCancelEvent
+00:19 +1364 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Fires cancel and resets for PointerCancelEvent
+00:19 +1365 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Can expand add and hover pointers
+00:19 +1366 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Can handle malformed scrolling event.
+00:19 +1367 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Fires cancel and resets when pointer dragged past slop tolerance
+00:19 +1368 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Fires cancel and resets when pointer dragged past slop tolerance
+00:19 +1369 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Should synthesize kPrimaryButton for touch when no button is set
+00:19 +1370 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Should not synthesize kPrimaryButton for touch when a button is set
+00:19 +1371 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Resets if times out in between taps
+00:19 +1372 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Resets if times out in between taps
+00:19 +1373 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Resets if times out in between taps
+00:19 +1374 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Resets if taps are far apart
+00:19 +1375 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Resets if taps are far apart
+00:19 +1376 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Resets if taps are far apart
+00:19 +1377 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Error handling
+00:19 +1378 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Error handling
+00:19 +1379 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: Error handling
+00:19 +1380 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Is no-op if no callbacks are specified
+00:19 +1381 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_test.dart: PointerEventConverter processes view IDs
+00:19 +1382 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/serial_tap_test.dart: Works for non-primary button
+00:19 +1383 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/examples/sector_layout_test.dart: Sector layout can paint
+00:19 +1384 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/selection_test.dart: selection utils selectionBasedOnRect works
+00:19 +1385 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/selection_test.dart: selection utils adjustDragOffset works
+00:20 +1386 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/paragraph_intrinsics_test.dart: list body and paragraph intrinsics
+00:20 +1387 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/paragraph_intrinsics_test.dart: textScaler affects intrinsics
+00:20 +1388 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/paragraph_intrinsics_test.dart: maxLines affects intrinsics
+00:20 +1389 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/paragraph_intrinsics_test.dart: strutStyle affects intrinsics
+00:20 +1390 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_constraints_test.dart: Properly constraints the physical size
+00:20 +1391 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder constructor
+00:20 +1392 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder.all constructor
+00:20 +1393 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder.symmetric constructor
+00:20 +1394 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder.lerp
+00:20 +1395 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder.lerp identical a,b
+00:20 +1396 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder.lerp with nulls
+00:20 +1397 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder Object API
+00:20 +1398 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder Object API
+00:20 +1399 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder.all with a borderRadius
+00:20 +1400 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder outer border uniformity
+00:20 +1401 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/table_border_test.dart: TableBorder with non-uniform widths but uniform colors applies border radius
+00:20 +1402 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: Describe transform control test
+00:20 +1403 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: transform property test
+00:20 +1404 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugPaintPadding
+00:20 +1405 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugPaintPadding from render objects
+00:20 +1406 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugPaintPadding from render objects
+00:20 +1407 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugPaintPadding from render objects with inverted direction vertical
+00:20 +1408 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugPaintPadding from render objects with inverted direction horizontal
+00:20 +1409 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugDisableOpacity keeps things in the right spot
+00:20 +1410 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugAssertAllRenderVarsUnset warns when debugProfileLayoutsEnabled set
+00:20 +1411 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugAssertAllRenderVarsUnset warns when debugDisableClipLayers set
+00:20 +1412 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugAssertAllRenderVarsUnset warns when debugDisablePhysicalShapeLayers set
+00:20 +1413 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugAssertAllRenderVarsUnset warns when debugDisableOpacityLayers set
+00:20 +1414 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/debug_test.dart: debugCheckHasBoundedAxis warns for vertical and horizontal axis
+00:20 +1415 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: PlatformViewRenderBox layout should size to max constraint
+00:20 +1416 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: PlatformViewRenderBox send semantics update if id is changed
+00:20 +1417 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: PlatformViewRenderBox mouse hover events are dispatched via PlatformViewController.dispatchPointerEvent
+00:20 +1418 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: PlatformViewRenderBox touch hover events are dispatched via PlatformViewController.dispatchPointerEvent
+00:20 +1419 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: multi-finger touch test
+00:20 +1420 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: created callback is reset when controller is changed
+00:20 +1421 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: render object changed its visual appearance after texture is created
+00:20 +1422 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: markNeedsPaint does not get called on a disposed RO
+00:20 +1423 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: markNeedsPaint does not get called when setting the same viewController
+00:20 +1424 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: RenderDarwinPlatformView RenderUiKitView does not handle pointer events when not laid out
+00:20 +1425 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: RenderDarwinPlatformView RenderUiKitView handles pointer events when laid out
+00:20 +1426 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: RenderDarwinPlatformView RenderAppKitView does not handle pointer events when not laid out
+00:20 +1427 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: RenderDarwinPlatformView RenderAppKitView handles pointer events when laid out
+00:20 +1428 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/platform_view_test.dart: PlatformViewRenderBox has transparent hitTestBehavior in semantics
+00:21 +1429 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/first_frame_test.dart: Flutter dispatches first frame event on the web only
+00:21 +1429 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: RenderView accounts for device pixel ratio in paintBounds
+00:21 +1430 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: RenderView does not replace the root layer unnecessarily
+00:21 +1431 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: RenderView does not replace the root layer unnecessarily when view resizes
+00:21 +1432 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: ViewConfiguration == and hashCode
+00:21 +1433 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: invokes DebugPaintCallback
+00:21 +1434 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: Config can be set and changed after instantiation without calling prepareInitialFrame first
+00:21 +1435 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/view_test.dart: Constraints are derived from configuration
+00:21 +1436 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Scrollable widget scrollDirection update test
+00:21 +1437 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal - down
+00:21 +1438 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal - down
+00:21 +1439 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal - right
+00:21 +1440 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal - up
+00:21 +1441 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal - left
+00:21 +1442 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal Sliver - down
+00:21 +1443 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal Sliver - right
+00:21 +1444 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal Sliver - up
+00:21 +1445 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal Sliver - up - reverse growth
+00:21 +1446 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal Sliver - left - reverse growth
+00:21 +1447 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport getOffsetToReveal Sliver - left
+00:21 +1448 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested Viewports showOnScreen
+00:21 +1449 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/sliver_cache_test.dart: RenderViewport calculates correct constraints, RenderSliverToBoxAdapter calculates correct geometry
+00:21 +1450 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen Reverse List showOnScreen
+00:21 +1451 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen Reverse List showOnScreen
+00:21 +1452 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen Reverse List showOnScreen
+00:21 +1453 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen Reverse List showOnScreen
+00:21 +1454 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen Reverse List showOnScreen
+00:21 +1455 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/sliver_cache_test.dart: RenderSliverFillRemaining calculates correct geometry when initially in view
+00:21 +1456 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen in view in inner, but not in outer
+00:21 +1457 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen in view in inner, but not in outer
+00:21 +1458 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen in view in inner, but not in outer
+00:21 +1459 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen in view in inner, but not in outer
+00:21 +1460 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen in view in inner, but not in outer
+00:21 +1461 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/sliver_cache_test.dart: RenderSliverFillRemainingWithScrollable calculates correct geometry when scrolled into view
+00:21 +1462 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen not in view of neither inner nor outer
+00:21 +1463 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen in view in inner and outer
+00:21 +1464 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen inner shown in outer, but item not visible
+00:21 +1465 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested viewports (same orientation) showOnScreen inner half shown in outer, item only visible in inner
+00:21 +1466 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested Viewports showOnScreen with allowImplicitScrolling=false for inner viewport
+00:21 +1467 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Nested Viewports showOnScreen on Sliver with allowImplicitScrolling=false for inner viewport
+00:21 +1468 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport showOnScreen with objects larger than viewport
+00:21 +1469 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly
+00:21 +1470 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen
+00:21 +1471 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen twice almost instantly
+00:22 +1472 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen but no child
+00:22 +1473 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen with maxShowOnScreenExtent 
+00:22 +1474 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/positioned_box_test.dart: RenderPositionedBox expands
+00:22 +1475 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/positioned_box_test.dart: RenderPositionedBox expands
+00:22 +1476 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly (reversed order version)
+00:22 +1477 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly (reversed order version)
+00:22 +1478 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.vertical RenderViewportBase.showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly (reversed order version)
+00:22 +1479 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.horizontal RenderViewportBase.showOnScreen
+00:22 +1480 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.horizontal RenderViewportBase.showOnScreen twice almost instantly
+00:22 +1481 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.horizontal RenderViewportBase.showOnScreen but no child
+00:22 +1482 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.horizontal RenderViewportBase.showOnScreen with maxShowOnScreenExtent 
+00:22 +1483 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.horizontal RenderViewportBase.showOnScreen with minShowOnScreenExtent 
+00:22 +1484 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Floating header showOnScreen animated: true, scrollDirection: Axis.horizontal RenderViewportBase.showOnScreen should not scroll if the rect is already visible, even if it does not scroll linearly (reversed order version)
+00:22 +1485 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion up, forward growth
+00:22 +1486 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion up, reverse growth
+00:22 +1487 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion right, forward growth
+00:22 +1488 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion right, reverse growth
+00:22 +1489 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion down, forward growth
+00:22 +1490 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion down, reverse growth
+00:22 +1491 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion left, forward growth
+00:22 +1492 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion left, reverse growth
+00:22 +1493 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewport getOffsetToReveal renderBox to sliver coordinates conversion will not assert on mismatched axis
+00:22 +1494 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: RenderViewportBase.showOnScreen reports the correct targetRect
+00:22 +1495 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: unbounded constraints control test Horizontal viewport was given unbounded height
+00:22 +1496 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: unbounded constraints control test Horizontal viewport was given unbounded width
+00:22 +1497 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: unbounded constraints control test Vertical viewport was given unbounded width
+00:22 +1498 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: unbounded constraints control test Vertical viewport was given unbounded height
+00:22 +1499 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport debugThrowIfNotCheckingIntrinsics() control test
+00:22 +1500 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport paint order default (firstIsTop)
+00:22 +1501 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport paint order lastIsTop
+00:22 +1502 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport hit-test order default (firstIsTop)
+00:22 +1503 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Viewport hit-test order lastIsTop
+00:22 +1504 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport constrained viewport correctly clips overflow
+00:22 +1505 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/object_paint_dispose_test.dart: Tracks picture layers accurately when painting is interleaved with a pushLayer
+00:22 +1506 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport correctly clips overflow without constraints
+00:22 +1507 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/paint_error_test.dart: reentrant paint error
+00:22 +1508 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport allows overscrolling on default platforms - vertical (variant: TargetPlatform.iOS)
+00:22 +1509 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport allows overscrolling on default platforms - vertical (variant: TargetPlatform.iOS)
+00:22 +1510 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport allows overscrolling on default platforms - vertical (variant: TargetPlatform.macOS)
+00:22 +1511 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport allows overscrolling on default platforms - horizontal (variant: TargetPlatform.iOS)
+00:22 +1512 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/viewport_test.dart: Overscrolling RenderShrinkWrappingViewport allows overscrolling on default platforms - horizontal (variant: TargetPlatform.macOS)
+00:22 +1513 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1514 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1515 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1516 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1517 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1518 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1519 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1520 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/repaint_boundary_2_test.dart: repaint boundary with constraint changes
+00:22 +1521 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_intrinsics_test.dart: editable intrinsics
+00:22 +1522 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_intrinsics_test.dart: textScaler affects intrinsics
+00:22 +1523 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_intrinsics_test.dart: maxLines affects intrinsics
+00:22 +1524 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_intrinsics_test.dart: strutStyle affects intrinsics
+00:23 +1525 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/size_test.dart: Stack can layout with top, right, bottom, left 0.0
+00:23 +1526 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/simple_semantics_test.dart: only send semantics update if semantics have changed
+00:23 +1527 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Overconstrained flex
+00:23 +1528 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Inconsequential overflow is ignored
+00:23 +1529 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Clip behavior is respected
+00:23 +1530 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Vertical Overflow
+00:23 +1531 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Vertical Overflow with RenderFlex.spacing
+00:23 +1532 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Horizontal Overflow
+00:23 +1533 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Horizontal Overflow with RenderFlex.spacing
+00:23 +1534 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Vertical Flipped Constraints
+00:23 +1535 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Defaults
+00:23 +1536 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Parent data
+00:23 +1537 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Stretch
+00:23 +1538 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Space evenly
+00:23 +1539 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisAlignment.start with RenderFlex.spacing
+00:23 +1540 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisAlignment.end with RenderFlex.spacing
+00:23 +1541 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisAlignment.center with RenderFlex.spacing
+00:23 +1542 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisAlignment.spaceEvenly with RenderFlex.spacing
+00:23 +1543 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisAlignment.spaceAround with RenderFlex.spacing
+00:23 +1544 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisAlignment.spaceBetween with RenderFlex.spacing
+00:23 +1545 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Fit.loose
+00:23 +1546 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Flexible with MainAxisSize.min
+00:23 +1547 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisSize.min inside unconstrained
+00:23 +1548 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisSize.min inside unconstrained
+00:23 +1549 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisSize.min inside unconstrained
+00:23 +1550 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: MainAxisSize.min inside tightly constrained
+00:23 +1551 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Flex RTL
+00:23 +1552 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: children with no baselines are top-aligned
+00:23 +1553 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Vertical Flex Baseline
+00:23 +1554 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics main axis intrinsics with RenderAspectRatio 1
+00:23 +1555 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics main/cross axis intrinsics in horizontal direction and RenderFlex.spacing
+00:23 +1556 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics main/cross axis intrinsics in vertical direction and RenderFlex.spacing
+00:23 +1557 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics cross axis intrinsics, with ascending flex flow layout
+00:23 +1558 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics cross axis intrinsics, with descending flex flow layout
+00:23 +1559 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics baseline aligned flex flow computeDryLayout
+00:23 +1560 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics baseline aligned children cross intrinsic size
+00:23 +1561 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Intrinsics children with no baselines do not affect the baseline location
+00:23 +1562 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Can call methods that check overflow even if overflow value is not set
+00:23 +1563 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_test.dart: Negative RenderFlex.spacing throws an exception
+00:23 +1564 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/reattach_test.dart: objects can be detached and re-attached: layout
+00:23 +1565 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/reattach_test.dart: objects can be detached and re-attached: compositingBits
+00:23 +1566 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/reattach_test.dart: objects can be detached and re-attached: paint
+00:23 +1567 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/reattach_test.dart: objects can be detached and re-attached: semantics (no change)
+00:23 +1568 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/reattach_test.dart: objects can be detached and re-attached: semantics (with change)
+00:23 +1569 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart: RenderAligningShiftedBox computeDryBaseline implementation test DropdownButtonFormField in Wrap in AlertDialog should not crash due to missing computeDryBaseline
+00:24 +1570 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart: RenderAligningShiftedBox computeDryBaseline implementation test DropdownButtonFormField in Wrap in AlertDialog should not crash due to missing computeDryBaseline
+00:24 +1571 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart: RenderAligningShiftedBox computeDryBaseline implementation test DropdownButtonFormField in Wrap in AlertDialog should not crash due to missing computeDryBaseline
+00:24 +1572 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart: RenderAligningShiftedBox computeDryBaseline implementation test DropdownButtonFormField in Wrap in AlertDialog should not crash due to missing computeDryBaseline
+00:24 +1573 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_gesture_test.dart: attach and detach correctly handle gesture
+00:24 +1574 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_gesture_test.dart: attach and detach correctly handle gesture
+00:24 +1575 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/editable_gesture_test.dart: attach and detach correctly handle gesture
+00:24 +1576 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/localized_fonts_test.dart: Material3 - Text with locale-specific glyphs, ambient locale
+00:24 +1577 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/localized_fonts_test.dart: Material2 - Text with locale-specific glyphs, explicit locale
+00:24 +1578 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/localized_fonts_test.dart: Material3 - Text with locale-specific glyphs, explicit locale
+00:24 +1579 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find finds the first value in a OffsetLayer when sized
+00:24 +1580 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find finds a value within the clip in a ClipRectLayer
+00:24 +1581 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find finds a value within the clip in a ClipRRectLayer
+00:24 +1582 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find finds a value under a TransformLayer
+00:24 +1583 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find looks for child AnnotatedRegions before parents
+00:24 +1584 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find looks for correct type
+00:24 +1585 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find does not clip Layer.find on an AnnotatedRegion with an unrelated type
+00:24 +1586 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> find handles non-invertible transforms
+00:24 +1587 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations finds the first value in a OffsetLayer when sized
+00:24 +1588 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations finds a value within the clip in a ClipRectLayer
+00:24 +1589 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations finds a value within the clip in a ClipRRectLayer
+00:24 +1590 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations finds a value under a TransformLayer
+00:24 +1591 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations finds multiple nested, overlapping regions
+00:24 +1592 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations looks for child AnnotatedRegions before parents
+00:24 +1593 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations looks for correct type
+00:24 +1594 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations does not clip Layer.find on an AnnotatedRegion with an unrelated type
+00:24 +1595 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/annotated_region_test.dart: AnnotatedRegion<Object> findAllAnnotations handles non-invertible transforms
+00:25 +1596 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/sliver_persistent_header_test.dart: RenderSliverFloatingPersistentHeader maxScrollObstructionExtent is 0
+00:25 +1597 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/sliver_persistent_header_test.dart: RenderSliverFloatingPinnedPersistentHeader maxScrollObstructionExtent is minExtent
+00:25 +1598 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: should size to render view
+00:25 +1599 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: performLayout error message
+00:25 +1600 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: applyPaintTransform error message
+00:25 +1601 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: Set size error messages
+00:25 +1602 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: Invalid size access error message
+00:25 +1603 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: Does not throw when accessing child size from computeDistanceToActualBaseline
+00:25 +1604 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: Flex and padding
+00:25 +1605 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: should not have a 0 sized colored Box
+00:25 +1606 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: reparenting should clear position
+00:25 +1607 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: UnconstrainedBox expands to fit children
+00:25 +1608 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: UnconstrainedBox handles vertical overflow
+00:25 +1609 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: UnconstrainedBox handles horizontal overflow
+00:25 +1610 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: ConstraintsTransformBox throws if the resulting constraints are not normalized
+00:25 +1611 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: ConstraintsTransformBox overflow is reported when insufficient size is given and clipBehavior is Clip.none
+00:25 +1612 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: ConstraintsTransformBox handles flow layout
+00:25 +1613 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: ConstraintsTransformBox paints even when its size is empty
+00:25 +1614 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: getMinIntrinsicWidth error handling
+00:25 +1615 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: UnconstrainedBox.toStringDeep returns useful information
+00:25 +1616 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: UnconstrainedBox honors constrainedAxis=Axis.horizontal
+00:25 +1617 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: UnconstrainedBox honors constrainedAxis=Axis.vertical
+00:25 +1618 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: clipBehavior is respected
+00:25 +1619 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing BoxHitTestResult wrapping HitTestResult
+00:25 +1620 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing addWithPaintTransform
+00:25 +1621 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing addWithPaintOffset
+00:25 +1622 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing addWithRawTransform
+00:25 +1623 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing addWithOutOfBandPosition
+00:25 +1624 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing error message
+00:25 +1625 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: hit testing localToGlobal with ancestor
+00:25 +1626 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: Error message when size has not been set in RenderBox performLayout should be well versed
+00:25 +1627 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: debugDoingBaseline flag is cleared after exception
+00:25 +1628 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: BaselineOffset minOf
+00:25 +1629 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/box_test.dart: BaselineOffset +
+00:25 +1630 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Wrap test; toStringDeep
+00:25 +1631 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Compute intrinsic height test
+00:25 +1632 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Compute intrinsic height test for width-in-height-out children
+00:25 +1633 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Compute intrinsic width test for height-in-width-out children
+00:25 +1634 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Compute intrinsic width test
+00:25 +1635 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Compute intrinsic height for only one run
+00:25 +1636 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Compute intrinsic width for only one run
+00:25 +1637 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/wrap_test.dart: Wrap respects clipBehavior
+00:25 +1638 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relayout_boundary_test.dart: relayout boundary change does not trigger relayout
+00:25 +1639 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/semantics_layout_sized_test.dart: semantics size updates when layout size changes
+00:25 +1640 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/semantics_layout_sized_test.dart: semantics blocksemantics corner case
+00:25 +1641 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/semantics_layout_sized_test.dart: semantics size updates to zero size
+00:25 +1642 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/semantics_layout_sized_test.dart: semantics updates when child changes in RenderTestLastChildSemanticsMultiChildParent
+00:26 +1643 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.findAllAnnotations returns all results from its children
+00:26 +1644 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.find returns the first result from its children
+00:26 +1645 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.findAllAnnotations returns empty result when finding nothing
+00:26 +1646 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.find returns null when finding nothing
+00:26 +1647 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.findAllAnnotations stops at the first opaque child
+00:26 +1648 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.findAllAnnotations returns children's opacity (true)
+00:26 +1649 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.findAllAnnotations returns children's opacity (false)
+00:26 +1650 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ContainerLayer.findAllAnnotations returns false as opacity when finding nothing
+00:26 +1651 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: OffsetLayer.findAllAnnotations respects offset
+00:26 +1652 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ClipRectLayer.findAllAnnotations respects clipRect
+00:26 +1653 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ClipRRectLayer.findAllAnnotations respects clipRRect
+00:26 +1654 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: ClipPathLayer.findAllAnnotations respects clipPath
+00:26 +1655 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: TransformLayer.findAllAnnotations respects transform
+00:26 +1656 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: TransformLayer.findAllAnnotations correctly transforms with perspective
+00:26 +1657 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: TransformLayer.findAllAnnotations skips when transform is irreversible
+00:26 +1658 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: LeaderLayer.findAllAnnotations respects offset
+00:26 +1659 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should append to the list and return the given opacity (false) during a successful hit
+00:26 +1660 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should append to the list and return the given opacity (true) during a successful hit
+00:26 +1661 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations has default opacity as false
+00:26 +1662 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should still check children and return children's opacity (false) during a failed hit
+00:26 +1663 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should still check children and return children's opacity (true) during a failed hit
+00:26 +1664 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should not add to children's opacity during a successful hit if it is not opaque
+00:26 +1665 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should add to children's opacity during a successful hit if it is opaque
+00:26 +1666 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should clip its annotation using size and offset (positive)
+00:26 +1667 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/layer_annotations_test.dart: AnnotatedRegionLayer.findAllAnnotations should clip its annotation using size and offset (negative)
+00:26 +1668 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.==
+00:26 +1669 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.fromDirectional
+00:26 +1670 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.shift
+00:26 +1671 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.inflate
+00:26 +1672 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.deflate
+00:26 +1673 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.intersect
+00:26 +1674 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.toRect
+00:26 +1675 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.toSize
+00:26 +1676 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.lerp
+00:26 +1677 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/relative_rect_test.dart: RelativeRect.lerp identical a,b
+00:26 +1678 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should detect enter, hover, and exit from Added, Hover, and Removed events for stylus
+00:26 +1679 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should detect enter, hover, and exit from Added, Hover, and Removed events for stylus
+00:26 +1680 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should not crash if the first event is a Removed event
+00:26 +1681 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should correctly handle multiple devices
+00:26 +1682 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should not handle non-hover events
+00:26 +1683 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should correctly handle when the annotation appears or disappears on the pointer
+00:26 +1684 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should correctly handle when the annotation moves in or out of the pointer
+00:26 +1685 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should correctly handle when the pointer is added or removed on the annotation
+00:26 +1686 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should correctly handle when the pointer moves in or out of the annotation
+00:26 +1687 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should not schedule post-frame callbacks when no mouse is connected
+00:26 +1688 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should not flip out if not all mouse events are listened to
+00:26 +1689 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should trigger callbacks between parents and children in correct order
+00:26 +1690 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/mouse_tracker_test.dart: should trigger callbacks between disjoint siblings in correctly order
+00:26 +1691 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/overflow_test.dart: overflow should not affect baseline
+00:26 +1692 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/limited_box_test.dart: LimitedBox: parent max size is unconstrained
+00:26 +1693 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/limited_box_test.dart: LimitedBox: parent maxWidth is unconstrained
+00:26 +1694 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/limited_box_test.dart: LimitedBox: parent maxHeight is unconstrained
+00:26 +1695 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/limited_box_test.dart: LimitedBox: no child
+00:26 +1696 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/limited_box_test.dart: LimitedBox: no child use parent
+00:27 +1697 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/painting_context_test.dart: PaintingContext.setIsComplexHint
+00:27 +1698 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/painting_context_test.dart: PaintingContext.setWillChangeHint
+00:27 +1699 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Shrink-wrapping width
+00:27 +1700 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: IntrinsicWidth without a child
+00:27 +1701 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Shrink-wrapping width (stepped width)
+00:27 +1702 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Shrink-wrapping width (stepped height)
+00:27 +1703 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Shrink-wrapping width (stepped everything)
+00:27 +1704 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: RenderIntrinsicWidth when parent is given loose constraints smaller than intrinsic width of child
+00:27 +1705 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: RenderIntrinsicWidth when parent is given tight constraints larger than intrinsic width of child
+00:27 +1706 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: RenderIntrinsicWidth when parent is given tight constraints smaller than intrinsic width of child
+00:27 +1707 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Shrink-wrapping height
+00:27 +1708 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: IntrinsicHeight without a child
+00:27 +1709 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: RenderIntrinsicHeight when parent is given loose constraints smaller than intrinsic height of child
+00:27 +1710 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: RenderIntrinsicHeight when parent is given tight constraints larger than intrinsic height of child
+00:27 +1711 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: RenderIntrinsicHeight when parent is given tight constraints smaller than intrinsic height of child
+00:27 +1712 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Padding and boring intrinsics
+00:27 +1713 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Padding and interesting intrinsics
+00:27 +1714 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Padding and boring intrinsics
+00:27 +1715 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/intrinsic_width_test.dart: Padding and interesting intrinsics
+00:27 +1716 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/binding_test.dart: handleMetricsChanged does not scheduleForcedFrame unless there a registered renderView with a child
+00:27 +1717 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/binding_test.dart: debugDumpSemantics prints explanation when semantics are unavailable
+00:27 +1718 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/binding_test.dart: root pipeline owner cannot manage root node
+00:27 +1719 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/flex_overflow_test.dart: Flex overflow indicator
+00:27 +1720 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: StackParentData basic test
+00:27 +1721 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: Stack can layout with top, right, bottom, left 0.0
+00:27 +1722 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: Stack can layout with no children
+00:27 +1723 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: Stack has correct clipBehavior
+00:27 +1724 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: RenderIndexedStack visitChildrenForSemantics only visits displayed child
+00:27 +1725 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: RenderIndexedStack debugDescribeChildren marks invisible children as offstage
+00:27 +1726 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: RenderIndexedStack debugDescribeChildren handles a null index
+00:27 +1727 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/stack_test.dart: Stack in Flex can layout with no children
+00:28 +1728 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/multi_view_binding_test.dart: Adding/removing renderviews updates renderViews getter
+00:28 +1729 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/multi_view_binding_test.dart: illegal add/remove renderviews
+00:28 +1730 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/multi_view_binding_test.dart: changing metrics updates configuration
+00:28 +1731 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/multi_view_binding_test.dart: semantics actions are performed on the right view
+00:28 +1732 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/multi_view_binding_test.dart: all registered renderviews are asked to composite frame
+00:28 +1733 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/multi_view_binding_test.dart: hit-testing reaches the right view
+00:28 +1734 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: onNeedVisualUpdate takes precedence over manifold
+00:28 +1735 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: parent's render objects are laid out before child's render objects
+00:28 +1736 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: child cannot dirty parent's render object during flushLayout
+00:28 +1737 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: updates compositing bits on children
+00:28 +1738 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: parent's render objects are painted before child's render objects
+00:28 +1739 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: child paint cannot dirty parent's render object
+00:28 +1740 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: parent's render objects do semantics before child's render objects
+00:28 +1741 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: child cannot mark parent's render object dirty during flushSemantics
+00:28 +1742 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: when manifold enables semantics all PipelineOwners in tree create SemanticsOwner
+00:28 +1743 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: when manifold enables semantics all PipelineOwners in tree that did not have a SemanticsOwner create one
+00:28 +1744 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: PipelineOwner can dispose local handle even when manifold forces semantics to on
+00:28 +1745 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: can hold on to local handle when manifold turns off semantics
+00:28 +1746 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot attach when already attached
+00:28 +1747 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: attach update semanticsOwner
+00:28 +1748 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: attach does not request visual update if nothing is dirty
+00:28 +1749 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot detach when not attached
+00:28 +1750 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot adopt twice
+00:28 +1751 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot adopt child of other parent
+00:28 +1752 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: adopting creates semantics owner if necessary
+00:28 +1753 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot drop unattached child
+00:28 +1754 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot drop child attached to other parent
+00:28 +1755 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: dropping destroys semantics owner if necessary
+00:28 +1756 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: can adopt/drop children during own layout
+00:28 +1757 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: cannot adopt/drop children during child layout
+00:28 +1758 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: visitChildren visits all children
+00:28 +1759 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/pipeline_owner_tree_test.dart: printing pipeline owner tree smoke test
+00:28 +1760 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterContext control
+00:28 +1761 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.new == and hashCode
+00:28 +1762 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.new toString and debugShortDescription
+00:28 +1763 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.new get filter
+00:28 +1764 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.blur == and hashCode
+00:28 +1765 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.blur toString and debugShortDescription
+00:28 +1766 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.compose == and hashCode
+00:28 +1767 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilterConfig.compose toString and debugShortDescription
+00:28 +1768 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_filter_config_test.dart: ImageFilterConfig ImageFilter resolves correctly
+00:28 +1769 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/semantics_and_children_test.dart: RenderOpacity and children and semantics
+00:28 +1770 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/semantics_and_children_test.dart: RenderOpacity and children and semantics
+00:28 +1771 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/slivers_helpers_test.dart: applyGrowthDirectionToAxisDirection produces expected AxisDirection
+00:28 +1772 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/slivers_helpers_test.dart: SliverConstraints are the same when copied
+00:28 +1773 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/slivers_helpers_test.dart: SliverConstraints normalizedGrowthDirection is inferred from AxisDirection and GrowthDirection
+00:28 +1774 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/slivers_helpers_test.dart: SliverGeometry with no arguments is valid
+00:28 +1775 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/slivers_helpers_test.dart: SliverGeometry throws error when layoutExtent exceeds paintExtent
+00:28 +1776 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/slivers_helpers_test.dart: SliverGeometry throws error when maxPaintExtent is less than paintExtent
+00:29 +1777 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/binding_pipeline_manifold_test.dart: BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update
+00:29 +1778 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/binding_pipeline_manifold_test.dart: Turning global semantics on/off creates semantics owners in PipelineOwner tree
+00:29 +1779 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_test.dart: Image sizing
+00:29 +1780 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_test.dart: Null image sizing
+00:29 +1781 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_test.dart: update image colorBlendMode
+00:29 +1782 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_test.dart: RenderImage disposes its image
+00:29 +1783 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_test.dart: RenderImage does not dispose its image if setting the same image twice
+00:29 +1784 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/image_test.dart: Render image disposes its image when it is disposed
+00:29 +1785 ~14 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/rendering/performance_overlay_test.dart: RenderPerformanceOverlay intrinsic height respects optionsMask
