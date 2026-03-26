@@ -37,7 +37,8 @@ static constexpr const char* kBadSocs[] = {
     // `exynos9820` and `exynos9825` have graphical errors:
     // https://github.com/flutter/flutter/issues/171992.
     "exynos9820",  //
-    "exynos9825"   //
+    "exynos9825",  //
+    "rk30sdk"      // https://github.com/flutter/flutter/issues/183510
 };
 
 static bool IsDeviceEmulator() {
