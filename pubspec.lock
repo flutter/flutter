@@ -867,10 +867,10 @@ packages:
     dependency: transitive
     description:
       name: ui_primitives
-      sha256: "17bdcfae85b699898e1a395e5519b53a2381d4ab572cd55d33f99f0e60f41141"
+      sha256: c82800d75d41f019ef87a6ff5e9d44550ebb3a8c831a6668064fd334878407a7
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev-002"
+    version: "0.0.1-dev-003"
   url_launcher:
     dependency: "direct main"
     description:
