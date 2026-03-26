@@ -1398,8 +1398,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     // that are outside of the viewport whose transform may not be valid. Only
     // the edge this event is updating is sure to be accurate.
     _updateDragLocationsFromGeometries(forceUpdateStart: !event.isEnd, forceUpdateEnd: event.isEnd);
-    assert(_selectionStartsInScrollable != null);
-    if (_selectionStartsInScrollable!) {
+    if (_selectionStartsInScrollable ?? false) {
       _jumpToEdge(event.isEnd);
     }
     return result;
@@ -1412,8 +1411,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     // that are outside of the viewport whose transform may not be valid. Only
     // the edge this event is updating is sure to be accurate.
     _updateDragLocationsFromGeometries(forceUpdateStart: !event.isEnd, forceUpdateEnd: event.isEnd);
-    assert(_selectionStartsInScrollable != null);
-    if (_selectionStartsInScrollable!) {
+    if (_selectionStartsInScrollable ?? false) {
       _jumpToEdge(event.isEnd);
     }
     return result;
