@@ -43,7 +43,7 @@ dependencies:
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
-  test_api: 0.7.10
+  test_api: 0.7.11
   typed_data: 1.4.0
   unified_analytics: 8.0.12
   url_launcher_android: 6.3.28
@@ -64,8 +64,8 @@ dependencies:
 dev_dependencies:
   flutter_tools:
     path: ../../../packages/flutter_tools/
-  test: 1.30.0
+  test: 1.31.0
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: lpm3b4
+# PUBSPEC CHECKSUM: 18ep1m

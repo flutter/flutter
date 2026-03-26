@@ -177,15 +177,6 @@ class SkiaGoldClient {
       '--passfail',
     ];
 
-    if (imgtestInitCommand.contains(null)) {
-      final buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold imgtest init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
-
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
@@ -307,15 +298,6 @@ class SkiaGoldClient {
       commitHash,
       ...getCIArguments(),
     ];
-
-    if (imgtestInitCommand.contains(null)) {
-      final buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold tryjob init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
 
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
