@@ -37,37 +37,6 @@ void main() {
     await tester.tap(find.text('Gone'));
     await tester.pumpAndSettle();
 
-    visibility = tester.widget(visibilityFinder);
-    expect(visibility.visible, isFalse);
-    expect(visibility.maintainSize, isFalse);
-  });
-
-  testWidgets('Expanded panel remains collapsible when icon is hidden', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const example.ExpansionPanelIconVisibilityExampleApp(),
-    );
-
-    await tester.tap(find.byType(ExpandIcon).first);
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.widget<ExpandIcon>(find.byType(ExpandIcon).first).isExpanded,
-      true,
-    );
-
-    await tester.tap(find.text('Hidden'));
-    await tester.pumpAndSettle();
-
-    final Finder visibilityFinder = find
-        .ancestor(
-          of: find.byType(ExpandIcon).first,
-          matching: find.byType(Visibility),
-        )
-        .first;
-
-    final Visibility visibility = tester.widget(visibilityFinder);
-    expect(visibility.visible, isTrue);
+    expect(find.byType(ExpandIcon), findsNothing);
   });
 }

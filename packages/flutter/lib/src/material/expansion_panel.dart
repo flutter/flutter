@@ -160,12 +160,6 @@ class ExpansionPanel {
   /// [ExpansionPanelIconVisibility.gone], both the icon and its space are
   /// removed.
   ///
-  /// If the panel is currently expanded, the icon will remain visible
-  /// regardless of this value so that the user can collapse it.
-  ///
-  /// When this is not [ExpansionPanelIconVisibility.visible], the
-  /// [canTapOnHeader] behavior is also disabled, unless the panel is expanded.
-  ///
   /// Defaults to [ExpansionPanelIconVisibility.visible].
   final ExpansionPanelIconVisibility trailingIconVisibility;
 }
@@ -433,11 +427,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       final ExpansionPanel child = widget.children[index];
       final Widget headerWidget = child.headerBuilder(context, _isChildExpanded(index));
 
-      final iconVisible =
-          child.trailingIconVisibility == ExpansionPanelIconVisibility.visible ||
-          _isChildExpanded(index);
-      final iconMaintainSize =
-          child.trailingIconVisibility == ExpansionPanelIconVisibility.hidden;
+      final iconVisible = child.trailingIconVisibility == .visible;
+      final iconMaintainSize = child.trailingIconVisibility == .hidden;
 
       Widget expandIconPadded = Visibility(
         visible: iconVisible,
@@ -447,7 +438,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         child: Padding(
           padding: const EdgeInsetsDirectional.only(end: 8.0),
           child: IgnorePointer(
-            ignoring: child.canTapOnHeader || (!iconVisible && !_isChildExpanded(index)),
+            ignoring: child.canTapOnHeader || !iconVisible,
             child: ExpandIcon(
               color: widget.expandIconColor,
               isExpanded: _isChildExpanded(index),
@@ -486,7 +477,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           expandIconPadded,
         ],
       );
-      if (child.canTapOnHeader && iconVisible) {
+      if (child.canTapOnHeader) {
         header = MergeSemantics(
           child: InkWell(
             splashColor: child.splashColor,
