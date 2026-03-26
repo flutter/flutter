@@ -105,45 +105,6 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   }
 }
 
-/// A short (one line) description of the problem that was detected.
-///
-/// Error summaries from the same source location should have little variance,
-/// so that they can be recognized as related. For example, they shouldn't
-/// include hash codes.
-///
-/// A [FlutterError] must start with an [ErrorSummary] and may not contain
-/// multiple summaries.
-///
-/// In debug builds, values interpolated into the `message` are
-/// expanded and placed into [value], which is of type [List<Object>].
-/// This allows IDEs to examine values interpolated into error messages.
-///
-/// See also:
-///
-///  * [ErrorDescription], which provides an explanation of the problem and its
-///    cause, any information that may help track down the problem, background
-///    information, etc.
-///  * [ErrorHint], which provides specific, non-obvious advice that may be
-///    applicable.
-///  * [FlutterError], which is the most common place to use an [ErrorSummary].
-class ErrorSummary extends _ErrorDiagnostic {
-  /// A lint enforces that this constructor can only be called with a string
-  /// literal to match the limitations of the Dart Kernel transformer that
-  /// optionally extracts out objects referenced using string interpolation in
-  /// the message passed in.
-  ///
-  /// The message will display with the same text regardless of whether the
-  /// kernel transformer is used. The kernel transformer is required so that
-  /// debugging tools can provide interactive displays of objects described by
-  /// the error.
-  ErrorSummary(super.message) : super(level: DiagnosticLevel.summary);
-
-  /// Calls to the default constructor may be rewritten to use this constructor
-  /// in debug mode using a kernel transformer.
-  // ignore: unused_element
-  ErrorSummary._fromParts(super.messageParts) : super._fromParts(level: DiagnosticLevel.summary);
-}
-
 /// An [ErrorHint] provides specific, non-obvious advice that may be applicable.
 ///
 /// If your message provides obvious advice that is always applicable, it is an
@@ -178,14 +139,6 @@ class ErrorHint extends _ErrorDiagnostic {
   /// in debug mode using a kernel transformer.
   // ignore: unused_element
   ErrorHint._fromParts(super.messageParts) : super._fromParts(level: DiagnosticLevel.hint);
-}
-
-/// An [ErrorSpacer] creates an empty [DiagnosticsNode], that can be used to
-/// tune the spacing between other [DiagnosticsNode] objects.
-class ErrorSpacer extends DiagnosticsProperty<void> {
-  /// Creates an empty space to insert into a list of [DiagnosticsNode] objects
-  /// typically within a [FlutterError] object.
-  ErrorSpacer() : super('', null, description: '', showName: false);
 }
 
 /// Dump the stack to the console using [debugPrint] and
@@ -223,58 +176,4 @@ void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
     lines = lines.take(maxFrames);
   }
   ErrorToConsoleDumper.dump(FlutterError.defaultStackFilter(lines).join('\n'));
-}
-
-/// Diagnostic with a [StackTrace] [value] suitable for displaying stack traces
-/// as part of a [FlutterError] object.
-class DiagnosticsStackTrace extends DiagnosticsBlock {
-  /// Creates a diagnostic for a stack trace.
-  ///
-  /// [name] describes a name the stack trace is given, e.g.
-  /// `When the exception was thrown, this was the stack`.
-  /// [stackFilter] provides an optional filter to use to filter which frames
-  /// are included. If no filter is specified, [FlutterError.defaultStackFilter]
-  /// is used.
-  /// [showSeparator] indicates whether to include a ':' after the [name].
-  DiagnosticsStackTrace(
-    String name,
-    StackTrace? stack, {
-    IterableFilter<String>? stackFilter,
-    super.showSeparator,
-  }) : super(
-         name: name,
-         value: stack,
-         properties: _applyStackFilter(stack, stackFilter),
-         style: DiagnosticsTreeStyle.flat,
-         allowTruncate: true,
-       );
-
-  /// Creates a diagnostic describing a single frame from a StackTrace.
-  DiagnosticsStackTrace.singleFrame(String name, {required String frame, super.showSeparator})
-    : super(
-        name: name,
-        properties: <DiagnosticsNode>[_createStackFrame(frame)],
-        style: DiagnosticsTreeStyle.whitespace,
-      );
-
-  static List<DiagnosticsNode> _applyStackFilter(
-    StackTrace? stack,
-    IterableFilter<String>? stackFilter,
-  ) {
-    if (stack == null) {
-      return <DiagnosticsNode>[];
-    }
-    final IterableFilter<String> filter = stackFilter ?? FlutterError.defaultStackFilter;
-    final Iterable<String> frames = filter(
-      '${FlutterError.demangleStackTrace(stack)}'.trimRight().split('\n'),
-    );
-    return frames.map<DiagnosticsNode>(_createStackFrame).toList();
-  }
-
-  static DiagnosticsNode _createStackFrame(String frame) {
-    return DiagnosticsNode.message(frame, allowWrap: false);
-  }
-
-  @override
-  bool get allowTruncate => false;
 }
