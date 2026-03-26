@@ -72,8 +72,8 @@ Finder _findOverflowBar() {
 const ShapeBorder _defaultM2DialogShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.all(Radius.circular(4.0)),
 );
-final ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.circular(28.0),
+const ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(28.0)),
 );
 
 void main() {

@@ -3487,8 +3487,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
-    // TODO(hellohuanlin): find a solution for iOS 26,
-    // https://github.com/flutter/flutter/issues/175099.
+    // We use a different workaround for iOS 26 and it is tested separately.
+    // See:
+    // testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView.
   } else if (@available(iOS 18.2, *)) {
     shouldReAddDelayingRecognizer = YES;
   }
@@ -3503,7 +3504,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 }
 
 - (void)
-    testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldNotRemoveAndAddBackDelayingRecognizerForNestedWrapperWebView {
+    testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldRemoveAndAddBackDelayingRecognizerForNestedWrapperWebView {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -3557,8 +3558,22 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
 
-  XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
-  XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+  BOOL shouldReAddDelayingRecognizer = NO;
+  if (@available(iOS 26.0, *)) {
+    // We use a different workaround for iOS 26 and it is tested separately.
+    // See:
+    // testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView.
+  } else if (@available(iOS 18.2, *)) {
+    shouldReAddDelayingRecognizer = YES;
+  }
+  if (shouldReAddDelayingRecognizer) {
+    // Since we remove and add back delayingRecognizer, it would be reordered to the last.
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
+  } else {
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
+    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+  }
 }
 
 - (void)

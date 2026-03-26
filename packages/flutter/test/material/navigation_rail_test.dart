@@ -6147,6 +6147,27 @@ void main() {
     );
     expect(tester.getSize(find.byType(NavigationRail)), Size.zero);
   });
+
+  testWidgets('NavigationRail respects mainAxisAlignment', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        selectedIndex: 0,
+        destinations: _destinations(),
+      ),
+    );
+
+    // Find the exact column by checking both alignment and size
+    final Finder columnFinder = find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is Column &&
+          widget.mainAxisAlignment == MainAxisAlignment.spaceEvenly &&
+          widget.mainAxisSize == MainAxisSize.max,
+    );
+
+    expect(columnFinder, findsOneWidget);
+  });
 }
 
 TestSemantics _expectedSemantics({bool scrollable = false}) {
