@@ -1800,6 +1800,7 @@ TEST(FlutterWindowsViewTest, SizeChangeTriggersMetricsEventWhichHasDisplayId) {
   view.OnWindowSizeChanged(100, 100);
   EXPECT_TRUE(received_metrics);
 }
+
 // Verify that the first frame callback fires after OnFramePresented (OpenGL
 // rendering path).
 TEST(FlutterWindowsViewTest, FirstFrameCallbackFiresOnFramePresented) {
