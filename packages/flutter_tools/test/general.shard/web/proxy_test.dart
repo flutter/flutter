@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show HttpServer;
+import 'dart:io' show HttpClient, HttpClientRequest, HttpClientResponse, HttpHeaders, HttpServer;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
@@ -444,5 +444,50 @@ void main() {
         }
       },
     );
+
+    test('should preserve multiple Set-Cookie headers from backend responses', () async {
+      HttpServer? mockServer;
+      HttpServer? proxyServer;
+      final client = HttpClient();
+      const cookie1 = 'csrftoken=abc; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Path=/; SameSite=Lax';
+      const cookie2 = 'sessionid=xyz; Path=/; HttpOnly; SameSite=Lax';
+      try {
+        mockServer = await shelf_io.serve(
+          (Request request) => Response.ok(
+            'proxied response',
+            headers: <String, Object>{
+              'set-cookie': <String>[cookie1, cookie2],
+            },
+          ),
+          'localhost',
+          0,
+        );
+        final int port = mockServer.port;
+
+        final rules = <ProxyRule>[
+          PrefixProxyRule(prefix: '/api/', target: 'http://localhost:$port/'),
+        ];
+
+        final Middleware middleware = proxyMiddleware(rules, logger);
+        proxyServer = await shelf_io.serve(
+          middleware((Request request) => Response.ok('Inner Handler Response')),
+          'localhost',
+          0,
+        );
+
+        final HttpClientRequest request = await client.getUrl(
+          Uri.parse('http://localhost:${proxyServer.port}/api/login'),
+        );
+        final HttpClientResponse response = await request.close();
+        await response.drain<void>();
+
+        expect(response.statusCode, 200);
+        expect(response.headers[HttpHeaders.setCookieHeader], <String>[cookie1, cookie2]);
+      } finally {
+        client.close(force: true);
+        await proxyServer?.close();
+        await mockServer?.close();
+      }
+    });
   });
 }

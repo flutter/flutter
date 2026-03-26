@@ -9,6 +9,10 @@ import '../base/logger.dart';
 import '../web/devfs_proxy.dart';
 
 const _kLogEntryPrefix = '[proxyMiddleware]';
+const String _kTokenChars =
+    r"!#$%&'*+\-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`"
+    'abcdefghijklmnopqrstuvwxyz|~';
+final RegExp _kSetCookieSplitter = RegExp(r'[ \t]*,[ \t]*(?=[' + _kTokenChars + r']+=)');
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
@@ -22,6 +26,22 @@ shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
     body: originalRequest.read(),
     context: originalRequest.context,
   );
+}
+
+shelf.Response _preserveSetCookieHeaders(shelf.Response response) {
+  final String? setCookieHeader = response.headers['set-cookie'];
+  if (setCookieHeader == null || !setCookieHeader.contains(',')) {
+    return response;
+  }
+
+  // Split merged Set-Cookie header values back into individual headers so Shelf
+  // can write them separately for clients.
+  final List<String> setCookieHeaders = setCookieHeader.split(_kSetCookieSplitter);
+  if (setCookieHeaders.length < 2) {
+    return response;
+  }
+
+  return response.change(headers: <String, Object>{'set-cookie': setCookieHeaders});
 }
 
 /// Iterates through the provided [effectiveProxy] rules for each incoming [shelf.Request].
@@ -47,7 +67,7 @@ Future<shelf.Response> _applyProxyRules(
       final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
-      return proxyResponse;
+      return _preserveSetCookieHeaders(proxyResponse);
     } on Exception catch (e) {
       logger.printError('$_kLogEntryPrefix Error for $finalTargetUrl: $e. Allowing fall-through.');
       return innerHandler(request);
