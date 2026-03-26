@@ -35,7 +35,6 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
     Color color,
-    Scalar stroke_width,
     bool stroked,
     const CircleGeometry* geometry) {
   Point center = geometry->GetCenter();
@@ -43,9 +42,9 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
   Rect bounding_box = Rect::MakeXYWH(center.x - radius, center.y - radius,
                                      radius * 2, radius * 2);
   Scalar aa_padding = geometry->GetAntialiasPadding();
-  return std::unique_ptr<UberSDFContents>(
-      new UberSDFContents(Type::kCircle, bounding_box, color, stroke_width,
-                          stroked, geometry, aa_padding));
+  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
+      Type::kCircle, bounding_box, color, geometry->GetStrokeWidth(), stroked,
+      geometry, aa_padding));
 }
 
 UberSDFContents::UberSDFContents(Type type,

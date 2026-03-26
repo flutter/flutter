@@ -1043,8 +1043,7 @@ void Canvas::DrawCircle(const Point& center,
     geometry->SetAntialiasPadding(1.0f);
 
     auto contents = UberSDFContents::MakeCircle(
-        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroked=*/is_stroked, &geometry.value());
+        /*color=*/paint.color, /*stroked=*/is_stroked, &geometry.value());
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
