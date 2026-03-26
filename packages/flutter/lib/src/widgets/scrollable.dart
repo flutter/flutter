@@ -1296,7 +1296,8 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _autoScroller.stopAutoScroll();
       return result;
     }
-    if (_selectionStartsInScrollable ?? false) {
+    assert(_selectionStartsInScrollable != null);
+    if (_selectionStartsInScrollable!) {
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
@@ -1306,6 +1307,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Offset _inferPositionRelatedToOrigin(Offset globalPosition) {
+    assert(_selectionStartsInScrollable != null);
     final box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
     if (_selectionStartsInScrollable == false) {
@@ -1372,7 +1374,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
-    assert(_selectionStartsInScrollable != true);
+    assert(_selectionStartsInScrollable == null);
     final SelectionResult result = super.handleSelectAll(event);
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex != -1) {
@@ -1396,7 +1398,8 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     // that are outside of the viewport whose transform may not be valid. Only
     // the edge this event is updating is sure to be accurate.
     _updateDragLocationsFromGeometries(forceUpdateStart: !event.isEnd, forceUpdateEnd: event.isEnd);
-    if (_selectionStartsInScrollable ?? false) {
+    assert(_selectionStartsInScrollable != null);
+    if (_selectionStartsInScrollable!) {
       _jumpToEdge(event.isEnd);
     }
     return result;
@@ -1409,7 +1412,8 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     // that are outside of the viewport whose transform may not be valid. Only
     // the edge this event is updating is sure to be accurate.
     _updateDragLocationsFromGeometries(forceUpdateStart: !event.isEnd, forceUpdateEnd: event.isEnd);
-    if (_selectionStartsInScrollable ?? false) {
+    assert(_selectionStartsInScrollable != null);
+    if (_selectionStartsInScrollable!) {
       _jumpToEdge(event.isEnd);
     }
     return result;
