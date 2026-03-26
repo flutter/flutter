@@ -28,8 +28,8 @@ class IconAlignmentExample extends StatefulWidget {
 }
 
 class _IconAlignmentExampleState extends State<IconAlignmentExample> {
-  TextDirection _textDirection = TextDirection.ltr;
-  IconAlignment _iconAlignment = IconAlignment.start;
+  TextDirection _textDirection = .ltr;
+  IconAlignment _iconAlignment = .start;
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +39,15 @@ class _IconAlignmentExampleState extends State<IconAlignmentExample> {
         textDirection: _textDirection,
         child: Center(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
             children: <Widget>[
               const Spacer(),
               OverflowBar(
                 spacing: 10,
                 overflowSpacing: 20,
-                alignment: MainAxisAlignment.center,
-                overflowAlignment: OverflowBarAlignment.center,
+                alignment: .center,
+                overflowAlignment: .center,
                 children: <Widget>[
                   ElevatedButton.icon(
                     onPressed: () {},
@@ -83,8 +83,8 @@ class _IconAlignmentExampleState extends State<IconAlignmentExample> {
               ),
               const Spacer(),
               OverflowBar(
-                alignment: MainAxisAlignment.spaceEvenly,
-                overflowAlignment: OverflowBarAlignment.center,
+                alignment: .spaceEvenly,
+                overflowAlignment: .center,
                 spacing: 10,
                 overflowSpacing: 10,
                 children: <Widget>[
