@@ -37,7 +37,7 @@ export 'package:ui_primitives/ui_primitives.dart'
 ///
 ///  * <https://docs.flutter.dev/testing/errors>, more information about error
 ///    handling in Flutter.
-typedef FlutterError = ui_primitives.UiError;
+class FlutterError extends ui_primitives.UiError {}
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
