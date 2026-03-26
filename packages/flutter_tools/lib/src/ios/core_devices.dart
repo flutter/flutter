@@ -123,6 +123,7 @@ class IOSCoreDeviceLauncher {
     // Filter out app extension processes (.appex) to avoid attaching the
     // debugger to a widget extension or other extension instead of the
     // main app process.
+    // See https://github.com/flutter/flutter/issues/183263.
     final List<IOSCoreDeviceRunningProcess> processes = await _coreDeviceControl
         .getRunningProcesses(deviceId: deviceId);
     final IOSCoreDeviceRunningProcess? launchedProcess = processes
