@@ -7,8 +7,7 @@
 library;
 
 import 'package:meta/meta.dart';
-
-import 'diagnostics.dart';
+import 'ui_primitives.dart';
 
 /// A [Key] is an identifier for [Widget]s, [Element]s and [SemanticsNode]s.
 ///

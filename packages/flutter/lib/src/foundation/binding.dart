@@ -22,7 +22,6 @@ import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWind
 
 import 'package:meta/meta.dart';
 
-import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
