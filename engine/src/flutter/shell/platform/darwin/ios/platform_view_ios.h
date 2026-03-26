@@ -184,6 +184,7 @@ class PlatformViewIOS final : public PlatformView {
   std::unordered_map<int64_t, std::unique_ptr<AccessibilityBridge>> accessibility_bridges_;
   // ScopedObserver dealloc_view_controller_observer_;
   std::unordered_map<int64_t, ScopedObserver> flutter_view_controller_will_dealloc_observers_;
+  bool semantics_tree_enabled_ = false;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
   std::shared_ptr<IOSSurfacesManager> ios_surfaces_manager_;

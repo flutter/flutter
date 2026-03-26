@@ -5,8 +5,13 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/common/constants.h"
 #import "flutter/fml/thread.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -15,10 +20,14 @@ namespace flutter {
 
 namespace {
 
+constexpr int64_t kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+
 class MockDelegate : public PlatformView::Delegate {
  public:
-  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
-  void OnPlatformViewDestroyed() override {}
+  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {
+    on_platform_view_created_calls_++;
+  }
+  void OnPlatformViewDestroyed() override { on_platform_view_destroyed_calls_++; }
   void OnPlatformViewScheduleFrame() override {}
   void OnPlatformViewAddView(int64_t view_id,
                              const ViewportMetrics& viewport_metrics,
@@ -52,10 +61,74 @@ class MockDelegate : public PlatformView::Delegate {
                                  flutter::AssetResolver::AssetResolverType type) override {}
 
   flutter::Settings settings_;
+  int on_platform_view_created_calls_ = 0;
+  int on_platform_view_destroyed_calls_ = 0;
 };
 
 }  // namespace
 }  // namespace flutter
+
+@interface TestFlutterViewEngineDelegate : NSObject <FlutterViewEngineDelegate>
+@property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
+@end
+
+@implementation TestFlutterViewEngineDelegate
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    _platformViewsController = [[FlutterPlatformViewsController alloc] init];
+  }
+  return self;
+}
+
+- (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
+                                  asBase64Encoded:(BOOL)base64Encode {
+  return {};
+}
+
+- (void)flutterViewAccessibilityDidCall {
+}
+
+@end
+
+@interface AccessibilityCountingBinaryMessenger : NSObject <FlutterBinaryMessenger>
+@property(nonatomic, assign) NSInteger accessibilityHandlerRegistrationCount;
+@end
+
+@implementation AccessibilityCountingBinaryMessenger {
+  FlutterBinaryMessengerConnection _nextConnection;
+}
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    _nextConnection = 1;
+  }
+  return self;
+}
+
+- (void)sendOnChannel:(NSString*)channel message:(NSData* _Nullable)message {
+}
+
+- (void)sendOnChannel:(NSString*)channel
+              message:(NSData* _Nullable)message
+          binaryReply:(FlutterBinaryReply _Nullable)callback {
+}
+
+- (FlutterBinaryMessengerConnection)setMessageHandlerOnChannel:(NSString*)channel
+                                          binaryMessageHandler:
+                                              (FlutterBinaryMessageHandler _Nullable)handler {
+  if ([channel isEqualToString:@"flutter/accessibility"] && handler != nil) {
+    self.accessibilityHandlerRegistrationCount++;
+  }
+  return _nextConnection++;
+}
+
+- (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
+}
+
+@end
 
 @interface PlatformViewIOSTest : XCTestCase
 @end
@@ -100,6 +173,217 @@ class MockDelegate : public PlatformView::Delegate {
   latch.Wait();
 
   [engine stopMocking];
+}
+
+- (void)testNotifyCreatedAndDestroyedTracksRenderingSurfacesPerView {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("PlatformViewIOSTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  TestFlutterViewEngineDelegate* implicitViewDelegate = [[TestFlutterViewEngineDelegate alloc] init];
+  FlutterView* implicitFlutterView =
+      [[FlutterView alloc] initWithDelegate:implicitViewDelegate opaque:YES enableWideGamut:NO];
+  implicitFlutterView.frame = CGRectMake(0, 0, 100, 100);
+  id implicitViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitViewController isViewLoaded]).andReturn(YES);
+  OCMStub([implicitViewController view]).andReturn(implicitFlutterView);
+  OCMStub([implicitViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+
+  TestFlutterViewEngineDelegate* secondaryViewDelegate =
+      [[TestFlutterViewEngineDelegate alloc] init];
+  FlutterView* secondaryFlutterView =
+      [[FlutterView alloc] initWithDelegate:secondaryViewDelegate opaque:YES enableWideGamut:NO];
+  secondaryFlutterView.frame = CGRectMake(0, 0, 100, 100);
+  id secondaryViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([secondaryViewController isViewLoaded]).andReturn(YES);
+  OCMStub([secondaryViewController view]).andReturn(secondaryFlutterView);
+  OCMStub([secondaryViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    // The implicit view keeps using SetOwnerViewController; secondary views use
+    // AddOwnerViewController.
+    platform_view->SetOwnerViewController(implicitViewController);
+    platform_view->AddOwnerViewController(secondaryViewController);
+
+    platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
+    platform_view->NotifyCreated(kSecondaryFlutterViewId);
+    XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
+    XCTAssertTrue(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
+    XCTAssertEqual(mock_delegate.on_platform_view_created_calls_, 1);
+
+    platform_view->NotifyDestroyed(kSecondaryFlutterViewId);
+    XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
+    XCTAssertFalse(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 0);
+
+    platform_view->RemoveOwnerViewController(kSecondaryFlutterViewId);
+    XCTAssertEqual(platform_view->GetOwnerViewController(), implicitViewController);
+
+    platform_view->NotifyDestroyed(flutter::kFlutterImplicitViewId);
+    XCTAssertEqual(mock_delegate.on_platform_view_destroyed_calls_, 1);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+- (void)testSetSemanticsTreeEnabledCreatesAccessibilityBridgesForAllControllers {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("PlatformViewIOSTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  AccessibilityCountingBinaryMessenger* messenger =
+      [[AccessibilityCountingBinaryMessenger alloc] init];
+  id sharedEngine = OCMClassMock([FlutterEngine class]);
+  OCMStub([sharedEngine binaryMessenger]).andReturn(messenger);
+  id implicitViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitViewController isViewLoaded]).andReturn(NO);
+  OCMStub([implicitViewController engine]).andReturn(sharedEngine);
+  OCMStub([implicitViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+
+  id secondaryViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([secondaryViewController isViewLoaded]).andReturn(NO);
+  OCMStub([secondaryViewController engine]).andReturn(sharedEngine);
+  OCMStub([secondaryViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    platform_view->SetOwnerViewController(implicitViewController);
+    platform_view->AddOwnerViewController(secondaryViewController);
+    XCTAssertFalse(platform_view->GetAccessibilityBridge());
+    platform_view->SetSemanticsTreeEnabled(true);
+    XCTAssertTrue(platform_view->GetAccessibilityBridge());
+    platform_view->SetSemanticsTreeEnabled(false);
+    XCTAssertFalse(platform_view->GetAccessibilityBridge());
+    latch.Signal();
+  });
+  latch.Wait();
+
+  XCTAssertEqual(messenger.accessibilityHandlerRegistrationCount, 2);
+  [sharedEngine stopMocking];
+}
+
+- (void)testAddingSecondaryControllerAfterSemanticsEnabledCreatesAccessibilityBridge {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("PlatformViewIOSTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  AccessibilityCountingBinaryMessenger* messenger =
+      [[AccessibilityCountingBinaryMessenger alloc] init];
+  id sharedEngine = OCMClassMock([FlutterEngine class]);
+  OCMStub([sharedEngine binaryMessenger]).andReturn(messenger);
+  id implicitViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitViewController isViewLoaded]).andReturn(NO);
+  OCMStub([implicitViewController engine]).andReturn(sharedEngine);
+  OCMStub([implicitViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+
+  id secondaryViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([secondaryViewController isViewLoaded]).andReturn(NO);
+  OCMStub([secondaryViewController engine]).andReturn(sharedEngine);
+  OCMStub([secondaryViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    platform_view->SetOwnerViewController(implicitViewController);
+    platform_view->SetSemanticsTreeEnabled(true);
+    platform_view->AddOwnerViewController(secondaryViewController);
+    latch.Signal();
+  });
+  latch.Wait();
+
+  XCTAssertEqual(messenger.accessibilityHandlerRegistrationCount, 2);
+  [sharedEngine stopMocking];
+}
+
+- (void)testOnPreEngineRestartResetsAllRegisteredControllers {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("PlatformViewIOSTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+
+  id implicitPlatformViewsController = OCMClassMock([FlutterPlatformViewsController class]);
+  id implicitRestorationPlugin = OCMClassMock([FlutterRestorationPlugin class]);
+  id implicitTextInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
+  id implicitViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([implicitViewController isViewLoaded]).andReturn(NO);
+  OCMStub([implicitViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
+  OCMStub([implicitViewController platformViewsController]).andReturn(implicitPlatformViewsController);
+  OCMStub([implicitViewController restorationPlugin]).andReturn(implicitRestorationPlugin);
+  OCMStub([implicitViewController textInputPlugin]).andReturn(implicitTextInputPlugin);
+
+  id secondaryPlatformViewsController = OCMClassMock([FlutterPlatformViewsController class]);
+  id secondaryRestorationPlugin = OCMClassMock([FlutterRestorationPlugin class]);
+  id secondaryTextInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
+  id secondaryViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([secondaryViewController isViewLoaded]).andReturn(NO);
+  OCMStub([secondaryViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
+  OCMStub([secondaryViewController platformViewsController]).andReturn(secondaryPlatformViewsController);
+  OCMStub([secondaryViewController restorationPlugin]).andReturn(secondaryRestorationPlugin);
+  OCMStub([secondaryViewController textInputPlugin]).andReturn(secondaryTextInputPlugin);
+
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    platform_view->SetOwnerViewController(implicitViewController);
+    platform_view->AddOwnerViewController(secondaryViewController);
+    platform_view->OnPreEngineRestart();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  OCMVerify([implicitPlatformViewsController reset]);
+  OCMVerify([implicitRestorationPlugin reset]);
+  OCMVerify([implicitTextInputPlugin reset]);
+  OCMVerify([secondaryPlatformViewsController reset]);
+  OCMVerify([secondaryRestorationPlugin reset]);
+  OCMVerify([secondaryTextInputPlugin reset]);
 }
 
 - (void)testLocaleCanBeSetWithoutViewController {

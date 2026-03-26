@@ -216,6 +216,11 @@ void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner
   FML_DCHECK([view_controllers_ objectForKey:@(viewIdentifier)] == nil);
   [view_controllers_ setObject:owner_controller forKey:@(viewIdentifier)];
 
+  if (semantics_tree_enabled_) {
+    accessibility_bridges_[viewIdentifier] =
+        std::make_unique<AccessibilityBridge>(owner_controller, this, platform_views_controller_);
+  }
+
   // Add an observer that will clear out the owner_controller_ ivar and
   // the accessibility_bridge_ in case the view controller is deleted.
   auto [it, inserted] = flutter_view_controller_will_dealloc_observers_.try_emplace(viewIdentifier);
@@ -346,6 +351,7 @@ void PlatformViewIOS::SetApplicationLocale(std::string locale) {
 
 // |PlatformView|
 void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
+  semantics_tree_enabled_ = enabled;
   if ([view_controllers_ count] > 0) {
     NSEnumerator* e = [view_controllers_ objectEnumerator];
     FlutterViewController* controller = nil;
@@ -353,7 +359,7 @@ void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
       if (enabled) {
         auto iter = accessibility_bridges_.find(controller.viewIdentifier);
         if (iter != accessibility_bridges_.end()) {
-          return;
+          continue;
         }
 
         accessibility_bridges_[controller.viewIdentifier] =

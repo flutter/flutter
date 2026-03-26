@@ -89,6 +89,8 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 namespace {
+constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+
 class MockPlatformViewDelegate : public PlatformView::Delegate {
  public:
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
@@ -276,6 +278,110 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                          }];
   XCTAssertNil(inputPlugin.activeView);
   [self waitForExpectations:@[ expectation ] timeout:1.0];
+}
+
+- (void)testSetClientDefaultsToImplicitViewController {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+}
+
+- (void)testSetClientUsesRequestedViewIdAndHostView {
+  FlutterViewController* secondaryViewController = [[FlutterViewController alloc] init];
+  [secondaryViewController loadView];
+  OCMStub([engine viewControllerForIdentifier:kSecondaryFlutterViewId])
+      .andReturn(secondaryViewController);
+
+  NSMutableDictionary* configuration = self.mutableTemplateCopy;
+  configuration[@"viewId"] = @(kSecondaryFlutterViewId);
+  [self setClientId:123 configuration:configuration];
+
+  XCTAssertEqual(textInputPlugin.currentViewController, secondaryViewController);
+  XCTAssertEqual([textInputPlugin hostView], secondaryViewController.view);
+}
+
+- (void)testSetClientSwitchesBetweenImplicitAndSecondaryViewControllers {
+  FlutterViewController* secondaryViewController = [[FlutterViewController alloc] init];
+  OCMStub([engine viewControllerForIdentifier:kSecondaryFlutterViewId])
+      .andReturn(secondaryViewController);
+
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+
+  NSMutableDictionary* secondaryConfiguration = self.mutableTemplateCopy;
+  secondaryConfiguration[@"viewId"] = @(kSecondaryFlutterViewId);
+  [self setClientId:456 configuration:secondaryConfiguration];
+  XCTAssertEqual(textInputPlugin.currentViewController, secondaryViewController);
+
+  [self setClientId:789 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+}
+
+- (void)testSetClientSwitchesBetweenImplicitAndSecondaryViewControllersAfterClearClient {
+  FlutterViewController* secondaryViewController = [[FlutterViewController alloc] init];
+  OCMStub([engine viewControllerForIdentifier:kSecondaryFlutterViewId])
+      .andReturn(secondaryViewController);
+
+  NSMutableDictionary* secondaryConfiguration = self.mutableTemplateCopy;
+  secondaryConfiguration[@"viewId"] = @(kSecondaryFlutterViewId);
+
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+
+  [self setClientClear];
+  XCTAssertNil(textInputPlugin.currentViewController);
+
+  [self setClientId:456 configuration:secondaryConfiguration];
+  XCTAssertEqual(textInputPlugin.currentViewController, secondaryViewController);
+
+  [self setClientClear];
+  XCTAssertNil(textInputPlugin.currentViewController);
+
+  [self setClientId:789 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+}
+
+- (void)testClearClientResetsCurrentViewController {
+  [self setClientId:123 configuration:self.mutableTemplateCopy];
+  XCTAssertEqual(textInputPlugin.currentViewController, viewController);
+
+  [self setClientClear];
+
+  XCTAssertNil(textInputPlugin.currentViewController);
+}
+
+- (void)testPropagatePressEventsToSecondaryViewController {
+  FlutterViewController* implicitViewController = OCMPartialMock(viewController);
+  FlutterViewController* mockSecondaryViewController =
+      OCMPartialMock([[FlutterViewController alloc] init]);
+  OCMStub([mockSecondaryViewController pressesBegan:[OCMArg isNotNil]
+                                          withEvent:[OCMArg isNotNil]]);
+  OCMStub([mockSecondaryViewController pressesEnded:[OCMArg isNotNil]
+                                          withEvent:[OCMArg isNotNil]]);
+  OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(implicitViewController);
+  OCMStub([engine viewControllerForIdentifier:kSecondaryFlutterViewId])
+      .andReturn(mockSecondaryViewController);
+
+  NSMutableDictionary* configuration = self.mutableTemplateCopy;
+  configuration[@"viewId"] = @(kSecondaryFlutterViewId);
+  [self setClientId:123 configuration:configuration];
+  FlutterTextInputView* currentView = textInputPlugin.activeView;
+  [self setTextInputShow];
+
+  [currentView pressesBegan:[NSSet setWithObjects:OCMClassMock([UIPress class]), nil]
+                  withEvent:OCMClassMock([UIPressesEvent class])];
+  OCMVerify(times(1), [mockSecondaryViewController pressesBegan:[OCMArg isNotNil]
+                                                      withEvent:[OCMArg isNotNil]]);
+  OCMVerify(never(), [implicitViewController pressesBegan:[OCMArg any]
+                                                withEvent:[OCMArg any]]);
+
+  [currentView pressesEnded:[NSSet setWithObjects:OCMClassMock([UIPress class]), nil]
+                  withEvent:OCMClassMock([UIPressesEvent class])];
+  OCMVerify(times(1), [mockSecondaryViewController pressesEnded:[OCMArg isNotNil]
+                                                      withEvent:[OCMArg isNotNil]]);
+  OCMVerify(never(), [implicitViewController pressesEnded:[OCMArg any]
+                                                withEvent:[OCMArg any]]);
 }
 
 - (void)testInvokeStartLiveTextInput {

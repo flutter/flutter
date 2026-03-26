@@ -445,7 +445,12 @@ class FakeIosPlatformViewsController {
       );
     }
 
-    _views[id] = FakeUiKitView(id, viewType, creationParams);
+    _views[id] = FakeUiKitView(
+      id,
+      viewType,
+      creationParams,
+      args['flutterViewId'] as int?,
+    );
     gesturesAccepted[id] = 0;
     gesturesRejected[id] = 0;
     return Future<int?>.sync(() => null);
@@ -681,11 +686,12 @@ class FakeAndroidMotionEvent {
 
 @immutable
 class FakeUiKitView {
-  const FakeUiKitView(this.id, this.type, [this.creationParams]);
+  const FakeUiKitView(this.id, this.type, [this.creationParams, this.flutterViewId]);
 
   final int id;
   final String type;
   final Uint8List? creationParams;
+  final int? flutterViewId;
 
   @override
   bool operator ==(Object other) {
@@ -695,15 +701,17 @@ class FakeUiKitView {
     return other is FakeUiKitView &&
         other.id == id &&
         other.type == type &&
-        other.creationParams == creationParams;
+        other.creationParams == creationParams &&
+        other.flutterViewId == flutterViewId;
   }
 
   @override
-  int get hashCode => Object.hash(id, type);
+  int get hashCode => Object.hash(id, type, flutterViewId);
 
   @override
   String toString() {
-    return 'FakeUiKitView(id: $id, type: $type, creationParams: $creationParams)';
+    return 'FakeUiKitView('
+        'id: $id, type: $type, creationParams: $creationParams, flutterViewId: $flutterViewId)';
   }
 }
 
