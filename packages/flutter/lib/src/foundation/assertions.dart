@@ -5,9 +5,6 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
-import 'package:meta/meta.dart';
-
-import 'basic_types.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
 import 'error_dumper.dart';
