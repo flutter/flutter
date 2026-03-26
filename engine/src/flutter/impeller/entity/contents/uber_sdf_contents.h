@@ -59,12 +59,19 @@ class UberSDFContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
+  /// The type of geometry (e.g. circle, rect).
   const Type type_;
-  Rect rect_;
+  /// The bounding box of the geometry.
+  Rect bounding_box_;
+  /// The color of the geometry.
   Color color_;
+  /// The width of the stroke.
   Scalar stroke_width_ = 0.0f;
+  /// Whether the geometry is stroked.
   bool stroked_ = false;
+  /// The geometry.
   const Geometry* geometry_;
+  /// The antialias padding.
   Scalar aa_padding_;
 
   UberSDFContents(const UberSDFContents&) = delete;

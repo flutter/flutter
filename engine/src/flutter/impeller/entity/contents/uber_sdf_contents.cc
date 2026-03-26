@@ -26,10 +26,11 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
     Scalar stroke_width,
     bool stroked,
     const FillRectGeometry* geometry) {
-  Rect rect = geometry->GetRect();
+  Rect bounding_box = geometry->GetRect();
   Scalar aa_padding = geometry->GetAntialiasPadding();
-  return std::make_unique<UberSDFContents>(
-      Type::kRect, rect, color, stroke_width, stroked, geometry, aa_padding);
+  return std::make_unique<UberSDFContents>(Type::kRect, bounding_box, color,
+                                           stroke_width, stroked, geometry,
+                                           aa_padding);
 }
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
@@ -39,22 +40,23 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
     const CircleGeometry* geometry) {
   Point center = geometry->GetCenter();
   Scalar radius = geometry->GetRadius();
-  Rect rect = Rect::MakeXYWH(center.x - radius, center.y - radius, radius * 2,
-                             radius * 2);
+  Rect bounding_box = Rect::MakeXYWH(center.x - radius, center.y - radius,
+                                     radius * 2, radius * 2);
   Scalar aa_padding = geometry->GetAntialiasPadding();
-  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      Type::kCircle, rect, color, stroke_width, stroked, geometry, aa_padding));
+  return std::unique_ptr<UberSDFContents>(
+      new UberSDFContents(Type::kCircle, bounding_box, color, stroke_width,
+                          stroked, geometry, aa_padding));
 }
 
 UberSDFContents::UberSDFContents(Type type,
-                                 Rect rect,
+                                 Rect bounding_box,
                                  Color color,
                                  Scalar stroke_width,
                                  bool stroked,
                                  const Geometry* geometry,
                                  Scalar aa_padding)
     : type_(type),
-      rect_(rect),
+      bounding_box_(bounding_box),
       color_(color),
       stroke_width_(stroke_width),
       stroked_(stroked),
@@ -71,8 +73,9 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.center = rect_.GetCenter();
-  frag_info.size = Point(rect_.GetWidth() / 2.0f, rect_.GetHeight() / 2.0f);
+  frag_info.center = bounding_box_.GetCenter();
+  frag_info.size =
+      Point(bounding_box_.GetWidth() / 2.0f, bounding_box_.GetHeight() / 2.0f);
   frag_info.stroke_width = stroke_width_;
   frag_info.aa_pixels = aa_padding_;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
