@@ -1,0 +1,50 @@
+// swift-tools-version: {{swiftToolsVersion}}
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+let package = Package(
+    name: "FlutterConfigurationPlugin",
+    products: [
+        .plugin(name: "FlutterConfigurationPlugin", targets: [{{#buildModes}}"Switch to {{uppercaseName}} Mode",{{/buildModes}}]),
+        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
+    ],
+    targets: [
+        {{#buildModes}}
+        .plugin(
+            name: "Switch to {{uppercaseName}} Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-{{lowercaseName}}", description: "Updates package to use the {{uppercaseName}} mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the {{uppercaseName}} mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/{{uppercaseName}}"
+        ),
+        {{/buildModes}}
+        .target(name: "FlutterToolHelper"),
+        .executableTarget(
+            name: "FlutterPrebuildTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        {{#generateTests}}
+        .testTarget(
+            name: "FlutterToolTests",
+            dependencies: [
+                "FlutterPluginTool", "FlutterToolHelper",
+                "FlutterPrebuildTool",
+                "FlutterAssembleTool",
+            ]
+        ),
+        {{/generateTests}}
+    ]
+)

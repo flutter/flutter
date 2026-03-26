@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_swift_package.dart';
 import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test_api/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
@@ -139,6 +141,10 @@ void main() {
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        late final flutterSwiftPackageTools = FlutterSwiftPackageTools(
+          utils: testUtils,
+          generateTests: false,
+        );
         // Plugin A represents a SwiftPM plugin
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
@@ -167,6 +173,7 @@ void main() {
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
           cocoapodDependencies: cocoapodDependencies,
+          flutterSwiftPackageTools: flutterSwiftPackageTools,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
@@ -196,7 +203,8 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
+        .package(name: "PluginA", path: "Sources/Packages/PluginA"),
+        .package(name: "FlutterConfigurationPlugin", path: "../FlutterConfigurationPlugin")
     ],
     targets: [
         .target(
@@ -1897,6 +1905,10 @@ let package = Package(
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+        late final flutterSwiftPackageTools = FlutterSwiftPackageTools(
+          utils: testUtils,
+          generateTests: false,
+        );
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
         pluginSwiftDependencies.copiedPlugins.add((pluginA, '$pluginsDirectoryPath/PluginA'));
@@ -1909,6 +1921,7 @@ let package = Package(
           flutterFrameworkDependency: flutterFrameworkDependency,
           appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
           cocoapodDependencies: cocoapodDependencies,
+          flutterSwiftPackageTools: flutterSwiftPackageTools,
           packagesForConfiguration: fs.directory(debugPackagesDirectoryPath),
           xcframeworkOutput: fs.directory(debugFrameworksDirectoryPath),
         );
@@ -1938,7 +1951,8 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
+        .package(name: "PluginA", path: "Sources/Packages/PluginA"),
+        .package(name: "FlutterConfigurationPlugin", path: "../FlutterConfigurationPlugin")
     ],
     targets: [
         .target(
@@ -2591,6 +2605,355 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         )''');
         expect(processManager, hasNoRemainingExpectations);
       });
+    });
+  });
+
+  group('FlutterSwiftPackageTools', () {
+    testUsingContext('generateArtifacts', () async {
+      final FileSystem fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list([]);
+      final testUtils = BuildSwiftPackageUtils(
+        analytics: FakeAnalytics(),
+        artifacts: FakeArtifacts(engineArtifactPath),
+        buildSystem: FakeBuildSystem(),
+        cache: FakeCache(fs, _flutterRoot),
+        fileSystem: fs,
+        flutterRoot: _flutterRoot,
+        flutterVersion: FakeFlutterVersion(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+        templateRenderer: const MustacheTemplateRenderer(),
+        xcode: FakeXcode(),
+      );
+      final tools = FlutterSwiftPackageTools(utils: testUtils, generateTests: false);
+
+      // Set up templates in fs
+      final Directory templateDir = fs.directory(
+        '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin/Scripts',
+      )..createSync(recursive: true);
+      templateDir.childFile('post_embed.sh.tmpl').createSync();
+
+      // Set up package_config.json for imageDirectory
+      final File packagesFile = fs.file(
+        '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+      )..createSync(recursive: true);
+      packagesFile.writeAsStringSync(
+        json.encode(<String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'flutter_template_images',
+              'rootUri': 'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+              'packageUri': 'lib/',
+              'languageVersion': '3.4',
+            },
+          ],
+        }),
+      );
+
+      final Directory outputDirectory = fs.directory('output')..createSync();
+      await tools.generateArtifacts(outputDirectory: outputDirectory);
+
+      expect(outputDirectory.childDirectory('Scripts').childFile('post_embed.sh'), exists);
+    });
+
+    testUsingContext('generateSwiftPackage', () async {
+      final FileSystem fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list([]);
+      final testUtils = BuildSwiftPackageUtils(
+        analytics: FakeAnalytics(),
+        artifacts: FakeArtifacts(engineArtifactPath),
+        buildSystem: FakeBuildSystem(),
+        cache: FakeCache(fs, _flutterRoot),
+        fileSystem: fs,
+        flutterRoot: _flutterRoot,
+        flutterVersion: FakeFlutterVersion(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+        templateRenderer: const MustacheTemplateRenderer(),
+        xcode: FakeXcode(),
+      );
+      final tools = FlutterSwiftPackageTools(utils: testUtils, generateTests: false);
+
+      // Set up templates in fs
+      for (final FileSystemEntity fileEntity
+          in fileSystem
+              .directory('${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin')
+              .listSync(recursive: true)) {
+        if (fileEntity is File) {
+          fs.file(fileEntity.path).createSync(recursive: true);
+          fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+        }
+      }
+
+      // Set up package_config.json for imageDirectory
+      final File packagesFile = fs.file(
+        '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+      )..createSync(recursive: true);
+      packagesFile.writeAsStringSync(
+        json.encode(<String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'flutter_template_images',
+              'rootUri': 'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+              'packageUri': 'lib/',
+              'languageVersion': '3.4',
+            },
+          ],
+        }),
+      );
+
+      final Directory outputDirectory = fs.directory('output')..createSync();
+      final buildInfos = <BuildInfo>[BuildInfo.debug, BuildInfo.profile, BuildInfo.release];
+      await tools.generateSwiftPackage(outputDirectory, buildInfos);
+
+      final Directory pluginDir = outputDirectory.childDirectory('FlutterConfigurationPlugin');
+      expect(pluginDir.childFile('Package.swift'), exists);
+      expect(pluginDir.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+let package = Package(
+    name: "FlutterConfigurationPlugin",
+    products: [
+        .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode","Switch to Profile Mode","Switch to Release Mode",]),
+        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
+    ],
+    targets: [
+        .plugin(
+            name: "Switch to Debug Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-debug", description: "Updates package to use the Debug mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Debug mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/Debug"
+        ),
+        .plugin(
+            name: "Switch to Profile Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-profile", description: "Updates package to use the Profile mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Profile mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/Profile"
+        ),
+        .plugin(
+            name: "Switch to Release Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-release", description: "Updates package to use the Release mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Release mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/Release"
+        ),
+        .target(name: "FlutterToolHelper"),
+        .executableTarget(
+            name: "FlutterPrebuildTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+    ]
+)''');
+      expect(
+        pluginDir
+            .childDirectory('Plugins')
+            .childDirectory('Debug')
+            .childFile('UpdateConfiguration.swift')
+            .readAsStringSync(),
+        contains('let configuration = "Debug"'),
+      );
+      expect(
+        pluginDir
+            .childDirectory('Plugins')
+            .childDirectory('Profile')
+            .childFile('UpdateConfiguration.swift')
+            .readAsStringSync(),
+        contains('let configuration = "Profile"'),
+      );
+      expect(
+        pluginDir
+            .childDirectory('Plugins')
+            .childDirectory('Release')
+            .childFile('UpdateConfiguration.swift')
+            .readAsStringSync(),
+        contains('let configuration = "Release"'),
+      );
+      expect(pluginDir.childDirectory('Tests'), isNot(exists));
+    });
+
+    testUsingContext('generateSwiftPackage with tests', () async {
+      final FileSystem fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list([]);
+      final testUtils = BuildSwiftPackageUtils(
+        analytics: FakeAnalytics(),
+        artifacts: FakeArtifacts(engineArtifactPath),
+        buildSystem: FakeBuildSystem(),
+        cache: FakeCache(fs, _flutterRoot),
+        fileSystem: fs,
+        flutterRoot: _flutterRoot,
+        flutterVersion: FakeFlutterVersion(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+        templateRenderer: const MustacheTemplateRenderer(),
+        xcode: FakeXcode(),
+      );
+      final tools = FlutterSwiftPackageTools(utils: testUtils, generateTests: true);
+
+      // Set up templates in fs
+      for (final FileSystemEntity fileEntity
+          in fileSystem
+              .directory('${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin')
+              .listSync(recursive: true)) {
+        if (fileEntity is File) {
+          fs.file(fileEntity.path).createSync(recursive: true);
+          fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+        }
+      }
+
+      // Set up package_config.json for imageDirectory
+      final File packagesFile = fs.file(
+        '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+      )..createSync(recursive: true);
+      packagesFile.writeAsStringSync(
+        json.encode(<String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'flutter_template_images',
+              'rootUri': 'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+              'packageUri': 'lib/',
+              'languageVersion': '3.4',
+            },
+          ],
+        }),
+      );
+
+      final Directory outputDirectory = fs.directory('output')..createSync();
+      final buildInfos = <BuildInfo>[BuildInfo.debug, BuildInfo.profile, BuildInfo.release];
+      await tools.generateSwiftPackage(outputDirectory, buildInfos);
+
+      final Directory pluginDir = outputDirectory.childDirectory('FlutterConfigurationPlugin');
+      expect(pluginDir.childFile('Package.swift'), exists);
+      expect(pluginDir.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+let package = Package(
+    name: "FlutterConfigurationPlugin",
+    products: [
+        .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode","Switch to Profile Mode","Switch to Release Mode",]),
+        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
+    ],
+    targets: [
+        .plugin(
+            name: "Switch to Debug Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-debug", description: "Updates package to use the Debug mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Debug mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/Debug"
+        ),
+        .plugin(
+            name: "Switch to Profile Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-profile", description: "Updates package to use the Profile mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Profile mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/Profile"
+        ),
+        .plugin(
+            name: "Switch to Release Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-release", description: "Updates package to use the Release mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Release mode Flutter framework"),
+                ]
+            ),
+            dependencies: [.target(name: "FlutterPluginTool")],
+            path: "Plugins/Release"
+        ),
+        .target(name: "FlutterToolHelper"),
+        .executableTarget(
+            name: "FlutterPrebuildTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: ["FlutterToolHelper"]
+        ),
+        .testTarget(
+            name: "FlutterToolTests",
+            dependencies: [
+                "FlutterPluginTool", "FlutterToolHelper",
+                "FlutterPrebuildTool",
+                "FlutterAssembleTool",
+            ]
+        ),
+    ]
+)''');
+      expect(
+        pluginDir
+            .childDirectory('Plugins')
+            .childDirectory('Debug')
+            .childFile('UpdateConfiguration.swift')
+            .readAsStringSync(),
+        contains('let configuration = "Debug"'),
+      );
+      expect(
+        pluginDir
+            .childDirectory('Plugins')
+            .childDirectory('Profile')
+            .childFile('UpdateConfiguration.swift')
+            .readAsStringSync(),
+        contains('let configuration = "Profile"'),
+      );
+      expect(
+        pluginDir
+            .childDirectory('Plugins')
+            .childDirectory('Release')
+            .childFile('UpdateConfiguration.swift')
+            .readAsStringSync(),
+        contains('let configuration = "Release"'),
+      );
+      expect(pluginDir.childDirectory('Tests'), exists);
     });
   });
 }

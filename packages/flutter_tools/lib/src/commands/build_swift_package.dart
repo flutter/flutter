@@ -35,6 +35,7 @@ import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../template.dart';
 import '../version.dart';
 import 'build.dart';
 import 'darwin_add_to_app.dart';
@@ -48,6 +49,8 @@ const String _kCocoaPods = 'CocoaPods';
 const String _kNativeAssets = 'NativeAssets';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
 const String _kSources = 'Sources';
+const String _kScripts = 'Scripts';
+const String _kFlutterConfigurationPlugin = 'FlutterConfigurationPlugin';
 const List<String> _kSupportedPlatforms = ['ios', 'macos'];
 const String _kCodesignIdentityFile = '.codesign_identity';
 
@@ -256,6 +259,10 @@ class BuildSwiftPackage extends BuildSubCommand {
     targetPlatform: _targetPlatform,
     utils: utils,
   );
+  late final flutterSwiftPackageTools = FlutterSwiftPackageTools(
+    utils: utils,
+    generateTests: usingCISystem,
+  );
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -330,6 +337,9 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     createSourcesSymlink(pluginRegistrantSwiftPackage, buildInfos.first.mode.uppercaseName);
 
+    await flutterSwiftPackageTools.generateArtifacts(outputDirectory: outputDirectory);
+    await flutterSwiftPackageTools.generateSwiftPackage(outputDirectory, buildInfos);
+
     return FlutterCommandResult.success();
   }
 
@@ -392,6 +402,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         flutterFrameworkDependency: flutterFrameworkDependency,
         appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
         cocoapodDependencies: cocoapodDependencies,
+        flutterSwiftPackageTools: flutterSwiftPackageTools,
         packagesForConfiguration: packagesForConfiguration,
         xcframeworkOutput: xcframeworkOutput,
       );
@@ -444,6 +455,7 @@ class FlutterPluginRegistrantSwiftPackage {
     required FlutterFrameworkDependency flutterFrameworkDependency,
     required AppFrameworkAndNativeAssetsDependencies appAndNativeAssetsDependencies,
     required CocoaPodPluginDependencies cocoapodDependencies,
+    required FlutterSwiftPackageTools flutterSwiftPackageTools,
     required Directory xcframeworkOutput,
   }) async {
     final (
@@ -476,6 +488,7 @@ class FlutterPluginRegistrantSwiftPackage {
     final packageDependencies = <SwiftPackagePackageDependency>[
       flutterFrameworkDependency.packageDependency,
       ...pluginPackageDependencies,
+      flutterSwiftPackageTools.packageDependency,
     ];
 
     const String swiftPackageName = kPluginSwiftPackageName;
@@ -1554,6 +1567,84 @@ class CocoaPodPluginDependencies {
       xcframeworkDirectory: xcframeworkOutput.childDirectory(_kCocoaPods),
     );
   }
+}
+
+/// Class that encapsulates the logic for building CocoaPod plugins for every platform and sdk into
+/// frameworks and then combines them into a single XCFramework for each.
+@visibleForTesting
+class FlutterSwiftPackageTools {
+  FlutterSwiftPackageTools({required BuildSwiftPackageUtils utils, required bool generateTests})
+    : _utils = utils,
+      _generateTests = generateTests;
+
+  final BuildSwiftPackageUtils _utils;
+  final bool _generateTests;
+
+  Future<void> generateArtifacts({required Directory outputDirectory}) async {
+    final Directory scriptsDirectory = outputDirectory.childDirectory(_kScripts);
+    ErrorHandlingFileSystem.deleteIfExists(scriptsDirectory, recursive: true);
+    final Template template = await Template.fromName(
+      _utils.fileSystem.path.join('add_to_app', 'darwin', 'Scripts'),
+      fileSystem: _utils.fileSystem,
+      templateManifest: null,
+      logger: _utils.logger,
+      templateRenderer: _utils.templateRenderer,
+    );
+    template.render(scriptsDirectory, <String, Object>{}, printStatusWhenWriting: false);
+  }
+
+  Future<void> generateSwiftPackage(Directory outputDirectory, List<BuildInfo> buildInfos) async {
+    final Directory swiftConfigurationPluginDirectory = outputDirectory.childDirectory(
+      _kFlutterConfigurationPlugin,
+    );
+    ErrorHandlingFileSystem.deleteIfExists(swiftConfigurationPluginDirectory, recursive: true);
+
+    final Template template = await Template.fromName(
+      _utils.fileSystem.path.join('add_to_app', 'darwin', _kFlutterConfigurationPlugin),
+      fileSystem: _utils.fileSystem,
+      templateManifest: null,
+      logger: _utils.logger,
+      templateRenderer: _utils.templateRenderer,
+    );
+    template.render(swiftConfigurationPluginDirectory, <String, Object>{
+      'buildModes': [
+        for (final buildInfo in buildInfos)
+          {'uppercaseName': buildInfo.mode.uppercaseName, 'lowercaseName': buildInfo.mode.cliName},
+      ],
+      'generateTests': _generateTests,
+      'swiftToolsVersion': minimumSwiftToolchainVersion,
+    }, printStatusWhenWriting: false);
+    final Directory directoryPerBuildMode = swiftConfigurationPluginDirectory
+        .childDirectory('Plugins')
+        .childDirectory('BuildMode');
+
+    // Copy for each build mode (rename for the last)
+    for (var index = 0; index <= buildInfos.length - 1; index++) {
+      final isLast = index == buildInfos.length - 1;
+      final BuildInfo buildInfo = buildInfos[index];
+      final Directory destination = swiftConfigurationPluginDirectory
+          .childDirectory('Plugins')
+          .childDirectory(buildInfo.mode.uppercaseName);
+      if (!isLast) {
+        copyDirectory(directoryPerBuildMode, destination);
+      } else {
+        directoryPerBuildMode.renameSync(destination.path);
+      }
+      final File swiftFile = destination.childFile('UpdateConfiguration.swift');
+      swiftFile.writeAsStringSync(
+        swiftFile.readAsStringSync().replaceAll(r'$(CONFIGURATION)', buildInfo.mode.uppercaseName),
+      );
+    }
+    if (!_generateTests) {
+      final Directory testsDirectory = swiftConfigurationPluginDirectory.childDirectory('Tests');
+      ErrorHandlingFileSystem.deleteIfExists(testsDirectory, recursive: true);
+    }
+  }
+
+  SwiftPackagePackageDependency get packageDependency => SwiftPackagePackageDependency(
+    name: _kFlutterConfigurationPlugin,
+    path: '../$_kFlutterConfigurationPlugin',
+  );
 }
 
 /// Create an XCFramework from a list of frameworks.

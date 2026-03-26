@@ -1,0 +1,61 @@
+//  Generated file. Do not edit.
+
+import FlutterToolHelper
+import Foundation
+
+@main
+struct FlutterPluginTool {
+  static func main() throws {
+    let (buildMode, packagePath) = try extractArguments(arguments: CommandLine.arguments)
+
+    let flutterPluginRegistrant = findFlutterPluginRegistrant(packagePath: packagePath)
+
+    let fileManager = FileManager.default
+    try FlutterToolHelper.updateSymlink(
+      targetBuildMode: buildMode,
+      currentLinkName: "Package.swift",
+      newLinkTarget: "./\(buildMode)/Package.swift",
+      flutterPluginRegistrantPath: flutterPluginRegistrant.path,
+      fileManager: fileManager
+    )
+  }
+
+  /// Extracts the configuration and package path from the command line arguments.
+  ///
+  /// - Parameter arguments: The command line arguments.
+  /// - Returns: A tuple containing the configuration and package path.
+  /// - Throws: `XcodeErrorAndExit.error` if the arguments are invalid.
+  static func extractArguments(arguments: [String]) throws -> (String, String) {
+    if arguments.count != 3 {
+      throw XcodeErrorAndExit.error([
+        "Invalid arguments: [\(arguments.joined(separator: ", "))]"
+      ])
+    }
+    let buildMode = arguments[1]
+    let validConfigurations = ["Debug", "Profile", "Release"]
+    if !validConfigurations.contains(buildMode) {
+      throw XcodeErrorAndExit.error(["Invalid build mode: \(buildMode)"])
+    }
+    let packagePath = arguments[2]
+    if !packagePath.contains("FlutterConfigurationPlugin")
+      && !packagePath.contains("FlutterPluginRegistrant")
+    {
+      throw XcodeErrorAndExit.error(["Invalid package path: \(packagePath)"])
+    }
+    return (buildMode, packagePath)
+  }
+
+  /// Finds the FlutterPluginRegistrant directory based on the package path.
+  ///
+  /// - Parameter packagePath: The path to the package.
+  /// - Returns: The URL to the FlutterPluginRegistrant directory.
+  static func findFlutterPluginRegistrant(packagePath: String) -> URL {
+    let packageURL = URL(fileURLWithPath: packagePath)
+    if packageURL.lastPathComponent == "FlutterConfigurationPlugin" {
+      return packageURL.deletingLastPathComponent().appendingPathComponent("FlutterPluginRegistrant")
+    }
+    return packageURL
+  }
+}
+
+extension FileManager: FlutterToolsFileManager {}

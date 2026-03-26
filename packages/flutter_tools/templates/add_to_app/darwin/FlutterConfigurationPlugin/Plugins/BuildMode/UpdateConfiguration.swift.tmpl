@@ -1,0 +1,25 @@
+import Foundation
+import PackagePlugin
+
+@main
+struct FlutterConfigurationPlugin: CommandPlugin {
+  func performCommand(context: PluginContext, arguments: [String]) async throws
+  {
+    let configuration = "$(CONFIGURATION)"
+    let tool = try context.tool(named: "FlutterPluginTool")
+    let process = try Process.run(
+      URL(fileURLWithPath: tool.url.path),
+      arguments: [
+        configuration,
+        context.package.directoryURL.path,
+      ]
+    )
+    process.waitUntilExit()
+    if process.terminationReason == .exit && process.terminationStatus == 0 {
+      print("Updated configuration to \(configuration)")
+    } else {
+      let problem = "\(process.terminationReason):\(process.terminationStatus)"
+      Diagnostics.error("Updating configuration to \(configuration) failed: \(problem)")
+    }
+  }
+}

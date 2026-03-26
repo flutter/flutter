@@ -1,0 +1,124 @@
+import Foundation
+
+public class FlutterPrebuildToolHelper {
+  /// Copies the Flutter framework to `BUILT_PRODUCTS_DIR`.
+  ///
+  /// - Parameters:
+  ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  ///   - processManager: The process runner to use.
+  /// - Throws: `XcodeErrorAndExit.error` if the copy fails.
+  public static func copyFlutterFramework(
+    targetBuildMode: String,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager,
+    processManager: FlutterProcessRunner
+  ) throws {
+    // Verify XCFramework for the build mode exists
+    let flutterPluginRegistrantPath = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "FLUTTER_PLUGIN_REGISTRANT_PATH"
+    )
+    let targetPlatform = try FlutterToolHelper.targetPlatform(env: env)
+    let frameworkName = targetPlatform == .macos ? "FlutterMacOS" : "Flutter"
+    let xcframeworkURL = URL(
+      fileURLWithPath:
+        "\(flutterPluginRegistrantPath)/\(targetBuildMode)/Frameworks/\(frameworkName).xcframework"
+    )
+    if !fileManager.fileExists(atPath: xcframeworkURL.path) {
+      throw XcodeErrorAndExit.error([
+        "FlutterPluginRegistrant does not exist for configuration \(targetBuildMode). "
+          + "You may need to run \"flutter build swift-package --build-mode "
+          + "\(targetBuildMode.lowercased())\" in your Flutter app."
+      ])
+    }
+
+    let builtProductsDir = try FlutterToolHelper.findOrExit(env: env, key: "BUILT_PRODUCTS_DIR")
+    do {
+      // Find the framework for the platform
+      let frameworkPath = try findPlatformFramework(
+        frameworkName: frameworkName,
+        xcframeworkURL: xcframeworkURL,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+      // Copy the platform framework to the BUILT_PRODUCTS_DIR
+      try rsyncFramework(
+        source: frameworkPath,
+        destination: URL(fileURLWithPath: builtProductsDir),
+        processManager: processManager
+      )
+    } catch let error as XcodeErrorAndExit {
+      throw error
+    } catch {
+      throw XcodeErrorAndExit.error([
+        "Unable to copy \(xcframeworkURL): \(error.localizedDescription)"
+      ])
+    }
+  }
+
+  /// Finds the framework for the target platform within an XCFramework.
+  ///
+  /// - Parameters:
+  ///   - frameworkName: The name of the framework.
+  ///   - xcframeworkURL: The URL to the XCFramework.
+  ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Returns: The URL to the platform-specific framework.
+  /// - Throws: `XcodeErrorAndExit.error` if the framework cannot be found.
+  static func findPlatformFramework(
+    frameworkName: String,
+    xcframeworkURL: URL,
+    targetPlatform: FlutterPlatform,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager
+  ) throws -> URL {
+    var isSimulatorBuild = false
+    if targetPlatform == .ios {
+      isSimulatorBuild = try FlutterToolHelper.usingSimulatorSdk(env: env)
+    }
+    for file in try fileManager.contentsOfDirectory(
+      at: xcframeworkURL,
+      includingPropertiesForKeys: nil,
+      options: []
+    ) {
+      let platformDirectory = file.lastPathComponent
+      if !platformDirectory.starts(with: "\(targetPlatform)-") {
+        continue
+      }
+      let simulatorDirectory = platformDirectory.hasSuffix("-simulator")
+      if isSimulatorBuild == simulatorDirectory {
+        return file.appendingPathComponent("\(frameworkName).framework")
+      }
+    }
+    throw XcodeErrorAndExit.error([
+      "Unable to find \(frameworkName) framework within \(xcframeworkURL.path)"
+    ])
+  }
+
+  /// Synchronizes a framework from source to destination using `rsync`.
+  ///
+  /// - Parameters:
+  ///   - source: The source URL of the framework.
+  ///   - destination: The destination URL of the framework.
+  ///   - processManager: The process runner to use.
+  /// - Throws: `XcodeErrorAndExit.error` if the synchronization fails.
+  static func rsyncFramework(
+    source: URL,
+    destination: URL,
+    processManager: FlutterProcessRunner
+  ) throws {
+    try processManager.run(
+      executableURL: URL(fileURLWithPath: "/usr/bin/rsync"),
+      arguments: [
+        "-av", "--delete", "--filter", "- .DS_Store/",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r", source.path, destination.path,
+      ],
+      env: nil,
+      failOnError: true
+    )
+  }
+}
