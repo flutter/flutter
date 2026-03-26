@@ -33,6 +33,10 @@ FLUTTER_ASSERT_ARC
 
 using namespace flutter::testing;
 
+namespace {
+constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+}  // namespace
+
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
 /// Used for testing low memory notification.
 @interface FlutterEnginePartialMock : FlutterEngine
@@ -954,6 +958,29 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   mockEngine.viewController = viewControllerB;
   [viewControllerA viewDidAppear:YES];
   OCMVerify(never(), [viewControllerA onUserSettingsChanged:nil]);
+}
+
+- (void)testSecondaryViewControllerDoesNotSendLifecycleOrTearDownWhenNoLongerRegistered {
+  id lifecycleChannel = OCMClassMock([FlutterBasicMessageChannel class]);
+  FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
+  mockEngine.lifecycleChannel = lifecycleChannel;
+
+  FlutterViewController* viewController =
+      [[FlutterViewController alloc] initWithEngine:mockEngine nibName:nil bundle:nil];
+  [viewController setupViewIdentifier:kSecondaryFlutterViewId];
+  mockEngine.viewController = nil;
+
+  FlutterViewController* partialViewController = OCMPartialMock(viewController);
+  OCMStub([partialViewController stateIsActive]).andReturn(YES);
+
+  [partialViewController viewDidAppear:YES];
+  OCMVerify(never(), [lifecycleChannel sendMessage:@"AppLifecycleState.resumed"]);
+
+  [partialViewController viewWillDisappear:NO];
+  OCMVerify(never(), [lifecycleChannel sendMessage:@"AppLifecycleState.inactive"]);
+
+  [partialViewController viewDidDisappear:NO];
+  OCMVerify(never(), [partialViewController surfaceUpdated:NO]);
 }
 
 - (void)

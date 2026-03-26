@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../services/fake_platform_views.dart';
+import 'multi_view_testing.dart';
 
 void main() {
   group('AndroidView', () {
@@ -1394,7 +1395,37 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeUiKitView>[FakeUiKitView(currentViewId + 1, 'webview')]),
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 1, 'webview', null, tester.view.viewId),
+        ]),
+      );
+    });
+
+    testWidgets('Create UIView uses ancestor View viewId', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+      final int secondaryFlutterViewId = tester.view.viewId + 1;
+
+      await tester.pumpWidget(
+        wrapWithView: false,
+        View(
+          view: FakeView(tester.view, viewId: secondaryFlutterViewId),
+          child: const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 1, 'webview', null, secondaryFlutterViewId),
+        ]),
       );
     });
 
@@ -1425,7 +1456,9 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeUiKitView>[FakeUiKitView(currentViewId + 2, 'maps')]),
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 2, 'maps', null, tester.view.viewId),
+        ]),
       );
     });
 
@@ -1495,7 +1528,9 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeUiKitView>[FakeUiKitView(currentViewId + 1, 'webview')]),
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(currentViewId + 1, 'webview', null, tester.view.viewId),
+        ]),
       );
     });
 
@@ -1532,7 +1567,12 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams),
+          FakeUiKitView(
+            currentViewId + 1,
+            'webview',
+            fakeView.creationParams,
+            tester.view.viewId,
+          ),
         ]),
       );
     });

@@ -872,12 +872,13 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
-  if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
+  BOOL isRegisteredViewController = [self.engine viewControllerForIdentifier:_viewIdentifier] == self;
+  if (isRegisteredViewController) {
     [self onUserSettingsChanged:nil];
     [self onAccessibilityStatusChanged:nil];
-  }
-  if (self.stateIsActive) {
-    [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
+    if (self.stateIsActive) {
+      [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
+    }
   }
   [super viewDidAppear:animated];
 }

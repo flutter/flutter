@@ -963,12 +963,11 @@ class _UiKitViewState
     extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
   @override
   Future<UiKitViewController> createNewViewController(int id) async {
-    final int flutterViewId = View.of(context).viewId;
     return PlatformViewsService.initUiKitView(
       id: id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection!,
-      flutterViewId: flutterViewId,
+      flutterViewId: View.of(context).viewId,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {

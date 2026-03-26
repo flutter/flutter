@@ -10,6 +10,7 @@ import 'fake_platform_views.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final int secondaryFlutterViewId = binding.platformDispatcher.implicitView!.viewId + 1;
 
   group('Android', () {
     late FakeAndroidPlatformViewsController viewsController;
@@ -531,6 +532,24 @@ void main() {
         unorderedEquals(<FakeUiKitView>[
           const FakeUiKitView(0, 'webview'),
           const FakeUiKitView(1, 'webview'),
+        ]),
+      );
+    });
+
+    test('initUiKitView forwards flutterViewId when provided', () async {
+      viewsController.registerViewType('webview');
+
+      await PlatformViewsService.initUiKitView(
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+        flutterViewId: secondaryFlutterViewId,
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeUiKitView>[
+          FakeUiKitView(0, 'webview', null, secondaryFlutterViewId),
         ]),
       );
     });
