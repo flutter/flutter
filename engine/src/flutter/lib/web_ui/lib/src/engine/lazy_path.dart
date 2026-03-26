@@ -418,7 +418,7 @@ final class ClosePathCommand implements PathCommand {
 
 typedef PathCombineSource = (ui.PathOperation, LazyPath, LazyPath);
 typedef PathExtractSource = (
-  LazyPathMetric pathMetric,
+  LazyPathMetric metric,
   double start,
   double end,
   bool startWithMoveTo,
@@ -462,7 +462,7 @@ class LazyPath implements ui.Path, Collectable {
   }
   factory LazyPath.extracted(
     LazyPath path,
-    LazyPathMetric pathMetric,
+    LazyPathMetric metric,
     double start,
     double end, {
     bool startWithMoveTo = true,
@@ -472,7 +472,7 @@ class LazyPath implements ui.Path, Collectable {
       pathCopy.constructors,
       pathCopy._fillType,
       [],
-      extractSource: (pathMetric, start, end, startWithMoveTo),
+      extractSource: (metric, start, end, startWithMoveTo),
     );
   }
 
@@ -512,8 +512,8 @@ class LazyPath implements ui.Path, Collectable {
       final (op, path1, path2) = _combineSource!;
       builder = constructors.combinePaths(op, path1.builtPath, path2.builtPath);
     } else if (_extractSource != null) {
-      final (pathMetric, start, end, startWithMoveTo) = _extractSource!;
-      builder = pathMetric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo);
+      final (metric, start, end, startWithMoveTo) = _extractSource!;
+      builder = metric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo);
     } else {
       builder = constructors.createNew();
     }
