@@ -402,3 +402,108 @@ Try `flutter pub outdated` for more information.
 00:04 +364 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
 00:04 +365 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
 00:04 +366 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +367 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +368 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +369 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +370 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +371 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +372 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +373 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +374 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +375 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +376 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +377 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +378 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid message
+00:04 +379 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +380 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +381 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +382 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +383 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +384 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +385 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +386 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +387 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +388 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
+00:04 +389 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_test.dart: Incompatible OrdinalSortKey throw AssertionError when compared
+00:04 +390 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +391 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +392 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +393 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +394 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +395 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +396 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +397 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +398 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +399 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +400 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +401 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +402 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +403 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +404 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +405 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +406 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +407 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +408 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +409 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +410 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +411 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +412 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +413 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +414 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +415 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +416 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +417 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +418 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +419 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +420 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +421 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +422 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +423 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +424 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +425 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
+00:04 +426 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
+00:05 +427 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_binding_set_semantics_tree_enabled_1_test.dart: setSemanticsTreeEnabled calls when the semantics is enabled before binding initialized
+00:05 +428 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_service_test.dart: Semantic announcement
+00:05 +429 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_service_test.dart: Semantic announcement
+00:05 +430 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update does not send update for merged nodes.
+00:05 +431 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update does not send update for merged nodes.
+00:05 +432 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update does not send update for merged nodes.
+00:05 +433 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update does not send update for merged nodes.
+00:05 +434 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update receives attributed text
+00:05 +435 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update receives correct traversal transform with nested OverlayPortals
+00:05 +436 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_node_send_event_test.dart: SemanticsNode.sendEvent reports error to FlutterError
+00:05 +437 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_owner_test.dart: Performing SemanticsAction.showOnScreen does not crash if node no longer exist
+00:06 +438 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/custom_semantics_action_test.dart: CustomSemanticsAction is provided a canonical id based on the label
+00:06 +439 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/harness/trivial_test.dart: should pass
+00:06 +440 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: obtainKey errors will be caught
+00:06 +441 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: obtainKey errors will be caught - check location
+00:06 +442 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image with empty file throws expected error and evicts from cache
+00:06 +443 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to null is null
+00:06 +444 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to null is null
+00:06 +445 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to null is null
+00:06 +446 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to null is null
+00:06 +447 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to null is null
+00:06 +448 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: Resize image sets tag
+00:06 +449 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration.lerp identical a,b
+00:06 +450 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image throws error when given a real but non-image file
+00:06 +451 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image throws error when given a real but non-image file
+00:06 +452 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image throws error when given a real but non-image file
+00:06 +453 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image throws error when given a real but non-image file
+00:06 +454 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image throws error when given a real but non-image file
+00:06 +455 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/image_provider_test.dart: File image throws error when given a real but non-image file
+00:06 +456 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration toString
+00:06 +457 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration toString
+00:06 +458 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
+00:06 +459 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
+00:07 +460 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - basic words
+00:07 +461 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - bidi overrides in LTR
+00:07 +461 ~3: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - bidi overrides in RTL
+00:07 +461 ~4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - forced line-wrapping with bidi
+00:07 +462 ~4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - line wrap mid-word
+00:07 +462 ~5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - line wrap mid-word, bidi - LTR base
+00:07 +462 ~6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - line wrap mid-word, bidi - RTL base
+00:07 +462 ~7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - multiple levels
+00:07 +462 ~8: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - getPositionForOffset - RTL in LTR
+00:07 +462 ~9: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - getPositionForOffset - LTR in RTL
+00:07 +462 ~10: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - Spaces
+00:07 +462 ~11: /Users/polina/_/flutter_dev/packages/flutter/test/painting/text_painter_rtl_test.dart: TextPainter - empty text baseline
