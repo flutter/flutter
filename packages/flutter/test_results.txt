@@ -141,3 +141,75 @@ Try `flutter pub outdated` for more information.
 00:03 +105 ~1: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_controller_test.dart: count tests for repeated animation calling repeat by setting count as valid with reverse as false, shall run animation accordingly
 00:03 +106 ~1: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_controller_test.dart: count tests for repeated animation calling repeat by setting count as valid with reverse as true, shall run animation accordingly
 00:04 +107 ~1: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animations_test.dart: toString control test
+00:04 +107 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animations_test.dart: toString control test
+00:04 +108 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +109 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +110 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +111 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +112 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +113 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +114 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +115 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +116 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +117 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +118 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +119 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +120 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +121 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +122 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +123 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +124 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +125 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +126 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +127 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:04 +128 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:05 +129 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: toString control test
+00:05 +130 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Curve flipped control test
+00:05 +131 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Threshold has a threshold
+00:05 +132 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Curve is continuous
+00:05 +133 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Bounce stays in bounds
+00:05 +134 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Elastic overshoots its bounds
+00:05 +135 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Back overshoots its bounds
+00:05 +136 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Decelerate does so
+00:05 +137 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: ThreePointCubic interpolates midpoint
+00:05 +138 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/curves_test.dart: Invalid transform parameter should assert
+00:05 +139 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +140 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +141 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +142 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +143 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +144 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +145 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: copyWith, ==, hashCode basics
+00:05 +146 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with mutating listener
+00:05 +147 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with mutating listener
+00:05 +148 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with mutating listener
+00:05 +149 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with mutating listener
+00:05 +150 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: AnimationStyle.copyWith() overrides all properties
+00:05 +151 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: AnimationStyle.copyWith() overrides all properties
+00:05 +152 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: AnimationStyle.copyWith() overrides all properties
+00:06 +153 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with throwing listener
+00:06 +154 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with throwing listener
+00:06 +155 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with throwing listener
+00:06 +156 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: default AnimationStyle debugFillProperties
+00:06 +157 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/iteration_patterns_test.dart: AnimationController with throwing status listener
+00:06 +158 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_style_test.dart: AnimationStyle implements debugFillProperties
+00:07 +159 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: addListener and removeListener add and remove listeners.
+00:07 +160 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: dispatchObjectEvent handles bad listeners
+00:07 +161 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: dispatchObjectEvent does not invoke concurrently added listeners
+00:07 +162 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: dispatchObjectEvent does not invoke concurrently removed listeners
+00:07 +163 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: last removeListener unsubscribes from Flutter SDK events
+00:07 +164 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: kFlutterMemoryAllocationsEnabled is true in debug mode.
+00:07 +165 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: publishers in Flutter dispatch events in debug mode
+00:08 +166 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/debug_test.dart: debugInstrumentAction works with non-failing actions
+00:08 +167 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/covariant_templates_test.dart: Assignment through a covariant template throws exception
+00:08 +168 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/debug_test.dart: debugInstrumentAction returns failing future if action throws
+00:08 +169 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/debug_test.dart: Memory allocations debugMaybeDispatchCreated
+00:08 +170 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/debug_test.dart: Memory allocations debugMaybeDispatchDisposed
+00:09 +171 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/animation/animation_controller_listener_test.dart: Disposing controller removes listeners to avoid memory leaks
+00:09 +172 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
+00:09 +173 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with long message
+00:09 +174 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with no message
+00:10 +175 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - NoSuchMethodError
+00:10 +176 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - NoSuchMethodError
+00:10 +177 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - empty stack
+00:10 +178 ~2: /Users/polinach/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Stack traces are not truncated
