@@ -358,7 +358,7 @@ class UndoHistoryValue {
 ///
 /// * [EditableText], which uses the [UndoHistory] widget and allows
 ///   control of the underlying history using an [UndoHistoryController].
-class UndoHistoryController extends ValueNotifier<UndoHistoryValue> {
+class UndoHistoryController extends ValueNotifier<UndoHistoryValue> implements ChangeNotifier {
   /// Creates a controller for an [UndoHistory] widget.
   UndoHistoryController({UndoHistoryValue? value}) : super(value ?? UndoHistoryValue.empty);
 
