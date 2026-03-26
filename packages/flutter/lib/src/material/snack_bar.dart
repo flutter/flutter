@@ -948,7 +948,6 @@ class _RenderSnackBarLayout extends RenderBox
       return;
     }
 
-    // 1. Подготовка параметров
     final hasAction = action != null;
     final hasCloseIcon = closeIcon != null;
     final bool hasButtons = hasAction || hasCloseIcon;
@@ -971,7 +970,7 @@ class _RenderSnackBarLayout extends RenderBox
         : 0.0;
     final double contentSpacePadding = isLtr ? resolvedPadding.left : resolvedPadding.right;
 
-    // 2. Предварительное измерение кнопок (Dry Layout)
+    // Dry Layout
     final double baseButtonMargin = _padding?.resolve(TextDirection.ltr).right ?? horizontalPadding;
     final double actionHorizontalMargin = hasAction ? baseButtonMargin / 2.0 : 0.0;
     final double iconHorizontalMargin = hasCloseIcon ? baseButtonMargin / 12.0 : 0.0;
@@ -991,14 +990,14 @@ class _RenderSnackBarLayout extends RenderBox
         : 0.0;
     final double totalActionAreaWidth = actionFootprint + iconFootprint + edgeWrapPadding;
 
-    // 3. Определение переполнения (Overflow)
+    // Overflow check
     var willOverflow = false;
     if (hasButtons && availableWidth > 0 && availableWidth < double.infinity) {
       final double buttonsWidth = dryActionSize.width + dryCloseIconSize.width;
       willOverflow = (buttonsWidth / availableWidth) > actionOverflowThreshold;
     }
 
-    // 4. Компоновка контента
+    // Calculate content sizes
     double strictContentMaxWidth;
     if (availableWidth == double.infinity) {
       strictContentMaxWidth = double.infinity;
@@ -1021,7 +1020,6 @@ class _RenderSnackBarLayout extends RenderBox
       ),
     );
 
-    // 5. Фактическое измерение кнопок
     final Size closeIconSize = hasCloseIcon
         ? ChildLayoutHelper.layoutChild(closeIcon, BoxConstraints(maxHeight: constraints.maxHeight))
         : Size.zero;
@@ -1029,7 +1027,6 @@ class _RenderSnackBarLayout extends RenderBox
         ? ChildLayoutHelper.layoutChild(action, BoxConstraints(maxHeight: constraints.maxHeight))
         : Size.zero;
 
-    // 6. Расчет итоговой высоты
     final double naturalHeight = contentSize.height + verticalPadding;
     final double maxButtonHeight = math.max(closeIconSize.height, actionSize.height);
 
@@ -1041,7 +1038,7 @@ class _RenderSnackBarLayout extends RenderBox
 
     size = constraints.constrain(Size(availableWidth, totalHeight));
 
-    // 7. Позиционирование контента
+    // Position the content.
     final double contentX = isLtr
         ? resolvedPadding.left
         : availableWidth - resolvedPadding.left - contentSize.width;
@@ -1055,7 +1052,7 @@ class _RenderSnackBarLayout extends RenderBox
       return;
     }
 
-    // 8. Позиционирование кнопок
+    // Position the buttons.
     final double actionRowTop = resolvedPadding.top + contentSize.height;
     double currentX = isLtr ? availableWidth - edgeWrapPadding : edgeWrapPadding;
 
