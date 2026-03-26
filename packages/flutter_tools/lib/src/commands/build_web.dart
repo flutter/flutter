@@ -39,14 +39,7 @@ class BuildWebCommand extends BuildSubCommand {
     // Flutter web-specific options
     //
     argParser.addSeparator('Flutter web options');
-    argParser.addOption(
-      'base-href',
-      help:
-          'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
-    );
+    usesBaseHrefOption();
     argParser.addOption(
       'static-assets-url',
       help:
