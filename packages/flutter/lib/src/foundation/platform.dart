@@ -7,7 +7,6 @@
 library;
 
 import '_platform_io.dart' if (dart.library.js_interop) '_platform_web.dart' as platform;
-import 'assertions.dart';
 import 'constants.dart';
 import 'ui_primitives.dart';
 

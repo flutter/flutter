@@ -405,31 +405,6 @@ mixin class ChangeNotifier implements Listenable {
   }
 }
 
-class _MergingListenable extends Listenable {
-  _MergingListenable(this._children);
-
-  final Iterable<Listenable?> _children;
-
-  @override
-  void addListener(VoidCallback listener) {
-    for (final Listenable? child in _children) {
-      child?.addListener(listener);
-    }
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    for (final Listenable? child in _children) {
-      child?.removeListener(listener);
-    }
-  }
-
-  @override
-  String toString() {
-    return 'Listenable.merge([${_children.join(", ")}])';
-  }
-}
-
 /// A [ChangeNotifier] that holds a single value.
 ///
 /// When [value] is replaced with a new value that is **not equal** to the old
@@ -469,6 +444,7 @@ class ValueNotifier<T> extends ChangeNotifier
   @override
   T get value => _value;
   T _value;
+  @override
   set value(T newValue) {
     if (_value == newValue) {
       return;

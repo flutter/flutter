@@ -14,7 +14,6 @@ import 'dart:ui' show clampDouble;
 
 import 'package:meta/meta.dart';
 
-import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'object.dart';
