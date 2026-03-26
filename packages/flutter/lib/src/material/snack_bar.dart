@@ -883,7 +883,8 @@ class _SnackBarLayoutWidget extends SlottedMultiChildRenderObjectWidget<_SnackBa
     renderObject
       ..actionOverflowThreshold = actionOverflowThreshold
       ..textDirection = textDirection
-      ..padding = padding;
+      ..padding = padding
+      ..isFloating = isFloating;
   }
 }
 
@@ -903,7 +904,7 @@ class _RenderSnackBarLayout extends RenderBox
   EdgeInsetsGeometry? _padding;
   double _actionOverflowThreshold;
   TextDirection _textDirection;
-  final bool _isFloating;
+  bool _isFloating;
 
   double get actionOverflowThreshold => _actionOverflowThreshold;
   set actionOverflowThreshold(double value) {
@@ -934,6 +935,13 @@ class _RenderSnackBarLayout extends RenderBox
   }
 
   bool get isFloating => _isFloating;
+  set isFloating(bool value) {
+    if (_isFloating == value) {
+      return;
+    }
+    _isFloating = value;
+    markNeedsLayout();
+  }
 
   @override
   void performLayout() {
@@ -1093,18 +1101,21 @@ class _RenderSnackBarLayout extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    for (final RenderBox child in children) {
-      final parentData = child.parentData! as BoxParentData;
-      final bool isHit = result.addWithPaintOffset(
-        offset: parentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - parentData.offset);
-          return child.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit) {
-        return true;
+    for (final _SnackBarSlot slot in _SnackBarSlot.values.reversed) {
+      final RenderBox? child = childForSlot(slot);
+      if (child != null) {
+        final parentData = child.parentData! as BoxParentData;
+        final bool isHit = result.addWithPaintOffset(
+          offset: parentData.offset,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(transformed == position - parentData.offset);
+            return child.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit) {
+          return true;
+        }
       }
     }
     return false;
