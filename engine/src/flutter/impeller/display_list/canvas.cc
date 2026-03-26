@@ -62,6 +62,8 @@ namespace impeller {
 
 namespace {
 
+constexpr Scalar kAntialiasPadding = 1.0f;
+
 bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
   return filter->type() == flutter::DlColorFilterType::kMatrix ||
          (filter->type() == flutter::DlColorFilterType::kBlend &&
@@ -539,7 +541,7 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   } else {
     geom = std::make_unique<CircleGeometry>(center, radius);
   }
-  geom->SetAntialiasPadding(1.0f);  // 1.0 for AA
+  geom->SetAntialiasPadding(kAntialiasPadding);
 
   auto contents =
       CircleContents::Make(std::move(geom), paint.color, is_stroked);
@@ -823,7 +825,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
-    Scalar expand_size = 1.0f;  // 1.0 for AA
+    Scalar expand_size = kAntialiasPadding;
     if (paint.style == Paint::Style::kStroke) {
       expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
                                                          paint.stroke.width);
