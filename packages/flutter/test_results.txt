@@ -1142,3 +1142,285 @@ Try `flutter pub outdated` for more information.
 00:14 +1063 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
 00:14 +1064 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
 00:14 +1065 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1066 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1067 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1068 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1069 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1070 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1071 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1072 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with CircleBorder
+00:14 +1073 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/double_tap_test.dart: Should recognize double tap
+00:14 +1074 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1075 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1076 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1077 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1078 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1079 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1080 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1081 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1082 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1083 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1084 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1085 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1086 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1087 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1088 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1089 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1090 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1091 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1092 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1093 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1094 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1095 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1096 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1097 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1098 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1099 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1100 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1101 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1102 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1103 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1104 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1105 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1106 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1107 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1108 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1109 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1110 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1111 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1112 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1113 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1114 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1115 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1116 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1117 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1118 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1119 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1120 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1121 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1122 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1123 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1124 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1125 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1126 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1127 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1128 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1129 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1130 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1131 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1132 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1133 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:14 +1134 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1135 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1136 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1137 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1138 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1139 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1140 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1141 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1142 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1143 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1144 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1145 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1146 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1147 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1148 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1149 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1150 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1151 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1152 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1153 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1154 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1155 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1156 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1157 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1158 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1159 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1160 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1161 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1162 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1163 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1164 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1165 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1166 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1167 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1168 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1169 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1170 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1171 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1172 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with RoundedRectangleBorder
+00:15 +1173 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/tap_and_drag_test.dart: Recognizes consecutive taps
+00:15 +1174 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1175 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1176 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1177 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1178 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1179 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1180 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1181 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1182 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1183 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1184 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1185 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1186 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1187 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1188 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1189 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1190 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1191 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1192 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1193 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1194 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1195 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1196 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1197 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1198 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1199 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1200 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1201 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1202 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1203 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1204 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1205 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1206 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1207 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1208 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1209 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1210 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1211 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1212 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1213 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1214 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1215 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder lerped with StadiumBorder
+00:15 +1216 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/velocity_tracker_test.dart: Assume zero velocity when there are no recent samples - base VelocityTracker
+00:15 +1217 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/velocity_tracker_test.dart: Assume zero velocity when there are no recent samples - IOS
+00:15 +1218 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/velocity_tracker_test.dart: Assume zero velocity when there are no recent samples - MacOS
+00:16 +1219 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should recognize pan
+00:16 +1220 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should report most recent point to onStart by default
+00:16 +1221 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should report most recent point to onStart with a start configuration
+00:16 +1222 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should recognize drag
+00:16 +1223 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should reject mouse drag when configured to ignore mouse pointers - Horizontal
+00:16 +1224 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should reject mouse drag when configured to ignore mouse pointers - Vertical
+00:16 +1225 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: DragGestureRecognizer.onStart behavior test
+00:16 +1226 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should report original timestamps
+00:16 +1227 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Should report initial down point to onStart with a down configuration
+00:16 +1228 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Drag with multiple pointers in down behavior - sumAllPointers
+00:16 +1229 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Drag with multiple pointers in down behavior - default
+00:16 +1230 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Drag with multiple pointers in down behavior - latestPointer
+00:16 +1231 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Horizontal drag with multiple pointers - averageBoundaryPointers
+00:16 +1232 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Vertical drag with multiple pointers - averageBoundaryPointers
+00:16 +1233 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Pan drag with multiple pointers - averageBoundaryPointers
+00:16 +1234 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Clamp max velocity
+00:16 +1235 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/drag_test.dart: Clamp max pan velocity in 2D, isotropically
+00:16 +1236 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1237 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1238 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1239 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1240 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1241 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1242 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1243 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1244 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1245 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1246 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1247 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1248 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1249 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1250 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1251 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1252 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1253 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1254 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1255 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1256 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1257 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1258 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1259 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1260 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1261 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1262 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: PointerEvent resampling on a widget
+00:16 +1263 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_binding_resample_event_on_widget_test.dart: Timer should be canceled when resampling stopped
+00:16 +1264 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/multidrag_test.dart: MultiDrag: moving before delay rejects
+00:16 +1265 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/multidrag_test.dart: MultiDrag: delay triggers
+00:16 +1266 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/multidrag_test.dart: MultiDrag: can filter based on device kind
+00:16 +1267 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/multidrag_test.dart: allowedButtonsFilter should work the same when null or not specified
+00:16 +1268 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/multidrag_test.dart: MultiDragPointerState dispatches memory events
+00:16 +1269 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Should win by accepting
+00:16 +1270 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Should win by sweep
+00:16 +1271 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Should win on release after hold sweep release
+00:16 +1272 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Should win on sweep after hold release sweep
+00:16 +1273 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Only first winner should win
+00:16 +1274 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Only first winner should win, regardless of order
+00:16 +1275 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Win before close is delayed to close
+00:16 +1276 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Win before close is delayed to close, and only first winner should win
+00:16 +1277 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/arena_test.dart: Win before close is delayed to close, and only first winner should win, regardless of order
+00:16 +1278 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/lsq_solver_test.dart: Least-squares fit: linear polynomial to line
+00:16 +1279 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/lsq_solver_test.dart: Least-squares fit: linear polynomial to sloped line
+00:16 +1280 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/lsq_solver_test.dart: Least-squares fit: quadratic polynomial to line
+00:16 +1281 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/lsq_solver_test.dart: Least-squares fit: quadratic polynomial to sloped line
+00:16 +1282 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/lsq_solver_test.dart: Least-squares fit: toString
+00:17 +1283 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_double_tap_test.dart: kTouchSlop is evaluated in the global coordinate space when scaled up
+00:17 +1284 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_double_tap_test.dart: kTouchSlop is evaluated in the global coordinate space when scaled down
+00:17 +1285 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: A force press can be recognized
+00:17 +1286 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: Invalid pressure ranges capabilities are not recognized
+00:17 +1287 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: If minimum pressure is not reached, start and end callbacks are not called
+00:17 +1288 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: Should recognize drag and not force touch if there is a drag recognizer
+00:17 +1289 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: Should not call ended on pointer up if the gesture was never accepted
+00:17 +1290 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: Should call start only once if there is a competing gesture recognizer
+00:17 +1291 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: A force press can be recognized with a custom interpolation function
+00:17 +1292 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: A pressure outside of the device reported min and max pressure will not give an error
+00:17 +1293 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/force_press_test.dart: A pressure of NAN will not give an error
+00:17 +1294 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/pointer_signal_resolver_test.dart: Resolving with no entries should be a no-op
+00:17 +1295 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/pointer_signal_resolver_test.dart: Resolving with no entries should notify engine of no-op
+00:17 +1296 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/pointer_signal_resolver_test.dart: First entry should always win
+00:17 +1297 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/pointer_signal_resolver_test.dart: Re-use after resolve should work
+00:17 +1298 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/pointer_signal_resolver_test.dart: works with transformed events
+00:17 +1299 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_config_regression_test.dart: Scroll Views get the same ScrollConfiguration as GestureDetectors
+00:17 +1300 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_config_regression_test.dart: Scroll Views get the same ScrollConfiguration as GestureDetectors
+00:17 +1301 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_config_regression_test.dart: Scroll Views get the same ScrollConfiguration as GestureDetectors
+00:17 +1302 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_config_regression_test.dart: Scroll Views get the same ScrollConfiguration as GestureDetectors
+00:17 +1303 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/gesture_config_regression_test.dart: Scroll Views get the same ScrollConfiguration as GestureDetectors
+00:17 +1304 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/monodrag_test.dart: DragGestureRecognizer can be subclassed to beat a CustomScrollView in the arena
+00:17 +1305 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/monodrag_test.dart: DragGestureRecognizer can be subclassed to beat a CustomScrollView in the arena
+00:18 +1306 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: toString control tests
+00:18 +1307 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: toString control tests
+00:18 +1308 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: toString control tests
+00:18 +1309 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: nthMouseButton control tests
+00:18 +1310 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: smallestButton tests
+00:18 +1311 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: isSingleButton tests
+00:18 +1312 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: computed hit slop values are based on pointer device kind
+00:18 +1313 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: computed hit slop values defer to device value when pointer kind is touch
+00:18 +1314 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: fromMouseEvent PointerEnterEvent.fromMouseEvent(hover)
+00:18 +1315 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: fromMouseEvent PointerExitEvent.fromMouseEvent(hover)
+00:18 +1316 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: fromMouseEvent PointerEnterEvent.fromMouseEvent(move)
+00:18 +1317 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: fromMouseEvent PointerExitEvent.fromMouseEvent(move)
+00:18 +1318 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: Default values of PointerEvents: PointerDownEvent
+00:18 +1319 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: Default values of PointerEvents: PointerMoveEvent
+00:18 +1320 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: paintTransformToPointerEventTransform
+00:18 +1321 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: transformPosition
+00:18 +1322 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: transformDeltaViaPositions
+00:18 +1323 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: transforming events
+00:18 +1324 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: copyWith PointerAddedEvent.copyWith()
+00:18 +1325 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: copyWith PointerHoverEvent.copyWith()
+00:18 +1326 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: copyWith PointerDownEvent.copyWith()
+00:18 +1327 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: copyWith PointerMoveEvent.copyWith()
+00:18 +1328 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: copyWith PointerUpEvent.copyWith()
+00:18 +1329 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: copyWith PointerRemovedEvent.copyWith()
+00:18 +1330 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: Ensure certain event types are allowed
+00:18 +1331 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/events_test.dart: Ensure certain event types are not allowed
+00:18 +1332 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: basic
+00:18 +1333 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: stream
+00:18 +1334 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: quick tap
+00:18 +1335 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: advance slowly
+00:18 +1336 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: advance fast
+00:18 +1337 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: skip
+00:18 +1338 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: skip all
+00:18 +1339 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: stop
+00:18 +1340 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: synthetic move
+00:18 +1341 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/resampler_test.dart: next sample time
+00:18 +1342 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/team_test.dart: GestureArenaTeam rejection test
+00:18 +1343 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_tap_test.dart: gets local coordinates
+00:18 +1344 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_tap_test.dart: gets local coordinates
+00:18 +1345 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_tap_test.dart: kTouchSlop is evaluated in the global coordinate space when scaled up
+00:18 +1346 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_tap_test.dart: kTouchSlop is evaluated in the global coordinate space when scaled down
+00:18 +1347 ~13 -2: /Users/polinach/_/flutter_dev/packages/flutter/test/gestures/transformed_long_press_test.dart: gets local coordinates
