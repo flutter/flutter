@@ -840,7 +840,14 @@ class _PackagesViewState extends State<_PackagesView> {
     final _LicenseData data,
     final bool drawSelection,
   ) {
+    final EdgeInsets viewPadding = MediaQuery.paddingOf(context);
+    final padding = EdgeInsets.only(
+      left: viewPadding.left,
+      right: viewPadding.right,
+      bottom: viewPadding.bottom,
+    );
     return ListView.builder(
+      padding: padding,
       itemCount: data.packages.length + 1,
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
@@ -1068,7 +1075,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
-    final viewPadding = MediaQuery.paddingOf(context);
+    final EdgeInsets viewPadding = MediaQuery.paddingOf(context);
     final padding = EdgeInsets.only(
       left: pad + viewPadding.left,
       right: pad + viewPadding.right,
