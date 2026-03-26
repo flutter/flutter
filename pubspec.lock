@@ -866,11 +866,10 @@ packages:
   ui_primitives:
     dependency: transitive
     description:
-      name: ui_primitives
-      sha256: c82800d75d41f019ef87a6ff5e9d44550ebb3a8c831a6668064fd334878407a7
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev-003"
+      path: "../genui/packages/ui_primitives"
+      relative: true
+    source: path
+    version: "0.0.1-dev-004"
   url_launcher:
     dependency: "direct main"
     description:

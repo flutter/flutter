@@ -10,8 +10,7 @@ import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'memory_allocations.dart';
-import 'ui_primitives.dart' as ui_primitives;
-import 'ui_primitives.dart' hide ValueNotifier;
+import 'ui_primitives.dart';
 
 export 'dart:ui' show VoidCallback;
 
