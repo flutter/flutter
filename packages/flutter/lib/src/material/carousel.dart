@@ -1249,7 +1249,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
           _firstVisibleItemIndex + (constraints.viewportMainAxisExtent / safeMinExtent).ceil();
       while (visibleItemsTotalExtent < constraints.viewportMainAxisExtent &&
           index < estimatedUpperBound) {
-        visibleItemsTotalExtent += _buildItemExtent(index, _currentLayoutDimensions);
+        visibleItemsTotalExtent += _buildItemExtent(index, layoutDimensions);
         if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
           return index;
         }
