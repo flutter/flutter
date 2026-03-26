@@ -1104,7 +1104,7 @@ void main() {
     // exception.
     expect(throwingProperty.value, isNull);
     expect(throwingProperty.isFiltered(DiagnosticLevel.info), isFalse);
-    expect(throwingProperty.toString(), equals('name: EXCEPTION (FlutterError)'));
+    expect(throwingProperty.toString(), equals('name: EXCEPTION (UiError)'));
     expect(throwingProperty.level, equals(DiagnosticLevel.error));
     validateDoublePropertyJsonSerialization(throwingProperty);
   });
@@ -1402,7 +1402,7 @@ void main() {
     expect(throwingProperty.value, isNull);
     expect(throwingProperty.exception, isFlutterError);
     expect(throwingProperty.isFiltered(DiagnosticLevel.info), false);
-    expect(throwingProperty.toString(), equals('name: EXCEPTION (FlutterError)'));
+    expect(throwingProperty.toString(), equals('name: EXCEPTION (UiError)'));
     validatePropertyJsonSerialization(throwingProperty);
   });
 

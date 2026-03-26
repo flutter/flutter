@@ -38,12 +38,12 @@ Try `flutter pub outdated` for more information.
 00:00 +4: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
 00:00 +5: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
 00:00 +6: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
-00:00 +7: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
-00:00 +8: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
-00:00 +9: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
-00:00 +10: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
-00:00 +11: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
-00:00 +12: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/benchmarks_test.dart: test pumpBenchmark() only runs one frame
+00:00 +7: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/binding_test.dart: scheduleForcedFrame sets up frame callbacks
+00:00 +8: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/binding_test.dart: Ticker.forceFrames requests forced frames
+00:00 +9: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/binding_test.dart: debugAssertNoTimeDilation does not throw if time dilate already reset
+00:00 +10: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/priority_test.dart: Priority operators control test
+00:00 +11: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/binding_test.dart: debugAssertNoTimeDilation throw if time dilate not reset
+00:00 +12: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/binding_test.dart: Adding a persistent frame callback during a persistent frame callback
 00:00 +13: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/ticker_test.dart: Ticker mute control test
 00:00 +14: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/ticker_test.dart: Ticker control test
 00:00 +15: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/ticker_test.dart: Ticker can be sped up with time dilation
@@ -51,48 +51,47 @@ Try `flutter pub outdated` for more information.
 00:00 +17: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/ticker_test.dart: Ticker stops ticking when application is paused
 00:00 +18: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/ticker_test.dart: Ticker can be created before application unpauses
 00:00 +19: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/ticker_test.dart: Ticker dispatches memory events
-00:00 +20: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: (setUpAll)
-00:00 +20: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: Tasks are executed in the right order
-00:00 +21: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: scheduleWarmUpFrame should flush microtasks between callbacks
-00:00 +22: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: 2 calls to scheduleWarmUpFrame just schedules it once
-00:00 +23: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: Flutter.Frame event fired
-00:00 +24: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: TimingsCallback exceptions are caught
-00:00 +25: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: currentSystemFrameTimeStamp is the raw timestamp
-00:00 +26: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: Animation frame scheduled in the middle of the warm-up frame
-00:00 +26 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: Can schedule futures to completion
-00:00 +27 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: Can schedule a frame callback with / without scheduling a new frame
-00:00 +28 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: (tearDownAll)
-00:00 +28 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/listener_helpers_test.dart: AnimationLocalStatusListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op
-00:00 +29 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/animation_test.dart: Check for a time dilation being in effect
-00:00 +30 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/animation_test.dart: Check for a time dilation being in effect
-00:00 +31 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/animation_test.dart: Can cancel queued callback
+00:00 +20: /Users/polina/_/flutter_dev/packages/flutter/test/animation/listener_helpers_test.dart: AnimationLocalStatusListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op
+00:00 +21: /Users/polina/_/flutter_dev/packages/flutter/test/animation/listener_helpers_test.dart: AnimationLocalListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op
+00:00 +22: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/animation_test.dart: Check for a time dilation being in effect
+00:00 +23: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: (setUpAll)
+00:00 +23: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/animation_test.dart: Can cancel queued callback
+00:00 +24: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: Tasks are executed in the right order
+00:00 +25: /Users/polina/_/flutter_dev/packages/flutter/test/scheduler/scheduler_test.dart: scheduleWarmUpFrame should flush microtasks between callbacks
+00:00 +26: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
+00:00 +27: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
+00:00 +28: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
+00:00 +29: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
+00:00 +30: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
+00:00 +30 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
+00:00 +31 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
 00:00 +32 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
-00:00 +33 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
-00:00 +34 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
-00:00 +35 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using direct future
-00:00 +36 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using orCancel
-00:00 +37 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers and failing
-00:00 +38 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: creating orCancel future later
-00:00 +39 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: creating orCancel future later
-00:00 +40 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: TickerFuture is a Future
+00:00 +33 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers - using orCancel
+00:00 +34 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: awaiting animation controllers and failing
+00:00 +35 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: creating orCancel future later
+00:00 +36 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: creating orCancel future later
+00:00 +37 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/futures_test.dart: TickerFuture is a Future
+00:00 +38 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/animation_from_listener_test.dart: Animation created from ValueListenable
+00:00 +39 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/animation_from_listener_test.dart: Animation created from ValueListenable can transform value
+00:00 +40 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/animation_from_listener_test.dart: Animation created from ValueListenable can be transformed via drive
 00:00 +41 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - Object
-00:01 +42 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - Color
-00:01 +43 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - Rect
-00:01 +44 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - int
-00:01 +45 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Can chain tweens
-00:01 +46 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Can animate tweens
-00:01 +47 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Can drive tweens
-00:01 +48 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: BorderTween nullable test
-00:01 +49 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: SizeTween
-00:01 +50 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: IntTween
-00:01 +51 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: RectTween
-00:01 +52 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Matrix4Tween
-00:01 +53 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: ConstantTween
-00:01 +54 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: ReverseTween
-00:01 +55 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: ColorTween
-00:01 +56 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: StepTween
-00:01 +57 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: CurveTween
-00:01 +58 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: BorderRadiusTween nullable test
+00:00 +42 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - Color
+00:00 +43 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - Rect
+00:00 +44 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: throws flutter error when tweening types that do not fully satisfy tween requirements - int
+00:00 +45 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Can chain tweens
+00:00 +46 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Can animate tweens
+00:00 +47 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Can drive tweens
+00:00 +48 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: BorderTween nullable test
+00:00 +49 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: SizeTween
+00:00 +50 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: IntTween
+00:00 +51 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: RectTween
+00:00 +52 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: Matrix4Tween
+00:00 +53 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: ConstantTween
+00:00 +54 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: ReverseTween
+00:00 +55 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: ColorTween
+00:00 +56 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: StepTween
+00:00 +57 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: CurveTween
+00:00 +58 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/tween_test.dart: BorderRadiusTween nullable test
 00:01 +59 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/animation_controller_test.dart: AnimationController dispatches memory events
 00:01 +60 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/animation_controller_test.dart: Can start the animation when resync() is called
 00:01 +61 ~1: /Users/polina/_/flutter_dev/packages/flutter/test/animation/animation_controller_test.dart: Can set value during status callback
@@ -194,7 +193,7 @@ Try `flutter pub outdated` for more information.
 00:01 +156 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:01 +157 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:01 +158 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +159 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
+00:01 +159 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:02 +160 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:02 +161 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:02 +162 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
@@ -203,38 +202,38 @@ Try `flutter pub outdated` for more information.
 00:02 +165 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:02 +166 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
 00:02 +167 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +168 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +169 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +170 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +171 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +172 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +173 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +174 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/animation/live_binding_test.dart: Should show event indicator for pointer events with setSurfaceSize
-00:02 +175 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of empty buffer
-00:02 +176 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of single byte
-00:02 +177 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 32-bit integer
-00:02 +178 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 32-bit integer in big endian
-00:02 +179 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 64-bit integer
-00:02 +180 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +181 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +182 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +183 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +184 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +185 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +186 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +187 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +188 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +189 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +190 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
-00:02 +191 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with long message
-00:02 +192 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with no message
-00:02 +193 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - NoSuchMethodError
-00:02 +194 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - NoSuchMethodError
-00:02 +195 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - empty stack
-00:02 +196 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Stack traces are not truncated
-00:02 +197 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/math_test.dart: clampDouble
-00:02 +198 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_2_test.dart: BindingBase.debugCheckZone
-00:02 +199 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_2_test.dart: BindingBase.debugCheckZone
+00:02 +168 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: dispatchObjectEvent handles bad listeners
+00:02 +169 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: dispatchObjectEvent does not invoke concurrently added listeners
+00:02 +170 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: dispatchObjectEvent does not invoke concurrently removed listeners
+00:02 +171 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: last removeListener unsubscribes from Flutter SDK events
+00:02 +172 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: kFlutterMemoryAllocationsEnabled is true in debug mode.
+00:02 +173 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/memory_allocations_test.dart: publishers in Flutter dispatch events in debug mode
+00:02 +174 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of empty buffer
+00:02 +175 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of single byte
+00:02 +176 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 32-bit integer
+00:02 +177 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 32-bit integer in big endian
+00:02 +178 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 64-bit integer
+00:02 +179 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 64-bit integer in big endian
+00:02 +180 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of double
+00:02 +181 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of double in big endian
+00:02 +182 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 32-bit int list when unaligned
+00:02 +183 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of 64-bit int list when unaligned
+00:02 +184 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of float list when unaligned
+00:02 +185 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip of double list when unaligned
+00:02 +186 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/serialization_test.dart: Write and read buffer round-trip done twice
+00:02 +187 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/constants_test.dart: isWeb is false for flutter tester
+00:02 +188 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/constants_test.dart: isWeb is false for flutter tester
+00:02 +189 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/constants_test.dart: isWeb is false for flutter tester
+00:02 +190 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_2_test.dart: BindingBase.debugCheckZone
+00:02 +191 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_2_test.dart: BindingBase.debugCheckZone
+00:02 +192 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with message
+00:02 +193 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with long message
+00:02 +194 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - assert with no message
+00:02 +195 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - NoSuchMethodError
+00:02 +196 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - NoSuchMethodError
+00:02 +197 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/error_reporting_test.dart: Error reporting - empty stack
+00:02 +198 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: debugPrintStack
+00:02 +199 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: debugPrintStack
 00:02 +200 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: should show message of ErrorDescription
 00:02 +201 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: debugPrintStack
 00:02 +202 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: FlutterErrorDetails.toString
@@ -243,55 +242,54 @@ Try `flutter pub outdated` for more information.
 00:02 +205 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: Malformed FlutterError objects
 00:02 +206 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: User-thrown exceptions have ErrorSummary properties
 00:02 +207 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: Identifies user fault
-00:02 +208 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: Identifies our fault
-00:02 +209 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/assertions_test.dart: RepetitiveStackFrameFilter does not go out of range
+00:02 +208 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: (setUpAll)
+00:02 +209 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: (setUpAll)
 00:02 +210 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: (setUpAll)
-00:02 +210 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugAllowBanner
-00:02 +211 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpApp
-00:02 +212 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpFocusTree
-00:02 +213 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpRenderTree
-00:02 +214 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpLayerTree
-00:02 +215 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpSemanticsTreeInTraversalOrder
-00:02 +216 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder
-00:02 +217 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugPaint
-00:02 +218 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugPaintBaselinesEnabled
-00:02 +219 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - invertOversizedImages
-00:02 +220 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - profileWidgetBuilds
-00:02 +221 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - profileUserWidgetBuilds
-00:02 +222 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - profileRenderObjectPaints
-00:02 +223 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - profileRenderObjectLayouts
-00:02 +224 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - profilePlatformChannels
-00:02 +225 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - evict
-00:02 +226 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - exit
-00:02 +227 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - platformOverride
-00:02 +228 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - repaintRainbow
-00:02 +229 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDisableClipLayers
-00:02 +230 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDisablePhysicalShapeLayers
-00:03 +231 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDisableOpacityLayers
-00:03 +232 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - reassemble
-00:03 +233 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - showPerformanceOverlay
-00:03 +234 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - timeDilation
-00:03 +235 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - brightnessOverride
-00:03 +236 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - activeDevToolsServerAddress
-00:03 +237 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - connectedVmServiceUri
-00:03 +238 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: (tearDownAll)
-00:03 +238 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - Simple Test
-00:03 +239 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - hash collisions
-00:03 +240 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
-00:03 +241 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/collections_test.dart: listEquals
-00:03 +242 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/collections_test.dart: setEquals
-00:03 +243 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/collections_test.dart: mapEquals
-00:03 +244 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/collections_test.dart: binarySearch
-00:03 +245 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/collections_test.dart: MergeSortRandom
-00:03 +246 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_trace_test.dart: FlutterError.defaultStackFilter
-00:03 +247 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_trace_test.dart: FlutterError.defaultStackFilter
-00:03 +248 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_test.dart: BindingBase.debugBindingType
-00:03 +249 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_test.dart: BindingBase.debugBindingType
-00:03 +250 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/binding_test.dart: BindingBase.debugBindingType
-00:03 +251 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
-00:03 +252 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
-00:03 +253 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
-00:03 +254 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:02 +210 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - Simple Test
+00:02 +211 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - Simple Test
+00:02 +212 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - Simple Test
+00:02 +213 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - Simple Test
+00:02 +214 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/collections_test.dart: listEquals
+00:02 +215 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpRenderTree
+00:02 +216 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpRenderTree
+00:02 +217 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpRenderTree
+00:02 +218 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpRenderTree
+00:02 +219 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/service_extensions_test.dart: Service extensions - debugDumpRenderTree
+00:02 +220 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +221 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +222 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +223 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +224 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +225 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +226 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +227 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +228 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +229 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +230 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +231 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +232 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +233 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +234 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +235 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +236 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +237 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +238 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +239 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +240 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +241 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +242 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +243 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +244 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +245 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +246 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:02 +247 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/persistent_hash_map_test.dart: PersistentHashMap - inflation of nodes
+00:03 +248 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_trace_test.dart: FlutterError.defaultStackFilter
+00:03 +249 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_trace_test.dart: FlutterError.defaultStackFilter (async test body)
+00:03 +250 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/consolidate_response_test.dart: Closure: (HttpClientResponse, {bool autoUncompress, ((int, int?) => void)? onBytesReceived}) => Future<Uint8List> from Function 'consolidateHttpClientResponseBytes': static. Converts an HttpClientResponse with contentLength to bytes
+00:03 +251 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/consolidate_response_test.dart: Closure: (HttpClientResponse, {bool autoUncompress, ((int, int?) => void)? onBytesReceived}) => Future<Uint8List> from Function 'consolidateHttpClientResponseBytes': static. Converts a compressed HttpClientResponse with contentLength to bytes
+00:03 +252 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/consolidate_response_test.dart: Closure: (HttpClientResponse, {bool autoUncompress, ((int, int?) => void)? onBytesReceived}) => Future<Uint8List> from Function 'consolidateHttpClientResponseBytes': static. Converts an HttpClientResponse without contentLength to bytes
+00:03 +253 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/consolidate_response_test.dart: Closure: (HttpClientResponse, {bool autoUncompress, ((int, int?) => void)? onBytesReceived}) => Future<Uint8List> from Function 'consolidateHttpClientResponseBytes': static. Notifies onBytesReceived for every chunk of bytes
+00:03 +254 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/consolidate_response_test.dart: Closure: (HttpClientResponse, {bool autoUncompress, ((int, int?) => void)? onBytesReceived}) => Future<Uint8List> from Function 'consolidateHttpClientResponseBytes': static. forwards errors from HttpClientResponse
 00:03 +255 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
 00:03 +256 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
 00:03 +257 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
@@ -299,889 +297,108 @@ Try `flutter pub outdated` for more information.
 00:03 +259 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
 00:03 +260 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
 00:03 +261 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
-00:03 +262 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/bit_field_test.dart: BitField control test
-00:03 +263 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/bit_field_test.dart: BitField control test
-00:03 +264 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier with mutating listener
-00:03 +265 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier with mutating listener
-00:03 +266 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: During notifyListeners, a listener was added and removed immediately
-00:03 +267 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: If a listener in the middle of the list of listeners removes itself, notifyListeners still notifies all listeners
-00:03 +268 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: If the first listener removes itself, notifyListeners still notify all listeners
-00:03 +269 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Merging change notifiers
-00:03 +270 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Merging change notifiers supports any iterable
-00:03 +271 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Merging change notifiers ignores null
-00:03 +272 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Can remove from merged notifier
-00:03 +273 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Cannot use a disposed ChangeNotifier except for remove listener
-00:03 +274 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Can remove listener on a disposed ChangeNotifier
-00:03 +275 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Can check hasListener on a disposed ChangeNotifier
-00:03 +276 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Value notifier
-00:03 +277 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Listenable.merge toString
-00:03 +278 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Listenable.merge does not leak
-00:03 +279 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: hasListeners
-00:03 +280 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier as a mixin
-00:03 +281 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Throws FlutterError when disposed and called
-00:03 +282 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Calling debugAssertNotDisposed works as intended
-00:03 +283 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: notifyListener can be called recursively
-00:03 +284 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Remove Listeners while notifying on a list which will not resize
-00:03 +285 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: TreeDiagnosticsMixin control test
-00:03 +286 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: TreeDiagnosticsMixin tree with properties test
-00:04 +287 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: toString test
-00:04 +288 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: transition test
-00:04 +289 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: describeEnum test
-00:04 +290 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: string property test
-00:04 +291 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: bool property test
-00:04 +292 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: flag property test
-00:04 +293 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: property with tooltip test
-00:04 +294 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: double property test
-00:04 +295 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration linearly interpolates between positive Durations
-00:04 +296 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration linearly interpolates between positive Durations
-00:04 +297 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: unsafe double property test
-00:04 +298 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: unsafe double property test
-00:04 +298 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration linearly interpolates between positive and negative Durations
-00:04 +299 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration starts at first Duration
-00:04 +300 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration ends at second Duration
-00:04 +301 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration time values beyond 1.0 have a multiplier effect
-00:04 +302 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: unsafe double property test [E]
-  Expected: 'name: EXCEPTION (FlutterError)'
-    Actual: 'name: EXCEPTION (UiError)'
-     Which: is different.
-            Expected: ... XCEPTION (FlutterErr ...
-              Actual: ... XCEPTION (UiError)
-                                    ^
-             Differ at offset 17
-  
-  package:matcher                                     expect
-  package:flutter_test/src/widget_tester.dart 473:18  expect
-  test/foundation/diagnostics_test.dart 1107:5        main.<fn>
-  
-00:04 +302 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: percent property
-00:04 +303 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: callback property test
-00:04 +304 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: missing callback property test
-00:04 +305 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: describe bool property
-00:04 +306 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: enum property test
-00:04 +307 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: int property test
-00:04 +308 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: object property test
-00:04 +309 ~2 -1: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: lazy object property test
-00:04 +309 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: length caches
-00:04 +309 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: lazy object property test [E]
-  Expected: 'name: EXCEPTION (FlutterError)'
-    Actual: 'name: EXCEPTION (UiError)'
-     Which: is different.
-            Expected: ... XCEPTION (FlutterErr ...
-              Actual: ... XCEPTION (UiError)
-                                    ^
-             Differ at offset 17
-  
-  package:matcher                                     expect
-  package:flutter_test/src/widget_tester.dart 473:18  expect
-  test/foundation/diagnostics_test.dart 1405:5        main.<fn>
-  
-00:04 +310 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +311 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +312 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +313 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +314 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +315 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +316 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +317 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +318 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +319 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +320 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
-00:04 +321 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: Stack trace test
-00:04 +322 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: StatefulElement diagnostics are stateful
-00:04 +323 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: StatefulElement diagnostics are stateful
-00:04 +324 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: error message style wrap test
-00:04 +325 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization default
-00:04 +326 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/reassemble_test.dart: Pointer events are locked during reassemble
-00:04 +327 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/reassemble_test.dart: Pointer events are locked during reassemble
-00:04 +328 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/reassemble_test.dart: Pointer events are locked during reassemble
-00:04 +329 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/reassemble_test.dart: Pointer events are locked during reassemble
-00:04 +330 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/reassemble_test.dart: Pointer events are locked during reassemble
-00:04 +331 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
-00:04 +332 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
-00:04 +333 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
-00:04 +334 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
-00:04 +335 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
-00:04 +336 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
-00:04 +337 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization filterProperties - replace
-00:04 +338 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint throttling
-00:04 +339 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint throttling
-00:04 +340 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint throttling
-00:04 +341 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint throttling
-00:04 +342 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization delegateForAddingNodes
-00:04 +343 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint can print null
-00:04 +344 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugFormatDouble formats doubles
-00:04 +345 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugDoublePrecision can control double precision
-00:04 +346 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/timeline_test.dart: Does not collect when collection not enabled
-00:04 +347 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/synchronous_future_test.dart: SynchronousFuture control test
-00:04 +348 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +349 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +350 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +351 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +352 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +353 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +354 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
-00:04 +355 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/timeline_test.dart: Measures the runtime of a function
-00:04 +356 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/timeline_test.dart: Measures the runtime of a function
-00:04 +357 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/timeline_test.dart: Measures the runtime of a function
-00:04 +358 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/timeline_test.dart: Measures the runtime of a function
-00:04 +359 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +360 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +361 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +362 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +363 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +364 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +365 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +366 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +367 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +368 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +369 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +370 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +371 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
-00:04 +372 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Live handling of Stack Overflows
-00:04 +373 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid message
-00:04 +374 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid message
-00:04 +375 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid message
-00:04 +376 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid message
-00:05 +377 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid error
-00:05 +378 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with invalid error
-00:05 +379 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_test.dart: SemanticsNode tagging
-00:05 +380 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_test.dart: SemanticsNode getSemanticsData includes tags
-00:05 +381 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_test.dart: SemanticsNode SemanticsConfiguration can set both string label/value/hint and attributed version
-00:05 +382 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +383 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +384 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +385 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +386 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +387 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +388 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +389 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +390 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +391 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +392 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +393 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +394 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +395 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +396 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +397 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +398 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +399 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +400 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +401 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +402 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +403 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +404 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +405 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +406 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +407 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +408 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +409 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +410 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +411 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +412 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +413 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +414 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +415 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +416 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +417 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +418 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +419 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +420 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +421 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +422 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +423 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +424 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +425 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +426 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +427 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +428 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +429 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +430 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +431 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/traversal_order_test.dart: Traversal order handles touching elements
-00:05 +432 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_update_test.dart: Semantics update receives correct traversal transform with nested OverlayPortals
-00:05 +433 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_service_test.dart: Semantic announcement
-00:05 +434 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_owner_test.dart: Performing SemanticsAction.showOnScreen does not crash if node no longer exist
-00:06 +435 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/semantics_node_send_event_test.dart: SemanticsNode.sendEvent reports error to FlutterError
-00:06 +436 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/semantics/custom_semantics_action_test.dart: CustomSemanticsAction is provided a canonical id based on the label
-00:06 +437 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/harness/trivial_test.dart: should pass
-00:06 +438 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to null is null
-00:06 +439 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration.lerp identical a,b
-00:06 +440 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from non-null to null lerps margin
-00:06 +441 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp from null to non-null lerps margin
-00:06 +442 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerps colors and margins
-00:06 +443 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration.lerpFrom and FlutterLogoDecoration.lerpTo
-00:06 +444 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration lerp changes styles at 0.5
-00:06 +445 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: FlutterLogoDecoration toString
-00:06 +446 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +447 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +448 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +449 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +450 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +451 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +452 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +453 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +454 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +455 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +456 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +457 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +458 ~2 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +458 ~3 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +458 ~4 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~4 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~5 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~6 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~7 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~8 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~9 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~10 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +459 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +460 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +461 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +462 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +463 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +464 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +465 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +466 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +467 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +468 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +469 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +470 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +471 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +472 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +473 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +474 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +475 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +476 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +477 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +478 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +479 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +480 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +481 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +482 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +483 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +484 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +485 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:06 +486 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +487 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +488 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +489 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +490 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +491 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +492 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +493 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +494 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +495 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +496 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +497 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/flutter_logo_test.dart: Flutter Logo golden test
-00:07 +498 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +499 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +500 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +501 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +502 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +503 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +504 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +505 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +506 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid
-00:07 +507 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +508 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +509 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +510 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +511 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +512 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +513 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +514 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +515 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +516 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +517 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +518 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +519 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +520 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +521 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +522 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +523 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +524 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +525 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +526 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +527 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +528 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +529 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +530 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +531 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +532 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +533 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +534 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +535 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +536 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +537 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +538 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +539 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +540 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:07 +541 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all zero corners
-00:08 +542 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +543 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +544 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +545 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +546 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +547 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +548 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +549 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +550 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +551 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +552 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +553 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +554 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +555 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +556 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +557 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +558 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +559 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +560 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +561 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +562 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +563 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +564 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +565 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +566 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +567 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 1
-00:08 +568 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +569 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +570 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +571 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +572 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +573 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +574 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +575 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +576 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +577 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +578 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +579 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +580 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +581 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +582 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-00:08 +583 ~11 -2: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners
-══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
-The following assertion was thrown while running async test code:
-Golden "painting.painting.rounded_superellipse_border.all_circular.png": Pixel test failed, 0.00%,
-64px diff detected.
-Failure feedback can be found at
-/Users/polina/_/flutter/bin/cache/pkg/flutter_dev/packages/flutter/test/painting/failures
-
-When the exception was thrown, this was the stack:
-#0      FlutterLocalFileComparator.compare (package:flutter_goldens/flutter_goldens.dart:688:5)
-<asynchronous suspension>
-#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
-<asynchronous suspension>
-<asynchronous suspension>
-#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
-<asynchronous suspension>
-<asynchronous suspension>
-#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
-<asynchronous suspension>
-#6      main.<anonymous closure>.<anonymous closure> (file:///Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart:238:7)
-<asynchronous suspension>
-#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
-<asynchronous suspension>
-#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1954:5)
-<asynchronous suspension>
-<asynchronous suspension>
-(elided 3 frames from dart:async and package:stack_trace)
-
-The exception was caught asynchronously.
-════════════════════════════════════════════════════════════════════════════════════════════════════
-00:09 +583 ~11 -3: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 2
-00:09 +583 ~11 -3: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all circular corners [E]
-  Test failed. See exception logs above.
-  The test description was: for all circular corners
-  
-00:09 +583 ~11 -3: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 2
-══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
-The following assertion was thrown while running async test code:
-Golden "painting.decoration_image.lerp.1.png": Pixel test failed, 1.37%, 190px diff detected.
-Failure feedback can be found at
-/Users/polina/_/flutter/bin/cache/pkg/flutter_dev/packages/flutter/test/painting/failures
-
-When the exception was thrown, this was the stack:
-#0      FlutterLocalFileComparator.compare (package:flutter_goldens/flutter_goldens.dart:688:5)
-<asynchronous suspension>
-#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
-<asynchronous suspension>
-<asynchronous suspension>
-#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
-<asynchronous suspension>
-<asynchronous suspension>
-#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
-<asynchronous suspension>
-#6      main.<anonymous closure> (file:///Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart:837:7)
-<asynchronous suspension>
-#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
-<asynchronous suspension>
-#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1954:5)
-<asynchronous suspension>
-<asynchronous suspension>
-(elided 3 frames from dart:async and package:stack_trace)
-
-The exception was caught asynchronously.
-════════════════════════════════════════════════════════════════════════════════════════════════════
-00:09 +583 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.normal.wide_radius
-00:09 +583 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp 2 [E]
-  Test failed. See exception logs above.
-  The test description was: ImageDecoration.lerp 2
-  
-00:09 +584 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +585 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +586 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +587 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +588 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +589 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +590 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +591 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +592 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +593 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +594 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +595 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +596 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:09 +597 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for all elliptical corners
-00:10 +598 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +599 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +600 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +601 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +602 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +603 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +604 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +605 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +606 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +607 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +608 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +609 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +610 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +611 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +612 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +613 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +614 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +615 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +616 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +617 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +618 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +619 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +620 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +621 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +622 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +623 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +624 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +625 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +626 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +627 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +628 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +629 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +630 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +631 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +632 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +633 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +634 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +635 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +636 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +637 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +638 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +639 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +640 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +641 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +642 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +643 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +644 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +645 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +646 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +647 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +648 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +649 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +650 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +651 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +652 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:10 +653 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +654 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +655 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +656 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +657 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +658 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +659 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +660 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +661 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-00:11 +662 ~11 -4: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background
-══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
-The following assertion was thrown while running async test code:
-Golden "painting.decoration_image.lerp.2.png": Pixel test failed, 0.15%, 6626px diff detected.
-Failure feedback can be found at
-/Users/polina/_/flutter/bin/cache/pkg/flutter_dev/packages/flutter/test/painting/failures
-
-When the exception was thrown, this was the stack:
-#0      FlutterLocalFileComparator.compare (package:flutter_goldens/flutter_goldens.dart:688:5)
-<asynchronous suspension>
-#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
-<asynchronous suspension>
-<asynchronous suspension>
-#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
-<asynchronous suspension>
-<asynchronous suspension>
-#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
-<asynchronous suspension>
-#6      main.<anonymous closure> (file:///Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart:1359:7)
-<asynchronous suspension>
-#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
-<asynchronous suspension>
-#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1954:5)
-<asynchronous suspension>
-<asynchronous suspension>
-(elided 3 frames from dart:async and package:stack_trace)
-
-The exception was caught asynchronously.
-════════════════════════════════════════════════════════════════════════════════════════════════════
-00:11 +662 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +662 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/decoration_image_lerp_test.dart: ImageDecoration.lerp with colored background [E]
-  Test failed. See exception logs above.
-  The test description was: ImageDecoration.lerp with colored background
-  
-00:11 +663 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +664 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +665 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +666 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +667 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +668 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +669 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping uniform corners
-00:11 +670 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +671 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +672 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +673 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +674 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +675 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +676 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +677 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +678 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +679 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +680 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +681 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +682 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +683 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +684 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +685 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +686 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +687 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/box_painter_test.dart: BoxShadow BoxStyle.solid.wide_radius
-00:11 +688 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test even radii
-00:12 +689 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +690 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +691 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +692 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +693 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +694 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +695 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +696 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +697 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +698 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +699 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +700 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +701 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +702 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +703 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +704 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +705 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +706 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +707 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +708 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +709 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +710 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +711 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +712 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +713 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +714 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +715 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +716 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +717 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +718 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +719 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +720 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +721 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +722 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +723 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +724 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +725 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +726 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +727 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +728 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +729 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +730 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +731 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +732 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +733 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +734 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +735 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +736 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +737 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +738 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +739 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +740 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +741 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:12 +742 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:13 +743 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:13 +744 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:13 +745 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:13 +746 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-00:13 +747 ~11 -5: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners
-══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
-The following assertion was thrown while running async test code:
-Golden "painting.painting.rounded_superellipse_border.clamping_non_uniform.png": Pixel test failed,
-0.00%, 87px diff detected.
-Failure feedback can be found at
-/Users/polina/_/flutter/bin/cache/pkg/flutter_dev/packages/flutter/test/painting/failures
-
-When the exception was thrown, this was the stack:
-#0      FlutterLocalFileComparator.compare (package:flutter_goldens/flutter_goldens.dart:688:5)
-<asynchronous suspension>
-#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
-<asynchronous suspension>
-<asynchronous suspension>
-#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
-<asynchronous suspension>
-<asynchronous suspension>
-#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
-<asynchronous suspension>
-#6      main.<anonymous closure>.<anonymous closure> (file:///Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart:279:7)
-<asynchronous suspension>
-#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
-<asynchronous suspension>
-#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1954:5)
-<asynchronous suspension>
-<asynchronous suspension>
-(elided 3 frames from dart:async and package:stack_trace)
-
-The exception was caught asynchronously.
-════════════════════════════════════════════════════════════════════════════════════════════════════
-00:13 +747 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +747 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for clamping non-uniform corners [E]
-  Test failed. See exception logs above.
-  The test description was: for clamping non-uniform corners
-  
-00:13 +748 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +749 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +750 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +751 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +752 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +753 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +754 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +755 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +756 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +757 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +758 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +759 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +760 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +761 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +762 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +763 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +764 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +765 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +766 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test varying radii
-00:13 +767 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +768 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +769 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +770 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +771 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +772 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +773 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +774 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +775 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +776 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +777 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +778 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +779 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +780 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +781 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +782 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +783 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +784 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +785 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +786 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +787 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +788 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +789 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +790 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +791 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +792 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +793 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +794 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +795 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +796 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +797 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +798 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +799 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +800 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +801 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +802 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +803 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:13 +804 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for non-uniform sharp corners
-00:14 +805 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +806 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +807 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +808 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +809 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +810 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +811 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +812 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +813 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +814 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +815 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +816 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +817 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test topLeft radii
-00:14 +818 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +819 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +820 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +821 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +822 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +823 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +824 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +825 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +826 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +827 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +828 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +829 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +830 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +831 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:14 +832 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:15 +833 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +834 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +835 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +836 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +837 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +838 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +839 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +840 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +841 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +842 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +843 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +844 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +845 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +846 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +846 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +847 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +848 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +849 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +850 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +851 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +852 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +853 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +854 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +855 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +856 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +857 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +858 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +859 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +860 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +861 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +862 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +862 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +863 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +864 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +865 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +866 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +867 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +868 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +869 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +870 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +871 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +872 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +873 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +874 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +875 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +876 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +877 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +878 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +879 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +880 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +881 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +882 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +883 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +884 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +885 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +886 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +887 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +888 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +889 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +890 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +891 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +892 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +893 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +894 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +895 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-00:15 +896 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
-══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
-The following assertion was thrown while running async test code:
-Golden "painting.painting.rounded_superellipse_border.long.png": Pixel test failed, 0.00%, 90px diff
-detected.
-Failure feedback can be found at
-/Users/polina/_/flutter/bin/cache/pkg/flutter_dev/packages/flutter/test/painting/failures
-
-When the exception was thrown, this was the stack:
-#0      FlutterLocalFileComparator.compare (package:flutter_goldens/flutter_goldens.dart:688:5)
-<asynchronous suspension>
-#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
-<asynchronous suspension>
-<asynchronous suspension>
-#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
-<asynchronous suspension>
-<asynchronous suspension>
-#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
-<asynchronous suspension>
-#6      main.<anonymous closure>.<anonymous closure> (file:///Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart:329:7)
-<asynchronous suspension>
-#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
-<asynchronous suspension>
-#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1954:5)
-<asynchronous suspension>
-<asynchronous suspension>
-(elided 3 frames from dart:async and package:stack_trace)
-
-The exception was caught asynchronously.
-════════════════════════════════════════════════════════════════════════════════════════════════════
-00:16 +896 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +896 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio [E]
-  Test failed. See exception logs above.
-  The test description was: for very large ratio
-  
-00:16 +897 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +898 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +899 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +900 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +901 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +902 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +903 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +904 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +905 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +906 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +907 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +908 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +909 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +910 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +911 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +912 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +913 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +914 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +915 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +916 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +917 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +918 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +919 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +920 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +921 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +922 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +923 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +924 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +925 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +926 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +927 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +928 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +929 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +930 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:16 +931 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
-00:17 +932 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test bottomLeft radii
-00:17 +933 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:17 +934 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:17 +935 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:17 +936 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:17 +937 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:17 +938 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
-00:17 +939 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:03 +262 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +263 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +264 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +265 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +266 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +267 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +268 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +269 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +270 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +271 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +272 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +273 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +274 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier can not dispose in callback
+00:03 +275 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration linearly interpolates between positive Durations
+00:03 +276 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration linearly interpolates between positive Durations
+00:03 +277 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration linearly interpolates between positive Durations
+00:03 +278 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +279 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +280 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +281 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +282 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +283 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +284 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +285 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier
+00:03 +286 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: enum property test
+00:03 +287 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/basic_types_test.dart: lerp Duration time values beyond 1.0 have a multiplier effect
+00:03 +288 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier with mutating listener
+00:03 +289 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier with mutating listener
+00:03 +290 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: object property test
+00:03 +291 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: During notifyListeners, a listener was added and removed immediately
+00:03 +292 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: lazy object property test
+00:03 +293 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: lazy object property test
+00:03 +294 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: lazy object property test
+00:03 +295 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Merging change notifiers
+00:03 +296 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: color property test
+00:03 +297 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: flag property test
+00:03 +298 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Merging change notifiers supports any iterable
+00:03 +299 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: has property test
+00:03 +300 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: has property test
+00:03 +301 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Can remove from merged notifier
+00:03 +302 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: iterable flags property test
+00:03 +303 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Cannot use a disposed ChangeNotifier except for remove listener
+00:03 +304 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: iterable property test
+00:03 +305 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: iterable property test
+00:03 +306 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Can check hasListener on a disposed ChangeNotifier
+00:03 +307 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: Stack trace test
+00:03 +308 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: Stack trace test
+00:03 +309 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: Stack trace test
+00:03 +310 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Listenable.merge does not leak
+00:03 +311 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: message test
+00:03 +312 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: message test
+00:03 +313 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: ChangeNotifier as a mixin
+00:03 +314 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_test.dart: error message style wrap test
+00:03 +315 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Throws FlutterError when disposed and called
+00:03 +316 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Throws FlutterError when disposed and called
+00:03 +317 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Throws FlutterError when disposed and called
+00:03 +318 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Calling debugAssertNotDisposed works as intended
+00:03 +319 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: notifyListener can be called recursively
+00:03 +320 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/change_notifier_test.dart: Remove Listeners while notifying on a list which will not resize
+00:03 +321 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: length caches
+00:03 +322 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: laziness
+00:03 +323 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: where and map
+00:03 +324 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: take and skip
+00:03 +325 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: expand
+00:03 +326 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/caching_iterable_test.dart: The Caching Iterable: elementAt correctness
+00:03 +327 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint
+00:03 +328 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
+00:03 +329 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Element diagnostics json includes widgetRuntimeType
+00:03 +330 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint throttling
+00:04 +331 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/print_test.dart: debugPrint throttling
+00:04 +332 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization default
+00:04 +333 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization default
+00:04 +334 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugFormatDouble formats doubles
+00:04 +335 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugFormatDouble formats doubles
+00:04 +336 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugFormatDouble formats doubles
+00:04 +337 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugFormatDouble formats doubles
+00:04 +338 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugFormatDouble formats doubles
+00:04 +339 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization includeProperties with subtreedepth 1
+00:04 +340 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/double_precision_test.dart: debugDoublePrecision can control double precision
+00:04 +341 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization additionalNodeProperties
+00:04 +342 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization filterProperties - sublist
+00:04 +343 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization filterProperties - replace
+00:04 +344 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization filterChildren - sublist
+00:04 +345 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization filterChildren - replace
+00:04 +346 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization nodeTruncator
+00:04 +347 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/diagnostics_json_test.dart: Serialization delegateForAddingNodes
+00:04 +348 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses line
+00:04 +349 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses string
+00:04 +350 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses StackTrace
+00:04 +351 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses complex stack
+00:04 +352 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses stack without cols
+00:04 +353 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses web stack
+00:04 +354 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses ...
+00:04 +355 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Live handling of Stack Overflows
+00:04 +356 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Live handling of Stack Overflows
+00:04 +357 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Traces from package:stack_trace throw assertion
+00:04 +358 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Can parse web constructor invocation with unknown class name
+00:04 +359 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/stack_frame_test.dart: Parses to null for wrong format.
+00:04 +360 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute()
+00:04 +361 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +362 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +363 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +364 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +365 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
+00:04 +366 ~2: /Users/polina/_/flutter_dev/packages/flutter/test/foundation/isolates_test.dart: compute() closes all ports with valid message
