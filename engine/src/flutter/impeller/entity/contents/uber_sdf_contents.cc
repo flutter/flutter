@@ -19,7 +19,7 @@ using PipelineBuilderCallback =
 using VS = UberSDFPipeline::VertexShader;
 using FS = UberSDFPipeline::FragmentShader;
 
-Scalar kAntialiasPixels = 1.0;
+constexpr Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
