@@ -18,6 +18,10 @@ void FillRectGeometry::SetAntialiasPadding(Scalar padding) {
   padding_pixels_ = padding;
 }
 
+Scalar FillRectGeometry::GetAntialiasPadding() const {
+  return padding_pixels_;
+}
+
 GeometryResult FillRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,

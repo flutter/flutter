@@ -41,7 +41,8 @@ class UberSDFContents : public ColorSourceContents {
                   Color color,
                   Scalar stroke_width,
                   bool stroked,
-                  const Geometry* geometry);
+                  const Geometry* geometry,
+                  Scalar aa_padding);
 
   ~UberSDFContents() override;
 
@@ -64,6 +65,7 @@ class UberSDFContents : public ColorSourceContents {
   Scalar stroke_width_ = 0.0f;
   bool stroked_ = false;
   const Geometry* geometry_;
+  Scalar aa_padding_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 

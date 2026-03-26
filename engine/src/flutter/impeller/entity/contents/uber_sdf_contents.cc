@@ -19,7 +19,6 @@ using PipelineBuilderCallback =
 using VS = UberSDFPipeline::VertexShader;
 using FS = UberSDFPipeline::FragmentShader;
 
-constexpr Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
@@ -28,8 +27,9 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
     bool stroked,
     const FillRectGeometry* geometry) {
   Rect rect = geometry->GetRect();
-  return std::make_unique<UberSDFContents>(Type::kRect, rect, color,
-                                           stroke_width, stroked, geometry);
+  Scalar aa_padding = geometry->GetAntialiasPadding();
+  return std::make_unique<UberSDFContents>(
+      Type::kRect, rect, color, stroke_width, stroked, geometry, aa_padding);
 }
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
@@ -41,8 +41,9 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
   Scalar radius = geometry->GetRadius();
   Rect rect = Rect::MakeXYWH(center.x - radius, center.y - radius, radius * 2,
                              radius * 2);
+  Scalar aa_padding = geometry->GetAntialiasPadding();
   return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      Type::kCircle, rect, color, stroke_width, stroked, geometry));
+      Type::kCircle, rect, color, stroke_width, stroked, geometry, aa_padding));
 }
 
 UberSDFContents::UberSDFContents(Type type,
@@ -50,13 +51,15 @@ UberSDFContents::UberSDFContents(Type type,
                                  Color color,
                                  Scalar stroke_width,
                                  bool stroked,
-                                 const Geometry* geometry)
+                                 const Geometry* geometry,
+                                 Scalar aa_padding)
     : type_(type),
       rect_(rect),
       color_(color),
       stroke_width_(stroke_width),
       stroked_(stroked),
-      geometry_(geometry) {}
+      geometry_(geometry),
+      aa_padding_(aa_padding) {}
 
 UberSDFContents::~UberSDFContents() = default;
 
@@ -71,7 +74,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.center = rect_.GetCenter();
   frag_info.size = Point(rect_.GetWidth() / 2.0f, rect_.GetHeight() / 2.0f);
   frag_info.stroke_width = stroke_width_;
-  frag_info.aa_pixels = kAntialiasPixels;
+  frag_info.aa_pixels = aa_padding_;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
   frag_info.type = type_ == Type::kCircle ? 0.0f : 1.0f;
 

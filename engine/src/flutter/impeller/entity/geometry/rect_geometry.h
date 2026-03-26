@@ -20,6 +20,8 @@ class FillRectGeometry final : public Geometry {
 
   void SetAntialiasPadding(Scalar padding);
 
+  Scalar GetAntialiasPadding() const;
+
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
 
