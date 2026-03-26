@@ -524,7 +524,7 @@ void main() {
         ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
         ' │   maxPaintExtent: 200.0, hasVisualOverflow: true, cacheExtent:\n'
         ' │   200.0)\n'
-        ' │ maxExtent: EXCEPTION (FlutterError)\n'
+        ' │ maxExtent: EXCEPTION (UiError)\n'
         ' │ child position: 0.0\n'
         ' │\n'
         ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
