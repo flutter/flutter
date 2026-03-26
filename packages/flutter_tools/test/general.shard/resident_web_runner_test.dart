@@ -1189,6 +1189,42 @@ name: my_app
   );
 
   testUsingContext(
+    'Restart defaults to hot restart on web-server when web hot reload is disabled',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: [
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      setupMocks();
+      flutterDevice.device = webServerDevice;
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+      final OperationResult result = await residentWebRunner.restart();
+
+      expect(logger.statusText, contains('Restarted application in'));
+      expect(result.code, 0);
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'Does not fail hot restart when not attached',
     () async {
       final logger = BufferLogger.test();

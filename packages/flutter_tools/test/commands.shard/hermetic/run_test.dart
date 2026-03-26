@@ -1899,6 +1899,26 @@ server:
       },
       initializeFlutterRoot: false,
     );
+
+    testUsingContext(
+      '--no-hot disables web hot reload in BuildInfo',
+      () async {
+        final command = BuildInfoCapturingRunCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await runner.run(<String>['run', '--no-hot']);
+
+        expect(command.capturedBuildInfo, isNotNull);
+        expect(command.capturedBuildInfo!.webEnableHotReload, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
   });
 }
 
@@ -2121,6 +2141,28 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
+  }
+
+  @override
+  bool get shouldRunPub => false;
+}
+
+class BuildInfoCapturingRunCommand extends RunCommand {
+  BuildInfo? capturedBuildInfo;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    capturedBuildInfo = await getBuildInfo();
+    return FlutterCommandResult.success();
+  }
+
+  @override
+  // ignore: must_call_super
+  Future<void> validateCommand() async {
+    devices = <Device>[
+      FakeDevice(targetPlatform: TargetPlatform.web_javascript, platformType: PlatformType.web)
+        ..supportsHotReload = true,
+    ];
   }
 
   @override

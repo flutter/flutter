@@ -1396,7 +1396,8 @@ abstract class FlutterCommand extends Command<void> {
     // TODO(natebiggs): Delete this when new DDC module system is the default.
     final bool webEnableHotReload =
         argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-        boolArg(FlutterOptions.kWebExperimentalHotReload);
+        boolArg(FlutterOptions.kWebExperimentalHotReload) &&
+        (!argParser.options.containsKey('hot') || boolArg('hot'));
 
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
