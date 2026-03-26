@@ -643,14 +643,14 @@ void main() {
       );
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('container_test.getClipPath.$goldenFileName.png'),
+        matchesGoldenFile(goldenFileName),
       );
     }
 
-    await test(const BoxDecoration(), 'BoxDecoration');
-    await test(const _MockUnderlineDecoration(), 'MockUnderlineDecoration');
-    await test(const ShapeDecoration(shape: StadiumBorder()), 'ShapeDecoration');
-    await test(const FlutterLogoDecoration(), 'FlutterLogoDecoration');
+    await test(const BoxDecoration(), 'container_test.getClipPath.BoxDecoration.png');
+    await test(const _MockUnderlineDecoration(), 'container_test.getClipPath.MockUnderlineDecoration.png');
+    await test(const ShapeDecoration(shape: StadiumBorder()), 'container_test.getClipPath.ShapeDecoration.png');
+    await test(const FlutterLogoDecoration(), 'container_test.getClipPath.FlutterLogoDecoration.png');
   });
 
   testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
