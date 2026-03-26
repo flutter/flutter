@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
-import '../widgets/sliver_test_utils.dart';
 
 void main() {
   Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
@@ -18,6 +17,17 @@ void main() {
     await gesture.moveBy(offset);
     await tester.pump(const Duration(milliseconds: 10));
     await gesture.up();
+  }
+
+  void verifySliverGeometry({
+    required GlobalKey key,
+    required bool visible,
+    required double paintExtent,
+  }) {
+    final target = key.currentContext!.findRenderObject()! as RenderSliver;
+    final SliverGeometry geometry = target.geometry!;
+    expect(geometry.visible, visible);
+    expect(geometry.paintExtent, paintExtent);
   }
 
   testWidgets('SliverAppBar - floating and pinned - correct elevation', (
