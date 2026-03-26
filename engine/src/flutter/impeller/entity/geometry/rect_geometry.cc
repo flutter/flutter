@@ -23,7 +23,9 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
     const Entity& entity,
     RenderPass& pass) const {
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
-  Rect expanded_rect = rect_.Expand(padding_pixels_);
+  Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
+  Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
+  Rect expanded_rect = rect_.Expand(padding);
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =
@@ -41,7 +43,9 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
 
 std::optional<Rect> FillRectGeometry::GetCoverage(
     const Matrix& transform) const {
-  return rect_.Expand(padding_pixels_).TransformAndClipBounds(transform);
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
+  return rect_.Expand(padding).TransformAndClipBounds(transform);
 }
 
 bool FillRectGeometry::CoversArea(const Matrix& transform,

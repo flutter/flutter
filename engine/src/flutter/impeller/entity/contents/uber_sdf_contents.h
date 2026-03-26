@@ -58,7 +58,7 @@ class UberSDFContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  Type type_ = Type::kCircle;
+  const Type type_;
   Rect rect_;
   Color color_;
   Scalar stroke_width_ = 0.0f;

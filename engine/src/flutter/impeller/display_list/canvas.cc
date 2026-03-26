@@ -825,7 +825,8 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
     Scalar expand_size = 1.0f;  // 1.0 for AA
     if (paint.style == Paint::Style::kStroke) {
-      expand_size += paint.stroke.width / 2.0f;
+      expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
+                                                         paint.stroke.width);
     }
 
     FillRectGeometry geometry(rect);
