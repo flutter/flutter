@@ -47,8 +47,8 @@ COMPARE_TESTS = (
     (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'57347']),
     (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'0xE003']),
     (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'\uE003']),
-    (True, '1variable.ttf', VARIABLE_MATERIAL_TTF,
-     [r'57348']),  # True because variable fonts retain all glyphs, producing identical output files
+    (False, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'57348'
+                                                    ]),  # False because different codepoint
     (True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [r'0xE003', r'0xE004']),
     (True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [
         r'0xE003',
