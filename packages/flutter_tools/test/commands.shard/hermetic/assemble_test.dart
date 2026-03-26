@@ -314,12 +314,12 @@ void main() {
         '?',
         '#',
       ];
-      for (final invaliDartDefine in invalidDartDefines) {
+      for (final invalidDartDefine in invalidDartDefines) {
         final command = <String>[
           'assemble',
           '--output',
           'Output',
-          '-DartDefines=$invaliDartDefine',
+          '-DartDefines=$invalidDartDefine',
           'debug_macos_bundle_flutter_assets',
         ];
         expect(
