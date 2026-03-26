@@ -28,9 +28,8 @@ std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
     bool stroked,
     const FillRectGeometry* geometry) {
   Rect rect = geometry->GetRect();
-  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      Type::kRect, rect, color, stroke_width, stroked, geometry));
-}
+  return std::make_unique<UberSDFContents>(
+      Type::kRect, rect, color, stroke_width, stroked, geometry);
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
     Color color,
