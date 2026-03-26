@@ -3305,7 +3305,9 @@ void main() {
     );
   });
 
-  testWidgets('Floating snackbar can display optional icon', (WidgetTester tester) async {
+  testWidgets('Material2 - Floating snackbar can display optional icon', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
