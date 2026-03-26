@@ -3216,6 +3216,22 @@ void main() {
       expect(computedPaintTransform, Matrix4.translationValues(0.0, 20.0, 321.0));
     },
   );
+
+  testWidgets('OverlayPortal does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = OverlayPortalController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: OverlayPortal(controller: controller, overlayChildBuilder: (_) => const Text('')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(OverlayPortal)), Size.zero);
+    controller.show();
+  });
 }
 
 class OverlayStatefulEntry extends OverlayEntry {

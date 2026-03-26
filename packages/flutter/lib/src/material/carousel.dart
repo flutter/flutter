@@ -868,19 +868,6 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     return maxExtent;
   }
 
-  late SliverLayoutDimensions _currentLayoutDimensions;
-
-  @override
-  void performLayout() {
-    _currentLayoutDimensions = SliverLayoutDimensions(
-      scrollOffset: constraints.scrollOffset,
-      precedingScrollExtent: constraints.precedingScrollExtent,
-      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-      crossAxisExtent: constraints.crossAxisExtent,
-    );
-    super.performLayout();
-  }
-
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
@@ -905,7 +892,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
       minExtent,
     );
     if (index == firstVisibleIndex) {
-      final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
+      final double firstVisibleItemExtent = _buildItemExtent(index, layoutDimensions);
 
       // If the first item is collapsed to be less than `effectiveMinExtent`,
       // then it should stop changing its size and should start to scroll off screen.
@@ -1084,8 +1071,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  late SliverLayoutDimensions _currentLayoutDimensions;
-
   // This is to implement the itemExtentBuilder callback to return each item extent
   // while scrolling.
   //
@@ -1225,7 +1210,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     }
     double visibleItemsTotalExtent = _distanceToLeadingEdge;
     for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-      visibleItemsTotalExtent += _buildItemExtent(i, _currentLayoutDimensions);
+      visibleItemsTotalExtent += _buildItemExtent(i, layoutDimensions);
     }
     return constraints.scrollOffset + visibleItemsTotalExtent;
   }
@@ -1276,7 +1261,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     if (childCount != null) {
       double visibleItemsTotalExtent = _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < childCount; i++) {
-        visibleItemsTotalExtent += _buildItemExtent(i, _currentLayoutDimensions);
+        visibleItemsTotalExtent += _buildItemExtent(i, layoutDimensions);
         if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
           return i;
         }
@@ -1301,7 +1286,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   BoxConstraints _getChildConstraints(int index) {
-    final double extent = itemExtentBuilder!(index, _currentLayoutDimensions)!;
+    final double extent = itemExtentBuilder!(index, layoutDimensions)!;
     return constraints.asBoxConstraints(minExtent: extent, maxExtent: extent);
   }
 
@@ -1326,12 +1311,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     final double remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
-    _currentLayoutDimensions = SliverLayoutDimensions(
-      scrollOffset: constraints.scrollOffset,
-      precedingScrollExtent: constraints.precedingScrollExtent,
-      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-      crossAxisExtent: constraints.crossAxisExtent,
-    );
     // TODO(Piinks): Clean up when deprecation expires.
     const double deprecatedExtraItemExtent = -1;
 
@@ -1440,7 +1419,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
       trailingScrollOffset += math.max(
         weights.last * extentUnit,
-        _buildItemExtent(lastIndex, _currentLayoutDimensions),
+        _buildItemExtent(lastIndex, layoutDimensions),
       );
       trailingScrollOffset += extraLayoutOffset;
     } else {

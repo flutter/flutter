@@ -80,8 +80,10 @@ class WebAssetServer implements AssetReader {
     required this.useLocalCanvasKit,
     required this.fileSystem,
     required this.logger,
+    String? baseHref,
     Map<String, String> webDefines = const <String, String>{},
   }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       _baseHref = baseHref,
        _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -268,8 +270,12 @@ class WebAssetServer implements AssetReader {
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
       logger: logger,
+      baseHref: webDevServerConfig.baseHref,
       webDefines: webDefines,
     );
+    if (webDevServerConfig.baseHref case final String baseHref?) {
+      server.basePath = stripLeadingSlash(baseHref.substring(0, baseHref.length - 1));
+    }
     final int selectedPort = server.selectedPort;
 
     final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
@@ -407,6 +413,7 @@ class WebAssetServer implements AssetReader {
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
   final Map<String, String> _webDefines;
+  final String? _baseHref;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -633,7 +640,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
     return bootstrapTemplate.withSubstitutions(
-      baseHref: '/',
+      baseHref: _baseHref ?? '/',
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
@@ -653,8 +660,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     final WebTemplate indexHtml = getWebTemplate(fileSystem, 'index.html', _kDefaultIndex);
     return shelf.Response.ok(
       indexHtml.withSubstitutions(
-        // Currently, we don't support --base-href for the "run" command.
-        baseHref: '/',
+        baseHref: _baseHref ?? '/',
         // Currently, we don't support --static-assets-url for the "run" command.
         staticAssetsUrl: '/',
         serviceWorkerVersion: null,
