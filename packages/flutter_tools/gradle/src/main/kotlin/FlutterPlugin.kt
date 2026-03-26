@@ -407,8 +407,7 @@ class FlutterPlugin : Plugin<Project> {
                 getPluginHandler(projectToAddTasksTo).getPluginList()
             )
             FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
-                projectToAddTasksTo,
-                getPluginHandler(projectToAddTasksTo).getPluginListWithoutDevDependencies()
+                projectToAddTasksTo
             )
             return
         }
@@ -490,8 +489,7 @@ class FlutterPlugin : Plugin<Project> {
             getPluginHandler(projectToAddTasksTo).getPluginList()
         )
         FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
-            projectToAddTasksTo,
-            getPluginHandler(projectToAddTasksTo).getPluginListWithoutDevDependencies()
+            projectToAddTasksTo
         )
     }
 

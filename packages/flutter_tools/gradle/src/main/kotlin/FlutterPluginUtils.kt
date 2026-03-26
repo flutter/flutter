@@ -516,17 +516,14 @@ object FlutterPluginUtils {
     /** Prints error message for usage of KGP. */
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
-    internal fun detectApplyingKotlinGradlePlugin(
-        project: Project,
-        pluginList: List<Map<String?, Any?>>
-    ) {
-        var projectToPrintAppLog: Project? = null
+    internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
 
         val appPluginRegex = """(?:^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.application\2(?![^/\n]*\bapply\s*[:(]?\s*false\b))|(?:plugins\s*\{[^{}]*?(?<=\n|\{)([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.application\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.application\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b))""".toRegex(RegexOption.MULTILINE)
         val libPluginRegex = """(?:^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.library\2(?![^/\n]*\bapply\s*[:(]?\s*false\b))|(?:plugins\s*\{[^{}]*?(?<=\n|\{)([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.library\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.library\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b))""".toRegex(RegexOption.MULTILINE)
         val kgpRegex = """^([^/\n]*?)(?:apply\s+plugin\s*:\s*|id\s*\(?\s*)(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)""".toRegex(RegexOption.MULTILINE)
 
+        var shouldLogForapp = false
         project.rootProject.subprojects {
             // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
             if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
@@ -552,79 +549,35 @@ object FlutterPluginUtils {
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
             if (hasAppPlugin) {
-                projectToPrintAppLog = this
-            } else {
+                shouldLogForapp = true
+            }
+
+            if (hasLibPlugin) {
                 pluginsWithKGPAppliedList.add(name)
             }
         }
 
         project.gradle.projectsEvaluated {
-            printAppWarnings(projectToPrintAppLog)
-            printPluginWarnings(pluginsWithKGPAppliedList, pluginList)
-        }
-    }
-
-    private fun printAppWarnings(projectToPrintAppLog: Project?) {
-        if (projectToPrintAppLog == null) return
-        System.err.println(
-            """
-            ⚠️ WARNING: Your main Android project ('${projectToPrintAppLog.name}') located at: ${projectToPrintAppLog.buildFile.absolutePath}
-            is applying KGP. Stop and follow the migration guide.
-            """.trimIndent()
-        )
-    }
-
-    private fun printPluginWarnings(
-        pluginsWithKGPAppliedList: List<String>,
-        pluginList: List<Map<String?, Any?>>
-    ) {
-        if (pluginsWithKGPAppliedList.isEmpty()) return
-
-        // 1. Use trimIndent() to make the multi-line string clean and readable in code
-        System.err.println(
-            """
-            ⚠️ WARNING: Your app uses plugin(s) that apply KGP. Upgrade the plugin version you are using
-            to a version that supports Built-in Kotlin by checking the plugin's changelog. If no such 
-            version exists, file an issue against the plugin. If necessary, here is a guide on filing 
-            an issue against a plugin:
-            """.trimIndent()
-        )
-        System.err.println()
-
-        val versionRegex = """-(\d+\.\d+\.\d+[^/]*)""".toRegex()
-
-        pluginList
-            .filter { pluginObject -> pluginObject["name"] in pluginsWithKGPAppliedList }
-            .forEach { pluginObject ->
-                // 2. Safely cast the name and path to strings
-                val matchedName = pluginObject["name"]?.toString() ?: "Unknown"
-                val matchedPath = pluginObject["path"]?.toString() ?: ""
-
-                // 3. Keep the version as nullable instead of relying on a magic "N/A" string
-                val version = versionRegex.find(matchedPath)?.groupValues?.get(1)
-
-                // 4. Branch the output cleanly based on whether the version was found
-                if (version != null) {
-                    val websiteUrl = "https://pub.dev/packages/$matchedName"
-                    System.err.println(
-                        """
-                        Plugin that needs migration: $matchedName | plugin version: $version | pub.dev url: $websiteUrl
-                        """.trimIndent()
-                    )
-                } else {
-                    System.err.println(
-                        """
-                        Plugin that needs migration: $matchedName | plugin version: N/A | pub.dev url: None (Local/External Plugin)
-                        """.trimIndent()
-                    )
-                    System.err.println(
-                        """    
-                        |    -> Note: You are not using a plugin hosted from the standard pub.dev registry,
-                        |    so the version is not included in the .pub-cache path. Please verify the version yourself.
-                        """.trimMargin()
-                    )
-                }
+            if (shouldLogForapp) {
+                project.logger.error(
+                    """
+                    ⚠️ WARNING: Your main Android project "${project.name}" located at: ${project.buildFile.absolutePath}
+                    is applying KGP. Stop and follow the migration guide.
+                    """.trimIndent()
+                )
             }
+            if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
+            project.logger.error(
+                """
+                ⚠️ WARNING: Your app uses plugin(s) that apply KGP. Upgrade the plugin version you are using
+                to a version that supports Built-in Kotlin by checking the plugin's changelog. If no such 
+                version exists, file an issue against the plugin. If necessary, here is a guide on filing 
+                an issue against a plugin:
+                                
+                Plugin(s) that need to migrate to Built-in Kotlin: ${pluginsWithKGPAppliedList.joinToString()}
+                """.trimIndent()
+            )
+        }
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
