@@ -16,9 +16,11 @@ namespace impeller {
 
 class LinearGradientContents final : public ColorSourceContents {
  public:
-  LinearGradientContents();
+  explicit LinearGradientContents(const Geometry* geometry);
 
   ~LinearGradientContents() override;
+
+  const Geometry* GetGeometry() const override;
 
   // |Contents|
   bool IsOpaque(const Matrix& transform) const override;
@@ -63,6 +65,7 @@ class LinearGradientContents final : public ColorSourceContents {
 
   bool CanApplyFastGradient() const;
 
+  const Geometry* geometry_ = nullptr;
   Point start_point_;
   Point end_point_;
   std::vector<Color> colors_;
