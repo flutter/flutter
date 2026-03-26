@@ -53,8 +53,8 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
       ),
       backgroundColor: Colors.transparent,
       body: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.widthOf(context),
+        height: MediaQuery.heightOf(context),
         child: useList
             ? ListView.builder(
                 key: const ValueKey<String>('vlp_list_view_scrollable'),
@@ -74,8 +74,8 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
                 key: const ValueKey<String>('vlp_single_child_scrollable'),
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 20,
-                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.widthOf(context) * 20,
+                  height: MediaQuery.heightOf(context),
                   child: RepaintBoundary(
                     child: CustomPaint(
                       isComplex: true,

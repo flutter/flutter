@@ -47,8 +47,8 @@ class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
           duration: const Duration(seconds: 2),
           curve: Curves.easeInOut,
           child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 5,
+            width: MediaQuery.widthOf(context),
+            height: MediaQuery.heightOf(context) / 5,
             color: Colors.blue,
           ),
         ),

@@ -87,8 +87,8 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
       title: const Center(child: Text('Window Settings')),
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.7,
-          height: MediaQuery.of(context).size.height * 0.8,
+          width: MediaQuery.widthOf(context) * 0.7,
+          height: MediaQuery.heightOf(context) * 0.8,
           child: Column(
             children: [
               Expanded(
