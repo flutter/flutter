@@ -449,6 +449,7 @@ class LazyPath implements ui.Path, Collectable {
     : _fillType = other._fillType,
       constructors = other.constructors,
       _combineSource = other._combineSource,
+      _extractSource = other._extractSource,
       _commands = List.from(other._commands);
   factory LazyPath.combined(ui.PathOperation operation, LazyPath path1, LazyPath path2) {
     final pathCopy1 = LazyPath.fromLazyPath(path1);
@@ -467,10 +468,9 @@ class LazyPath implements ui.Path, Collectable {
     double end, {
     bool startWithMoveTo = true,
   }) {
-    final pathCopy = LazyPath.fromLazyPath(path);
     return LazyPath._(
-      pathCopy.constructors,
-      pathCopy._fillType,
+      path.constructors,
+      path._fillType,
       [],
       extractSource: (metric, start, end, startWithMoveTo),
     );
@@ -724,7 +724,7 @@ class LazyPath implements ui.Path, Collectable {
 
   @override
   LazyPathMetrics computeMetrics({bool forceClosed = false}) {
-    return LazyPathMetrics(path: this, forceClosed: forceClosed);
+    return LazyPathMetrics(path: LazyPath.fromLazyPath(this), forceClosed: forceClosed);
   }
 
   @override
