@@ -31,7 +31,7 @@ class MenuEntry {
 
   static List<Widget> build(
     List<MenuEntry> selections, [
-    Duration hoverOpenDelay = Duration.zero,
+    Duration hoverOpenDelay = .zero,
   ]) {
     Widget buildSelection(MenuEntry selection) {
       if (selection.menuChildren != null) {
@@ -117,20 +117,20 @@ class _MyMenuBarState extends State<MyMenuBar> {
     return Column(
       children: <Widget>[
         Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             Expanded(child: MenuBar(children: MenuEntry.build(_getMenus()))),
           ],
         ),
         Expanded(
           child: Container(
-            alignment: Alignment.center,
+            alignment: .center,
             color: backgroundColor,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const .all(12.0),
                   child: Text(
                     showingMessage ? widget.message : '',
                     style: Theme.of(context).textTheme.headlineSmall,
