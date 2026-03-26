@@ -9,6 +9,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
+import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
 import io.mockk.called
 import io.mockk.every
@@ -23,7 +24,9 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
+import org.gradle.api.plugins.PluginManager
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
@@ -753,6 +756,345 @@ class FlutterPluginUtilsTest {
         verify { project.afterEvaluate(capture(projectActionSlot)) }
         assertThrows<IllegalArgumentException> { projectActionSlot.captured.execute(project) }
     }
+    @Test
+    fun `detectApplyingKotlinGradlePlugin logs app warning when KGP is only applied in app`(
+        @TempDir tempDir: Path
+    ) {
+        val rootBuildGradleFile = tempDir.resolve("build.gradle").toFile().apply { createNewFile() }
+
+        val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+        val appBuildGradleFile = File(appDir, "build.gradle").apply {
+            createNewFile()
+            writeText(
+                """
+                apply plugin: 'com.android.application'
+                apply plugin: 'kotlin-android'
+                """.trimIndent()
+            )
+        }
+
+        val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+        val pluginBuildGradleFile = File(pluginDir, "build.gradle").apply {
+            createNewFile()
+            writeText(
+                """
+                apply plugin: 'com.android.library'
+                """.trimIndent()
+            )
+        }
+
+        val project = mockk<Project>()
+        val rootProject = mockk<Project>()
+        val mockGradle = mockk<Gradle>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+
+        every { project.rootProject } returns rootProject
+        every { project.gradle } returns mockGradle
+        every { project.logger } returns mockLogger
+        every { project.name } returns "rootProject"
+        every { project.buildFile } returns rootBuildGradleFile
+
+        val appProject = mockk<Project>()
+        every { appProject.name } returns "app"
+        every { appProject.projectDir } returns appDir
+        every { appProject.buildFile } returns appBuildGradleFile
+        every { appProject.logger } returns mockLogger
+
+        val pluginProject = mockk<Project>()
+        val pluginPluginManager = mockk<PluginManager>(relaxed = true)
+        every { pluginProject.name } returns "plugin"
+        every { pluginProject.projectDir } returns pluginDir
+        every { pluginProject.buildFile } returns pluginBuildGradleFile
+        every { pluginProject.logger } returns mockLogger
+        every { pluginProject.pluginManager } returns pluginPluginManager
+
+        val subprojectsActionSlot = slot<Action<Project>>()
+        val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
+
+        every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
+        every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
+
+        // 1. Call function under test
+        detectApplyingKotlinGradlePlugin(project)
+
+        // 2. Simulate Gradle evaluating subprojects
+        verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
+        subprojectsActionSlot.captured.execute(appProject)
+        subprojectsActionSlot.captured.execute(pluginProject)
+
+        // 3. Simulate Gradle finishing project evaluation
+        verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
+        projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+        // 4. Verify specific warning was logged
+        verify {
+            mockLogger.error(
+                """
+                ⚠️ WARNING: Your main Android project "rootProject" located at: ${rootBuildGradleFile.absolutePath}
+                is applying KGP. Stop and follow the migration guide.
+                """.trimIndent()
+            )
+        }
+        verify(exactly = 0) {
+            mockLogger.error(match { it.contains("Plugin(s) that need to migrate") })
+        }
+    }
+
+    @Test
+    fun `detectApplyingKotlinGradlePlugin logs plugin warning when KGP is only applied in plugins`(
+        @TempDir tempDir: Path
+    ) {
+        val rootBuildGradleFile = tempDir.resolve("build.gradle").toFile().apply { createNewFile() }
+
+        val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+        val appBuildGradleFile = File(appDir, "build.gradle").apply {
+            createNewFile()
+            writeText(
+                """
+                apply plugin: 'com.android.application'
+                """.trimIndent()
+            )
+        }
+
+        val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+        val pluginBuildGradleFile = File(pluginDir, "build.gradle").apply {
+            createNewFile()
+            writeText(
+                """
+                apply plugin: 'com.android.library'
+                apply plugin: 'kotlin-android'
+                """.trimIndent()
+            )
+        }
+
+        val project = mockk<Project>()
+        val rootProject = mockk<Project>()
+        val mockGradle = mockk<Gradle>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+
+        every { project.rootProject } returns rootProject
+        every { project.gradle } returns mockGradle
+        every { project.logger } returns mockLogger
+        every { project.name } returns "rootProject"
+        every { project.buildFile } returns rootBuildGradleFile
+
+        val appProject = mockk<Project>()
+        val appPluginManager = mockk<PluginManager>(relaxed = true)
+        every { appProject.name } returns "app"
+        every { appProject.projectDir } returns appDir
+        every { appProject.buildFile } returns appBuildGradleFile
+        every { appProject.logger } returns mockLogger
+        every { appProject.pluginManager } returns appPluginManager
+
+        val pluginProject = mockk<Project>()
+        every { pluginProject.name } returns "plugin"
+        every { pluginProject.projectDir } returns pluginDir
+        every { pluginProject.buildFile } returns pluginBuildGradleFile
+        every { pluginProject.logger } returns mockLogger
+
+        val subprojectsActionSlot = slot<Action<Project>>()
+        val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
+
+        every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
+        every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
+
+        detectApplyingKotlinGradlePlugin(project)
+
+        verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
+        subprojectsActionSlot.captured.execute(appProject)
+        subprojectsActionSlot.captured.execute(pluginProject)
+
+        verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
+        projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+        verify(exactly = 0) {
+            mockLogger.error(match { it.contains("Your main Android project") })
+        }
+        verify {
+            mockLogger.error(
+                """
+                ⚠️ WARNING: Your app uses plugin(s) that apply KGP. Upgrade the plugin version you are using
+                to a version that supports Built-in Kotlin by checking the plugin's changelog. If no such 
+                version exists, file an issue against the plugin. If necessary, here is a guide on filing 
+                an issue against a plugin:
+                                
+                Plugin(s) that need to migrate to Built-in Kotlin: plugin
+                """.trimIndent()
+            )
+        }
+    }
+
+    @Test
+    fun `detectApplyingKotlinGradlePlugin logs app and plugin warning when KGP is only applied in both app and plugins`(
+        @TempDir tempDir: Path
+    ) {
+        val rootBuildGradleFile = tempDir.resolve("build.gradle").toFile().apply { createNewFile() }
+
+        val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+        val appBuildGradleFile =
+            File(appDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.application'
+                    apply plugin: 'kotlin-android'
+                    """.trimIndent()
+                )
+            }
+
+        val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+        val pluginBuildGradleFile =
+            File(pluginDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.library'
+                    apply plugin: 'kotlin-android'
+                    """.trimIndent()
+                )
+            }
+
+        val project = mockk<Project>()
+        val rootProject = mockk<Project>()
+        val mockGradle = mockk<Gradle>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+
+        every { project.rootProject } returns rootProject
+        every { project.gradle } returns mockGradle
+        every { project.logger } returns mockLogger
+        every { project.name } returns "rootProject"
+        every { project.buildFile } returns rootBuildGradleFile
+
+        val appProject = mockk<Project>()
+        every { appProject.name } returns "app"
+        every { appProject.projectDir } returns appDir
+        every { appProject.buildFile } returns appBuildGradleFile
+        every { appProject.logger } returns mockLogger
+
+        val pluginProject = mockk<Project>()
+        every { pluginProject.name } returns "plugin"
+        every { pluginProject.projectDir } returns pluginDir
+        every { pluginProject.buildFile } returns pluginBuildGradleFile
+        every { pluginProject.logger } returns mockLogger
+
+        val subprojectsActionSlot = slot<Action<Project>>()
+        val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
+
+        every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
+        every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
+
+        detectApplyingKotlinGradlePlugin(project)
+
+        verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
+        subprojectsActionSlot.captured.execute(appProject)
+        subprojectsActionSlot.captured.execute(pluginProject)
+
+        verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
+        projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+        verify {
+            mockLogger.error(
+                """
+                ⚠️ WARNING: Your main Android project "rootProject" located at: ${rootBuildGradleFile.absolutePath}
+                is applying KGP. Stop and follow the migration guide.
+                """.trimIndent()
+            )
+        }
+        verify {
+            mockLogger.error(
+                """
+                ⚠️ WARNING: Your app uses plugin(s) that apply KGP. Upgrade the plugin version you are using
+                to a version that supports Built-in Kotlin by checking the plugin's changelog. If no such 
+                version exists, file an issue against the plugin. If necessary, here is a guide on filing 
+                an issue against a plugin:
+                                
+                Plugin(s) that need to migrate to Built-in Kotlin: plugin
+                """.trimIndent()
+            )
+        }
+    }
+
+    @Test
+    fun `detectApplyingKotlinGradlePlugin does not log when migrated to Built-in Kotlin`(
+        @TempDir tempDir: Path
+    ) {
+        val rootBuildGradleFile = tempDir.resolve("build.gradle").toFile().apply { createNewFile() }
+
+        val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+        val appBuildGradleFile =
+            File(appDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.application'
+                    """.trimIndent()
+                )
+            }
+
+        val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+        val pluginBuildGradleFile =
+            File(pluginDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.library'
+                    """.trimIndent()
+                )
+            }
+
+        val project = mockk<Project>()
+        val rootProject = mockk<Project>()
+        val mockGradle = mockk<Gradle>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+
+        every { project.rootProject } returns rootProject
+        every { project.gradle } returns mockGradle
+        every { project.logger } returns mockLogger
+        every { project.name } returns "rootProject"
+        every { project.buildFile } returns rootBuildGradleFile
+
+        val appProject = mockk<Project>()
+        val appPluginManager = mockk<PluginManager>(relaxed = true)
+        every { appProject.name } returns "app"
+        every { appProject.projectDir } returns appDir
+        every { appProject.buildFile } returns appBuildGradleFile
+        every { appProject.logger } returns mockLogger
+        every { appProject.pluginManager } returns appPluginManager
+
+        val pluginProject = mockk<Project>()
+        val pluginPluginManager = mockk<PluginManager>(relaxed = true)
+        every { pluginProject.name } returns "plugin"
+        every { pluginProject.projectDir } returns pluginDir
+        every { pluginProject.buildFile } returns pluginBuildGradleFile
+        every { pluginProject.logger } returns mockLogger
+        every { pluginProject.pluginManager } returns pluginPluginManager
+
+        val subprojectsActionSlot = slot<Action<Project>>()
+        val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
+
+        every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
+        every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
+
+        detectApplyingKotlinGradlePlugin(project)
+
+        verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
+        subprojectsActionSlot.captured.execute(appProject)
+        subprojectsActionSlot.captured.execute(pluginProject)
+
+        verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
+        projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+        // Neither logs should occur
+        verify(exactly = 0) {
+            mockLogger.error(any())
+        }
+
+        // Since neither have KGP applied, verify that the utility automatically applies the built-in KGP to them
+        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+        verify(exactly = 1) { pluginPluginManager.apply("kotlin-android") }
+    }
+
+
 
     // forceNdkDownload
     @Test
