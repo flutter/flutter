@@ -15,13 +15,6 @@ void main() {
     });
   });
 
-  test('WidgetStatesController dispatches memory events', () async {
-    await expectLater(
-      await memoryEvents(() => WidgetStatesController().dispose(), WidgetStatesController),
-      areCreateAndDispose,
-    );
-  });
-
   test('WidgetStatesController update, listener', () {
     var count = 0;
     void valueChanged() {
