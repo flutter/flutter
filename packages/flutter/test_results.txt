@@ -1042,3 +1042,146 @@ The exception was caught asynchronously.
 00:14 +830 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
 00:14 +831 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
 00:14 +832 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:15 +833 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +834 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +835 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +836 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +837 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +838 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +839 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +840 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +841 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +842 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +843 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +844 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +845 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +846 ~11 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +846 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +847 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +848 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +849 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +850 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +851 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +852 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +853 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +854 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +855 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +856 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +857 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +858 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +859 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +860 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +861 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +862 ~12 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +862 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +863 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +864 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +865 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +866 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +867 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +868 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +869 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +870 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +871 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +872 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +873 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +874 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +875 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +876 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +877 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +878 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +879 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +880 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +881 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +882 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +883 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +884 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +885 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +886 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +887 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +888 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +889 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +890 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +891 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +892 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +893 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +894 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +895 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+00:15 +896 ~13 -6: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "painting.painting.rounded_superellipse_border.long.png": Pixel test failed, 0.00%, 90px diff
+detected.
+Failure feedback can be found at
+/Users/polina/_/flutter/bin/cache/pkg/flutter_dev/packages/flutter/test/painting/failures
+
+When the exception was thrown, this was the stack:
+#0      FlutterLocalFileComparator.compare (package:flutter_goldens/flutter_goldens.dart:688:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart:329:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1954:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:16 +896 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +896 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/rounded_superellipse_border_test.dart: RoundedSuperellipseBorder looks correct for very large ratio [E]
+  Test failed. See exception logs above.
+  The test description was: for very large ratio
+  
+00:16 +897 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +898 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +899 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +900 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +901 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +902 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +903 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +904 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +905 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +906 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +907 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +908 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +909 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +910 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +911 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +912 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +913 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +914 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +915 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +916 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +917 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +918 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +919 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +920 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +921 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +922 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +923 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +924 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +925 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +926 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +927 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +928 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +929 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +930 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:16 +931 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/star_border_test.dart: StarBorder basic geometry
+00:17 +932 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/continuous_rectangle_border_test.dart: Golden test bottomLeft radii
+00:17 +933 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:17 +934 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:17 +935 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:17 +936 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:17 +937 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:17 +938 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
+00:17 +939 ~13 -7: /Users/polina/_/flutter_dev/packages/flutter/test/painting/gradient_test.dart: Transforms Gradients - 45 degrees SweepGradient(center: Alignment.center, startAngle: 0.0, endAngle: 6.3, colors: [Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.5333, colorSpace: ColorSpace.sRGB)], tileMode: TileMode.clamp, transform: GradientRotation(radians: 0.8))
