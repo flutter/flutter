@@ -1580,11 +1580,12 @@ class FlutterSwiftPackageTools {
   final BuildSwiftPackageUtils _utils;
   final bool _generateTests;
 
+  /// Generates bash scripts and xcfilelists to be used for integrating SwiftPM into an native project.
   Future<void> generateArtifacts({required Directory outputDirectory}) async {
     final Directory scriptsDirectory = outputDirectory.childDirectory(_kScripts);
     ErrorHandlingFileSystem.deleteIfExists(scriptsDirectory, recursive: true);
     final Template template = await Template.fromName(
-      _utils.fileSystem.path.join('add_to_app', 'darwin', 'Scripts'),
+      _utils.fileSystem.path.join('add_to_app', 'darwin', _kScripts),
       fileSystem: _utils.fileSystem,
       templateManifest: null,
       logger: _utils.logger,
@@ -1593,6 +1594,7 @@ class FlutterSwiftPackageTools {
     template.render(scriptsDirectory, <String, Object>{}, printStatusWhenWriting: false);
   }
 
+  /// Generates a Swift Package that can be used for integrating SwiftPM into an native project.
   Future<void> generateSwiftPackage(Directory outputDirectory, List<BuildInfo> buildInfos) async {
     final Directory swiftConfigurationPluginDirectory = outputDirectory.childDirectory(
       _kFlutterConfigurationPlugin,
@@ -1618,7 +1620,7 @@ class FlutterSwiftPackageTools {
         .childDirectory('Plugins')
         .childDirectory('BuildMode');
 
-    // Copy for each build mode (rename for the last)
+    // Copy Plugins/BuildMode for each build mode (rename for the last)
     for (var index = 0; index <= buildInfos.length - 1; index++) {
       final isLast = index == buildInfos.length - 1;
       final BuildInfo buildInfo = buildInfos[index];
@@ -1641,6 +1643,15 @@ class FlutterSwiftPackageTools {
     }
   }
 
+  /// The package dependency for the FlutterConfigurationPlugin.
+  ///
+  /// This dependency does not need to be added as a dependency of a Swift Package target because
+  /// it is a SwiftPM command plugin.
+  ///
+  /// ```swift
+  ///   dependencies: [
+  ///     .package(name: "FlutterConfigurationPlugin", path: "../FlutterConfigurationPlugin"),
+  /// ```
   SwiftPackagePackageDependency get packageDependency => SwiftPackagePackageDependency(
     name: _kFlutterConfigurationPlugin,
     path: '../$_kFlutterConfigurationPlugin',
