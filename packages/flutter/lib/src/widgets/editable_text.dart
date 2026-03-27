@@ -3509,6 +3509,26 @@ class EditableTextState extends State<EditableText>
   /// remote value is outdated and needs updating.
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
+  // When true, the next selection-only update arriving from the platform via
+  // updateEditingValue is discarded. Used on web to suppress the browser's
+  // native word-selection that fires after a secondary tap (right-click) on a
+  // readOnly EditableText, since Flutter has already applied the correct
+  // selection through the gesture handler.
+  bool _suppressNextPlatformSelectionUpdate = false;
+
+  /// Schedules suppression of the next platform-driven selection update.
+  ///
+  /// Call this immediately after a gesture handler has applied the desired
+  /// selection, to prevent an asynchronous platform update (e.g. the browser's
+  /// hidden textarea word-selecting on right-click) from overriding it.
+  ///
+  /// Has no effect on non-web platforms.
+  void suppressNextPlatformSelectionUpdate() {
+    if (kIsWeb) {
+      _suppressNextPlatformSelectionUpdate = true;
+    }
+  }
+
   @override
   TextEditingValue get currentTextEditingValue => _value;
 
@@ -3533,6 +3553,17 @@ class EditableTextState extends State<EditableText>
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
+      if (kIsWeb && _suppressNextPlatformSelectionUpdate) {
+        // On web, the browser's hidden textarea can send an unsolicited
+        // word-selection after a right-click (secondary tap). When a gesture
+        // handler has already applied the correct selection and flagged that
+        // the next platform-driven selection update should be suppressed,
+        // discard this update to prevent the browser from overriding the
+        // Flutter-managed selection.
+        _suppressNextPlatformSelectionUpdate = false;
+        _lastKnownRemoteTextEditingValue = _value;
+        return;
+      }
       value = _value.copyWith(selection: value.selection);
     }
     _lastKnownRemoteTextEditingValue = value;
