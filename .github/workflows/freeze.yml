@@ -1,0 +1,53 @@
+# Copyright 2024 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Material and Cupertino Code Freeze
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches:
+      - master
+    paths:
+      - 'packages/flutter/lib/src/material/**'
+      - 'packages/flutter/lib/src/cupertino/**'
+      - 'packages/flutter/test/material/**'
+      - 'packages/flutter/test/cupertino/**'
+      - 'examples/api/lib/material/**'
+      - 'examples/api/lib/cupertino/**'
+      - 'examples/api/test/material/**'
+      - 'examples/api/test/cupertino/**'
+      - 'packages/flutter/lib/fix_data/fix_cupertino.yaml'
+      - 'packages/flutter/lib/fix_data/fix_material/**'
+      - 'packages/flutter/test_fixes/material/**'
+      - 'packages/flutter/test_fixes/cupertino/**'
+
+permissions: read-all
+
+jobs:
+  check_freeze:
+    name: Check Code Freeze
+    runs-on: ubuntu-latest
+    if: github.repository == 'flutter/flutter'
+    steps:
+      - name: Fail if Material or Cupertino changed
+        run: |
+          echo "Error: Changes to Material or Cupertino are not permitted during the current code freeze."
+          echo "The following paths (including tests, examples, and fixes) are currently frozen:"
+          echo "  - packages/flutter/lib/src/material/"
+          echo "  - packages/flutter/lib/src/cupertino/"
+          echo "  - packages/flutter/test/material/"
+          echo "  - packages/flutter/test/cupertino/"
+          echo "  - examples/api/lib/material/"
+          echo "  - examples/api/lib/cupertino/"
+          echo "  - examples/api/test/material/"
+          echo "  - examples/api/test/cupertino/"
+          echo "  - packages/flutter/lib/fix_data/fix_cupertino.yaml"
+          echo "  - packages/flutter/lib/fix_data/fix_material/"
+          echo "  - packages/flutter/test_fixes/material/"
+          echo "  - packages/flutter/test_fixes/cupertino/"
+          echo ""
+          echo "If this is a critical fix that must land during the freeze, please file an issue for team-design."
+          echo "Information on this code freeze: https://github.com/flutter/flutter/issues/184093"
+          exit 1
