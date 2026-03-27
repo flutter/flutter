@@ -210,7 +210,7 @@ interface class FlutterTestRunner {
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     PackageConfig? projectPackageConfig;
-    if (await packageConfigFile.exists()) {
+    if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
         Uri.file(flutterProject.directory.path),

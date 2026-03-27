@@ -640,7 +640,7 @@ Future<void> testMain() async {
 
     // Frame 6:
     //   Render: deleted platform views.
-    //   Expect: error.
+    //   Expect: warning.
     for (final id in platformViewIds) {
       const codec = StandardMethodCodec();
       final completer = Completer<void>();
@@ -652,17 +652,22 @@ Future<void> testMain() async {
       await completer.future;
     }
 
+    final warnings = <String>[];
+    final void Function(String) originalPrintWarning = printWarning;
+    printWarning = (String warning) => warnings.add(warning);
     try {
       await renderTestScene(viewCount: platformViewIds.length);
-      fail('Expected to throw');
-    } on AssertionError catch (error) {
-      expect(
-        error.toString(),
+    } finally {
+      printWarning = originalPrintWarning;
+    }
+    expect(
+      warnings,
+      contains(
         contains(
           'Cannot render platform views: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15. These views have not been created, or they have been deleted.',
         ),
-      );
-    }
+      ),
+    );
 
     // Frame 7:
     //   Render: a platform view after error.
