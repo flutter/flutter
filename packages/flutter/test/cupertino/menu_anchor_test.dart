@@ -3809,11 +3809,9 @@ void main() {
       });
 
       testWidgets('hover color', (WidgetTester tester) async {
-        const hoverColor = CupertinoDynamicColor.withBrightnessAndContrast(
+        const hoverColor = CupertinoDynamicColor.withBrightness(
           color: Color.fromRGBO(50, 50, 50, 0.05),
           darkColor: Color.fromRGBO(255, 255, 255, 0.05),
-          highContrastColor: Color.fromRGBO(50, 50, 50, 0.1),
-          darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.1),
         );
         const customHoverColor = CupertinoDynamicColor.withBrightness(
           color: Color.fromRGBO(75, 0, 0, 1),
@@ -3900,11 +3898,9 @@ void main() {
       });
 
       testWidgets('pressed color', (WidgetTester tester) async {
-        const pressedColor = CupertinoDynamicColor.withBrightnessAndContrast(
+        const pressedColor = CupertinoDynamicColor.withBrightness(
           color: Color.fromRGBO(50, 50, 50, 0.1),
           darkColor: Color.fromRGBO(255, 255, 255, 0.1),
-          highContrastColor: Color.fromRGBO(50, 50, 50, 0.2),
-          darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.2),
         );
 
         const customPressedColor = CupertinoDynamicColor.withBrightness(
@@ -4004,11 +4000,9 @@ void main() {
       });
 
       testWidgets('focused color', (WidgetTester tester) async {
-        const focusedColor = CupertinoDynamicColor.withBrightnessAndContrast(
+        const focusedColor = CupertinoDynamicColor.withBrightness(
           color: Color.fromRGBO(50, 50, 50, 0.075),
           darkColor: Color.fromRGBO(255, 255, 255, 0.075),
-          highContrastColor: Color.fromRGBO(50, 50, 50, 0.15),
-          darkHighContrastColor: Color.fromRGBO(255, 255, 255, 0.15),
         );
 
         const customFocusedColor = CupertinoDynamicColor.withBrightness(
@@ -4098,6 +4092,120 @@ void main() {
         await tester.pump();
 
         expect(getItemDecoration(Tag.b).color, isSameColorAs(customFocusedColor.darkColor));
+      });
+
+      testWidgets('swiped color', (WidgetTester tester) async {
+        const swipedColor = CupertinoDynamicColor.withBrightness(
+          color: Color.fromRGBO(50, 50, 50, 0.1),
+          darkColor: Color.fromRGBO(255, 255, 255, 0.1),
+        );
+
+        const customSwipedColor = CupertinoDynamicColor.withBrightness(
+          color: Color.fromRGBO(75, 0, 0, 1),
+          darkColor: Color.fromRGBO(150, 0, 0, 1),
+        );
+
+        const decoration = WidgetStateProperty<BoxDecoration>.fromMap(
+          <WidgetStatesConstraint, BoxDecoration>{
+            WidgetState.dragged: BoxDecoration(color: customSwipedColor),
+            WidgetState.any: BoxDecoration(),
+          },
+        );
+
+        BoxDecoration getItemDecoration(Tag tag) {
+          return tester
+                  .widget<DecoratedBox>(
+                    find.descendant(
+                      of: find.widgetWithText(CupertinoMenuItem, tag.text),
+                      matching: find.byType(DecoratedBox),
+                    ),
+                  )
+                  .decoration
+              as BoxDecoration;
+        }
+
+        Widget buildApp(ui.Brightness brightness) {
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  requestFocusOnHover: false,
+                  requestCloseOnActivate: false,
+                  child: Text(Tag.a.text),
+                ),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  requestFocusOnHover: false,
+                  requestCloseOnActivate: false,
+                  decoration: decoration,
+                  child: Text(Tag.b.text),
+                ),
+              ],
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildApp(ui.Brightness.light));
+        controller.open();
+        await tester.pumpAndSettle();
+
+        final TestGesture gesture = await tester.createGesture();
+        addTearDown(gesture.removePointer);
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        // Start press
+        await gesture.down(tester.getCenter(find.text(Tag.a.text)));
+        await tester.pump();
+
+        // Move to trigger swipe gesture
+        await gesture.moveBy(const Offset(30, 0));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(swipedColor.color));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        // Swipe into the second item
+        await gesture.moveTo(tester.getCenter(find.text(Tag.b.text)));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customSwipedColor.color));
+
+        // Release the press
+        await gesture.up();
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a), equals(const BoxDecoration()));
+        expect(getItemDecoration(Tag.b), equals(const BoxDecoration()));
+
+        controller.close();
+        await tester.pump();
+
+        await tester.pumpWidget(buildApp(ui.Brightness.dark));
+
+        controller.open();
+        await tester.pump();
+
+        expect(controller.isOpen, isTrue);
+
+        // Verify dark mode swiped colors
+        await gesture.down(tester.getCenter(find.text(Tag.a.text)));
+        await gesture.moveBy(const Offset(30, 0));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.a).color, isSameColorAs(swipedColor.darkColor));
+
+        await gesture.moveTo(tester.getCenter(find.text(Tag.b.text)));
+        await tester.pump();
+
+        expect(getItemDecoration(Tag.b).color, isSameColorAs(customSwipedColor.darkColor));
+
+        await gesture.up();
       });
 
       testWidgets('mouse cursor can be set and is inherited', (WidgetTester tester) async {

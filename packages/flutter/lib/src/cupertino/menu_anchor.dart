@@ -1144,7 +1144,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
           valueListenable: _sizeAnimation,
           child: child,
           builder: (BuildContext context, double value, Widget? child) {
-            final ui.Rect anchorRect = widget.anchorPosition != null
+            final ui.Rect effectiveAnchorRect = widget.anchorPosition != null
                 ? _attachmentPoint & Size.zero
                 : widget.anchorRect;
             final List<ui.DisplayFeature>? displayFeatures = MediaQuery.maybeDisplayFeaturesOf(
@@ -1152,12 +1152,12 @@ class _MenuOverlayState extends State<_MenuOverlay>
             );
             return CustomSingleChildLayout(
               delegate: _MenuLayoutDelegate(
-                anchorRect: anchorRect,
+                anchorRect: effectiveAnchorRect,
                 attachmentPoint: _attachmentPoint,
+                avoidBounds: displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{},
+                heightFactor: value,
                 menuAlignment: _menuAlignment,
                 overlayPadding: widget.overlayPadding.resolve(_textDirection),
-                heightFactor: value,
-                avoidBounds: displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{},
               ),
               child: child,
             );
@@ -1215,8 +1215,9 @@ class _ShadowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ShadowPainter oldDelegate) =>
-      oldDelegate.brightness != brightness || oldDelegate.repaint != repaint;
+  bool shouldRepaint(_ShadowPainter oldDelegate) {
+    return oldDelegate.brightness != brightness || oldDelegate.repaint != repaint;
+  }
 
   @override
   bool shouldRebuildSemantics(_ShadowPainter oldDelegate) => false;
@@ -1225,11 +1226,11 @@ class _ShadowPainter extends CustomPainter {
 class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
   const _MenuLayoutDelegate({
     required this.anchorRect,
+    required this.attachmentPoint,
+    required this.avoidBounds,
+    required this.heightFactor,
     required this.menuAlignment,
     required this.overlayPadding,
-    required this.attachmentPoint,
-    required this.heightFactor,
-    required this.avoidBounds,
   });
 
   // Rectangle anchoring the menu
@@ -1238,6 +1239,12 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
   // The offset of the menu from the top-left corner of the overlay.
   final ui.Offset attachmentPoint;
 
+  // List of rectangles that the menu should not overlap. Unusable screen area.
+  final Set<Rect> avoidBounds;
+
+  // The factor by which to multiply the height of the child.
+  final double heightFactor;
+
   // The resolved alignment of the menu attachment point relative to the menu surface.
   final Alignment menuAlignment;
 
@@ -1245,12 +1252,6 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
   //
   // Used to prevent the menu from being obstructed by system UI.
   final EdgeInsets overlayPadding;
-
-  // The factor by which to multiply the height of the child.
-  final double heightFactor;
-
-  // List of rectangles that the menu should not overlap. Unusable screen area.
-  final Set<Rect> avoidBounds;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -1269,6 +1270,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
     final ui.Offset desiredPosition = attachmentPoint - menuAlignment.alongSize(finalSize);
     final ui.Rect screen = _findClosestScreen(size, anchorRect.center, avoidBounds);
     final ui.Offset finalPosition = _positionChild(screen, finalSize, desiredPosition, anchorRect);
+
     // If the menu sits above the anchor when fully open, grow upward:
     // keep the bottom (attachment) fixed by shifting the top-left during animation.
     final bool growsUp = finalPosition.dy + finalSize.height <= anchorRect.center.dy;
@@ -1403,12 +1405,12 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_MenuLayoutDelegate oldDelegate) {
-    return menuAlignment != oldDelegate.menuAlignment ||
+    return anchorRect != oldDelegate.anchorRect ||
         attachmentPoint != oldDelegate.attachmentPoint ||
-        anchorRect != oldDelegate.anchorRect ||
-        overlayPadding != oldDelegate.overlayPadding ||
+        !setEquals(avoidBounds, oldDelegate.avoidBounds) ||
         heightFactor != oldDelegate.heightFactor ||
-        !setEquals(avoidBounds, oldDelegate.avoidBounds);
+        menuAlignment != oldDelegate.menuAlignment ||
+        overlayPadding != oldDelegate.overlayPadding;
   }
 }
 
@@ -1738,7 +1740,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
     this.onPressed,
     this.decoration,
     this.mouseCursor,
-    this.statesController,
     this.behavior = HitTestBehavior.opaque,
     this.requestCloseOnActivate = true,
     this.requestFocusOnHover = true,
@@ -1803,9 +1804,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
 
   /// The mouse cursor to display on hover.
   final WidgetStateProperty<MouseCursor>? mouseCursor;
-
-  /// {@macro flutter.material.inkwell.statesController}
-  final WidgetStatesController? statesController;
 
   /// How the menu item should respond to hit tests.
   final HitTestBehavior behavior;
@@ -1969,6 +1967,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
 
   TextStyle _resolveDefaultSubtitleStyle(BuildContext context, TextScaler textScaler) {
     final isDark = CupertinoTheme.maybeBrightnessOf(context) == Brightness.dark;
+
     return _DynamicTypeStyle.subhead
         .resolveTextStyle(textScaler)
         .copyWith(
@@ -2029,7 +2028,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
         autofocus: autofocus,
         focusNode: focusNode,
         decoration: decoration ?? defaultDecoration,
-        statesController: statesController,
         behavior: behavior,
         child: DefaultTextStyle.merge(
           maxLines: isAccessibilityModeEnabled
@@ -2353,7 +2351,6 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
     required this.autofocus,
     required this.requestFocusOnHover,
     required this.behavior,
-    required this.statesController,
     required this.mouseCursor,
     required this.decoration,
     required this.child,
@@ -2366,7 +2363,6 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
   final bool autofocus;
   final bool requestFocusOnHover;
   final HitTestBehavior behavior;
-  final WidgetStatesController? statesController;
   final WidgetStateProperty<MouseCursor> mouseCursor;
   final WidgetStateProperty<BoxDecoration> decoration;
   final Widget child;
@@ -2376,8 +2372,8 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
       _CupertinoMenuItemInteractionHandlerState();
 }
 
-class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItemInteractionHandler>
-    implements _SwipeTarget {
+class _CupertinoMenuItemInteractionHandlerState
+    extends State<_CupertinoMenuItemInteractionHandler> {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivation),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _handleActivation),
@@ -2388,54 +2384,31 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
-  WidgetStatesController? _internalStatesController;
-  WidgetStatesController get _statesController {
-    return widget.statesController ?? _internalStatesController!;
-  }
+  final WidgetStatesController _statesController = WidgetStatesController();
 
-  bool get isHovered => _isHovered;
-  bool _isHovered = false;
+  bool get isHovered => _statesController.value.contains(WidgetState.hovered);
   set isHovered(bool value) {
-    if (_isHovered != value) {
-      _isHovered = value;
-      _statesController.update(WidgetState.hovered, value);
-    }
+    _statesController.update(WidgetState.hovered, value);
   }
 
-  bool get isPressed => _isPressed;
-  bool _isPressed = false;
+  bool get isPressed => _statesController.value.contains(WidgetState.pressed);
   set isPressed(bool value) {
-    if (_isPressed != value) {
-      _isPressed = value;
-      _statesController.update(WidgetState.pressed, value);
-    }
+    _statesController.update(WidgetState.pressed, value);
   }
 
-  bool get isSwiped => _isSwiped;
-  bool _isSwiped = false;
+  bool get isSwiped => _statesController.value.contains(WidgetState.dragged);
   set isSwiped(bool value) {
-    if (_isSwiped != value) {
-      _isSwiped = value;
-      _statesController.update(WidgetState.dragged, value);
-    }
+    _statesController.update(WidgetState.dragged, value);
   }
 
-  bool get isFocused => _isFocused;
-  bool _isFocused = false;
+  bool get isFocused => _statesController.value.contains(WidgetState.focused);
   set isFocused(bool value) {
-    if (_isFocused != value) {
-      _isFocused = value;
-      _statesController.update(WidgetState.focused, value);
-    }
+    _statesController.update(WidgetState.focused, value);
   }
 
-  bool get isEnabled => _isEnabled;
-  bool _isEnabled = false;
+  bool get isEnabled => !_statesController.value.contains(WidgetState.disabled);
   set isEnabled(bool value) {
-    if (_isEnabled != value) {
-      _isEnabled = value;
-      _statesController.update(WidgetState.disabled, !value);
-    }
+    _statesController.update(WidgetState.disabled, !value);
   }
 
   @override
@@ -2443,10 +2416,6 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     super.initState();
     if (widget.focusNode == null) {
       _internalFocusNode = FocusNode();
-    }
-
-    if (widget.statesController == null) {
-      _internalStatesController = WidgetStatesController();
     }
 
     isEnabled = widget.onPressed != null;
@@ -2468,16 +2437,6 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
       isFocused = _focusNode.hasPrimaryFocus;
     }
 
-    if (widget.statesController != oldWidget.statesController) {
-      if (widget.statesController != null) {
-        _internalStatesController?.dispose();
-        _internalStatesController = null;
-      } else {
-        assert(_internalStatesController == null);
-        _internalStatesController = WidgetStatesController();
-      }
-    }
-
     if (widget.onPressed != oldWidget.onPressed) {
       if (widget.onPressed == null) {
         isEnabled = isHovered = isPressed = isSwiped = isFocused = false;
@@ -2488,44 +2447,8 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 
   @override
-  bool didSwipeEnter() {
-    if (!isEnabled) {
-      return true;
-    }
-
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-        HapticFeedback.selectionClick();
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-        break;
-    }
-
-    isSwiped = true;
-    return true;
-  }
-
-  @override
-  void didSwipeLeave() {
-    if (mounted) {
-      isSwiped = false;
-    }
-  }
-
-  @override
-  void didSwipeActivate() {
-    if (mounted && isEnabled) {
-      _handleActivation();
-    }
-  }
-
-  @override
   void dispose() {
-    _internalStatesController?.dispose();
-    _internalStatesController = null;
+    _statesController.dispose();
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -2581,6 +2504,37 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     Actions.invoke(context, const DismissIntent());
   }
 
+  void _handleSwipeEnter() {
+    if (!isEnabled) {
+      return;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+        HapticFeedback.selectionClick();
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        break;
+    }
+
+    isSwiped = true;
+  }
+
+  void _handleSwipeExit() {
+    if (mounted) {
+      isSwiped = false;
+    }
+  }
+
+  void _handleSwipeCompleted() {
+    if (mounted && isEnabled) {
+      _handleActivation();
+    }
+  }
+
   Widget _buildStatefulAppearance(BuildContext context, Set<WidgetState> value, Widget? child) {
     final MouseCursor cursor = widget.mouseCursor.resolve(value);
     final BoxDecoration decoration = widget.decoration.resolve(value);
@@ -2631,16 +2585,18 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
           enabled: isEnabled,
           onDismiss: isEnabled ? _handleDismissMenu : null,
         ),
-        child: MetaData(
-          metaData: this,
-          child: Actions(
-            actions: isEnabled ? _actions : <Type, Action<Intent>>{},
-            child: Focus(
-              autofocus: isEnabled && widget.autofocus,
-              focusNode: _focusNode,
-              canRequestFocus: isEnabled,
-              skipTraversal: !isEnabled,
-              onFocusChange: _handleFocusChange,
+        child: Actions(
+          actions: isEnabled ? _actions : <Type, Action<Intent>>{},
+          child: Focus(
+            autofocus: isEnabled && widget.autofocus,
+            focusNode: _focusNode,
+            canRequestFocus: isEnabled,
+            skipTraversal: !isEnabled,
+            onFocusChange: _handleFocusChange,
+            child: _SwipeTarget(
+              onEnter: _handleSwipeEnter,
+              onExit: _handleSwipeExit,
+              onCompletion: _handleSwipeCompleted,
               child: ValueListenableBuilder<Set<WidgetState>>(
                 valueListenable: _statesController,
                 builder: _buildStatefulAppearance,
@@ -2658,11 +2614,17 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 }
 
-/// Implement to receive callbacks when a pointer enters or leaves while down.
+/// A widget that triggers callbacks when a pointer enters or leaves while down.
 ///
-/// An ancestor [_SwipeRegion] must be present in order to receive these
-/// callbacks.
-abstract interface class _SwipeTarget {
+/// An ancestor [_SwipeRegion] must be present in order for callbacks to be triggered.
+class _SwipeTarget extends StatelessWidget {
+  const _SwipeTarget({
+    required this.onEnter,
+    required this.onExit,
+    required this.onCompletion,
+    required this.child,
+  });
+
   /// A pointer has entered this region while down.
   ///
   /// This includes:
@@ -2671,13 +2633,9 @@ abstract interface class _SwipeTarget {
   ///  * The point has contacted the screen in this region. In this case, this
   ///    method is called as soon as the pointer down event occurs regardless of
   ///    whether the gesture wins the arena immediately.
-  ///
-  /// When this function returns true, this [_SwipeTarget] will prevent
-  /// underlying widgets from being entered by the swipe gesture. Otherwise,
-  /// underlying widgets may also receive swipe enter events.
-  bool didSwipeEnter();
+  final VoidCallback? onEnter;
 
-  /// A pointer has exited this region.
+  /// A pointer has exited this region while down.
   ///
   /// This includes:
   ///  * The pointer has moved out of this region.
@@ -2685,13 +2643,28 @@ abstract interface class _SwipeTarget {
   ///  * The pointer is canceled.
   ///  * The gesture loses the arena.
   ///  * The gesture ends. In this case, this method is called immediately
-  ///    before [didSwipeActivate].
-  void didSwipeLeave();
+  ///    before [onCompletion].
+  final VoidCallback? onExit;
 
-  /// The drag gesture is completed in this region.
+  /// The drag gesture completed in this region.
   ///
-  /// This method is called immediately after a [didSwipeLeave].
-  void didSwipeActivate();
+  /// This method is called immediately after [onExit].
+  final VoidCallback? onCompletion;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// Whether this target stops underlying widgets from being swiped.
+  ///
+  /// When true, targets that are obscured by this widget will not receive
+  /// swipe enter or exit events. When false, swipe events will continue
+  /// to propagate to targets behind this one.
+  bool get isOpaque => true;
+
+  @override
+  Widget build(BuildContext context) {
+    return MetaData(metaData: this, child: child);
+  }
 }
 
 class _SwipeScope extends InheritedWidget {
@@ -2826,7 +2799,7 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     widget.onDistanceChanged(distance);
   }
 
-  void _handleSwipeEnd(DragEndDetails position) {
+  void _handleSwipeEnd(DragEndDetails updateDetails) {
     _completeSwipe();
   }
 
@@ -2976,68 +2949,63 @@ class _SwipeHandle extends Drag {
         targets.add(metaData);
       }
     }
-    // Identify targets that are no longer hit.
-    //
-    // This ensures disjoint siblings (1 -> 2) have a "Leave 1" -> "Enter 2" order.
+
     _enteredTargets.removeWhere((target) {
       if (!targets.contains(target)) {
-        target.didSwipeLeave();
+        target.onExit?.call();
         return true;
       }
       return false;
     });
 
-    final nextEntered = <_SwipeTarget>{};
-
-    // If an existing target is encountered, assume the previous chain is effectively
-    // active and don't add *new* underlying targets that weren't there before
-    // (preserving "blocking" behavior without calling didSwipeEnter again).
-    var hasEncounteredExisting = false;
+    final hitTargets = <_SwipeTarget>{};
+    final newlyEnteredTargets = <_SwipeTarget>[];
+    var hitExistingTarget = false;
     for (final target in targets) {
       if (_enteredTargets.contains(target)) {
-        nextEntered.add(target);
-        hasEncounteredExisting = true;
-      } else {
-        if (hasEncounteredExisting) {
-          // If we have already hit a target that was previously entered, we perform
-          // a "sticky" block. We assume the existing target blocked this new underlying
-          // target previously, so we don't enter it now.
-          break;
-        }
-        nextEntered.add(target);
-        if (target.didSwipeEnter()) {
-          break;
-        }
+        hitTargets.add(target);
+        hitExistingTarget = true;
+        continue;
+      }
+
+      if (!hitExistingTarget) {
+        hitTargets.add(target);
+        newlyEnteredTargets.add(target);
+      }
+
+      if (target.isOpaque) {
+        break;
       }
     }
 
     // Leave old targets.
     //
-    // Disjoint siblings were removed above (1 -> 2) to preserve the expected
-    // "Leave 1" -> "Enter 2" order. For nested items (1 -> 1.1 -> 1.1.1), the
-    // order is less critical, but the most specific item should still be left
-    // last to preserve the expected behavior of the surface.
-    //
-    // This means that entering a nested item (1.1) that obscures a parent item
-    // (1) will result in "Enter 1.1" -> "Leave 1". Leaving the nested item will
-    // behave in the opposite order: "Leave 1.1" -> "Enter 1".
+    // Disjoint siblings (1 -> 2) were removed above to preserve the expected
+    // "Leave 1" -> "Enter 2" order. For nested items (1 -> 1.1 -> 1.1.1),
+    // entering a nested item (1.1) that obscures a parent item (1) will result
+    // in "Leave 1" -> "Enter 1.1". Leaving the nested item will behave in the
+    // opposite order: "Leave 1.1" -> "Enter 1".
     for (final _SwipeTarget target in _enteredTargets.reversed) {
-      if (!nextEntered.contains(target)) {
-        target.didSwipeLeave();
+      if (!hitTargets.contains(target)) {
+        target.onExit?.call();
       }
+    }
+
+    for (final _SwipeTarget target in newlyEnteredTargets.reversed) {
+      target.onEnter?.call();
     }
 
     _enteredTargets
       ..clear()
-      ..addAll(nextEntered);
+      ..addAll(hitTargets);
   }
 
   void _leaveAllEntered({bool pointerUp = false}) {
     for (var i = 0; i < _enteredTargets.length; i += 1) {
       final _SwipeTarget target = _enteredTargets[i];
-      target.didSwipeLeave();
+      target.onExit?.call();
       if (pointerUp) {
-        target.didSwipeActivate();
+        target.onCompletion?.call();
       }
     }
     _enteredTargets.clear();
