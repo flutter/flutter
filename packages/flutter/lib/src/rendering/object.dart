@@ -1610,16 +1610,18 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // the parent of this node will have to update its semantics subtree to remove
           // this node from its children.
           if (!node._semantics.geometry!.isVisible && !node._semantics.isRoot) {
-            final _RenderObjectSemantics parentInSemanticsTree =
-                node._semantics.parentInSemanticsTree!;
-            if (!parentInSemanticsTree.geometryDirty) {
-              targets.add(parentInSemanticsTree);
-            } else {
-              final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
-                  parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
-              // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
-              if (firstAncestorNodeWithCleanGeometry != null) {
-                targets.add(firstAncestorNodeWithCleanGeometry);
+            final _RenderObjectSemantics? parentInSemanticsTree =
+                node._semantics.parentInSemanticsTree;
+            if (parentInSemanticsTree != null) {
+              if (!parentInSemanticsTree.geometryDirty) {
+                targets.add(parentInSemanticsTree);
+              } else {
+                final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
+                    parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
+                // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
+                if (firstAncestorNodeWithCleanGeometry != null) {
+                  targets.add(firstAncestorNodeWithCleanGeometry);
+                }
               }
             }
           }
