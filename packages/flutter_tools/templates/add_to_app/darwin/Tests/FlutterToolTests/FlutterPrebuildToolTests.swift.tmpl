@@ -18,7 +18,7 @@ func copyFlutterFrameworkForIOS(
   let processManager = MockFlutterProcessManager()
 
   let targetBuildMode = "Debug"
-  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterNativeIntegration"
   let xcframework =
     "\(flutterPluginRegistrantPath)/\(targetBuildMode)/Frameworks/Flutter.xcframework"
   let buildDir = "/Build/Products/Debug-\(platformName)"
@@ -37,7 +37,7 @@ func copyFlutterFrameworkForIOS(
   try FlutterPrebuildToolHelper.copyFlutterFramework(
     targetBuildMode: targetBuildMode,
     env: [
-      "FLUTTER_PLUGIN_REGISTRANT_PATH": flutterPluginRegistrantPath,
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPluginRegistrantPath,
       "PLATFORM_NAME": platformName, "SDKROOT": "\(platformName)26.2",
       "BUILT_PRODUCTS_DIR": buildDir,
     ],
@@ -52,7 +52,7 @@ func copyFlutterFrameworkForMacOS() async throws {
   let processManager = MockFlutterProcessManager()
 
   let targetBuildMode = "Debug"
-  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterNativeIntegration"
   let xcframework =
     "\(flutterPluginRegistrantPath)/\(targetBuildMode)/Frameworks/FlutterMacOS.xcframework"
   let buildDir = "/Build/Products/Debug"
@@ -70,7 +70,7 @@ func copyFlutterFrameworkForMacOS() async throws {
   try FlutterPrebuildToolHelper.copyFlutterFramework(
     targetBuildMode: targetBuildMode,
     env: [
-      "FLUTTER_PLUGIN_REGISTRANT_PATH": flutterPluginRegistrantPath,
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPluginRegistrantPath,
       "PLATFORM_NAME": "macosx", "SDKROOT": "macosx",
       "BUILT_PRODUCTS_DIR": buildDir,
     ],

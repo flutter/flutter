@@ -88,9 +88,9 @@ public class FlutterAssembleToolHelper {
 
     // Verify expected and actual build mode matches
     if actualBuildMode.lowercased() != expectedBuildMode.lowercased() {
-      let flutterPluginRegistrantPath = try FlutterToolHelper.findOrExit(
+      let packagePath = try FlutterToolHelper.findOrExit(
         env: env,
-        key: "FLUTTER_PLUGIN_REGISTRANT_PATH"
+        key: "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH"
       )
       throw XcodeErrorAndExit.error([
         "The Flutter framework's build mode does not match the currently targeted configuration.",
@@ -100,9 +100,8 @@ public class FlutterAssembleToolHelper {
           + "\"Switch to \(targetBuildMode) Mode\".",
         "   or",
         "   2) Run the following in a terminal:",
-        "       cd \(flutterPluginRegistrantPath)",
-        "       swift package plugin --package FlutterConfigurationPlugin "
-          + "--allow-writing-to-package-directory switch-to-\(targetBuildMode.lowercased())",
+        "       cd \(packagePath)",
+        "       swift package plugin --allow-writing-to-package-directory switch-to-\(targetBuildMode.lowercased())",
       ])
     }
   }

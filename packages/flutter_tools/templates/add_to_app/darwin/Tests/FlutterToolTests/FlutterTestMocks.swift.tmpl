@@ -33,7 +33,7 @@ class MockFileManager: FlutterToolsFileManager {
   var fileContents: [String: Data] = [:]
 
   func destinationOfSymbolicLink(atPath path: String) throws -> String {
-    return "./Release/Package.swift"
+    return "./Release"
   }
 
   func fileExists(atPath path: String) -> Bool {

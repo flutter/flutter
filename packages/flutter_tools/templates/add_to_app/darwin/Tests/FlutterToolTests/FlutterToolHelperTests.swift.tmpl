@@ -82,13 +82,12 @@ func updateSymlinkNoChange() async throws {
   let fileManager = MockFileManager()
 
   let targetBuildMode = "Release"
-  let targetName = "Package.swift"
-  let expectedLink = "./\(targetBuildMode)/Package.swift"
+  let expectedLink = "./\(targetBuildMode)"
   try FlutterToolHelper.updateSymlink(
     targetBuildMode: targetBuildMode,
-    currentLinkName: targetName,
+    currentLinkName: "FlutterPluginRegistrant",
     newLinkTarget: expectedLink,
-    flutterPluginRegistrantPath: "/path/to/SwiftPackages/FlutterPluginRegistrant",
+    integrationPackagePath: "/path/to/SwiftPackages/FlutterNativeIntegration",
     fileManager: fileManager
   )
 
@@ -101,9 +100,9 @@ func updateSymlinkSuccess() async throws {
   let fileManager = MockFileManager()
 
   let targetBuildMode = "Debug"
-  let targetName = "Package.swift"
-  let expectedLink = "./\(targetBuildMode)/Package.swift"
-  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
+  let targetName = "FlutterPluginRegistrant"
+  let expectedLink = "./\(targetBuildMode)"
+  let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterNativeIntegration"
   let currentLinkPath = "\(flutterPluginRegistrantPath)/\(targetName)"
   let newTargetPath = "\(flutterPluginRegistrantPath)/\(expectedLink)"
   fileManager.filesExist[newTargetPath] = true
@@ -113,7 +112,7 @@ func updateSymlinkSuccess() async throws {
     targetBuildMode: targetBuildMode,
     currentLinkName: targetName,
     newLinkTarget: expectedLink,
-    flutterPluginRegistrantPath: flutterPluginRegistrantPath,
+    integrationPackagePath: flutterPluginRegistrantPath,
     fileManager: fileManager
   )
 
@@ -127,8 +126,8 @@ func updateSymlinkSuccess() async throws {
 func updateSymlinkThrowsIfNewLinkDoesNotExist() async throws {
   let fileManager = MockFileManager()
   let targetBuildMode = "Debug"
-  let targetName = "Package.swift"
-  let expectedLink = "./\(targetBuildMode)/Package.swift"
+  let targetName = "FlutterPluginRegistrant"
+  let expectedLink = "./\(targetBuildMode)"
   let flutterPluginRegistrantPath = "/path/to/SwiftPackages/FlutterPluginRegistrant"
   let currentLinkPath = "\(flutterPluginRegistrantPath)/\(targetName)"
   let newTargetPath = "\(flutterPluginRegistrantPath)/\(expectedLink)"
@@ -139,7 +138,7 @@ func updateSymlinkThrowsIfNewLinkDoesNotExist() async throws {
       targetBuildMode: targetBuildMode,
       currentLinkName: targetName,
       newLinkTarget: newTargetPath,
-      flutterPluginRegistrantPath: "/path/to/SwiftPackages/FlutterPluginRegistrant",
+      integrationPackagePath: "/path/to/SwiftPackages/FlutterNativeIntegration",
       fileManager: fileManager
     )
   }

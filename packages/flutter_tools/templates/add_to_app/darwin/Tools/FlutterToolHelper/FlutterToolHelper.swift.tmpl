@@ -80,11 +80,11 @@ public class FlutterToolHelper {
     targetBuildMode: String,
     currentLinkName: String,
     newLinkTarget: String,
-    flutterPluginRegistrantPath: String,
+    integrationPackagePath: String,
     fileManager: FlutterToolsFileManager
   ) throws {
     // Check if current link exists and exit if it already matches
-    let currentLinkPath = "\(flutterPluginRegistrantPath)/\(currentLinkName)"
+    let currentLinkPath = "\(integrationPackagePath)/\(currentLinkName)"
     let currentLinkTarget = try? fileManager.destinationOfSymbolicLink(
       atPath: currentLinkPath
     )
@@ -94,7 +94,7 @@ public class FlutterToolHelper {
     }
 
     // Verify new target exists
-    let newTargetPath = "\(flutterPluginRegistrantPath)/\(newLinkTarget)"
+    let newTargetPath = "\(integrationPackagePath)/\(newLinkTarget)"
     if !fileManager.fileExists(atPath: newTargetPath) {
       let lowerBuildMode = targetBuildMode.lowercased()
       throw XcodeErrorAndExit.error([

@@ -35,6 +35,7 @@ import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
+import '../runner/flutter_command_runner.dart';
 import '../template.dart';
 import '../version.dart';
 import 'build.dart';
@@ -44,13 +45,15 @@ const String _kFileAnIssue =
     'Please file an issue at https://github.com/flutter/flutter/issues/new/choose';
 const String _kFrameworks = 'Frameworks';
 const String _kPackages = 'Packages';
-const String _kPlugins = 'Plugins';
+const String _kFlutterPlugins = '.plugins';
 const String _kCocoaPods = 'CocoaPods';
 const String _kNativeAssets = 'NativeAssets';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
+const String _kFlutterIntegrationPackageName = 'FlutterNativeIntegration';
 const String _kSources = 'Sources';
 const String _kScripts = 'Scripts';
-const String _kFlutterConfigurationPlugin = 'FlutterConfigurationPlugin';
+const String _kTools = 'Tools';
+const String _kSwiftPlugins = 'Plugins';
 const List<String> _kSupportedPlatforms = ['ios', 'macos'];
 const String _kCodesignIdentityFile = '.codesign_identity';
 
@@ -259,10 +262,20 @@ class BuildSwiftPackage extends BuildSubCommand {
     targetPlatform: _targetPlatform,
     utils: utils,
   );
-  late final flutterSwiftPackageTools = FlutterSwiftPackageTools(
+  late final flutterNativeIntegrationSwiftPackage = FlutterNativeIntegrationSwiftPackage(
     utils: utils,
-    generateTests: usingCISystem,
+    generateTests: generateTests,
   );
+
+  /// Whether to generate tests for the Swift package integration tools and plugins.
+  ///
+  /// Tests should only be generated in CI and when the target platform is macOS. Tests will not
+  /// run when targeting iOS because `swift test` targets macOS and the dependency on the iOS
+  /// Flutter.xcframework will not be able to resolve to a valid binary.
+  bool get generateTests {
+    return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true) &&
+        _targetPlatform == FlutterDarwinPlatform.macos;
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -284,10 +297,10 @@ class BuildSwiftPackage extends BuildSubCommand {
     );
     final Directory cacheDirectory = outputDirectory.childDirectory('.cache')
       ..createSync(recursive: true);
-    final Directory pluginRegistrantSwiftPackage = outputDirectory.childDirectory(
-      kPluginSwiftPackageName,
+    final Directory flutterIntegrationPackage = outputDirectory.childDirectory(
+      _kFlutterIntegrationPackageName,
     )..createSync(recursive: true);
-    final Directory pluginsDirectory = pluginRegistrantSwiftPackage.childDirectory(_kPlugins);
+    final Directory pluginsDirectory = flutterIntegrationPackage.childDirectory(_kFlutterPlugins);
 
     await project.regeneratePlatformSpecificTooling(releaseMode: false);
 
@@ -314,7 +327,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     );
     for (final buildInfo in buildInfos) {
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
-      final Directory xcframeworkOutput = pluginRegistrantSwiftPackage
+      final Directory xcframeworkOutput = flutterIntegrationPackage
           .childDirectory(xcodeBuildConfiguration)
           .childDirectory(_kFrameworks);
 
@@ -328,17 +341,19 @@ class BuildSwiftPackage extends BuildSubCommand {
       );
 
       await _generateSwiftPackages(
-        pluginRegistrantSwiftPackage: pluginRegistrantSwiftPackage,
+        flutterIntegrationPackage: flutterIntegrationPackage,
         plugins: plugins,
         xcodeBuildConfiguration: xcodeBuildConfiguration,
         xcframeworkOutput: xcframeworkOutput,
       );
     }
-
-    createSourcesSymlink(pluginRegistrantSwiftPackage, buildInfos.first.mode.uppercaseName);
-
-    await flutterSwiftPackageTools.generateArtifacts(outputDirectory: outputDirectory);
-    await flutterSwiftPackageTools.generateSwiftPackage(outputDirectory, buildInfos);
+    await flutterNativeIntegrationSwiftPackage.generateSwiftPackages(
+      outputDirectory: outputDirectory,
+      flutterIntegrationPackage: flutterIntegrationPackage,
+      highestSupportedVersion: pluginSwiftDependencies.highestSupportedVersion,
+      buildInfos: buildInfos,
+    );
+    createSourcesSymlink(flutterIntegrationPackage, buildInfos.first.mode.uppercaseName);
 
     return FlutterCommandResult.success();
   }
@@ -380,14 +395,14 @@ class BuildSwiftPackage extends BuildSubCommand {
   }
 
   Future<void> _generateSwiftPackages({
-    required Directory pluginRegistrantSwiftPackage,
+    required Directory flutterIntegrationPackage,
     required List<Plugin> plugins,
     required String xcodeBuildConfiguration,
     required Directory xcframeworkOutput,
   }) async {
     final Status status = logger.startProgress('   ├─Generating swift packages...');
     try {
-      final Directory modeDirectory = pluginRegistrantSwiftPackage.childDirectory(
+      final Directory modeDirectory = flutterIntegrationPackage.childDirectory(
         xcodeBuildConfiguration,
       );
       final Directory packagesForConfiguration = modeDirectory.childDirectory(_kPackages);
@@ -402,7 +417,6 @@ class BuildSwiftPackage extends BuildSubCommand {
         flutterFrameworkDependency: flutterFrameworkDependency,
         appAndNativeAssetsDependencies: appAndNativeAssetsDependencies,
         cocoapodDependencies: cocoapodDependencies,
-        flutterSwiftPackageTools: flutterSwiftPackageTools,
         packagesForConfiguration: packagesForConfiguration,
         xcframeworkOutput: xcframeworkOutput,
       );
@@ -418,11 +432,11 @@ class BuildSwiftPackage extends BuildSubCommand {
   ///
   /// Creates a symlink from Package.swift to "./[defaultBuildMode]/Package.swift"
   @visibleForTesting
-  void createSourcesSymlink(Directory pluginRegistrantSwiftPackage, String defaultBuildMode) {
-    final Link sourcesLink = pluginRegistrantSwiftPackage.childLink(_kSources);
-    final Link manifestLink = pluginRegistrantSwiftPackage.childLink('Package.swift');
-    _createOrUpdateSymlink(sourcesLink, './$defaultBuildMode');
-    _createOrUpdateSymlink(manifestLink, './$defaultBuildMode/Package.swift');
+  void createSourcesSymlink(Directory flutterIntegrationPackage, String defaultBuildMode) {
+    final Link flutterPluginRegistrant = flutterIntegrationPackage.childLink(
+      kPluginSwiftPackageName,
+    );
+    _createOrUpdateSymlink(flutterPluginRegistrant, './$defaultBuildMode');
   }
 
   void _createOrUpdateSymlink(Link link, String target) {
@@ -455,7 +469,6 @@ class FlutterPluginRegistrantSwiftPackage {
     required FlutterFrameworkDependency flutterFrameworkDependency,
     required AppFrameworkAndNativeAssetsDependencies appAndNativeAssetsDependencies,
     required CocoaPodPluginDependencies cocoapodDependencies,
-    required FlutterSwiftPackageTools flutterSwiftPackageTools,
     required Directory xcframeworkOutput,
   }) async {
     final (
@@ -488,13 +501,12 @@ class FlutterPluginRegistrantSwiftPackage {
     final packageDependencies = <SwiftPackagePackageDependency>[
       flutterFrameworkDependency.packageDependency,
       ...pluginPackageDependencies,
-      flutterSwiftPackageTools.packageDependency,
     ];
 
     const String swiftPackageName = kPluginSwiftPackageName;
     final File manifestFile = modeDirectory.childFile('Package.swift');
 
-    final product = SwiftPackageProduct(
+    final product = SwiftPackageProduct.library(
       name: swiftPackageName,
       targets: <String>[swiftPackageName],
       libraryType: .static,
@@ -520,23 +532,21 @@ class FlutterPluginRegistrantSwiftPackage {
     pluginsPackage.createSwiftPackage(generateEmptySources: false);
 
     await _generateSourceFiles(
-      modeDirectory: modeDirectory,
+      sourceDirectory: modeDirectory.childDirectory(_kSources),
       plugins: plugins,
-      xcodeBuildConfiguration: xcodeBuildConfiguration,
     );
   }
 
   /// Generates GeneratedPluginRegistrant source files.
   Future<void> _generateSourceFiles({
-    required Directory modeDirectory,
+    required Directory sourceDirectory,
     required List<Plugin> plugins,
-    required String xcodeBuildConfiguration,
   }) async {
     ErrorHandlingFileSystem.deleteIfExists(
-      modeDirectory.childDirectory(kPluginSwiftPackageName),
+      sourceDirectory.childDirectory(kPluginSwiftPackageName),
       recursive: true,
     );
-    final File swiftFile = modeDirectory
+    final File swiftFile = sourceDirectory
         .childDirectory(kPluginSwiftPackageName)
         .childFile('GeneratedPluginRegistrant.swift');
     switch (_targetPlatform) {
@@ -553,6 +563,7 @@ class FlutterPluginRegistrantSwiftPackage {
           plugins,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
+          public: true,
         );
     }
   }
@@ -626,7 +637,7 @@ class FlutterFrameworkDependency {
       name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
       platforms: [],
       products: [
-        SwiftPackageProduct(
+        SwiftPackageProduct.library(
           name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
           targets: <String>[kFlutterGeneratedFrameworkSwiftPackageTargetName],
         ),
@@ -655,7 +666,7 @@ class FlutterFrameworkDependency {
   /// ```
   SwiftPackagePackageDependency get packageDependency => SwiftPackagePackageDependency(
     name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
-    path: '$_kSources/$_kPackages/$kFlutterGeneratedFrameworkSwiftPackageTargetName',
+    path: '$_kPackages/$kFlutterGeneratedFrameworkSwiftPackageTargetName',
   );
 
   /// The target dependency for the FlutterFramework.
@@ -749,7 +760,18 @@ class FlutterPluginSwiftDependencies {
       // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
       final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
         ..createSync(recursive: true);
-      copyDirectory(_utils.fileSystem.directory(plugin.path), pluginDestination);
+      copyDirectory(
+        _utils.fileSystem.directory(plugin.path),
+        pluginDestination,
+        shouldCopyDirectory: (directory) {
+          // Skip copying symlinks and build outputs.
+          return !directory.path.contains('.symlinks/plugins') &&
+              !directory.path.contains('example/build/') &&
+              !directory.path.contains('.build/') &&
+              !directory.path.contains('.swiftpm/') &&
+              !directory.path.contains('.dart_tool/');
+        },
+      );
 
       final String? swiftPackagePath = plugin.pluginSwiftPackagePath(
         _utils.fileSystem,
@@ -905,10 +927,7 @@ class FlutterPluginSwiftDependencies {
       }
 
       packageDependencies.add(
-        SwiftPackagePackageDependency(
-          name: plugin.name,
-          path: '$_kSources/$_kPackages/${plugin.name}',
-        ),
+        SwiftPackagePackageDependency(name: plugin.name, path: '$_kPackages/${plugin.name}'),
       );
       targetDependencies.add(
         SwiftPackageTargetDependency.product(
@@ -1216,7 +1235,7 @@ class AppFrameworkAndNativeAssetsDependencies {
   /// ```
   SwiftPackageTarget get appBinaryTarget => SwiftPackageTarget.binaryTarget(
     name: _appBinaryName,
-    relativePath: '$_kSources/$_kFrameworks/$_appBinaryName.xcframework',
+    relativePath: '$_kFrameworks/$_appBinaryName.xcframework',
   );
 
   /// Generate target dependencies and binary targets for the App.xcframework and any native
@@ -1268,7 +1287,7 @@ class CocoaPodPluginDependencies {
   }) async {
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     final Directory podsDirectory = _xcodeProject.hostAppRoot.childDirectory('Pods');
-    if (!podsDirectory.existsSync() || !_xcodeProject.podfile.existsSync()) {
+    if (!podsDirectory.existsSync() && !_xcodeProject.podfile.existsSync()) {
       return;
     }
     final Directory cocoapodXCFrameworkOutput = xcframeworkOutput.childDirectory(_kCocoaPods);
@@ -1569,93 +1588,220 @@ class CocoaPodPluginDependencies {
   }
 }
 
-/// Class that encapsulates the logic for building CocoaPod plugins for every platform and sdk into
-/// frameworks and then combines them into a single XCFramework for each.
+/// Class that encapsulates the logic for the Swift package that will be used to integrate
+/// a Flutter app into a native iOS or macOS app.
+///
+/// This Swift package will depend on the FlutterRegistrant Swift package and will include tools
+/// that will be integrated into the native build process.
 @visibleForTesting
-class FlutterSwiftPackageTools {
-  FlutterSwiftPackageTools({required BuildSwiftPackageUtils utils, required bool generateTests})
-    : _utils = utils,
-      _generateTests = generateTests;
+class FlutterNativeIntegrationSwiftPackage {
+  FlutterNativeIntegrationSwiftPackage({
+    required BuildSwiftPackageUtils utils,
+    required bool generateTests,
+  }) : _utils = utils,
+       _generateTests = generateTests;
 
   final BuildSwiftPackageUtils _utils;
   final bool _generateTests;
 
-  /// Generates bash scripts and xcfilelists to be used for integrating SwiftPM into an native project.
-  Future<void> generateArtifacts({required Directory outputDirectory}) async {
-    final Directory scriptsDirectory = outputDirectory.childDirectory(_kScripts);
+  /// The name of the Swift package library with common logic shared among the other tools.
+  static const String _kFlutterToolHelper = 'FlutterToolHelper';
+
+  /// The name of the Swift package executable tools that will be used during the build pre-action.
+  static const String _kFlutterPrebuildTool = 'FlutterPrebuildTool';
+
+  /// The name of the Swift package executable tool that will be used during a build run phase that
+  /// occurs after the Flutter.framework and App.framework are embedded into the app bundle.
+  static const String _kFlutterAssembleTool = 'FlutterAssembleTool';
+
+  // ignore: comment_references
+  /// The name of the Swift package executable tool that will be used to for the "Switch to
+  /// [insert build mode]" plugins.
+  static const String _kFlutterPluginTool = 'FlutterPluginTool';
+
+  /// The name of the Swift test target that will be used to test the Flutter tools in CI.
+  static const String _kFlutterToolTests = 'FlutterToolTests';
+
+  static const List<String> _executableTools = <String>[
+    _kFlutterPrebuildTool,
+    _kFlutterAssembleTool,
+    _kFlutterPluginTool,
+  ];
+
+  /// Generates the Swift package and its sources that will be used to integrate a Flutter app
+  /// into a native iOS or macOS app.
+  Future<void> generateSwiftPackages({
+    required Directory outputDirectory,
+    required Directory flutterIntegrationPackage,
+    required SwiftPackageSupportedPlatform highestSupportedVersion,
+    required List<BuildInfo> buildInfos,
+  }) async {
+    await _generateSourceFiles(
+      outputDirectory: outputDirectory,
+      flutterIntegrationPackage: flutterIntegrationPackage,
+      buildInfos: buildInfos,
+    );
+
+    final integrationPackage = SwiftPackage(
+      manifest: flutterIntegrationPackage.childFile('Package.swift'),
+      name: _kFlutterIntegrationPackageName,
+      platforms: <SwiftPackageSupportedPlatform>[highestSupportedVersion],
+      products: _products,
+      dependencies: [
+        SwiftPackagePackageDependency(name: kPluginSwiftPackageName, path: kPluginSwiftPackageName),
+      ],
+      targets: [...getTargets(buildInfos)],
+      templateRenderer: _utils.templateRenderer,
+    );
+
+    integrationPackage.createSwiftPackage();
+  }
+
+  /// Copies files from the template to the output directory.
+  Future<void> _generateSourceFiles({
+    required Directory outputDirectory,
+    required Directory flutterIntegrationPackage,
+    required List<BuildInfo> buildInfos,
+  }) async {
+    await _generateScripts(outputDirectory.childDirectory(_kScripts));
+    await _generateToolsSources(flutterIntegrationPackage.childDirectory(_kSources));
+    await _generatePluginsSources(
+      flutterIntegrationPackage.childDirectory(_kSwiftPlugins),
+      buildInfos,
+    );
+    await _generateTestSources(flutterIntegrationPackage.childDirectory('Tests'));
+  }
+
+  /// Generates bash scripts and xcfilelists to be used for integrating SwiftPM into the
+  /// [scriptsDirectory].
+  Future<void> _generateScripts(Directory scriptsDirectory) async {
     ErrorHandlingFileSystem.deleteIfExists(scriptsDirectory, recursive: true);
-    final Template template = await Template.fromName(
+    final Template scriptsTemplate = await Template.fromName(
       _utils.fileSystem.path.join('add_to_app', 'darwin', _kScripts),
       fileSystem: _utils.fileSystem,
       templateManifest: null,
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    template.render(scriptsDirectory, <String, Object>{}, printStatusWhenWriting: false);
+    scriptsTemplate.render(scriptsDirectory, <String, Object>{
+      'packageName': _kFlutterIntegrationPackageName,
+    }, printStatusWhenWriting: false);
   }
 
-  /// Generates a Swift Package that can be used for integrating SwiftPM into an native project.
-  Future<void> generateSwiftPackage(Directory outputDirectory, List<BuildInfo> buildInfos) async {
-    final Directory swiftConfigurationPluginDirectory = outputDirectory.childDirectory(
-      _kFlutterConfigurationPlugin,
-    );
-    ErrorHandlingFileSystem.deleteIfExists(swiftConfigurationPluginDirectory, recursive: true);
-
-    final Template template = await Template.fromName(
-      _utils.fileSystem.path.join('add_to_app', 'darwin', _kFlutterConfigurationPlugin),
+  /// Generate source files for Swift package executable tools to be used for integrating SwiftPM
+  /// into the [sourcesDirectory].
+  Future<void> _generateToolsSources(Directory sourcesDirectory) async {
+    ErrorHandlingFileSystem.deleteIfExists(sourcesDirectory, recursive: true);
+    final Template toolsTemplate = await Template.fromName(
+      _utils.fileSystem.path.join('add_to_app', 'darwin', _kTools),
       fileSystem: _utils.fileSystem,
       templateManifest: null,
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    template.render(swiftConfigurationPluginDirectory, <String, Object>{
-      'buildModes': [
-        for (final buildInfo in buildInfos)
-          {'uppercaseName': buildInfo.mode.uppercaseName, 'lowercaseName': buildInfo.mode.cliName},
-      ],
-      'generateTests': _generateTests,
-      'swiftToolsVersion': minimumSwiftToolchainVersion,
-    }, printStatusWhenWriting: false);
-    final Directory directoryPerBuildMode = swiftConfigurationPluginDirectory
-        .childDirectory('Plugins')
-        .childDirectory('BuildMode');
+    toolsTemplate.render(sourcesDirectory, <String, Object>{}, printStatusWhenWriting: false);
+  }
 
-    // Copy Plugins/BuildMode for each build mode (rename for the last)
-    for (var index = 0; index <= buildInfos.length - 1; index++) {
-      final isLast = index == buildInfos.length - 1;
-      final BuildInfo buildInfo = buildInfos[index];
-      final Directory destination = swiftConfigurationPluginDirectory
-          .childDirectory('Plugins')
-          .childDirectory(buildInfo.mode.uppercaseName);
-      if (!isLast) {
-        copyDirectory(directoryPerBuildMode, destination);
-      } else {
-        directoryPerBuildMode.renameSync(destination.path);
-      }
-      final File swiftFile = destination.childFile('UpdateConfiguration.swift');
-      swiftFile.writeAsStringSync(
-        swiftFile.readAsStringSync().replaceAll(r'$(CONFIGURATION)', buildInfo.mode.uppercaseName),
+  /// Generate source files for Swift package plugins to be used for integrating SwiftPM into the
+  /// [pluginsDirectory].
+  Future<void> _generatePluginsSources(
+    Directory pluginsDirectory,
+    List<BuildInfo> buildInfos,
+  ) async {
+    // Copy swift plugins to be used for integrating SwiftPM into an native project.
+    final Template pluginsTemplate = await Template.fromName(
+      _utils.fileSystem.path.join('add_to_app', 'darwin', 'Plugins'),
+      fileSystem: _utils.fileSystem,
+      templateManifest: null,
+      logger: _utils.logger,
+      templateRenderer: _utils.templateRenderer,
+    );
+    for (final buildInfo in buildInfos) {
+      final Directory pluginsModeDirectory = pluginsDirectory.childDirectory(
+        buildInfo.mode.uppercaseName,
       );
-    }
-    if (!_generateTests) {
-      final Directory testsDirectory = swiftConfigurationPluginDirectory.childDirectory('Tests');
-      ErrorHandlingFileSystem.deleteIfExists(testsDirectory, recursive: true);
+      pluginsTemplate.render(pluginsModeDirectory, <String, Object>{
+        'buildMode': buildInfo.mode.uppercaseName,
+      }, printStatusWhenWriting: false);
     }
   }
 
-  /// The package dependency for the FlutterConfigurationPlugin.
-  ///
-  /// This dependency does not need to be added as a dependency of a Swift Package target because
-  /// it is a SwiftPM command plugin.
-  ///
-  /// ```swift
-  ///   dependencies: [
-  ///     .package(name: "FlutterConfigurationPlugin", path: "../FlutterConfigurationPlugin"),
-  /// ```
-  SwiftPackagePackageDependency get packageDependency => SwiftPackagePackageDependency(
-    name: _kFlutterConfigurationPlugin,
-    path: '../$_kFlutterConfigurationPlugin',
-  );
+  /// Generate tests for the Swift package integration tools and plugins if [_generateTests] is true.
+  Future<void> _generateTestSources(Directory testDirectory) async {
+    ErrorHandlingFileSystem.deleteIfExists(testDirectory, recursive: true);
+    if (_generateTests) {
+      final Template testsTemplate = await Template.fromName(
+        _utils.fileSystem.path.join('add_to_app', 'darwin', 'Tests'),
+        fileSystem: _utils.fileSystem,
+        templateManifest: null,
+        logger: _utils.logger,
+        templateRenderer: _utils.templateRenderer,
+      );
+      testsTemplate.render(testDirectory, <String, Object>{}, printStatusWhenWriting: false);
+    }
+  }
+
+  /// The products the FlutterNativeIntegration swift package vends.
+  List<SwiftPackageProduct> get _products => <SwiftPackageProduct>[
+    SwiftPackageProduct.library(
+      name: _kFlutterIntegrationPackageName,
+      targets: [_kFlutterIntegrationPackageName],
+    ),
+    SwiftPackageProduct.executable(name: 'flutter-prebuild-tool', targets: [_kFlutterPrebuildTool]),
+    SwiftPackageProduct.executable(name: 'flutter-assemble-tool', targets: [_kFlutterAssembleTool]),
+  ];
+
+  /// The library, plugin, executable, and test targets for the FlutterNativeIntegration swift package.
+  List<SwiftPackageTarget> getTargets(List<BuildInfo> buildInfos) {
+    final swiftPackagePlugins = <SwiftPackageTarget>[
+      for (final buildInfo in buildInfos)
+        SwiftPackageTarget.pluginTarget(
+          name: 'Switch to ${buildInfo.mode.uppercaseName} Mode',
+          dependencies: <SwiftPackageTargetDependency>[
+            SwiftPackageTargetDependency.target(name: _kFlutterPluginTool),
+          ],
+          path: '$_kSwiftPlugins/${buildInfo.mode.uppercaseName}',
+          commandCapability: SwiftPackageCommandCapability(
+            verb: 'switch-to-${buildInfo.mode.cliName}',
+            description:
+                'Updates package to use the ${buildInfo.mode.uppercaseName} mode Flutter framework',
+          ),
+        ),
+    ];
+
+    final executableTargets = <SwiftPackageTarget>[
+      for (final String tool in _executableTools)
+        SwiftPackageTarget.executableTarget(
+          name: tool,
+          dependencies: [SwiftPackageTargetDependency.target(name: _kFlutterToolHelper)],
+        ),
+    ];
+
+    return <SwiftPackageTarget>[
+      SwiftPackageTarget.defaultTarget(
+        name: _kFlutterIntegrationPackageName,
+        dependencies: [
+          SwiftPackageTargetDependency.product(
+            name: kPluginSwiftPackageName,
+            packageName: kPluginSwiftPackageName,
+          ),
+        ],
+      ),
+      ...swiftPackagePlugins,
+      SwiftPackageTarget.defaultTarget(name: _kFlutterToolHelper),
+      ...executableTargets,
+      if (_generateTests)
+        SwiftPackageTarget.testTarget(
+          name: _kFlutterToolTests,
+          dependencies: [
+            SwiftPackageTargetDependency.target(name: _kFlutterPluginTool),
+            SwiftPackageTargetDependency.target(name: _kFlutterToolHelper),
+            SwiftPackageTargetDependency.target(name: _kFlutterPrebuildTool),
+            SwiftPackageTargetDependency.target(name: _kFlutterAssembleTool),
+          ],
+        ),
+    ];
+  }
 }
 
 /// Create an XCFramework from a list of frameworks.
@@ -1726,7 +1872,7 @@ Future<void> _produceXCFramework({
         binaryTargets.add(
           SwiftPackageTarget.binaryTarget(
             name: frameworkName,
-            relativePath: '$_kSources/$_kFrameworks/$directoryName/${entity.basename}',
+            relativePath: '$_kFrameworks/$directoryName/${entity.basename}',
           ),
         );
       }

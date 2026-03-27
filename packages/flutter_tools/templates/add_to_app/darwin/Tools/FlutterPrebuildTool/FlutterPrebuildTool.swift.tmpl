@@ -18,23 +18,15 @@ struct FlutterPrebuildTool {
         processManager: processManager
       )
 
-      let registrantPath = try FlutterToolHelper.findOrExit(
+      let packagePath = try FlutterToolHelper.findOrExit(
         env: env,
-        key: "FLUTTER_PLUGIN_REGISTRANT_PATH"
-      )
-
-      try FlutterToolHelper.updateSymlink(
-        targetBuildMode: mode,
-        currentLinkName: "Package.swift",
-        newLinkTarget: "./\(mode)/Package.swift",
-        flutterPluginRegistrantPath: registrantPath,
-        fileManager: fileManager
+        key: "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH"
       )
       try FlutterToolHelper.updateSymlink(
         targetBuildMode: mode,
-        currentLinkName: "Sources",
+        currentLinkName: "FlutterPluginRegistrant",
         newLinkTarget: "./\(mode)",
-        flutterPluginRegistrantPath: registrantPath,
+        integrationPackagePath: packagePath,
         fileManager: fileManager
       )
     } catch XcodeErrorAndExit.error(let errorMessages) {

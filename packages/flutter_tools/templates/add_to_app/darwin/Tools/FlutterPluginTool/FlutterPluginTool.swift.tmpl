@@ -8,14 +8,12 @@ struct FlutterPluginTool {
   static func main() throws {
     let (buildMode, packagePath) = try extractArguments(arguments: CommandLine.arguments)
 
-    let flutterPluginRegistrant = findFlutterPluginRegistrant(packagePath: packagePath)
-
     let fileManager = FileManager.default
     try FlutterToolHelper.updateSymlink(
       targetBuildMode: buildMode,
-      currentLinkName: "Package.swift",
-      newLinkTarget: "./\(buildMode)/Package.swift",
-      flutterPluginRegistrantPath: flutterPluginRegistrant.path,
+      currentLinkName: "FlutterPluginRegistrant",
+      newLinkTarget: "./\(buildMode)",
+      integrationPackagePath: packagePath,
       fileManager: fileManager
     )
   }
@@ -37,24 +35,11 @@ struct FlutterPluginTool {
       throw XcodeErrorAndExit.error(["Invalid build mode: \(buildMode)"])
     }
     let packagePath = arguments[2]
-    if !packagePath.contains("FlutterConfigurationPlugin")
-      && !packagePath.contains("FlutterPluginRegistrant")
+    if !packagePath.contains("FlutterNativeIntegration")
     {
       throw XcodeErrorAndExit.error(["Invalid package path: \(packagePath)"])
     }
     return (buildMode, packagePath)
-  }
-
-  /// Finds the FlutterPluginRegistrant directory based on the package path.
-  ///
-  /// - Parameter packagePath: The path to the package.
-  /// - Returns: The URL to the FlutterPluginRegistrant directory.
-  static func findFlutterPluginRegistrant(packagePath: String) -> URL {
-    let packageURL = URL(fileURLWithPath: packagePath)
-    if packageURL.lastPathComponent == "FlutterConfigurationPlugin" {
-      return packageURL.deletingLastPathComponent().appendingPathComponent("FlutterPluginRegistrant")
-    }
-    return packageURL
   }
 }
 

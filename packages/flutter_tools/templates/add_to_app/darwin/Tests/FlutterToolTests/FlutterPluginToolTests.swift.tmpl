@@ -11,7 +11,7 @@ import Testing
     (
       [
         "/path/to/SwiftPackages...", "Dummy",
-        "/path/to/SwiftPackages/FlutterPluginRegistrant",
+        "/path/to/SwiftPackages/FlutterNativeIntegration",
       ], "Invalid build mode: Dummy"
     ),
     (
@@ -32,26 +32,8 @@ func extractArgumentsThrowsError(
 @Test
 func extractArgumentsSuccess() async throws {
   let (buildMode, packagePath) = try FlutterPluginTool.extractArguments(
-    arguments: ["", "Debug", "/path/to/SwiftPackages/FlutterPluginRegistrant"]
+    arguments: ["", "Debug", "/path/to/SwiftPackages/FlutterNativeIntegration"]
   )
   #expect(buildMode == "Debug")
-  #expect(packagePath == "/path/to/SwiftPackages/FlutterPluginRegistrant")
-}
-
-@Test(
-  "Find FlutterPluginRegistrant Swift Package",
-  arguments: [
-    (
-      "/path/to/SwiftPackages/FlutterPluginRegistrant",
-      "/path/to/SwiftPackages/FlutterPluginRegistrant"
-    ),
-    (
-      "/path/to/SwiftPackages/FlutterConfigurationPlugin",
-      "/path/to/SwiftPackages/FlutterPluginRegistrant"
-    ),
-  ]
-)
-func findFlutterPluginRegistrant(path: String, expectedResultPath: String) async throws {
-  let found = FlutterPluginTool.findFlutterPluginRegistrant(packagePath: path)
-  #expect(found.path == expectedResultPath)
+  #expect(packagePath == "/path/to/SwiftPackages/FlutterNativeIntegration")
 }

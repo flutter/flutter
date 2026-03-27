@@ -7,13 +7,13 @@ import PackagePlugin
 struct FlutterConfigurationPlugin: CommandPlugin {
   func performCommand(context: PluginContext, arguments: [String]) async throws
   {
-    let configuration = "$(CONFIGURATION)"
+    let configuration = "{{buildMode}}"
     let tool = try context.tool(named: "FlutterPluginTool")
     let process = try Process.run(
-      URL(fileURLWithPath: tool.url.path),
+      URL(fileURLWithPath: tool.path.string),
       arguments: [
         configuration,
-        context.package.directoryURL.path,
+        context.package.directory.string,
       ]
     )
     process.waitUntilExit()

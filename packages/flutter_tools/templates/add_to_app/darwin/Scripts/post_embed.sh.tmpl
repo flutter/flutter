@@ -22,11 +22,10 @@ unset CDPATH
 # Find path to FlutterConfigurationPlugin
 PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
-FLUTTER_PLUGIN_REGISTRANT_PATH="$BIN_DIR/../FlutterPluginRegistrant"
-FLUTTER_CONFIGURATION_PLUGIN="$BIN_DIR/../FlutterConfigurationPlugin"
+FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH="$BIN_DIR/../{{packageName}}"
 
 # Use prebuilt flutter-assemble-tool if possible, otherwise re-build it for next time
-PREBUILT_FLUTTER_TOOL="$FLUTTER_CONFIGURATION_PLUGIN/.build/release/flutter-assemble-tool"
+PREBUILT_FLUTTER_TOOL="$FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH/.build/release/flutter-assemble-tool"
 if [[ -z "${REBUILD_FLUTTER_TOOL+set}" ]] || [[ "$REBUILD_FLUTTER_TOOL" != "YES" ]]; then
   PREBUILT_FLUTTER_TOOL_SCAN=$(gktool scan "$PREBUILT_FLUTTER_TOOL") || REBUILD_FLUTTER_TOOL="YES"
   if [[ "$PREBUILT_FLUTTER_TOOL_SCAN" != *"Scan completed and software is allowed by system policy."* ]]; then
@@ -37,7 +36,7 @@ if [[ -z "${REBUILD_FLUTTER_TOOL+set}" ]] || [[ "$REBUILD_FLUTTER_TOOL" != "YES"
   fi
 fi
 if [[ "$REBUILD_FLUTTER_TOOL" == "YES" ]]; then
-  cd "$FLUTTER_CONFIGURATION_PLUGIN"
+  cd "$FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH"
   env -i PATH=$PATH swift build --product flutter-assemble-tool -c release --disable-sandbox
 fi
-FLUTTER_PLUGIN_REGISTRANT_PATH=$FLUTTER_PLUGIN_REGISTRANT_PATH "$PREBUILT_FLUTTER_TOOL"
+FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH=$FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH "$PREBUILT_FLUTTER_TOOL"

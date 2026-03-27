@@ -272,6 +272,8 @@ class Context {
     ]);
   }
 
+  /// Builds the App.framework from a build script in a native app (add-to-app).
+  /// After building the framework, it embeds it into the app and codesigns it.
   void buildForNativeApp(TargetPlatform platform) {
     buildApp(platform, 'build-native');
     final xcodeFrameworksDir =

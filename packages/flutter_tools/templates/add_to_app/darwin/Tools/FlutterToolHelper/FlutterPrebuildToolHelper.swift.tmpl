@@ -18,15 +18,15 @@ public class FlutterPrebuildToolHelper {
     processManager: FlutterProcessRunner
   ) throws {
     // Verify XCFramework for the build mode exists
-    let flutterPluginRegistrantPath = try FlutterToolHelper.findOrExit(
+    let packagePath = try FlutterToolHelper.findOrExit(
       env: env,
-      key: "FLUTTER_PLUGIN_REGISTRANT_PATH"
+      key: "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH"
     )
     let targetPlatform = try FlutterToolHelper.targetPlatform(env: env)
     let frameworkName = targetPlatform == .macos ? "FlutterMacOS" : "Flutter"
     let xcframeworkURL = URL(
       fileURLWithPath:
-        "\(flutterPluginRegistrantPath)/\(targetBuildMode)/Frameworks/\(frameworkName).xcframework"
+        "\(packagePath)/\(targetBuildMode)/Frameworks/\(frameworkName).xcframework"
     )
     if !fileManager.fileExists(atPath: xcframeworkURL.path) {
       throw XcodeErrorAndExit.error([
