@@ -17,7 +17,7 @@ std::shared_ptr<PipelineCompileQueueGLES> PipelineCompileQueueGLES::Create(
 
 PipelineCompileQueueGLES::PipelineCompileQueueGLES(
     fml::RefPtr<fml::TaskRunner> worker_task_runner)
-    : PipelineCompileQueue(),
+    : PipelineCompileQueue(true),
       worker_task_runner_(std::move(worker_task_runner)) {}
 
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {}
