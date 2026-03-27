@@ -76,7 +76,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -84,7 +84,7 @@ void main() {
       final UniformFloatSlot slot = shader.getUniformFloat('iVec2Uniform');
       expect(slot.shaderIndex, 1);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
       expect(slot.shaderIndex, 5);
     } finally {
@@ -110,7 +110,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -118,7 +118,7 @@ void main() {
       final UniformFloatSlot slot = shader.getUniformFloat('iMat2Uniform', 3);
       expect(slot.shaderIndex, 6);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
       expect(slot.shaderIndex, 7);
       // Make sure there is no crash here.
@@ -146,7 +146,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -154,7 +154,7 @@ void main() {
       final UniformFloatSlot slotA = shader.getUniformFloat('iFloatUniform');
       slotA.set(1.0);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
 
       final UniformFloatSlot slotB = shader.getUniformFloat('iFloatUniformRenamed');
@@ -184,7 +184,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -192,7 +192,7 @@ void main() {
       final ImageSamplerSlot slot = shader.getImageSampler('tex_a');
       expect(slot.shaderIndex, 0);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
       expect(slot.shaderIndex, 1);
     } finally {
@@ -204,3 +204,12 @@ void main() {
 }
 
 void _use(Shader shader) {}
+
+/// Delete the file first, if it exists, to ensure the engine doesn't attempt
+/// to read a memory-mapped file that is actively being truncated and written to.
+void _deleteAndWrite(File file, Uint8List bytes) {
+  if (file.existsSync()) {
+    file.deleteSync();
+  }
+  file.writeAsBytesSync(bytes, flush: true);
+}
