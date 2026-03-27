@@ -1876,8 +1876,9 @@ void main() {
           ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            rrect: const BorderRadius.all(Radius.circular(12.0))
-              .toRRect(const Rect.fromLTWH(0, 0, 800.0, 56.0)),
+            rrect: const BorderRadius.all(
+              Radius.circular(12.0),
+            ).toRRect(const Rect.fromLTWH(0, 0, 800.0, 56.0)),
           )
           // Border outline. The rrect is the -center- of the 1.0 stroked outline.
           ..rrect(
@@ -14449,8 +14450,9 @@ void main() {
           ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            rrect: const BorderRadius.all(Radius.circular(12.0))
-              .toRRect(const Rect.fromLTWH(0, 0, 800.0, 56.0)),
+            rrect: const BorderRadius.all(
+              Radius.circular(12.0),
+            ).toRRect(const Rect.fromLTWH(0, 0, 800.0, 56.0)),
           )
           // Border outline. The rrect is the -center- of the 1.0 stroked outline.
           ..rrect(
@@ -15100,8 +15102,9 @@ void main() {
           ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            rrect: const BorderRadius.all(Radius.circular(borderRadius))
-              .toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
+            rrect: const BorderRadius.all(
+              Radius.circular(borderRadius),
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
           )
           ..restore(),
       );

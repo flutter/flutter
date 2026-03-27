@@ -891,10 +891,10 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: defaultActiveFillColor)
+        ..rrect(color: defaultActiveFillColor)
         ..rrect()
         ..path(color: defaultCheckColor)
-        ..path(color: defaultFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
+        ..rrect(color: defaultFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
       reason: 'Checkbox shows the correct focus color',
     );
 
@@ -904,10 +904,10 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: defaultActiveFillColor)
+        ..rrect(color: defaultActiveFillColor)
         ..rrect()
         ..path(color: defaultCheckColor)
-        ..path(color: testFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
+        ..rrect(color: testFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke),
       reason: 'Checkbox can configure a focus color',
     );
   });
@@ -932,9 +932,9 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: defaultInactiveFillColor)
+        ..rrect(color: defaultInactiveFillColor)
         ..drrect()
-        ..path(color: pressedDarkShadow),
+        ..rrect(color: pressedDarkShadow),
       reason: 'Inactive pressed checkbox is slightly darkened',
     );
 
@@ -952,10 +952,10 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: defaultActiveFillColor)
+        ..rrect(color: defaultActiveFillColor)
         ..rrect()
         ..path(color: defaultCheckColor)
-        ..path(color: pressedDarkShadow),
+        ..rrect(color: pressedDarkShadow),
       reason: 'Active pressed checkbox is slightly darkened',
     );
 
@@ -986,9 +986,9 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: defaultInactiveFillColor)
+        ..rrect(color: defaultInactiveFillColor)
         ..drrect()
-        ..path(color: pressedLightShadow),
+        ..rrect(color: pressedLightShadow),
       reason: 'Inactive pressed checkbox is slightly lightened',
     );
 
@@ -1007,10 +1007,10 @@ void main() {
     expect(
       find.byType(CupertinoCheckbox),
       paints
-        ..path(color: defaultActiveFillColor)
+        ..rrect(color: defaultActiveFillColor)
         ..rrect()
         ..path(color: checkColor)
-        ..path(color: pressedLightShadow),
+        ..rrect(color: pressedLightShadow),
       reason: 'Active pressed checkbox is slightly lightened',
     );
 
