@@ -3104,7 +3104,7 @@ void main() {
   ) async {
     final rootNavigatorKey = GlobalKey<NavigatorState>();
     final childNavigatorKey = GlobalKey<NavigatorState>();
-    // Create a [TestWidgetsApp], with a nested [Navigator], which has the
+    // Create a [WidgetsApp], with a nested [Navigator], which has the
     // [Draggable].
     await tester.pumpWidget(
       TestWidgetsApp(
@@ -3166,7 +3166,7 @@ void main() {
   ) async {
     final rootNavigatorKey = GlobalKey<NavigatorState>();
     final childNavigatorKey = GlobalKey<NavigatorState>();
-    // Create a [TestWidgetsApp], with a nested [Navigator], which has the
+    // Create a [WidgetsApp], with a nested [Navigator], which has the
     // [Draggable].
     await tester.pumpWidget(
       TestWidgetsApp(
@@ -3571,7 +3571,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Drag and drop - feedback matches pointer in scaled TestWidgetsApp', (
+  testWidgets('Drag and drop - feedback matches pointer in scaled WidgetsApp', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -3600,7 +3600,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Drag and drop - childDragAnchorStrategy works in scaled TestWidgetsApp', (
+  testWidgets('Drag and drop - childDragAnchorStrategy works in scaled WidgetsApp', (
     WidgetTester tester,
   ) async {
     final Key sourceKey = UniqueKey();
@@ -3632,7 +3632,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Drag and drop - feedback matches pointer in rotated TestWidgetsApp', (
+  testWidgets('Drag and drop - feedback matches pointer in rotated WidgetsApp', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
