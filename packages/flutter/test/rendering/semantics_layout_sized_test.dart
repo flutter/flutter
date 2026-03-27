@@ -156,8 +156,6 @@ void main() {
     newChild.isSemanticBoundary = true;
     grandParent.add(newChild);
 
-    // Flushing semantics now will run through flushSemantics.
-    // firstAncestorNodeWithCleanGeometry will be null at line 1618.
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
 }
