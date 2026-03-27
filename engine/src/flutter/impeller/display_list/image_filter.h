@@ -15,7 +15,7 @@ namespace impeller {
 ///
 std::shared_ptr<FilterContents> WrapInput(
     const std::shared_ptr<Context>& context,
-    TextureCache* image_cache,
+    TextureCache* texture_cache,
     const flutter::DlImageFilter* filter,
     const FilterInput::Ref& input);
 

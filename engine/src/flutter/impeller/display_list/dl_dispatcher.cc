@@ -680,7 +680,7 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
 
 std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
     const sk_sp<flutter::DlImage>& image) {
-  return GetCachedTexture(image.get(), GetContext(), image_cache_);
+  return GetCachedTexture(image.get(), GetContext(), texture_cache_);
 }
 
 void DlDispatcherBase::drawVertices(
@@ -938,8 +938,8 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
                                        IRect32 cull_rect,
-                                       TextureCache* image_cache)
-    : DlDispatcherBase(image_cache),
+                                       TextureCache* texture_cache)
+    : DlDispatcherBase(texture_cache),
       canvas_(renderer,
               render_target,
               is_onscreen,
@@ -947,7 +947,7 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                   RequiresReadbackForBlends(renderer, max_root_blend_mode),
               cull_rect),
       renderer_(renderer) {
-  canvas_.SetImageCache(image_cache_);
+  canvas_.SetImageCache(texture_cache_);
 }
 
 Canvas& CanvasDlDispatcher::GetCanvas() {
@@ -1234,7 +1234,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     bool reset_host_buffer,
     bool generate_mips,
     std::optional<PixelFormat> target_pixel_format,
-    TextureCache* image_cache) {
+    TextureCache* texture_cache) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1289,7 +1289,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
       impeller::IRect32::MakeSize(size),         //
-      image_cache                                //
+      texture_cache                              //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
@@ -1316,7 +1316,7 @@ bool RenderToTarget(ContentContext& context,
                     Rect cull_rect,
                     bool reset_host_buffer,
                     bool is_onscreen,
-                    TextureCache* image_cache) {
+                    TextureCache* texture_cache) {
   FirstPassDispatcher collector(context, impeller::Matrix(), cull_rect);
   display_list->Dispatch(collector, cull_rect);
 
@@ -1327,7 +1327,7 @@ bool RenderToTarget(ContentContext& context,
       display_list->root_has_backdrop_filter(),  //
       display_list->max_root_blend_mode(),       //
       IRect32::RoundOut(cull_rect),              //
-      image_cache                                //
+      texture_cache                              //
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);

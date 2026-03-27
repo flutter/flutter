@@ -139,7 +139,7 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<impeller::Context>& impeller_context) {
-  auto texture = dl_image->impeller_texture();
+  auto texture = dl_image->GetImpellerTexture(impeller_context);
 
   if (impeller_context == nullptr) {
     encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,

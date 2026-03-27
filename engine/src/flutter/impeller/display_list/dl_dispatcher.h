@@ -67,8 +67,8 @@ using DlPath = flutter::DlPath;
 /// operations for other specific classes.
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
-  explicit DlDispatcherBase(TextureCache* image_cache = nullptr)
-      : image_cache_(image_cache) {}
+  explicit DlDispatcherBase(TextureCache* texture_cache = nullptr)
+      : texture_cache_(texture_cache) {}
 
   virtual ~DlDispatcherBase() = default;
 
@@ -300,7 +300,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
  protected:
   Paint paint_;
   Matrix initial_matrix_;
-  TextureCache* image_cache_;
+  TextureCache* texture_cache_;
 
   static void SimplifyOrDrawPath(Canvas& canvas,
                                  const DlPath& cache,
@@ -319,7 +319,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
                      IRect32 cull_rect,
-                     TextureCache* image_cache = nullptr);
+                     TextureCache* texture_cache = nullptr);
 
   ~CanvasDlDispatcher() = default;
 
@@ -459,7 +459,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     bool reset_host_buffer = true,
     bool generate_mips = false,
     std::optional<PixelFormat> target_pixel_format = std::nullopt,
-    TextureCache* image_cache = nullptr);
+    TextureCache* texture_cache = nullptr);
 
 /// @brief Render the provided display list to the render target.
 ///
@@ -471,7 +471,7 @@ bool RenderToTarget(ContentContext& context,
                     Rect cull_rect,
                     bool reset_host_buffer,
                     bool is_onscreen = true,
-                    TextureCache* image_cache = nullptr);
+                    TextureCache* texture_cache = nullptr);
 
 }  // namespace impeller
 

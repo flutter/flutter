@@ -89,8 +89,23 @@ sk_sp<SkImage> DlImageImpeller::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageImpeller::impeller_texture() const {
+std::shared_ptr<impeller::Texture> DlImageImpeller::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   return texture_;
+}
+
+// |DlImage|
+flutter::DlColorSpace DlImageImpeller::GetColorSpace() const {
+  if (!texture_) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  switch (texture_->GetTextureDescriptor().format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+    case impeller::PixelFormat::kR16G16B16A16Float:
+      return flutter::DlColorSpace::kExtendedSRGB;
+    default:
+      return flutter::DlColorSpace::kSRGB;
+  }
 }
 
 // |DlImage|

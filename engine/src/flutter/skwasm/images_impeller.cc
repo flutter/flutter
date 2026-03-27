@@ -32,7 +32,8 @@ class DlWimpImageBase : public flutter::DlImage {
 
   sk_sp<SkImage> skia_image() const override { return nullptr; }
 
-  std::shared_ptr<impeller::Texture> impeller_texture() const override {
+  std::shared_ptr<impeller::Texture> GetImpellerTexture(
+      const std::shared_ptr<impeller::Context>& context) const override {
     return nullptr;
   }
 

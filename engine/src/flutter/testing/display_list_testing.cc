@@ -332,9 +332,6 @@ std::ostream& operator<<(std::ostream& os, const DlImage* image) {
   if (image->skia_image()) {
     os << "skia(" << image->skia_image().get() << "), ";
   }
-  if (image->impeller_texture()) {
-    os << "impeller(" << image->impeller_texture().get() << "), ";
-  }
   return os << "isTextureBacked: " << image->isTextureBacked() << ")";
 }
 

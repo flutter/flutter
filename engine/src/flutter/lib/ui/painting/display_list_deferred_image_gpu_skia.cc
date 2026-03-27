@@ -63,8 +63,8 @@ sk_sp<SkImage> DlDeferredImageGPUSkia::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlDeferredImageGPUSkia::impeller_texture()
-    const {
+std::shared_ptr<impeller::Texture> DlDeferredImageGPUSkia::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   return nullptr;
 }
 

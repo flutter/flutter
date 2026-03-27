@@ -52,11 +52,30 @@ sk_sp<SkImage> DlDeferredImageGPUImpeller::skia_image() const {
 
 // |DlImage|
 std::shared_ptr<impeller::Texture>
-DlDeferredImageGPUImpeller::impeller_texture() const {
+DlDeferredImageGPUImpeller::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   if (!wrapper_) {
     return nullptr;
   }
   return wrapper_->texture();
+}
+
+// |DlImage|
+flutter::DlColorSpace DlDeferredImageGPUImpeller::GetColorSpace() const {
+  if (!wrapper_) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  std::shared_ptr<impeller::Texture> texture = wrapper_->texture();
+  if (!texture) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  switch (texture->GetTextureDescriptor().format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+    case impeller::PixelFormat::kR16G16B16A16Float:
+      return flutter::DlColorSpace::kExtendedSRGB;
+    default:
+      return flutter::DlColorSpace::kSRGB;
+  }
 }
 
 // |DlImage|
@@ -176,14 +195,14 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
               snapshot_delegate->GetTextureRegistry());
         }
 
-        auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
+        auto texture = snapshot_delegate->MakeImpellerSnapshotSync(
             display_list, wrapper->size_, wrapper->pixel_format_);
-        if (!snapshot) {
+        if (!texture) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";
           return;
         }
-        std::atomic_store(&wrapper->texture_, snapshot->impeller_texture());
+        std::atomic_store(&wrapper->texture_, texture);
       }));
 }
 

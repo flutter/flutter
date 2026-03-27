@@ -9,6 +9,7 @@
 #include <optional>
 #include <string>
 
+#include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
@@ -50,16 +51,8 @@ class DlImage : public SkRefCnt {
   virtual sk_sp<SkImage> skia_image() const = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief      If this display list image is meant to be used by the Impeller
-  ///             backend, an Impeller texture instance. Null otherwise.
-  ///
-  /// @return     An Impeller texture instance or null.
-  ///
-  virtual std::shared_ptr<impeller::Texture> impeller_texture() const = 0;
-
-  //----------------------------------------------------------------------------
   /// @brief      Gets the Impeller texture instance, providing the current
-  /// context.
+  ///             context.
   ///             This allows the image to lazily generate the texture if it
   ///             needs to know the context (e.g. for deferred WebGL rendering).
   ///
@@ -67,8 +60,15 @@ class DlImage : public SkRefCnt {
   /// @return     An Impeller texture instance or null.
   ///
   virtual std::shared_ptr<impeller::Texture> GetImpellerTexture(
-      const std::shared_ptr<impeller::Context>& context) const {
-    return impeller_texture();
+      const std::shared_ptr<impeller::Context>& context) const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Gets the color space of the image.
+  ///
+  /// @return     The color space.
+  ///
+  virtual DlColorSpace GetColorSpace() const {
+    return DlColorSpace::kSRGB;
   }
 
   //----------------------------------------------------------------------------
@@ -146,8 +146,7 @@ class DlImage : public SkRefCnt {
     if (this == other) {
       return true;
     }
-    return skia_image() == other->skia_image() &&
-           impeller_texture() == other->impeller_texture();
+    return skia_image() == other->skia_image();
   }
 
   bool Equals(const DlImage& other) const { return Equals(&other); }

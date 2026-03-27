@@ -19,19 +19,19 @@ using TextureCache =
 inline std::shared_ptr<Texture> GetCachedTexture(
     const flutter::DlImage* image,
     const std::shared_ptr<Context>& context,
-    TextureCache* image_cache) {
+    TextureCache* texture_cache) {
   if (!image) {
     return nullptr;
   }
-  if (image_cache) {
-    auto it = image_cache->find(image);
-    if (it != image_cache->end()) {
+  if (texture_cache) {
+    auto it = texture_cache->find(image);
+    if (it != texture_cache->end()) {
       return it->second;
     }
   }
   auto texture = image->GetImpellerTexture(context);
-  if (image_cache && texture) {
-    (*image_cache)[image] = texture;
+  if (texture_cache && texture) {
+    (*texture_cache)[image] = texture;
   }
   return texture;
 }

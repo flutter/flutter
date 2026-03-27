@@ -21,7 +21,8 @@ class DlImageSkia final : public DlImage {
   sk_sp<SkImage> skia_image() const override;
 
   // |DlImage|
-  std::shared_ptr<impeller::Texture> impeller_texture() const override;
+  std::shared_ptr<impeller::Texture> GetImpellerTexture(
+      const std::shared_ptr<impeller::Context>& context) const override;
 
   // |DlImage|
   bool isOpaque() const override;

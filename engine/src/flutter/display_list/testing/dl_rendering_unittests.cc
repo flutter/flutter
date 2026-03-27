@@ -562,7 +562,7 @@ struct DlJobRenderer : public MatrixClipJobRenderer {
   }
 
   bool targets_impeller() const override {
-    return dl_image_->impeller_texture() != nullptr;
+    return dl_image_->isTextureBacked();
   }
 
  private:

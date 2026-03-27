@@ -396,9 +396,10 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
   EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
-  EXPECT_EQ(
-      result.first->impeller_texture()->GetTextureDescriptor().storage_mode,
-      impeller::StorageMode::kHostVisible);
+  EXPECT_EQ(result.first->GetImpellerTexture(no_gpu_access_context)
+                ->GetTextureDescriptor()
+                .storage_mode,
+            impeller::StorageMode::kHostVisible);
 
   no_gpu_access_context->FlushTasks(/*fail=*/true);
 }

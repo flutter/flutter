@@ -488,7 +488,8 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   impeller::TextureDescriptor desc;
   desc.format = impeller::PixelFormat::kR16G16B16A16Float;
   auto texture = std::make_shared<MockTexture>(desc);
-  EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
+  EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
+      .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
   buffer.reserve(100 * 100 * 8);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
@@ -518,7 +519,8 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   impeller::TextureDescriptor desc;
   desc.format = impeller::PixelFormat::kB10G10R10XR;
   auto texture = std::make_shared<MockTexture>(desc);
-  EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
+  EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
+      .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
   buffer.reserve(100 * 100 * 4);
   auto context = MakeConvertDlImageToSkImageContext(buffer);

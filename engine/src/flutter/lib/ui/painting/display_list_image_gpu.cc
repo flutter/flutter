@@ -27,7 +27,8 @@ sk_sp<SkImage> DlImageGPU::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageGPU::impeller_texture() const {
+std::shared_ptr<impeller::Texture> DlImageGPU::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   return nullptr;
 }
 

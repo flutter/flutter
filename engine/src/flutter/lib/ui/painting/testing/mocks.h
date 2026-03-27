@@ -8,6 +8,7 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "gmock/gmock.h"
+#include "impeller/core/texture.h"
 
 namespace flutter {
 namespace testing {
@@ -35,22 +36,37 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               (override));
   MOCK_METHOD(GrDirectContext*, GetGrContext, (), (override));
   MOCK_METHOD(void,
-              MakeRasterSnapshot,
+              MakeSkiaSnapshot,
               (sk_sp<DisplayList>,
                DlISize,
-               std::function<void(sk_sp<DlImage>)>,
+               std::function<void(sk_sp<SkImage>)>,
                SnapshotPixelFormat target_format),
               (override));
-  MOCK_METHOD(sk_sp<DlImage>,
-              MakeRasterSnapshotSync,
+  MOCK_METHOD(sk_sp<SkImage>,
+              MakeSkiaSnapshotSync,
+              (sk_sp<DisplayList>, DlISize, SnapshotPixelFormat),
+              (override));
+  MOCK_METHOD(void,
+              MakeImpellerSnapshot,
+              (sk_sp<DisplayList>,
+               DlISize,
+               std::function<void(std::shared_ptr<impeller::Texture>)>,
+               SnapshotPixelFormat target_format),
+              (override));
+  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
+              MakeImpellerSnapshotSync,
               (sk_sp<DisplayList>, DlISize, SnapshotPixelFormat),
               (override));
   MOCK_METHOD(sk_sp<SkImage>,
               ConvertToRasterImage,
               (sk_sp<SkImage>),
               (override));
-  MOCK_METHOD(sk_sp<DlImage>,
-              MakeTextureImage,
+  MOCK_METHOD(sk_sp<SkImage>,
+              MakeSkiaTextureImage,
+              (sk_sp<SkImage>, SnapshotPixelFormat),
+              (override));
+  MOCK_METHOD(std::shared_ptr<impeller::Texture>,
+              MakeImpellerTextureImage,
               (sk_sp<SkImage>, SnapshotPixelFormat),
               (override));
   MOCK_METHOD(void,
@@ -79,8 +95,8 @@ class MockDlImage : public DlImage {
   MOCK_METHOD(bool, isOpaque, (), (const, override));
   MOCK_METHOD(bool, isTextureBacked, (), (const, override));
   MOCK_METHOD(std::shared_ptr<impeller::Texture>,
-              impeller_texture,
-              (),
+              GetImpellerTexture,
+              (const std::shared_ptr<impeller::Context>&),
               (const, override));
   MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
   MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));

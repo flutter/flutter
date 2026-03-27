@@ -19,7 +19,8 @@ sk_sp<SkImage> DlImageSkia::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageSkia::impeller_texture() const {
+std::shared_ptr<impeller::Texture> DlImageSkia::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   return nullptr;
 }
 

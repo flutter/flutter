@@ -144,7 +144,9 @@ class Canvas {
 
   ~Canvas() = default;
 
-  void SetImageCache(TextureCache* image_cache) { image_cache_ = image_cache; }
+  void SetImageCache(TextureCache* texture_cache) {
+    texture_cache_ = texture_cache;
+  }
 
   /// @brief Update the backdrop data used to group together backdrop filters
   ///        within the same layer
@@ -302,7 +304,7 @@ class Canvas {
   RenderTarget render_target_;
   const bool is_onscreen_;
   bool requires_readback_;
-  TextureCache* image_cache_ = nullptr;
+  TextureCache* texture_cache_ = nullptr;
   EntityPassClipStack clip_coverage_stack_;
 
   std::deque<CanvasStackEntry> transform_stack_;
