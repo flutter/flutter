@@ -1258,17 +1258,15 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     };
 
     // Reserve space for the bubble's internal padding and screen margins.
-    final double safeMaxWidth = math.max(
-      0.0,
-      screenSize.width - _kValueIndicatorHorizontalBuffer,
-    );
+    final double safeMaxWidth = math.max(0.0, screenSize.width - _kValueIndicatorHorizontalBuffer);
 
     labelPainter
       ..text = TextSpan(style: _sliderTheme.valueIndicatorTextStyle, text: text)
       ..textDirection = textDirection
       ..textScaleFactor = textScaleFactor
       ..maxLines = 1
-      ..ellipsis = '\u2026' // Standard Unicode ellipsis
+      ..ellipsis =
+          '\u2026' // Standard Unicode ellipsis
       ..layout(maxWidth: safeMaxWidth);
 
     // Changing the textDirection can result in the layout changing, because the
