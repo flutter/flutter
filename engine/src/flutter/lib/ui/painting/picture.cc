@@ -12,8 +12,8 @@
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_skia.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #if IMPELLER_SUPPORTS_RENDERING
-#include "flutter/impeller/display_list/dl_image_impeller.h"
-#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"  // nogncheck
+#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "third_party/tonic/converter/dart_converter.h"

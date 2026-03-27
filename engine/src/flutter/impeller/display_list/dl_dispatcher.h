@@ -16,7 +16,6 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/paint.h"
-#include "impeller/display_list/texture_cache.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/rect.h"
 
@@ -65,8 +64,7 @@ using DlPath = flutter::DlPath;
 /// operations for other specific classes.
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
-  explicit DlDispatcherBase(TextureCache* texture_cache = nullptr)
-      : texture_cache_(texture_cache) {}
+  explicit DlDispatcherBase() {}
 
   virtual ~DlDispatcherBase() = default;
 
@@ -291,14 +289,13 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   virtual Canvas& GetCanvas() = 0;
 
-  virtual std::shared_ptr<impeller::Context> GetContext() const = 0;
+  virtual const ContentContext& GetContentContext() const = 0;
 
   std::shared_ptr<Texture> GetTexture(const sk_sp<flutter::DlImage>& image);
 
  protected:
   Paint paint_;
   Matrix initial_matrix_;
-  TextureCache* texture_cache_;
 
   static void SimplifyOrDrawPath(Canvas& canvas,
                                  const DlPath& cache,
@@ -316,8 +313,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
                      bool is_onscreen,
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
-                     IRect32 cull_rect,
-                     TextureCache* texture_cache = nullptr);
+                     IRect32 cull_rect);
 
   ~CanvasDlDispatcher() = default;
 
@@ -354,7 +350,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   const ContentContext& renderer_;
 
   Canvas& GetCanvas() override;
-  std::shared_ptr<impeller::Context> GetContext() const override;
+  const ContentContext& GetContentContext() const override;
 };
 
 /// Performs a first pass over the display list to collect information
@@ -456,8 +452,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
     AiksContext& context,
     bool reset_host_buffer = true,
     bool generate_mips = false,
-    std::optional<PixelFormat> target_pixel_format = std::nullopt,
-    TextureCache* texture_cache = nullptr);
+    std::optional<PixelFormat> target_pixel_format = std::nullopt);
 
 /// @brief Render the provided display list to the render target.
 ///
@@ -468,8 +463,7 @@ bool RenderToTarget(ContentContext& context,
                     const sk_sp<flutter::DisplayList>& display_list,
                     Rect cull_rect,
                     bool reset_host_buffer,
-                    bool is_onscreen = true,
-                    TextureCache* texture_cache = nullptr);
+                    bool is_onscreen = true);
 
 }  // namespace impeller
 

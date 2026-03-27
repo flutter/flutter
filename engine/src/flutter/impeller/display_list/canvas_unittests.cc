@@ -15,7 +15,6 @@
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
-#include "impeller/display_list/texture_cache.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
@@ -475,21 +474,22 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
 
   auto dl_image = impeller::DlImageImpeller::Make(texture);
 
-  TextureCache cache;
-  auto cached_tex1 =
-      GetCachedTexture(dl_image.get(), context.GetContext(), &cache);
+  context.SetTextureCachingEnabled(true);
+  auto cached_tex1 = context.GetCachedTexture(dl_image.get());
   ASSERT_EQ(cached_tex1, texture);
-  ASSERT_EQ(cache.size(), 1u);
 
-  auto cached_tex2 =
-      GetCachedTexture(dl_image.get(), context.GetContext(), &cache);
+  auto cached_tex2 = context.GetCachedTexture(dl_image.get());
   ASSERT_EQ(cached_tex2, texture);
-  ASSERT_EQ(cache.size(), 1u);
 
-  // Test that passing nullptr for cache doesn't crash and returns the texture.
-  auto cached_tex3 =
-      GetCachedTexture(dl_image.get(), context.GetContext(), nullptr);
+  context.RemoveCachedTexture(dl_image.get());
+  auto cached_tex3 = context.GetCachedTexture(dl_image.get());
   ASSERT_EQ(cached_tex3, texture);
+
+  context.ClearCachedTextures();
+  auto cached_tex4 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex4, texture);
+
+  context.SetTextureCachingEnabled(false);
 }
 
 }  // namespace testing

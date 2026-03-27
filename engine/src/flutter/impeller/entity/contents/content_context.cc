@@ -8,6 +8,7 @@
 #include <memory>
 #include <utility>
 
+#include "flutter/display_list/image/dl_image.h"
 #include "fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
@@ -1548,5 +1549,38 @@ PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
 }
 
 #endif  // IMPELLER_ENABLE_OPENGLES
+
+void ContentContext::SetTextureCachingEnabled(bool enabled) {
+  is_texture_caching_enabled_ = enabled;
+  if (!enabled) {
+    texture_cache_.clear();
+  }
+}
+
+std::shared_ptr<Texture> ContentContext::GetCachedTexture(
+    const flutter::DlImage* image) const {
+  if (!image) {
+    return nullptr;
+  }
+  if (is_texture_caching_enabled_) {
+    auto it = texture_cache_.find(image);
+    if (it != texture_cache_.end()) {
+      return it->second;
+    }
+  }
+  auto texture = image->GetImpellerTexture(GetContext());
+  if (is_texture_caching_enabled_ && texture) {
+    texture_cache_[image] = texture;
+  }
+  return texture;
+}
+
+void ContentContext::RemoveCachedTexture(const flutter::DlImage* image) const {
+  texture_cache_.erase(image);
+}
+
+void ContentContext::ClearCachedTextures() const {
+  texture_cache_.clear();
+}
 
 }  // namespace impeller

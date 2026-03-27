@@ -26,6 +26,10 @@
 #include "impeller/typographer/lazy_glyph_atlas.h"
 #include "impeller/typographer/typographer_context.h"
 
+namespace flutter {
+class DlImage;
+}  // namespace flutter
+
 namespace impeller {
 /// Pipeline state configuration.
 ///
@@ -280,6 +284,15 @@ class ContentContext {
       const std::string& unique_entrypoint_name) const;
 
   /// @brief Retrieve the current host buffer for transient storage of indexes
+  const std::shared_ptr<HostBuffer>& GetIndexesHostBuffer() const {
+    return indexes_host_buffer_;
+  }
+
+  void SetTextureCachingEnabled(bool enabled);
+  std::shared_ptr<Texture> GetCachedTexture(
+      const flutter::DlImage* image) const;
+  void RemoveCachedTexture(const flutter::DlImage* image) const;
+  void ClearCachedTextures() const;
   ///        used for indexed draws.
   ///
   /// This may or may not return the same value as `GetTransientsDataBuffer`
@@ -362,6 +375,10 @@ class ContentContext {
   std::shared_ptr<HostBuffer> indexes_host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
   std::unique_ptr<TextShadowCache> text_shadow_cache_;
+
+  bool is_texture_caching_enabled_ = false;
+  mutable std::unordered_map<const flutter::DlImage*, std::shared_ptr<Texture>>
+      texture_cache_;
 
   ContentContext(const ContentContext&) = delete;
 

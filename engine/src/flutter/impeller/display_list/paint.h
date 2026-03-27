@@ -12,8 +12,8 @@
 #include "display_list/effects/dl_image_filter.h"
 #include "impeller/display_list/color_filter.h"
 #include "impeller/display_list/image_filter.h"
-#include "impeller/display_list/texture_cache.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -69,8 +69,7 @@ struct Paint {
 
     std::shared_ptr<Contents> CreateMaskBlur(
         const Paint& paint,
-        const std::shared_ptr<Context>& context,
-        TextureCache* texture_cache,
+        const ContentContext& renderer,
         const Geometry* geometry,
         std::shared_ptr<ColorSourceContents> contents,
         bool needs_color_filter,
@@ -94,8 +93,7 @@ struct Paint {
   /// @return     The filter-wrapped contents. If there are no filters that need
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
-  std::shared_ptr<Contents> WithFilters(const std::shared_ptr<Context>& context,
-                                        TextureCache* texture_cache,
+  std::shared_ptr<Contents> WithFilters(const ContentContext& renderer,
                                         std::shared_ptr<Contents> input) const;
 
   /// @brief      Wrap this paint's configured filters to the given contents of
@@ -107,8 +105,7 @@ struct Paint {
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
   std::shared_ptr<Contents> WithFiltersForSubpassTarget(
-      const std::shared_ptr<Context>& context,
-      TextureCache* texture_cache,
+      const ContentContext& renderer,
       std::shared_ptr<Contents> input,
       const Matrix& effect_transform = Matrix()) const;
 
@@ -116,8 +113,7 @@ struct Paint {
   bool HasColorFilter() const;
 
   std::shared_ptr<ColorSourceContents> CreateContents(
-      const std::shared_ptr<Context>& context,
-      TextureCache* texture_cache,
+      const ContentContext& renderer,
       const Geometry* geometry) const;
 
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
@@ -125,8 +121,7 @@ struct Paint {
                                          const Matrix& ctm) const;
 
   std::shared_ptr<FilterContents> WithImageFilter(
-      const std::shared_ptr<Context>& context,
-      TextureCache* texture_cache,
+      const ContentContext& renderer,
       const FilterInput::Variant& input,
       const Matrix& effect_transform,
       Entity::RenderingMode rendering_mode) const;

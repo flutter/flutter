@@ -16,11 +16,9 @@
 
 namespace impeller {
 
-std::shared_ptr<FilterContents> WrapInput(
-    const std::shared_ptr<Context>& context,
-    TextureCache* texture_cache,
-    const flutter::DlImageFilter* filter,
-    const FilterInput::Ref& input) {
+std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
+                                          const flutter::DlImageFilter* filter,
+                                          const FilterInput::Ref& input) {
   FML_DCHECK(filter);
 
   switch (filter->type()) {
@@ -75,9 +73,8 @@ std::shared_ptr<FilterContents> WrapInput(
 
       auto matrix = matrix_filter->matrix();
       return FilterContents::MakeLocalMatrixFilter(
-          FilterInput::Make(WrapInput(context, texture_cache,
-                                      matrix_filter->image_filter().get(),
-                                      input)),
+          FilterInput::Make(
+              WrapInput(renderer, matrix_filter->image_filter().get(), input)),
           matrix);
     }
     case flutter::DlImageFilterType::kColorFilter: {
@@ -100,17 +97,16 @@ std::shared_ptr<FilterContents> WrapInput(
       auto outer_dl_filter = compose->outer();
       auto inner_dl_filter = compose->inner();
       if (!outer_dl_filter) {
-        return WrapInput(context, texture_cache, inner_dl_filter.get(), input);
+        return WrapInput(renderer, inner_dl_filter.get(), input);
       }
       if (!inner_dl_filter) {
-        return WrapInput(context, texture_cache, outer_dl_filter.get(), input);
+        return WrapInput(renderer, outer_dl_filter.get(), input);
       }
       FML_DCHECK(outer_dl_filter && inner_dl_filter);
 
       return WrapInput(
-          context, texture_cache, outer_dl_filter.get(),
-          FilterInput::Make(
-              WrapInput(context, texture_cache, inner_dl_filter.get(), input)));
+          renderer, outer_dl_filter.get(),
+          FilterInput::Make(WrapInput(renderer, inner_dl_filter.get(), input)));
     }
     case flutter::DlImageFilterType::kRuntimeEffect: {
       const flutter::DlRuntimeEffectImageFilter* runtime_filter =
@@ -137,8 +133,8 @@ std::shared_ptr<FilterContents> WrapInput(
         if (!image) {
           return nullptr;
         }
-        std::shared_ptr<impeller::Texture> texture = impeller::GetCachedTexture(
-            image->image().get(), context, texture_cache);
+        std::shared_ptr<impeller::Texture> texture =
+            renderer.GetCachedTexture(image->image().get());
         FML_DCHECK(texture);
         index++;
         texture_inputs.push_back({

@@ -54,6 +54,7 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
             std::make_unique<impeller::ContentContext>(context_,
                                                        typographer_context_,
                                                        nullptr)) {
+    content_context_->SetTextureCachingEnabled(true);
     active_contexts.push_back(this);
   }
 
@@ -66,10 +67,9 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
 
   virtual void RenderPicture(
       const sk_sp<flutter::DisplayList> display_list) override {
-    impeller::RenderToTarget(*content_context_, surface_->GetRenderTarget(),
-                             display_list,
-                             impeller::Rect::MakeLTRB(0, 0, width_, height_),
-                             true, true, &image_cache_);
+    impeller::RenderToTarget(
+        *content_context_, surface_->GetRenderTarget(), display_list,
+        impeller::Rect::MakeLTRB(0, 0, width_, height_), true, true);
   }
 
   virtual bool RasterizeImage(flutter::DlImage* image,
@@ -110,7 +110,11 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
     }
   }
 
-  void RemoveImage(const flutter::DlImage* image) { image_cache_.erase(image); }
+  void RemoveImage(const flutter::DlImage* image) {
+    if (content_context_) {
+      content_context_->RemoveCachedTexture(image);
+    }
+  }
 
   virtual void SetResourceCacheLimit(int bytes) override {
     // No-op
@@ -131,7 +135,6 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
   std::shared_ptr<impeller::TypographerContext> typographer_context_;
   std::unique_ptr<impeller::ContentContext> content_context_;
   std::unique_ptr<impeller::Surface> surface_;
-  impeller::TextureCache image_cache_;
   int width_ = 0;
   int height_ = 0;
 };
