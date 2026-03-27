@@ -42,13 +42,8 @@ class _SliderExampleState extends State<SliderExample> {
             Slider(
               // ignore: deprecated_member_use
               year2023: year2023,
-              divisions: 10,
               value: _currentSliderValue,
               max: 100,
-
-              label:
-                  'Current value is ${_currentSliderValue.round()} longgggggggggggggggggggggggggggggggggg and more loooong loooooong loooong loooong',
-
               onChanged: (double value) {
                 setState(() {
                   _currentSliderValue = value;
@@ -70,7 +65,9 @@ class _SliderExampleState extends State<SliderExample> {
             ),
             SwitchListTile(
               value: year2023,
-              title: year2023 ? const Text('Switch to latest M3 style') : const Text('Switch to year2023 M3 style'),
+              title: year2023
+                  ? const Text('Switch to latest M3 style')
+                  : const Text('Switch to year2023 M3 style'),
               onChanged: (bool value) {
                 setState(() {
                   year2023 = !year2023;
