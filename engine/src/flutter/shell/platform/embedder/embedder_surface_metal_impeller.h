@@ -14,6 +14,8 @@
 #include "fml/concurrent_message_loop.h"
 #include "impeller/display_list/aiks_context.h"
 
+#include "impeller/base/flags.h"
+
 namespace impeller {
 class Context;
 }
@@ -33,7 +35,8 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
       GPUMTLDeviceHandle device,
       GPUMTLCommandQueueHandle command_queue,
       MetalDispatchTable dispatch_table,
-      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+      impeller::Flags impeller_flags);
 
   ~EmbedderSurfaceMetalImpeller() override;
 

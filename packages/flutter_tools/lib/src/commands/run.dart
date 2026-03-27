@@ -248,6 +248,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
+    addEnableHcppFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -264,6 +265,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  bool get enableHcpp => boolArg('enable-hcpp');
   bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
 
   @override
@@ -329,6 +331,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
+        enableHcpp: enableHcpp,
         enableLocalDiscovery: enableLocalDiscovery,
       );
     } else {
@@ -392,6 +395,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+        enableHcpp: enableHcpp,
         enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
       );
@@ -413,11 +417,20 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
     );
 
+    final String? baseHref = stringArg('base-href') ?? fileConfig.baseHref;
+    if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
+    }
+
     final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
       host: stringArg('web-hostname'),
       port: webPort,
       https: httpsConfig,
       headers: extractWebHeaders(),
+      baseHref: baseHref,
     );
     return webDevServerConfig;
   }

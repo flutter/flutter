@@ -29,7 +29,7 @@ class BadgeExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           IconButton(
             icon: const Badge(

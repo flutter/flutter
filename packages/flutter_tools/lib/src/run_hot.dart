@@ -1603,6 +1603,8 @@ class ProjectFileInvalidator {
             // uri.toFilePath() does not work with MultiRootFileSystem.
             () =>
                 (uri.hasScheme && uri.scheme != 'file'
+                        // TODO(srawlins): Switch from using `stat` to using `statSync`.
+                        // ignore: avoid_slow_async_io
                         ? _fileSystem.file(uri).stat()
                         : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
                     .then((FileStat stat) {

@@ -613,9 +613,8 @@ static std::optional<Entity> PipelineBlend(
     // If a foreground color is set, blend it in.
 
     if (foreground_color.has_value()) {
-      auto contents = std::make_shared<SolidColorContents>();
       FillRectGeometry geom(Rect::MakeSize(pass.GetRenderTargetSize()));
-      contents->SetGeometry(&geom);
+      auto contents = std::make_shared<SolidColorContents>(&geom);
       contents->SetColor(foreground_color.value());
 
       Entity foreground_entity;

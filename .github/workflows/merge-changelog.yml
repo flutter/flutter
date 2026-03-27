@@ -19,48 +19,60 @@ jobs:
       - name: Setup Repository
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
+          repository: flutteractionsbot/flutter
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ref: master
-
-      # avoid downloading hundreds of other branches/history
-      # utilizing `fetch-depth:0` in actions/checkout would clone everything.
-      - name: Fetch Stable Branch Only
-        run: git fetch origin stable:stable --depth=1
 
       - name: Configure git
         run: |
-          git config user.name "[bot] Merge Changelog"
-          git config user.email "<>"
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
+          git remote add upstream https://github.com/flutter/flutter.git
 
-      - name: Read CHANGELOG.md from the stable branch
-        id: read_stable_changelog
+      # avoid downloading hundreds of other branches/history
+      # utilizing `fetch-depth:0` in actions/checkout would clone everything.
+      - name: Fetch upstream branches
         run: |
-          # origin/stable is locally mapped to stable
-          # use the local stable ref from above
-          CHANGELOG_CONTENT=$(git show stable:CHANGELOG.md)
-          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          git fetch upstream stable:stable --depth=1
+          git fetch upstream master --depth=1
 
       - name: Prepare PR branch and commit changes
         id: prepare_pr_branch
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
           PR_BRANCH="sync-changelog-stable-to-master-$(date +%s)"
           echo "pr_branch_name=$PR_BRANCH" >> "$GITHUB_OUTPUT"
-          git checkout -b "$PR_BRANCH" master
-          echo "${{ env.CHANGELOG_CONTENT }}" > CHANGELOG.md
+
+          # Base the branch on upstream's master to avoid issues if the fork's master is out of date
+          git checkout -b "$PR_BRANCH" upstream/master
+
+          # Retrieve the file from stable directly into the working directory
+          git show stable:CHANGELOG.md > CHANGELOG.md
+
+          # Stop if no changes are detected
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changes detected. Skipping PR creation."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
           git add CHANGELOG.md
           git commit -m "Sync CHANGELOG.md from stable"
           git push origin "$PR_BRANCH"
 
       - name: Create Pull Request
+        if: steps.prepare_pr_branch.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
           PR_HEAD_BRANCH=${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
 
           gh pr create \
             --base master \
-            --head "$PR_HEAD_BRANCH" \
+            --head flutteractionsbot:$PR_HEAD_BRANCH \
+            --repo flutter/flutter \
             --title "Sync CHANGELOG.md from stable" \
             --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \
             --label autosubmit
