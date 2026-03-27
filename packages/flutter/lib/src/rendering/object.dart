@@ -1612,12 +1612,15 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           if (!node._semantics.geometry!.isVisible && !node._semantics.isRoot) {
             final _RenderObjectSemantics parentInSemanticsTree =
                 node._semantics.parentInSemanticsTree!;
-            parentInSemanticsTree.computeAncestorInfo(treeShapeToken);
-            final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
-                parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
-            // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
-            if (firstAncestorNodeWithCleanGeometry != null) {
-              targets.add(firstAncestorNodeWithCleanGeometry);
+            if (!parentInSemanticsTree.geometryDirty) {
+              targets.add(parentInSemanticsTree);
+            } else {
+              final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
+                  parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
+              // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
+              if (firstAncestorNodeWithCleanGeometry != null) {
+                targets.add(firstAncestorNodeWithCleanGeometry);
+              }
             }
           }
           targets.add(node._semantics);
