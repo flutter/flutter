@@ -91,7 +91,7 @@ or
     '-dTrackWidgetCreation=$trackWidgetCreation',
     '-dBuildMode=$buildMode',
     '-dTargetFile=$flutterTarget',
-    '-dTreeShakeIcons="$treeShakeIcons"',
+    '-dTreeShakeIcons=$treeShakeIcons',
     '-dDartObfuscation=$dartObfuscation',
     if (codeSizeDirectory != null) '-dCodeSizeDirectory=$codeSizeDirectory',
     if (splitDebugInfo != null) '-dSplitDebugInfo=$splitDebugInfo',
