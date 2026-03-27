@@ -21,6 +21,7 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
   bool consolidate = false;
   bool useList = false;
   Int16List waveData = loadGraph();
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.sizeOf(context);
