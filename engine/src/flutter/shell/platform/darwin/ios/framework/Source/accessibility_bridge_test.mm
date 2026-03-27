@@ -17,6 +17,10 @@
 
 FLUTTER_ASSERT_ARC
 
+namespace {
+constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+}  // namespace
+
 @class MockPlatformView;
 __weak static MockPlatformView* gMockPlatformView = nil;
 
@@ -71,8 +75,6 @@ __weak static MockPlatformView* gMockPlatformView = nil;
 
 namespace flutter {
 namespace {
-constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
-
 class MockDelegate : public PlatformView::Delegate {
  public:
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
@@ -1712,7 +1714,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   fml::AutoResetWaitableEvent latch;
-  __block UIView<UITextInput>* resolvedTextInputView = nil;
+  UIView<UITextInput>* resolvedTextInputView = nil;
   thread_task_runner->PostTask([&] {
     platform_view->SetOwnerViewController(implicitFlutterViewController);
     auto bridge = std::make_unique<flutter::AccessibilityBridge>(

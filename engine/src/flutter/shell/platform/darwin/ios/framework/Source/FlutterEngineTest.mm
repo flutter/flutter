@@ -407,6 +407,27 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(2), [mockEngine updateDisplays]);
 }
 
+- (void)testSetViewControllerNilReleasesImplicitViewController {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  __weak FlutterViewController* weakViewController = nil;
+  @autoreleasepool {
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    weakViewController = viewController;
+    XCTAssertEqual(engine.viewController, viewController);
+
+    engine.viewController = nil;
+    XCTAssertNil(engine.viewController);
+
+    viewController = nil;
+  }
+
+  XCTAssertNil(weakViewController);
+}
+
 - (void)testReplacingImplicitViewControllerKeepsNewControllerAfterOldDealloc {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine createShell:@"" libraryURI:@"" initialRoute:nil];

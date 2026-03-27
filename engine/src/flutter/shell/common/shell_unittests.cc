@@ -5234,18 +5234,10 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
 
   fml::AutoResetWaitableEvent add_latch;
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &add_latch, &active_rendering_surfaces] {
+           [&shell, &add_latch, &active_rendering_surfaces, kSecondaryViewId] {
              shell->GetPlatformView()->AddView(
                  kSecondaryViewId,
-                 {
-                     1.0,  // p_device_pixel_ratio
-                     100,  // p_physical_width
-                     100,  // p_physical_height
-                     1,    // p_min_width_constraint,
-                     100,  // p_max_width_constraint,
-                     1,    // p_min_height_constraint,
-                     100,  // p_max_height_constraint,
-                 },
+                 ViewportMetrics{1.0, 100, 100, 22, 0},
                  [&](bool added) {
                    EXPECT_TRUE(added);
                    active_rendering_surfaces->insert(kSecondaryViewId);
@@ -5262,7 +5254,7 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
 
   fml::AutoResetWaitableEvent remove_latch;
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &remove_latch, &active_rendering_surfaces] {
+           [&shell, &remove_latch, &active_rendering_surfaces, kSecondaryViewId] {
              shell->GetPlatformView()->RemoveView(kSecondaryViewId,
                                                   [&](bool removed) {
                                                     EXPECT_TRUE(removed);
