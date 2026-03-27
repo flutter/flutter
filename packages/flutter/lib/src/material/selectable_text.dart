@@ -77,12 +77,13 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   @override
   void onSecondaryTap() {
     super.onSecondaryTap();
-    // On web, the browser's hidden textarea natively word-selects on a
-    // right-click and then sends an updateEditingValue to Flutter with that
-    // word-selection range. The base class has already applied the correct
-    // selection (selectWord on macOS/iOS, selectPosition elsewhere), so
-    // suppress the incoming browser update to prevent it from overriding
-    // Flutter's selection.
+    // On platforms that maintain an input connection for readOnly text (web,
+    // macOS), the platform can send an unsolicited word-selection via
+    // updateEditingValue after a right-click, even when interactive selection
+    // is disabled. The base class has already applied the correct selection
+    // (selectWord on macOS/iOS, selectPosition elsewhere), so schedule
+    // suppression of the next platform update to prevent it from overriding
+    // the Flutter-managed selection.
     editableText.suppressNextPlatformSelectionUpdate();
   }
 }

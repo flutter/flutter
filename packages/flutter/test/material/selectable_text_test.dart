@@ -5741,21 +5741,23 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/181833
       //
-      // On web, the browser's hidden textarea natively word-selects on a
-      // right-click and sends an updateEditingValue with that word range.
-      // After Flutter's onSecondaryTap handler applies the correct selection,
-      // the incoming browser update must be suppressed.
+      // On web/macOS, a readOnly EditableText keeps an input connection open
+      // (for keyboard shortcuts and context menus). The platform can therefore
+      // send an unsolicited word-selection via updateEditingValue after a
+      // right-click. This test verifies the suppression mechanism: after
+      // suppressNextPlatformSelectionUpdate() is called, the very next
+      // updateEditingValue is discarded and the Flutter-managed selection is
+      // preserved.
       //
-      // This test exercises the suppression mechanism directly by calling
-      // suppressNextPlatformSelectionUpdate() before a simulated platform
-      // update. The kIsWeb guard in updateEditingValue means suppression only
-      // fires on web at runtime; this test verifies the mechanism itself works.
+      // macOS is used as the target platform because it creates an input
+      // connection even for readOnly text (_shouldCreateInputConnection = true),
+      // allowing updateEditingValue to reach the suppression check.
       const String text = 'abc def ghi';
       await tester.pumpWidget(
         const MaterialApp(home: Material(child: SelectableText(text))),
       );
 
-      // Tap to establish the input connection and place the cursor.
+      // Tap to establish the input connection and place the cursor at offset 5.
       final Offset ePos = textOffsetToPosition(tester, 5);
       await tester.tapAt(ePos, kind: PointerDeviceKind.mouse);
       await tester.pumpAndSettle();
@@ -5763,11 +5765,11 @@ void main() {
       final EditableTextState state = tester.state(find.byType(EditableText));
       final TextSelection selectionBeforeUpdate = state.currentTextEditingValue.selection;
 
-      // Simulate what onSecondaryTap does on web: after applying the correct
-      // selection, schedule suppression of the next platform update.
+      // Schedule suppression of the next platform update (simulating what
+      // onSecondaryTap does after applying the correct selection).
       state.suppressNextPlatformSelectionUpdate();
 
-      // Simulate the browser sending a word-selection update ('def': 4..7).
+      // Simulate the platform sending a word-selection update ('def': 4..7).
       state.updateEditingValue(
         const TextEditingValue(
           text: text,
@@ -5776,9 +5778,72 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The platform word-selection must have been suppressed; selection
-      // remains what Flutter set before the platform update arrived.
+      // The platform word-selection must have been suppressed; the selection
+      // remains what Flutter had before the platform update arrived.
       expect(state.currentTextEditingValue.selection, selectionBeforeUpdate);
+
+      // Verify the flag is consumed: a second updateEditingValue is NOT
+      // suppressed and the selection does change.
+      state.updateEditingValue(
+        const TextEditingValue(
+          text: text,
+          selection: TextSelection(baseOffset: 4, extentOffset: 7),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        state.currentTextEditingValue.selection,
+        const TextSelection(baseOffset: 4, extentOffset: 7),
+      );
     },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
+  );
+
+  testWidgets(
+    'right-click on SelectableText triggers suppression of next platform selection update',
+    (WidgetTester tester) async {
+      // End-to-end test: verifies that the onSecondaryTap override in
+      // _SelectableTextSelectionGestureDetectorBuilder correctly calls
+      // suppressNextPlatformSelectionUpdate(), so a subsequent platform
+      // word-selection update is discarded.
+      const String text = 'abc def ghi';
+      await tester.pumpWidget(
+        const MaterialApp(home: Material(child: SelectableText(text))),
+      );
+
+      // Tap to establish the input connection.
+      final Offset ePos = textOffsetToPosition(tester, 5);
+      await tester.tapAt(ePos, kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+
+      // Right-click on the 'e' in 'def' (offset 5). This triggers onSecondaryTap
+      // which calls suppressNextPlatformSelectionUpdate() internally.
+      final TestGesture gesture = await tester.startGesture(
+        ePos,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      final TextSelection selectionAfterRightClick = state.currentTextEditingValue.selection;
+
+      // Simulate the platform sending a word-selection update for 'def' (4..7).
+      // This must be suppressed because onSecondaryTap already set the flag.
+      state.updateEditingValue(
+        const TextEditingValue(
+          text: text,
+          selection: TextSelection(baseOffset: 4, extentOffset: 7),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Selection must remain what onSecondaryTap set, not the platform update.
+      expect(state.currentTextEditingValue.selection, selectionAfterRightClick);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
   );
 }

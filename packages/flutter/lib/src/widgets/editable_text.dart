@@ -3509,26 +3509,35 @@ class EditableTextState extends State<EditableText>
   /// remote value is outdated and needs updating.
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
-  // When true, the next selection-only update arriving from the platform via
-  // updateEditingValue is discarded. Used on web to suppress the browser's
-  // native word-selection that fires after a secondary tap (right-click) on a
-  // readOnly EditableText, since Flutter has already applied the correct
-  // selection through the gesture handler.
+  // When true, the next call to updateEditingValue on a readOnly widget
+  // discards the incoming selection. Used to suppress an unsolicited platform
+  // word-selection (e.g. the browser's hidden textarea word-selecting on
+  // right-click) when Flutter's gesture handler has already applied the correct
+  // selection. The flag is always consumed by the very next updateEditingValue
+  // call that has an active input connection, regardless of readOnly state.
   bool _suppressNextPlatformSelectionUpdate = false;
 
-  /// Schedules suppression of the next platform-driven selection update.
+  /// Schedules suppression of the next platform-driven selection update on a
+  /// [readOnly] [EditableText].
   ///
   /// Call this immediately after a gesture handler has applied the desired
   /// selection, to prevent an asynchronous platform update (e.g. the browser's
   /// hidden textarea word-selecting on right-click) from overriding it.
   ///
-  /// The suppression only takes effect on web (via the [kIsWeb] guard inside
-  /// [updateEditingValue]) and is consumed by the very next call to
-  /// [updateEditingValue] regardless of whether the incoming value differs from
-  /// the current one.
+  /// The flag is always consumed by the very next [updateEditingValue] call
+  /// that reaches an active input connection, regardless of whether the
+  /// incoming value actually differs from the current one. This prevents the
+  /// flag from leaking if called on a non-[readOnly] widget (in that case the
+  /// flag is consumed but the update proceeds normally).
+  ///
+  /// On platforms where no input connection exists for [readOnly] text
+  /// (i.e. non-web, non-macOS), [updateEditingValue] returns early before
+  /// reaching the flag, so suppression has no observable effect there.
   ///
   /// This method is intended for use by [SelectableText]'s gesture handler
   /// and in tests. It should not be called from arbitrary call sites.
+  /// Note: [TextField] with [readOnly] set to true may exhibit the same
+  /// platform word-selection issue on web; that is tracked separately.
   void suppressNextPlatformSelectionUpdate() {
     _suppressNextPlatformSelectionUpdate = true;
   }
@@ -3554,17 +3563,21 @@ class EditableTextState extends State<EditableText>
       );
     }
 
+    // Always consume the suppression flag when updateEditingValue is reached
+    // with an active connection. This prevents the flag from leaking if it was
+    // set on a non-readOnly widget (where the readOnly block below is skipped).
+    final bool suppressUpdate = _suppressNextPlatformSelectionUpdate;
+    _suppressNextPlatformSelectionUpdate = false;
+
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
-      if (kIsWeb && _suppressNextPlatformSelectionUpdate) {
-        // On web, the browser's hidden textarea can send an unsolicited
-        // word-selection after a right-click (secondary tap). When a gesture
-        // handler has already applied the correct selection and flagged that
-        // the next platform-driven selection update should be suppressed,
-        // discard this update to prevent the browser from overriding the
-        // Flutter-managed selection.
-        _suppressNextPlatformSelectionUpdate = false;
+      if (suppressUpdate) {
+        // A gesture handler (e.g. onSecondaryTap in SelectableText) has already
+        // applied the correct selection and requested that the next platform
+        // update be discarded. This prevents an unsolicited platform
+        // word-selection (e.g. the browser's hidden textarea word-selecting on
+        // right-click) from overriding the Flutter-managed selection.
         _lastKnownRemoteTextEditingValue = _value;
         return;
       }
