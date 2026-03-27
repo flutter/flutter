@@ -29,6 +29,7 @@ class FlutterCache extends Cache {
     required Platform platform,
     required super.osUtils,
     required FlutterProjectFactory projectFactory,
+    super.stdio,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
     registerArtifact(MaterialFonts(this));
     registerArtifact(GradleWrapper(this));
