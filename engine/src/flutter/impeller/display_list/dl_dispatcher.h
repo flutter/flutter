@@ -20,13 +20,11 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/rect.h"
 
-namespace flutter {
-class DlImage;
-}
+#include "flutter/display_list/image/dl_image.h"
 
 namespace impeller {
 
-class Texture;
+#include "impeller/core/texture.h"
 
 using DlScalar = flutter::DlScalar;
 using DlPoint = flutter::DlPoint;

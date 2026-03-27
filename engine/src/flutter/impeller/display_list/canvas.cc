@@ -1534,16 +1534,6 @@ void Canvas::SaveLayer(const Paint& paint,
   Point local_position = Point(0, 0);
   if (backdrop_filter) {
     local_position = subpass_coverage.GetOrigin() - GetGlobalPassPosition();
-    Canvas::BackdropFilterProc backdrop_filter_proc =
-        [backdrop_filter = backdrop_filter, this](
-            const FilterInput::Ref& input, const Matrix& effect_transform,
-            Entity::RenderingMode rendering_mode) {
-          auto filter = WrapInput(renderer_.GetContext(), texture_cache_,
-                                  backdrop_filter, input);
-          filter->SetEffectTransform(effect_transform);
-          filter->SetRenderingMode(rendering_mode);
-          return filter;
-        };
 
     std::shared_ptr<Texture> input_texture;
 
@@ -1594,11 +1584,12 @@ void Canvas::SaveLayer(const Paint& paint,
       input_texture = backdrop_data->texture_slot;
     }
 
-    backdrop_filter_contents = backdrop_filter_proc(
-        FilterInput::Make(std::move(input_texture)),
-        transform_stack_.back().transform.Basis(),
-        // When the subpass has a translation that means the math with
-        // the snapshot has to be different.
+    backdrop_filter_contents =
+        WrapInput(renderer_.GetContext(), texture_cache_, backdrop_filter,
+                  FilterInput::Make(std::move(input_texture)));
+    backdrop_filter_contents->SetEffectTransform(
+        transform_stack_.back().transform.Basis());
+    backdrop_filter_contents->SetRenderingMode(
         transform_stack_.back().transform.HasTranslation()
             ? Entity::RenderingMode::kSubpassPrependSnapshotTransform
             : Entity::RenderingMode::kSubpassAppendSnapshotTransform);

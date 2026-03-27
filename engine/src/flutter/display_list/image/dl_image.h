@@ -67,9 +67,7 @@ class DlImage : public SkRefCnt {
   ///
   /// @return     The color space.
   ///
-  virtual DlColorSpace GetColorSpace() const {
-    return DlColorSpace::kSRGB;
-  }
+  virtual DlColorSpace GetColorSpace() const { return DlColorSpace::kSRGB; }
 
   //----------------------------------------------------------------------------
   /// @brief      If the pixel format of this image ignores alpha, this returns
