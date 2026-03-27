@@ -21,9 +21,9 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
   bool consolidate = false;
   bool useList = false;
   Int16List waveData = loadGraph();
-
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -52,9 +52,8 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
         ],
       ),
       backgroundColor: Colors.transparent,
-      body: SizedBox(
-        width: MediaQuery.widthOf(context),
-        height: MediaQuery.heightOf(context),
+      body: SizedBox.fromSize(
+        size: size,
         child: useList
             ? ListView.builder(
                 key: const ValueKey<String>('vlp_list_view_scrollable'),
@@ -74,8 +73,8 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
                 key: const ValueKey<String>('vlp_single_child_scrollable'),
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
-                  width: MediaQuery.widthOf(context) * 20,
-                  height: MediaQuery.heightOf(context),
+                  width: size.width * 20,
+                  height: size.height,
                   child: RepaintBoundary(
                     child: CustomPaint(
                       isComplex: true,
