@@ -140,6 +140,23 @@ size_t Picture::GetAllocationSize() const {
   }
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
+static sk_sp<DlImage> MakeImpellerImage(
+    const std::shared_ptr<impeller::Texture>& texture) {
+  if (texture) {
+    return impeller::DlImageImpeller::Make(texture,
+                                           DlImage::OwningContext::kRaster);
+  }
+#if FML_OS_IOS_SIMULATOR
+  return impeller::DlImageImpeller::Make(nullptr,
+                                         DlImage::OwningContext::kRaster,
+                                         /*is_fake_image=*/true);
+#else
+  return nullptr;
+#endif
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 Dart_Handle Picture::RasterizeToImage(const sk_sp<DisplayList>& display_list,
                                       uint32_t width,
                                       uint32_t height,
@@ -180,7 +197,11 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
   auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
   auto raster_task_runner = dart_state->GetTaskRunners().GetRasterTaskRunner();
   auto snapshot_delegate = dart_state->GetSnapshotDelegate();
+#if IMPELLER_SUPPORTS_RENDERING
   auto is_impeller_enabled = dart_state->IsImpellerEnabled();
+#else
+  auto is_impeller_enabled = false;
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
   // We can't create an image on this task runner because we don't have a
   // graphics context. Even if we did, it would be slow anyway. Also, this
@@ -240,28 +261,18 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                                   snapshot_delegate->GetGrContext());
         }
         if (is_impeller_enabled) {
+#if IMPELLER_SUPPORTS_RENDERING
           snapshot_delegate->MakeImpellerSnapshot(
               snapshot_display_list, picture_bounds,
               [ui_task_runner,
                ui_task](const std::shared_ptr<impeller::Texture>& texture) {
                 fml::TaskRunner::RunNowOrPostTask(
                     ui_task_runner, [ui_task, texture]() {
-                      sk_sp<DlImage> image;
-                      if (texture) {
-                        image = impeller::DlImageImpeller::Make(
-                            texture, DlImage::OwningContext::kRaster);
-                      }
-#if FML_OS_IOS_SIMULATOR
-                      else if (!image) {
-                        image = impeller::DlImageImpeller::Make(
-                            nullptr, DlImage::OwningContext::kRaster,
-                            /*is_fake_image=*/true);
-                      }
-#endif
-                      ui_task(image);
+                      ui_task(MakeImpellerImage(texture));
                     });
               },
               SnapshotPixelFormat::kDontCare);
+#endif  // IMPELLER_SUPPORTS_RENDERING
         } else {
           snapshot_delegate->MakeSkiaSnapshot(
               snapshot_display_list, picture_bounds,
