@@ -1033,15 +1033,9 @@ class TextEditingValue {
   /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
   ///
-  /// On iOS 17 and later, when inline predictive text is enabled for the text
-  /// field, the system may show predicted continuation text using the same
-  /// composing (marked-text) range as IME composition, so this range can cover
-  /// that provisional text. On iOS, inline prediction is disabled unless
-  /// explicitly enabled for the field.
-  ///
-  /// See also:
-  ///
-  ///  * [EditableText.enableInlinePrediction], to enable or disable this behavior on iOS.
+  /// On iOS 17 and later, the composing region can also be used
+  /// to display inline text predictions. The user can accept the
+  /// predicted text by tapping the Space bar.
   ///
   /// The composing region should typically only be changed by the IME, or the
   /// user via interacting with the IME.
