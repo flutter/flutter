@@ -430,17 +430,17 @@ void main() {
           ),
         ),
       );
+      expect(tester.getRect(find.text('header')), const Rect.fromLTWH(0, 100, 800, 300));
+
       await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
       await tester.pumpAndSettle();
 
+      expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
       expect(
         semantics,
-        isNot(
-          includesNodeWith(
-            tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
-          ),
-        ),
+        isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.excludeFromScrolling})),
       );
+      expect(tester.getRect(find.text('header')), const Rect.fromLTWH(0, 0, 800, 300));
 
       await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
       await tester.pumpAndSettle();
@@ -450,6 +450,7 @@ void main() {
         RenderViewport.excludeFromScrolling,
         RenderViewport.useTwoPaneSemantics,
       });
+      expect(tester.getRect(find.text('header')), const Rect.fromLTWH(0, 0, 800, 300));
 
       semantics.dispose();
     },

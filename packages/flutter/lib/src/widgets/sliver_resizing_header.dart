@@ -231,8 +231,8 @@ class _RenderSliverResizingHeader extends RenderSliver
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child == this.child);
-    applyPaintTransformForBoxChild(child as RenderBox, transform);
+    final childParentData = child.parentData! as SliverPhysicalParentData;
+    childParentData.applyPaintTransform(transform);
   }
 
   @override
