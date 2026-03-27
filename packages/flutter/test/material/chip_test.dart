@@ -3534,15 +3534,17 @@ void main() {
         }),
       ),
     );
+    const avatarX = 16.0;
+    const avatarY = 16.0;
+    const avatarRadius = 12.0;
     const selectScrimColor = Color(0x60191919);
     expect(
       rawChip,
-      paints..circle(
-        color: selectScrimColor,
-        x: 16.0,
-        y: 16.0,
-        radius: 12.0,
-      ),
+      paints
+        // CircleAvatar background.
+        ..circle(x: avatarX, y: avatarY, radius: avatarRadius)
+        // Selection scrim overlay.
+        ..circle(color: selectScrimColor, x: avatarX, y: avatarY, radius: avatarRadius),
     );
   });
 
@@ -3567,15 +3569,17 @@ void main() {
         }),
       ),
     );
+    const avatarX = 18.0;
+    const avatarY = 18.0;
+    const avatarRadius = 10.0;
     const selectScrimColor = Color(0x60191919);
     expect(
       rawChip,
-      paints..circle(
-        color: selectScrimColor,
-        x: 18.0,
-        y: 18.0,
-        radius: 10.0,
-      ),
+      paints
+        // CircleAvatar background.
+        ..circle(x: avatarX, y: avatarY, radius: avatarRadius)
+        // Selection scrim overlay.
+        ..circle(color: selectScrimColor, x: avatarX, y: avatarY, radius: avatarRadius),
     );
   });
 

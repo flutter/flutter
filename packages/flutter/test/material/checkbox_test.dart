@@ -433,7 +433,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: theme.colorScheme.secondary)
+        ..rrect(color: theme.colorScheme.secondary)
         ..path(color: const Color(0xFFFFFFFF)),
     ); // checkmark is rendered as a path
 
@@ -455,7 +455,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: theme.colorScheme.secondary)
+        ..rrect(color: theme.colorScheme.secondary)
         ..path(color: const Color(0xFFFFFFFF)),
     ); // checkmark is rendered as a path
 
@@ -499,7 +499,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: theme.colorScheme.primary)
+        ..rrect(color: theme.colorScheme.primary)
         ..path(color: theme.colorScheme.onPrimary),
     ); // checkmark is rendered as a path
 
@@ -521,7 +521,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: theme.colorScheme.primary)
+        ..rrect(color: theme.colorScheme.primary)
         ..path(color: theme.colorScheme.onPrimary),
     ); // checkmark is rendered as a path
 
@@ -563,7 +563,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: borderColor)
+        ..rrect(color: borderColor)
         ..path(color: checkColor),
     ); // paints's color is 0xFFFFFFFF (default color)
 
@@ -574,7 +574,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: borderColor)
+        ..rrect(color: borderColor)
         ..path(color: checkColor),
     ); // paints's color is 0xFF000000 (params)
 
@@ -629,7 +629,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: borderColor)
+        ..rrect(color: borderColor)
         ..path(color: checkColor),
     ); // paints's color is 0xFFFFFFFF (default color)
 
@@ -640,7 +640,7 @@ void main() {
     expect(
       getCheckboxRenderer(),
       paints
-        ..path(color: borderColor)
+        ..rrect(color: borderColor)
         ..path(color: checkColor),
     ); // paints's color is 0xFF000000 (params)
 
@@ -704,7 +704,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..path(color: const Color(0xff2196f3))
+        ..rrect(color: const Color(0xff2196f3))
         ..path(color: Colors.white),
     );
 
@@ -782,7 +782,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..path(color: theme.colorScheme.primary)
+        ..rrect(color: theme.colorScheme.primary)
         ..path(color: theme.colorScheme.onPrimary),
     );
 
@@ -922,7 +922,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: const Color(0xff2196f3))
+        ..rrect(color: const Color(0xff2196f3))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -937,7 +937,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..path(color: const Color(0xff2196f3))
+        ..rrect(color: const Color(0xff2196f3))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -947,7 +947,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: const Color(0x61000000))
+        ..rrect(color: const Color(0x61000000))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -988,7 +988,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: const Color(0xff6750a4))
+        ..rrect(color: const Color(0xff6750a4))
         ..path(color: theme.colorScheme.onPrimary, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -1003,7 +1003,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..path(color: const Color(0xff6750a4))
+        ..rrect(color: const Color(0xff6750a4))
         ..path(color: theme.colorScheme.onPrimary, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -1013,7 +1013,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        ..rrect(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..path(color: theme.colorScheme.surface, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -2136,7 +2136,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: themeData.colorScheme.error.withOpacity(0.1))
-        ..path(color: themeData.colorScheme.error)
+        ..rrect(color: themeData.colorScheme.error)
         ..path(color: themeData.colorScheme.onError),
     );
 
@@ -2148,7 +2148,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: themeData.colorScheme.error)
+        ..rrect(color: themeData.colorScheme.error)
         ..path(color: themeData.colorScheme.onError),
     );
 
@@ -2163,7 +2163,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
-        ..path(color: themeData.colorScheme.error),
+        ..rrect(color: themeData.colorScheme.error),
     );
 
     // Start pressing
@@ -2175,7 +2175,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: themeData.colorScheme.error.withOpacity(0.1))
-        ..path(color: themeData.colorScheme.error),
+        ..rrect(color: themeData.colorScheme.error),
     );
     await gestureLongPress.up();
     await tester.pump();
