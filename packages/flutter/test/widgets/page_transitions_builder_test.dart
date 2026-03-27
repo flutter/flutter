@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'utils.dart';
+import 'route_tester.dart';
 
 void main() {
   testWidgets('PageTransitionsBuilder buildTransitions method is called correctly', (
