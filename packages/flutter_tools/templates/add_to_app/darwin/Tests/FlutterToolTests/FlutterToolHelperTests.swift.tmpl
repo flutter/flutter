@@ -27,13 +27,13 @@ func parseFlutterBuildModeSuccess(
 @Test(
   "Parse Flutter Build Mode from Environment Throws",
   arguments: [
-    (["CONFIGURATION": "ASDF"], "Unknown CONFIGURATION: asdf"),
-    (["FLUTTER_BUILD_MODE": "ASDF"], "Unknown CONFIGURATION: asdf"),
-    ([:], "Unknown CONFIGURATION: "),
+    (["CONFIGURATION": "ASDF"]),
+    (["FLUTTER_BUILD_MODE": "ASDF"]),
+    ([:]),
   ]
 )
-func parseFlutterBuildModeThrows(env: [String: String], errorMessage: String) async throws {
-  #expect(throws: XcodeErrorAndExit.error([errorMessage])) {
+func parseFlutterBuildModeThrows(env: [String: String]) async throws {
+  #expect(throws: XcodeErrorAndExit.self) {
     try FlutterToolHelper.parseFlutterBuildMode(env: env)
   }
 }

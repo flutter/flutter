@@ -219,7 +219,7 @@ public class FlutterAssembleToolHelper {
       flutterExportedEnv: exportedEnv
     )
 
-    // Verify Flutter root exists and print a warning and exit if not
+    // Verify Flutter root exists
     let flutterRoot = try FlutterToolHelper.findOrExit(env: mergedEnvironment, key: "FLUTTER_ROOT")
     if !fileManager.fileExists(atPath: flutterRoot) {
       throw XcodeErrorAndExit.error([
@@ -258,7 +258,7 @@ public class FlutterAssembleToolHelper {
       resolvedPath = "\(srcRoot)/\(flutterAppPath)"
     }
 
-    // Verify the Flutter app exists and print a warning and exit if not
+    // Verify the Flutter app exists
     if !fileManager.fileExists(atPath: resolvedPath) {
       throw XcodeErrorAndExit.error([
         "FLUTTER_APPLICATION_PATH is set to \(resolvedPath), but could not be located."

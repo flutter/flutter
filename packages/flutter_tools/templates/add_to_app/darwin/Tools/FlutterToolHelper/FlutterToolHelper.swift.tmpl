@@ -22,8 +22,13 @@ public class FlutterToolHelper {
     } else if rawMode.contains("debug") {
       buildMode = "Debug"
     } else {
-      let message = "Unknown CONFIGURATION: \(rawMode)"
-      throw XcodeErrorAndExit.error([message])
+      throw XcodeErrorAndExit.error([
+        "Unknown FLUTTER_BUILD_MODE: \(rawMode)",
+        "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive).'",
+        "This is controlled by the FLUTTER_BUILD_MODE environment variable.",
+        "If that is not set, the CONFIGURATION environment variable is used.",
+        "To fix this, please rename the \(rawMode) configuration to include an appropriate value or set FLUTTER_BUILD_MODE",
+      ])
     }
 
     return buildMode
