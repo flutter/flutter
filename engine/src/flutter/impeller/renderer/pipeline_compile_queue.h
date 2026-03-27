@@ -43,6 +43,7 @@ class PipelineCompileQueue
     : public std::enable_shared_from_this<PipelineCompileQueue> {
  public:
   PipelineCompileQueue() = default;
+  PipelineCompileQueue(bool wait_until_rendering);
 
   virtual ~PipelineCompileQueue();
 
@@ -80,6 +81,13 @@ class PipelineCompileQueue
   ///             runners.
   ///
   virtual void PostJob(const fml::closure& job) = 0;
+
+  bool WaitUntilRendering() { return wait_until_rendering_; };
+
+  void FlushPendingJobs();
+
+ protected:
+  bool wait_until_rendering_ = false;
 
  private:
   Mutex pending_jobs_mutex_;

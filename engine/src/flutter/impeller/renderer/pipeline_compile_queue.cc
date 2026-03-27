@@ -9,6 +9,9 @@
 
 namespace impeller {
 
+PipelineCompileQueue::PipelineCompileQueue(bool wait_until_rendering)
+    : wait_until_rendering_(wait_until_rendering) {}
+
 PipelineCompileQueue::~PipelineCompileQueue() {
   FinishAllJobs();
 }
@@ -35,12 +38,13 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
       return true;
     }
   }
-
-  PostJob([weak_queue = weak_from_this()]() {
-    if (auto queue = weak_queue.lock()) {
-      queue->DoOneJob();
-    }
-  });
+  if (!WaitUntilRendering()) {
+    PostJob([weak_queue = weak_from_this()]() {
+      if (auto queue = weak_queue.lock()) {
+        queue->DoOneJob();
+      }
+    });
+  }
   return true;
 }
 
@@ -80,6 +84,14 @@ void PipelineCompileQueue::DoOneJob() {
   if (auto job = TakeNextJob()) {
     job();
   }
+}
+
+void PipelineCompileQueue::FlushPendingJobs() {
+  PostJob([weak_queue = weak_from_this()]() {
+    if (auto queue = weak_queue.lock()) {
+      queue->FinishAllJobs();
+    }
+  });
 }
 
 void PipelineCompileQueue::FinishAllJobs() {
