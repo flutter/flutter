@@ -59,8 +59,8 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
             ::testing::Return(snapshot_delegate->GetMockTextureRegistry()));
     impeller::TextureDescriptor desc;
     desc.size = {1, 1};
-    ::testing::DefaultValue<bool>::Set(true);
     auto mock_texture = std::make_shared<impeller::testing::MockTexture>(desc);
+    EXPECT_CALL(*mock_texture, IsValid()).WillRepeatedly(::testing::Return(true));
     EXPECT_CALL(
         *snapshot_delegate,
         MakeImpellerSnapshotSync(::testing::_, ::testing::_, ::testing::_))
