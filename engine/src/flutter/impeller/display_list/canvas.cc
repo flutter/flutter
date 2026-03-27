@@ -824,7 +824,8 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs) {
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
     Scalar expand_size = kAntialiasPadding;
     if (paint.style == Paint::Style::kStroke) {
       expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
@@ -1044,7 +1045,8 @@ void Canvas::DrawCircle(const Point& center,
     }
   }
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs) {
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
     const bool is_stroked = paint.style == Paint::Style::kStroke;
 
     std::optional<CircleGeometry> geometry;
