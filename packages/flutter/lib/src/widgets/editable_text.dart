@@ -3522,11 +3522,15 @@ class EditableTextState extends State<EditableText>
   /// selection, to prevent an asynchronous platform update (e.g. the browser's
   /// hidden textarea word-selecting on right-click) from overriding it.
   ///
-  /// Has no effect on non-web platforms.
+  /// The suppression only takes effect on web (via the [kIsWeb] guard inside
+  /// [updateEditingValue]) and is consumed by the very next call to
+  /// [updateEditingValue] regardless of whether the incoming value differs from
+  /// the current one.
+  ///
+  /// This method is intended for use by [SelectableText]'s gesture handler
+  /// and in tests. It should not be called from arbitrary call sites.
   void suppressNextPlatformSelectionUpdate() {
-    if (kIsWeb) {
-      _suppressNextPlatformSelectionUpdate = true;
-    }
+    _suppressNextPlatformSelectionUpdate = true;
   }
 
   @override

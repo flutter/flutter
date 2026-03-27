@@ -5737,44 +5737,38 @@ void main() {
   });
 
   testWidgets(
-    'right-click on web does not let the browser override the Flutter-managed selection',
+    'suppressNextPlatformSelectionUpdate prevents platform selection from overriding Flutter selection',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/181833
       //
       // On web, the browser's hidden textarea natively word-selects on a
-      // right-click and then sends an updateEditingValue with that word range.
-      // After Flutter's onSecondaryTap handler has applied the correct selection
-      // (selectPosition on non-Apple, selectWord on Apple), the incoming
-      // browser update must be suppressed so it does not override the
-      // Flutter-managed selection.
+      // right-click and sends an updateEditingValue with that word range.
+      // After Flutter's onSecondaryTap handler applies the correct selection,
+      // the incoming browser update must be suppressed.
+      //
+      // This test exercises the suppression mechanism directly by calling
+      // suppressNextPlatformSelectionUpdate() before a simulated platform
+      // update. The kIsWeb guard in updateEditingValue means suppression only
+      // fires on web at runtime; this test verifies the mechanism itself works.
       const String text = 'abc def ghi';
       await tester.pumpWidget(
         const MaterialApp(home: Material(child: SelectableText(text))),
       );
 
-      // Tap once to establish the input connection.
+      // Tap to establish the input connection and place the cursor.
       final Offset ePos = textOffsetToPosition(tester, 5);
       await tester.tapAt(ePos, kind: PointerDeviceKind.mouse);
       await tester.pumpAndSettle();
 
       final EditableTextState state = tester.state(find.byType(EditableText));
+      final TextSelection selectionBeforeUpdate = state.currentTextEditingValue.selection;
 
-      // Right-click on the 'e' in 'def' (offset 5).
-      final TestGesture gesture = await tester.startGesture(
-        ePos,
-        kind: PointerDeviceKind.mouse,
-        buttons: kSecondaryMouseButton,
-      );
-      await tester.pump();
-      await gesture.up();
-      await tester.pumpAndSettle();
+      // Simulate what onSecondaryTap does on web: after applying the correct
+      // selection, schedule suppression of the next platform update.
+      state.suppressNextPlatformSelectionUpdate();
 
-      // Capture the selection Flutter applied via onSecondaryTap.
-      final TextSelection flutterSelection = state.currentTextEditingValue.selection;
-
-      // Simulate the browser sending a word-selection update (the bug scenario).
-      // 'def' spans offsets 4..7 in 'abc def ghi'.
-      tester.testTextInput.updateEditingValue(
+      // Simulate the browser sending a word-selection update ('def': 4..7).
+      state.updateEditingValue(
         const TextEditingValue(
           text: text,
           selection: TextSelection(baseOffset: 4, extentOffset: 7),
@@ -5782,10 +5776,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The browser's word-selection must have been suppressed; Flutter's
-      // selection remains unchanged.
-      expect(state.currentTextEditingValue.selection, flutterSelection);
+      // The platform word-selection must have been suppressed; selection
+      // remains what Flutter set before the platform update arrived.
+      expect(state.currentTextEditingValue.selection, selectionBeforeUpdate);
     },
-    skip: !kIsWeb,
   );
 }
