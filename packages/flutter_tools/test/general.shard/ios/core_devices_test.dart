@@ -246,7 +246,8 @@ void main() {
             // See https://github.com/flutter/flutter/issues/183263.
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
               'processIdentifier': 123,
-              'executable': '/path/to/MyApp.app/PlugIns/SomethingExtension.appex/SomethingExtension',
+              'executable':
+                  '/path/to/MyApp.app/PlugIns/SomethingExtension.appex/SomethingExtension',
             }),
             // Main app process
             IOSCoreDeviceRunningProcess.fromJson(const <String, Object?>{
