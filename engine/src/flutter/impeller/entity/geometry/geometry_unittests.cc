@@ -87,7 +87,9 @@ TEST(EntityGeometryTest, FillRectGeometryPaddingIsAdjustedByInverseMaxBasis) {
   {
     auto coverage = geometry.GetCoverage(Matrix());
     EXPECT_TRUE(coverage.has_value());
-    EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-1, -1, 101, 101));
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-1, -1, 101, 101));
+    }
   }
 
   // At scale 2, padding should be 0.5 in local coordinates, which becomes 1.0
@@ -96,8 +98,10 @@ TEST(EntityGeometryTest, FillRectGeometryPaddingIsAdjustedByInverseMaxBasis) {
     auto matrix = Matrix::MakeScale({2.0, 2.0, 1.0});
     auto coverage = geometry.GetCoverage(matrix);
     EXPECT_TRUE(coverage.has_value());
-    EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-0.5, -0.5, 100.5, 100.5)
-                                    .TransformAndClipBounds(matrix));
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-0.5, -0.5, 100.5, 100.5)
+                                      .TransformAndClipBounds(matrix));
+    }
   }
 
   // At scale 0.5, padding should be 2.0 in local coordinates, which becomes 1.0
@@ -106,8 +110,10 @@ TEST(EntityGeometryTest, FillRectGeometryPaddingIsAdjustedByInverseMaxBasis) {
     auto matrix = Matrix::MakeScale({0.5, 0.5, 1.0});
     auto coverage = geometry.GetCoverage(matrix);
     EXPECT_TRUE(coverage.has_value());
-    EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-2.0, -2.0, 102.0, 102.0)
-                                    .TransformAndClipBounds(matrix));
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-2.0, -2.0, 102.0, 102.0)
+                                      .TransformAndClipBounds(matrix));
+    }
   }
 }
 
