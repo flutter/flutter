@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
@@ -607,8 +608,26 @@ class WebAssetServer implements AssetReader {
   final Logger logger;
 
   String get _buildConfigString {
+    final Map<String, String> wasmHashes = <String, String>{};
+    for (final String path in _webMemoryFS.files.keys) {
+      if (path.endsWith('.wasm')) {
+        wasmHashes[fileSystem.path.basename(path)] = crypto.sha256.convert(_webMemoryFS.files[path]!).toString();
+      }
+    }
+    final String canvasKitPath = globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path;
+    final Directory canvasKitDirectory = fileSystem.directory(fileSystem.path.join(canvasKitPath, 'canvaskit'));
+    if (canvasKitDirectory.existsSync()) {
+      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+        if (file.path.endsWith('.wasm')) {
+          final String fileName = fileSystem.path.basename(file.path);
+          wasmHashes[fileName] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+        }
+      }
+    }
+
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      'wasmHashes': wasmHashes,
       'builds': <Object>[
         <String, Object>{
           'compileTarget': 'dartdevc',
