@@ -1215,7 +1215,7 @@ String toMultiRootPath(Uri fileUri, String? scheme, List<String> fileSystemRoots
   final String filePath = fileUri.toFilePath(windows: windows);
   for (final fileSystemRoot in fileSystemRoots) {
     if (filePath.startsWith(fileSystemRoot)) {
-      return Uri(scheme: scheme, path: filePath.substring(fileSystemRoot.length)).toString();
+      return '$scheme://${filePath.substring(fileSystemRoot.length)}';
     }
   }
   return fileUri.toString();
