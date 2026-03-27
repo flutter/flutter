@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
@@ -234,6 +235,83 @@ tasks.register("clean", Delete) {
     delete rootProject.layout.buildDirectory
 }
 '''),
+        );
+      });
+    });
+
+    group('migrate to opt-out of Built-in Kotlin', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late File topLevelGradlePropertiesFile;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        bufferLogger = BufferLogger.test();
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
+        );
+        topLevelGradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
+      });
+
+      testUsingContext('skip if Built-in Kotlin flag exists', () async {
+        topLevelGradlePropertiesFile.writeAsStringSync(gradlePropertiesFileContentToMigrateTo);
+
+        // Built-in Kotlin flag already exists
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+          isTrue,
+        );
+        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+
+        await androidProjectMigration.migrate();
+        expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+        expect(
+          bufferLogger.traceText,
+          contains(
+            'The developer has already configured the Built-In Kotlin flag, skipping migration of disabling Built-in Kotlin.',
+          ),
+        );
+      });
+
+      testUsingContext(
+        'create gradle.properties file and add flag if gradle.properties file is missing',
+        () async {
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The gradle.properties file was not found. Creating it with disabled Built-in Kotlin.',
+            ),
+          );
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+            isTrue,
+          );
+        },
+      );
+
+      testUsingContext('add flag if it does not exist in gradle.properties file', () async {
+        topLevelGradlePropertiesFile.writeAsStringSync(gradlePropertiesFileContentToMigrate);
+        expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+          isFalse,
+        );
+        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+
+        await androidProjectMigration.migrate();
+
+        expect(
+          bufferLogger.traceText,
+          contains('Migrating to disable Built-in Kotlin by default.'),
+        );
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+          isTrue,
         );
       });
     });
