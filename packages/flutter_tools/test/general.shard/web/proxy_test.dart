@@ -540,5 +540,15 @@ void main() {
         '__Secure-id=xyz; Secure',
       ]);
     });
+
+    test('handles cookie names with RFC 6265 special characters', () {
+      final List<String> result = splitSetCookieHeader(
+        "my!cookie=abc; Path=/, other.cookie\$|~=xyz",
+      );
+      expect(result, <String>[
+        'my!cookie=abc; Path=/',
+        'other.cookie\$|~=xyz',
+      ]);
+    });
   });
 }

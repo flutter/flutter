@@ -76,8 +76,8 @@ bool _isNewCookie(String part) {
     return false;
   }
 
-  // RFC 6265 cookie-name is a token; allow common characters including dots.
-  return RegExp(r'^[a-zA-Z0-9_.\-]+$').hasMatch(token);
+  // RFC 6265 cookie-name is a token (RFC 2616 §2.2); allow all valid token characters.
+  return RegExp(r"^[!#$%&'*+.^_`|~0-9a-zA-Z-]+$").hasMatch(token);
 }
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
