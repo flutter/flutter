@@ -18,6 +18,10 @@
 
 FLUTTER_ASSERT_ARC
 
+namespace {
+constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
+}  // namespace
+
 @interface FlutterEngine ()
 - (nonnull FlutterTextInputPlugin*)textInputPlugin;
 @end
@@ -89,8 +93,6 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 namespace {
-constexpr FlutterViewIdentifier kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
-
 class MockPlatformViewDelegate : public PlatformView::Delegate {
  public:
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}

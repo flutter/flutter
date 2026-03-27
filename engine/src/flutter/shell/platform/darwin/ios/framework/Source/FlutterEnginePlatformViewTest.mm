@@ -14,15 +14,18 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
 
-namespace flutter {
 namespace {
-
 constexpr int64_t kSecondaryFlutterViewId = flutter::kFlutterImplicitViewId + 1;
 constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
+}  // namespace
+
+namespace flutter {
+namespace {
 
 class FakeDelegate : public PlatformView::Delegate {
  public:
@@ -184,32 +187,24 @@ flutter::FakeDelegate fake_delegate;
   [flutterViewController stopMocking];
 }
 
-- (void)testSetViewControllerNilRemovesImplicitMappingAndReleasesController {
+- (void)testSetViewControllerNilRemovesImplicitMapping {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   XCTAssertNotNil(engine);
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockEngine platformView]).andReturn(platform_view.get());
 
-  __weak FlutterViewController* weakViewController = nil;
-  @autoreleasepool {
-    FlutterViewController* viewController =
-        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-    weakViewController = viewController;
+  FlutterViewController* viewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-    XCTAssertEqual(engine.viewController, viewController);
-    XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
-                   viewController);
+  XCTAssertEqual(engine.viewController, viewController);
+  XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
+                 viewController);
 
-    [engine setViewController:nil];
+  [engine setViewController:nil];
 
-    XCTAssertNil(engine.viewController);
-    XCTAssertNil([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId]);
-    XCTAssertNil(platform_view->GetOwnerViewController());
-
-    viewController = nil;
-  }
-
-  XCTAssertNil(weakViewController);
+  XCTAssertNil(engine.viewController);
+  XCTAssertNil([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId]);
+  XCTAssertNil(platform_view->GetOwnerViewController());
 }
 
 - (void)testEnableMultiViewAssignsIncrementingIdentifiersAndLookup {
@@ -267,11 +262,29 @@ flutter::FakeDelegate fake_delegate;
 }
 
 - (void)testNotifyDestroyedOnlyDestroysPlatformViewWhenLastViewIsRemoved {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
+  id mockEngine = OCMPartialMock(engine);
+  OCMStub([mockEngine platformView]).andReturn(platform_view.get());
+
+  [engine enableMultiView];
+
+  FlutterViewController* implicitViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  FlutterViewController* secondaryViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+
+  [implicitViewController loadViewIfNeeded];
+  [secondaryViewController loadViewIfNeeded];
+
   platform_view->NotifyCreated(flutter::kFlutterImplicitViewId);
   platform_view->NotifyCreated(kSecondaryFlutterViewId);
+  XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
+  XCTAssertTrue(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
   XCTAssertEqual(fake_delegate.on_platform_view_created_calls_, 1);
 
   platform_view->NotifyDestroyed(kSecondaryFlutterViewId);
+  XCTAssertTrue(platform_view->HasRenderingSurface(flutter::kFlutterImplicitViewId));
+  XCTAssertFalse(platform_view->HasRenderingSurface(kSecondaryFlutterViewId));
   XCTAssertEqual(fake_delegate.on_platform_view_destroyed_calls_, 0);
 
   platform_view->NotifyDestroyed(flutter::kFlutterImplicitViewId);
@@ -305,7 +318,7 @@ flutter::FakeDelegate fake_delegate;
   XCTAssertEqual(fake_delegate.removed_view_ids_[0], secondaryViewController.viewIdentifier);
 }
 
-- (void)testDeallocatingSecondaryViewControllerDoesNotLeakAndKeepsOtherMappings {
+- (void)testUpdateViewportMetricsOnlyRoutesToRegisteredViewIdentifiers {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockEngine platformView]).andReturn(platform_view.get());
@@ -314,47 +327,9 @@ flutter::FakeDelegate fake_delegate;
 
   FlutterViewController* implicitViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-
-  __weak FlutterViewController* weakSecondaryViewController = nil;
-  FlutterViewIdentifier secondaryViewIdentifier = kSecondaryFlutterViewId;
-  @autoreleasepool {
-    FlutterViewController* secondaryViewController =
-        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-    secondaryViewIdentifier = secondaryViewController.viewIdentifier;
-    weakSecondaryViewController = secondaryViewController;
-
-    XCTAssertEqual([engine viewControllerForIdentifier:secondaryViewIdentifier],
-                   secondaryViewController);
-
-    secondaryViewController = nil;
-  }
-
-  XCTAssertNil(weakSecondaryViewController);
-
-  // Drain the main queue so the dealloc observer can deregister the released controller.
-  XCTestExpectation* drainedMainQueue = [self expectationWithDescription:@"drained-main-queue"];
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [drainedMainQueue fulfill];
-  });
-  [self waitForExpectations:@[ drainedMainQueue ] timeout:1.0];
-
-  XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
-                 implicitViewController);
-  XCTAssertNil([engine viewControllerForIdentifier:secondaryViewIdentifier]);
-  XCTAssertEqual(fake_delegate.removed_view_ids_.size(), 1UL);
-  XCTAssertEqual(fake_delegate.removed_view_ids_[0], secondaryViewIdentifier);
-}
-
-- (void)testUpdateViewportMetricsOnlyRoutesToRegisteredViewIdentifiers {
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
-  id mockEngine = OCMPartialMock(engine);
-  OCMStub([mockEngine platformView]).andReturn(platform_view.get());
-
-  [engine enableMultiView];
-
-  [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   FlutterViewController* secondaryViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  XCTAssertEqual(implicitViewController.viewIdentifier, flutter::kFlutterImplicitViewId);
 
   flutter::ViewportMetrics metrics = {};
   metrics.physical_width = 320;

@@ -3397,8 +3397,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
 
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto implicitSurface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
             submitFrame:std::move(implicitSurface)
@@ -3422,7 +3425,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
          withParams:[flutterPlatformViewsController compositionParamsForView:3]];
 
   auto secondarySurface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
             submitFrame:std::move(secondarySurface)
@@ -3566,8 +3571,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
 
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
             submitFrame:std::move(surface)
@@ -3634,8 +3642,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   [flutterPlatformViewsController
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto implicitSurface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
             submitFrame:std::move(implicitSurface)
@@ -3654,7 +3665,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       compositeView:3
          withParams:[flutterPlatformViewsController compositionParamsForView:3]];
   auto secondarySurface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      nullptr, framebuffer_info,
+      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+      [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
             submitFrame:std::move(secondarySurface)
