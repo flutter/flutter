@@ -34,6 +34,7 @@
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
+#include "impeller/entity/contents/uber_sdf_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -1229,6 +1230,20 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   Entity entity;
   entity.SetContents(std::make_shared<SolidColorContents>(nullptr));
   ASSERT_FALSE(entity.GetCoverage().has_value());
+}
+
+TEST(EntityTest, UberSDFContentsCoverage) {
+  auto rect = Rect::MakeXYWH(100, 100, 200, 200);
+  FillRectGeometry geometry(rect.Expand(1.0f));
+  auto contents =
+      UberSDFContents::MakeRect(Color::Red(), 0.0f, false, &geometry);
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(
+      coverage.value(),
+      Rect::MakeXYWH(100, 100, 200, 200).Expand(1.0f));  // expanded by AA
 }
 
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
