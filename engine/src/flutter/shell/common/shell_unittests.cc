@@ -8,6 +8,7 @@
 #include <ctime>
 #include <future>
 #include <memory>
+#include <mutex>
 #include <thread>
 #include <unordered_set>
 #include <utility>
@@ -247,16 +248,17 @@ class SurfaceTrackingPlatformView : public PlatformView {
         has_rendering_surface_callback_(
             std::move(has_rendering_surface_callback)) {}
 
-  std::unique_ptr<Surface> CreateRenderingSurface() override {
-    return std::make_unique<MockSurface>();
-  }
-
   bool HasRenderingSurface(int64_t view_id) override {
     return has_rendering_surface_callback_(view_id);
   }
 
  private:
   const HasRenderingSurfaceCallback has_rendering_surface_callback_;
+};
+
+struct RenderingSurfaceState {
+  std::mutex mutex;
+  std::unordered_set<int64_t> active_view_ids;
 };
 
 class TestPlatformView : public PlatformView {
@@ -5141,15 +5143,16 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeWhenRenderingSurfaceIsMissing) {
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
 
-  auto active_rendering_surfaces =
-      std::make_shared<std::unordered_set<int64_t>>();
-  active_rendering_surfaces->insert(kImplicitViewId);
+  auto rendering_surface_state = std::make_shared<RenderingSurfaceState>();
+  rendering_surface_state->active_view_ids.insert(kImplicitViewId);
   Shell::CreateCallback<PlatformView> platform_view_create_callback =
-      [active_rendering_surfaces](Shell& shell) {
+      [rendering_surface_state](Shell& shell) {
         return std::make_unique<SurfaceTrackingPlatformView>(
             shell, shell.GetTaskRunners(),
-            [active_rendering_surfaces](int64_t view_id) {
-              return active_rendering_surfaces->count(view_id) > 0;
+            [rendering_surface_state](int64_t view_id) {
+              std::scoped_lock lock(rendering_surface_state->mutex);
+              return rendering_surface_state->active_view_ids.count(view_id) >
+                     0;
             });
       };
   std::unique_ptr<Shell> shell = CreateShell({
@@ -5158,42 +5161,11 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeWhenRenderingSurfaceIsMissing) {
       .platform_view_create_callback = platform_view_create_callback,
   });
 
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            kImplicitViewId,
-            {
-                1.0,   // p_device_pixel_ratio
-                500,   // p_physical_width
-                800,   // p_physical_height
-                1,     // p_min_width_constraint,
-                1000,  // p_max_width_constraint,
-                1,     // p_min_height_constraint,
-                1000,  // p_max_height_constraint,
-                0,     // p_physical_padding_top
-                0,     // p_physical_padding_right
-                0,     // p_physical_padding_bottom
-                0,     // p_physical_padding_left
-                0,     // p_physical_view_inset_top,
-                0,     // p_physical_view_inset_right,
-                0,     // p_physical_view_inset_bottom,
-                0,     // p_physical_view_inset_left,
-                0,     // p_physical_system_gesture_inset_top,
-                0,     // p_physical_system_gesture_inset_right,
-                0,     // p_physical_system_gesture_inset_bottom,
-                0,     // p_physical_system_gesture_inset_left,
-                22,    // p_physical_touch_slop,
-                {},    // p_physical_display_features_bounds,
-                {},    // p_physical_display_features_type,
-                {},    // p_physical_display_features_state,
-                0,     // p_display_id
-                0,     // p_physical_display_corner_radius_top_left
-                0,     // p_physical_display_corner_radius_top_right
-                0,     // p_physical_display_corner_radius_bottom_right
-                0,     // p_physical_display_corner_radius_bottom_left
-            });
-      });
-  PumpOneFrame(shell.get());
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
+    shell->GetPlatformView()->SetViewportMetrics(kImplicitViewId,
+                                                 ViewportMetrics{1.0, 100, 100,
+                                                                 22, 0});
+  });
 
   auto layer_tree =
       std::make_unique<LayerTree>(/*root_layer=*/nullptr,
@@ -5201,7 +5173,10 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeWhenRenderingSurfaceIsMissing) {
   ASSERT_FALSE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                  *layer_tree));
 
-  active_rendering_surfaces->erase(kImplicitViewId);
+  {
+    std::scoped_lock lock(rendering_surface_state->mutex);
+    rendering_surface_state->active_view_ids.erase(kImplicitViewId);
+  }
 
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *layer_tree));
@@ -5215,15 +5190,17 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
                            task_runner);
 
   constexpr int64_t kSecondaryViewId = kImplicitViewId + 1;
-  auto active_rendering_surfaces =
-      std::make_shared<std::unordered_set<int64_t>>();
-  active_rendering_surfaces->insert(kImplicitViewId);
+  auto rendering_surface_state = std::make_shared<RenderingSurfaceState>();
+  rendering_surface_state->active_view_ids.insert(kImplicitViewId);
+  rendering_surface_state->active_view_ids.insert(kSecondaryViewId);
   Shell::CreateCallback<PlatformView> platform_view_create_callback =
-      [active_rendering_surfaces](Shell& shell) {
+      [rendering_surface_state](Shell& shell) {
         return std::make_unique<SurfaceTrackingPlatformView>(
             shell, shell.GetTaskRunners(),
-            [active_rendering_surfaces](int64_t view_id) {
-              return active_rendering_surfaces->count(view_id) > 0;
+            [rendering_surface_state](int64_t view_id) {
+              std::scoped_lock lock(rendering_surface_state->mutex);
+              return rendering_surface_state->active_view_ids.count(view_id) >
+                     0;
             });
       };
   std::unique_ptr<Shell> shell = CreateShell({
@@ -5232,19 +5209,11 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
       .platform_view_create_callback = platform_view_create_callback,
   });
 
-  fml::AutoResetWaitableEvent add_latch;
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &add_latch, &active_rendering_surfaces, kSecondaryViewId] {
-             shell->GetPlatformView()->AddView(
-                 kSecondaryViewId,
-                 ViewportMetrics{1.0, 100, 100, 22, 0},
-                 [&](bool added) {
-                   EXPECT_TRUE(added);
-                   active_rendering_surfaces->insert(kSecondaryViewId);
-                   add_latch.Signal();
-                 });
+           [&shell] {
+             shell->GetPlatformView()->SetViewportMetrics(
+                 kSecondaryViewId, ViewportMetrics{1.0, 100, 100, 22, 0});
            });
-  add_latch.Wait();
 
   auto layer_tree =
       std::make_unique<LayerTree>(/*root_layer=*/nullptr,
@@ -5254,17 +5223,18 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
 
   fml::AutoResetWaitableEvent remove_latch;
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &remove_latch, &active_rendering_surfaces, kSecondaryViewId] {
+           [&shell, &remove_latch] {
              shell->GetPlatformView()->RemoveView(kSecondaryViewId,
                                                   [&](bool removed) {
-                                                    EXPECT_TRUE(removed);
-                                                    active_rendering_surfaces
-                                                        ->erase(
-                                                            kSecondaryViewId);
+                                                    EXPECT_FALSE(removed);
                                                     remove_latch.Signal();
                                                   });
            });
   remove_latch.Wait();
+  {
+    std::scoped_lock lock(rendering_surface_state->mutex);
+    rendering_surface_state->active_view_ids.erase(kSecondaryViewId);
+  }
 
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kSecondaryViewId,
                                                 *layer_tree));
