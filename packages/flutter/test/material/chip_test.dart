@@ -3537,10 +3537,11 @@ void main() {
     const selectScrimColor = Color(0x60191919);
     expect(
       rawChip,
-      paints..path(
+      paints..circle(
         color: selectScrimColor,
-        includes: <Offset>[const Offset(10, 10)],
-        excludes: <Offset>[const Offset(4, 4)],
+        x: 16.0,
+        y: 16.0,
+        radius: 12.0,
       ),
     );
   });
@@ -3569,10 +3570,11 @@ void main() {
     const selectScrimColor = Color(0x60191919);
     expect(
       rawChip,
-      paints..path(
+      paints..circle(
         color: selectScrimColor,
-        includes: <Offset>[const Offset(11, 11)],
-        excludes: <Offset>[const Offset(4, 4)],
+        x: 18.0,
+        y: 18.0,
+        radius: 10.0,
       ),
     );
   });

@@ -751,11 +751,11 @@ void main() {
 
     await tester.pumpWidget(buildApp(enabled: true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
   });
 
   testWidgets('Checkbox fill color take precedence over active/inactive colors', (
@@ -793,11 +793,11 @@ void main() {
 
     await tester.pumpWidget(buildApp(enabled: true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
   });
 
   testWidgets('Checkbox fill color resolves in hovered/focused states', (
@@ -842,7 +842,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(getCheckboxRenderer(), paints..path(color: focusedFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: focusedFillColor));
 
     // Start hovering.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -851,7 +851,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoCheckbox)));
     await tester.pumpAndSettle();
 
-    expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
   });
 
   testWidgets('Checkbox configures focus color', (WidgetTester tester) async {

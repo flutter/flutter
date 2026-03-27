@@ -423,7 +423,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getCheckboxRenderer(),
-      paints..path(color: Colors.transparent),
+      paints..rrect(color: Colors.transparent),
     ); // paint transparent border
     expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
     expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
@@ -441,7 +441,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getCheckboxRenderer(),
-      paints..path(color: Colors.transparent),
+      paints..rrect(color: Colors.transparent),
     ); // paint transparent border
     expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
     expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
@@ -489,7 +489,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getCheckboxRenderer(),
-      paints..path(color: Colors.transparent),
+      paints..rrect(color: Colors.transparent),
     ); // paint transparent border
     expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
     expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
@@ -507,7 +507,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getCheckboxRenderer(),
-      paints..path(color: Colors.transparent),
+      paints..rrect(color: Colors.transparent),
     ); // paint transparent border
     expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
     expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
@@ -586,14 +586,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getCheckboxRenderer(),
-      paints..path(color: activeColor),
+      paints..rrect(color: activeColor),
     ); // paints's color is 0xFF00FF00 (theme)
 
     activeColor = const Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeColor));
   });
 
   testWidgets('Material3 - Checkbox color rendering', (WidgetTester tester) async {
@@ -652,14 +652,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getCheckboxRenderer(),
-      paints..path(color: activeColor),
+      paints..rrect(color: activeColor),
     ); // paints's color is 0xFF00FF00 (theme)
 
     activeColor = const Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(activeColor: activeColor));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeColor));
   });
 
   testWidgets('Material2 - Checkbox is focusable and has correct focus color', (
@@ -1368,11 +1368,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(enabled: true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
 
     await tester.pumpWidget(buildFrame(enabled: false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
   });
 
   testWidgets('Checkbox fill color resolves in hovered/focused states', (
@@ -1423,7 +1423,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(getCheckboxRenderer(), paints..path(color: focusedFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: focusedFillColor));
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1432,7 +1432,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
-    expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
   });
 
   testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
@@ -1934,12 +1934,12 @@ void main() {
     await tester.pumpWidget(buildApp(value: true));
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), paints..drrect(color: Colors.transparent));
-    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
+    expect(getCheckboxRenderer(), paints..rrect(color: activeColor)); // checkbox fill
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), paints..drrect(color: Colors.transparent));
-    expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
+    expect(getCheckboxRenderer(), paints..rrect(color: activeColor)); // checkbox fill
   });
 
   testWidgets('Material2 - Checkbox WidgetStateBorderSide applies unconditionally', (
@@ -2420,12 +2420,12 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), paints..drrect(color: theme.unselectedWidgetColor));
-    expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: inactiveBackgroundColor));
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), paints..drrect(color: theme.disabledColor));
-    expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: inactiveBackgroundColor));
   });
 
   testWidgets('Material3 - Checkbox respects fillColor when it is unchecked', (
@@ -2463,7 +2463,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
     expect(getCheckboxRenderer(), paints..drrect(color: theme.colorScheme.onSurfaceVariant));
-    expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: inactiveBackgroundColor));
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
@@ -2471,7 +2471,7 @@ void main() {
       getCheckboxRenderer(),
       paints..drrect(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
-    expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: inactiveBackgroundColor));
   });
 
   testWidgets('Checkbox renders at zero area', (WidgetTester tester) async {
