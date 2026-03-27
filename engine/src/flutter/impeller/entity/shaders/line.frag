@@ -2,6 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This shader draws lines using the technique from GPU Gems 2, Chapter 22:
+// "Fast Prefiltered Lines." Instead of relying on hardware multisample
+// anti-aliasing (MSAA), this approach analytically determines pixel coverage.
+//
+// The LineContents expands the line's geometry into a padded bounding box. For
+// each vertex, four implicit edge equations are computed, representing the
+// normalized distances from the borders. The fragment shader uses these
+// distances to look up the coverage percentage from a precomputed 1D curve
+// texture, resulting in fast, high-quality, and artifact-free anti-aliasing.
+//
+// For information on the implementation of this shader, see the design doc:
+// https://docs.google.com/document/d/19I6ToHCMlSgSava-niFWzMLGJEAd-rYiBQEGOMu8IJg/edit?tab=t.0#heading=h.icnmwum4oznc
+//
+// See also:
+// - //impeller/entity/shaders/line.vert
+// - //impeller/entity/contents/line_contents.cc
+
 precision mediump float;
 
 #include <impeller/color.glsl>
@@ -9,14 +26,27 @@ precision mediump float;
 
 uniform FragInfo {
   vec4 color;
+  float cap_type;  // 0.0 for butt/square, 1.0 for round
 }
 frag_info;
 
+// A 1D texture that encodes the coverage percentage (or anti-aliasing profile)
+// across the edge of the line. This acts as a prefiltered lookup table.
 uniform sampler2D curve;
 
 highp in vec2 v_position;
 // These should be `flat` but that doesn't work in our glsl compiler. It
 // shouldn't make any visual difference.
+//
+// Equations for the four edges defining the line segment's padded bounding box.
+// Evaluated as dot(pos, v_eN), these give the normalized distance from the
+// respective edge. A distance <= 0.0 is completely outside the padded geometry.
+// The distances evaluate to 1.0 exactly at the geometric center of the line.
+//
+// v_e0 and v_e2: Distances from the two parallel side edges defining the
+//                line segment's bounds (along its thickness).
+// v_e1 and v_e3: Distances from the two perpendicular cap edges defining the
+//                start and end bounds of the line segment.
 highp in vec3 v_e0;
 highp in vec3 v_e1;
 highp in vec3 v_e2;
@@ -36,7 +66,16 @@ float CalculateLine() {
     return 0.0;
   }
 
-  return lookup(min(d.x, d.z)) * lookup(min(d.y, d.w));
+  if (frag_info.cap_type == 1.0) {
+    if (min(d.y, d.w) < 1.0) {
+      float R = distance(vec2(min(d.x, d.z), min(d.y, d.w)), vec2(1.0));
+      return lookup(clamp(1.0 - R, 0.0, 1.0));
+    } else {
+      return lookup(min(d.x, d.z));
+    }
+  } else {
+    return lookup(min(d.x, d.z)) * lookup(min(d.y, d.w));
+  }
 }
 
 void main() {
