@@ -1535,7 +1535,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         ..textScaleFactor = textScaleFactor
         ..maxLines = 1
         ..ellipsis =
-            '\u2026' // Material standard ellipsis
+            '\u2026' // Standard Unicode ellipsis
         ..layout(maxWidth: safeMaxWidth);
     } else {
       _labelPainter.text = null;
