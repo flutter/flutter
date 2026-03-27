@@ -6,6 +6,7 @@
 /// @docImport 'text_field.dart';
 library;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
@@ -63,6 +64,7 @@ class InputDatePickerFormField extends StatefulWidget {
     this.acceptEmptyDate = false,
     this.focusNode,
     this.calendarDelegate = const GregorianCalendarDelegate(),
+    this.inputFormatters,
   }) : initialDate = initialDate != null ? calendarDelegate.dateOnly(initialDate) : null,
        firstDate = calendarDelegate.dateOnly(firstDate),
        lastDate = calendarDelegate.dateOnly(lastDate) {
@@ -149,6 +151,9 @@ class InputDatePickerFormField extends StatefulWidget {
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
+
+  /// The [TextInputFormatter]s that will be applied to the date input mode.
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
@@ -284,6 +289,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         autofocus: widget.autofocus,
         controller: _controller,
         focusNode: widget.focusNode,
+        inputFormatters: widget.inputFormatters,
       ),
     );
   }

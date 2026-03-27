@@ -223,6 +223,7 @@ Future<DateTime?> showDatePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+  final List<TextInputFormatter>? inputFormatters,
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -265,6 +266,7 @@ Future<DateTime?> showDatePicker({
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
     calendarDelegate: calendarDelegate,
+    inputFormatters: inputFormatters,
   );
 
   if (textDirection != null) {
@@ -332,6 +334,7 @@ class DatePickerDialog extends StatefulWidget {
     this.switchToCalendarEntryModeIcon,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
     this.calendarDelegate = const GregorianCalendarDelegate(),
+    this.inputFormatters,
   }) : initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate),
        firstDate = calendarDelegate.dateOnly(firstDate),
        lastDate = calendarDelegate.dateOnly(lastDate),
@@ -459,6 +462,9 @@ class DatePickerDialog extends StatefulWidget {
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
+
+  /// The [TextInputFormatter]s that will be applied to the date input mode.
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -674,6 +680,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                         fieldLabelText: widget.fieldLabelText,
                         keyboardType: widget.keyboardType,
                         autofocus: true,
+                        inputFormatters: widget.inputFormatters,
                       ),
                     ),
                   ),
@@ -1194,6 +1201,7 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
   CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+  List<TextInputFormatter>? inputFormatters,
 }) async {
   initialDateRange = initialDateRange == null ? null : calendarDelegate.datesOnly(initialDateRange);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -1259,6 +1267,7 @@ Future<DateTimeRange?> showDateRangePicker({
     switchToInputEntryModeIcon: switchToInputEntryModeIcon,
     switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
     calendarDelegate: calendarDelegate,
+    inputFormatters: inputFormatters,
   );
 
   if (textDirection != null) {
@@ -1358,6 +1367,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
     this.calendarDelegate = const GregorianCalendarDelegate(),
+    this.inputFormatters,
   }) : _currentDate = currentDate;
 
   /// The date range that the date range picker starts with when it opens.
@@ -1495,6 +1505,9 @@ class DateRangePickerDialog extends StatefulWidget {
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
+
+  /// Optional list of [TextInputFormatter]s to apply to the text fields in the date range picker.
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1706,6 +1719,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
                     fieldStartLabelText: widget.fieldStartLabelText,
                     fieldEndLabelText: widget.fieldEndLabelText,
                     keyboardType: widget.keyboardType,
+                    inputFormatters: widget.inputFormatters,
                   ),
                   const Spacer(),
                 ],
@@ -3243,6 +3257,7 @@ class _InputDateRangePicker extends StatefulWidget {
     this.autofocus = false,
     this.autovalidate = false,
     this.keyboardType = TextInputType.datetime,
+    this.inputFormatters,
   }) : initialStartDate = initialStartDate == null
            ? null
            : calendarDelegate.dateOnly(initialStartDate),
@@ -3311,6 +3326,10 @@ class _InputDateRangePicker extends StatefulWidget {
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
+
+  /// Input formatters for the text fields.
+  /// These will be applied to the start and end date fields.
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   _InputDateRangePickerState createState() => _InputDateRangePickerState();
@@ -3467,6 +3486,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             keyboardType: widget.keyboardType,
             onChanged: _handleStartChanged,
             autofocus: widget.autofocus,
+            inputFormatters: widget.inputFormatters,
           ),
         ),
         const SizedBox(width: 8),
@@ -3483,6 +3503,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
             ),
             keyboardType: widget.keyboardType,
             onChanged: _handleEndChanged,
+            inputFormatters: widget.inputFormatters,
           ),
         ),
       ],
