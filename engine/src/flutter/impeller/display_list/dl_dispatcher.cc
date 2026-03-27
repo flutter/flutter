@@ -590,7 +590,7 @@ void DlDispatcherBase::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
 void DlDispatcherBase::drawPath(const DlPath& path) {
   AUTO_DEPTH_WATCHER(1u);
 
-  SimplifyOrDrawPath(GetCanvas(), path, paint_);
+  GetCanvas().DrawPath(path, paint_);
 }
 
 void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
