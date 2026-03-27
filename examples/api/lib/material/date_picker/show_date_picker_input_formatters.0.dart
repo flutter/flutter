@@ -84,8 +84,8 @@ class _ShowDatePickerInputFormattersState
               _selectedDate == null
                   ? 'No date selected'
                   : _selectedEndDate == null
-                  ? 'Selected date: ${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}'
-                  : 'Selected date range: ${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year} - ${_selectedEndDate!.day.toString().padLeft(2, '0')}/${_selectedEndDate!.month.toString().padLeft(2, '0')}/${_selectedEndDate!.year}',
+                  ? 'Selected date: ${MaterialLocalizations.of(context).formatCompactDate(_selectedDate!)}'
+                  : 'Selected date range: ${MaterialLocalizations.of(context).formatCompactDate(_selectedDate!)} - ${MaterialLocalizations.of(context).formatCompactDate(_selectedEndDate!)}',
             ),
             const SizedBox(height: 16),
             ElevatedButton(
