@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
-import '../widgets/utils.dart';
 
 // From bottom_sheet.dart.
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
@@ -1165,7 +1164,7 @@ void main() {
     }
 
     PageRoute<void> customPageRouteBuilder() {
-      return TestRoute<void>(
+      return _TestRoute<void>(
         fullscreenDialog: true,
         maintainState: true,
         transitionDuration: const Duration(milliseconds: 300),
@@ -3901,6 +3900,69 @@ class _ScaffoldWithPrimaryScrollViewState extends State<_ScaffoldWithPrimaryScro
           body: SingleChildScrollView(primary: true, child: SizedBox(height: 2000)),
         ),
       ),
+    );
+  }
+}
+
+class _TestRoute<T> extends PageRoute<T> {
+  _TestRoute({
+    this.child,
+    this.builder,
+    RouteSettings super.settings = const RouteSettings(),
+    this.barrierColor,
+    this.maintainState = false,
+    this.transitionDuration = Duration.zero,
+    this.reverseTransitionDuration = Duration.zero,
+    this.transitionsBuilder,
+    super.fullscreenDialog,
+    super.allowSnapshotting,
+  }) : assert(child != null || builder != null, 'Either child or builder must be provided.');
+
+  final Widget? child;
+  final WidgetBuilder? builder;
+  final PageTransitionsBuilder? transitionsBuilder;
+
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
+
+  @override
+  final Color? barrierColor;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  final bool maintainState;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return child ?? builder?.call(context) ?? const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (transitionsBuilder == null) {
+      return child;
+    }
+
+    return transitionsBuilder!.buildTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
     );
   }
 }
