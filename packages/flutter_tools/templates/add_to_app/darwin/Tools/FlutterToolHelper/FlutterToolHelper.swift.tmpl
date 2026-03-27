@@ -2,6 +2,7 @@
 
 import Foundation
 
+/// A helper class for Flutter tools and plugins.
 public class FlutterToolHelper {
   /// Parses the Flutter build mode from the environment variables.
   ///
@@ -67,29 +68,30 @@ public class FlutterToolHelper {
     return filenameWithExtension.contains("simulator")
   }
 
-  /// Updates a symbolic link within the FlutterPluginRegistrant directory.
+  /// Updates the `FlutterPluginRegistrant` symbolic link within the `FlutterNativeIntegration`
+  /// package.
   ///
   /// - Parameters:
-  ///   - targetBuildMode: The build mode the app is being built for.
-  ///   - currentLinkName: The name of the link to update.
-  ///   - newLinkTarget: The destination the link should point to.
-  ///   - flutterPluginRegistrantPath: The path to the FlutterPluginRegistrant.
+  ///   - targetBuildMode: The build mode the app is being built for and the destination the link
+  ///     should point to.
+  ///   - integrationPackagePath: The path to the FlutterNativeIntegration.
   ///   - fileManager: The file manager to use for file operations.
   /// - Throws: `XcodeErrorAndExit.error` if the update fails.
   public static func updateSymlink(
     targetBuildMode: String,
-    currentLinkName: String,
-    newLinkTarget: String,
     integrationPackagePath: String,
     fileManager: FlutterToolsFileManager
   ) throws {
+    let currentLinkName = "FlutterPluginRegistrant"
+    let newLinkTarget = "./\(targetBuildMode)"
+
     // Check if current link exists and exit if it already matches
     let currentLinkPath = "\(integrationPackagePath)/\(currentLinkName)"
     let currentLinkTarget = try? fileManager.destinationOfSymbolicLink(
       atPath: currentLinkPath
     )
     if currentLinkTarget == newLinkTarget {
-      print("FlutterPluginRegistrant/\(currentLinkName) symlink is up-to-date.")
+      print("\(currentLinkName) symlink is up-to-date.")
       return
     }
 
@@ -98,7 +100,7 @@ public class FlutterToolHelper {
     if !fileManager.fileExists(atPath: newTargetPath) {
       let lowerBuildMode = targetBuildMode.lowercased()
       throw XcodeErrorAndExit.error([
-        "FlutterPluginRegistrant does not exist for configuration \(targetBuildMode). "
+        "\(currentLinkName) does not exist for configuration \(targetBuildMode). "
           + "You may need to run \"flutter build swift-package --build-mode \(lowerBuildMode)\" "
           + "in your Flutter app."
       ])
@@ -116,7 +118,7 @@ public class FlutterToolHelper {
         withDestinationPath: newLinkTarget
       )
       print(
-        "FlutterPluginRegistrant/\(currentLinkName) symlink \(currentLinkPath) updated to \(newLinkTarget)."
+        "\(currentLinkName) symlink \(currentLinkPath) updated to \(newLinkTarget)."
       )
     } catch {
       // If creating the symlink fails, recreate the previous one

@@ -563,7 +563,6 @@ class FlutterPluginRegistrantSwiftPackage {
           plugins,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
-          public: true,
         );
     }
   }
@@ -760,18 +759,7 @@ class FlutterPluginSwiftDependencies {
       // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
       final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
         ..createSync(recursive: true);
-      copyDirectory(
-        _utils.fileSystem.directory(plugin.path),
-        pluginDestination,
-        shouldCopyDirectory: (directory) {
-          // Skip copying symlinks and build outputs.
-          return !directory.path.contains('.symlinks/plugins') &&
-              !directory.path.contains('example/build/') &&
-              !directory.path.contains('.build/') &&
-              !directory.path.contains('.swiftpm/') &&
-              !directory.path.contains('.dart_tool/');
-        },
-      );
+      copyDirectory(_utils.fileSystem.directory(plugin.path), pluginDestination);
 
       final String? swiftPackagePath = plugin.pluginSwiftPackagePath(
         _utils.fileSystem,
@@ -1287,7 +1275,7 @@ class CocoaPodPluginDependencies {
   }) async {
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
     final Directory podsDirectory = _xcodeProject.hostAppRoot.childDirectory('Pods');
-    if (!podsDirectory.existsSync() && !_xcodeProject.podfile.existsSync()) {
+    if (!podsDirectory.existsSync() || !_xcodeProject.podfile.existsSync()) {
       return;
     }
     final Directory cocoapodXCFrameworkOutput = xcframeworkOutput.childDirectory(_kCocoaPods);
@@ -1683,9 +1671,7 @@ class FlutterNativeIntegrationSwiftPackage {
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    scriptsTemplate.render(scriptsDirectory, <String, Object>{
-      'packageName': _kFlutterIntegrationPackageName,
-    }, printStatusWhenWriting: false);
+    scriptsTemplate.render(scriptsDirectory, <String, Object>{}, printStatusWhenWriting: false);
   }
 
   /// Generate source files for Swift package executable tools to be used for integrating SwiftPM

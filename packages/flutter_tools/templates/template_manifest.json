@@ -4,7 +4,6 @@
   "files": [
     "templates/add_to_app/darwin/Plugins/UpdateConfiguration.swift.tmpl",
     "templates/add_to_app/darwin/Scripts/FlutterAssembleInputs.xcfilelist.tmpl",
-    "templates/add_to_app/darwin/Scripts/FlutterAssembleOutputs.xcfilelist.tmpl",
     "templates/add_to_app/darwin/Scripts/post_embed.sh.tmpl",
     "templates/add_to_app/darwin/Scripts/pre_build.sh.tmpl",
     "templates/add_to_app/darwin/Tests/FlutterToolTests/FlutterAssembleToolTests.swift.tmpl",

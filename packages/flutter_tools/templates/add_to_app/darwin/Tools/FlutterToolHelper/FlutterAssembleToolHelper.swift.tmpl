@@ -2,7 +2,7 @@
 
 import Foundation
 
-/// A helper class for the Flutter assemble tool.
+/// A helper class for the `FlutterAssembleTool`.
 public class FlutterAssembleToolHelper {
   /// Verifies that the Flutter framework has the correct build mode.
   ///
@@ -96,7 +96,7 @@ public class FlutterAssembleToolHelper {
         "The Flutter framework's build mode does not match the currently targeted configuration.",
         "Expected \(targetBuildMode) but found \(actualBuildMode) for \(frameworkInfoPlistURL.path).",
         "Please complete one of the following:",
-        "   1) Right click on FlutterPluginRegistrant in Xcode's Project Navigator and select "
+        "   1) Right click on FlutterNativeIntegration in Xcode's Project Navigator and select "
           + "\"Switch to \(targetBuildMode) Mode\".",
         "   or",
         "   2) Run the following in a terminal:",

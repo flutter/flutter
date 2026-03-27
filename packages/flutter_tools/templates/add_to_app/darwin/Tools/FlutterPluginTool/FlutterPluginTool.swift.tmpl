@@ -3,6 +3,8 @@
 import FlutterToolHelper
 import Foundation
 
+/// Executable tool that is expected to be called from a Swift package plugin to change the build
+/// mode of the `FlutterPluginRegistrant` swift package.
 @main
 struct FlutterPluginTool {
   static func main() throws {
@@ -11,8 +13,6 @@ struct FlutterPluginTool {
     let fileManager = FileManager.default
     try FlutterToolHelper.updateSymlink(
       targetBuildMode: buildMode,
-      currentLinkName: "FlutterPluginRegistrant",
-      newLinkTarget: "./\(buildMode)",
       integrationPackagePath: packagePath,
       fileManager: fileManager
     )

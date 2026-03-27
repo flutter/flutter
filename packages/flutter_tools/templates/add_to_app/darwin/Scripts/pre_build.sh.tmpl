@@ -9,6 +9,9 @@ if [[ $ACTION == "clean" ]]; then
   exit 0
 fi
 
+# Needed because if it is set, cd may print the path it changed to.
+unset CDPATH
+
 function follow_links() (
   cd -P "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
@@ -21,13 +24,10 @@ function follow_links() (
   echo "$file"
 )
 
-# Needed because if it is set, cd may print the path it changed to.
-unset CDPATH
-
-# Find path to FlutterConfigurationPlugin
+# Find path to FlutterNativeIntegration
 PROG_NAME="$(follow_links "${BASH_SOURCE[0]}")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
-FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH="$BIN_DIR/../{{packageName}}"
+FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH="$BIN_DIR/../FlutterNativeIntegration"
 
 # Use prebuilt flutter-prebuild-tool if possible, otherwise re-build it for next time
 PREBUILT_FLUTTER_TOOL="$FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH/.build/release/flutter-prebuild-tool"

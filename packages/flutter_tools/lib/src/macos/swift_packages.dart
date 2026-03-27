@@ -254,22 +254,16 @@ enum SwiftPackageProductType {
 /// Representation of Product from
 /// https://developer.apple.com/documentation/packagedescription/product.
 class SwiftPackageProduct {
-  SwiftPackageProduct.library({
-    required this.name,
-    required this.targets,
-    this.libraryType,
-    this.productType = SwiftPackageProductType.library,
-  });
-  SwiftPackageProduct.plugin({
-    required this.name,
-    required this.targets,
-    this.productType = SwiftPackageProductType.plugin,
-  }) : libraryType = null;
-  SwiftPackageProduct.executable({
-    required this.name,
-    required this.targets,
-    this.productType = SwiftPackageProductType.executable,
-  }) : libraryType = null;
+  SwiftPackageProduct.library({required this.name, required this.targets, this.libraryType})
+    : productType = SwiftPackageProductType.library;
+
+  SwiftPackageProduct.plugin({required this.name, required this.targets})
+    : productType = SwiftPackageProductType.plugin,
+      libraryType = null;
+
+  SwiftPackageProduct.executable({required this.name, required this.targets})
+    : productType = SwiftPackageProductType.executable,
+      libraryType = null;
 
   final String name;
   final SwiftPackageLibraryType? libraryType;

@@ -3,6 +3,11 @@
 import FlutterToolHelper
 import Foundation
 
+/// Executable tool that is expected to be called from a Xcode pre-action for an iOS or macOS app.
+///
+/// This tool copies the Flutter framework into the `BUILT_PRODUCTS_DIR`.
+///
+/// This tool also change the build mode of the `FlutterPluginRegistrant` swift package.
 @main
 struct FlutterPrebuildTool {
   static func main() throws {
@@ -24,8 +29,6 @@ struct FlutterPrebuildTool {
       )
       try FlutterToolHelper.updateSymlink(
         targetBuildMode: mode,
-        currentLinkName: "FlutterPluginRegistrant",
-        newLinkTarget: "./\(mode)",
         integrationPackagePath: packagePath,
         fileManager: fileManager
       )

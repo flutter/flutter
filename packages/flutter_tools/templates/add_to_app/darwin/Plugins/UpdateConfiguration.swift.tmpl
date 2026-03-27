@@ -3,6 +3,8 @@
 import Foundation
 import PackagePlugin
 
+/// Plugin tool used to switch build modes of the `FlutterPluginRegistrant` swift package by
+/// updating its symlink.
 @main
 struct FlutterConfigurationPlugin: CommandPlugin {
   func performCommand(context: PluginContext, arguments: [String]) async throws
