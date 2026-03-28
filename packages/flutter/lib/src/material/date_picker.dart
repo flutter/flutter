@@ -236,6 +236,19 @@ Future<DateTime?> showDatePicker({
   /// input must still conform to the locale’s expected compact date format in
   /// order to be considered valid, regardless of the formatters provided.
   final List<TextInputFormatter>? inputFormatters,
+
+  /// Optional list of [TextInputFormatter]s to apply to the date input field
+  /// when in input mode.
+  ///
+  /// These formatters control how the user’s input is displayed and which
+  /// characters are allowed, but they do not change how the entered text is
+  /// parsed or validated as a date.
+  ///
+  /// Date parsing and validation continue to use
+  /// [MaterialLocalizations.parseCompactDate] for the current locale, so the
+  /// input must still conform to the locale’s expected compact date format in
+  /// order to be considered valid, regardless of the formatters provided.
+  final List<TextInputFormatter>? inputFormatters,
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
