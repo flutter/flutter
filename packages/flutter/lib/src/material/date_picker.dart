@@ -1217,6 +1217,7 @@ Future<DateTimeRange?> showDateRangePicker({
   Color? barrierColor,
   String? barrierLabel,
   bool useRootNavigator = true,
+  RouteSettings? routeSettings,
   TextDirection? textDirection,
   TransitionBuilder? builder,
   Offset? anchorPoint,
