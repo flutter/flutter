@@ -5430,15 +5430,18 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/121053.
   testWidgets(
-    'Ensure SelectionArea does not affect the layout of its children',
+    'Ensure SelectableRegion does not affect the layout of its children',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        TestWidgetsApp(
           home: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              SelectionArea(child: Text('row 1')),
-              Text('row 2'),
+              SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: const Text('row 1'),
+              ),
+              const Text('row 2'),
             ],
           ),
         ),
@@ -5446,7 +5449,44 @@ void main() {
       await tester.pumpAndSettle();
       final double xOffset1 = tester.getTopLeft(find.text('row 1')).dx;
       final double xOffset2 = tester.getTopLeft(find.text('row 2')).dx;
+      final Size size1 = tester.getSize(find.text('row 1'));
+      final Size size2 = tester.getSize(find.text('row 2'));
       expect(xOffset1, xOffset2);
+      expect(size1, size2);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/171632.
+  testWidgets(
+    'SelectableRegion preserves constraints from parent rather than loosening them',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 300.0, minHeight: 400.0),
+              child: SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: Container(
+                  key: const Key('container'),
+                  constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[Text('Row 1')],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Because min constraints win, the container size should be forced to 300x400.
+      final Size containerSize = tester.getSize(find.byKey(const Key('container')));
+      expect(containerSize.width, 300.0);
+      expect(containerSize.height, 400.0);
     },
     variant: TargetPlatformVariant.all(),
   );

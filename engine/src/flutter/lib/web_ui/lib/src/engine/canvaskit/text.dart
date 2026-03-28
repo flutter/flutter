@@ -794,10 +794,10 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
 /// The CanvasKit implementation of [ui.Paragraph].
 class CkParagraph implements ui.Paragraph {
   CkParagraph(SkParagraph skParagraph, this._paragraphStyle) {
-    _ref = UniqueRef<SkParagraph>(this, skParagraph, 'Paragraph');
+    _ref = CkUniqueRef<SkParagraph>(this, skParagraph, 'Paragraph');
   }
 
-  late final UniqueRef<SkParagraph> _ref;
+  late final CkUniqueRef<SkParagraph> _ref;
 
   SkParagraph get skiaObject => _ref.nativeObject;
 

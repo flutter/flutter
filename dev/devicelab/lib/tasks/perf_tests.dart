@@ -331,8 +331,12 @@ TaskFunction createFlutterViewStartupTest() {
   return StartupTest('${flutterDirectory.path}/examples/flutter_view', reportMetrics: false).run;
 }
 
-TaskFunction createPlatformViewStartupTest() {
-  return StartupTest('${flutterDirectory.path}/examples/platform_view', reportMetrics: false).run;
+TaskFunction createPlatformViewStartupTest({bool? enableImpeller}) {
+  return StartupTest(
+    '${flutterDirectory.path}/examples/platform_view',
+    reportMetrics: false,
+    enableImpeller: enableImpeller,
+  ).run;
 }
 
 TaskFunction createBasicMaterialCompileTest() {

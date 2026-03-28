@@ -40,7 +40,7 @@ class _FilterChipExampleState extends State<FilterChipExample> {
 
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           Text('Choose an exercise', style: textTheme.labelLarge),
           const SizedBox(height: 5.0),

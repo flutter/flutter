@@ -1802,16 +1802,10 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       find.byType(RawScrollbar),
       paints
-        ..path(
-          includes: const <Offset>[
-            Offset(782.0, 180.0),
-            Offset(782.0, 180.0 - 18.0),
-            Offset(782.0 + 18.0, 180),
-            Offset(782.0, 180.0 + 18.0),
-            Offset(782.0 - 18.0, 180),
-          ],
-        )
-        ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0),
+        // Scrollbar thumb background fill.
+        ..circle(x: 782.0, y: 180.0, radius: 18.0, style: PaintingStyle.fill)
+        // Scrollbar thumb border (stroke).
+        ..circle(x: 782.0, y: 180.0, radius: 17.0, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
 
@@ -1873,10 +1867,14 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       find.byType(RawScrollbar),
       paints
+        // Scrollbar track.
         ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
-        ..path(
-          includes: const <Offset>[Offset(800.0, 0.0)],
-          excludes: const <Offset>[Offset(780.0, 0.0)],
+        // Scrollbar thumb background fill.
+        ..rrect(
+          rrect: RRect.fromRectAndCorners(
+            const Rect.fromLTRB(780.0, 0.0, 800.0, 360.0),
+            topLeft: const Radius.circular(8.0),
+          ),
         ),
     );
   });
