@@ -152,7 +152,17 @@ class InputDatePickerFormField extends StatefulWidget {
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
 
-  /// The [TextInputFormatter]s that will be applied to the date input mode.
+  /// The [TextInputFormatter]s that will be applied to the [TextField] used for
+  /// manual date entry.
+  ///
+  /// These formatters can be used to customize how users enter dates, such as
+  /// restricting which characters are allowed or automatically formatting the
+  /// input into a locale-appropriate date representation as the user types.
+  ///
+  /// If non-null, this list replaces the default date input formatting behavior
+  /// rather than augmenting it. When providing custom [inputFormatters], you are
+  /// responsible for handling all input validation and formatting logic needed to
+  /// ensure that the entered text represents a valid date.
   final List<TextInputFormatter>? inputFormatters;
 
   @override

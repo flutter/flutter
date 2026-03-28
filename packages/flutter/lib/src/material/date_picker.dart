@@ -223,6 +223,8 @@ Future<DateTime?> showDatePicker({
   final Icon? switchToInputEntryModeIcon,
   final Icon? switchToCalendarEntryModeIcon,
   final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+
+  /// Optional list of [TextInputFormatter]s to apply to the date input field when in input mode.
   final List<TextInputFormatter>? inputFormatters,
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
@@ -1201,6 +1203,8 @@ Future<DateTimeRange?> showDateRangePicker({
   final Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
   CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+
+  /// Optional list of [TextInputFormatter]s to apply to the date input field when in input mode.
   List<TextInputFormatter>? inputFormatters,
 }) async {
   initialDateRange = initialDateRange == null ? null : calendarDelegate.datesOnly(initialDateRange);
