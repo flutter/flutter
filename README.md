@@ -1,8 +1,10 @@
 <a href="https://flutter.dev/">
   <h1 align="center">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/logos/flutter_logo_dark.webp">
-      <img alt="Flutter" src="docs/logos/flutter_logo_light.webp">
+      <source media="(prefers-color-scheme: dark)" srcset="docs/logos/flutter_logo_dark.webp" type="image/webp">
+      <source media="(prefers-color-scheme: dark)" srcset="docs/logos/flutter_logo_dark.png" type="image/png">
+      <source srcset="docs/logos/flutter_logo_light.webp" type="image/webp">
+      <img alt="Flutter" src="docs/logos/flutter_logo_light.png">
     </picture>
   </h1>
 </a>
