@@ -10,6 +10,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
+import 'address_bar_controller.dart';
 import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
@@ -69,6 +70,7 @@ class EngineFlutterView implements ui.FlutterView {
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
     pointerBinding = PointerBinding(this);
+    addressBarController = AddressBarController(this);
     _resizeSubscription = onResize.listen(_handleBrowserResize);
     _globalHtmlAttributes.applyAttributes(
       viewId: viewId,
@@ -110,6 +112,7 @@ class EngineFlutterView implements ui.FlutterView {
     _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
+    addressBarController.dispose();
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
     renderer.clearFragmentProgramCache();
@@ -153,6 +156,8 @@ class EngineFlutterView implements ui.FlutterView {
   late final DomManager dom = DomManager(devicePixelRatio: devicePixelRatio);
 
   late final PointerBinding pointerBinding;
+
+  late final AddressBarController addressBarController;
 
   @override
   ViewConstraints get physicalConstraints {

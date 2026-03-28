@@ -387,6 +387,7 @@ extension type DomEvent._(JSObject _) implements JSObject {
 
   external void preventDefault();
   external void stopPropagation();
+  external void stopImmediatePropagation();
 
   @JS('initEvent')
   external void _initEvent(String type, [bool bubbles, bool cancelable]);
