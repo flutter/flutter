@@ -1204,19 +1204,6 @@ Future<DateTimeRange?> showDateRangePicker({
   Color? barrierColor,
   String? barrierLabel,
   bool useRootNavigator = true,
-
-  /// Optional list of [TextInputFormatter]s to apply to the date input field when in input mode.
-  ///
-  /// These formatters control how text is entered into and displayed in the
-  /// input field (for example, restricting characters or inserting separators),
-  /// but they do not change the underlying date parsing or validation logic.
-  ///
-  /// The entered value is still parsed and validated using
-  /// [MaterialLocalizations.parseCompactDate]. Any custom [TextInputFormatter]s
-  /// provided here should therefore remain compatible with the compact date
-  /// format expected by the current [MaterialLocalizations] for the active
-  /// locale; otherwise, the input may be rejected as an invalid date even if it
-  /// visually appears formatted.
   TextDirection? textDirection,
   TransitionBuilder? builder,
   Offset? anchorPoint,
@@ -1540,7 +1527,15 @@ class DateRangePickerDialog extends StatefulWidget {
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
 
-  /// Optional list of [TextInputFormatter]s to apply to the text fields in the date range picker.
+  /// Optional list of [TextInputFormatter]s that are applied to both the
+  /// start and end date text fields when the date range picker is in input
+  /// entry mode.
+  ///
+  /// These formatters run before the fields' built-in date parsing and
+  /// validation logic. They can be used to restrict or transform the user's
+  /// raw input (for example, to limit the allowed characters), but they do
+  /// not change how the resulting text is interpreted as a [DateTime] or how
+  /// the overall date range is validated.
   final List<TextInputFormatter>? inputFormatters;
 
   @override
@@ -3333,12 +3328,7 @@ class _InputDateRangePicker extends StatefulWidget {
   /// range (i.e. the start date is after the end date).
   final String? errorInvalidRangeText;
 
-  /// Input formatters for the date text fields.
-  ///
-  /// The same list of [TextInputFormatter]s is applied to both the start and
-  /// end date fields. These formatters can affect how text is entered or
-  /// displayed, but they do not replace or override the date range validation
-  /// logic performed by this picker.
+  /// Hint text shown when the start date field is empty
   final String? fieldStartHintText;
 
   /// Hint text shown when the end date field is empty.
@@ -3366,8 +3356,12 @@ class _InputDateRangePicker extends StatefulWidget {
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
 
-  /// Input formatters for the text fields.
-  /// These will be applied to the start and end date fields.
+  /// Input formatters for the date text fields.
+  ///
+  /// The same list of [TextInputFormatter]s is applied to both the start and
+  /// end date fields. These formatters can affect how text is entered or
+  /// displayed, but they do not replace or override the date range validation
+  /// logic performed by this picker.
   final List<TextInputFormatter>? inputFormatters;
 
   @override
