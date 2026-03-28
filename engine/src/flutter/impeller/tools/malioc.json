@@ -4870,7 +4870,7 @@
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/line.frag.gles",
       "has_side_effects": false,
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "modifies_coverage": false,
       "reads_color_buffer": false,
       "type": "Fragment",
@@ -4878,20 +4878,20 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 3,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "varying"
             ],
             "longest_path_cycles": [
-              0.1875,
-              0.1875,
-              0.1875,
-              0.0,
+              0.265625,
+              0.25,
+              0.265625,
+              0.0625,
               0.0,
               1.75,
-              0.5
+              0.25
             ],
             "pipelines": [
               "arith_total",
@@ -4918,13 +4918,13 @@
               "varying"
             ],
             "total_cycles": [
-              0.1875,
-              0.1875,
-              0.1875,
-              0.0,
+              0.34375,
+              0.265625,
+              0.34375,
+              0.0625,
               0.0,
               1.75,
-              0.5
+              1.0
             ]
           },
           "stack_spill_bytes": 0,
@@ -4947,7 +4947,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              3.299999952316284,
+              4.619999885559082,
               5.0,
               2.0
             ],
@@ -4965,12 +4965,12 @@
               0.0
             ],
             "total_bound_pipelines": [
-              "load_store"
+              "arithmetic"
             ],
             "total_cycles": [
-              3.6666667461395264,
+              6.0,
               5.0,
-              2.0
+              4.0
             ]
           },
           "thread_occupancy": 100,
@@ -9444,20 +9444,20 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 33,
+          "fp16_arithmetic": 25,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "varying"
             ],
             "longest_path_cycles": [
-              0.1875,
-              0.171875,
-              0.15625,
-              0.1875,
+              0.25,
+              0.234375,
+              0.25,
+              0.25,
               0.0,
               1.75,
-              0.5
+              0.25
             ],
             "pipelines": [
               "arith_total",
@@ -9474,7 +9474,7 @@
             "shortest_path_cycles": [
               0.1875,
               0.15625,
-              0.109375,
+              0.125,
               0.1875,
               0.0,
               1.75,
@@ -9484,13 +9484,13 @@
               "varying"
             ],
             "total_cycles": [
-              0.1875,
-              0.171875,
-              0.15625,
-              0.1875,
+              0.328125,
+              0.25,
+              0.328125,
+              0.25,
               0.0,
               1.75,
-              0.5
+              1.0
             ]
           },
           "stack_spill_bytes": 0,

@@ -141,12 +141,14 @@ class _InputBorderPainter extends CustomPainter {
     final Rect canvasRect = Offset.zero & size;
     final Color blendedFillColor = blendedColor;
     if (blendedFillColor.alpha > 0) {
-      canvas.drawPath(
-        borderValue.getOuterPath(canvasRect, textDirection: textDirection),
-        Paint()
-          ..color = blendedFillColor
-          ..style = PaintingStyle.fill,
-      );
+      final paint = Paint()
+        ..color = blendedFillColor
+        ..style = PaintingStyle.fill;
+      if (borderValue.preferPaintInterior) {
+        borderValue.paintInterior(canvas, canvasRect, paint, textDirection: textDirection);
+      } else {
+        canvas.drawPath(borderValue.getOuterPath(canvasRect, textDirection: textDirection), paint);
+      }
     }
 
     borderValue.paint(
