@@ -414,8 +414,8 @@ void _drawFrame() {
 }
 
 @pragma('vm:entry-point')
-void _textureFrameAvailable(int textureId) {
-  PlatformDispatcher.instance._textureFrameAvailable(textureId);
+void _notifyTextureFrameAvailable(int textureId) {
+  PlatformDispatcher.instance._notifyTextureFrameAvailable(textureId);
 }
 
 @pragma('vm:entry-point')
