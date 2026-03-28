@@ -6610,6 +6610,47 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/168765
+  testWidgets(
+    'context menu overlay entry is built after selection handles',
+    (WidgetTester tester) async {
+      final List<String> buildOrder = <String>[];
+      final selectionControls = _OrderTrackingSelectionControls(buildOrder);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: selectionControls,
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  buildOrder.add('contextMenu');
+                  return const SizedBox.shrink();
+                },
+            child: const Text('How are you?'),
+          ),
+        ),
+      );
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+      );
+
+      // Long press to trigger selection handles and context menu.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Verify that the context menu was built after the selection handles,
+      // which means the context menu overlay entry is on top and receives
+      // hit tests first.
+      expect(buildOrder, <String>['handle', 'handle', 'contextMenu']);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
@@ -6798,5 +6839,33 @@ class RenderSelectAll extends RenderProxyBox with Selectable, SelectionRegistran
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
     this.startHandle = startHandle;
     this.endHandle = endHandle;
+  }
+}
+
+/// A [TextSelectionControls] with [TextSelectionHandleControls] mixin that
+/// tracks when handles are built, used to verify overlay insertion order.
+class _OrderTrackingSelectionControls extends TextSelectionControls
+    with TextSelectionHandleControls {
+  _OrderTrackingSelectionControls(this.buildOrder);
+
+  final List<String> buildOrder;
+
+  @override
+  Size getHandleSize(double textLineHeight) => const Size(20.0, 30.0);
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    buildOrder.add('handle');
+    return const SizedBox(width: 20.0, height: 30.0);
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
   }
 }
