@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import androidx.annotation.DoNotInline;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -658,8 +659,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
       return;
     }
-    int fontWeightAdjustment =
-        rootAccessibilityView.getResources().getConfiguration().fontWeightAdjustment;
+    int fontWeightAdjustment;
+    try {
+      fontWeightAdjustment = Api31Impl.getFontWeightAdjustment(rootAccessibilityView);
+    } catch (NoSuchFieldError exception) {
+      accessibilityFeatureFlags &= ~AccessibilityFeature.BOLD_TEXT.value;
+      sendLatestAccessibilityFlagsToFlutter();
+      return;
+    }
     boolean shouldBold =
         fontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED
             && fontWeightAdjustment >= BOLD_TEXT_WEIGHT_ADJUSTMENT;
@@ -680,6 +687,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   @VisibleForTesting
   public AccessibilityNodeInfo obtainAccessibilityNodeInfo(View rootView, int virtualViewId) {
     return AccessibilityNodeInfo.obtain(rootView, virtualViewId);
+  }
+
+  @RequiresApi(API_LEVELS.API_31)
+  private static class Api31Impl {
+    @DoNotInline
+    static int getFontWeightAdjustment(@NonNull View rootAccessibilityView) {
+      return rootAccessibilityView.getResources().getConfiguration().fontWeightAdjustment;
+    }
   }
 
   /**
