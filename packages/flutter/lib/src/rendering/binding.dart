@@ -70,8 +70,9 @@ mixin RendererBinding
 
   /// Registry mapping texture IDs to their [TextureBox] render objects.
   ///
-  /// Used to mark textures dirty when the engine notifies us of new frames
-  /// via [handleTextureFrameAvailable].
+  /// When the engine notifies us of a new frame via
+  /// [handleTextureFrameAvailable], this registry is used to look up the
+  /// corresponding [TextureBox] and mark it as needing paint.
   @visibleForTesting
   final Map<int, TextureBox> textureRegistry = <int, TextureBox>{};
 
