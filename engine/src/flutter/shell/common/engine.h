@@ -664,7 +664,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   /// @param[in]  texture_id  The ID of the texture that has a new frame.
   ///
-  void TextureFrameAvailable(int64_t texture_id);
+  void NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Gets the main port of the root isolate. Since the isolate is
