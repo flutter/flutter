@@ -665,7 +665,7 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  void _textureFrameAvailable(int textureId) {
+  void _notifyTextureFrameAvailable(int textureId) {
     _invoke1<int>(onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
   }
 
