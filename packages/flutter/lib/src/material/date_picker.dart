@@ -224,7 +224,17 @@ Future<DateTime?> showDatePicker({
   final Icon? switchToCalendarEntryModeIcon,
   final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 
-  /// Optional list of [TextInputFormatter]s to apply to the date input field when in input mode.
+  /// Optional list of [TextInputFormatter]s to apply to the date input field
+  /// when in input mode.
+  ///
+  /// These formatters control how the user’s input is displayed and which
+  /// characters are allowed, but they do not change how the entered text is
+  /// parsed or validated as a date.
+  ///
+  /// Date parsing and validation continue to use
+  /// [MaterialLocalizations.parseCompactDate] for the current locale, so the
+  /// input must still conform to the locale’s expected compact date format in
+  /// order to be considered valid, regardless of the formatters provided.
   final List<TextInputFormatter>? inputFormatters,
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
@@ -1194,7 +1204,19 @@ Future<DateTimeRange?> showDateRangePicker({
   Color? barrierColor,
   String? barrierLabel,
   bool useRootNavigator = true,
-  RouteSettings? routeSettings,
+
+  /// Optional list of [TextInputFormatter]s to apply to the date input field when in input mode.
+  ///
+  /// These formatters control how text is entered into and displayed in the
+  /// input field (for example, restricting characters or inserting separators),
+  /// but they do not change the underlying date parsing or validation logic.
+  ///
+  /// The entered value is still parsed and validated using
+  /// [MaterialLocalizations.parseCompactDate]. Any custom [TextInputFormatter]s
+  /// provided here should therefore remain compatible with the compact date
+  /// format expected by the current [MaterialLocalizations] for the active
+  /// locale; otherwise, the input may be rejected as an invalid date even if it
+  /// visually appears formatted.
   TextDirection? textDirection,
   TransitionBuilder? builder,
   Offset? anchorPoint,
@@ -1489,7 +1511,15 @@ class DateRangePickerDialog extends StatefulWidget {
   /// If it is non-null, the date range picker will persist and restore the
   /// date range selected on the dialog.
   ///
-  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// Optional list of [TextInputFormatter]s that are applied to both the
+  /// start and end date text fields when the date range picker is in input
+  /// entry mode.
+  ///
+  /// These formatters run before the fields' built-in date parsing and
+  /// validation logic. They can be used to restrict or transform the user's
+  /// raw input (for example, to limit the allowed characters), but they do
+  /// not change how the resulting text is interpreted as a [DateTime] or how
+  /// the overall date range is validated.
   /// from the surrounding [RestorationScope] using the provided restoration ID.
   ///
   /// See also:
@@ -3303,7 +3333,12 @@ class _InputDateRangePicker extends StatefulWidget {
   /// range (i.e. the start date is after the end date).
   final String? errorInvalidRangeText;
 
-  /// Hint text shown when the start date field is empty.
+  /// Input formatters for the date text fields.
+  ///
+  /// The same list of [TextInputFormatter]s is applied to both the start and
+  /// end date fields. These formatters can affect how text is entered or
+  /// displayed, but they do not replace or override the date range validation
+  /// logic performed by this picker.
   final String? fieldStartHintText;
 
   /// Hint text shown when the end date field is empty.
