@@ -388,7 +388,7 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @return     Returns if the notification to the running isolate was
   ///             successful. Returns false if the root isolate is not running.
   ///
-  bool TextureFrameAvailable(int64_t texture_id);
+  bool NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Notify the Dart VM that no frame workloads are expected on the
