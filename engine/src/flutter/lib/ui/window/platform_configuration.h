@@ -559,12 +559,12 @@ class PlatformConfiguration final {
   ///             needing paint, ensuring the view containing the texture is
   ///             recomposited even if no other render objects are dirty.
   ///
-  ///             This method calls the `::_textureFrameAvailable` method in
-  ///             `hooks.dart`.
+  ///             This method calls the `::_notifyTextureFrameAvailable` method
+  ///             in `hooks.dart`.
   ///
   /// @param[in]  texture_id  The ID of the texture that has a new frame.
   ///
-  void TextureFrameAvailable(int64_t texture_id);
+  void NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieves the viewport metrics with the given ID managed by
@@ -622,7 +622,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
-  tonic::DartPersistentValue texture_frame_available_;
+  tonic::DartPersistentValue notify_texture_frame_available_;
 
   uint64_t last_frame_number_ = 0;
   int64_t last_microseconds_ = 0;
