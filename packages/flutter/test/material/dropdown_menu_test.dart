@@ -5396,8 +5396,9 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pump();
 
-    // The internal focus node should have gained focus.
+    // The internal focus node created by DropdownMenu should have gained focus.
     final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.focusNode.debugLabel, 'DropdownMenu<TestMenu>');
     expect(editableText.focusNode.hasFocus, isTrue);
   });
 

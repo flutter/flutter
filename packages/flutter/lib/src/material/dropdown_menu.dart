@@ -730,7 +730,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   WidgetStatesController? _highlightedItemStatesController;
 
   FocusNode? _focusNode;
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode(debugLabel: '${widget.runtimeType}'));
 
   FocusNode? _localTrailingIconButtonFocusNode;
   FocusNode get _trailingIconButtonFocusNode =>
