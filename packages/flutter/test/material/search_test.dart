@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/clipboard_utils.dart';
+import 'clipboard_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {

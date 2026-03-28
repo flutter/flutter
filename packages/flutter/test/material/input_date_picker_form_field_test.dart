@@ -8,7 +8,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/clipboard_utils.dart';
+import 'clipboard_utils.dart';
 
 class TestMaterialLocalizations extends DefaultMaterialLocalizations {
   @override
