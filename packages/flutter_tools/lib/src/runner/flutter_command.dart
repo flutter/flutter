@@ -1947,8 +1947,6 @@ abstract class FlutterCommand extends Command<void> {
       }, offline: offline);
       await globals.cache.updateAll(await requiredArtifacts, offline: offline);
     }
-    globals.cache.releaseLock();
-
     await validateCommand();
 
     final FlutterProject project = FlutterProject.current();
@@ -1961,6 +1959,7 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
     }
+    globals.cache.releaseLock();
 
     if (regeneratePlatformSpecificToolingDuringVerify) {
       await regeneratePlatformSpecificToolingIfApplicable(
