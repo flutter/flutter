@@ -1349,8 +1349,8 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
       task_runners_.GetUITaskRunner(),
       [engine = engine_->GetWeakPtr(), texture_id]() {
         if (engine) {
-          engine->TextureFrameAvailable(texture_id);
-          engine->ScheduleFrame(false);
+          engine->NotifyTextureFrameAvailable(texture_id);
+          engine->ScheduleFrame(/*regenerate_layer_trees=*/false);
         }
       });
 }
