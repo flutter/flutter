@@ -24,11 +24,6 @@ import 'scrollable.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
 
-// Examples can assume:
-// late BuildContext context;
-// late List<Widget> menuItems;
-// late RawMenuOverlayInfo info;
-
 const bool _kDebugMenus = false;
 
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
@@ -136,15 +131,385 @@ class _MenuControllerScope extends InheritedWidget {
   const _MenuControllerScope({
     required this.isOpen,
     required this.controller,
+    required this.tapRegionGroupId,
     required super.child,
   });
 
   final bool isOpen;
   final MenuController controller;
+  final Object tapRegionGroupId;
 
   @override
   bool updateShouldNotify(_MenuControllerScope oldWidget) {
-    return isOpen != oldWidget.isOpen;
+    return isOpen != oldWidget.isOpen || tapRegionGroupId != oldWidget.tapRegionGroupId;
+  }
+}
+
+/// An interface used to define the behavior of a [RawMenuNode].
+///
+/// Typically, [RawMenuNodeDelegate] is implemented by the [State] of a widget
+/// that builds a [RawMenuNode].
+///
+/// See [RawMenuAnchor] for example usage of this delegate.
+abstract interface class RawMenuNodeDelegate {
+  /// Whether the menu is open.
+  bool get isOpen;
+
+  /// Implementers should define what to do when [MenuController.open] is
+  /// called.
+  ///
+  /// The `position` argument is the `position` argument passed to
+  /// [MenuController.open]. It should be used to position the menu in the local
+  /// coordinates of the [RawMenuNode.child].
+  ///
+  /// The `showOverlay` callback should be called when the menu should be shown.
+  /// This can occur immediately (the default behavior), or after a delay.
+  ///
+  /// If an opening animation is required, it should typically be started
+  /// immediately after calling `showOverlay` within this method.
+  void didRequestMenuOpen(Offset? position, VoidCallback showOverlay);
+
+  /// Implementers should define what to do when [MenuController.close] is
+  /// called.
+  ///
+  /// The `hideOverlay` callback should be called when the menu should be
+  /// hidden. This can occur immediately (the default behavior), or after a
+  /// delay, such as after a closing animation has completed.
+  ///
+  /// The [hideOverlay] callback is safe to call after the widget is dismounted,
+  /// or not at all.
+  ///
+  /// Pending timers started in a previous call to [handleMenuCloseRequest] should be
+  /// canceled when this callback is triggered.
+  ///
+  /// This method is not called if the menu is already closed.
+  void handleMenuCloseRequest(VoidCallback hideOverlay);
+
+  /// Implement to define how to open the menu.
+  ///
+  /// This is called when the menu overlay should be shown and added to the
+  /// widget tree.
+  ///
+  /// The optional `position` argument should be used to position the menu in
+  /// the local coordinates of the [RawMenuNode.child].
+  void handleMenuOpen({Offset? position});
+
+  /// Implement to define how to close the menu.
+  ///
+  /// This is called when the menu overlay should be hidden and removed from the
+  /// widget tree.
+  ///
+  /// Prior to [handleMenuClose] being called, all descendant menus will have been closed.
+  ///
+  /// This method is not called if the menu is already closed.
+  void handleMenuClose();
+}
+
+/// A widget that acts as a logical node in a menu tree and delegates its
+/// presentation to a [RawMenuNodeDelegate].
+///
+/// Its primary responsibilities are:
+///
+/// 1.  **State Coordination**: It orchestrates open/close operations across the
+///     menu tree. For example, when this node opens, it first begins closing
+///     all siblings.
+///
+/// 2.  **Inheritance**: It provides the [MenuController] and
+///     [RawMenuNodeDelegate.isOpen] to descendants. These can be accessed using
+///     [MenuController.maybeOf] and [MenuController.maybeIsOpenOf],
+///     respectively.
+///
+/// 3.  **Behavioral Triggers**: It listens for external events (like scrolling
+///     or screen resizing) to automatically close the menu tree when necessary.
+///
+/// ### Relationship to [RawMenuAnchor]
+///
+/// [RawMenuAnchor] uses [RawMenuNode] internally. Its state mixes in
+/// [RawMenuNodeDelegate] and builds a [RawMenuNode] that delegates to itself.
+/// For most use cases, [RawMenuAnchor] is the correct widget to use.
+/// [RawMenuNode] is intended for cases where the anchor widget needs full
+/// control over its own presentation — for example, when the menu content is
+/// rendered in a [Stack] rather than in an [Overlay].
+///
+/// See also:
+///
+///  * [RawMenuNodeDelegate], the mixin that defines what should happen when a
+///    [RawMenuNode] is opened or closed.
+///  * [RawMenuAnchor], a widget that wraps a [RawMenuNode] and presents its
+///    menu in an [OverlayPortal].
+///  * [RawMenuAnchorGroup], a widget that registers a group of related
+///    [RawMenuNode]s in the menu tree without displaying its own overlay.
+///  * [MenuController], the controller used to open, close, and interrogate a
+///    menu anchor.
+class RawMenuNode extends StatefulWidget {
+  ///
+  const RawMenuNode({
+    super.key,
+    required this.delegate,
+    required this.controller,
+    required this.child,
+  });
+
+  /// The delegate that defines the presentation of this menu.
+  ///
+  /// This is typically the [State] of the widget that wraps this [RawMenuNode].
+  final RawMenuNodeDelegate delegate;
+
+  /// A [MenuController] that allows opening and closing of the menu from other
+  /// widgets.
+  final MenuController controller;
+
+  /// The child widget that this [RawMenuNode] surrounds.
+  ///
+  /// This is typically a widget that contains both the menu button and the menu
+  /// panel, such as a [Stack].
+  final Widget child;
+
+  @override
+  State<RawMenuNode> createState() => _RawMenuNodeState();
+}
+
+class _RawMenuNodeState extends State<RawMenuNode> {
+  final List<_RawMenuNodeState> _anchorChildren = <_RawMenuNodeState>[];
+  _RawMenuNodeState? _parent;
+  ScrollPosition? _scrollPosition;
+  Size? _viewSize;
+
+  RawMenuNodeDelegate get delegate => widget.delegate;
+  bool get isOpen => delegate.isOpen;
+
+  /// Whether this [_RawMenuNodeState] is the top node of the menu tree.
+  bool get isRoot => _parent == null;
+
+  /// The root of the menu tree that this [RawMenuAnchor] is in.
+  _RawMenuNodeState get root {
+    var anchor = this;
+    while (anchor._parent != null) {
+      anchor = anchor._parent!;
+    }
+    return anchor;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller._attach(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final _RawMenuNodeState? newParent = MenuController.maybeOf(context)?._anchor;
+    if (newParent != _parent) {
+      assert(
+        newParent != this,
+        'A MenuController should only be attached to one anchor at a time.',
+      );
+      _parent?._removeChild(this);
+      _parent = newParent;
+      _parent?._addChild(this);
+    }
+
+    if (isRoot) {
+      _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
+      _scrollPosition = Scrollable.maybeOf(context)?.position;
+      _scrollPosition?.isScrollingNotifier.addListener(_handleScroll);
+
+      final Size newSize = MediaQuery.sizeOf(context);
+      if (_viewSize != null && newSize != _viewSize && isOpen) {
+        // Close the menus if the view changes size.
+        // handleCloseRequest();
+      }
+      _viewSize = newSize;
+    }
+  }
+
+  @override
+  void didUpdateWidget(RawMenuNode oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._detach(this);
+      widget.controller._attach(this);
+    }
+  }
+
+  @override
+  void dispose() {
+    assert(_debugMenuInfo('Disposing of $this'));
+    _parent?._removeChild(this);
+    _parent = null;
+    _anchorChildren.clear();
+    widget.controller._detach(this);
+    super.dispose();
+  }
+
+  void _addChild(_RawMenuNodeState child) {
+    assert(isRoot || _debugMenuInfo('Added root child: $child'));
+    assert(!_anchorChildren.contains(child));
+    _anchorChildren.add(child);
+    assert(_debugMenuInfo('Added:\n${child.widget.toStringDeep()}'));
+    assert(_debugMenuInfo('Tree:\n${widget.toStringDeep()}'));
+  }
+
+  void _removeChild(_RawMenuNodeState child) {
+    assert(isRoot || _debugMenuInfo('Removed root child: $child'));
+    assert(_anchorChildren.contains(child));
+    assert(_debugMenuInfo('Removing:\n${child.widget.toStringDeep()}'));
+    _anchorChildren.remove(child);
+    assert(_debugMenuInfo('Tree:\n${widget.toStringDeep()}'));
+  }
+
+  void _handleScroll() {
+    // If an ancestor scrolls, and we're a root anchor, then close the menus.
+    // Don't just close it on *any* scroll, since we want to be able to scroll
+    // menus themselves if they're too big for the view.
+    if (isOpen) {
+      handleCloseRequest();
+    }
+  }
+
+  void _childChangedOpenState() {
+    _parent?._childChangedOpenState();
+    _scheduleSafeCallback(() {
+      if (mounted) {
+        setState(() {
+          // Mark dirty to notify MenuController dependents.
+        });
+      }
+    }, debugLabel: '_RawMenuAnchorBaseState._childChangedOpenState');
+  }
+
+  /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
+  ///
+  /// Call this when the menu overlay should be shown and added to the widget
+  /// tree.
+  ///
+  /// The optional `position` argument should specify the location of the menu
+  /// in the local coordinates of the [RawMenuAnchor].
+  void open({Offset? position}) {
+    if (!mounted) {
+      return;
+    }
+
+    if (isOpen) {
+      // The menu is already open, but we need to move to another location. If a
+      // child of this menu is open, calling OverlayPortalController.show() will
+      // show this menu above the child. To avoid this, we close the menu and
+      // all of its children first, which will remove the menu overlay from the
+      // widget tree.
+      close();
+    }
+
+    assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero}'));
+
+    // Close all siblings.
+    _parent?.requestChildrenClose();
+    delegate.handleMenuOpen(position: position);
+    _parent?._childChangedOpenState();
+    setState(() {
+      // Mark dirty to notify MenuController dependents.
+    });
+  }
+
+  /// Close the menu and all of its children.
+  ///
+  /// Called when the menu overlay should be hidden and removed from the widget
+  /// tree.
+  void close() {
+    assert(_debugMenuInfo('Closing $this'));
+    if (!isOpen) {
+      return;
+    }
+
+    assert(mounted, 'A RawMenuAnchorDelegate returned true from isOpen after it was disposed.');
+    closeChildren();
+    delegate.handleMenuClose();
+    _parent?._childChangedOpenState();
+    setState(() {
+      // Mark dirty to notify MenuController dependents.
+    });
+  }
+
+  /// Called by [MenuController.open] to trigger the opening sequence of this
+  /// menu, which eventually leads to [_RawMenuNodeState.open].
+  void handleOpenRequest({ui.Offset? position}) {
+    delegate.didRequestMenuOpen(position, () {
+      open(position: position);
+    });
+  }
+
+  /// Called by [MenuController.close] to trigger the closing sequence of this
+  /// menu, which eventually leads to [_RawMenuNodeState.close].
+  void handleCloseRequest() {
+    if (!isOpen) {
+      return;
+    }
+
+    // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
+    // didChangeDependencies. When this happens, calling setState during the
+    // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
+    // will throw an error, since we'd be scheduling a build during a build. We
+    // avoid this by checking if we're in a build, and if so, we schedule the
+    // close for the next frame.
+    _scheduleSafeCallback(() {
+      if (mounted) {
+        delegate.handleMenuCloseRequest(close);
+      }
+    }, debugLabel: '_RawMenuAnchorBaseState.handleCloseRequest');
+    requestChildrenClose();
+  }
+
+  /// Close the open submenus of this menu.
+  ///
+  /// This method will call [close] on each child of this menu, which will
+  /// immediately close the child.
+  void closeChildren() {
+    assert(_debugMenuInfo('Closing children of $this'));
+    final children = List<_RawMenuNodeState>.of(_anchorChildren);
+    for (final child in children) {
+      child.close();
+    }
+  }
+
+  /// Request that the open submenus of this menu be closed.
+  ///
+  /// This method will call [handleCloseRequest] on each child of this
+  /// menu, which will trigger the closing sequence of each child.
+  void requestChildrenClose() {
+    assert(_debugMenuInfo('Calling handleCloseRequest for children of $this'));
+    final children = List<_RawMenuNodeState>.of(_anchorChildren);
+    for (final child in children) {
+      child.handleCloseRequest();
+    }
+  }
+
+  void handleOutsideTap(PointerDownEvent pointerDownEvent) {
+    assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
+    if (isOpen) {
+      requestChildrenClose();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _MenuControllerScope(
+      isOpen: isOpen,
+      controller: widget.controller,
+      tapRegionGroupId: root.widget.controller,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          // Check if open to allow DismissIntent to bubble when the menu is
+          // closed.
+          if (isOpen) DismissIntent: DismissMenuAction(controller: widget.controller),
+        },
+        child: widget.child,
+      ),
+    );
+  }
+
+  @override
+  String toString({DiagnosticLevel? minLevel}) {
+    return describeIdentity(this);
   }
 }
 
@@ -315,6 +680,12 @@ class RawMenuAnchor extends StatefulWidget {
   /// callback can be used to add a delay or a closing animation before the menu
   /// is hidden.
   ///
+  /// This callback is also triggered when a parent [RawMenuAnchor] is opened,
+  /// since that triggers [MenuController.close] on all descendant menu
+  /// controllers. As a result, pending timers or animations started in
+  /// [onCloseRequested] should be canceled when this callback is triggered, to
+  /// prevent them from closing the menu at an unintended time.
+  ///
   /// If the menu is not closed, this callback will also be called when the root
   /// menu anchor is scrolled and when the screen is resized.
   ///
@@ -443,234 +814,21 @@ class RawMenuAnchor extends StatefulWidget {
   }
 }
 
-// Base mixin that provides the common interface and state for both types of
-// [RawMenuAnchor]s, [RawMenuAnchor] and [RawMenuAnchorGroup].
-@optionalTypeArgs
-mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
-  final List<_RawMenuAnchorBaseMixin> _anchorChildren = <_RawMenuAnchorBaseMixin>[];
-  _RawMenuAnchorBaseMixin? _parent;
-  ScrollPosition? _scrollPosition;
-  Size? _viewSize;
-
-  /// Whether this [_RawMenuAnchorBaseMixin] is the top node of the menu tree.
-  @protected
-  bool get isRoot => _parent == null;
-
-  /// The [MenuController] that is used by the [_RawMenuAnchorBaseMixin].
-  ///
-  /// If an overriding widget does not provide a [MenuController], then
-  /// [_RawMenuAnchorBaseMixin] will create and manage its own.
-  MenuController get menuController;
-
-  /// Whether this submenu's overlay is visible.
-  @protected
-  bool get isOpen;
-
-  /// The root of the menu tree that this [RawMenuAnchor] is in.
-  @protected
-  _RawMenuAnchorBaseMixin get root {
-    _RawMenuAnchorBaseMixin anchor = this;
-    while (anchor._parent != null) {
-      anchor = anchor._parent!;
-    }
-    return anchor;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    menuController._attach(this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final _RawMenuAnchorBaseMixin? newParent = MenuController.maybeOf(context)?._anchor;
-    if (newParent != _parent) {
-      assert(
-        newParent != this,
-        'A MenuController should only be attached to one anchor at a time.',
-      );
-      _parent?._removeChild(this);
-      _parent = newParent;
-      _parent?._addChild(this);
-    }
-
-    if (isRoot) {
-      _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
-      _scrollPosition = Scrollable.maybeOf(context)?.position;
-      _scrollPosition?.isScrollingNotifier.addListener(_handleScroll);
-
-      final Size newSize = MediaQuery.sizeOf(context);
-      if (_viewSize != null && newSize != _viewSize && isOpen) {
-        // Close the menus if the view changes size.
-        handleCloseRequest();
-      }
-      _viewSize = newSize;
-    }
-  }
-
-  @override
-  void dispose() {
-    assert(_debugMenuInfo('Disposing of $this'));
-    if (isOpen) {
-      close(inDispose: true);
-    }
-
-    _parent?._removeChild(this);
-    _parent = null;
-    _anchorChildren.clear();
-    menuController._detach(this);
-    super.dispose();
-  }
-
-  void _addChild(_RawMenuAnchorBaseMixin child) {
-    assert(isRoot || _debugMenuInfo('Added root child: $child'));
-    assert(!_anchorChildren.contains(child));
-    _anchorChildren.add(child);
-    assert(_debugMenuInfo('Added:\n${child.widget.toStringDeep()}'));
-    assert(_debugMenuInfo('Tree:\n${widget.toStringDeep()}'));
-  }
-
-  void _removeChild(_RawMenuAnchorBaseMixin child) {
-    assert(isRoot || _debugMenuInfo('Removed root child: $child'));
-    assert(_anchorChildren.contains(child));
-    assert(_debugMenuInfo('Removing:\n${child.widget.toStringDeep()}'));
-    _anchorChildren.remove(child);
-    assert(_debugMenuInfo('Tree:\n${widget.toStringDeep()}'));
-  }
-
-  void _handleScroll() {
-    // If an ancestor scrolls, and we're a root anchor, then close the menus.
-    // Don't just close it on *any* scroll, since we want to be able to scroll
-    // menus themselves if they're too big for the view.
-    if (isOpen) {
-      handleCloseRequest();
-    }
-  }
-
-  void _childChangedOpenState() {
-    _parent?._childChangedOpenState();
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      setState(() {
-        // Mark dirty now, but only if not in a build.
-      });
-    } else {
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-        setState(() {
-          // Mark dirty
-        });
-      });
-    }
-  }
-
-  /// Open the menu, optionally at a position relative to the [RawMenuAnchor].
-  ///
-  /// Call this when the menu overlay should be shown and added to the widget
-  /// tree.
-  ///
-  /// The optional `position` argument should specify the location of the menu
-  /// in the local coordinates of the [RawMenuAnchor].
-  @protected
-  void open({Offset? position});
-
-  /// Close the menu and all of its children.
-  ///
-  /// Call this when the menu overlay should be hidden and removed from the
-  /// widget tree.
-  ///
-  /// If `inDispose` is true, this method call was triggered by the widget being
-  /// unmounted.
-  @protected
-  void close({bool inDispose = false});
-
-  /// Implemented by subclasses to define what to do when [MenuController.open]
-  /// is called.
-  ///
-  /// This method should not be directly called by subclasses. Its call chain
-  /// should eventually invoke `_RawMenuAnchorBaseMixin.open`
-  @protected
-  void handleOpenRequest({Offset? position});
-
-  /// Implemented by subclasses to define what to do when [MenuController.close]
-  /// is called.
-  ///
-  /// This method should not be directly called by subclasses. Its call chain
-  /// should eventually invoke `_RawMenuAnchorBaseMixin.close`.
-  @protected
-  void handleCloseRequest();
-
-  /// Request that the submenus of this menu be closed.
-  ///
-  /// By default, this method will call [handleCloseRequest] on each child of this
-  /// menu, which will trigger the closing sequence of each child.
-  ///
-  /// If `inDispose` is true, this method was triggered by the widget being
-  /// unmounted.
-  @protected
-  void closeChildren({bool inDispose = false}) {
-    assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final child in List<_RawMenuAnchorBaseMixin>.of(_anchorChildren)) {
-      if (inDispose) {
-        child.close(inDispose: inDispose);
-      } else {
-        child.handleCloseRequest();
-      }
-    }
-  }
-
-  /// Handles taps outside of the menu surface.
-  ///
-  /// By default, this closes this submenu's children.
-  @protected
-  void handleOutsideTap(PointerDownEvent pointerDownEvent) {
-    assert(_debugMenuInfo('Tapped Outside $menuController'));
-    if (isOpen) {
-      closeChildren();
-    }
-  }
-
-  // Used to build the anchor widget in subclasses.
-  @protected
-  Widget buildAnchor(BuildContext context);
-
-  @override
-  @nonVirtual
-  Widget build(BuildContext context) {
-    return _MenuControllerScope(
-      isOpen: isOpen,
-      controller: menuController,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          // Check if open to allow DismissIntent to bubble when the menu is
-          // closed.
-          if (isOpen) DismissIntent: DismissMenuAction(controller: menuController),
-        },
-        child: Builder(builder: buildAnchor),
-      ),
-    );
-  }
-
-  @override
-  String toString({DiagnosticLevel? minLevel}) => describeIdentity(this);
-}
-
-class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMixin<RawMenuAnchor> {
-  // The global key used to determine the bounding rect for the anchor.
-  final GlobalKey _anchorKey = GlobalKey<_RawMenuAnchorState>(
-    debugLabel: kReleaseMode ? null : 'MenuAnchor',
-  );
+class _RawMenuAnchorState extends State<RawMenuAnchor> implements RawMenuNodeDelegate {
   final OverlayPortalController _overlayController = OverlayPortalController(
     debugLabel: kReleaseMode ? null : 'MenuAnchor controller',
   );
 
   Offset? _menuPosition;
-  bool get _isRootOverlayAnchor => _parent is! _RawMenuAnchorState;
+  RawMenuNodeDelegate? get parent => widget.controller._anchor?._parent?.delegate;
+  bool get _isRootOverlayAnchor {
+    return parent is! _RawMenuAnchorState;
+  }
 
   // If we are a nested menu, we still want to use the same overlay as the
   // root menu.
   bool get useRootOverlay {
-    if (_parent case _RawMenuAnchorState(useRootOverlay: final bool useRoot)) {
+    if (parent case _RawMenuAnchorState(useRootOverlay: final bool useRoot)) {
       return useRoot;
     }
 
@@ -682,103 +840,33 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   bool get isOpen => _overlayController.isShowing;
 
   @override
-  MenuController get menuController => widget.controller;
-
-  @override
-  void didUpdateWidget(RawMenuAnchor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._detach(this);
-      widget.controller._attach(this);
-    }
+  void handleMenuClose() {
+    _scheduleSafeCallback(() {
+      if (mounted) {
+        _overlayController.hide();
+        widget.onClose?.call();
+      }
+    }, debugLabel: 'MenuAnchor.onClose');
   }
 
   @override
-  void open({Offset? position}) {
-    if (!mounted) {
-      return;
-    }
+  void handleMenuCloseRequest(ui.VoidCallback hideOverlay) {
+    widget.onCloseRequested(hideOverlay);
+  }
 
-    if (isOpen) {
-      // The menu is already open, but we need to move to another location, so
-      // close it first.
-      close();
-    }
-
-    assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero}'));
-
-    // Close all siblings.
-    _parent?.closeChildren();
-    assert(!_overlayController.isShowing);
+  @override
+  void handleMenuOpen({ui.Offset? position}) {
     _menuPosition = position;
-    _parent?._childChangedOpenState();
     _overlayController.show();
-
     if (_isRootOverlayAnchor) {
       widget.childFocusNode?.requestFocus();
     }
-
     widget.onOpen?.call();
-    setState(() {
-      // Mark dirty to notify MenuController dependents.
-    });
   }
 
   @override
-  void close({bool inDispose = false}) {
-    assert(_debugMenuInfo('Closing $this'));
-    if (!isOpen) {
-      return;
-    }
-
-    closeChildren(inDispose: inDispose);
-    // Don't hide if we're in the middle of a build.
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      _overlayController.hide();
-    } else if (!inDispose) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _overlayController.hide();
-      }, debugLabel: 'MenuAnchor.hide');
-    }
-
-    if (!inDispose) {
-      // Notify that _childIsOpen changed state, but only if not
-      // currently disposing.
-      _parent?._childChangedOpenState();
-      widget.onClose?.call();
-      if (mounted &&
-          SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        setState(() {
-          // Mark dirty, but only if mounted and not in a build.
-        });
-      }
-    }
-  }
-
-  @override
-  void handleOpenRequest({ui.Offset? position}) {
-    widget.onOpenRequested(position, () {
-      open(position: position);
-    });
-  }
-
-  @override
-  void handleCloseRequest() {
-    // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
-    // didChangeDependencies. When this happens, calling setState during the
-    // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
-    // will throw an error, since we'd be scheduling a build during a build. We
-    // avoid this by checking if we're in a build, and if so, we schedule the
-    // close for the next frame.
-    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      widget.onCloseRequested(close);
-    } else {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          widget.onCloseRequested(close);
-        }
-      }, debugLabel: 'RawMenuAnchor.handleCloseRequest');
-    }
+  void didRequestMenuOpen(ui.Offset? position, ui.VoidCallback showOverlay) {
+    widget.onOpenRequested(position, showOverlay);
   }
 
   Widget _buildOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
@@ -792,39 +880,61 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       anchorRect: anchorRect,
       overlaySize: layoutInfo.overlaySize,
       position: _menuPosition,
-      tapRegionGroupId: root.menuController,
+      tapRegionGroupId: MenuController.maybeTapRegionGroupIdOf(context)!,
     );
 
     return widget.overlayBuilder(context, info);
   }
 
+  /// Handles taps outside of the menu surface.
+  ///
+  /// By default, this closes this submenu's children.
+  @protected
+  void handleOutsideTap(PointerDownEvent pointerDownEvent) {
+    assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
+    if (isOpen) {
+      widget.controller.closeChildren();
+    }
+  }
+
+  Widget _buildAnchor(BuildContext context) {
+    // A dependency on MenuController.isOpen is established to ensure the
+    // anchor child is rebuilt when the menu opens and closes.
+    MenuController.maybeIsOpenOf(context);
+    return TapRegion(
+      groupId: MenuController.maybeTapRegionGroupIdOf(context),
+      consumeOutsideTaps: isOpen && widget.consumeOutsideTaps,
+      onTapOutside: handleOutsideTap,
+      child:
+          widget.builder?.call(context, widget.controller, widget.child) ??
+          widget.child ??
+          const SizedBox(),
+    );
+  }
+
   @override
-  Widget buildAnchor(BuildContext context) {
+  Widget build(BuildContext context) {
     final Widget child = Shortcuts(
       includeSemantics: false,
       shortcuts: _kMenuTraversalShortcuts,
-      child: TapRegion(
-        groupId: root.menuController,
-        consumeOutsideTaps: root.isOpen && widget.consumeOutsideTaps,
-        onTapOutside: handleOutsideTap,
-        child: Builder(
-          key: _anchorKey,
-          builder: (BuildContext context) {
-            return widget.builder?.call(context, menuController, widget.child) ??
-                widget.child ??
-                const SizedBox();
-          },
-        ),
-      ),
+      child: Builder(builder: _buildAnchor),
     );
 
-    return OverlayPortal.overlayChildLayoutBuilder(
-      controller: _overlayController,
-      overlayChildBuilder: _buildOverlay,
-      overlayLocation: useRootOverlay
-          ? OverlayChildLocation.rootOverlay
-          : OverlayChildLocation.nearestOverlay,
-      child: child,
+    return RawMenuNode(
+      controller: widget.controller,
+      delegate: this,
+      child: Builder(
+        builder: (BuildContext context) {
+          return OverlayPortal.overlayChildLayoutBuilder(
+            controller: _overlayController,
+            overlayChildBuilder: _buildOverlay,
+            overlayLocation: useRootOverlay
+                ? OverlayChildLocation.rootOverlay
+                : OverlayChildLocation.nearestOverlay,
+            child: child,
+          );
+        },
+      ),
     );
   }
 
@@ -888,72 +998,48 @@ class RawMenuAnchorGroup extends StatefulWidget {
   State<RawMenuAnchorGroup> createState() => _RawMenuAnchorGroupState();
 }
 
-class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
-    with _RawMenuAnchorBaseMixin<RawMenuAnchorGroup> {
+class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup> implements RawMenuNodeDelegate {
   @override
-  bool get isOpen => _anchorChildren.any((_RawMenuAnchorBaseMixin child) => child.isOpen);
+  bool get isOpen =>
+      widget.controller._anchor?._anchorChildren.any((child) => child.isOpen) ?? false;
 
   @override
-  MenuController get menuController => widget.controller;
+  void handleMenuClose() {}
 
   @override
-  void didUpdateWidget(RawMenuAnchorGroup oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._detach(this);
-      widget.controller._attach(this);
+  void handleMenuCloseRequest(ui.VoidCallback hideOverlay) {}
+
+  @override
+  void handleMenuOpen({ui.Offset? position}) {
+    // Menu groups are always open, so this is a no-op.
+  }
+
+  @override
+  void didRequestMenuOpen(ui.Offset? position, ui.VoidCallback showOverlay) {
+    // RawMenuAnchorGroup cannot be opened directly, so we don't call showOverlay.
+  }
+
+  void handleOutsideTap(PointerDownEvent pointerDownEvent) {
+    assert(_debugMenuInfo('Tapped Outside ${widget.controller}'));
+    if (isOpen) {
+      widget.controller.closeChildren();
     }
   }
 
-  @override
-  void close({bool inDispose = false}) {
-    if (!isOpen) {
-      return;
-    }
-
-    closeChildren(inDispose: inDispose);
-    if (!inDispose) {
-      if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-        setState(() {
-          // Mark dirty, but only if mounted and not in a build.
-        });
-      } else {
-        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-          if (mounted) {
-            setState(() {
-              // Mark dirty.
-            });
-          }
-        });
-      }
-    }
-  }
-
-  @override
-  void open({Offset? position}) {
-    assert(menuController._anchor == this);
-    // Menu nodes are always open, so this is a no-op.
-    return;
-  }
-
-  @override
-  void handleCloseRequest() {
-    assert(_debugMenuInfo('Requesting close $this'));
-    close();
-  }
-
-  @override
-  void handleOpenRequest({ui.Offset? position}) {
-    assert(_debugMenuInfo('Requesting open $this'));
-    open(position: position);
-  }
-
-  @override
-  Widget buildAnchor(BuildContext context) {
+  Widget _buildChild(BuildContext context) {
     return TapRegion(
-      groupId: root.menuController,
+      groupId: MenuController.maybeTapRegionGroupIdOf(context),
       onTapOutside: handleOutsideTap,
       child: widget.child,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RawMenuNode(
+      controller: widget.controller,
+      delegate: this,
+      child: Builder(builder: _buildChild),
     );
   }
 }
@@ -982,7 +1068,7 @@ class MenuController {
   //
   // This is set automatically when this `MenuController` is attached to an
   // anchor.
-  _RawMenuAnchorBaseMixin? _anchor;
+  _RawMenuNodeState? _anchor;
 
   /// Whether or not the menu associated with this [MenuController] is open.
   bool get isOpen => _anchor?.isOpen ?? false;
@@ -1018,15 +1104,15 @@ class MenuController {
   /// without closing the menu itself.
   void closeChildren() {
     assert(_anchor != null);
-    _anchor!.closeChildren();
+    _anchor!.requestChildrenClose();
   }
 
   // ignore: use_setters_to_change_properties
-  void _attach(_RawMenuAnchorBaseMixin anchor) {
+  void _attach(_RawMenuNodeState anchor) {
     _anchor = anchor;
   }
 
-  void _detach(_RawMenuAnchorBaseMixin anchor) {
+  void _detach(_RawMenuNodeState anchor) {
     if (_anchor == anchor) {
       _anchor = null;
     }
@@ -1050,6 +1136,15 @@ class MenuController {
   /// widget will rebuild when the menu opens and closes.
   static bool? maybeIsOpenOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
+  }
+
+  /// Returns the [TapRegion.groupId] used by the ancestor [RawMenuNode] nearest
+  /// to the given `context`, if one exists. Otherwise, returns null.
+  ///
+  /// This method will establish a dependency relationship, so the calling
+  /// widget will rebuild when the menu's [TapRegion.groupId] changes.
+  static Object? maybeTapRegionGroupIdOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.tapRegionGroupId;
   }
 
   @override
@@ -1082,6 +1177,18 @@ class DismissMenuAction extends DismissAction {
   @override
   bool isEnabled(DismissIntent intent) {
     return controller._anchor != null;
+  }
+}
+
+/// Invokes a `callback` immediately if the scheduler is idle, or schedules
+/// it for the next frame if the scheduler is currently processing a build.
+void _scheduleSafeCallback(VoidCallback callback, {String? debugLabel}) {
+  if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+    callback();
+  } else {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      callback();
+    }, debugLabel: debugLabel ?? '_scheduleSafeCallback');
   }
 }
 
