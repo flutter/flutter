@@ -440,7 +440,7 @@ void main() {
         void onCallback() {
           if (--pendingCallbacks == 0) {
             testZone.run(() {
-              callbacksDone.complete(null);
+              callbacksDone.complete();
             });
           }
         }

@@ -2318,7 +2318,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               },
             ),
           );
-          result.complete(null);
+          result.complete();
         });
       } catch (exception, stack) {
         FlutterError.reportError(
@@ -2332,7 +2332,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             },
           ),
         );
-        result.complete(null);
+        result.complete();
       }
       result.future.whenComplete(() {
         _pendingAsyncTasks!.complete();
