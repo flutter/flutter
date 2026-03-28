@@ -1508,6 +1508,8 @@ class DateRangePickerDialog extends StatefulWidget {
   /// raw input (for example, to limit the allowed characters), but they do
   /// not change how the resulting text is interpreted as a [DateTime] or how
   /// the overall date range is validated.
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
   /// from the surrounding [RestorationScope] using the provided restoration ID.
   ///
   /// See also:
