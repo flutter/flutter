@@ -61,7 +61,7 @@ class _DatePickerExampleState extends State<DatePickerExample>
       builder: (BuildContext context) {
         return DatePickerDialog(
           restorationId: 'date_picker_dialog',
-          initialEntryMode: DatePickerEntryMode.calendarOnly,
+          initialEntryMode: .calendarOnly,
           initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
           firstDate: DateTime(2021),
           lastDate: DateTime(2022),

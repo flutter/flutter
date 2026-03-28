@@ -85,7 +85,7 @@ class _LabeledSwitchExampleState extends State<LabeledSwitchExample> {
   Widget build(BuildContext context) {
     return LinkedLabelSwitch(
       label: 'Linked, tappable label text',
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const .symmetric(horizontal: 20.0),
       value: _isSelected,
       onChanged: (bool newValue) {
         setState(() {

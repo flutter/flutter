@@ -5094,9 +5094,78 @@ TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest, DrawFilledRectangularLinesPromoteToDrawRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  // Unclosed set of lines forming 3 sides of a rectangle.
+  DlPath path = DlPathBuilder()
+                    .MoveTo(rect.GetLeftBottom())
+                    .LineTo(rect.GetLeftTop())
+                    .LineTo(rect.GetRightTop())
+                    .LineTo(rect.GetRightBottom())
+                    .TakePath();
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(path, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest,
+       DrawStrokedUnclosedRectangularLinesDoesNotPromoteToDrawRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  // Unclosed set of lines forming 3 sides of a rectangle.
+  DlPath path = DlPathBuilder()
+                    .MoveTo(rect.GetLeftBottom())
+                    .LineTo(rect.GetLeftTop())
+                    .LineTo(rect.GetRightTop())
+                    .LineTo(rect.GetRightBottom())
+                    .TakePath();
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(path, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder rect_dl_builder;
+  rect_dl_builder.DrawRect(rect, paint);
+  auto rect_dl = rect_dl_builder.Build();
+
+  ASSERT_TRUE(DisplayListsNE_Verbose(dl, rect_dl));
+}
+
+TEST_F(DisplayListTest, DrawStrokedRectangularLinesPromoteToDrawRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+
+  // Closed set of lines forming a full rectangle.
+  DlPath path = DlPathBuilder()
+                    .MoveTo(rect.GetLeftBottom())
+                    .LineTo(rect.GetLeftTop())
+                    .LineTo(rect.GetRightTop())
+                    .LineTo(rect.GetRightBottom())
+                    .Close()
+                    .TakePath();
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(path, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRect(rect, paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
@@ -5110,9 +5179,7 @@ TEST_F(DisplayListTest, DrawOvalPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRoundRect) {
@@ -5127,12 +5194,31 @@ TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRoundRect) {
   expected.DrawRoundRect(rrect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
-TEST_F(DisplayListTest, DrawRectRoundRectPathPromoteToDrawRect) {
+TEST_F(DisplayListTest, DrawRRectPathUnequalRadiiPromoteToDrawRoundRect) {
+  DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+  DlRoundRect rrect =
+      DlRoundRect::MakeRectRadii(rect, {
+                                           DlSize(0.0f, 0.0f),  // top_left
+                                           DlSize(2.0f, 2.0f),  // top_right
+                                           DlSize(4.0f, 4.0f),  // bottom_right
+                                           DlSize(3.0f, 5.0f),  // bottom_left
+                                       });
+
+  DisplayListBuilder builder;
+  builder.DrawPath(DlPath::MakeRoundRect(rrect), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawRoundRect(rrect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRect) {
   DlRect rect = DlRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
   DlRoundRect rrect = DlRoundRect::MakeRect(rect);
 
@@ -5144,9 +5230,22 @@ TEST_F(DisplayListTest, DrawRectRoundRectPathPromoteToDrawRect) {
   expected.DrawRect(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+TEST_F(DisplayListTest, DrawLinePathPromoteToDrawLine) {
+  DlPoint start = DlPoint::MakeXY(10.0f, 10.0f);
+  DlPoint end = DlPoint::MakeXY(20.0f, 20.0f);
+
+  DisplayListBuilder builder;
+  builder.DrawPath(DlPath::MakeLine(start, end), DlPaint());
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawLine(start, end, DlPaint());
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
@@ -5161,9 +5260,7 @@ TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {
   expected.DrawOval(rect, DlPaint());
   auto expect_dl = expected.Build();
 
-  // Support for this will be re-added soon, until then verify that we
-  // do not promote.
-  ASSERT_TRUE(DisplayListsNE_Verbose(dl, expect_dl));
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
 TEST_F(DisplayListTest, ClipRectRRectPromoteToClipRect) {
