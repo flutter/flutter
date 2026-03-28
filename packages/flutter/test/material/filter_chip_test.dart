@@ -14,7 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/feedback_tester.dart';
+import 'feedback_tester.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({

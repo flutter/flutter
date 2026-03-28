@@ -18,7 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/feedback_tester.dart';
+import 'feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
