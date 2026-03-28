@@ -35,7 +35,7 @@ class _IconButtonExampleState extends State<IconButtonExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: <Widget>[
         IconButton(
           icon: const Icon(Icons.volume_up),
