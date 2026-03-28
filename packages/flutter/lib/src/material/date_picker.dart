@@ -3329,7 +3329,7 @@ class _InputDateRangePicker extends StatefulWidget {
   /// range (i.e. the start date is after the end date).
   final String? errorInvalidRangeText;
 
-  /// Hint text shown when the start date field is empty
+  /// Hint text shown when the start date field is empty.
   final String? fieldStartHintText;
 
   /// Hint text shown when the end date field is empty.
