@@ -121,6 +121,22 @@ TEST(LineContents, CreateCurveDataScaled) {
   EXPECT_NEAR(data[3] / 255.f, 1.f, kEhCloseEnough);
 }
 
+TEST(LineContents, CreateCurveDataHairline) {
+  std::vector<uint8_t> data = LineContents::CreateCurveData(/*width=*/0.0,
+                                                            /*radius=*/1.0,
+                                                            /*scale=*/1.0);
+  EXPECT_EQ(data.size(), 32u);
+  EXPECT_NEAR(data[data.size() - 1] / 255.f, 1.f, kEhCloseEnough);
+}
+
+TEST(LineContents, CreateCurveDataVeryThin) {
+  std::vector<uint8_t> data = LineContents::CreateCurveData(/*width=*/0.01,
+                                                            /*radius=*/1.0,
+                                                            /*scale=*/1.0);
+  EXPECT_EQ(data.size(), 32u);
+  EXPECT_NEAR(data[data.size() - 1] / 255.f, 1.f, kEhCloseEnough);
+}
+
 // This scales the line to be less than 1 pixel.
 TEST(LineContents, CalculatePerVertexLimit) {
   LineVertexShader::PerVertexData per_vertex[4];
