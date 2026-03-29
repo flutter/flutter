@@ -491,6 +491,9 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
       // sequence number prepended to its data, so subtract that space from
       // the buffer.
       if (chunk->get_type() == kFrameDataChunkType) {
+        if (chunk->get_data_length() < 4) {
+          return std::make_pair(std::nullopt, nullptr);
+        }
         chunk_space -= 4;
       }
     }
