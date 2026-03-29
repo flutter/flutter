@@ -1339,8 +1339,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox).last)),
       paints
-        ..path()
-        ..path(color: fillColor)
+        ..rrect(color: fillColor)
         ..path(color: checkColor),
     );
   });

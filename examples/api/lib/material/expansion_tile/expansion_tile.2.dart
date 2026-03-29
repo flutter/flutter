@@ -40,7 +40,7 @@ class _ExpansionTileAnimationStyleAppState
       home: Scaffold(
         body: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               SegmentedButton<AnimationStyles>(
                 selected: _animationStyleSelection,

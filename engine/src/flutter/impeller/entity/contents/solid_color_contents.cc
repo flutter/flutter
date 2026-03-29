@@ -11,7 +11,8 @@
 
 namespace impeller {
 
-SolidColorContents::SolidColorContents() = default;
+SolidColorContents::SolidColorContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 SolidColorContents::~SolidColorContents() = default;
 
@@ -21,6 +22,10 @@ void SolidColorContents::SetColor(Color color) {
 
 Color SolidColorContents::GetColor() const {
   return color_.WithAlpha(color_.alpha * GetOpacityFactor());
+}
+
+const Geometry* SolidColorContents::GetGeometry() const {
+  return geometry_;
 }
 
 bool SolidColorContents::IsSolidColor() const {
@@ -72,8 +77,12 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 std::optional<Color> SolidColorContents::AsBackgroundColor(
     const Entity& entity,
     ISize target_size) const {
+  const Geometry* geometry = GetGeometry();
+  if (geometry == nullptr) {
+    return std::nullopt;
+  }
   Rect target_rect = Rect::MakeSize(target_size);
-  return GetGeometry()->CoversArea(entity.GetTransform(), target_rect)
+  return geometry->CoversArea(entity.GetTransform(), target_rect)
              ? GetColor()
              : std::optional<Color>();
 }

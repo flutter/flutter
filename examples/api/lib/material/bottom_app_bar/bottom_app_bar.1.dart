@@ -54,7 +54,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           onChanged: (FloatingActionButtonLocation? value) =>
               _onFabLocationChanged(value),
           child: ListView(
-            padding: const EdgeInsets.only(bottom: 88),
+            padding: const .only(bottom: 88),
             children: <Widget>[
               SwitchListTile(
                 title: const Text('Floating Action Button'),
@@ -67,7 +67,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
                 onChanged: _onShowNotchChanged,
               ),
               const Padding(
-                padding: EdgeInsets.all(16),
+                padding: .all(16),
                 child: Text('Floating action button position'),
               ),
               const RadioListTile<FloatingActionButtonLocation>(
