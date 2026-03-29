@@ -185,6 +185,7 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.form => _noCheckRequired,
       SemanticsRole.loadingSpinner => _noCheckRequired,
       SemanticsRole.progressBar => _semanticsProgressBar,
+      SemanticsRole.slider => _semanticsSlider,
       // TODO(chunhtai): add checks when the roles are used in framework.
       // https://github.com/flutter/flutter/issues/159741.
       SemanticsRole.dragHandle => _unimplemented,
@@ -245,6 +246,55 @@ sealed class _DebugSemanticsRoleChecks {
       );
     }
 
+    return null;
+  }
+
+  static FlutterError? _semanticsSlider(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+
+    // Check if value is present
+    if (data.value.isEmpty) {
+      return FlutterError('A slider must have a value');
+    }
+
+    // Check if minValue and maxValue are present
+    if (data.minValue?.isEmpty ?? true) {
+      return FlutterError('A slider must have a minValue');
+    }
+
+    if (data.maxValue?.isEmpty ?? true) {
+      return FlutterError('A slider must have a maxValue');
+    }
+
+    // Validate that value is within min and max range
+    try {
+      final double currentValue = double.parse(data.value.replaceAll('%', ''));
+      final double minVal = double.parse(data.minValue!);
+      final double maxVal = double.parse(data.maxValue!);
+
+      if (minVal >= maxVal) {
+        return FlutterError('Slider minValue ($minVal) must be less than maxValue ($maxVal)');
+      }
+
+      if (data.value.contains('%')) {
+        if (currentValue < 0.0 || currentValue > 100.0) {
+          return FlutterError(
+            'Slider percentage value ($currentValue%) must be between 0% and 100%',
+          );
+        }
+      } else {
+        if (currentValue < minVal || currentValue > maxVal) {
+          return FlutterError(
+            'Slider value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
+          );
+        }
+      }
+    } on FormatException {
+      return FlutterError(
+        'Slider value, minValue, and maxValue must be valid numbers. '
+        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
     return null;
   }
 

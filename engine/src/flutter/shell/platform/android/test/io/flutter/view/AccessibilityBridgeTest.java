@@ -2440,6 +2440,58 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itAddsRangeInfoToSlider_withPercentage() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 33; // SemanticsRole::kSlider
+    testSemanticsNode.value = "50%";
+    testSemanticsNode.minValue = "0.0";
+    testSemanticsNode.maxValue = "5.0";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.SeekBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(5.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(2.5f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void itAddsActionSetProgressForSlider() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 33; // SemanticsRole::kSlider
+    testSemanticsNode.value = "50%";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.SeekBar", nodeInfo.getClassName().toString());
+    assertTrue(
+        nodeInfo
+            .getActionList()
+            .contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS));
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void itOmitsActionSetProgressForProgressBar() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.value = "50";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertFalse(
+        nodeInfo
+            .getActionList()
+            .contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS));
+  }
+
+  @Test
   public void itAddsRangeInfoToProgressBar_missingMinAndMaxValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();

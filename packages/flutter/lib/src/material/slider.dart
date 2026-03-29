@@ -1017,6 +1017,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       label: widget.label,
       container: true,
       slider: true,
+      role: SemanticsRole.slider,
+      minValue: widget.min.toString(),
+      maxValue: widget.max.toString(),
       onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
       child: FocusableActionDetector(
         actions: _actionMap,

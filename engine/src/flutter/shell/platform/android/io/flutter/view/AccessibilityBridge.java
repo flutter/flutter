@@ -854,7 +854,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     Role role = Role.values()[semanticsNode.role];
     switch (role) {
       case PROGRESS_BAR:
-        result.setClassName("android.widget.ProgressBar");
+      case SLIDER:
+        result.setClassName(
+            role == Role.SLIDER ? "android.widget.SeekBar" : "android.widget.ProgressBar");
+        if (role == Role.SLIDER && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+          result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS);
+        }
         if (semanticsNode.value != null) {
           float min = Float.NEGATIVE_INFINITY;
           float max = Float.POSITIVE_INFINITY;
@@ -873,7 +878,19 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             }
           }
           try {
-            float parsedValue = Float.parseFloat(semanticsNode.value);
+            String valueString = semanticsNode.value;
+            boolean isPercentage =
+                role == Role.SLIDER && valueString != null && valueString.endsWith("%");
+            if (isPercentage) {
+              valueString = valueString.substring(0, valueString.length() - 1);
+            }
+            float parsedValue = Float.parseFloat(valueString);
+            if (isPercentage) {
+              // Convert the percentage to a value between min and max.
+              if (max != Float.POSITIVE_INFINITY && min != Float.NEGATIVE_INFINITY) {
+                parsedValue = (parsedValue / 100.0f) * (max - min) + min;
+              }
+            }
             result.setRangeInfo(
                 AccessibilityNodeInfo.RangeInfo.obtain(
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
@@ -2409,7 +2426,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     CONTENT_INFO(29),
     MAIN(30),
     NAVIGATION(31),
-    REGION(32);
+    REGION(32),
+    SLIDER(33);
 
     final int value;
 

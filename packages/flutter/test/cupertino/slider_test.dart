@@ -458,6 +458,9 @@ void main() {
               decreasedValue: '40%',
               textDirection: TextDirection.ltr,
               flags: <SemanticsFlag>[SemanticsFlag.isSlider],
+              role: SemanticsRole.slider,
+              minValue: '0.0',
+              maxValue: '100.0',
               actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
             ),
           ],
@@ -483,7 +486,14 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(id: 1, flags: <SemanticsFlag>[SemanticsFlag.isSlider]),
+            TestSemantics(
+              id: 1,
+              flags: <SemanticsFlag>[SemanticsFlag.isSlider],
+              role: SemanticsRole.slider,
+              minValue: '0.0',
+              maxValue: '100.0',
+              value: '50%',
+            ),
           ],
         ),
         ignoreRect: true,
@@ -516,6 +526,9 @@ void main() {
         increasedValue: '60%',
         decreasedValue: '40%',
         textDirection: TextDirection.ltr,
+        role: SemanticsRole.slider,
+        minValue: '0.0',
+        maxValue: '100.0',
       ),
     );
 
@@ -539,6 +552,9 @@ void main() {
         increasedValue: '70%',
         decreasedValue: '50%',
         textDirection: TextDirection.ltr,
+        role: SemanticsRole.slider,
+        minValue: '0.0',
+        maxValue: '100.0',
       ),
     );
 
