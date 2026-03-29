@@ -371,7 +371,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 ///
 ///   * [FlutterError.onError], which is called whenever the Flutter framework
 ///     catches an error.
-class FlutterErrorDetails with Diagnosticable implements FrameworkErrorDetails
+class FlutterErrorDetails with Diagnosticable implements FrameworkErrorDetails {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
   ///
