@@ -1,4 +1,6 @@
-import 'ui_primitives.dart';
+import 'package:ui_primitives/ui_primitives.dart';
+
+import 'assertions.dart';
 
 /// Configures the error reporting for the ui_primitives package.
 void configureErrorReportingInUiPrimitives() {

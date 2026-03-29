@@ -2,4 +2,5 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'package:ui_primitives/ui_primitives.dart' hide VoidCallback;
+export 'package:ui_primitives/ui_primitives.dart'
+    show FrameworkError, FrameworkErrorDetails, Listenable, ValueListenable, ValueNotifier;

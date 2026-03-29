@@ -12,6 +12,7 @@ import 'constants.dart';
 import 'diagnostics.dart';
 import 'error_dumper.dart';
 import 'stack_frame.dart';
+import 'ui_primitives.dart';
 
 export 'basic_types.dart' show IterableFilter;
 export 'diagnostics.dart'
@@ -370,7 +371,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 ///
 ///   * [FlutterError.onError], which is called whenever the Flutter framework
 ///     catches an error.
-class FlutterErrorDetails with Diagnosticable {
+class FlutterErrorDetails with Diagnosticable implements FrameworkErrorDetails
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
   ///
@@ -749,7 +750,9 @@ class FlutterErrorDetails with Diagnosticable {
 ///
 ///  * <https://docs.flutter.dev/testing/errors>, more information about error
 ///    handling in Flutter.
-class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
+class FlutterError extends Error
+    with DiagnosticableTreeMixin
+    implements AssertionError, FrameworkError {
   /// Create an error message from a string.
   ///
   /// The message may have newlines in it. The first line should be a terse
