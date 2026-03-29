@@ -445,12 +445,7 @@ class FakeIosPlatformViewsController {
       );
     }
 
-    _views[id] = FakeUiKitView(
-      id,
-      viewType,
-      creationParams,
-      args['flutterViewId'] as int?,
-    );
+    _views[id] = FakeUiKitView(id, viewType, creationParams, args['flutterViewId'] as int?);
     gesturesAccepted[id] = 0;
     gesturesRejected[id] = 0;
     return Future<int?>.sync(() => null);

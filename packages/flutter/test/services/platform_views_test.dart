@@ -548,9 +548,7 @@ void main() {
 
       expect(
         viewsController.views,
-        unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(0, 'webview', null, secondaryFlutterViewId),
-        ]),
+        unorderedEquals(<FakeUiKitView>[FakeUiKitView(0, 'webview', null, secondaryFlutterViewId)]),
       );
     });
 

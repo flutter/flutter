@@ -241,9 +241,10 @@ class SurfaceTrackingPlatformView : public PlatformView {
  public:
   using HasRenderingSurfaceCallback = std::function<bool(int64_t view_id)>;
 
-  SurfaceTrackingPlatformView(PlatformView::Delegate& delegate,
-                              const TaskRunners& task_runners,
-                              HasRenderingSurfaceCallback has_rendering_surface_callback)
+  SurfaceTrackingPlatformView(
+      PlatformView::Delegate& delegate,
+      const TaskRunners& task_runners,
+      HasRenderingSurfaceCallback has_rendering_surface_callback)
       : PlatformView(delegate, task_runners),
         has_rendering_surface_callback_(
             std::move(has_rendering_surface_callback)) {}
@@ -5162,9 +5163,8 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeWhenRenderingSurfaceIsMissing) {
   });
 
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
-    shell->GetPlatformView()->SetViewportMetrics(kImplicitViewId,
-                                                 ViewportMetrics{1.0, 100, 100,
-                                                                 22, 0});
+    shell->GetPlatformView()->SetViewportMetrics(
+        kImplicitViewId, ViewportMetrics{1.0, 100, 100, 22, 0});
   });
 
   auto layer_tree =
@@ -5209,11 +5209,10 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
       .platform_view_create_callback = platform_view_create_callback,
   });
 
-  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell] {
-             shell->GetPlatformView()->SetViewportMetrics(
-                 kSecondaryViewId, ViewportMetrics{1.0, 100, 100, 22, 0});
-           });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
+    shell->GetPlatformView()->SetViewportMetrics(
+        kSecondaryViewId, ViewportMetrics{1.0, 100, 100, 22, 0});
+  });
 
   auto layer_tree =
       std::make_unique<LayerTree>(/*root_layer=*/nullptr,
@@ -5222,14 +5221,13 @@ TEST_F(ShellTest, ShouldDiscardLayerTreeAfterViewIsRemoved) {
                                                  *layer_tree));
 
   fml::AutoResetWaitableEvent remove_latch;
-  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &remove_latch] {
-             shell->GetPlatformView()->RemoveView(kSecondaryViewId,
-                                                  [&](bool removed) {
-                                                    EXPECT_FALSE(removed);
-                                                    remove_latch.Signal();
-                                                  });
-           });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell,
+                                                             &remove_latch] {
+    shell->GetPlatformView()->RemoveView(kSecondaryViewId, [&](bool removed) {
+      EXPECT_FALSE(removed);
+      remove_latch.Signal();
+    });
+  });
   remove_latch.Wait();
   {
     std::scoped_lock lock(rendering_surface_state->mutex);

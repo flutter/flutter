@@ -1567,12 +1567,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(
-            currentViewId + 1,
-            'webview',
-            fakeView.creationParams,
-            tester.view.viewId,
-          ),
+          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams, tester.view.viewId),
         ]),
       );
     });

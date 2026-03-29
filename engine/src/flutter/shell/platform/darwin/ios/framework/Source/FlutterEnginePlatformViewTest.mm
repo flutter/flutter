@@ -193,8 +193,9 @@ flutter::FakeDelegate fake_delegate;
   id mockEngine = OCMPartialMock(engine);
   OCMStub([mockEngine platformView]).andReturn(platform_view.get());
 
-  FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
 
   XCTAssertEqual(engine.viewController, viewController);
   XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
@@ -228,11 +229,9 @@ flutter::FakeDelegate fake_delegate;
   XCTAssertEqual(engine.viewController, implicitViewController);
   XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
                  implicitViewController);
-  XCTAssertEqual([engine
-                     viewControllerForIdentifier:kSecondaryFlutterViewId],
+  XCTAssertEqual([engine viewControllerForIdentifier:kSecondaryFlutterViewId],
                  secondaryViewController);
-  XCTAssertEqual([engine
-                     viewControllerForIdentifier:kTertiaryFlutterViewId],
+  XCTAssertEqual([engine viewControllerForIdentifier:kTertiaryFlutterViewId],
                  tertiaryViewController);
 
   XCTAssertEqual(fake_delegate.added_view_ids_.size(), 2UL);
@@ -309,10 +308,8 @@ flutter::FakeDelegate fake_delegate;
 
   XCTAssertEqual([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId],
                  implicitViewController);
-  XCTAssertNil([engine
-      viewControllerForIdentifier:secondaryViewController.viewIdentifier]);
-  XCTAssertEqual([engine
-                     viewControllerForIdentifier:tertiaryViewController.viewIdentifier],
+  XCTAssertNil([engine viewControllerForIdentifier:secondaryViewController.viewIdentifier]);
+  XCTAssertEqual([engine viewControllerForIdentifier:tertiaryViewController.viewIdentifier],
                  tertiaryViewController);
   XCTAssertEqual(fake_delegate.removed_view_ids_.size(), 1UL);
   XCTAssertEqual(fake_delegate.removed_view_ids_[0], secondaryViewController.viewIdentifier);

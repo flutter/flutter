@@ -965,8 +965,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   FlutterEnginePartialMock* mockEngine = [[FlutterEnginePartialMock alloc] init];
   mockEngine.lifecycleChannel = lifecycleChannel;
 
-  FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:mockEngine nibName:nil bundle:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
   [viewController setupViewIdentifier:kSecondaryFlutterViewId];
   mockEngine.viewController = nil;
 

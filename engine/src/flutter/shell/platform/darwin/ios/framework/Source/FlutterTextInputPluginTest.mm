@@ -356,10 +356,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterViewController* implicitViewController = OCMPartialMock(viewController);
   FlutterViewController* mockSecondaryViewController =
       OCMPartialMock([[FlutterViewController alloc] init]);
-  OCMStub([mockSecondaryViewController pressesBegan:[OCMArg isNotNil]
-                                          withEvent:[OCMArg isNotNil]]);
-  OCMStub([mockSecondaryViewController pressesEnded:[OCMArg isNotNil]
-                                          withEvent:[OCMArg isNotNil]]);
+  OCMStub([mockSecondaryViewController pressesBegan:[OCMArg isNotNil] withEvent:[OCMArg isNotNil]]);
+  OCMStub([mockSecondaryViewController pressesEnded:[OCMArg isNotNil] withEvent:[OCMArg isNotNil]]);
   OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
       .andReturn(implicitViewController);
   OCMStub([engine viewControllerForIdentifier:kSecondaryFlutterViewId])
@@ -375,15 +373,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                   withEvent:OCMClassMock([UIPressesEvent class])];
   OCMVerify(times(1), [mockSecondaryViewController pressesBegan:[OCMArg isNotNil]
                                                       withEvent:[OCMArg isNotNil]]);
-  OCMVerify(never(), [implicitViewController pressesBegan:[OCMArg any]
-                                                withEvent:[OCMArg any]]);
+  OCMVerify(never(), [implicitViewController pressesBegan:[OCMArg any] withEvent:[OCMArg any]]);
 
   [currentView pressesEnded:[NSSet setWithObjects:OCMClassMock([UIPress class]), nil]
                   withEvent:OCMClassMock([UIPressesEvent class])];
   OCMVerify(times(1), [mockSecondaryViewController pressesEnded:[OCMArg isNotNil]
                                                       withEvent:[OCMArg isNotNil]]);
-  OCMVerify(never(), [implicitViewController pressesEnded:[OCMArg any]
-                                                withEvent:[OCMArg any]]);
+  OCMVerify(never(), [implicitViewController pressesEnded:[OCMArg any] withEvent:[OCMArg any]]);
 }
 
 - (void)testInvokeStartLiveTextInput {

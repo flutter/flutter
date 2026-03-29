@@ -1668,8 +1668,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertEqual(mock_delegate.dispatched_semantics_action_calls_, 1);
   XCTAssertEqual(mock_delegate.last_dispatched_semantics_view_id_, kSecondaryFlutterViewId);
   XCTAssertEqual(mock_delegate.last_dispatched_semantics_node_id_, 456);
-  XCTAssertEqual(mock_delegate.last_dispatched_semantics_action_,
-                 flutter::SemanticsAction::kTap);
+  XCTAssertEqual(mock_delegate.last_dispatched_semantics_action_, flutter::SemanticsAction::kTap);
   [sharedEngine stopMocking];
 }
 

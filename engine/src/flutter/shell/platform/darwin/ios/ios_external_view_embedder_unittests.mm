@@ -72,8 +72,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   flutter::DlCanvas* expectedCanvas = nullptr;
 
   flutter::IOSExternalViewEmbedder embedder(
-      controller, iosContext,
-      [&](int64_t flutter_view_id, flutter::DlISize& frame_size) {
+      controller, iosContext, [&](int64_t flutter_view_id, flutter::DlISize& frame_size) {
         callbackCalls++;
         createdViewId = flutter_view_id;
         createdFrameSize = frame_size;
@@ -92,8 +91,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   flutter::ExternalViewEmbedder& embedder_ref = embedder;
 
   const flutter::DlISize frameSize(100, 200);
-  embedder_ref.PrepareFlutterView(/*flutter_view_id=*/kSecondaryFlutterViewId,
-                                  frameSize,
+  embedder_ref.PrepareFlutterView(/*flutter_view_id=*/kSecondaryFlutterViewId, frameSize,
                                   /*device_pixel_ratio=*/2.0);
 
   XCTAssertEqual(callbackCalls, 1);
@@ -113,8 +111,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 
   uintptr_t pendingFrameAddress = 0;
   flutter::IOSExternalViewEmbedder embedder(
-      controller, iosContext,
-      [&](int64_t flutter_view_id, flutter::DlISize& frame_size) {
+      controller, iosContext, [&](int64_t flutter_view_id, flutter::DlISize& frame_size) {
         flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
         auto frame = std::make_unique<flutter::SurfaceFrame>(
             /*surface=*/nullptr,
@@ -130,8 +127,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   flutter::ExternalViewEmbedder& embedder_ref = embedder;
 
   flutter::DlISize frameSize(64, 64);
-  embedder_ref.PrepareFlutterView(/*flutter_view_id=*/kTertiaryFlutterViewId,
-                                  frameSize,
+  embedder_ref.PrepareFlutterView(/*flutter_view_id=*/kTertiaryFlutterViewId, frameSize,
                                   /*device_pixel_ratio=*/1.0);
 
   bool frameWasSubmitted = false;
@@ -140,7 +136,8 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
       /*surface=*/nullptr,
       /*framebuffer_info=*/framebuffer_info,
       /*encode_callback=*/[](flutter::SurfaceFrame&, flutter::DlCanvas*) { return true; },
-      /*submit_callback=*/[&frameWasSubmitted](flutter::SurfaceFrame&) {
+      /*submit_callback=*/
+      [&frameWasSubmitted](flutter::SurfaceFrame&) {
         frameWasSubmitted = true;
         return true;
       },
@@ -150,8 +147,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
 
   embedder_ref.SubmitFlutterView(/*flutter_view_id=*/kTertiaryFlutterViewId,
                                  /*context=*/nullptr,
-                                 /*aiks_context=*/nullptr,
-                                 std::move(frame));
+                                 /*aiks_context=*/nullptr, std::move(frame));
 
   XCTAssertEqual(controller->submitFrameCalls_, 1);
   XCTAssertEqual(controller->lastSubmittedViewId_, kTertiaryFlutterViewId);
@@ -164,8 +160,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   FlutterPlatformViewsControllerSpy* controller = [[FlutterPlatformViewsControllerSpy alloc] init];
 
   flutter::IOSExternalViewEmbedder embedder(
-      controller, iosContext,
-      [](int64_t flutter_view_id, flutter::DlISize& frame_size) {
+      controller, iosContext, [](int64_t flutter_view_id, flutter::DlISize& frame_size) {
         flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
         return std::make_unique<flutter::SurfaceFrame>(
             /*surface=*/nullptr,

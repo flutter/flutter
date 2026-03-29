@@ -327,7 +327,8 @@ class MockDelegate : public PlatformView::Delegate {
   id implicitViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([implicitViewController isViewLoaded]).andReturn(NO);
   OCMStub([implicitViewController viewIdentifier]).andReturn(flutter::kFlutterImplicitViewId);
-  OCMStub([implicitViewController platformViewsController]).andReturn(implicitPlatformViewsController);
+  OCMStub([implicitViewController platformViewsController])
+      .andReturn(implicitPlatformViewsController);
   OCMStub([implicitViewController restorationPlugin]).andReturn(implicitRestorationPlugin);
   OCMStub([implicitViewController textInputPlugin]).andReturn(implicitTextInputPlugin);
 
@@ -337,7 +338,8 @@ class MockDelegate : public PlatformView::Delegate {
   id secondaryViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([secondaryViewController isViewLoaded]).andReturn(NO);
   OCMStub([secondaryViewController viewIdentifier]).andReturn(kSecondaryFlutterViewId);
-  OCMStub([secondaryViewController platformViewsController]).andReturn(secondaryPlatformViewsController);
+  OCMStub([secondaryViewController platformViewsController])
+      .andReturn(secondaryPlatformViewsController);
   OCMStub([secondaryViewController restorationPlugin]).andReturn(secondaryRestorationPlugin);
   OCMStub([secondaryViewController textInputPlugin]).andReturn(secondaryTextInputPlugin);
 
