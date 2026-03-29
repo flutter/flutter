@@ -6,6 +6,8 @@ import 'package:ui_primitives/ui_primitives.dart' hide VoidCallback;
 
 export 'package:ui_primitives/ui_primitives.dart' hide VoidCallback;
 
+/// Configures the error reporting for the ui_primitives package.
+
 void configureErrorReportingInUiPrimitives() {
   FrameworkErrorReporter.instance = _FlutterErrorReporter();
 }
