@@ -863,6 +863,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  ui_primitives:
+    dependency: transitive
+    description:
+      path: "../genui/packages/ui_primitives"
+      relative: true
+    source: path
+    version: "0.0.1-dev-006"
   url_launcher:
     dependency: "direct main"
     description:
