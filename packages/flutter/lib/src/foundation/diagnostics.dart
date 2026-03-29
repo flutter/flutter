@@ -18,6 +18,7 @@ import 'assertions.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'ui_primitives.dart';
 
 // Examples can assume:
 // late int rows, columns;
@@ -1463,7 +1464,7 @@ typedef _NodesToJsonifyStack = ListQueue<(DiagnosticsNode, void Function(_JsonDi
 ///
 /// In release mode, far less information is retained and some information may
 /// not print at all.
-abstract class DiagnosticsNode {
+abstract class DiagnosticsNode implements ValueContext {
   /// Initializes the object.
   ///
   /// The [style], [showName], and [showSeparator] arguments must not
