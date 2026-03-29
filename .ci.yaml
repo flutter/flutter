@@ -6964,6 +6964,22 @@ targets:
       - DEPS
       - dev/bots/**
 
+  - name: Windows_arm64 flutter_packaging_test
+    recipe: packaging/packaging
+    bringup: true # Remove when successfully build Windows on ARM.
+    presubmit: false
+    enabled_branches:
+      - master
+    properties:
+      task_name: flutter_packaging
+      tags: >
+        ["framework", "hostonly", "shard", "windows", "arm64"]
+    runIf:
+      - .ci.yaml
+      - engine/**
+      - DEPS
+      - dev/bots/**
+
   - name: Windows windows_startup_test
     recipe: devicelab/devicelab_drone
     presubmit: false
