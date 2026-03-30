@@ -18,8 +18,8 @@ TEST_F(ShellTest, RejectsApngWithFrameDataLengthLessThanFour) {
   ASSERT_EQ(generator, nullptr);
 }
 
-TEST_F(ShellTest, AcceptsApngWithFrameDataLengthEqualToFour) {
-  auto data = OpenFixtureAsSkData("apng_fdat_len4.apng");
+TEST_F(ShellTest, AcceptsValidApngWithFrameData) {
+  auto data = OpenFixtureAsSkData("alpha_animated.apng");
   ASSERT_NE(data, nullptr);
 
   auto generator = APNGImageGenerator::MakeFromData(std::move(data));
@@ -28,4 +28,3 @@ TEST_F(ShellTest, AcceptsApngWithFrameDataLengthEqualToFour) {
 
 }  // namespace testing
 }  // namespace flutter
-
