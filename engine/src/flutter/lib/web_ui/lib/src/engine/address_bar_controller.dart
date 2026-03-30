@@ -191,8 +191,7 @@ class AddressBarController {
       for (final DomTouch touch in te.changedTouches) {
         final int id = touch.identifier!.toInt();
         _activeTouchIds.add(id);
-        final ui.Offset offset = _touchOffset(touch);
-        _sendPointerData(ui.PointerChange.down, ts, id, offset, 1);
+        _sendPointerData(ui.PointerChange.down, ts, id, touch.clientX, touch.clientY, 1);
       }
     });
 
@@ -204,8 +203,7 @@ class AddressBarController {
         if (!_activeTouchIds.contains(id)) {
           continue;
         }
-        final ui.Offset offset = _touchOffset(touch);
-        _sendPointerData(ui.PointerChange.move, ts, id, offset, 1);
+        _sendPointerData(ui.PointerChange.move, ts, id, touch.clientX, touch.clientY, 1);
       }
     });
 
@@ -217,8 +215,7 @@ class AddressBarController {
         if (!_activeTouchIds.remove(id)) {
           continue;
         }
-        final ui.Offset offset = _touchOffset(touch);
-        _sendPointerData(ui.PointerChange.up, ts, id, offset, 0);
+        _sendPointerData(ui.PointerChange.up, ts, id, touch.clientX, touch.clientY, 0);
       }
     });
 
@@ -230,22 +227,19 @@ class AddressBarController {
         if (!_activeTouchIds.remove(id)) {
           continue;
         }
-        final ui.Offset offset = _touchOffset(touch);
-        _sendPointerData(ui.PointerChange.cancel, ts, id, offset, 0);
+        _sendPointerData(ui.PointerChange.cancel, ts, id, touch.clientX, touch.clientY, 0);
       }
     });
   }
 
-  ui.Offset _touchOffset(DomTouch touch) {
-    final DomRect rect = _view.dom.rootElement.getBoundingClientRect();
-    return ui.Offset(touch.clientX - rect.x, touch.clientY - rect.y);
-  }
-
+  // In full-page mode the host element is position:fixed at (0,0),
+  // so clientX/clientY are already root-relative.
   void _sendPointerData(
     ui.PointerChange change,
     num eventTimeStamp,
     int device,
-    ui.Offset offset,
+    double clientX,
+    double clientY,
     int buttons,
   ) {
     final int ms = eventTimeStamp.toInt();
@@ -262,8 +256,8 @@ class AddressBarController {
       timeStamp: timeStamp,
       signalKind: ui.PointerSignalKind.none,
       device: device,
-      physicalX: offset.dx * dpr,
-      physicalY: offset.dy * dpr,
+      physicalX: clientX * dpr,
+      physicalY: clientY * dpr,
       buttons: buttons,
       pressure: buttons > 0 ? 1.0 : 0.0,
       pressureMax: 1.0,
