@@ -74,13 +74,16 @@ class FullPageDimensionsProvider extends DimensionsProvider {
         // in portrait and is rotated to landscape.  clientWidth is reliable.
         // See: https://github.com/flutter/flutter/issues/81430
         windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
+      } else {
+        windowInnerWidth = viewport.width! * devicePixelRatio;
+      }
 
-        // innerHeight tracks address bar collapse and is not affected by
-        // the on-screen keyboard (unlike viewport.height).
+      if (ui_web.browser.isMobile) {
+        // innerHeight tracks address bar collapse without firing
+        // intermediate values during the animation, unlike viewport.height.
         // See: https://github.com/flutter/flutter/issues/69529
         windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
       } else {
-        windowInnerWidth = viewport.width! * devicePixelRatio;
         windowInnerHeight = viewport.height! * devicePixelRatio;
       }
     } else {
@@ -97,9 +100,8 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     late double windowInnerHeight;
 
     if (viewport != null) {
-      if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs && !isEditingOnMobile) {
-        // Match computePhysicalSize() which uses innerHeight on iOS.
-        // See: https://github.com/flutter/flutter/issues/69529
+      if (ui_web.browser.isMobile && !isEditingOnMobile) {
+        // Match computePhysicalSize() which uses innerHeight on mobile.
         windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
       } else {
         windowInnerHeight = viewport.height! * devicePixelRatio;

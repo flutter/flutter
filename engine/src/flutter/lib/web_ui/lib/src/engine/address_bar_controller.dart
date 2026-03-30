@@ -20,24 +20,38 @@ typedef _ListenerRecord = ({
   JSAny options,
 });
 
-/// Enables iOS browser address bar collapse for Flutter web apps.
+/// Enables mobile browser address bar collapse for Flutter web apps.
 ///
-/// The browser collapses the address bar only when it detects a
-/// user-initiated scroll, which requires `touch-action` to not be `none`.
-/// However, changing `touch-action` causes the browser to fire
-/// `pointercancel` during vertical scroll, breaking [PointerBinding]'s
-/// gesture stream.
+/// Flutter web sets `touch-action: none` on `<body>`, preventing the
+/// browser from detecting scrolls. This class sets `touch-action: pan-y`
+/// and adds a spacer to make `<body>` scrollable, allowing the browser
+/// to collapse the address bar on scroll.
 ///
-/// This class works around the issue by blocking touch-type Pointer Events
-/// and handling finger input via Touch Events instead. Touch Events are
-/// independent of Pointer Events and continue after `pointercancel`.
-/// Mouse and pen Pointer Events are not blocked — [PointerBinding] handles
-/// them normally.
+/// ## Touch input switching
 ///
-/// Only active for full-page embedding on iOS. On other platforms or with
-/// a custom host element, the constructor is a no-op.
+/// `touch-action: pan-y` causes the browser to fire `pointercancel`
+/// during vertical scrolling, breaking [PointerBinding]'s gesture stream.
+/// This class blocks touch-type Pointer Events at the capture phase and
+/// handles finger input via Touch Events instead. Mouse and pen Pointer
+/// Events pass through to [PointerBinding] unchanged.
 ///
-/// See https://github.com/flutter/flutter/issues/69529
+/// ## Scroll position management
+///
+/// On iOS, a single scroll-snap target at the midpoint of a large spacer
+/// prevents momentum scrolling while keeping scrollTop far from 0.
+///
+/// On Android, two scroll-snap targets (top and bottom) form a binary
+/// state: the snap direction matches the user's scroll direction, which
+/// is required because Chrome uses final scroll direction (not gesture
+/// direction) for address bar detection. The top target is offset by 1px
+/// from scrollTop=0 to prevent pull-to-refresh.
+///
+/// Only active for full-page embedding on mobile. On desktop or with a
+/// custom host element, the constructor and [dispose] are no-ops.
+///
+/// See also:
+///
+///  * https://github.com/flutter/flutter/issues/69529
 class AddressBarController {
   AddressBarController(this._view) : _pointerDataConverter = PointerDataConverter() {
     if (!_isSupported) {
@@ -53,14 +67,14 @@ class AddressBarController {
     _setupTouchHandlers();
   }
 
-  static const int spacerHeight = 10000;
-
   final EngineFlutterView _view;
   final PointerDataConverter _pointerDataConverter;
 
+  static bool get _isIOs => ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs;
+  static bool get _isAndroid => ui_web.browser.operatingSystem == ui_web.OperatingSystem.android;
+
   bool get _isSupported =>
-      ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs &&
-      _view.embeddingStrategy is FullPageEmbeddingStrategy;
+      (_isIOs || _isAndroid) && _view.embeddingStrategy is FullPageEmbeddingStrategy;
 
   final Set<int> _activeTouchIds = <int>{};
   final List<_ListenerRecord> _listeners = [];
@@ -84,11 +98,6 @@ class AddressBarController {
       ..setProperty('scrollbar-width', '');
   }
 
-  /// Appends a tall invisible element under `<html>` to provide scroll room.
-  ///
-  /// `scroll-snap-type: y mandatory` on `<html>` with a snap point at the
-  /// center prevents iOS Safari from momentum-scrolling, which would block
-  /// touch event delivery until momentum stops.
   void _setupSpacer() {
     domDocument.documentElement!.style
       ..setProperty('scroll-snap-type', 'y mandatory')
@@ -100,21 +109,43 @@ class AddressBarController {
       ..top = '0'
       ..left = '0'
       ..width = '1px'
-      ..height = '${spacerHeight}px'
       ..pointerEvents = 'none'
       ..opacity = '0';
     _spacerElement = spacer;
-    domDocument.documentElement!.append(spacer);
 
-    final DomElement snapTarget = createDomElement('flt-scroll-snap-target');
-    snapTarget.style
+    if (_isAndroid) {
+      // Two snap targets: snap direction matches user's scroll direction,
+      // which Chrome requires for correct address bar detection.
+      // Top snap at 1px prevents scrollTop=0 (pull-to-refresh).
+      // collapseMargin keeps the bottom snap reachable after the address
+      // bar collapses and the viewport grows (~80px).
+      const snapDistance = 100;
+      const collapseMargin = 100;
+      final int viewportHeight = domWindow.innerHeight!.toInt();
+      spacer.style.height = '${viewportHeight + snapDistance + 1 + collapseMargin}px';
+      spacer.append(_createSnapTarget(1));
+      spacer.append(_createSnapTarget(snapDistance + 1));
+    } else if (_isIOs) {
+      // Single snap target at midpoint prevents momentum scrolling
+      // and keeps scrollTop far from 0 (no pull-to-refresh).
+      const spacerHeight = 10000;
+      spacer.style.height = '${spacerHeight}px';
+      spacer.append(_createSnapTarget(spacerHeight ~/ 2));
+    }
+
+    domDocument.documentElement!.append(spacer);
+  }
+
+  DomElement _createSnapTarget(int topOffset) {
+    final DomElement target = createDomElement('flt-scroll-snap-target');
+    target.style
       ..position = 'absolute'
-      ..top = '${spacerHeight ~/ 2}px'
+      ..top = '${topOffset}px'
       ..left = '0'
       ..width = '1px'
       ..height = '1px'
       ..setProperty('scroll-snap-align', 'start');
-    spacer.append(snapTarget);
+    return target;
   }
 
   /// Blocks touch-type Pointer Events from reaching [PointerBinding].
