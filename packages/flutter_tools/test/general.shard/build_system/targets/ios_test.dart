@@ -1383,32 +1383,6 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     });
-
-    testWithoutContext('can be skipped during add-to-app native build phase', () async {
-      final fileSystem = MemoryFileSystem.test();
-      final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
-        'my_project',
-      );
-
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        processManager: processManager,
-        artifacts: artifacts,
-        logger: logger,
-        fileSystem: fileSystem,
-        outputDir: outputDir,
-        projectDir: projectDirectory,
-        defines: <String, String>{
-          kIosArchs: 'arm64',
-          kSdkRoot: 'path/to/iPhoneOS.sdk',
-          kCodesignIdentity: 'ABC123',
-          kXcodeBuildScript: 'build-native',
-        },
-      );
-
-      const Target target = DebugUnpackIOS();
-      expect(await target.canSkip(environment), isTrue);
-    });
   });
 
   group('DebugIosLLDBInit', () {

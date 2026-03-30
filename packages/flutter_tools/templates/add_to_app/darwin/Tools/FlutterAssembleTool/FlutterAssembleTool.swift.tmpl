@@ -21,14 +21,9 @@ struct FlutterAssembleTool {
       let processManager = FlutterProcessManager()
       let mode = try FlutterToolHelper.parseFlutterBuildMode(env: env)
       let targetPlatform = try FlutterToolHelper.targetPlatform(env: env)
-      try FlutterAssembleToolHelper.verifyFlutterFramework(
+
+      try FlutterAssembleToolHelper.run(
         targetBuildMode: mode,
-        targetPlatform: targetPlatform,
-        env: env,
-        fileManager: fileManager
-      )
-      try FlutterAssembleToolHelper.assemble(
-        command: "build-native",
         targetPlatform: targetPlatform,
         env: env,
         fileManager: fileManager,

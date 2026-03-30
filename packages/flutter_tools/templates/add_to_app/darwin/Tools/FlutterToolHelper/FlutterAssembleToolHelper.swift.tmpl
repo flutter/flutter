@@ -4,20 +4,169 @@ import Foundation
 
 /// A helper class for the `FlutterAssembleTool`.
 public class FlutterAssembleToolHelper {
-  /// Verifies that the Flutter framework has the correct build mode.
+  /// Ensures the correct build mode is being used for Flutter artifacts and re-builds the
+  /// Flutter application if possible.
   ///
-  /// Checks within both the `BUILT_PRODUCTS_DIR` and `TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH`
-  /// directories.
+  /// If a Flutter application path is set, this will call `flutter assemble` to re-build,
+  /// codesign, and embed the Flutter.framework and App.framework. Otherwise, this will copy and
+  /// codesign the correct build mode version of the Flutter.framework and App.framework into the
+  /// app bundle if needed.
+  ///
+  /// `flutter assemble` is not compatible with and will be skipped when User Script Sandboxing
+  /// is enabled. Also, copying into the app bundle is not allowed. This will throw and error with
+  /// guidance on how to switch build modes.
   ///
   /// - Parameters:
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
   ///   - fileManager: The file manager to use for file operations.
-  /// - Throws: `XcodeErrorAndExit.error` if the framework build mode is incorrect.
-  public static func verifyFlutterFramework(
+  ///   - processManager: The process runner to use.
+  /// - Throws: `XcodeErrorAndExit.error` if the assembly fails.
+  public static func run(
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager,
+    processManager: FlutterProcessRunner
+  ) throws {
+    let sandboxing = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "ENABLE_USER_SCRIPT_SANDBOXING"
+    )
+    let appPath = try flutterApplicationPath(env: env, fileManager: fileManager)
+    let packagePath = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH"
+    )
+
+    if sandboxing == "YES" {
+      try runInSandbox(
+        appPath: appPath,
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+      return
+    }
+
+    if let appPath {
+      try FlutterToolHelper.updateSymlink(
+        targetBuildMode: targetBuildMode,
+        integrationPackagePath: packagePath,
+        fileManager: fileManager
+      )
+      try assemble(
+        appPath: appPath,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager,
+        processManager: processManager
+      )
+      return
+    }
+
+    try verifyBuildModeAndUpdateIfNeeded(
+      packagePath: packagePath,
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: env,
+      fileManager: fileManager,
+      processManager: processManager
+    )
+  }
+
+  /// Runs the assembly process within a sandbox.
+  ///
+  /// If sandboxing is enabled, `flutter assemble` cannot be run. This method
+  /// verifies the Flutter framework and updates the symlink if necessary.
+  ///
+  /// - Parameters:
+  ///   - appPath: The path to the Flutter application.
+  ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Throws: `XcodeErrorAndExit.error` if sandboxing is enabled and `FLUTTER_APPLICATION_PATH` is set.
+  static func runInSandbox(
+    appPath: String?,
+    packagePath: String,
+    targetBuildMode: String,
+    targetPlatform: FlutterPlatform,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager
+  ) throws {
+    if appPath != nil {
+      FlutterToolHelper.xcodeWarning(
+        message:
+          "ENABLE_USER_SCRIPT_SANDBOXING is enabled. \"flutter assemble\" is not compatible with sandboxing and will be skipped."
+      )
+      FlutterToolHelper.xcodeWarning(
+        message:
+          "To enable \"flutter assemble\", set ENABLE_USER_SCRIPT_SANDBOXING=NO. Or remove FLUTTER_APPLICATION_PATH to dismiss this warning."
+      )
+    }
+    do {
+      try FlutterAssembleToolHelper.verifyFlutterFramework(
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+    } catch XcodeErrorAndExit.error(let errorMessages) {
+      let mismatchError = errorMessages.contains(where: {
+        $0.range(of: "build mode does not match", options: .caseInsensitive)
+          != nil
+      })
+      if !mismatchError {
+        throw XcodeErrorAndExit.error(errorMessages)
+      }
+      FlutterToolHelper.xcodeError(
+        message:
+          "Flutter build mode has changed. ENABLE_USER_SCRIPT_SANDBOXING is enabled."
+      )
+      FlutterToolHelper.xcodeError(
+        message:
+          "Unable to change already built artifacts. Updating build mode for next build..."
+      )
+      try FlutterToolHelper.updateSymlink(
+        targetBuildMode: targetBuildMode,
+        integrationPackagePath: packagePath,
+        fileManager: fileManager
+      )
+      throw XcodeErrorAndExit.error(
+        [
+          "Please re-run.",
+          "To avoid this error when switching build modes, you can set ENABLE_USER_SCRIPT_SANDBOXING=NO.",
+          "Or you can complete one of the following actions before building:",
+        ]
+          + pluginInstructions(
+            targetBuildMode: targetBuildMode,
+            packagePath: packagePath
+          )
+      )
+    }
+  }
+
+  /// Verifies that the Flutter framework has the correct build mode.
+  ///
+  /// - Parameters:
+  ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
+  ///   - verifyBuiltProducts: Whether to verify `BUILT_PRODUCTS_DIR`.
+  ///   - verifyTargetBuild: Whether to verify `TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH`.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Throws: `XcodeErrorAndExit.error` if the framework build mode is incorrect.
+  static func verifyFlutterFramework(
+    packagePath: String,
+    targetBuildMode: String,
+    targetPlatform: FlutterPlatform,
+    verifyBuiltProducts: Bool = true,
+    verifyTargetBuild: Bool = true,
     env: [String: String],
     fileManager: FlutterToolsFileManager
   ) throws {
@@ -28,31 +177,43 @@ public class FlutterAssembleToolHelper {
     )
 
     // Verify build mode of framework in BUILT_PRODUCTS_DIR
-    let builtProductsDir = try FlutterToolHelper.findOrExit(env: env, key: "BUILT_PRODUCTS_DIR")
-    try verifyFrameworkBuildMode(
-      buildDirectory: builtProductsDir,
-      expectedBuildMode: expectedBuildMode,
-      targetBuildMode: targetBuildMode,
-      targetPlatform: targetPlatform,
-      env: env,
-      fileManager: fileManager
-    )
+    if verifyBuiltProducts {
+      let builtProductsDir = try FlutterToolHelper.findOrExit(
+        env: env,
+        key: "BUILT_PRODUCTS_DIR"
+      )
+      try verifyFrameworkBuildMode(
+        buildDirectory: builtProductsDir,
+        expectedBuildMode: expectedBuildMode,
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+    }
 
-    // Verify build mode of framework in TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH
-    let targetBuildDir = try FlutterToolHelper.findOrExit(env: env, key: "TARGET_BUILD_DIR")
-    let frameworksFolderPath = try FlutterToolHelper.findOrExit(
-      env: env,
-      key: "FRAMEWORKS_FOLDER_PATH"
-    )
-    let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
-    try verifyFrameworkBuildMode(
-      buildDirectory: embeddedFrameworks,
-      expectedBuildMode: expectedBuildMode,
-      targetBuildMode: targetBuildMode,
-      targetPlatform: targetPlatform,
-      env: env,
-      fileManager: fileManager
-    )
+    if verifyTargetBuild {
+      // Verify build mode of framework in TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH
+      let targetBuildDir = try FlutterToolHelper.findOrExit(
+        env: env,
+        key: "TARGET_BUILD_DIR"
+      )
+      let frameworksFolderPath = try FlutterToolHelper.findOrExit(
+        env: env,
+        key: "FRAMEWORKS_FOLDER_PATH"
+      )
+      let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
+      try verifyFrameworkBuildMode(
+        buildDirectory: embeddedFrameworks,
+        expectedBuildMode: expectedBuildMode,
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+    }
   }
 
   /// Verifies a framework's build mode.
@@ -71,6 +232,7 @@ public class FlutterAssembleToolHelper {
   static func verifyFrameworkBuildMode(
     buildDirectory: String,
     expectedBuildMode: String,
+    packagePath: String,
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
     env: [String: String],
@@ -88,22 +250,29 @@ public class FlutterAssembleToolHelper {
 
     // Verify expected and actual build mode matches
     if actualBuildMode.lowercased() != expectedBuildMode.lowercased() {
-      let packagePath = try FlutterToolHelper.findOrExit(
-        env: env,
-        key: "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH"
+      throw XcodeErrorAndExit.error(
+        [
+          "The Flutter framework's build mode does not match the currently targeted configuration.",
+          "Expected \(targetBuildMode) but found \(actualBuildMode) for \(frameworkInfoPlistURL.path).",
+          "Please complete one of the following:",
+        ]
+          + pluginInstructions(
+            targetBuildMode: targetBuildMode,
+            packagePath: packagePath
+          )
       )
-      throw XcodeErrorAndExit.error([
-        "The Flutter framework's build mode does not match the currently targeted configuration.",
-        "Expected \(targetBuildMode) but found \(actualBuildMode) for \(frameworkInfoPlistURL.path).",
-        "Please complete one of the following:",
-        "   1) Right click on FlutterNativeIntegration in Xcode's Project Navigator and select "
-          + "\"Switch to \(targetBuildMode) Mode\".",
-        "   or",
-        "   2) Run the following in a terminal:",
-        "       cd \(packagePath)",
-        "       swift package plugin --allow-writing-to-package-directory switch-to-\(targetBuildMode.lowercased())",
-      ])
     }
+  }
+
+  static func pluginInstructions(targetBuildMode: String, packagePath: String) -> [String] {
+    return [
+      "   1) Right click on FlutterNativeIntegration in Xcode's Project Navigator and select "
+        + "\"Switch to \(targetBuildMode) Mode\".",
+      "   or",
+      "   2) Run the following in a terminal:",
+      "       cd \(packagePath)",
+      "       swift package plugin --allow-writing-to-package-directory switch-to-\(targetBuildMode.lowercased())",
+    ]
   }
 
   /// Determines the path to the framework's Info.plist.
@@ -123,7 +292,9 @@ public class FlutterAssembleToolHelper {
       ? "FlutterMacOS.framework/Resources/Info.plist"
       : "Flutter.framework/Info.plist"
 
-    return URL(fileURLWithPath: buildDirectory).appendingPathComponent(infoPlistRelativePath)
+    return URL(fileURLWithPath: buildDirectory).appendingPathComponent(
+      infoPlistRelativePath
+    )
   }
 
   /// Determines the expected build mode for the given SDK.
@@ -162,8 +333,11 @@ public class FlutterAssembleToolHelper {
     fileManager: FlutterToolsFileManager
   ) throws -> String {
     do {
-      guard let data = fileManager.contents(atPath: frameworkInfoPlistURL.path) else {
-        throw XcodeErrorAndExit.error(["Failed to read \(frameworkInfoPlistURL)"])
+      guard let data = fileManager.contents(atPath: frameworkInfoPlistURL.path)
+      else {
+        throw XcodeErrorAndExit.error([
+          "Failed to read \(frameworkInfoPlistURL)"
+        ])
       }
       guard
         let plist = try PropertyListSerialization.propertyList(
@@ -172,10 +346,14 @@ public class FlutterAssembleToolHelper {
           format: nil
         ) as? [String: Any]
       else {
-        throw XcodeErrorAndExit.error(["Failed to parse \(frameworkInfoPlistURL)"])
+        throw XcodeErrorAndExit.error([
+          "Failed to parse \(frameworkInfoPlistURL)"
+        ])
       }
       guard let parsedBuildMode = plist["BuildMode"] as? String else {
-        throw XcodeErrorAndExit.error(["Failed to read BuildMode from \(frameworkInfoPlistURL)"])
+        throw XcodeErrorAndExit.error([
+          "Failed to read BuildMode from \(frameworkInfoPlistURL)"
+        ])
       }
       return parsedBuildMode
     } catch let error as XcodeErrorAndExit {
@@ -184,6 +362,75 @@ public class FlutterAssembleToolHelper {
       throw XcodeErrorAndExit.error([
         "Failed to read contents of \(frameworkInfoPlistURL): \(error.localizedDescription)"
       ])
+    }
+  }
+
+  /// Verifies the build mode and updates the Flutter and App framework symlink if needed.
+  ///
+  /// This method is called when `FLUTTER_APPLICATION_PATH` is not set. It ensures
+  /// that the Flutter and App frameworks match the target build mode.
+  ///
+  /// - Parameters:
+  ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  ///   - processManager: The process runner to use.
+  /// - Throws: `XcodeErrorAndExit.error` if the verification or update fails.
+  static func verifyBuildModeAndUpdateIfNeeded(
+    packagePath: String,
+    targetBuildMode: String,
+    targetPlatform: FlutterPlatform,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager,
+    processManager: FlutterProcessRunner
+  ) throws {
+    var updated = false
+    do {
+      try FlutterAssembleToolHelper.verifyFlutterFramework(
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+    } catch {
+      // If it fails to verify, update the build mode
+      try FlutterToolHelper.updateSymlink(
+        targetBuildMode: targetBuildMode,
+        integrationPackagePath: packagePath,
+        fileManager: fileManager
+      )
+      // Copy and codesign
+      try FlutterAssembleToolHelper.copyFlutterFramework(
+        frameworkName: targetPlatform == .ios ? "Flutter" : "FlutterMacOS",
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager,
+        processManager: processManager
+      )
+      try FlutterAssembleToolHelper.copyFlutterFramework(
+        frameworkName: "App",
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager,
+        processManager: processManager
+      )
+      updated = true
+    }
+    if updated == true {
+      try FlutterAssembleToolHelper.verifyFlutterFramework(
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        verifyBuiltProducts: false,
+        env: env,
+        fileManager: fileManager
+      )
     }
   }
 
@@ -196,22 +443,22 @@ public class FlutterAssembleToolHelper {
   ///   - fileManager: The file manager to use for file operations.
   ///   - processManager: The process runner to use.
   /// - Throws: `XcodeErrorAndExit.error` if the assembly fails.
-  public static func assemble(
-    command: String,
+  static func assemble(
+    appPath: String,
     targetPlatform: FlutterPlatform,
     env: [String: String],
     fileManager: FlutterToolsFileManager,
     processManager: FlutterProcessRunner
   ) throws {
-    guard let appPath = try flutterApplicationPath(env: env, fileManager: fileManager) else {
-      return
-    }
-
     // Get the environment by parsing flutter_export_environment.sh and merging the exported
     // variables with the Xcode environment.
-    let platform = targetPlatform.rawValue
+    let exportedEnvPath = try exportedEnvPath(
+      appPath: appPath,
+      platform: targetPlatform,
+      fileManager: fileManager
+    )
     let exportedEnv = try environmentFromBashExports(
-      exportedEnvPath: "\(appPath)/\(platform)/Flutter/flutter_export_environment.sh",
+      exportedEnvPath: exportedEnvPath,
       fileManager: fileManager
     )
     let mergedEnvironment = mergeEnvironment(
@@ -220,7 +467,10 @@ public class FlutterAssembleToolHelper {
     )
 
     // Verify Flutter root exists
-    let flutterRoot = try FlutterToolHelper.findOrExit(env: mergedEnvironment, key: "FLUTTER_ROOT")
+    let flutterRoot = try FlutterToolHelper.findOrExit(
+      env: mergedEnvironment,
+      key: "FLUTTER_ROOT"
+    )
     if !fileManager.fileExists(atPath: flutterRoot) {
       throw XcodeErrorAndExit.error([
         "FLUTTER_ROOT is set to \(flutterRoot), but could not be located."
@@ -229,10 +479,12 @@ public class FlutterAssembleToolHelper {
 
     // Call xcode_backend.dart from within the Flutter root
     let dartExecutable = "\(flutterRoot)/bin/dart"
-    let xcodeBackendScript = "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart"
+    let xcodeBackendScript =
+      "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart"
+    let command = "build-native"
     try processManager.run(
       executableURL: URL(fileURLWithPath: dartExecutable),
-      arguments: [xcodeBackendScript, command, platform],
+      arguments: [xcodeBackendScript, command, targetPlatform.rawValue],
       env: mergedEnvironment,
       failOnError: true
     )
@@ -249,7 +501,9 @@ public class FlutterAssembleToolHelper {
     env: [String: String],
     fileManager: FlutterToolsFileManager
   ) throws -> String? {
-    guard let flutterAppPath = env["FLUTTER_APPLICATION_PATH"], !flutterAppPath.isEmpty else {
+    guard let flutterAppPath = env["FLUTTER_APPLICATION_PATH"],
+      !flutterAppPath.isEmpty
+    else {
       return nil
     }
     var resolvedPath = flutterAppPath
@@ -265,6 +519,36 @@ public class FlutterAssembleToolHelper {
       ])
     }
     return resolvedPath
+  }
+
+  /// Finds the path to the `flutter_export_environment.sh` file.
+  ///
+  /// - Parameters:
+  ///   - appPath: The path to the Flutter application.
+  ///   - platform: The platform (iOS or macOS) the app is being built for.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Returns: The path to the `flutter_export_environment.sh` file.
+  /// - Throws: `XcodeErrorAndExit.error` if the file cannot be located.
+  static func exportedEnvPath(
+    appPath: String,
+    platform: FlutterPlatform,
+    fileManager: FlutterToolsFileManager
+  ) throws -> String {
+    if platform == FlutterPlatform.macos {
+      return
+        "\(appPath)/\(platform)/Flutter/ephemeral/flutter_export_environment.sh"
+    }
+    let path = "\(appPath)/\(platform)/Flutter/flutter_export_environment.sh"
+    if fileManager.fileExists(atPath: path) {
+      return path
+    }
+    let modulePath = "\(appPath)/.ios/Flutter/flutter_export_environment.sh"
+    if fileManager.fileExists(atPath: modulePath) {
+      return modulePath
+    }
+    throw XcodeErrorAndExit.error([
+      "Unable to run \"flutter assemble\". Failed to find \(path)"
+    ])
   }
 
   /// Parses environment variables from a bash script.
@@ -302,7 +586,9 @@ public class FlutterAssembleToolHelper {
       .components(separatedBy: CharacterSet.newlines)
     for line in lines {
       // Remove the surrounding quotations
-      let trimmedLine = line.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+      let trimmedLine = line.trimmingCharacters(
+        in: CharacterSet(charactersIn: "\"")
+      )
 
       // Get the key and value by splitting by "="
       guard let splitIndex = trimmedLine.firstIndex(of: "=") else {
@@ -328,5 +614,145 @@ public class FlutterAssembleToolHelper {
     flutterExportedEnv: [String: String]
   ) -> [String: String] {
     return xcodeEnv.merging(flutterExportedEnv) { (current, _) in current }
+  }
+
+  /// Copies the Flutter framework to `BUILT_PRODUCTS_DIR`.
+  ///
+  /// - Parameters:
+  ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  ///   - processManager: The process runner to use.
+  /// - Throws: `XcodeErrorAndExit.error` if the copy fails.
+  static func copyFlutterFramework(
+    frameworkName: String,
+    packagePath: String,
+    targetBuildMode: String,
+    targetPlatform: FlutterPlatform,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager,
+    processManager: FlutterProcessRunner
+  ) throws {
+    // Verify XCFramework for the build mode exists
+    let xcframeworkURL = URL(
+      fileURLWithPath:
+        "\(packagePath)/\(targetBuildMode)/Frameworks/\(frameworkName).xcframework"
+    )
+    if !fileManager.fileExists(atPath: xcframeworkURL.path) {
+      throw XcodeErrorAndExit.error([
+        "FlutterPluginRegistrant does not exist for configuration \(targetBuildMode). "
+          + "You may need to run \"flutter build swift-package --build-mode "
+          + "\(targetBuildMode.lowercased())\" in your Flutter app."
+      ])
+    }
+
+    let targetBuildDir = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "TARGET_BUILD_DIR"
+    )
+    let frameworksFolderPath = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "FRAMEWORKS_FOLDER_PATH"
+    )
+    let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
+    do {
+      // Find the framework for the platform
+      let frameworkPath = try findPlatformFramework(
+        frameworkName: frameworkName,
+        xcframeworkURL: xcframeworkURL,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+      // Copy the platform framework to the FRAMEWORKS_FOLDER_PATH
+      try rsyncFramework(
+        source: frameworkPath,
+        destination: URL(fileURLWithPath: embeddedFrameworks),
+        processManager: processManager
+      )
+
+      if let codesignIdentity = env["EXPANDED_CODE_SIGN_IDENTITY"] {
+        if env["CODE_SIGNING_REQUIRED"] != "NO" {
+          try processManager.run(
+            executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
+            arguments: [
+              "--force", "--verbose", "--sign", codesignIdentity, "--",
+              "\(embeddedFrameworks)/\(frameworkPath.lastPathComponent)",
+            ],
+            env: nil,
+            failOnError: true
+          )
+        }
+      }
+    } catch let error as XcodeErrorAndExit {
+      throw error
+    } catch {
+      throw XcodeErrorAndExit.error([
+        "Unable to copy \(xcframeworkURL): \(error.localizedDescription)"
+      ])
+    }
+  }
+
+  /// Finds the framework for the target platform within an XCFramework.
+  ///
+  /// - Parameters:
+  ///   - frameworkName: The name of the framework.
+  ///   - xcframeworkURL: The URL to the XCFramework.
+  ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
+  ///   - env: A dictionary of environment variables.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Returns: The URL to the platform-specific framework.
+  /// - Throws: `XcodeErrorAndExit.error` if the framework cannot be found.
+  static func findPlatformFramework(
+    frameworkName: String,
+    xcframeworkURL: URL,
+    targetPlatform: FlutterPlatform,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager
+  ) throws -> URL {
+    var isSimulatorBuild = false
+    if targetPlatform == .ios {
+      isSimulatorBuild = try FlutterToolHelper.usingSimulatorSdk(env: env)
+    }
+    for file in try fileManager.contentsOfDirectory(
+      at: xcframeworkURL,
+      includingPropertiesForKeys: nil,
+      options: []
+    ) {
+      let platformDirectory = file.lastPathComponent
+      if !platformDirectory.starts(with: "\(targetPlatform)-") {
+        continue
+      }
+      let simulatorDirectory = platformDirectory.hasSuffix("-simulator")
+      if isSimulatorBuild == simulatorDirectory {
+        return file.appendingPathComponent("\(frameworkName).framework")
+      }
+    }
+    throw XcodeErrorAndExit.error([
+      "Unable to find \(frameworkName) framework within \(xcframeworkURL.path)"
+    ])
+  }
+
+  /// Synchronizes a framework from source to destination using `rsync`.
+  ///
+  /// - Parameters:
+  ///   - source: The source URL of the framework.
+  ///   - destination: The destination URL of the framework.
+  ///   - processManager: The process runner to use.
+  /// - Throws: `XcodeErrorAndExit.error` if the synchronization fails.
+  static func rsyncFramework(
+    source: URL,
+    destination: URL,
+    processManager: FlutterProcessRunner
+  ) throws {
+    try processManager.run(
+      executableURL: URL(fileURLWithPath: "/usr/bin/rsync"),
+      arguments: [
+        "-av", "--delete", "--filter", "- .DS_Store/",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r", source.path, destination.path,
+      ],
+      env: nil,
+      failOnError: true
+    )
   }
 }

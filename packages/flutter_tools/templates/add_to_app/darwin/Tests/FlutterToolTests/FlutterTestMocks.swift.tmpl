@@ -5,10 +5,8 @@ import Testing
 
 /// A mock implementation of `FlutterProcessRunner` for testing.
 public class MockFlutterProcessManager: FlutterProcessRunner {
-  var expectedURL: String = ""
-  var expectedArguments: [String] = []
+  var expectedProcesses: [MockProcess] = []
   var validateEnvironment: Bool = false
-  var expectedEnv: [String: String]? = nil
 
   public func run(
     executableURL: URL,
@@ -16,11 +14,24 @@ public class MockFlutterProcessManager: FlutterProcessRunner {
     env: [String: String]?,
     failOnError: Bool
   ) throws {
-    #expect(executableURL.path == expectedURL)
-    #expect(arguments == expectedArguments)
+    let expectedProcess = expectedProcesses.remove(at: 0)
+    #expect(executableURL.path == expectedProcess.expectedURL)
+    #expect(arguments == expectedProcess.expectedArguments)
     if validateEnvironment {
-      #expect(env == expectedEnv)
+      #expect(env == expectedProcess.expectedEnv)
     }
+  }
+}
+
+public class MockProcess {
+  var expectedURL: String
+  var expectedArguments: [String]
+  var expectedEnv: [String: String]?
+
+  init(expectedURL: String, expectedArguments: [String], expectedEnv: [String : String]? = nil) {
+    self.expectedURL = expectedURL
+    self.expectedArguments = expectedArguments
+    self.expectedEnv = expectedEnv
   }
 }
 
@@ -30,7 +41,7 @@ class MockFileManager: FlutterToolsFileManager {
   var filesRemoved: [String] = []
   var symlinksCreated: [String: String] = [:]
   var filesInDirectory: [String: [URL]] = [:]
-  var fileContents: [String: Data] = [:]
+  var fileContents: [String: [Data]] = [:]
 
   func destinationOfSymbolicLink(atPath path: String) throws -> String {
     return "./Release"
@@ -41,7 +52,7 @@ class MockFileManager: FlutterToolsFileManager {
   }
 
   func contents(atPath path: String) -> Data? {
-    return fileContents[path]
+    return fileContents[path]?.remove(at: 0)
   }
 
   func removeItem(at URL: URL) throws {

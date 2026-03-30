@@ -7,8 +7,7 @@ import PackagePlugin
 /// updating its symlink.
 @main
 struct FlutterConfigurationPlugin: CommandPlugin {
-  func performCommand(context: PluginContext, arguments: [String]) async throws
-  {
+  func performCommand(context: PluginContext, arguments: [String]) async throws {
     let configuration = "{{buildMode}}"
     let tool = try context.tool(named: "FlutterPluginTool")
     let process = try Process.run(

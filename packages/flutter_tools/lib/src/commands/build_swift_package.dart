@@ -355,6 +355,14 @@ class BuildSwiftPackage extends BuildSubCommand {
     );
     createSourcesSymlink(flutterIntegrationPackage, buildInfos.first.mode.uppercaseName);
 
+    if (_xcodeProject is IosProject) {
+      generateLLDBInitFile(
+        scriptsDirectory: outputDirectory.childDirectory(_kScripts),
+        buildInfos: buildInfos,
+        project: _xcodeProject,
+      );
+    }
+
     return FlutterCommandResult.success();
   }
 
@@ -445,6 +453,28 @@ class BuildSwiftPackage extends BuildSubCommand {
     } else {
       link.createSync(target);
     }
+  }
+
+  /// iOS 26 physical devices require an LLDB Init File to use JIT debugging.
+  /// This method generates the LLDB Init File and the helper python script.
+  @visibleForTesting
+  void generateLLDBInitFile({
+    required Directory scriptsDirectory,
+    required List<BuildInfo> buildInfos,
+    required IosProject project,
+  }) {
+    scriptsDirectory.createSync(recursive: true);
+    if (!buildInfos.any((BuildInfo info) => info.isDebug)) {
+      return;
+    }
+    final File lldbInitSourceFile = project.lldbInitFile;
+    final File lldbHelperPythonFile = project.lldbHelperPythonFile;
+    final File lldbInitTargetFile = scriptsDirectory.childFile(lldbInitSourceFile.basename);
+    final File lldbHelperPythonTargetFile = scriptsDirectory.childFile(
+      lldbHelperPythonFile.basename,
+    );
+    lldbInitSourceFile.copySync(lldbInitTargetFile.path);
+    lldbHelperPythonFile.copySync(lldbHelperPythonTargetFile.path);
   }
 }
 
@@ -1595,9 +1625,6 @@ class FlutterNativeIntegrationSwiftPackage {
   /// The name of the Swift package library with common logic shared among the other tools.
   static const String _kFlutterToolHelper = 'FlutterToolHelper';
 
-  /// The name of the Swift package executable tools that will be used during the build pre-action.
-  static const String _kFlutterPrebuildTool = 'FlutterPrebuildTool';
-
   /// The name of the Swift package executable tool that will be used during a build run phase that
   /// occurs after the Flutter.framework and App.framework are embedded into the app bundle.
   static const String _kFlutterAssembleTool = 'FlutterAssembleTool';
@@ -1610,11 +1637,7 @@ class FlutterNativeIntegrationSwiftPackage {
   /// The name of the Swift test target that will be used to test the Flutter tools in CI.
   static const String _kFlutterToolTests = 'FlutterToolTests';
 
-  static const List<String> _executableTools = <String>[
-    _kFlutterPrebuildTool,
-    _kFlutterAssembleTool,
-    _kFlutterPluginTool,
-  ];
+  static const List<String> _executableTools = <String>[_kFlutterAssembleTool, _kFlutterPluginTool];
 
   /// Generates the Swift package and its sources that will be used to integrate a Flutter app
   /// into a native iOS or macOS app.
@@ -1733,7 +1756,6 @@ class FlutterNativeIntegrationSwiftPackage {
       name: _kFlutterIntegrationPackageName,
       targets: [_kFlutterIntegrationPackageName],
     ),
-    SwiftPackageProduct.executable(name: 'flutter-prebuild-tool', targets: [_kFlutterPrebuildTool]),
     SwiftPackageProduct.executable(name: 'flutter-assemble-tool', targets: [_kFlutterAssembleTool]),
   ];
 
@@ -1782,7 +1804,6 @@ class FlutterNativeIntegrationSwiftPackage {
           dependencies: [
             SwiftPackageTargetDependency.target(name: _kFlutterPluginTool),
             SwiftPackageTargetDependency.target(name: _kFlutterToolHelper),
-            SwiftPackageTargetDependency.target(name: _kFlutterPrebuildTool),
             SwiftPackageTargetDependency.target(name: _kFlutterAssembleTool),
           ],
         ),

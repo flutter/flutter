@@ -11,7 +11,8 @@ public class FlutterToolHelper {
   /// - Throws: `XcodeErrorAndExit.error` if the build mode cannot be determined.
   public static func parseFlutterBuildMode(env: [String: String]) throws -> String {
     // Get FLUTTER_BUILD_MODE or fallback to CONFIGURATION, then lowercase it
-    let rawMode = (env["FLUTTER_BUILD_MODE"] ?? env["CONFIGURATION"] ?? "").lowercased()
+    let rawMode = (env["FLUTTER_BUILD_MODE"] ?? env["CONFIGURATION"] ?? "")
+      .lowercased()
 
     let buildMode: String
 
@@ -44,8 +45,7 @@ public class FlutterToolHelper {
     if platformName.contains("macosx") {
       return .macos
     } else if platformName.contains("iphoneos")
-      || platformName.contains("iphonesimulator")
-    {
+      || platformName.contains("iphonesimulator") {
       return .ios
     } else {
       throw XcodeErrorAndExit.error([
@@ -64,10 +64,9 @@ public class FlutterToolHelper {
     let url = URL(fileURLWithPath: sdkRoot)
     let filenameWithExtension = url.lastPathComponent.lowercased()
     if !filenameWithExtension.contains("iphone")
-      && !filenameWithExtension.contains("macosx")
-    {
+      && !filenameWithExtension.contains("macosx") {
       throw XcodeErrorAndExit.error([
-        "Unrecognized SDKROOT: \(sdkRoot). Flutter only supports iOS and macOS."
+        "Unrecognized SDKROOT: \(sdkRoot). Flutter only supports iOS and macOS.",
       ])
     }
     return filenameWithExtension.contains("simulator")
@@ -96,7 +95,9 @@ public class FlutterToolHelper {
       atPath: currentLinkPath
     )
     if currentLinkTarget == newLinkTarget {
-      print("\(currentLinkName) symlink is up-to-date.")
+      FlutterToolHelper.xcodeNote(
+        message: "\(currentLinkName) symlink is up-to-date."
+      )
       return
     }
 
@@ -122,8 +123,9 @@ public class FlutterToolHelper {
         atPath: currentLinkPath,
         withDestinationPath: newLinkTarget
       )
-      print(
-        "\(currentLinkName) symlink \(currentLinkPath) updated to \(newLinkTarget)."
+      FlutterToolHelper.xcodeNote(
+        message:
+          "\(currentLinkName) symlink \(currentLinkPath) updated to \(newLinkTarget)."
       )
     } catch {
       // If creating the symlink fails, recreate the previous one
@@ -158,11 +160,31 @@ public class FlutterToolHelper {
     return value
   }
 
-  /// Prints an error message to `stderr`.
+  /// Prints an error message to `stdout` to be reported to the Xcode build system.
+  ///
+  ///  https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
   ///
   /// - Parameter message: The message to print.
   public static func xcodeError(message: String) {
-    fputs("error: \(message)\n", stderr)
+    fputs("error: \(message)\n", stdout)
+  }
+
+  /// Prints an warning message to `stdout` to be reported to the Xcode build system.
+  ///
+  ///  https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
+  ///
+  /// - Parameter message: The message to print.
+  public static func xcodeWarning(message: String) {
+    fputs("error: \(message)\n", stdout)
+  }
+
+  /// Prints an note message to `stdout` to be reported to the Xcode build system.
+  ///
+  ///  https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
+  ///
+  /// - Parameter message: The message to print.
+  public static func xcodeNote(message: String) {
+    fputs("note: \(message)\n", stdout)
   }
 
 }
@@ -245,7 +267,7 @@ public class FlutterProcessManager: FlutterProcessRunner {
 
         let stdoutData = stdPipe.fileHandleForReading.readDataToEndOfFile()
         let output = String(decoding: stdoutData, as: UTF8.self)
-        print(output)
+        FlutterToolHelper.xcodeNote(message: output)
         if process.terminationStatus != 0 && failOnError {
           throw XcodeErrorAndExit.error([
             "\(executableURL) returned non-zero exit code: \(process.terminationStatus)"

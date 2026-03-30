@@ -26,7 +26,7 @@ struct FlutterPluginTool {
   static func extractArguments(arguments: [String]) throws -> (String, String) {
     if arguments.count != 3 {
       throw XcodeErrorAndExit.error([
-        "Invalid arguments: [\(arguments.joined(separator: ", "))]"
+        "Invalid arguments: [\(arguments.joined(separator: ", "))]",
       ])
     }
     let buildMode = arguments[1]
@@ -35,8 +35,7 @@ struct FlutterPluginTool {
       throw XcodeErrorAndExit.error(["Invalid build mode: \(buildMode)"])
     }
     let packagePath = arguments[2]
-    if !packagePath.contains("FlutterNativeIntegration")
-    {
+    if !packagePath.contains("FlutterNativeIntegration") {
       throw XcodeErrorAndExit.error(["Invalid package path: \(packagePath)"])
     }
     return (buildMode, packagePath)

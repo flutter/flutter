@@ -272,21 +272,11 @@ class Context {
     ]);
   }
 
-  /// Builds the App.framework from a build script in a native app (add-to-app).
-  /// After building the framework, it embeds it into the app and codesigns it.
+  /// Call `flutter assemble` from a build script in a native app (add-to-app).
+  /// After building the App.framework, embed it and the Flutter framework into the app.
   void buildForNativeApp(TargetPlatform platform) {
     buildApp(platform, 'build-native');
-    final xcodeFrameworksDir =
-        '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
-
-    final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-    final bool codesign =
-        platform == TargetPlatform.macos &&
-        expandedCodeSignIdentity != null &&
-        expandedCodeSignIdentity.isNotEmpty &&
-        environment['CODE_SIGNING_REQUIRED'] != 'NO';
-
-    _embedAppFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
+    embedFlutterFrameworks(platform);
   }
 
   /// Embeds the App.framework, Flutter/FlutterMacOS.framework, and any native

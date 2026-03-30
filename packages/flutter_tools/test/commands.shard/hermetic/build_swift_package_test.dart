@@ -56,6 +56,7 @@ void main() {
   const releaseFrameworksDirectoryPath = '$releaseModeDirectoryPath/Frameworks';
   const releaseNativeAssetsDirectoryPath = '$releaseFrameworksDirectoryPath/NativeAssets';
   const cacheDirectoryPath = 'output/.cache';
+  const scriptsDirectoryPath = 'output/Scripts';
   const debugCocoapodCache = '$cacheDirectoryPath/Debug/CocoaPods';
   const pluginsDirectoryPath = '$nativeIntegrationSwiftPackagePath/.plugins';
   const flutterCachePath = '/path/to/flutter/bin/cache';
@@ -94,6 +95,41 @@ void main() {
       final Link generatedSourcesLink = fs.link(pluginRegistrantSwiftPackagePath);
       expect(generatedSourcesLink, exists);
       expect(generatedSourcesLink.targetSync(), './Debug');
+    });
+
+    testUsingContext('generateLLDBInitFile', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list([]);
+      final command = BuildSwiftPackage(
+        analytics: FakeAnalytics(),
+        artifacts: FakeArtifacts(engineArtifactPath),
+        buildSystem: FakeBuildSystem(),
+        cache: FakeCache(fs, _flutterRoot),
+        fileSystem: fs,
+        flutterVersion: FakeFlutterVersion(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        templateRenderer: const MustacheTemplateRenderer(),
+        xcode: FakeXcode(),
+        featureFlags: FakeFeatureFlags(),
+        verboseHelp: false,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
+      final Directory appPath = fs.currentDirectory.childDirectory('my_flutter_app');
+      appPath.childFile('ios/Flutter/ephemeral/flutter_lldbinit').createSync(recursive: true);
+      appPath.childFile('ios/Flutter/ephemeral/flutter_lldb_helper.py').createSync(recursive: true);
+      final Directory scriptsOutput = fs.directory(scriptsDirectoryPath);
+      command.generateLLDBInitFile(
+        scriptsDirectory: scriptsOutput,
+        buildInfos: [BuildInfo.debug],
+        project: FakeIosProject(directory: appPath),
+      );
+      final File lldbInitFile = scriptsOutput.childFile('flutter_lldbinit');
+      final File lldbHelperPythonFile = scriptsOutput.childFile('flutter_lldb_helper.py');
+      expect(lldbInitFile, exists);
+      expect(lldbHelperPythonFile, exists);
     });
   });
 
@@ -2680,7 +2716,6 @@ let package = Package(
     ],
     products: [
         .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"]),
-        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
     ],
     dependencies: [
@@ -2736,12 +2771,6 @@ let package = Package(
             name: "FlutterToolHelper"
         ),
         .executableTarget(
-            name: "FlutterPrebuildTool",
-            dependencies: [
-                .target(name: "FlutterToolHelper")
-            ]
-        ),
-        .executableTarget(
             name: "FlutterAssembleTool",
             dependencies: [
                 .target(name: "FlutterToolHelper")
@@ -2782,10 +2811,6 @@ let package = Package(
       );
       expect(
         flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
-        exists,
-      );
-      expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterPrebuildTool'),
         exists,
       );
       expect(
@@ -2887,7 +2912,6 @@ let package = Package(
     ],
     products: [
         .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"]),
-        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
     ],
     dependencies: [
@@ -2943,12 +2967,6 @@ let package = Package(
             name: "FlutterToolHelper"
         ),
         .executableTarget(
-            name: "FlutterPrebuildTool",
-            dependencies: [
-                .target(name: "FlutterToolHelper")
-            ]
-        ),
-        .executableTarget(
             name: "FlutterAssembleTool",
             dependencies: [
                 .target(name: "FlutterToolHelper")
@@ -2965,7 +2983,6 @@ let package = Package(
             dependencies: [
                 .target(name: "FlutterPluginTool"),
                 .target(name: "FlutterToolHelper"),
-                .target(name: "FlutterPrebuildTool"),
                 .target(name: "FlutterAssembleTool")
             ]
         )
@@ -2998,10 +3015,6 @@ let package = Package(
       );
       expect(
         flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
-        exists,
-      );
-      expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterPrebuildTool'),
         exists,
       );
       expect(
@@ -3222,6 +3235,13 @@ class FakeIosProject extends Fake implements IosProject {
   File get flutterPluginSwiftPackageManifest => hostAppRoot.childFile(
     'Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
   );
+
+  @override
+  File get lldbInitFile => hostAppRoot.childFile('Flutter/ephemeral/flutter_lldbinit');
+
+  @override
+  File get lldbHelperPythonFile =>
+      hostAppRoot.childFile('Flutter/ephemeral/flutter_lldb_helper.py');
 }
 
 class FakeMacosProject extends Fake implements MacOSProject {

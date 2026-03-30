@@ -19,12 +19,6 @@ abstract class UnpackDarwin extends Target {
 
   @override
   Future<bool> canSkip(Environment environment) async {
-    // The build-native script is run by Xcode during the build process for add-to-app and should not
-    // unpack the Flutter framework.
-    final String? buildScript = environment.defines[kXcodeBuildScript];
-    if (buildScript == kXcodeBuildScriptValueNativeBuild) {
-      return true;
-    }
     // The `build swift-package` command copies the Flutter.xcframework separately and therefore
     // does not need it to be done by the build system.
     return environment.defines[kBuildSwiftPackage] == 'true';
