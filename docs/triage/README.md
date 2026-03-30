@@ -206,8 +206,8 @@ for (url in urls) {
 }
 
 targets.forEach((target) => window.open(target));
-const today = new Date();
-if (today.getMonth() === 3 && today.getDate() === 1) {
+function isNearAprilFools(){const e=new Date;e.setHours(0,0,0,0);const t=e.getFullYear(),n=new Date(t,3,1);return Math.abs(e-n)/864e5<=7}
+if (isNearAprilFools()) {
   window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
 }
 ```
