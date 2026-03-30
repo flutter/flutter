@@ -47,7 +47,7 @@ export const createWasmInstantiator = (url, filename) => {
         return response;
       }
     }
-  // Cross-Origin Storage is not available or we failed to retrieve the file, try fetching it from the network.
+    // Cross-Origin Storage is not available or we failed to retrieve the file, try fetching it from the network.
     const response = await fetch(url);
     if (supportsCrossOriginStorage && hash && response.ok) {
       const cosHash = { algorithm: 'SHA-256', value: hash };
