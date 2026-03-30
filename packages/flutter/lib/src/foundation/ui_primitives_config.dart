@@ -1,6 +1,8 @@
 import 'package:ui_primitives/ui_primitives.dart';
 
 import 'assertions.dart';
+import 'change_notifier.dart';
+import 'diagnostics.dart';
 
 /// Configures the error reporting for the ui_primitives package.
 void configureErrorReportingInUiPrimitives() {
@@ -9,18 +11,42 @@ void configureErrorReportingInUiPrimitives() {
 
 class _FlutterErrorReporter implements FrameworkErrorReporter {
   @override
-  FrameworkError errorByDetails(FrameworkErrorDetails details) {
-    // TODO: implement errorByDetails
-    throw UnimplementedError();
-  }
+  FrameworkError errorByDetails(FrameworkErrorDetails details) {}
 
   @override
-  FrameworkError errorByMessage(String message) {
-    return FlutterError(message);
-  }
+  Error errorByMessage(String message) => FlutterError(message);
 
   @override
   void report(FrameworkErrorDetails details) {
-    // TODO: implement report
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: details.exception,
+        stack: details.stack,
+        library: 'foundation library',
+        context: ErrorDescription('while dispatching notifications for ${details.runtimeType}'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<Listenable>(
+            'The ${details.runtimeType} sending notification was',
+            details.dispatchingObject,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ],
+      ),
+    );
+  }
+
+  DiagnosticsNode _node(Object? object) {
+    if (object is Listenable) {
+      return _property<Listenable>(object);
+    }
+    return DiagnosticsNode(object);
+  }
+
+  DiagnosticsProperty<T> _property<T>(T object) {
+    return DiagnosticsProperty<T>(
+      'The ${object.runtimeType} sending notification was',
+      object,
+      style: DiagnosticsTreeStyle.errorProperty,
+    );
   }
 }
