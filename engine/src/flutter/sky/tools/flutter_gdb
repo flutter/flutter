@@ -49,11 +49,21 @@ def _get_adb_command(args, flutter_root):
     return adb_command
 
 
+def _validate_package_name(package):
+    """Validate that the package name contains only safe Android package name characters."""
+    if not re.match(r'^[a-zA-Z0-9._\-]+$', package):
+        raise ValueError(
+            'Invalid package name: %s. Package names must contain only '
+            'alphanumeric characters, dots, underscores, or hyphens.' % package
+        )
+    return package
+
+
 def _find_package_pid(adb_command, package):
     """Find the pid of the Flutter application process."""
     ps_output = subprocess.check_output(adb_command + ['shell', 'ps'],
                                         encoding='utf-8')
-    ps_match = re.search('^\S+\s+(\d+).*\s%s' % package, ps_output, re.MULTILINE)
+    ps_match = re.search(r'^\S+\s+(\d+).*\s' + re.escape(package), ps_output, re.MULTILINE)
     if not ps_match:
         print('Unable to find pid for package %s on device' % package)
         return None
@@ -142,6 +152,8 @@ class GdbClient(object):
         flutter_root = _get_flutter_root()
         adb_command = _get_adb_command(args, flutter_root)
 
+        _validate_package_name(args.package)
+
         if args.pull_libs:
             if not self._copy_system_libs(adb_command, args.package, args.old_sysroot):
                 return 1
@@ -187,6 +199,8 @@ class GdbServer(object):
     def run(self, args):
         flutter_root = _get_flutter_root()
         adb_command = _get_adb_command(args, flutter_root)
+
+        _validate_package_name(args.package)
 
         package_pid = _find_package_pid(adb_command, args.package)
         if package_pid is None:
