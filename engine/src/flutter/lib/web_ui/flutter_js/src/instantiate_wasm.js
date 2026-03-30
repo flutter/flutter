@@ -22,6 +22,13 @@ export const createWasmInstantiator = (url, filename) => {
     console.log('Cross-Origin Storage is supported. See https://wicg.github.io/cross-origin-storage/ for more details.');
   }
 
+  /**
+   * Tries to get the WASM module from Cross-Origin Storage.
+   * (Only used when Cross-Origin Storage is supported.)
+   *
+   * @param {string} hash The hash of the WASM module.
+   * @returns {Promise<Response|undefined>} The response from Cross-Origin Storage if available, undefined otherwise.
+   */
   const tryGettingResponseFromCrossOriginStorage = async (hash) => {
     const cosHash = { algorithm: 'SHA-256', value: hash };
     try {
