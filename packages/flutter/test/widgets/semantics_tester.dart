@@ -22,8 +22,8 @@ const String _matcherHelp =
 /// Useful with [hasSemantics] and [SemanticsTester] to test the contents of the
 /// semantics tree.
 ///
-/// This class should be avoided due a high frequency of breakages caused by
-/// small semantics tree changes. Instead prefer [SemanticsController.find],
+/// This class should be avoided due to a high frequency of breakages caused by
+/// small semantics tree changes. Instead, prefer [SemanticsController.find],
 /// accessible via [WidgetTester.semantics].
 class TestSemantics {
   /// Creates an object with some test semantics data.
