@@ -795,7 +795,7 @@ final class _GdkGeometry extends ffi.Struct {
   external int winGravity;
 }
 
-/// Wraps GdkRGBA
+/// Wraps GdkRGBA.
 final class _GdkRGBA extends ffi.Struct {
   factory _GdkRGBA() {
     return ffi.Struct.create();
