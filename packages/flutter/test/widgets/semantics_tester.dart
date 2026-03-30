@@ -15,10 +15,16 @@ export 'package:flutter/rendering.dart' show SemanticsData;
 const String _matcherHelp =
     'Try dumping the semantics with debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest) from the package:flutter/rendering.dart library to see what the semantics tree looks like.';
 
+// TODO(justinmc): Remove this per
+// https://github.com/flutter/flutter/issues/184367.
 /// Test semantics data that is compared against real semantics tree.
 ///
 /// Useful with [hasSemantics] and [SemanticsTester] to test the contents of the
 /// semantics tree.
+///
+/// This class should be avoided due a high frequency of breakages caused by
+/// small semantics tree changes. Instead prefer [SemanticsController.find],
+/// accessible via [WidgetTester.semantics].
 class TestSemantics {
   /// Creates an object with some test semantics data.
   ///
