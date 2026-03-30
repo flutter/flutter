@@ -226,6 +226,16 @@ bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   bool surface_will_update =
       SurfaceWillUpdate(surface_->width(), surface_->height(), width, height);
   if (!surface_will_update) {
+    {
+      std::unique_lock<std::mutex> lock(resize_mutex_);
+      // If a resize was already started for a different target size, update
+      // the target so OnFrameGenerated can match and present the frame.
+      // Without this, the stale target causes every frame to be dropped.
+      if (resize_status_ == ResizeState::kResizeStarted) {
+        resize_target_width_ = width;
+        resize_target_height_ = height;
+      }
+    }
     SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
   }
