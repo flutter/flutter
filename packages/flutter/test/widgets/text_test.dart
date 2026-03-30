@@ -1813,6 +1813,51 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets(
+    'WidgetSpan is correctly positioned after textAlign triggers only a repaint',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/181532.
+      // When textAlign changes, only markNeedsPaint() is called, but the paint
+      // offset shifts the text. positionInlineChildren must be called during
+      // paint so WidgetSpan children stay aligned with surrounding text.
+      const double widgetWidth = 30.0;
+      const double widgetHeight = 20.0;
+
+      Widget buildText(TextAlign align) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 300.0,
+              child: Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    const TextSpan(text: 'before '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: SizedBox(width: widgetWidth, height: widgetHeight),
+                    ),
+                    const TextSpan(text: ' after'),
+                  ],
+                ),
+                textAlign: align,
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildText(TextAlign.left));
+      final Offset leftAlignedPosition = tester.getTopLeft(find.byType(SizedBox).last);
+
+      await tester.pumpWidget(buildText(TextAlign.right));
+      final Offset rightAlignedPosition = tester.getTopLeft(find.byType(SizedBox).last);
+
+      // The WidgetSpan should shift horizontally when text alignment changes.
+      expect(rightAlignedPosition.dx, greaterThan(leftAlignedPosition.dx));
+    },
+  );
 }
 
 Future<void> _pumpTextWidget({

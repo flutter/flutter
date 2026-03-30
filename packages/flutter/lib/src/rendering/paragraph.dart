@@ -1009,6 +1009,12 @@ class RenderParagraph extends RenderBox
     // been invalidated but performLayout wasn't called at this point. Make sure
     // the TextPainter has a valid layout.
     _layoutTextWithConstraints(constraints);
+    // Re-position inline children since the paint offset may have changed when
+    // only a repaint was triggered (e.g. textAlign change). See also:
+    // https://github.com/flutter/flutter/issues/181532
+    if (childCount > 0) {
+      positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
+    }
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final paint = Paint()..color = debugCurrentRepaintColor.toColor();

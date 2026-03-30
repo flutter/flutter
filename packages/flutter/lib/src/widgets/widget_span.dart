@@ -420,7 +420,7 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.scaleByDouble(scale, scale, scale, 1);
+    transform.scale(scale, scale, 1.0);
   }
 
   @override
