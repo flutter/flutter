@@ -1731,7 +1731,7 @@ let package = Package(
         expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
 
         final File cachedManifest = cacheDir
-            .childDirectory('Plugins')
+            .childDirectory('Manifests')
             .childDirectory('PluginA')
             .childFile('Package.swift');
         expect(cachedManifest.existsSync(), isTrue);

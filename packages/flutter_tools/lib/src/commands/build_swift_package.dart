@@ -44,6 +44,7 @@ const String _kFileAnIssue =
 const String _kFrameworks = 'Frameworks';
 const String _kPackages = 'Packages';
 const String _kPlugins = 'Plugins';
+const String _kManifests = 'Manifests';
 const String _kCocoaPods = 'CocoaPods';
 const String _kNativeAssets = 'NativeAssets';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
@@ -675,11 +676,11 @@ class FlutterPluginSwiftDependencies {
   /// The highest [SwiftPackageSupportedPlatform] among all of the Flutter SwiftPM plugins.
   /// Defaults to the Flutter framework's [SwiftPackageSupportedPlatform].
   SwiftPackageSupportedPlatform get highestSupportedVersion => _highestSupportedVersion;
-    late SwiftPackageSupportedPlatform _highestSupportedVersion =
+  late SwiftPackageSupportedPlatform _highestSupportedVersion =
       _targetPlatform.supportedPackagePlatform;
 
   @visibleForTesting
-  /// A list of [Plugin]s copied and path to the copied Swift package.
+  /// A list of plugin name, path to the copied Swift package, and the plugin's supported version.
   final List<({String name, String swiftPackagePath, SwiftPackageSupportedPlatform? version})>
   copiedPlugins = [];
 
@@ -746,14 +747,11 @@ class FlutterPluginSwiftDependencies {
     })
   >
   _processPlugin(Plugin plugin, Directory pluginsDirectory, Directory cacheDirectory) async {
-    // The entire plugin is copied instead of just the Swift package to maintain any relative
-    // links within the plugin.
-    // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
     final String swiftPackagePath = await _copyPlugin(plugin, pluginsDirectory);
     final File manifest = _utils.fileSystem.directory(swiftPackagePath).childFile('Package.swift');
 
     final Directory pluginCache = cacheDirectory
-        .childDirectory('Plugins')
+        .childDirectory(_kManifests)
         .childDirectory(plugin.name);
     final File cachedManifest = pluginCache.childFile('Package.swift');
     final File cachedVersionFile = pluginCache.childFile('${_targetPlatform.name}.version');
@@ -807,9 +805,13 @@ class FlutterPluginSwiftDependencies {
     );
   }
 
+  /// Copies the plugin to the [pluginsDirectory] and returns the path to the copied Swift package.
   Future<String> _copyPlugin(Plugin plugin, Directory pluginsDirectory) async {
     final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
       ..createSync(recursive: true);
+    // The entire plugin is copied instead of just the Swift package to maintain any relative
+    // links within the plugin.
+    // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
     copyDirectory(
       _utils.fileSystem.directory(plugin.path),
       pluginDestination,
