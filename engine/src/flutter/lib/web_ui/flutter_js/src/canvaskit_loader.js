@@ -32,7 +32,7 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
     } else if (useChromiumCanvasKit) {
       filename = "chromium/canvaskit.wasm";
     }
-    const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, filename), filename);
+    const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, "canvaskit.wasm"), filename);
     const canvasKitModule = await import(canvasKitUrl);
     window.flutterCanvasKit = await canvasKitModule.default({
       instantiateWasm: wasmInstantiator,
