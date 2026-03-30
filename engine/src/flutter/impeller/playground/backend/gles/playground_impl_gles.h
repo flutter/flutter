@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_PLAYGROUND_BACKEND_GLES_PLAYGROUND_IMPL_GLES_H_
 
 #include "impeller/playground/playground_impl.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 
 namespace impeller {
 
@@ -25,6 +26,8 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   using UniqueHandle = std::unique_ptr<void, decltype(&DestroyWindowHandle)>;
   UniqueHandle handle_;
   std::shared_ptr<ReactorWorker> worker_;
+  std::optional<ReactorGLES::WorkerID> worker_id_;
+  std::shared_ptr<Context> context_;
   const bool use_angle_;
   void* angle_glesv2_;
 

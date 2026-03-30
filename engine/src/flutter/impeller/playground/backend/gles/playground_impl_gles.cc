@@ -67,6 +67,16 @@ void PlaygroundImplGLES::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
+static std::vector<std::shared_ptr<fml::Mapping>>
+ShaderLibraryMappingsForPlayground(bool is_gles3);
+
+struct SharedGLState {
+  GLFWwindow* window = nullptr;
+  std::shared_ptr<Context> context;
+};
+
+static SharedGLState* g_shared_gl = nullptr;
+
 PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
@@ -106,15 +116,76 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   ::glfwWindowHint(GLFW_CONTEXT_DEBUG, GLFW_TRUE);
 #endif
 
-  auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, nullptr);
+  if (!g_shared_gl) {
+    g_shared_gl = new SharedGLState();
+  }
+
+  if (!g_shared_gl->window) {
+    g_shared_gl->window =
+        ::glfwCreateWindow(1, 1, "SharedHeadless", nullptr, nullptr);
+    ::glfwMakeContextCurrent(g_shared_gl->window);
+
+    auto resolver = CreateGLProcAddressResolver();
+    auto gl = std::make_unique<ProcTableGLES>(resolver);
+
+    if (gl->IsValid()) {
+      if (gl->GetDescription()->HasDebugExtension()) {
+        gl->DebugMessageCallbackKHR(
+            +[](GLenum /* source */, GLenum message_type,
+                GLuint /* message_id */, GLenum /* severity */,
+                GLsizei /* length */, const GLchar* message,
+                const void* /* user_param */) {
+              switch (message_type) {
+                case GL_DEBUG_TYPE_ERROR_KHR:
+                  FML_LOG(ERROR) << "GL Error: " << message;
+                  return;
+                default:
+                  return;
+              }
+            },
+            nullptr);
+
+#ifndef NDEBUG
+        gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+#endif
+      }
+
+      bool is_gles3 =
+          gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+      g_shared_gl->context = ContextGLES::Create(
+          switches.flags, std::move(gl),
+          ShaderLibraryMappingsForPlayground(is_gles3), true);
+
+      if (!g_shared_gl->context) {
+        FML_LOG(ERROR) << "Could not create shared playground context.";
+      }
+    } else {
+      FML_LOG(ERROR)
+          << "Shared Proc table when creating playground was invalid.";
+    }
+
+    ::glfwMakeContextCurrent(nullptr);
+  }
+
+  auto window = ::glfwCreateWindow(1, 1, "Test", nullptr, g_shared_gl->window);
 
   ::glfwMakeContextCurrent(window);
   worker_->SetReactionsAllowedOnCurrentThread(true);
 
   handle_.reset(window);
+
+  context_ = g_shared_gl->context;
+  if (context_) {
+    // Add the current playground's worker to the shared context's reactor.
+    worker_id_ = ContextGLES::Cast(*context_).GetReactor()->AddWorker(worker_);
+  }
 }
 
-PlaygroundImplGLES::~PlaygroundImplGLES() = default;
+PlaygroundImplGLES::~PlaygroundImplGLES() {
+  if (worker_id_ && context_) {
+    ContextGLES::Cast(*context_).GetReactor()->RemoveWorker(*worker_id_);
+  }
+}
 
 static std::vector<std::shared_ptr<fml::Mapping>>
 ShaderLibraryMappingsForPlayground(bool is_gles3) {
@@ -163,46 +234,7 @@ ShaderLibraryMappingsForPlayground(bool is_gles3) {
 
 // |PlaygroundImpl|
 std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
-  auto gl = std::make_unique<ProcTableGLES>(CreateGLProcAddressResolver());
-  if (!gl->IsValid()) {
-    FML_LOG(ERROR) << "Proc table when creating a playground was invalid.";
-    return nullptr;
-  }
-
-  if (gl->GetDescription()->HasDebugExtension()) {
-    gl->DebugMessageCallbackKHR(
-        +[](GLenum /* source */, GLenum message_type, GLuint /* message_id */,
-            GLenum /* severity */, GLsizei /* length */, const GLchar* message,
-            const void* /* user_param */) {
-          switch (message_type) {
-            case GL_DEBUG_TYPE_ERROR_KHR:
-              FML_LOG(ERROR) << "GL Error: " << message;
-              return;
-            default:
-              return;
-          }
-        },
-        nullptr);
-
-#ifndef NDEBUG
-    gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
-#endif
-  }
-  bool is_gles3 = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
-  auto context =
-      ContextGLES::Create(switches_.flags, std::move(gl),
-                          ShaderLibraryMappingsForPlayground(is_gles3), true);
-  if (!context) {
-    FML_LOG(ERROR) << "Could not create context.";
-    return nullptr;
-  }
-
-  auto worker_id = context->AddReactorWorker(worker_);
-  if (!worker_id.has_value()) {
-    FML_LOG(ERROR) << "Could not add reactor worker.";
-    return nullptr;
-  }
-  return context;
+  return context_;
 }
 
 // |PlaygroundImpl|
