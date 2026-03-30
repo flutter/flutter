@@ -217,5 +217,5 @@ Future<void> _deleteAndWrite(File file, Uint8List bytes) async {
   // or `openat` may fail entirely due to APFS asynchronous directory updates.
   //
   // renameSync() was tried but it was not sufficient to fix the issue.
-  await Future.delayed(const Duration(milliseconds: 100));
+  await Future<void>.delayed(const Duration(milliseconds: 100));
 }
