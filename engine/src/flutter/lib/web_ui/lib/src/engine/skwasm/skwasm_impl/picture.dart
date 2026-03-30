@@ -7,22 +7,23 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
 class SkwasmPicture implements LayerPicture, StackTraceDebugger {
-  SkwasmPicture.fromHandle(PictureHandle handle) {
+  SkwasmPicture.fromHandle(PictureHandle handle) : _isClone = false {
     box = CountedRef<SkwasmPicture, PictureHandle>(
       handle,
       this,
       'Picture',
       onDispose: (PictureHandle h) => pictureDispose(h),
-      onDisposed: (SkwasmPicture picture) => ui.Picture.onDispose?.call(picture),
     );
     _init();
     ui.Picture.onCreate?.call(this);
   }
 
-  SkwasmPicture.cloneOf(this.box) {
+  SkwasmPicture.cloneOf(this.box) : _isClone = true {
     box.ref(this);
     _init();
   }
+
+  final bool _isClone;
 
   void _init() {
     assert(() {
@@ -49,6 +50,9 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   void dispose() {
     if (_disposed) {
       return;
+    }
+    if (!_isClone) {
+      ui.Picture.onDispose?.call(this);
     }
     _disposed = true;
     box.unref(this);

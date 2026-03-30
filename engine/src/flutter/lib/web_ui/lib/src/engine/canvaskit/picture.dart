@@ -17,21 +17,18 @@ import 'surface.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
 class CkPicture implements LayerPicture, StackTraceDebugger {
-  CkPicture(SkPicture skPicture) {
-    _ref = CkCountedRef<CkPicture, SkPicture>(
-      skPicture,
-      this,
-      'Picture',
-      onDisposed: (CkPicture picture) => ui.Picture.onDispose?.call(picture),
-    );
+  CkPicture(SkPicture skPicture) : _isClone = false {
+    _ref = CkCountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
     _initStackTrace();
   }
 
-  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) {
+  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) : _isClone = true {
     _ref = ref;
     ref.ref(this);
     _initStackTrace();
   }
+
+  final bool _isClone;
 
   late final CkCountedRef<CkPicture, SkPicture> _ref;
 
@@ -97,6 +94,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
       _debugDisposalStackTrace = StackTrace.current;
       return true;
     }());
+    if (!_isClone) {
+      ui.Picture.onDispose?.call(this);
+    }
     _isDisposed = true;
     _ref.unref(this);
   }
