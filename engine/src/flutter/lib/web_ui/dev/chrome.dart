@@ -110,6 +110,8 @@ class Chrome extends Browser {
           '--no-default-browser-check',
           '--disable-default-apps',
           '--disable-translate',
+          '--password-store=basic',
+          '--use-mock-keychain',
           '--remote-debugging-port=$kDevtoolsPort',
 
           // SwiftShader support on ARM macs is disabled until they upgrade to a newer

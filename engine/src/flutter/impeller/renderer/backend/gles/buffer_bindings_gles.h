@@ -19,6 +19,7 @@ namespace impeller {
 namespace testing {
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindArrayData);
+FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices);
 }  // namespace testing
 
 //------------------------------------------------------------------------------
@@ -53,6 +54,8 @@ class BufferBindingsGLES {
  private:
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest, BindUniformData);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest, BindArrayData);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  BindUniformDataVerticesAndMatrices);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///

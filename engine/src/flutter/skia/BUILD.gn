@@ -708,8 +708,8 @@ skia_component("skia") {
   if (is_win) {
     sources += skia_ports_windows_sources
     sources += [
-      "$_skia_root/src/ports/SkDebug_win.cpp",
       "$_skia_root/src/ports/SkImageGeneratorWIC.cpp",
+      "$_skia_root/src/ports/SkLog_win.cpp",
     ]
     libs += [
       "Ole32.lib",
@@ -732,7 +732,7 @@ skia_component("skia") {
 
   if (is_android) {
     deps += [ "//flutter/third_party/expat" ]
-    sources += [ "$_skia_root/src/ports/SkDebug_android.cpp" ]
+    sources += [ "$_skia_root/src/ports/SkLog_android.cpp" ]
     libs += [
       "EGL",
       "GLESv2",
@@ -741,7 +741,7 @@ skia_component("skia") {
   }
 
   if (is_linux || is_wasm || is_qnx) {
-    sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
+    sources += [ "$_skia_root/src/ports/SkLog_stdio.cpp" ]
     if (skia_use_egl) {
       libs += [ "GLESv2" ]
     }
@@ -750,8 +750,8 @@ skia_component("skia") {
   if (is_mac) {
     public += [ "$_skia_root/include/ports/SkCFObject.h" ]
     sources += [
-      "$_skia_root/src/ports/SkDebug_stdio.cpp",
       "$_skia_root/src/ports/SkImageGeneratorCG.cpp",
+      "$_skia_root/src/ports/SkLog_stdio.cpp",
     ]
     frameworks = [
       "ApplicationServices.framework",
@@ -762,8 +762,8 @@ skia_component("skia") {
   if (is_ios) {
     public += [ "$_skia_root/include/ports/SkCFObject.h" ]
     sources += [
-      "$_skia_root/src/ports/SkDebug_stdio.cpp",
       "$_skia_root/src/ports/SkImageGeneratorCG.cpp",
+      "$_skia_root/src/ports/SkLog_stdio.cpp",
     ]
     frameworks = [
       "CoreFoundation.framework",
@@ -773,6 +773,6 @@ skia_component("skia") {
   }
 
   if (is_fuchsia) {
-    sources += [ "$_skia_root/src/ports/SkDebug_stdio.cpp" ]
+    sources += [ "$_skia_root/src/ports/SkLog_stdio.cpp" ]
   }
 }

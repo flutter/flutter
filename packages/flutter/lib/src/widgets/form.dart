@@ -243,6 +243,9 @@ class FormState extends State<Form> {
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
+  /// The [FormFieldState] objects that are currently registered with this [Form].
+  Iterable<FormFieldState<dynamic>> get fields => _fields;
+
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
@@ -330,6 +333,19 @@ class FormState extends State<Form> {
       field.reset();
     }
     _hasInteractedByUser = false;
+    _fieldDidChange();
+  }
+
+  /// Clears the validation errors for all [FormField]s in this [Form]
+  /// without resetting their values.
+  ///
+  /// See also:
+  ///
+  ///  * [FormFieldState.clearError], which clears the error for a single form field.
+  void clearError() {
+    for (final FormFieldState<dynamic> field in _fields) {
+      field._clearErrorInternal();
+    }
     _fieldDidChange();
   }
 
@@ -649,10 +665,25 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void reset() {
     setState(() {
       _value = widget.initialValue;
-      _hasInteractedByUser.value = false;
-      _errorText.value = null;
+      _clearErrorInternal();
     });
     widget.onReset?.call();
+    Form.maybeOf(context)?._fieldDidChange();
+  }
+
+  /// Clears any visible validation error for this field without resetting the field's value.
+  ///
+  /// This sets [errorText] to null and [hasInteractedByUser] to false.
+  ///
+  /// If [AutovalidateMode.always] is used, the error may reappear immediately
+  /// because the field will trigger a new validation cycle during the next build.
+  /// See also:
+  ///
+  ///  * [FormState.clearError], which clears errors across all fields in the form.
+  void clearError() {
+    setState(() {
+      _clearErrorInternal();
+    });
     Form.maybeOf(context)?._fieldDidChange();
   }
 
@@ -669,6 +700,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _validate();
     });
     return !hasError;
+  }
+
+  void _clearErrorInternal() {
+    _errorText.value = null;
+    _hasInteractedByUser.value = false;
   }
 
   void _validate() {

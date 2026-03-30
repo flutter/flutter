@@ -65,3 +65,6 @@ leak:egl::*
 
 # False positives in libfontconfig. http://crbug.com/39050
 leak:libfontconfig
+
+# False positives in D-Bus.
+leak:libdbus-1.so

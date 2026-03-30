@@ -61,9 +61,8 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
             ];
           } else {
             children = const <Widget>[
-              SizedBox(
-                width: 60,
-                height: 60,
+              SizedBox.square(
+                dimension: 60,
                 child: CircularProgressIndicator(),
               ),
               Padding(

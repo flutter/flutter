@@ -45,9 +45,8 @@ void main() {
         theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: textDirection,
-          child: SizedBox(
-            height: itemHeight * 10,
-            width: itemHeight * 10,
+          child: SizedBox.square(
+            dimension: itemHeight * 10,
             child: ReorderableListView(
               header: header,
               footer: footer,
@@ -363,9 +362,8 @@ void main() {
           return MaterialApp(
             home: Directionality(
               textDirection: TextDirection.ltr,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: ReorderableListView(
                   children: const <Widget>[SizedBox(key: firstBox, width: 10, height: 10)],
                   onReorderItem: (_, _) {},
@@ -543,9 +541,8 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: SizedBox(
-            width: 100.0,
-            height: 100.0,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: Directionality(textDirection: TextDirection.ltr, child: overlay),
           ),
         );
@@ -1146,9 +1143,8 @@ void main() {
           return MaterialApp(
             home: Directionality(
               textDirection: TextDirection.ltr,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: ReorderableListView(
                   scrollDirection: Axis.horizontal,
                   children: const <Widget>[SizedBox(key: firstBox, width: 10, height: 10)],
@@ -1785,6 +1781,59 @@ void main() {
       expect(tester.getCenter(find.text('A')).dy, greaterThan(tester.getCenter(find.text('B')).dy));
     });
 
+    testWidgets(
+      'ReorderableListView in Flexible with one item does not assert when dragged to edge',
+      (WidgetTester tester) async {
+        final items = <String>['Item 1'];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: <Widget>[
+                  Flexible(
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return ReorderableListView(
+                          onReorder: (int oldIndex, int newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) {
+                                newIndex -= 1;
+                              }
+                              final String item = items.removeAt(oldIndex);
+                              items.insert(newIndex, item);
+                            });
+                          },
+                          children: <Widget>[
+                            ListTile(
+                              key: const ValueKey<String>('Item 1'),
+                              title: Text(items.first),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Offset startLocation = tester.getCenter(find.byKey(const ValueKey<String>('Item 1')));
+        final TestGesture gesture = await tester.startGesture(startLocation);
+        await tester.pump();
+        await gesture.moveTo(tester.getBottomRight(find.byType(Scaffold)) - const Offset(10, 10));
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(tester.takeException(), isNull);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+
     testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
       const testItemKey = Key('Test item');
       final Widget reorderableListView = ReorderableListView(
@@ -2341,9 +2390,8 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child: SizedBox(
-        width: 100.0,
-        height: 100.0,
+      child: SizedBox.square(
+        dimension: 100.0,
         child: Directionality(textDirection: TextDirection.ltr, child: reorderableList),
       ),
     );
@@ -2745,9 +2793,8 @@ class _StatefulState extends State<_Stateful> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48.0,
-      height: 48.0,
+    return SizedBox.square(
+      dimension: 48.0,
       child: Material(
         child: Checkbox(value: checked, onChanged: (bool? newValue) => checked = newValue),
       ),

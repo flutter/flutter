@@ -21,6 +21,10 @@ Color _scaleAlpha(Color x, double factor) {
   return x.withValues(alpha: (x.a * factor).clamp(0, 1));
 }
 
+ColorSpace _widerColorSpace(ColorSpace a, ColorSpace b) {
+  return a == ColorSpace.displayP3 || b == ColorSpace.displayP3 ? ColorSpace.displayP3 : a;
+}
+
 class Color {
   const Color(int value)
     : this._fromARGBC(value >> 24, value >> 16, value >> 8, value, ColorSpace.sRGB);
@@ -158,13 +162,24 @@ class Color {
       if (x == null) {
         return _scaleAlpha(y, t);
       } else {
-        assert(x.colorSpace == y.colorSpace);
+        final Color a;
+        final Color b;
+        final ColorSpace resultColorSpace;
+        if (x.colorSpace == y.colorSpace) {
+          a = x;
+          b = y;
+          resultColorSpace = x.colorSpace;
+        } else {
+          resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
+          a = x.withValues(colorSpace: resultColorSpace);
+          b = y.withValues(colorSpace: resultColorSpace);
+        }
         return Color.from(
-          alpha: _lerpDouble(x.a, y.a, t).clamp(0, 1),
-          red: _lerpDouble(x.r, y.r, t).clamp(0, 1),
-          green: _lerpDouble(x.g, y.g, t).clamp(0, 1),
-          blue: _lerpDouble(x.b, y.b, t).clamp(0, 1),
-          colorSpace: x.colorSpace,
+          alpha: _lerpDouble(a.a, b.a, t).clamp(0, 1),
+          red: _lerpDouble(a.r, b.r, t).clamp(0, 1),
+          green: _lerpDouble(a.g, b.g, t).clamp(0, 1),
+          blue: _lerpDouble(a.b, b.b, t).clamp(0, 1),
+          colorSpace: resultColorSpace,
         );
       }
     }
@@ -747,14 +762,14 @@ Future<Codec> instantiateImageCodecWithSize(
   FrameInfo? info;
   try {
     if (getTargetSize == null) {
-      return engine.renderer.instantiateImageCodec(buffer._list!);
+      return await engine.renderer.instantiateImageCodec(buffer._list!);
     } else {
       codec = await engine.renderer.instantiateImageCodec(buffer._list!);
       info = await codec.getNextFrame();
       final int width = info.image.width;
       final int height = info.image.height;
       final TargetImageSize targetSize = getTargetSize(width, height);
-      return engine.renderer.instantiateImageCodec(
+      return await engine.renderer.instantiateImageCodec(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
@@ -1127,6 +1142,45 @@ abstract class UniformVec4Slot extends UniformType {
   void set(double x, double y, double z, double w);
 }
 
+abstract class UniformMat2Slot extends UniformType {
+  void set(double m00, double m01, double m10, double m11);
+}
+
+abstract class UniformMat3Slot extends UniformType {
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m10,
+    double m11,
+    double m12,
+    double m20,
+    double m21,
+    double m22,
+  );
+}
+
+abstract class UniformMat4Slot extends UniformType {
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m03,
+    double m10,
+    double m11,
+    double m12,
+    double m13,
+    double m20,
+    double m21,
+    double m22,
+    double m23,
+    double m30,
+    double m31,
+    double m32,
+    double m33,
+  );
+}
+
 abstract class UniformArray<T extends UniformType> {
   T operator [](int index);
   int get length;
@@ -1157,6 +1211,12 @@ abstract class FragmentShader implements Shader {
 
   UniformVec4Slot getUniformVec4(String name);
 
+  UniformMat2Slot getUniformMat2(String name);
+
+  UniformMat3Slot getUniformMat3(String name);
+
+  UniformMat4Slot getUniformMat4(String name);
+
   UniformArray<UniformFloatSlot> getUniformFloatArray(String name);
 
   UniformArray<UniformVec2Slot> getUniformVec2Array(String name);
@@ -1164,6 +1224,12 @@ abstract class FragmentShader implements Shader {
   UniformArray<UniformVec3Slot> getUniformVec3Array(String name);
 
   UniformArray<UniformVec4Slot> getUniformVec4Array(String name);
+
+  UniformArray<UniformMat2Slot> getUniformMat2Array(String name);
+
+  UniformArray<UniformMat3Slot> getUniformMat3Array(String name);
+
+  UniformArray<UniformMat4Slot> getUniformMat4Array(String name);
 
   ImageSamplerSlot getImageSampler(String name);
 }

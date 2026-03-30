@@ -122,10 +122,6 @@ std::string EntryPointFunctionNameFromSourceName(
     SourceLanguage source_language,
     const std::string& entry_point_name);
 
-bool TargetPlatformNeedsReflection(TargetPlatform platform);
-
-bool TargetPlatformBundlesSkSL(TargetPlatform platform);
-
 std::string ShaderCErrorToString(shaderc_compilation_status status);
 
 shaderc_shader_kind ToShaderCShaderKind(SourceType type);

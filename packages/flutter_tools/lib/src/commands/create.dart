@@ -441,6 +441,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
+    final bool withSwiftPackageManager = featureFlags.isSwiftPackageManagerEnabled;
+
     final Map<String, Object?> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
@@ -448,7 +450,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
-      withSwiftPackageManager: featureFlags.isSwiftPackageManagerEnabled,
+      withSwiftPackageManager: withSwiftPackageManager,
       withFfiPluginHook: generateFfiPlugin,
       withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
@@ -736,43 +738,16 @@ Your $application code is in $relativeAppMain.
     templateContext['description'] = description;
 
     final projectName = templateContext['projectName'] as String?;
-    final bool includeDarwin = templateContext['darwin'] as bool? ?? false;
-    final bool originalIos = templateContext['ios'] as bool? ?? false;
-    final bool originalMacos = templateContext['macos'] as bool? ?? false;
-    if (includeDarwin) {
-      // Temporarily disable ios/macos for the plugin generation
-      // so we don't get ios/ and macos/ directories in the plugin root.
-      templateContext['ios'] = false;
-      templateContext['macos'] = false;
-    }
-
     final templates = <String>['plugin', 'plugin_shared'];
 
-    final bool useSwiftPackageManager =
-        (templateContext['ios'] == true || templateContext['macos'] == true || includeDarwin) &&
-        featureFlags.isSwiftPackageManagerEnabled;
+    final ({bool originalIos, bool originalMacos, bool? originalWithSwiftPackageManager})
+    darwinState = _updateContextAndTemplatesForDarwin(
+      templateContext: templateContext,
+      templates: templates,
+      directory: directory,
+      projectName: projectName,
+    );
 
-    if (useSwiftPackageManager) {
-      if (includeDarwin) {
-        templates.add('plugin_darwin_spm');
-      } else {
-        templates.add('plugin_swift_package_manager');
-      }
-      templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
-      templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
-      templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
-          .format();
-      templateContext['macosSupportedPlatform'] = FlutterDarwinPlatform
-          .macos
-          .supportedPackagePlatform
-          .format();
-    } else {
-      if (includeDarwin) {
-        templates.add('plugin_darwin_cocoapods');
-      } else {
-        templates.add('plugin_cocoapods');
-      }
-    }
     generatedCount += await renderMerged(
       templates,
       directory,
@@ -780,11 +755,16 @@ Your $application code is in $relativeAppMain.
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
     );
-    // Restore the original ios and macos values.
+    // Restore the original ios, macos, and withSwiftPackageManager values.
     // This is necessary in case the user requested the darwin platform,
     // and we need to restore them for the example app generation.
-    templateContext['ios'] = originalIos;
-    templateContext['macos'] = originalMacos;
+    templateContext['ios'] = darwinState.originalIos;
+    templateContext['macos'] = darwinState.originalMacos;
+    if (darwinState.originalWithSwiftPackageManager != null) {
+      templateContext['withSwiftPackageManager'] = darwinState.originalWithSwiftPackageManager;
+    } else {
+      templateContext.remove('withSwiftPackageManager');
+    }
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
@@ -972,6 +952,78 @@ Your $application code is in $relativeAppMain.
       return <String>[];
     }
     return stringsArg('platforms');
+  }
+
+  ({bool originalIos, bool originalMacos, bool? originalWithSwiftPackageManager})
+  _updateContextAndTemplatesForDarwin({
+    required Map<String, Object?> templateContext,
+    required List<String> templates,
+    required Directory directory,
+    required String? projectName,
+  }) {
+    final bool includeDarwin = templateContext['darwin'] as bool? ?? false;
+    final bool originalIos = templateContext['ios'] as bool? ?? false;
+    final bool originalMacos = templateContext['macos'] as bool? ?? false;
+    final originalWithSwiftPackageManager = templateContext['withSwiftPackageManager'] as bool?;
+
+    if (includeDarwin) {
+      // Temporarily disable ios/macos for the plugin generation
+      // so we don't get ios/ and macos/ directories in the plugin root.
+      templateContext['ios'] = false;
+      templateContext['macos'] = false;
+    }
+
+    final bool includeApplePlatforms =
+        templateContext['ios'] == true || templateContext['macos'] == true || includeDarwin;
+
+    if (!includeApplePlatforms) {
+      return (
+        originalIos: originalIos,
+        originalMacos: originalMacos,
+        originalWithSwiftPackageManager: originalWithSwiftPackageManager,
+      );
+    }
+
+    // Check if this is an existing plugin with CocoaPods structure (Classes/ directory).
+    // If so, preserve backward compatibility by using CocoaPods templates.
+    // For new plugins, use SwiftPM structure.
+    final bool hasExistingCocoaPodsStructure = const <String>['ios', 'macos', 'darwin'].any(
+      (String platform) =>
+          directory.childDirectory(platform).childDirectory('Classes').existsSync(),
+    );
+
+    final bool useSwiftPackageManagerStructure = !hasExistingCocoaPodsStructure;
+
+    templateContext['withSwiftPackageManager'] = useSwiftPackageManagerStructure;
+
+    if (useSwiftPackageManagerStructure) {
+      if (includeDarwin) {
+        templates.add('plugin_darwin_spm');
+      } else {
+        templates.add('plugin_swift_package_manager');
+      }
+      templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
+      templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
+      templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
+          .format();
+      templateContext['macosSupportedPlatform'] = FlutterDarwinPlatform
+          .macos
+          .supportedPackagePlatform
+          .format();
+    } else {
+      // Existing plugin with CocoaPods structure: preserve backward compatibility.
+      if (includeDarwin) {
+        templates.add('plugin_darwin_cocoapods');
+      } else {
+        templates.add('plugin_cocoapods');
+      }
+    }
+
+    return (
+      originalIos: originalIos,
+      originalMacos: originalMacos,
+      originalWithSwiftPackageManager: originalWithSwiftPackageManager,
+    );
   }
 }
 

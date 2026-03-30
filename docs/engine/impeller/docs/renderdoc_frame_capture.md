@@ -7,7 +7,7 @@
    If the RenderDoc installed from your package manager crashes on startup, consider [building from source](https://github.com/baldurk/renderdoc/blob/v1.x/docs/CONTRIBUTING/Compiling.md).
 
 2. The next step would be to run the application you wish the capture the frames of.
-   Typically these would be one of the [playground tests](https://github.com/flutter/engine/tree/main/impeller/playground),
+   Typically these would be one of the [playground tests](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller/playground),
    for example [those in entity_unittests.cc](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/entity/entity_unittests.cc).
    To build these, do:
 

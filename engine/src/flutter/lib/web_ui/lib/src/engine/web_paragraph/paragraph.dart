@@ -14,6 +14,7 @@ import '../view_embedder/style_manager.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
+import 'paint_paragraph.dart';
 import 'painter.dart';
 
 @visibleForTesting
@@ -144,6 +145,8 @@ enum StyleElements {
   // Text cluster
   text,
 }
+
+enum ShadowDirection { left, right, top, bottom }
 
 class WebTextStyle implements ui.TextStyle {
   factory WebTextStyle({
@@ -967,17 +970,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    for (final TextLine line in _layout.lines) {
-      _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
-    }
-  }
-
-  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    for (final TextLine line in _layout.lines) {
-      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
-    }
+    _paint.paint(canvas, _layout, _painter, offset.dx, offset.dy);
   }
 
   @override
@@ -1087,7 +1080,8 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(this, CanvasKitPainter());
+  late final TextPaint _paint = PaintParagraph(this);
+  late final Painter _painter = CanvasKitPainter();
 }
 
 class WebLineMetrics implements ui.LineMetrics {
@@ -1294,9 +1288,11 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     final text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
-    WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
-    for (var i = 0; i < _spans.length; ++i) {
-      WebParagraphDebug.log('$i: ${_spans[i]}');
+    if (WebParagraphDebug.apiLogging) {
+      WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
+      for (var i = 0; i < _spans.length; ++i) {
+        WebParagraphDebug.log('$i: ${_spans[i]}');
+      }
     }
     return paragraph;
   }

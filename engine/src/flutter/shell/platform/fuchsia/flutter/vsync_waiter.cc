@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "vsync_waiter.h"
+#include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 
 #include <cstdint>
 
@@ -14,7 +14,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/trace_event.h"
 
-#include "flutter_runner_product_configuration.h"
+#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h"
 
 namespace flutter_runner {
 

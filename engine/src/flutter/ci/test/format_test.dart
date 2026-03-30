@@ -295,4 +295,33 @@ void main() {
       fixture.gitRemove();
     }
   });
+
+  test('Python formatter picks up tools/gn', () {
+    // This test verifies that the formatter correctly identifies and processes
+    // 'tools/gn', which is a Python script but does not have a .py extension.
+    //
+    // Note: This test modifies a live script in the repository. It is careful
+    // to restore the original content (including any unstaged local changes)
+    // without interfering with the git index.
+    final gnFile = io.File('${repoDir.path}/tools/gn');
+    final String originalContent = gnFile.readAsStringSync();
+    try {
+      gnFile.writeAsStringSync(pythonContentPair.original);
+
+      io.Process.runSync(formatterPath, <String>[
+        '--check',
+        'python',
+        '--fix',
+      ], workingDirectory: repoDir.path);
+
+      final String formattedContent = gnFile.readAsStringSync();
+      expect(formattedContent, equals(pythonContentPair.formatted));
+    } finally {
+      // Restore the original file content. We avoid using 'git checkout' or
+      // 'git restore' here to ensure that any local modifications the user
+      // had before running the test are preserved and their staging state
+      // (staged vs unstaged) remains unchanged.
+      gnFile.writeAsStringSync(originalContent);
+    }
+  });
 }

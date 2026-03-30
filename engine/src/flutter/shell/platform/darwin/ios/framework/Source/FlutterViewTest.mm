@@ -7,11 +7,16 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterSceneDelegate.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 FLUTTER_ASSERT_ARC
+
+@interface FlutterView (Testing)
+- (BOOL)isWideGamutSupported;
+@end
 
 @interface FakeDelegate : NSObject <FlutterViewEngineDelegate>
 @property(nonatomic) BOOL callbackCalled;
@@ -181,10 +186,14 @@ FLUTTER_ASSERT_ARC
 }
 
 - (NSDictionary*)createWindowMocks {
+  return [self createWindowMocksWithWideGamut:NO];
+}
+
+- (NSDictionary*)createWindowMocksWithWideGamut:(BOOL)enableWideGamut {
   id mockEngine = OCMClassMock([FlutterEngine class]);
   FlutterView* view = [[FlutterView alloc] initWithDelegate:mockEngine
                                                      opaque:NO
-                                            enableWideGamut:NO];
+                                            enableWideGamut:enableWideGamut];
   id mockWindow = OCMClassMock([UIWindow class]);
   id mockWindowScene = OCMClassMock([UIWindowScene class]);
 
@@ -206,6 +215,98 @@ FLUTTER_ASSERT_ARC
     @"mockEngine" : mockEngine,
     @"mockWindow" : mockWindow,
   };
+}
+
+#pragma mark - Wide Gamut Tests
+
+// Helper: add FlutterView to a real UIWindow so that layoutSubviews can access screen.
+- (FlutterView*)createViewInWindowWithWideGamut:(BOOL)enableWideGamut {
+  FakeDelegate* delegate = [[FakeDelegate alloc] init];
+  FlutterView* view = [[FlutterView alloc] initWithDelegate:delegate
+                                                     opaque:NO
+                                            enableWideGamut:enableWideGamut];
+  // Add to a real window so layoutSubviews has access to screen.
+  UIWindow* window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+  [window addSubview:view];
+  view.frame = window.bounds;
+  [view layoutSubviews];
+  return view;
+}
+
+- (void)testWideGamutViewSetsBGRA10XRPixelFormat {
+  FlutterView* view = [self createViewInWindowWithWideGamut:YES];
+  // On a wide gamut capable device, the pixel format should be BGRA10_XR.
+  // On non-wide-gamut devices, it falls back to BGRA8Unorm.
+  if ([view isWideGamutSupported]) {
+    XCTAssertEqual(view.pixelFormat, MTLPixelFormatBGRA10_XR);
+  } else {
+    XCTAssertEqual(view.pixelFormat, MTLPixelFormatBGRA8Unorm);
+  }
+}
+
+- (void)testStandardGamutViewKeepsBGRA8Unorm {
+  FlutterView* view = [self createViewInWindowWithWideGamut:NO];
+  XCTAssertEqual(view.pixelFormat, MTLPixelFormatBGRA8Unorm);
+}
+
+- (void)testWideGamutViewSetsExtendedSRGBColorSpace {
+  FlutterView* view = [self createViewInWindowWithWideGamut:YES];
+  if ([view isWideGamutSupported]) {
+    CAMetalLayer* layer = (CAMetalLayer*)view.layer;
+    CGColorSpaceRef colorSpace = layer.colorspace;
+    XCTAssertNotNil((__bridge id)colorSpace);
+    CGColorSpaceRef extendedSRGB = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
+    XCTAssertTrue(CFEqual(colorSpace, extendedSRGB));
+    CGColorSpaceRelease(extendedSRGB);
+  }
+}
+
+- (void)testStandardGamutViewDoesNotSetExtendedColorSpace {
+  FlutterView* view = [self createViewInWindowWithWideGamut:NO];
+  CAMetalLayer* layer = (CAMetalLayer*)view.layer;
+  // Default CAMetalLayer colorspace is nil (device default sRGB).
+  XCTAssertNil((__bridge id)layer.colorspace);
+}
+
+#pragma mark - FlutterOverlayView Wide Gamut Tests
+
+- (void)testOverlayViewWideGamutSetsBGRA10XR {
+  FlutterOverlayView* overlay =
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA10_XR];
+  CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
+  XCTAssertEqual(layer.pixelFormat, MTLPixelFormatBGRA10_XR);
+}
+
+- (void)testOverlayViewWideGamutSetsExtendedSRGBColorSpace {
+  FlutterOverlayView* overlay =
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA10_XR];
+  CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
+  CGColorSpaceRef colorSpace = layer.colorspace;
+  XCTAssertNotNil((__bridge id)colorSpace);
+  CGColorSpaceRef extendedSRGB = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
+  XCTAssertTrue(CFEqual(colorSpace, extendedSRGB));
+  CGColorSpaceRelease(extendedSRGB);
+}
+
+- (void)testOverlayViewStandardGamutKeepsBGRA8Unorm {
+  FlutterOverlayView* overlay =
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA8Unorm];
+  CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
+  XCTAssertEqual(layer.pixelFormat, MTLPixelFormatBGRA8Unorm);
+}
+
+- (void)testOverlayViewStandardGamutDoesNotSetExtendedColorSpace {
+  FlutterOverlayView* overlay =
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA8Unorm];
+  CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
+  XCTAssertNil((__bridge id)layer.colorspace);
+}
+
+- (void)testOverlayViewContentsScaleIsSet {
+  FlutterOverlayView* overlay =
+      [[FlutterOverlayView alloc] initWithContentsScale:3.0 pixelFormat:MTLPixelFormatBGRA10_XR];
+  XCTAssertEqual(overlay.layer.contentsScale, 3.0);
+  XCTAssertEqual(overlay.layer.rasterizationScale, 3.0);
 }
 
 @end

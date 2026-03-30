@@ -109,10 +109,9 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
         alignment: Alignment.center,
         children: <Widget>[
           // Background
-          SizedBox(width: 500, height: 500, child: ColoredBox(color: Colors.green)),
-          SizedBox(
-            width: 400,
-            height: 400,
+          SizedBox.square(dimension: 500, child: ColoredBox(color: Colors.green)),
+          SizedBox.square(
+            dimension: 400,
             child: _HybridCompositionAndroidPlatformView(
               viewType: 'changing_color_button_platform_view',
             ),

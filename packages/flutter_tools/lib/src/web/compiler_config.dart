@@ -59,7 +59,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     this.dumpInfo = false,
     this.nativeNullAssertions = false,
     super.optimizationLevel,
-    this.noFrequencyBasedMinification = false,
+    this.useFrequencyBasedMinification = true,
     super.sourceMaps = true,
     this.minify,
     super.renderer = WebRendererMode.defaultForJs,
@@ -85,9 +85,10 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// Whether native null assertions are enabled.
   final bool nativeNullAssertions;
 
-  // If `--no-frequency-based-minification` should be passed to dart2js
-  // TODO(kevmoo): consider renaming this to be "positive". Double negatives are confusing.
-  final bool noFrequencyBasedMinification;
+  /// Whether to use frequency-based minification in dart2js.
+  ///
+  /// When `false`, passes `--no-frequency-based-minification` to the compiler.
+  final bool useFrequencyBasedMinification;
 
   @override
   CompileTarget get compileTarget => CompileTarget.js;
@@ -101,7 +102,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     if (buildMode == BuildMode.debug) '--enable-asserts',
     '-O${optimizationLevelForBuildMode(buildMode)}',
     if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
-    if (noFrequencyBasedMinification) '--no-frequency-based-minification',
+    if (!useFrequencyBasedMinification) '--no-frequency-based-minification',
     if (csp) '--csp',
   ];
 
@@ -133,7 +134,7 @@ class JsCompilerConfig extends WebCompilerConfig {
       'csp': csp,
       'dumpInfo': dumpInfo,
       'nativeNullAssertions': nativeNullAssertions,
-      'noFrequencyBasedMinification': noFrequencyBasedMinification,
+      'useFrequencyBasedMinification': useFrequencyBasedMinification,
       'minify': minify,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };

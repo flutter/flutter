@@ -231,6 +231,8 @@ struct GLProc {
   PROC(Uniform2fv);                          \
   PROC(Uniform3fv);                          \
   PROC(Uniform4fv);                          \
+  PROC(UniformMatrix2fv);                    \
+  PROC(UniformMatrix3fv);                    \
   PROC(UniformMatrix4fv);                    \
   PROC(UseProgram);                          \
   PROC(VertexAttribPointer);                 \

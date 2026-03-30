@@ -21,7 +21,8 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart' show DragStartBehavior, HitTestEntry, HitTestResult;
+import 'package:flutter/rendering.dart' show RenderMetaData;
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -72,6 +73,7 @@ enum _ScaffoldSlot {
   floatingActionButton,
   drawer,
   endDrawer,
+  statusBar,
 }
 
 /// Manages [SnackBar]s and [MaterialBanner]s for descendant [Scaffold]s.
@@ -995,14 +997,14 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // for floating action button
     required this.previousFloatingActionButtonLocation,
     required this.currentFloatingActionButtonLocation,
-    required this.floatingActionButtonMoveAnimationProgress,
+    required this.floatingActionButtonMoveAnimation,
     required this.floatingActionButtonMotionAnimator,
     required this.isSnackBarFloating,
     required this.snackBarWidth,
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
-  });
+  }) : super(relayout: floatingActionButtonMoveAnimation);
 
   final bool extendBody;
   final bool extendBodyBehindAppBar;
@@ -1013,7 +1015,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final FloatingActionButtonLocation previousFloatingActionButtonLocation;
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
-  final double floatingActionButtonMoveAnimationProgress;
+  final ValueListenable<double> floatingActionButtonMoveAnimation;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final bool isSnackBarFloating;
@@ -1183,7 +1185,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
         begin: previousFabOffset,
         end: currentFabOffset,
-        progress: floatingActionButtonMoveAnimationProgress,
+        progress: floatingActionButtonMoveAnimation.value,
       );
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
@@ -1272,6 +1274,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }());
     }
 
+    if (hasChild(_ScaffoldSlot.statusBar)) {
+      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: minInsets.top));
+      positionChild(_ScaffoldSlot.statusBar, Offset.zero);
+    }
+
     if (hasChild(_ScaffoldSlot.drawer)) {
       layoutChild(_ScaffoldSlot.drawer, BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.drawer, Offset.zero);
@@ -1293,8 +1300,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     return oldDelegate.minInsets != minInsets ||
         oldDelegate.minViewPadding != minViewPadding ||
         oldDelegate.textDirection != textDirection ||
-        oldDelegate.floatingActionButtonMoveAnimationProgress !=
-            floatingActionButtonMoveAnimationProgress ||
         oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation ||
         oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation ||
         oldDelegate.extendBody != extendBody ||
@@ -2205,6 +2210,7 @@ class ScaffoldState extends State<Scaffold>
   final GlobalKey<DrawerControllerState> _endDrawerKey = GlobalKey<DrawerControllerState>();
 
   final GlobalKey _bodyKey = GlobalKey();
+  late final GlobalKey _statusBarKey = GlobalKey();
 
   /// Whether this scaffold has a non-null [Scaffold.appBar].
   bool get hasAppBar => widget.appBar != null;
@@ -2746,7 +2752,18 @@ class ScaffoldState extends State<Scaffold>
     super.handleStatusBarTap();
     assert(widget.primary);
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
-    if (primaryScrollController != null && primaryScrollController.hasClients) {
+    if (primaryScrollController != null &&
+        primaryScrollController.hasClients &&
+        // TODO(LongCatIsLooong): the iOS embedder used to send status bar tap
+        // evets as fake touches at Offset.zero, such that at most one Scaffold
+        // (usually the foreground primary Scaffold) can handle the status bar
+        // tap event, thanks to hit-testing and gesture disambiguation.
+        // To keep that behavior, this widget performs an additional hit-test here
+        // to make sure the status bar tap is only handled if the scaffold is
+        // hit-testable (thus in the foreground)
+        // Switch to a better solution when available:
+        // https://github.com/flutter/flutter/issues/182403
+        _HitTestableAtOrigin.hitTestableAtOrigin(_statusBarKey)) {
       primaryScrollController.animateTo(
         0.0,
         duration: const Duration(milliseconds: 1000),
@@ -3172,6 +3189,25 @@ class ScaffoldState extends State<Scaffold>
       removeBottomPadding: true,
     );
 
+    final Widget? statusBar = switch (themeData.platform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.macOS => widget.primary ? _HitTestableAtOrigin(_statusBarKey) : null,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => null,
+    };
+
+    _addIfNonNull(
+      children,
+      statusBar,
+      _ScaffoldSlot.statusBar,
+      removeLeftPadding: false,
+      removeTopPadding: true,
+      removeRightPadding: false,
+      removeBottomPadding: true,
+    );
+
     if (_endDrawerOpened.value) {
       _buildDrawer(children, textDirection);
       _buildEndDrawer(children, textDirection);
@@ -3199,9 +3235,8 @@ class ScaffoldState extends State<Scaffold>
       child: ScrollNotificationObserver(
         child: Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: AnimatedBuilder(
-            animation: _floatingActionButtonMoveController,
-            builder: (BuildContext context, Widget? child) {
+          child: Builder(
+            builder: (BuildContext context) {
               return Actions(
                 actions: <Type, Action<Intent>>{DismissIntent: _DismissDrawerAction(context)},
                 child: CustomMultiChildLayout(
@@ -3211,8 +3246,7 @@ class ScaffoldState extends State<Scaffold>
                     minInsets: minInsets,
                     minViewPadding: minViewPadding,
                     currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                    floatingActionButtonMoveAnimationProgress:
-                        _floatingActionButtonMoveController.value,
+                    floatingActionButtonMoveAnimation: _floatingActionButtonMoveController,
                     floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
                     geometryNotifier: _geometryNotifier,
                     previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
@@ -3445,5 +3479,43 @@ class _ScaffoldScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
     return hasDrawer != oldWidget.hasDrawer;
+  }
+}
+
+final class _HitTestableAtOrigin extends StatelessWidget {
+  const _HitTestableAtOrigin(this.globalKey);
+
+  final GlobalKey globalKey;
+
+  /// Whether the render box of the [_HitTestableAtOrigin] widget associated
+  /// with the given global `key` is hit-testable at [Offset.zero].
+  ///
+  /// This is used by the `handleStatusBarTap` implementation to avoid sending
+  /// status bar tap events to scroll views in offscreen subtrees.
+  static bool hitTestableAtOrigin(GlobalKey key) {
+    final context = key.currentContext as Element?;
+    if (context == null) {
+      assert(
+        false,
+        'BuildContext associated with $key is not mounted. '
+        'If you see this in a test, this is likely because the test was trying '
+        'to simulate status bar tap on a non-iOS platform',
+      );
+      return false;
+    }
+    final renderObject = context.renderObject! as RenderMetaData;
+    final int viewId = View.of(context).viewId;
+    final result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(result, Offset.zero, viewId);
+    return result.path.any((HitTestEntry entry) => entry.target == renderObject);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MetaData(
+      key: globalKey,
+      behavior: HitTestBehavior.translucent,
+      child: const SizedBox.expand(),
+    );
   }
 }

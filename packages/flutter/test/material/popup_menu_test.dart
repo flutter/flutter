@@ -3108,9 +3108,8 @@ void main() {
                 },
                 child: const Text('press'),
               ),
-              SizedBox(
-                height: 10,
-                width: 10,
+              SizedBox.square(
+                dimension: 10,
                 child: Navigator(
                   key: navigator,
                   onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(

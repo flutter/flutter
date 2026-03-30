@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "task_runner_adapter.h"
+#include "flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h"
 
 #include <lib/async/cpp/task.h>
 #include <lib/async/default.h>

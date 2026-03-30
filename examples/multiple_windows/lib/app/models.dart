@@ -11,13 +11,24 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 class KeyedWindow {
   KeyedWindow({
-    this.parent,
     this.isMainWindow = false,
     required this.key,
     required this.controller,
   });
 
-  final BaseWindowController? parent;
+  BaseWindowController? get parent {
+    switch (controller) {
+      case RegularWindowController():
+        return null;
+      case DialogWindowController dialogController:
+        return dialogController.parent;
+      case TooltipWindowController tooltipController:
+        return tooltipController.parent;
+      default:
+        throw Exception('Unknown controller type');
+    }
+  }
+
   final bool isMainWindow;
   final UniqueKey key;
   final BaseWindowController controller;
@@ -28,8 +39,8 @@ class KeyedWindow {
 /// The window manager manages a flat list of all of the [BaseWindowController]s
 /// that have been created by the application as well as which controller is
 /// currently selected by the UI.
-class WindowManager extends ChangeNotifier {
-  WindowManager({required List<KeyedWindow> initialWindows})
+class KeyedWindowManager extends ChangeNotifier {
+  KeyedWindowManager({required List<KeyedWindow> initialWindows})
     : _windows = initialWindows;
 
   final List<KeyedWindow> _windows;
@@ -44,20 +55,24 @@ class WindowManager extends ChangeNotifier {
     _windows.removeWhere((KeyedWindow window) => window.key == key);
     notifyListeners();
   }
+
+  Iterable<KeyedWindow> getWindows({required BaseWindowController? parent}) {
+    return _windows.where((KeyedWindow window) => window.parent == parent);
+  }
 }
 
-/// Provides access to the [WindowManager] from the widget tree.
-class WindowManagerAccessor extends InheritedNotifier<WindowManager> {
-  const WindowManagerAccessor({
+/// Provides access to the [KeyedWindowManager] from the widget tree.
+class KeyedWindowManagerAccessor extends InheritedNotifier<KeyedWindowManager> {
+  const KeyedWindowManagerAccessor({
     super.key,
     required super.child,
-    required WindowManager windowManager,
+    required KeyedWindowManager windowManager,
   }) : super(notifier: windowManager);
 
-  static WindowManager of(BuildContext context) {
-    final WindowManagerAccessor? result = context
-        .dependOnInheritedWidgetOfExactType<WindowManagerAccessor>();
-    assert(result != null, 'No WindowManager found in context');
+  static KeyedWindowManager of(BuildContext context) {
+    final KeyedWindowManagerAccessor? result = context
+        .dependOnInheritedWidgetOfExactType<KeyedWindowManagerAccessor>();
+    assert(result != null, 'No KeyedWindowManager found in context');
     return result!.notifier!;
   }
 }

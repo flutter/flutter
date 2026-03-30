@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 
 const int kSingleTapUpTimeout = 500;
@@ -1641,7 +1642,7 @@ void main() {
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.notPasteable);
 
-        mockClipboard.handleMethodCall(
+        await mockClipboard.handleMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{'text': 'pasteablestring'}),
         );
         await expectLater(notifier.update(), completes);

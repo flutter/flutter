@@ -1144,8 +1144,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
 class _SwitchPainter extends ToggleablePainter {
   AnimationController get positionController => _positionController!;
   AnimationController? _positionController;
-  set positionController(AnimationController? value) {
-    assert(value != null);
+  set positionController(AnimationController value) {
     if (value == _positionController) {
       return;
     }
@@ -1213,8 +1212,7 @@ class _SwitchPainter extends ToggleablePainter {
 
   Color get activePressedColor => _activePressedColor!;
   Color? _activePressedColor;
-  set activePressedColor(Color? value) {
-    assert(value != null);
+  set activePressedColor(Color value) {
     if (value == _activePressedColor) {
       return;
     }
@@ -1224,8 +1222,7 @@ class _SwitchPainter extends ToggleablePainter {
 
   Color get inactivePressedColor => _inactivePressedColor!;
   Color? _inactivePressedColor;
-  set inactivePressedColor(Color? value) {
-    assert(value != null);
+  set inactivePressedColor(Color value) {
     if (value == _inactivePressedColor) {
       return;
     }
@@ -1455,8 +1452,7 @@ class _SwitchPainter extends ToggleablePainter {
 
   bool get isCupertino => _isCupertino!;
   bool? _isCupertino;
-  set isCupertino(bool? value) {
-    assert(value != null);
+  set isCupertino(bool value) {
     if (value == _isCupertino) {
       return;
     }

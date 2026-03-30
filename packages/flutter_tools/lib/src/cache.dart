@@ -744,11 +744,12 @@ class Cache {
     return true;
   }
 
-  /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
-    if (!_lockEnabled) {
-      return;
-    }
+  /// Returns the list of artifacts that need updating from [requiredArtifacts].
+  Future<List<ArtifactSet>> _collectArtifactsToUpdate(
+    Set<DevelopmentArtifact> requiredArtifacts,
+  ) async {
+    final artifactsToUpdate = <ArtifactSet>[];
+
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
@@ -757,6 +758,41 @@ class Cache {
       if (await artifact.isUpToDate(_fileSystem)) {
         continue;
       }
+      artifactsToUpdate.add(artifact);
+    }
+    return artifactsToUpdate;
+  }
+
+  /// Update the cache to contain all `requiredArtifacts`.
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+    if (!_lockEnabled) {
+      return;
+    }
+
+    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
+
+    if (artifactsToUpdate.isEmpty) {
+      return;
+    }
+
+    // Download artifacts and display progress
+    final int total = artifactsToUpdate.length;
+    for (var i = 0; i < artifactsToUpdate.length; i++) {
+      final ArtifactSet artifact = artifactsToUpdate[i];
+      final int current = i + 1;
+
+      // Set progress context for the artifact updater
+      _artifactUpdater.setProgressContext(
+        artifactIndex: current,
+        artifactTotal: total,
+        downloadTotal: artifact.downloadCount,
+      );
+
+      // For artifacts containing multiple downloads, print the artifact name
+      if (artifact.downloadCount > 1) {
+        _logger.printStatus('[$current/$total] ${artifact.displayName}');
+      }
+
       try {
         await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
       } on SocketException catch (e) {
@@ -771,6 +807,7 @@ class Cache {
         rethrow;
       }
     }
+    _artifactUpdater.resetProgressContext();
   }
 
   Future<bool> areRemoteArtifactsAvailable({
@@ -828,10 +865,20 @@ abstract class ArtifactSet {
   /// The canonical name of the artifact.
   String get name;
 
+  /// A prettier display name.
+  ///
+  /// Defaults to the canonical name.
+  String get displayName => name;
+
   /// The name of the stamp file.
   ///
   /// Defaults to the same as the artifact name.
   String get stampName => name;
+
+  /// The number of individual downloads this artifact will perform.
+  ///
+  /// Defaults to 1.
+  int get downloadCount => 1;
 }
 
 /// An artifact set managed by the cache.
@@ -930,6 +977,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   @override
   String? get version => cache.engineRevision;
 
+  @override
+  int get downloadCount => getPackageDirs().length + getBinaryDirs().length;
+
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
 
@@ -975,11 +1025,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      await artifactUpdater.downloadZipArchive(
-        'Downloading package $pkgName...',
-        Uri.parse('$url$pkgName.zip'),
-        pkgDir,
-      );
+      await artifactUpdater.downloadZipArchive(pkgName, Uri.parse('$url$pkgName.zip'), pkgDir);
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
@@ -987,13 +1033,8 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String urlPath = toolsDir[1];
       final Directory dir = fileSystem.directory(fileSystem.path.join(location.path, cacheDir));
 
-      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
       final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
-      await artifactUpdater.downloadZipArchive(
-        'Downloading $friendlyName tools...',
-        Uri.parse(url + urlPath),
-        dir,
-      );
+      await artifactUpdater.downloadZipArchive(friendlyName, Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir, operatingSystemUtils);
     }
@@ -1094,6 +1135,36 @@ class ArtifactUpdater {
   @visibleForTesting
   final downloadedFiles = <File>[];
 
+  // Progress tracking state for download output formatting.
+  int _artifactIndex = 0;
+  int _artifactTotal = 0;
+  int _downloadIndex = 0;
+  int _downloadTotal = 0;
+
+  /// Sets the progress context for artifact downloads.
+  ///
+  /// This is called before each artifact update to enable progress output.
+  /// The [downloadIndex] can be used to set the current download index
+  /// within an artifact (1-based).
+  void setProgressContext({
+    required int artifactIndex,
+    required int artifactTotal,
+    required int downloadTotal,
+    int downloadIndex = 0,
+  }) {
+    _artifactIndex = artifactIndex;
+    _artifactTotal = artifactTotal;
+    _downloadIndex = downloadIndex;
+    _downloadTotal = downloadTotal;
+  }
+
+  void resetProgressContext() {
+    _artifactIndex = 0;
+    _artifactTotal = 0;
+    _downloadIndex = 0;
+    _downloadTotal = 0;
+  }
+
   /// These filenames, should they exist after extracting an archive, should be deleted.
   static const _denylistedBasenames = <String>{
     'entitlements.txt',
@@ -1112,25 +1183,37 @@ class ArtifactUpdater {
   }
 
   /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, _operatingSystemUtils.unzip);
+  Future<void> downloadZipArchive(String artifactName, Uri url, Directory location) {
+    return _downloadArchive(artifactName, url, location, _operatingSystemUtils.unzip);
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, _operatingSystemUtils.unpack);
+  Future<void> downloadZippedTarball(String artifactName, Uri url, Directory location) {
+    return _downloadArchive(artifactName, url, location, _operatingSystemUtils.unpack);
   }
 
   /// Download a file from the given [url] and copy it to [location].
-  Future<void> downloadFile(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, (File file, Directory dir) {
+  Future<void> downloadFile(String artifactName, Uri url, Directory location) {
+    return _downloadArchive(artifactName, url, location, (File file, Directory dir) {
       file.copySync(dir.childFile(file.basename).path);
     });
   }
 
+  /// Formats a download message with progress context.
+  @visibleForTesting
+  String formatProgressMessage(String artifactName) {
+    final int displayIndex = _downloadIndex + 1;
+    if (_downloadTotal == 1) {
+      return '[$_artifactIndex/$_artifactTotal] $artifactName';
+    } else {
+      final prefix = displayIndex == _downloadTotal ? '└─' : '├─';
+      return '  $prefix [$displayIndex/$_downloadTotal] $artifactName';
+    }
+  }
+
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(
-    String message,
+    String artifactName,
     Uri url,
     Directory location,
     void Function(File, Directory) extractor,
@@ -1139,9 +1222,11 @@ class ArtifactUpdater {
     final File tempFile = _createDownloadFile(downloadPath);
     Status status;
     int retries = _kRetryCount;
+    final String formattedMessage = formatProgressMessage(artifactName);
+    _downloadIndex++;
 
     while (retries > 0) {
-      status = _logger.startProgress(message);
+      status = _logger.startProgress(formattedMessage);
       try {
         _ensureExists(tempFile.parent);
         if (tempFile.existsSync()) {

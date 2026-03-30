@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_http_client.dart';
 import '../src/fakes.dart';
 
 const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64');
@@ -365,6 +366,113 @@ void main() {
       flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()),
       'www.flutter.dev',
     );
+  });
+
+  testWithoutContext('ArtifactSet.displayName defaults to name', () {
+    final cache = Cache.test(processManager: FakeProcessManager.any());
+    final artifact = FakeSimpleArtifact(cache);
+
+    expect(artifact.name, 'fake');
+    expect(artifact.displayName, 'fake');
+  });
+
+  testWithoutContext('ArtifactSet.downloadCount defaults to 1', () {
+    final cache = Cache.test(processManager: FakeProcessManager.any());
+    final artifact = FakeSimpleArtifact(cache);
+
+    expect(artifact.downloadCount, 1);
+  });
+
+  testWithoutContext(
+    'EngineCachedArtifact.downloadCount returns sum of package and binary dirs',
+    () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_artifact.',
+      );
+      final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
+
+      final artifact = FakeCachedArtifact(
+        cache: cache,
+        binaryDirs: <List<String>>[
+          <String>['dir1', 'url1'],
+          <String>['dir2', 'url2'],
+        ],
+        packageDirs: <String>['pkg1', 'pkg2', 'pkg3'],
+        requiredArtifacts: DevelopmentArtifact.universal,
+      );
+
+      expect(artifact.downloadCount, 5);
+    },
+  );
+
+  group('ArtifactUpdater progress formatting', () {
+    late FileSystem fileSystem;
+    late Directory tempStorage;
+    late ArtifactUpdater artifactUpdater;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      tempStorage = fileSystem.systemTempDirectory.createTempSync('temp.');
+      artifactUpdater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.any(),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+      );
+    });
+
+    testWithoutContext('formats single download with artifact index', () {
+      artifactUpdater.setProgressContext(artifactIndex: 2, artifactTotal: 5, downloadTotal: 1);
+
+      expect(artifactUpdater.formatProgressMessage('Test Artifact'), '[2/5] Test Artifact');
+    });
+
+    testWithoutContext('formats multiple downloads with tree prefix', () {
+      // First download gets ├─ prefix
+      artifactUpdater.setProgressContext(artifactIndex: 1, artifactTotal: 3, downloadTotal: 4);
+      expect(artifactUpdater.formatProgressMessage('first'), '  ├─ [1/4] first');
+
+      // Middle downloads also get ├─ prefix
+      artifactUpdater.setProgressContext(
+        artifactIndex: 1,
+        artifactTotal: 3,
+        downloadTotal: 4,
+        downloadIndex: 1,
+      );
+      expect(artifactUpdater.formatProgressMessage('second'), '  ├─ [2/4] second');
+
+      artifactUpdater.setProgressContext(
+        artifactIndex: 1,
+        artifactTotal: 3,
+        downloadTotal: 4,
+        downloadIndex: 2,
+      );
+      expect(artifactUpdater.formatProgressMessage('third'), '  ├─ [3/4] third');
+
+      // Last download gets └─ prefix
+      artifactUpdater.setProgressContext(
+        artifactIndex: 1,
+        artifactTotal: 3,
+        downloadTotal: 4,
+        downloadIndex: 3,
+      );
+      expect(artifactUpdater.formatProgressMessage('fourth'), '  └─ [4/4] fourth');
+    });
+
+    testWithoutContext('resetProgressContext resets download index', () {
+      artifactUpdater.setProgressContext(artifactIndex: 2, artifactTotal: 5, downloadTotal: 1);
+      expect(artifactUpdater.formatProgressMessage('first'), '[2/5] first');
+
+      artifactUpdater.resetProgressContext();
+      artifactUpdater.setProgressContext(artifactIndex: 1, artifactTotal: 3, downloadTotal: 1);
+
+      // After reset, index should start fresh
+      expect(artifactUpdater.formatProgressMessage('new'), '[1/3] new');
+    });
   });
 
   testWithoutContext(
@@ -881,7 +989,7 @@ void main() {
 
       await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-      expect(messages, <String>['Downloading Web SDK...']);
+      expect(messages, <String>['Web SDK']);
 
       expect(downloads, <String>[
         'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
@@ -1002,7 +1110,7 @@ void main() {
 
     await engineStamp.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-    expect(messages, <String>['Downloading engine information...']);
+    expect(messages, <String>['Engine Information']);
 
     expect(downloads, <String>[
       'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/engine_stamp.json',
@@ -1317,6 +1425,12 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
 
   @override
   DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+
+  @override
+  String get displayName => 'fake';
+
+  @override
+  int get downloadCount => 1;
 }
 
 class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
@@ -1432,22 +1546,33 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadFile;
 
   @override
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
-    onDownloadZipTarball?.call(message, url, location);
+  Future<void> downloadZippedTarball(String artifactName, Uri url, Directory location) async {
+    onDownloadZipTarball?.call(artifactName, url, location);
   }
 
   @override
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
-    onDownloadZipArchive?.call(message, url, location);
+  Future<void> downloadZipArchive(String artifactName, Uri url, Directory location) async {
+    onDownloadZipArchive?.call(artifactName, url, location);
   }
 
   @override
-  Future<void> downloadFile(String message, Uri url, Directory location) async {
-    onDownloadFile?.call(message, url, location);
+  Future<void> downloadFile(String artifactName, Uri url, Directory location) async {
+    onDownloadFile?.call(artifactName, url, location);
   }
 
   @override
   void removeDownloadedFiles() {}
+
+  @override
+  void setProgressContext({
+    required int artifactIndex,
+    required int artifactTotal,
+    required int downloadTotal,
+    int downloadIndex = 0,
+  }) {}
+
+  @override
+  void resetProgressContext() {}
 }
 
 class FakeArtifactUpdaterDownload extends ArtifactUpdater {

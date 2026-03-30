@@ -26,6 +26,7 @@ class ColdRunner extends ResidentRunner {
     super.stayResident,
     super.machine,
     super.dartBuilder,
+    super.shutdownHooks,
   }) : super(hotMode: false);
 
   final bool traceStartup;
@@ -172,6 +173,7 @@ class ColdRunner extends ResidentRunner {
       await flutterDevice!.device!.dispose();
     }
     await stopEchoingDeviceLog();
+    await super.cleanupAtFinish();
   }
 
   @override

@@ -8,7 +8,6 @@
 #include <lib/fdio/namespace.h>
 #include <lib/zx/channel.h>
 
-#include <memory>
 #include <string>
 
 namespace dart_runner {

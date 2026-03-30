@@ -342,7 +342,22 @@ class SemanticTextField extends SemanticRole {
     } else {
       editableElement.removeAttribute('aria-required');
     }
+
+    // Apply hint as aria-description on the editable element so screen readers
+    // announce it along with the input field. This enables form validation
+    // errors to be announced when the error text is passed via the hint property.
+    _updateHintDescription();
+
     _updateInputType();
+  }
+
+  void _updateHintDescription() {
+    final String? hint = semanticsObject.hint;
+    if (hint != null && hint.trim().isNotEmpty) {
+      editableElement.setAttribute('aria-description', hint);
+    } else {
+      editableElement.removeAttribute('aria-description');
+    }
   }
 
   void _updateEnabledState() {
