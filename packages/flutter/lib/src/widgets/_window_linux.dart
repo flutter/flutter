@@ -209,8 +209,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     var provider = _GtkCssProvider();
     provider.loadFromData("window { background-color: transparent; }");
     _GtkStyleContext context = _window.getStyleContext();
-    // Note: 800 is GTK_STYLE_CONTEXT_PRIORITY_USER
-    context.addProvider(provider, 800);
+    context.addProvider(provider, kGtkStyleContextPriorityUser);
     provider.unref();
 
     _windowMonitor = _FlWindowMonitor(
@@ -573,6 +572,8 @@ enum _GdkWindowTypeHint {
   // ignore: unused_field
   dnd,
 }
+
+const int kGtkStyleContextPriorityUser = 800;
 
 @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Int)>(symbol: 'g_malloc0')
 external ffi.Pointer<ffi.NativeType> _gMalloc0(int count);
