@@ -286,6 +286,9 @@ std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
     }
   }
 
+  if (chunk->get_data_length() < sizeof(AnimationControlChunkData)) {
+    return nullptr;
+  }
   const AnimationControlChunkData* animation_data =
       CastChunkData<AnimationControlChunkData>(chunk);
 
@@ -430,6 +433,9 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
   // The presence of an fcTL chunk is optional for the first (default) image
   // of a PNG. Both cases are handled in APNGImage.
   if (chunk->get_type() == kFrameControlChunkType) {
+    if (chunk->get_data_length() < sizeof(FrameControlChunkData)) {
+      return std::make_pair(std::nullopt, nullptr);
+    }
     control_data = CastChunkData<FrameControlChunkData>(chunk);
 
     ImageGenerator::FrameInfo frame_info;
