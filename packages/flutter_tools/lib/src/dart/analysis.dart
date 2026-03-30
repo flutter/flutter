@@ -50,8 +50,38 @@ class AnalysisServer {
   final _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   var _didServerErrorOccur = false;
 
+  /// Whether the server is currently analyzing.
+  bool get isAnalyzing => _isAnalyzing;
+  bool _isAnalyzing = false;
+
+  /// Returns a [Future] that completes when the server is no longer analyzing.
+  ///
+  /// If [delay] is provided, this method will wait for that duration before
+  /// checking if the server is analyzing. if the server starts analyzing during
+  /// that duration, it will wait for analysis to complete.
+  ///
+  /// This is useful to avoid the race condition where analysis hasn't started
+  /// yet after a file change.
+  Future<void> waitForAnalysis({Duration delay = const Duration(milliseconds: 100)}) async {
+    if (_isAnalyzing) {
+      await onAnalyzing.firstWhere((bool analyzing) => !analyzing);
+    }
+    if (delay != Duration.zero) {
+      // Wait for analysis to potentially start.
+      try {
+        await onAnalyzing.firstWhere((bool analyzing) => analyzing).timeout(delay);
+        // If analysis started, wait for it to finish.
+        if (_isAnalyzing) {
+          await onAnalyzing.firstWhere((bool analyzing) => !analyzing);
+        }
+      } on TimeoutException {
+        // Analysis didn't start within the delay, so we assume it's not going to.
+      }
+    }
+  }
+
   var _id = 0;
-  final _outstandingRequests = <int, Completer<Map<String, Object?>>>{};
+  final _outstandingRequests = <int, Completer<Map<String, Object?>?>>{};
 
   Future<void> start() async {
     final command = <String>[
@@ -124,13 +154,17 @@ class AnalysisServer {
   Future<int?>? _onExit;
 
   void _writeMessage({required String message}) {
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message\n');
+    print('Content-Length: ${message.length}\r\n\r\n$message\n');
   }
 
-  Future<Map<String, Object?>> sendRequest(String method, Map<String, Object?> params) async {
+  Future<void> connectToDtd({required Uri dtdUri}) async =>
+      sendRequest('dart/connectToDtd', {'uri': dtdUri.toString()});
+
+  Future<Map<String, Object?>?> sendRequest(String method, Map<String, Object?> params) async {
     final int id = ++_id;
-    final Completer<Map<String, Object?>> completer = _outstandingRequests[id] =
-        Completer<Map<String, Object?>>();
+    final Completer<Map<String, Object?>?> completer = _outstandingRequests[id] =
+        Completer<Map<String, Object?>?>();
     final String message = json.encode(<String, Object?>{
       'jsonrpc': '2.0',
       'id': id,
@@ -225,9 +259,9 @@ class AnalysisServer {
 
     if (response is Map<String, Object?>) {
       final Object? id = response['id'];
-      final Completer<Map<String, Object?>>? completer = _outstandingRequests.remove(id);
+      final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
       if (completer != null) {
-        if (response case {'result': final Map<String, Object?> result}) {
+        if (response case {'result': final Map<String, Object?>? result}) {
           completer.complete(result);
         } else if (response case {'error': final Map<String, Object?> error}) {
           completer.completeError(error['message'] ?? error);
@@ -273,8 +307,10 @@ class AnalysisServer {
     if (value is Map<String, Object?>) {
       final kind = value['kind'] as String?;
       if (kind == 'begin') {
+        _isAnalyzing = true;
         _analyzingController.add(true);
       } else if (kind == 'end') {
+        _isAnalyzing = false;
         _analyzingController.add(false);
       }
     }

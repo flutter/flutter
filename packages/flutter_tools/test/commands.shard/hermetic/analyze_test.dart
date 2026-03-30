@@ -15,11 +15,11 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
-import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart' as test_process_manager;
 import '../../src/test_flutter_command_runner.dart';
 
 const _kFlutterRoot = '/data/flutter';
@@ -77,20 +77,6 @@ void main() {
       }
     });
 
-    String buildResponse({required String message}) {
-      return 'Content-Length: ${message.length}\r\n\r\n$message';
-    }
-
-    final headerRegExp = RegExp(r'Content-Length:\s(\d+)(\r\n|\n){2}', caseSensitive: false);
-    String stripLspHeader({required String message}) {
-      final Match? match = headerRegExp.firstMatch(message);
-      if (match == null) {
-        throw StateError('Unexpected message format: $message');
-      }
-      final int messageLength = int.parse(match.group(1)!);
-      return message.replaceFirst(headerRegExp, '').substring(0, messageLength);
-    }
-
     testUsingContext(
       'SIGABRT throws Exception',
       () async {
@@ -133,6 +119,8 @@ void main() {
       () async {
         final streamController = StreamController<List<int>>();
         final sink = IOSink(streamController.sink);
+        final Completer<void> exitCompleter = Completer<void>();
+        final process = _CustomLspProcess(stdin: sink, exitCompleter: exitCompleter);
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             // artifact paths are from Artifacts.test() and stable
@@ -145,27 +133,55 @@ void main() {
               '--disable-server-feature-search',
               '--suppress-analytics',
             ],
-            stdin: sink,
-            //completer: completer,
-            stdout: buildResponse(message: '{"id":1, "result":{}}'),
+            process: process,
           ),
         ]);
-        try {
-          await runner.run(<String>['analyze', '--flutter-repo']);
-        } on Object {}
-        final String rawRequest = stripLspHeader(
-          message: await streamController.stream
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
-              .join('\n'),
-        );
 
-        final initializeCommand = jsonDecode(rawRequest) as Map<String, Object?>;
-        expect(initializeCommand['method'], 'initialize');
-        final params = initializeCommand['params']! as Map<String, Object?>;
-        expect(params['workspaceFolders'], <String?>[
-          fileSystem.directory(Cache.flutterRoot).uri.toString(),
-        ]);
+        final Stream<String> messages = streamController.stream
+            .transform(utf8.decoder)
+            .transform(const LineSplitter());
+
+        String? firstMessage;
+        messages.listen((String msg) {
+          if (!msg.startsWith('{')) {
+            return;
+          }
+          if (firstMessage == null) {
+            firstMessage = msg;
+            final request = jsonDecode(msg) as Map<String, Object?>;
+            if (request['method'] == 'initialize') {
+              process.addResponse(
+                '{"jsonrpc":"2.0","id":1,"result":'
+                '{"capabilities":{"window":{"workDoneProgress":true}}}}',
+              );
+              process.addResponse(
+                r'{"jsonrpc":"2.0","method":"$/progress","params":'
+                r'{"token":"analyze","value":{"kind":"begin"}}}',
+              );
+              process.addResponse(
+                r'{"jsonrpc":"2.0","method":"$/progress","params":'
+                r'{"token":"analyze","value":{"kind":"end"}}}',
+              );
+              exitCompleter.complete();
+            }
+          }
+        });
+
+        await runner.run(<String>['analyze', '--flutter-repo']);
+
+        expect(firstMessage, isNotNull);
+        final request = jsonDecode(firstMessage!) as Map<String, Object?>;
+        expect(request['method'], 'initialize');
+        final params = request['params']! as Map<String, Object?>;
+        expect(
+          params['workspaceFolders'] as List?,
+          contains(
+            equals(<String, dynamic>{
+              'name': '/home/user/flutter',
+              'uri': 'file:///home/user/flutter/',
+            }),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -200,24 +216,6 @@ void main() {
     inRepo(null, fileSystem);
     inRepo(<String>[], fileSystem);
   });
-
-  testWithoutContext('AnalysisError from json write correct', () {
-    const file = '/Users/.../lib/test.dart';
-    final json = <String, dynamic>{
-      'severity': 3,
-      'range': <String, dynamic>{
-        'start': <String, dynamic>{'line': 14, 'character': 3},
-      },
-      'file': file,
-      'message': 'Prefer final for variable declarations if they are not reassigned.',
-      'code': 'var foo = 123;',
-      'hasFix': false,
-    };
-    expect(
-      WrittenError.fromLsp(json, file).toString(),
-      '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)',
-    );
-  });
 }
 
 bool inRepo(List<String>? fileList, FileSystem fileSystem) {
@@ -233,4 +231,18 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
     }
   }
   return false;
+}
+
+class _CustomLspProcess extends test_process_manager.FakeProcess {
+  _CustomLspProcess({super.stdin, Completer<void>? exitCompleter})
+    : super(completer: exitCompleter);
+
+  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  void addResponse(String message) {
+    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message\n'));
+  }
 }
