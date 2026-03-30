@@ -841,23 +841,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
     const Geometry* geom = contents->GetGeometry();
 
-    if (paint.color_source) {
-      std::shared_ptr<Contents> color_source_contents =
-          paint.CreateContents(geom);
-      std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
-          BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
-                              FilterInput::Make(color_source_contents)});
-
-      final_contents = paint.WithFilters(std::move(final_contents));
-
-      entity.SetContents(std::move(final_contents));
-      AddRenderEntityToCurrentPass(entity, /*reuse_depth=*/false);
-    } else {
-      AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
-                                              /*reuse_depth=*/false,
-                                              /*override_contents=*/
-                                              std::move(contents));
-    }
+    AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     return;
   }
 
@@ -1066,23 +1050,7 @@ void Canvas::DrawCircle(const Point& center,
 
     const Geometry* geom = contents->GetGeometry();
 
-    if (paint.color_source) {
-      std::shared_ptr<Contents> color_source_contents =
-          paint.CreateContents(geom);
-      std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
-          BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
-                              FilterInput::Make(color_source_contents)});
-
-      final_contents = paint.WithFilters(std::move(final_contents));
-
-      entity.SetContents(std::move(final_contents));
-      AddRenderEntityToCurrentPass(entity, /*reuse_depth=*/false);
-    } else {
-      AddRenderEntityWithFiltersToCurrentPass(
-          entity, geom, paint,
-          /*reuse_depth=*/false,
-          /*override_contents=*/std::move(contents));
-    }
+    AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     return;
   }
 
@@ -1986,6 +1954,32 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
 
   entity.SetContents(paint.WithFilters(std::move(text_contents)));
   AddRenderEntityToCurrentPass(entity, false);
+}
+
+void Canvas::AddRenderSDFEntityToCurrentPass(
+    Entity& entity,
+    const Geometry* geom,
+    const Paint& paint,
+    std::shared_ptr<ColorSourceContents> contents) {
+  if (paint.color_source) {
+    // UberSDF doesn't perform things like gradients so we blend the SDF
+    // with the color source.
+    std::shared_ptr<Contents> color_source_contents =
+        paint.CreateContents(geom);
+    std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
+        BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                            FilterInput::Make(color_source_contents)});
+
+    final_contents = paint.WithFilters(std::move(final_contents));
+
+    entity.SetContents(std::move(final_contents));
+    AddRenderEntityToCurrentPass(entity, /*reuse_depth=*/false);
+  } else {
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                            /*reuse_depth=*/false,
+                                            /*override_contents=*/
+                                            std::move(contents));
+  }
 }
 
 void Canvas::AddRenderEntityWithFiltersToCurrentPass(
