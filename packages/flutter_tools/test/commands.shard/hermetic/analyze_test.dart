@@ -137,18 +137,17 @@ void main() {
           ),
         ]);
 
-        final Stream<String> messages = streamController.stream
-            .transform(utf8.decoder)
-            .transform(const LineSplitter());
-
+        final StringBuffer buffer = StringBuffer();
+        final Completer<void> messageReceived = Completer<void>();
         String? firstMessage;
-        messages.listen((String msg) {
-          if (!msg.startsWith('{')) {
-            return;
-          }
-          if (firstMessage == null) {
-            firstMessage = msg;
-            final request = jsonDecode(msg) as Map<String, Object?>;
+
+        streamController.stream.transform(utf8.decoder).listen((String chunk) {
+          buffer.write(chunk);
+          final String current = buffer.toString();
+          if (current.contains('{') && firstMessage == null) {
+            final int startIndex = current.indexOf('{');
+            firstMessage = current.substring(startIndex);
+            final request = jsonDecode(firstMessage!) as Map<String, Object?>;
             if (request['method'] == 'initialize') {
               process.addResponse(
                 '{"jsonrpc":"2.0","id":1,"result":'
@@ -163,6 +162,7 @@ void main() {
                 r'{"token":"analyze","value":{"kind":"end"}}}',
               );
               exitCompleter.complete();
+              messageReceived.complete();
             }
           }
         });
@@ -243,6 +243,6 @@ class _CustomLspProcess extends test_process_manager.FakeProcess {
   Stream<List<int>> get stdout => _stdoutController.stream;
 
   void addResponse(String message) {
-    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message\n'));
+    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message'));
   }
 }
