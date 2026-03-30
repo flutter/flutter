@@ -265,26 +265,13 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
-      // On x64 stdout is "uname -m: x86_64"
-      // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
-      if (hostPlatformCheck.exitCode != 0) {
-        _hostPlatform = HostPlatform.linux_x64;
-        _logger.printError(
-          'Encountered an error trying to run "uname -m":\n'
-          '  exit code: ${hostPlatformCheck.exitCode}\n'
-          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
-          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
-          'Assuming host platform is ${getNameForHostPlatform(_hostPlatform!)}.',
-        );
-      } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
-        _hostPlatform = HostPlatform.linux_x64;
-      } else if (hostPlatformCheck.stdout.trim().endsWith('riscv64')) {
-        _hostPlatform = HostPlatform.linux_riscv64;
-      } else {
-        // We default to ARM if it's not x86_64 and we did not get an error.
-        _hostPlatform = HostPlatform.linux_arm64;
-      }
+      final abi = Abi.current();
+      _hostPlatform = switch (abi) {
+        Abi.linuxArm64 || Abi.fuchsiaArm64 || Abi.androidArm64 => HostPlatform.linux_arm64,
+        Abi.linuxX64 || Abi.fuchsiaX64 || Abi.androidX64 => HostPlatform.linux_x64,
+        Abi.linuxRiscv64 || Abi.fuchsiaRiscv64 || Abi.androidRiscv64 => HostPlatform.linux_riscv64,
+        _ => throwToolExit('Host platform and architecture "$abi" not supported for Posix.'),
+      };
     }
     return _hostPlatform!;
   }
@@ -390,33 +377,15 @@ class _MacOSUtils extends _PosixUtils {
     return _name!;
   }
 
-  // On ARM returns arm64, even when this process is running in Rosetta.
   @override
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
-      String? sysctlPath;
-      if (which('sysctl') == null) {
-        // Fallback to known install locations.
-        for (final path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
-          if (_fileSystem.isFileSync(path)) {
-            sysctlPath = path;
-          }
-        }
-      } else {
-        sysctlPath = 'sysctl';
-      }
-
-      if (sysctlPath == null) {
-        throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
-      }
-      final RunResult arm64Check = _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
-      // On arm64 stdout is "sysctl hw.optional.arm64: 1"
-      // On x86 hw.optional.arm64 is unavailable and exits with 1.
-      if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
-        _hostPlatform = HostPlatform.darwin_arm64;
-      } else {
-        _hostPlatform = HostPlatform.darwin_x64;
-      }
+      final abi = Abi.current();
+      _hostPlatform = switch (abi) {
+        Abi.macosArm64 => HostPlatform.darwin_arm64,
+        Abi.macosX64 => HostPlatform.darwin_x64,
+        _ => throwToolExit('Host platform and architecture "$abi" not supported for MacOS.'),
+      };
     }
     return _hostPlatform!;
   }
@@ -480,9 +449,11 @@ class _WindowsUtils extends OperatingSystemUtils {
   HostPlatform get hostPlatform {
     if (_hostPlatform == null) {
       final abi = Abi.current();
-      _hostPlatform = (abi == Abi.windowsArm64)
-          ? HostPlatform.windows_arm64
-          : HostPlatform.windows_x64;
+      _hostPlatform = switch (abi) {
+        Abi.windowsArm64 => HostPlatform.windows_arm64,
+        Abi.windowsX64 => HostPlatform.windows_x64,
+        _ => throwToolExit('Host platform and architecture "$abi" not supported for Windows.'),
+      };
     }
     return _hostPlatform!;
   }
