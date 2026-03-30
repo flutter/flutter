@@ -3,4 +3,4 @@
 // found in the LICENSE file.
 
 export 'package:ui_primitives/ui_primitives.dart'
-    show FrameworkError, FrameworkErrorDetails, Listenable, ValueListenable, ValueNotifier;
+    show FrameworkErrorDetails, Listenable, ValueListenable, ValueNotifier;
