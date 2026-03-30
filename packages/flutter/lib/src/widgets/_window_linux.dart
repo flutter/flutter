@@ -91,6 +91,7 @@ class WindowingOwnerLinux extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
     required RegularWindowControllerDelegate delegate,
   }) {
     final controller = RegularWindowControllerLinux(
@@ -100,6 +101,7 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredConstraints: preferredConstraints,
       title: title,
       decorated: decorated,
+      backgroundColor: backgroundColor,
     );
     _windows[controller.rootView.viewId] = controller._window;
     return controller;
@@ -194,6 +196,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
   }) : _owner = owner,
        _delegate = delegate,
        _window = _GtkWindow(_GtkWindowType.toplevel),
@@ -201,6 +204,14 @@ class RegularWindowControllerLinux extends RegularWindowController {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
+
+    // Set the window background to transparent (it defaults to the theme color, normall grey).
+    var provider = _GtkCssProvider();
+    provider.loadFromData("window { background-color: transparent; }");
+    _GtkStyleContext context = _window.getStyleContext();
+    // Note: 800 is GTK_STYLE_CONTEXT_PRIORITY_USER
+    context.addProvider(provider, 800);
+    provider.unref();
 
     _windowMonitor = _FlWindowMonitor(
       _window,
@@ -225,6 +236,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
     _window.setDecorated(decorated);
     final engine = _FlEngine.current();
     final view = _FlView(engine);
+    view.setBackgroundColor(backgroundColor);
     final int viewId = view.getId();
     rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
@@ -636,6 +648,11 @@ class _GtkWidget extends _GObject {
     return _GdkWindow(_gtkWidgetGetWindow(instance));
   }
 
+  /// Get the style context for this widget.
+  _GtkStyleContext getStyleContext() {
+    return _GtkStyleContext(_gtkWidgetGetStyleContext(instance));
+  }
+
   /// Destroy the widget.
   void destroy() {
     _gtkWindowDestroy(instance);
@@ -651,8 +668,68 @@ class _GtkWidget extends _GObject {
     ffi.Pointer<ffi.NativeType> widget,
   );
 
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_widget_get_style_context',
+  )
+  external static ffi.Pointer<ffi.NativeType> _gtkWidgetGetStyleContext(
+    ffi.Pointer<ffi.NativeType> widget,
+  );
+
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_destroy')
   external static void _gtkWindowDestroy(ffi.Pointer<ffi.NativeType> widget);
+}
+
+/// Wraps GtkStyleContext.
+class _GtkStyleContext extends _GObject {
+  /// Creates a wrapper to an existing [GtkStyleContext] in [instance].
+  const _GtkStyleContext(super.instance);
+
+  /// Adds a CSS provider to this style context with the given priority.
+  void addProvider(_GtkStyleProvider provider, int priority) {
+    _gtkStyleContextAddProvider(instance, provider.instance, priority);
+  }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.NativeType>, ffi.Int)>(
+    symbol: 'gtk_style_context_add_provider',
+  )
+  external static void _gtkStyleContextAddProvider(
+    ffi.Pointer<ffi.NativeType> context,
+    ffi.Pointer<ffi.NativeType> provider,
+    int priority,
+  );
+}
+
+/// Wraps GtkStyleProvider.
+class _GtkStyleProvider extends _GObject {
+  /// Creates a wrapper to an existing [GtkStyleProvider] in [instance].
+  const _GtkStyleProvider(super.instance);
+}
+
+/// Wraps GtkCssProvider.
+class _GtkCssProvider extends _GtkStyleProvider {
+  /// Creates a wrapper to an existing [GtkCssProvider] in [instance].
+  _GtkCssProvider() : super(_gtkCssProviderNew());
+
+  /// Loads data into this CSS provider replacing any existing data.
+  bool loadFromData(String data) {
+    var dataString = _stringToNative(data);
+    var result = _gtkCssProviderLoadFromData(instance, dataString, -1, ffi.nullptr);
+    _gFree(dataString);
+    return result;
+  }
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function()>(symbol: 'gtk_css_provider_new')
+  external static ffi.Pointer<ffi.NativeType> _gtkCssProviderNew();
+
+  @ffi.Native<
+    ffi.Bool Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.Uint8>, ffi.Int, ffi.Pointer)
+  >(symbol: 'gtk_css_provider_load_from_data')
+  external static bool _gtkCssProviderLoadFromData(
+    ffi.Pointer<ffi.NativeType> provider,
+    ffi.Pointer<ffi.Uint8> data,
+    int length,
+    ffi.Pointer error,
+  );
 }
 
 /// Wraps GdkWindow.
@@ -715,6 +792,25 @@ final class _GdkGeometry extends ffi.Struct {
 
   @ffi.Int()
   external int winGravity;
+}
+
+/// Wraps GdkRGBA
+final class _GdkRGBA extends ffi.Struct {
+  factory _GdkRGBA() {
+    return ffi.Struct.create();
+  }
+
+  @ffi.Double()
+  external double red;
+
+  @ffi.Double()
+  external double green;
+
+  @ffi.Double()
+  external double blue;
+
+  @ffi.Double()
+  external double alpha;
 }
 
 /// Wraps GtkWindow.
@@ -957,6 +1053,18 @@ class _FlView extends _GtkWidget {
     return _flViewGetId(instance);
   }
 
+  /// Set the background color of this view.
+  void setBackgroundColor(Color color) {
+    final ffi.Pointer<_GdkRGBA> color_ = _gMalloc0(ffi.sizeOf<_GdkRGBA>()).cast<_GdkRGBA>();
+    final _GdkRGBA c = color_.ref;
+    c.red = color.red / 255.0;
+    c.green = color.green / 255.0;
+    c.blue = color.blue / 255.0;
+    c.alpha = color.alpha / 255.0;
+    _flViewSetBackgroundColor(instance, color_);
+    _gFree(color_);
+  }
+
   @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
     symbol: 'fl_view_new_for_engine',
   )
@@ -966,6 +1074,14 @@ class _FlView extends _GtkWidget {
 
   @ffi.Native<ffi.Int64 Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'fl_view_get_id')
   external static int _flViewGetId(ffi.Pointer<ffi.NativeType> view);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<_GdkRGBA>)>(
+    symbol: 'fl_view_set_background_color',
+  )
+  external static void _flViewSetBackgroundColor(
+    ffi.Pointer<ffi.NativeType> view,
+    ffi.Pointer<_GdkRGBA> color,
+  );
 }
 
 /// Wraps FlWindowMonitor (helper object for handling signals from GtkWindow).

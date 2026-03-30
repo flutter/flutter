@@ -144,6 +144,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
     required RegularWindowControllerDelegate delegate,
   }) {
     return RegularWindowControllerWin32(

@@ -81,6 +81,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
   }) {
     final res = RegularWindowControllerMacOS(
       owner: this,

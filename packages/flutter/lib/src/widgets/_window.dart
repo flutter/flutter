@@ -232,6 +232,7 @@ abstract class RegularWindowController extends BaseWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    Color backgroundColor = const Color.fromARGB(0, 255, 255, 255),
     bool decorated = true,
     RegularWindowControllerDelegate? delegate,
   }) {
@@ -250,6 +251,7 @@ abstract class RegularWindowController extends BaseWindowController {
       preferredConstraints: preferredConstraints,
       title: title,
       decorated: decorated,
+      backgroundColor: backgroundColor,
     );
   }
 
@@ -1184,6 +1186,7 @@ abstract class WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
   });
 
   /// Creates a [DialogWindowController] with the provided properties.
@@ -1285,6 +1288,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
   }) {
     throw UnsupportedError(errorMessage);
   }
