@@ -1975,7 +1975,518 @@ void main() {
         expect(itemRect.right, lessThanOrEqualTo(carouselRight));
       }
     });
+
+    testWidgets('CarouselView infinite', (WidgetTester tester) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView(
+              itemExtent: 200,
+              infinite: true,
+              controller: controller,
+              children: List<Widget>.generate(3, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+
+      // Verify animating to an index beyond the array length.
+      controller.animateToItem(5);
+      await tester.pumpAndSettle();
+
+      // Should show last item 2 times based on size.
+      expect(find.textContaining('Item 2'), findsAtLeastNWidgets(2));
+    });
   });
+
+  testWidgets('CarouselView infinite scrolling', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            infinite: true,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(CarouselView)));
+    expect(viewportSize, const Size(800, 600));
+
+    // Initial state: viewport is 800 wide, each item is 200 wide.
+    // Visible items: Item 0 at [0-200], Item 1 at [200-400], Item 2 at [400-600], Item 0 at [600-800] (wraps).
+    expect(find.text('Item 0'), findsNWidgets(2)); // Item 0 appears twice due to wrap.
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+
+    Rect rect0 = tester.getRect(getItem(0).first);
+    expect(rect0, const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0));
+    Rect rect1 = tester.getRect(getItem(1).first);
+    expect(rect1, const Rect.fromLTRB(200.0, 0.0, 400.0, 600.0));
+    Rect rect2 = tester.getRect(getItem(2).first);
+    expect(rect2, const Rect.fromLTRB(400.0, 0.0, 600.0, 600.0));
+
+    // Scroll forward by 400 pixels (dragging left).
+    await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling 400 pixels:
+    // Visible items: Item 2 at [0-200], Item 0 at [200-400], Item 1 at [400-600], Item 2 at [600-800].
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsNWidgets(2)); // Item 2 appears twice.
+
+    rect2 = tester.getRect(getItem(2).first);
+    expect(rect2, const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0));
+    rect0 = tester.getRect(getItem(0).first);
+    expect(rect0, const Rect.fromLTRB(200.0, 0.0, 400.0, 600.0));
+    rect1 = tester.getRect(getItem(1).first);
+    expect(rect1, const Rect.fromLTRB(400.0, 0.0, 600.0, 600.0));
+  });
+
+  testWidgets('CarouselView infinite scrolling supports bidirectional scrolling', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            infinite: true,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsNWidgets(2));
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+
+    final double initialItem0Left = tester.getRect(getItem(0).first).left;
+
+    await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling backward, Item 2 should now appear twice.
+    expect(find.text('Item 2'), findsNWidgets(2));
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    final double afterItem2Left = tester.getRect(getItem(2).first).left;
+    expect(afterItem2Left, moreOrLessEquals(initialItem0Left, epsilon: 10.0));
+
+    await tester.drag(find.byType(CarouselView), const Offset(-200, 0));
+    await tester.pumpAndSettle();
+
+    // Should be back to initial state.
+    expect(find.text('Item 0'), findsNWidgets(2));
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+  });
+
+  testWidgets('CarouselView.weighted infinite scrolling', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 2, 1],
+            infinite: true,
+            children: List<Widget>.generate(3, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(CarouselView)));
+    expect(viewportSize, const Size(800, 600));
+
+    // With flexWeights [1, 2, 1], total weight = 4, viewport = 800.
+    // Item widths: small = 1/4 * 800 = 200, large = 2/4 * 800 = 400.
+    // With consumeMaxWeight (default true), Item 0 is placed at the max weight position (index 1).
+    // With infinite scrolling, items wrap to fill the entire viewport:
+    // Item 2 (small) at [0, 200], Item 0 (large) at [200, 600], Item 1 (small) at [600, 800].
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget); // Wraps to fill the padding area
+
+    final Rect rect2 = tester.getRect(getItem(2).first);
+    expect(rect2, const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0));
+    final Rect rect0 = tester.getRect(getItem(0).first);
+    expect(rect0, const Rect.fromLTRB(200.0, 0.0, 600.0, 600.0));
+    final Rect rect1 = tester.getRect(getItem(1).first);
+    expect(rect1, const Rect.fromLTRB(600.0, 0.0, 800.0, 600.0));
+
+    // Scroll forward by 400 pixels (one large item width).
+    await tester.drag(find.byType(CarouselView), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling, items shift and cycle infinitely.
+    // With only 3 items and infinite scroll, items wrap around.
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+  });
+
+  testWidgets('CarouselView.weighted with hero layout (1,7,1) and infinite scrolling', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 7, 1],
+            infinite: true,
+            children: List<Widget>.generate(6, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(CarouselView)));
+    expect(viewportSize, const Size(800, 600));
+
+    // With flexWeights [1, 7, 1], total weight = 9, viewport = 800.
+    // Item widths: small ≈ 88.89, large ≈ 622.22.
+    // With consumeMaxWeight (default true), Item 0 is placed at the max weight position (index 1).
+    // Initial layout: [padding small] Item 0 (large), Item 1 (small).
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsNothing);
+
+    // Verify Item 0 is in the large/hero position with correct width.
+    final Rect rect0 = tester.getRect(getItem(0).first);
+    expect(rect0.left, moreOrLessEquals(800.0 / 9, epsilon: 0.1)); // ~88.89
+    expect(rect0.width, moreOrLessEquals(800.0 * 7 / 9, epsilon: 0.1)); // ~622.22
+
+    // Scroll forward - should continue infinitely and show different items.
+    await tester.drag(find.byType(CarouselView), const Offset(-622, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling, later items should be visible.
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+
+    // Scroll backward to return to initial position.
+    await tester.drag(find.byType(CarouselView), const Offset(622, 0));
+    await tester.pumpAndSettle();
+
+    // Should show Item 0 again in the hero position.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+
+    // Scroll backward beyond initial position - should work due to infinite.
+    // This tests true bidirectional infinite scrolling.
+    await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+    await tester.pumpAndSettle();
+
+    // After scrolling backward, items from the "end" of the list should appear
+    // (wrapping around). With 6 items, scrolling backward from Item 0 shows Item 5.
+    expect(find.text('Item 5'), findsOneWidget);
+  });
+
+  testWidgets('CarouselView.weighted with multi-browse layout and infinite scrolling', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 2, 3, 2, 1],
+            infinite: true,
+            consumeMaxWeight: false,
+            children: List<Widget>.generate(10, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(CarouselView)));
+    expect(viewportSize, const Size(800, 600));
+
+    // With flexWeights [1, 2, 3, 2, 1] and consumeMaxWeight = false, multiple items are visible.
+    // Items have varying widths based on the weight cycle.
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+
+    // Scroll forward by one item worth (first item extent = 800 * 1/9 ≈ 88.89 pixels).
+    await tester.drag(find.byType(CarouselView), const Offset(-89, 0));
+    await tester.pumpAndSettle();
+
+    // Items should have shifted, with later items now visible.
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 3'), findsOneWidget);
+
+    // Scroll backward beyond initial position (should still work due to infinite).
+    await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Item 0'), findsOneWidget);
+  });
+
+  testWidgets('CarouselView infinite leadingItem wraps correctly when scrolling forwards', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+    final reportedIndices = <int>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            onIndexChanged: (int index) {
+              reportedIndices.add(index);
+            },
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final int initialItem = controller.leadingItem;
+
+    // Scroll forward by dragging left. Each 200px drag moves one item.
+    // We'll scroll through all items and verify the leadingItem wraps correctly.
+    for (var i = 1; i <= 7; i++) {
+      await tester.drag(find.byType(CarouselView), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      // The leadingItem should wrap to [0, itemCount - 1] range.
+      expect(controller.leadingItem, (initialItem + i) % 5);
+    }
+
+    // Verify the onIndexChanged callback was invoked with correct wrapped indices.
+    expect(reportedIndices.length, greaterThanOrEqualTo(7));
+    for (final index in reportedIndices) {
+      expect(index, inInclusiveRange(0, 4));
+    }
+  });
+
+  testWidgets('CarouselView infinite leadingItem wraps correctly when scrolling backwards', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+    final reportedIndices = <int>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            onIndexChanged: (int index) {
+              reportedIndices.add(index);
+            },
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final int initialItem = controller.leadingItem;
+
+    // Scroll backward by dragging right. Each 200px drag moves one item backwards.
+    // We'll scroll backward through items and verify the leadingItem wraps correctly.
+    for (var i = 1; i <= 7; i++) {
+      await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+      await tester.pumpAndSettle();
+      // When scrolling backwards, wrap negative indices to positive.
+      // (initialItem - i) % 5 handles wrapping for negative values in Dart.
+      final int expectedItem = ((initialItem - i) % 5 + 5) % 5;
+      expect(controller.leadingItem, expectedItem);
+    }
+
+    // Verify the onIndexChanged callback was invoked with correct wrapped indices.
+    expect(reportedIndices.length, greaterThanOrEqualTo(7));
+    for (final index in reportedIndices) {
+      expect(index, inInclusiveRange(0, 4));
+    }
+  });
+
+  testWidgets('CarouselView infinite animateToItem scrolls forward to next item', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final double initialOffset = controller.offset;
+    final int initialItem = controller.leadingItem;
+
+    // Animate forward by one item. The offset should increase (scroll forward),
+    // not decrease (scroll backward).
+    controller.animateToItem(
+      initialItem + 1,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.linear,
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.leadingItem, equals((initialItem + 1) % 5));
+    expect(controller.offset, greaterThan(initialOffset));
+  });
+
+  testWidgets('CarouselView.weighted infinite animateToItem scrolls forward to next item', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: const <int>[1, 7, 1],
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final double initialOffset = controller.offset;
+
+    // With consumeMaxWeight and [1,7,1], animateToItem(1) places item 1 in the
+    // max-weight position. This is one item forward from initial (item 0 in hero).
+    // The offset should increase (scroll forward), not decrease (scroll backward).
+    controller.animateToItem(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, greaterThan(initialOffset));
+    // Item 1 should now be visible in the hero position.
+    expect(find.text('Item 1'), findsOneWidget);
+  });
+
+  testWidgets('CarouselView infinite animateToItem scrolls forward even to item just behind', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    // First scroll forward to item 2.
+    controller.animateToItem(2, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+    expect(controller.leadingItem, equals(2));
+
+    final double offsetAtItem2 = controller.offset;
+
+    // Now animate to item 1 which is just behind. In infinite mode this should
+    // scroll forward through items 3 → 4 → 0 → 1, not backward.
+    controller.animateToItem(1, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+    await tester.pumpAndSettle();
+
+    expect(controller.leadingItem, equals(1));
+    expect(controller.offset, greaterThan(offsetAtItem2));
+  });
+
+  testWidgets(
+    'CarouselView.weighted infinite animateToItem scrolls forward even to item just behind',
+    (WidgetTester tester) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[1, 7, 1],
+              itemSnapping: true,
+              infinite: true,
+              controller: controller,
+              children: List<Widget>.generate(5, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+
+      // First scroll forward to item 2 (in hero position).
+      controller.animateToItem(
+        2,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+
+      final double offsetAtItem2 = controller.offset;
+
+      // Now animate to item 1 which is just behind. In infinite mode this should
+      // scroll forward through the remaining items, not backward.
+      controller.animateToItem(
+        1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.offset, greaterThan(offsetAtItem2));
+      expect(find.text('Item 1'), findsOneWidget);
+    },
+  );
 
   group('CarouselView onIndexChanged callback', () {
     Widget buildCarousel({

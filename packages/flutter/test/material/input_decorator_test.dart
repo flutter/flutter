@@ -387,7 +387,7 @@ void main() {
           expect(
             findBorderPainter(),
             paints
-              ..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
+              ..rrect(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
           );
         });
 
@@ -444,7 +444,7 @@ void main() {
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           expect(
             findBorderPainter(),
-            paints..path(
+            paints..rrect(
               style: PaintingStyle.fill,
               color: theme.colorScheme.onSurface.withOpacity(0.04),
             ),
@@ -506,7 +506,7 @@ void main() {
           expect(theme.hoverColor, Colors.black.withOpacity(0.04));
           expect(
             findBorderPainter(),
-            paints..path(
+            paints..rrect(
               style: PaintingStyle.fill,
               color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
             ),
@@ -568,7 +568,7 @@ void main() {
           expect(
             findBorderPainter(),
             paints
-              ..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
+              ..rrect(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
           );
         });
 
@@ -594,7 +594,7 @@ void main() {
           expect(
             findBorderPainter(),
             paints
-              ..path(style: PaintingStyle.fill, color: Color.alphaBlend(hoverColor, focusColor)),
+              ..rrect(style: PaintingStyle.fill, color: Color.alphaBlend(hoverColor, focusColor)),
           );
         });
 
@@ -672,7 +672,7 @@ void main() {
           expect(
             findBorderPainter(),
             paints
-              ..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
+              ..rrect(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
           );
         });
 
@@ -1731,76 +1731,19 @@ void main() {
         ),
       );
 
-      // Skia determines the scale based on the ratios of radii to the total
-      // height or width allowed. In this case, it is the right side of the
-      // border, which have two corners with largerBorderRadius that add up
-      // to be 400.0.
-      const double denominator = largerBorderRadius * 2.0;
-
-      const double largerBorderRadiusScaled =
-          largerBorderRadius / denominator * inputDecoratorHeight;
-      const double smallerBorderRadiusScaled =
-          smallerBorderRadius / denominator * inputDecoratorHeight;
-
       expect(
         findBorderPainter(),
         paints
           ..save()
-          ..path(
+          ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            includes: const <Offset>[
-              // The border should draw along the four edges of the
-              // InputDecorator.
-
-              // Top center.
-              Offset(inputDecoratorWidth / 2.0, 0.0),
-              // Bottom center.
-              Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-              // Left center.
-              Offset(0.0, inputDecoratorHeight / 2.0),
-              // Right center.
-              Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
-
-              // The border path should contain points where each rounded corner
-              // ends.
-
-              // Bottom-right arc.
-              Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
-              // Top-right arc.
-              Offset(inputDecoratorWidth, 0.0 + largerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
-              // Bottom-left arc.
-              Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
-              Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
-              // Top-left arc.
-              Offset(0.0, 0.0 + smallerBorderRadiusScaled),
-              Offset(0.0 + smallerBorderRadiusScaled, 0.0),
-            ],
-            excludes: const <Offset>[
-              // The border should not contain the corner points, since the border
-              // is rounded.
-
-              // Top-left.
-              Offset.zero,
-              // Top-right.
-              Offset(inputDecoratorWidth, 0.0),
-              // Bottom-left.
-              Offset(0.0, inputDecoratorHeight),
-              // Bottom-right.
-              Offset(inputDecoratorWidth, inputDecoratorHeight),
-
-              // Corners with larger border ratio should not contain points outside
-              // of the larger radius.
-
-              // Bottom-right arc.
-              Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
-              // Top-left arc.
-              Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
-            ],
+            rrect: const BorderRadius.only(
+              topLeft: Radius.circular(smallerBorderRadius),
+              bottomLeft: Radius.circular(smallerBorderRadius),
+              topRight: Radius.circular(largerBorderRadius),
+              bottomRight: Radius.circular(largerBorderRadius),
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
           )
           ..restore(),
       );
@@ -1830,67 +1773,17 @@ void main() {
         ),
       );
 
-      const double denominator = borderRadius * 2.0;
-      const double borderRadiusScaled = borderRadius / denominator * inputDecoratorHeight;
-
       expect(find.text(labelText), findsOneWidget);
-      final Rect labelRect = tester.getRect(find.text(labelText));
-
       expect(
         findBorderPainter(),
         paints
           ..save()
-          ..path(
+          ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            includes: <Offset>[
-              // The border should draw along the four edges of the
-              // InputDecorator.
-
-              // Top center.
-              const Offset(inputDecoratorWidth / 2.0, 0.0),
-              // Bottom center.
-              const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-              // Left center.
-              const Offset(0.0, inputDecoratorHeight / 2.0),
-              // Right center.
-              const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
-
-              // The border path should contain points where each rounded corner
-              // ends.
-
-              // Bottom-right arc.
-              const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
-              const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
-              // Top-right arc.
-              const Offset(inputDecoratorWidth, 0.0 + borderRadiusScaled),
-              const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
-              // Bottom-left arc.
-              const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
-              const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
-              // Top-left arc.
-              const Offset(0.0, 0.0 + borderRadiusScaled),
-              const Offset(0.0 + borderRadiusScaled, 0.0),
-
-              // Gap edges:
-              // gap start x = radius - radius * cos(arc sweep).
-              // gap start y = radius - radius * sin(arc sweep).
-              const Offset(39.49999999999999, 32.284366616798906),
-              Offset(39.49999999999999 + labelRect.width, 0.0),
-            ],
-            excludes: const <Offset>[
-              // The border should not contain the corner points, since the border
-              // is rounded.
-
-              // Top-left.
-              Offset.zero,
-              // Top-right.
-              Offset(inputDecoratorWidth, 0.0),
-              // Bottom-left.
-              Offset(0.0, inputDecoratorHeight),
-              // Bottom-right.
-              Offset(inputDecoratorWidth, inputDecoratorHeight),
-            ],
+            rrect: const BorderRadius.all(
+              Radius.circular(borderRadius),
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
           )
           ..restore(),
       );
@@ -1976,30 +1869,23 @@ void main() {
 
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
-      // Fill is the border's outer path, a rounded rectangle.
       expect(
         box,
-        paints..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: <Offset>[const Offset(800.0 / 2.0, 56 / 2.0)],
-          excludes: <Offset>[
-            const Offset(1.0, 6.0), // outside the rounded corner, top left.
-            const Offset(800.0 - 1.0, 6.0), // top right.
-            const Offset(1.0, 56.0 - 6.0), // bottom left.
-            const Offset(800 - 1.0, 56.0 - 6.0), // bottom right.
-          ],
-        ),
-      );
-
-      // Border outline. The rrect is the -center- of the 1.0 stroked outline.
-      expect(
-        box,
-        paints..rrect(
-          style: PaintingStyle.stroke,
-          strokeWidth: 1.0,
-          rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
-        ),
+        paints
+          // The border's outer path, a rounded rectangle.
+          ..rrect(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            rrect: const BorderRadius.all(
+              Radius.circular(12.0),
+            ).toRRect(const Rect.fromLTWH(0, 0, 800.0, 56.0)),
+          )
+          // Border outline. The rrect is the -center- of the 1.0 stroked outline.
+          ..rrect(
+            style: PaintingStyle.stroke,
+            strokeWidth: 1.0,
+            rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+          ),
       );
     });
 
@@ -2032,6 +1918,19 @@ void main() {
         expect(
           box,
           paints
+            // Background fill of the InputDecorator.
+            ..rrect(
+              style: PaintingStyle.fill,
+              color: const Color(0xFF00FF00),
+              rrect: RRect.fromLTRBR(
+                0,
+                0,
+                inputDecoratorWidth,
+                inputDecoratorHeight,
+                const Radius.circular(borderRadius),
+              ),
+            )
+            // The stroked OutlineInputBorder.
             ..rrect(style: PaintingStyle.stroke, strokeWidth: borderWidth, rrect: expectedRRect),
         );
       }
@@ -10103,7 +10002,7 @@ void main() {
         ),
       );
 
-      expect(findBorderPainter(), paints..path(style: PaintingStyle.fill, color: fillColor));
+      expect(findBorderPainter(), paints..rrect(style: PaintingStyle.fill, color: fillColor));
     });
 
     testWidgets('activeIndicatorBorder', (WidgetTester tester) async {
@@ -10140,7 +10039,7 @@ void main() {
       final Color focusColor = theme.colorScheme.surfaceContainerHighest;
       expect(
         findBorderPainter(),
-        paints..path(style: PaintingStyle.fill, color: Color.alphaBlend(hoverColor, focusColor)),
+        paints..rrect(style: PaintingStyle.fill, color: Color.alphaBlend(hoverColor, focusColor)),
       );
     });
 
@@ -14544,30 +14443,23 @@ void main() {
 
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
-      // Fill is the border's outer path, a rounded rectangle
       expect(
         box,
-        paints..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: <Offset>[const Offset(800.0 / 2.0, 56 / 2.0)],
-          excludes: <Offset>[
-            const Offset(1.0, 6.0), // outside the rounded corner, top left
-            const Offset(800.0 - 1.0, 6.0), // top right
-            const Offset(1.0, 56.0 - 6.0), // bottom left
-            const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-          ],
-        ),
-      );
-
-      // Border outline. The rrect is the -center- of the 1.0 stroked outline.
-      expect(
-        box,
-        paints..rrect(
-          style: PaintingStyle.stroke,
-          strokeWidth: 1.0,
-          rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
-        ),
+        paints
+          // The border's outer path, a rounded rectangle.
+          ..rrect(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            rrect: const BorderRadius.all(
+              Radius.circular(12.0),
+            ).toRRect(const Rect.fromLTWH(0, 0, 800.0, 56.0)),
+          )
+          // Border outline. The rrect is the -center- of the 1.0 stroked outline.
+          ..rrect(
+            style: PaintingStyle.stroke,
+            strokeWidth: 1.0,
+            rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+          ),
       );
     });
 
@@ -15154,76 +15046,19 @@ void main() {
         ),
       );
 
-      // Skia determines the scale based on the ratios of radii to the total
-      // height or width allowed. In this case, it is the right side of the
-      // border, which have two corners with largerBorderRadius that add up
-      // to be 400.0.
-      const double denominator = largerBorderRadius * 2.0;
-
-      const double largerBorderRadiusScaled =
-          largerBorderRadius / denominator * inputDecoratorHeight;
-      const double smallerBorderRadiusScaled =
-          smallerBorderRadius / denominator * inputDecoratorHeight;
-
       expect(
         findBorderPainter(),
         paints
           ..save()
-          ..path(
+          ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            includes: const <Offset>[
-              // The border should draw along the four edges of the
-              // InputDecorator.
-
-              // Top center
-              Offset(inputDecoratorWidth / 2.0, 0.0),
-              // Bottom center
-              Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-              // Left center
-              Offset(0.0, inputDecoratorHeight / 2.0),
-              // Right center
-              Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
-
-              // The border path should contain points where each rounded corner
-              // ends.
-
-              // Bottom-right arc
-              Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
-              // Top-right arc
-              Offset(inputDecoratorWidth, 0.0 + largerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
-              // Bottom-left arc
-              Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
-              Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
-              // Top-left arc
-              Offset(0.0, 0.0 + smallerBorderRadiusScaled),
-              Offset(0.0 + smallerBorderRadiusScaled, 0.0),
-            ],
-            excludes: const <Offset>[
-              // The border should not contain the corner points, since the border
-              // is rounded.
-
-              // Top-left
-              Offset.zero,
-              // Top-right
-              Offset(inputDecoratorWidth, 0.0),
-              // Bottom-left
-              Offset(0.0, inputDecoratorHeight),
-              // Bottom-right
-              Offset(inputDecoratorWidth, inputDecoratorHeight),
-
-              // Corners with larger border ratio should not contain points outside
-              // of the larger radius.
-
-              // Bottom-right arc
-              Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
-              // Top-left arc
-              Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
-              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
-            ],
+            rrect: const BorderRadius.only(
+              topLeft: Radius.circular(smallerBorderRadius),
+              bottomLeft: Radius.circular(smallerBorderRadius),
+              topRight: Radius.circular(largerBorderRadius),
+              bottomRight: Radius.circular(largerBorderRadius),
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
           )
           ..restore(),
       );
@@ -15259,67 +15094,17 @@ void main() {
         ),
       );
 
-      const double denominator = borderRadius * 2.0;
-      const double borderRadiusScaled = borderRadius / denominator * inputDecoratorHeight;
-
       expect(find.text(labelText), findsOneWidget);
-      final Rect labelRect = tester.getRect(find.text(labelText));
-
       expect(
         findBorderPainter(),
         paints
           ..save()
-          ..path(
+          ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            includes: <Offset>[
-              // The border should draw along the four edges of the
-              // InputDecorator.
-
-              // Top center
-              const Offset(inputDecoratorWidth / 2.0, 0.0),
-              // Bottom center
-              const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-              // Left center
-              const Offset(0.0, inputDecoratorHeight / 2.0),
-              // Right center
-              const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
-
-              // The border path should contain points where each rounded corner
-              // ends.
-
-              // Bottom-right arc
-              const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
-              const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
-              // Top-right arc
-              const Offset(inputDecoratorWidth, 0.0 + borderRadiusScaled),
-              const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
-              // Bottom-left arc
-              const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
-              const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
-              // Top-left arc
-              const Offset(0.0, 0.0 + borderRadiusScaled),
-              const Offset(0.0 + borderRadiusScaled, 0.0),
-
-              // Gap edges
-              // gap start x = radius - radius * cos(arc sweep)
-              // gap start y = radius - radius * sin(arc sweep)
-              const Offset(39.49999999999999, 32.284366616798906),
-              Offset(39.49999999999999 + labelRect.width, 0.0),
-            ],
-            excludes: const <Offset>[
-              // The border should not contain the corner points, since the border
-              // is rounded.
-
-              // Top-left
-              Offset.zero,
-              // Top-right
-              Offset(inputDecoratorWidth, 0.0),
-              // Bottom-left
-              Offset(0.0, inputDecoratorHeight),
-              // Bottom-right
-              Offset(inputDecoratorWidth, inputDecoratorHeight),
-            ],
+            rrect: const BorderRadius.all(
+              Radius.circular(borderRadius),
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
           )
           ..restore(),
       );
