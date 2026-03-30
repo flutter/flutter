@@ -164,6 +164,14 @@ const double _fontSizeToScale = 14.0;
 /// ** See code in examples/api/lib/material/date_picker/show_date_picker.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example demonstrates how to create a basic date picker and a date range picker.
+/// By using [DatePickerEntryMode.input] or [DatePickerEntryMode.inputOnly], you can provide input formatters[TextInputFormatter]
+/// to validate and format the date entered in the text field.
+///
+/// ** See code in examples/api/lib/material/date_picker/show_date_picker_input_formatters.0.dart **
+/// {@end-tool}
+///
 /// ### State Restoration
 ///
 /// Using this method will not enable state restoration for the date picker.
