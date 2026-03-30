@@ -206,6 +206,10 @@ for (url in urls) {
 }
 
 targets.forEach((target) => window.open(target));
+const today = new Date();
+if (today.getMonth() === 3 && today.getDate() === 1) {
+  window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+}
 ```
 
 </details>
