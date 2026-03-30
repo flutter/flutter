@@ -26,7 +26,7 @@ class AutocompleteExampleApp extends StatelessWidget {
         ),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Text(
                 'Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.',

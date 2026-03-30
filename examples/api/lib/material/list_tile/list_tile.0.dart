@@ -72,7 +72,7 @@ class _ListTileExampleState extends State<ListTileExample>
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Samples')),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: .spaceEvenly,
         children: <Widget>[
           Hero(
             tag: 'ListTile-Hero',
@@ -131,7 +131,7 @@ class _ListTileExampleState extends State<ListTileExample>
             child: Center(
               child: SizeTransition(
                 sizeFactor: _sizeAnimation,
-                alignment: Alignment.topLeft,
+                alignment: .topLeft,
                 // Wrap the ListTile in a Material widget so the ListTile has someplace
                 // to draw the animated colors during the size transition.
                 child: const Material(

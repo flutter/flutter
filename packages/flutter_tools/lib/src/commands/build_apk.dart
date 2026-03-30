@@ -135,9 +135,6 @@ class BuildApkCommand extends BuildSubCommand {
       configOnly: configOnly,
     );
 
-    // When an app is successfully built, record to analytics whether Impeller
-    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
-    // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
