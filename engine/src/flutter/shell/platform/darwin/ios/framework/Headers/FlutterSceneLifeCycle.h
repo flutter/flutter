@@ -101,6 +101,7 @@ API_AVAILABLE(ios(13.0))
 /**
  * A protocol for manually registering a `FlutterEngine` to receive scene life cycle events.
  */
+NS_SWIFT_UI_ACTOR
 @protocol FlutterSceneLifeCycleEngineRegistration
 /**
  * Registers a `FlutterEngine` to receive scene life cycle events.

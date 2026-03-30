@@ -13,16 +13,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * A message encoding/decoding mechanism.
+ *
+ * The implementation must be thread-safe as the codec can be used on any thread.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_SENDABLE
 @protocol FlutterMessageCodec
 /**
  * Returns a shared instance of this `FlutterMessageCodec`.
  */
-+ (instancetype)sharedInstance;
++ (instancetype)sharedInstance NS_SWIFT_NONISOLATED;
 
 /**
  * Encodes the specified message into binary.
+ *
+ * The implementation should typically copy data from `message` to the `NSData`
+ * to avoid data races.
  *
  * @param message The message.
  * @return The binary encoding, or `nil`, if `message` was `nil`.
@@ -31,6 +37,9 @@ FLUTTER_DARWIN_EXPORT
 
 /**
  * Decodes the specified message from binary.
+ *
+ * The implementation should typically copy data from `message` to avoid data
+ * races.
  *
  * @param message The message.
  * @return The decoded message, or `nil`, if `message` was `nil`.
@@ -49,6 +58,7 @@ FLUTTER_DARWIN_EXPORT
  * On the Dart side, messages are represented using `ByteData`.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_SENDABLE
 @interface FlutterBinaryCodec : NSObject <FlutterMessageCodec>
 @end
 
@@ -60,6 +70,7 @@ FLUTTER_DARWIN_EXPORT
  * on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_SENDABLE
 @interface FlutterStringCodec : NSObject <FlutterMessageCodec>
 @end
 
@@ -78,6 +89,7 @@ FLUTTER_DARWIN_EXPORT
  * package.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_SENDABLE
 @interface FlutterJSONMessageCodec : NSObject <FlutterMessageCodec>
 @end
 

@@ -189,9 +189,10 @@ FLUTTER_DARWIN_EXPORT
  * Used for submitting a method call result back to a Flutter caller. Also used in
  * the dual capacity for handling a method call result received from Flutter.
  *
- * @param result The result.
+ * @param result The result. The caller must relinquish all references to it
+ * after this call to prevent data races.
  */
-typedef void (^FlutterResult)(id _Nullable result);
+typedef void (^FlutterResult)(id _Nullable NS_SWIFT_SENDING result);
 
 /**
  * A strategy for handling method calls.

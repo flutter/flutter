@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface FlutterHourFormat : NSObject
 + (BOOL)isAlwaysUse24HourFormat;
 

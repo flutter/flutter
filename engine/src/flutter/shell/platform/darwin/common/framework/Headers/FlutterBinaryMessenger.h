@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param reply The reply.
  */
-typedef void (^FlutterBinaryReply)(NSData* _Nullable reply);
+typedef void (^FlutterBinaryReply)(NSData* _Nullable NS_SWIFT_SENDING reply);
 
 /**
  * A strategy for handling incoming binary messages from Flutter and to send
@@ -27,10 +27,11 @@ typedef void (^FlutterBinaryReply)(NSData* _Nullable reply);
  * @param message The message.
  * @param reply A callback for submitting an asynchronous reply to the sender.
  */
-typedef void (^FlutterBinaryMessageHandler)(NSData* _Nullable message, FlutterBinaryReply reply);
+typedef void (NS_SWIFT_SENDABLE ^FlutterBinaryMessageHandler)(NSData* _Nullable NS_SWIFT_SENDING message, FlutterBinaryReply reply);
 
 typedef int64_t FlutterBinaryMessengerConnection;
 
+NS_SWIFT_UI_ACTOR
 @protocol FlutterTaskQueue <NSObject>
 @end
 

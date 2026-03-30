@@ -13,6 +13,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 FLUTTER_DARWIN_EXPORT
+FLUTTER_SWIFT_CONCURRENCY_EXEMPT("The camera plugin implementation its texture using its own synchronization mechanism. CVPixelBuffer is not Sendable and the camera plugin ")
+NS_SWIFT_NONISOLATED
 /**
  * Represents a texture that can be shared with Flutter.
  *
@@ -21,13 +23,16 @@ FLUTTER_DARWIN_EXPORT
 @protocol FlutterTexture <NSObject>
 /**
  * Copy the contents of the texture into a `CVPixelBuffer`.
+ 
+ * This method is called on the raster thread. The implementation must relinquish all references to the returned
+ * CVPixelBufferRef such that the content of the buffer cannot be modified after this method returns.
  *
  * The type of the pixel buffer is one of the following:
  * - `kCVPixelFormatType_32BGRA`
  * - `kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange`
  * - `kCVPixelFormatType_420YpCbCr8BiPlanarFullRange`
  */
-- (CVPixelBufferRef _Nullable)copyPixelBuffer;
+- (CVPixelBufferRef _Nullable)copyPixelBuffer NS_SWIFT_SENDING;
 
 /**
  * Called when the texture is unregistered.
@@ -39,6 +44,7 @@ FLUTTER_DARWIN_EXPORT
 @end
 
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 /**
  * A collection of registered `FlutterTexture`'s.
  */
@@ -52,7 +58,8 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Notifies Flutter that the content of the previously registered texture has been updated.
  *
- * This will trigger a call to `-[FlutterTexture copyPixelBuffer]` on the raster thread.
+ * This method must be called on the platform thread. Calling this method will trigger a call to
+ * `-[FlutterTexture copyPixelBuffer]` on the raster thread.
  */
 - (void)textureFrameAvailable:(int64_t)textureId;
 /**
