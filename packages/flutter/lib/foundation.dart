@@ -53,4 +53,5 @@ export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';
 export 'src/foundation/timeline.dart';
 export 'src/foundation/ui_primitives.dart';
+export 'src/foundation/ui_primitives_config.dart';
 export 'src/foundation/unicode.dart';

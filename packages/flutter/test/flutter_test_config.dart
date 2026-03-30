@@ -32,6 +32,9 @@ bool _isLeakTrackingEnabled() {
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
+  // TODO(polina-c): configure it for running applications too.
+  configureErrorReportingInUiPrimitives();
+
   // Enable checks because there are many implementations of [RenderBox] in this
   // package can benefit from the additional validations.
   debugCheckIntrinsicSizes = true;
