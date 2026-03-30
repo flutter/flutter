@@ -232,7 +232,7 @@ abstract class RegularWindowController extends BaseWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    Color backgroundColor = const Color.fromARGB(0, 255, 255, 255),
+    Color backgroundColor = const Color.fromARGB(255, 0, 0, 0),
     bool decorated = true,
     RegularWindowControllerDelegate? delegate,
   }) {
