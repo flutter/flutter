@@ -545,7 +545,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       }
     }
 
-    return !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+    // Match arm64 as an architecture token, not as a substring of arm64e (see #184056).
+    return !buildSettings.contains(RegExp(r'EXCLUDED_ARCHS[^\n]*\barm64\b'));
   }
 
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
