@@ -455,7 +455,7 @@ void main() {
               'The Dart VM service is listening on http://127.0.0.1:65155/ZkxDXuYz2Aw=/\n'
               'Content-Length: 36\r\n\r\n{"jsonrpc":"2.0","id":1,"result":{}}'
               'Content-Length: 93\r\n\r\n'
-              '{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze",'
+              r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
               '"value":{"kind":"begin"}}}'
               'Content-Length: 249\r\n\r\n'
               '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
@@ -463,7 +463,7 @@ void main() {
               '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
               '"message":"It\'s an error."}]}}'
               'Content-Length: 91\r\n\r\n'
-              '{"jsonrpc":"2.0","method":"\$/progress","params":{"token":"analyze",'
+              r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
               '"value":{"kind":"end"}}}',
         ),
       ]);

@@ -119,7 +119,7 @@ void main() {
       () async {
         final streamController = StreamController<List<int>>();
         final sink = IOSink(streamController.sink);
-        final Completer<void> exitCompleter = Completer<void>();
+        final exitCompleter = Completer<void>();
         final process = _CustomLspProcess(stdin: sink, exitCompleter: exitCompleter);
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -137,13 +137,13 @@ void main() {
           ),
         ]);
 
-        final StringBuffer buffer = StringBuffer();
-        final Completer<void> messageReceived = Completer<void>();
+        final buffer = StringBuffer();
+        final messageReceived = Completer<void>();
         String? firstMessage;
 
         streamController.stream.transform(utf8.decoder).listen((String chunk) {
           buffer.write(chunk);
-          final String current = buffer.toString();
+          final current = buffer.toString();
           if (current.contains('{') && firstMessage == null) {
             final int startIndex = current.indexOf('{');
             firstMessage = current.substring(startIndex);

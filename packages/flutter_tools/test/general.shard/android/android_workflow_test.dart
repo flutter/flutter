@@ -312,7 +312,7 @@ Review licenses that have not been accepted (y/N)?
     sdk.sdkManagerVersion = '26.0.0';
     processManager.addCommand(
       FakeCommand(
-        command: <String>['/foo/bar/sdkmanager', '--licenses'],
+        command: const <String>['/foo/bar/sdkmanager', '--licenses'],
         stdin: IgnoringStdin(),
       ),
     );
@@ -399,7 +399,7 @@ Review licenses that have not been accepted (y/N)?
     final logger = BufferLogger.test();
     processManager.addCommand(
       FakeCommand(
-        command: <String>[sdkManagerPath, '--licenses'],
+        command: const <String>[sdkManagerPath, '--licenses'],
         exitCode: 1,
         stderr: 'sdkmanager crash',
         stdin: IgnoringStdin(),
@@ -673,7 +673,7 @@ Review licenses that have not been accepted (y/N)?
       final logger = BufferLogger.test();
       processManager.addCommand(
         FakeCommand(
-          command: <String>[sdkManagerPath, '--licenses'],
+          command: const <String>[sdkManagerPath, '--licenses'],
           exitCode: 1,
           stderr: '''
 Error: LinkageError occurred while loading main class com.android.sdklib.tool.sdkmanager.SdkManagerCli
@@ -920,7 +920,7 @@ class ThrowingStdin<T> extends Fake implements IOSink {
 class IgnoringStdin extends Fake implements IOSink {
   @override
   Future<void> addStream(Stream<List<int>> stream) async {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(
       (_) {},
       onDone: completer.complete,
