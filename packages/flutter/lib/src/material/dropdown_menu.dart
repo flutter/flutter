@@ -783,7 +783,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (oldWidget.enableSearch != widget.enableSearch) {
       if (!widget.enableSearch) {
         _enableSearch = widget.enableSearch;
-        currentHighlight = null;
       }
     }
     if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
@@ -1020,7 +1019,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       text: entry.label,
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
-                    currentHighlight = widget.enableSearch ? i : null;
+                    currentHighlight = i;
                     widget.onSelected?.call(entry.value);
                     _enableFilter = false;
                     if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
@@ -1127,9 +1126,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       if (_controller.isOpen) {
         widget.onSelected?.call(null);
       }
-    }
-    if (!widget.enableSearch) {
-      currentHighlight = null;
     }
     _controller.close();
   }

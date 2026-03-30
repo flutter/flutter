@@ -560,6 +560,34 @@ void main() {
       expect(getItemLabelStyle(selectedItem.label)?.fontWeight, FontWeight.bold);
       expect(getItemLabelStyle(nonSelectedItem.label)?.fontWeight, FontWeight.normal);
     });
+
+        testWidgets('Selected entry is highlighted when enableSearch is false', (
+      WidgetTester tester,
+    ) async {
+      final themeData = ThemeData();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              requestFocusOnTap: true,
+              enableSearch: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+      await tester.tap(findMenuItemButton('Item 3'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      expect(isItemHighlighted(tester, themeData, 'Item 3'), true);
+    });
   });
 
   testWidgets('Inner TextField is disabled when DropdownMenu is disabled', (
