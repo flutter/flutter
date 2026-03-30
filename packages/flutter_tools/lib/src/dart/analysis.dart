@@ -158,9 +158,6 @@ class AnalysisServer {
     print('Content-Length: ${message.length}\r\n\r\n$message\n');
   }
 
-  Future<void> connectToDtd({required Uri dtdUri}) async =>
-      sendRequest('dart/connectToDtd', {'uri': dtdUri.toString()});
-
   Future<Map<String, Object?>?> sendRequest(String method, Map<String, Object?> params) async {
     final int id = ++_id;
     final Completer<Map<String, Object?>?> completer = _outstandingRequests[id] =
