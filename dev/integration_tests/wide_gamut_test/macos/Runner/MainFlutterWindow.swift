@@ -10,8 +10,7 @@ import Foundation
 // 2. Subclass to intercept and "lock" the wide-gamut state without global swizzling.
 class WideGamutViewController: FlutterViewController {
     
-    // This intercepts the private engine method called during window moves/resizes.
-    // By overriding it, we stop the engine from checking the screen and disabling wide-gamut.
+    // Override the method in the view controller to force wide-gamut support.
     @objc(updateWideGamutForScreen)
     func updateWideGamutForScreen() {
         if let flutterView = self.view as AnyObject as? PrivateFlutterView {
