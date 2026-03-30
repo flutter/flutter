@@ -2,5 +2,4 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-export 'package:ui_primitives/ui_primitives.dart'
-    show FrameworkErrorDetails, Listenable, ValueListenable, ValueNotifier;
+export 'package:ui_primitives/ui_primitives.dart' show Listenable, ValueListenable, ValueNotifier;
