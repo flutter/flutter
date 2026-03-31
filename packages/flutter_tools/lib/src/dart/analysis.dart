@@ -289,7 +289,8 @@ class AnalysisServer {
             case 'textDocument/publishDiagnostics':
               _handleAnalysisIssues(paramsMap);
             case 'window/showMessage':
-              _handleServerError(paramsMap);
+              _handleShowMessage(paramsMap);
+              break;
           }
         }
       }
@@ -312,11 +313,24 @@ class AnalysisServer {
     }
   }
 
-  void _handleServerError(Map<String, Object?> params) {
-    // LSP window/showMessage
-    final message = params['message']! as String;
-    _logger.printError('Error from the analysis server: $message');
-    _didServerErrorOccur = true;
+  void _handleShowMessage(Map<String, Object?> params) {
+    final int? typeId = params['type'] as int?;
+    final _ShowMessageType? type = _ShowMessageType.fromId(typeId);
+    final String message = params['message']! as String;
+
+    switch (type) {
+      case _ShowMessageType.error:
+        _didServerErrorOccur = true;
+        _logger.printError('Error from the analysis server: $message');
+      case _ShowMessageType.warning:
+        _logger.printWarning('Warning from the analysis server: $message');
+      case _ShowMessageType.info:
+        _logger.printStatus('Info from the analysis server: $message');
+      case _ShowMessageType.log:
+        _logger.printTrace('Log from the analysis server: $message');
+      case null:
+        _logger.printStatus('Message from the analysis server: $message');
+    }
   }
 
   void _handleAnalysisIssues(Map<String, Object?> params) {
@@ -486,4 +500,26 @@ class FileAnalysisErrors {
 
   final String file;
   final List<AnalysisError> errors;
+}
+
+enum _ShowMessageType {
+  error(1),
+  warning(2),
+  info(3),
+  log(4);
+
+  const _ShowMessageType(this.id);
+  final int id;
+
+  static _ShowMessageType? fromId(int? id) {
+    if (id == null) {
+      return null;
+    }
+    for (final _ShowMessageType type in values) {
+      if (type.id == id) {
+        return type;
+      }
+    }
+    return null;
+  }
 }
