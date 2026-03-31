@@ -28,11 +28,13 @@ class CircleContents : public ColorSourceContents {
  private:
   explicit CircleContents(std::unique_ptr<CircleGeometry> geometry,
                           Color color,
-                          bool stroked);
+                          bool stroked,
+                          Scalar aa_padding);
 
   std::unique_ptr<CircleGeometry> geometry_;
   Color color_;
   bool stroked_;
+  Scalar aa_padding_;
 };
 }  // namespace impeller
 
