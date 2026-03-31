@@ -36,6 +36,8 @@ class FramebufferBlendContents final : public ColorSourceContents {
 
   ~FramebufferBlendContents() override;
 
+  const Geometry* GetGeometry() const override;
+
   void SetBlendMode(BlendMode blend_mode);
 
   void SetChildContents(std::shared_ptr<Contents> child_contents);

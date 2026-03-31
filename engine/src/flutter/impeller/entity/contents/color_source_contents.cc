@@ -13,14 +13,6 @@ ColorSourceContents::ColorSourceContents() = default;
 
 ColorSourceContents::~ColorSourceContents() = default;
 
-void ColorSourceContents::SetGeometry(const Geometry* geometry) {
-  geometry_ = geometry;
-}
-
-const Geometry* ColorSourceContents::GetGeometry() const {
-  return geometry_;
-}
-
 void ColorSourceContents::SetOpacityFactor(Scalar alpha) {
   opacity_ = alpha;
 }
@@ -43,8 +35,9 @@ bool ColorSourceContents::IsSolidColor() const {
 
 std::optional<Rect> ColorSourceContents::GetCoverage(
     const Entity& entity) const {
-  return geometry_->GetCoverage(entity.GetTransform());
-};
+  const Geometry* geometry = GetGeometry();
+  return geometry ? geometry->GetCoverage(entity.GetTransform()) : std::nullopt;
+}
 
 void ColorSourceContents::SetInheritedOpacity(Scalar opacity) {
   inherited_opacity_ = opacity;

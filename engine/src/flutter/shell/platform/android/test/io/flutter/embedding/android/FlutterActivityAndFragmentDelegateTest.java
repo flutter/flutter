@@ -79,6 +79,8 @@ public class FlutterActivityAndFragmentDelegateTest {
   private FlutterActivityAndFragmentDelegate.Host mockHost2;
 
   @Before
+  // Annotation required because FlutterShellArgs was deprecated in favor of FlutterEngineFlags.
+  @SuppressWarnings("deprecation")
   public void setup() {
     FlutterInjector.reset();
     // Create a mocked FlutterEngine for the various interactions required by the delegate
@@ -462,6 +464,8 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
+  // Annotation required because FlutterShellArgs was deprecated in favor of FlutterEngineFlags.
+  @SuppressWarnings("deprecation")
   public void itGivesHostAnOpportunityToConfigureFlutterTextureView() {
     // ---- Test setup ----
     Host customMockHost = mock(Host.class);
