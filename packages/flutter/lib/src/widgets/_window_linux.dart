@@ -571,7 +571,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    //_window.setTypeHint(_GDK_WINDOW_TYPE_HINT_TOOLTIP);
+    _window.setTypeHint(_GdkWindowTypeHint.tooltip);
     _window.setDecorated(false);
     _window.realize();
 
