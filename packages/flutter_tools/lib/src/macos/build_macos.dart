@@ -113,9 +113,7 @@ Future<void> buildMacOS({
   await migration.run();
 
   final String buildDirectoryPath = getMacOSBuildDirectory();
-  final Directory flutterBuildDir = flutterProject.directory.childDirectory(
-    buildDirectoryPath,
-  );
+  final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -166,8 +164,6 @@ Future<void> buildMacOS({
       );
     }
   }
-
-
 
   await processPodsIfNeeded(flutterProject.macos, buildDirectoryPath, buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.

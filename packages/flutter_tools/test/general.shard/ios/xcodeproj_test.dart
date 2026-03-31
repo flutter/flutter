@@ -558,8 +558,26 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
-        const FakeCommand(command: <String>['pgrep', '-n', 'xcrun', 'xcodebuild', '-clonedSourcePackagesDirPath', '/build/macos/SourcePackages', '-resolvePackageDependencies']),
-        const FakeCommand(command: <String>['xcrun', 'xcodebuild', '-clonedSourcePackagesDirPath', '/build/macos/SourcePackages', '-resolvePackageDependencies']),
+        const FakeCommand(
+          command: <String>[
+            'pgrep',
+            '-n',
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/macos/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/macos/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xcrun',
