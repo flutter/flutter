@@ -46,74 +46,82 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
       duration: const Duration(seconds: 1),
       builder: (context, double value, Widget? child) {
         final double padding = 20 + value * 16;
-        return Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x4D000000),
-                blurRadius: 12.0,
-                offset: Offset(0, 4),
+        return Overlay.wrap(
+          alwaysSizeToContent: true,
+          child: Material(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x4D000000),
+                    blurRadius: 12.0,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
+              padding: EdgeInsets.symmetric(
+                horizontal: padding,
+                vertical: padding,
+              ),
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0x33FFFFFF),
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.info,
-                      color: Color(0xFFFFFFFF),
-                      size: 20,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0x33FFFFFF),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: const Icon(
+                          Icons.info,
+                          color: Color(0xFFFFFFFF),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Popup Window',
+                        style: TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Popup Window',
-                    style: TextStyle(
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                  const SizedBox(height: 16),
+                  Container(
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: const Color(0x33FFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: TextField(
+                      controller: _textController,
+                      focusNode: _focusNode,
+                      style: const TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontSize: 14,
+                      ),
+                      cursorColor: const Color(0xFFFFFFFF),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                width: 200,
-                decoration: BoxDecoration(
-                  color: const Color(0x33FFFFFF),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: TextField(
-                  controller: _textController,
-                  focusNode: _focusNode,
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 14,
-                  ),
-                  cursorColor: const Color(0xFFFFFFFF),
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
