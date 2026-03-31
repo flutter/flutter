@@ -17,22 +17,25 @@ using PipelineBuilderCallback =
 using VS = CirclePipeline::VertexShader;
 using FS = CirclePipeline::FragmentShader;
 
-Scalar kAntialiasPixels = 1.0;
 }  // namespace
 
 std::unique_ptr<CircleContents> CircleContents::Make(
     std::unique_ptr<CircleGeometry> geometry,
     Color color,
     bool stroked) {
-  geometry->SetAntialiasPadding(kAntialiasPixels);
+  Scalar aa_padding = geometry->GetAntialiasPadding();
   return std::unique_ptr<CircleContents>(
-      new CircleContents(std::move(geometry), color, stroked));
+      new CircleContents(std::move(geometry), color, stroked, aa_padding));
 }
 
 CircleContents::CircleContents(std::unique_ptr<CircleGeometry> geometry,
                                Color color,
-                               bool stroked)
-    : geometry_(std::move(geometry)), color_(color), stroked_(stroked) {}
+                               bool stroked,
+                               Scalar aa_padding)
+    : geometry_(std::move(geometry)),
+      color_(color),
+      stroked_(stroked),
+      aa_padding_(aa_padding) {}
 
 bool CircleContents::Render(const ContentContext& renderer,
                             const Entity& entity,
@@ -45,7 +48,7 @@ bool CircleContents::Render(const ContentContext& renderer,
   frag_info.center = geometry_->GetCenter();
   frag_info.radius = geometry_->GetRadius();
   frag_info.stroke_width = geometry_->GetStrokeWidth();
-  frag_info.aa_pixels = kAntialiasPixels;
+  frag_info.aa_pixels = aa_padding_;
   frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
   auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
@@ -74,6 +77,10 @@ bool CircleContents::Render(const ContentContext& renderer,
 
 std::optional<Rect> CircleContents::GetCoverage(const Entity& entity) const {
   return geometry_->GetCoverage(entity.GetTransform());
+}
+
+const Geometry* CircleContents::GetGeometry() const {
+  return geometry_.get();
 }
 
 }  // namespace impeller

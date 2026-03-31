@@ -80,7 +80,7 @@ class CkVertices implements ui.Vertices {
         _colors,
         _indices,
       );
-      _ref = UniqueRef<SkVertices>(this, skVertices, 'Vertices');
+      _ref = CkUniqueRef<SkVertices>(this, skVertices, 'Vertices');
     } else {
       _ref = null;
     }
@@ -91,7 +91,7 @@ class CkVertices implements ui.Vertices {
   final Float32List? _textureCoordinates;
   final Uint32List? _colors;
   final Uint16List? _indices;
-  late final UniqueRef<SkVertices>? _ref;
+  late final CkUniqueRef<SkVertices>? _ref;
 
   SkVertices get skiaObject => _ref!.nativeObject;
 
