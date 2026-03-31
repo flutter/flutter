@@ -1,80 +1,59 @@
 # Novi
 
-Aplicación Flutter multiplataforma con pantalla de inicio de sesión, tema claro/oscuro y persistencia de preferencias. Proyecto pensado para seguir creciendo (API, registro, etc.).
+**Novi** es una aplicación móvil (APK Android) desarrollada con Flutter. Incluye pantalla de inicio de sesión, pantalla de inicio tras “entrar”, y **modo claro / oscuro** que puedes dejar automático según el teléfono o fijar a mano; la preferencia se guarda en el dispositivo.
 
-## Características
+> Proyecto personal en evolución: más adelante se puede conectar a un backend real (cuentas, API, etc.).
 
-- **Inicio de sesión**: formulario con correo y contraseña, validación básica y flujo simulado hacia una pantalla de inicio.
-- **Tema claro y oscuro**: soporte Material 3; modo **según el sistema**, **claro** u **oscuro**, con botón en login y en la pantalla principal. La elección se guarda en el dispositivo (`shared_preferences`).
-- **Plataformas**: Android, iOS, Web, Windows, Linux y macOS (estructura estándar de Flutter).
+---
 
-## Requisitos
+## Qué hace la app
 
-- [Flutter](https://docs.flutter.dev/get-started/install) (SDK compatible con **Dart ^3.11**).
-- Para Android: Android SDK / [Android Studio](https://developer.android.com/studio) según la [guía oficial para Flutter](https://docs.flutter.dev/get-started/install/windows).
+| | |
+|---|---|
+| **Inicio de sesión** | Correo y contraseña con validación básica; el flujo de autenticación es de demostración hasta conectar un servidor. |
+| **Tema** | Tres modos: según el sistema, siempre claro o siempre oscuro. Icono arriba a la derecha en login y en la pantalla principal. |
+| **Plataforma** | Pensada para **Android** (APK). El mismo código también corre en web y escritorio si lo compilas desde el proyecto. |
 
-Comprobar el entorno:
+---
 
-```bash
-flutter doctor -v
-```
+## Instalar la APK en Android
 
-## Cómo ejecutar el proyecto
+1. Genera la release en tu PC: `flutter build apk --release --split-per-abi`
+2. En el móvil **ARM 64 bits** (casi todos los actuales), usa:  
+   `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
+3. Copia el archivo al teléfono y ábrelo para instalar (puede hacer falta permitir *fuentes desconocidas* en ajustes).
+
+Para **actualizar** la app instalada, vuelve a instalar una APK nueva con el mismo identificador de aplicación (misma firma / mismo proyecto).
+
+---
+
+## Desarrollo (clonar y ejecutar)
+
+Requisitos: [Flutter](https://docs.flutter.dev/get-started/install) (Dart ^3.11) y, para Android, el SDK configurado (`flutter doctor`).
 
 ```bash
 git clone https://github.com/TU_USUARIO/novi.git
 cd novi
 flutter pub get
+flutter run -d chrome    # o el dispositivo que uses
 ```
 
-- **Chrome (web):** `flutter run -d chrome`
-- **Windows:** `flutter run -d windows` (requiere Visual Studio con desarrollo de escritorio C++).
-- **Android (dispositivo o emulador):** `flutter run` con depuración USB activada o emulador iniciado.
-
-Durante el desarrollo: **`r`** hot reload, **`R`** hot restart.
-
-## Generar APK (Android)
-
-```bash
-flutter build apk --release --split-per-abi
-```
-
-La APK para la mayoría de móviles actuales (ARM 64 bits) suele ser:
-
-`build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
-
-## Estructura relevante
+Estructura principal del código:
 
 ```
 lib/
-├── main.dart                 # MaterialApp, temas claro/oscuro
-├── screens/
-│   ├── login_screen.dart
-│   └── home_screen.dart
-├── theme/
-│   └── theme_controller.dart # Modo de tema y persistencia
+├── main.dart
+├── screens/          # login, inicio
+├── theme/            # tema y preferencia guardada
 └── widgets/
-    └── theme_mode_button.dart
 ```
-
-## Dependencias principales
-
-| Paquete | Uso |
-|--------|-----|
-| `shared_preferences` | Guardar la preferencia de tema |
-| `cupertino_icons` | Iconos iOS-style (plantilla Flutter) |
-
-## Tests
 
 ```bash
 flutter test
 ```
 
-## Notas
-
-- El inicio de sesión es **demostración** (sin backend); sustituir la lógica en `login_screen.dart` cuando conectes una API o Firebase.
-- No subas claves ni `google-services.json` con secretos reales; usa variables de entorno o secretos fuera del repositorio.
+---
 
 ## Licencia
 
-Define la licencia que prefieras en este repositorio (por ejemplo MIT o propietaria).
+Indica aquí la licencia que quieras usar para Novi (por ejemplo MIT o uso privado).
