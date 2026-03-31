@@ -33,4 +33,13 @@ BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 FLUTTER_ROOT="$BIN_DIR/../../.."
 DART="$FLUTTER_ROOT/bin/dart"
 
+# Xcode provides its own version of Git that may be incompatible with the
+# primary installation of Git on the host.  If another Git is found when all
+# Xcode directories are removed from the PATH, then tell Flutter's scripts to
+# use that version of Git.
+NO_XCODE_PATH=$(echo $PATH | tr ":" "\n" | grep -v /Xcode.app/ | tr "\n" ":")
+if NO_XCODE_GIT=$(env PATH=$NO_XCODE_PATH which git); then
+  export FLUTTER_GIT=$NO_XCODE_GIT
+fi
+
 "$DART" "$BIN_DIR/xcode_backend.dart" "$@" "ios"

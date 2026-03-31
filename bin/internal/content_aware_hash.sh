@@ -12,8 +12,10 @@
 # -------------------------------------------------------------------------- #
 
 set -e
+set -o pipefail
 
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
+GIT=${FLUTTER_GIT:-git}
 
 unset GIT_DIR
 unset GIT_INDEX_FILE
@@ -25,7 +27,7 @@ unset GIT_WORK_TREE
 # bin/internal/release-candidate-branch.version: release marker
 TRACKEDFILES=(DEPS engine bin/internal/release-candidate-branch.version)
 BASEREF="HEAD"
-CURRENT_BRANCH="$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)"
+CURRENT_BRANCH="$($GIT -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)"
 
 # By default, the content hash is based on HEAD.
 # For local development branches, we want to base the hash on the merge-base
@@ -50,14 +52,14 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   # This is a development branch. Find the merge-base.
   # We will fallback to origin if upstream is not detected.
   REMOTE="origin"
-  if git -C "$FLUTTER_ROOT" remote get-url upstream >/dev/null 2>&1; then
+  if $GIT -C "$FLUTTER_ROOT" remote get-url upstream >/dev/null 2>&1; then
     REMOTE="upstream"
   fi
 
   # Try to find the merge-base with master, then main.
-  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
+  MERGEBASE=$($GIT -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
   if [[ -z "$MERGEBASE" ]]; then
-    MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
+    MERGEBASE=$($GIT -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
   fi
 
   if [[ -n "$MERGEBASE" ]]; then
@@ -65,4 +67,4 @@ if [[ "$CURRENT_BRANCH" != "main" && \
   fi
 fi
 
-git -C "$FLUTTER_ROOT" ls-tree "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
+$GIT -C "$FLUTTER_ROOT" ls-tree "$BASEREF" -- "${TRACKEDFILES[@]}" | git hash-object --stdin
