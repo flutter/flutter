@@ -21,18 +21,6 @@
 typedef int64_t FlutterViewIdentifier;
 
 /**
- * Protocol for wide gamut support in FlutterView.
- */
-@protocol FlutterViewWideGamut <NSObject>
-
-/**
- * Updates the wide gamut setting on the surface manager.
- */
-- (void)setEnableWideGamut:(BOOL)enabled;
-
-@end
-
-/**
  * Values for the `mouseTrackingMode` property.
  */
 typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
