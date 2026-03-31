@@ -24,7 +24,7 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '8.13.0', gradleVersion: '9.1.0', kotlinVersion: '2.2.20'),
   /* Others */
   VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '2.1.0'),
-  VersionTuple(agpVersion: '8.9.0', gradleVersion: '8.11.1', kotlinVersion: '2.2.0')
+  VersionTuple(agpVersion: '8.9.0', gradleVersion: '8.11.1', kotlinVersion: '2.2.0'),
 ]; // Max length is 7 entries until this test is split See https://github.com/flutter/flutter/issues/167495.
 
 Future<void> main() async {
