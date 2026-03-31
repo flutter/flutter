@@ -987,11 +987,10 @@ class _FlView extends _GtkWidget {
 /// Wraps FlViewMonitor (helper object for handling signals from FlView).
 class _FlViewMonitor extends _GObject {
   /// Create a new FlViewMonitor.
-  factory _FlViewMonitor(_FlView view, {VoidCallback? onFirstFrame}) {
-    void noop() {}
+  factory _FlViewMonitor(_FlView view, {required VoidCallback onFirstFrame}) {
     return _FlViewMonitor._internal(
       view.instance,
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onFirstFrame ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onFirstFrame),
     );
   }
 
