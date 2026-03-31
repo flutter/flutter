@@ -12,9 +12,7 @@ void main() {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll(() async {
-    await driver.close();
-  });
+  tearDownAll(driver.close);
 
   test('check that we are showing the performance overlay', () async {
     await driver.requestData('status'); // force a reassemble

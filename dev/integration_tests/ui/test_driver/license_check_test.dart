@@ -27,9 +27,7 @@ void main() {
       await driver.waitUntilFirstFrameRasterized();
     });
 
-    tearDownAll(() async {
-      await driver.close();
-    });
+    tearDownAll(driver.close);
 
     test('flutter license', () async {
       await driver.waitFor(find.byValueKey('Header'));

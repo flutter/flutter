@@ -136,7 +136,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: defaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(
       tester.getSize(find.byType(Checkbox)),
@@ -146,11 +146,11 @@ void main() {
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
     expect(
       _getCheckboxMaterial(tester),
       paints
-        ..path(color: selectedFillColor)
+        ..rrect(color: selectedFillColor)
         ..path(color: defaultCheckColor),
     );
 
@@ -174,7 +174,7 @@ void main() {
     expect(
       _getCheckboxMaterial(tester),
       paints
-        ..path(color: selectedFillColor)
+        ..rrect(color: selectedFillColor)
         ..path(color: focusedCheckColor),
     );
   });
@@ -254,7 +254,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: defaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(
       tester.getSize(find.byType(Checkbox)),
@@ -264,11 +264,11 @@ void main() {
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
     expect(
       _getCheckboxMaterial(tester),
       paints
-        ..path(color: selectedFillColor)
+        ..rrect(color: selectedFillColor)
         ..path(color: checkColor),
     );
 
@@ -318,12 +318,12 @@ void main() {
     // Unselected checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: themeDefaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: themeDefaultFillColor));
 
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: selectedFillColor));
   });
 
   testWidgets('Checkbox theme overlay color resolves in active/pressed states', (
@@ -412,11 +412,11 @@ void main() {
 
     await tester.pumpWidget(buildCheckbox(active: true));
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor));
+    expect(_getCheckboxMaterial(tester), paints..rrect(color: localThemeFillColor));
     expect(
       _getCheckboxMaterial(tester),
       paints
-        ..path(color: localThemeFillColor)
+        ..rrect(color: localThemeFillColor)
         ..path(color: localThemeCheckColor),
     );
   });
