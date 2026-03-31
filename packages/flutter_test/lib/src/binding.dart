@@ -198,10 +198,10 @@ class _TestFlutterView implements FlutterView {
   @override
   ui.ViewConstraints get physicalConstraints => constraints != null
       ? ui.ViewConstraints(
-          minWidth: constraints!.minWidth,
-          maxWidth: constraints!.maxWidth,
-          minHeight: constraints!.minHeight,
-          maxHeight: constraints!.maxHeight,
+          minWidth: constraints!.minWidth * devicePixelRatio,
+          maxWidth: constraints!.maxWidth * devicePixelRatio,
+          minHeight: constraints!.minHeight * devicePixelRatio,
+          maxHeight: constraints!.maxHeight * devicePixelRatio,
         )
       : ui.ViewConstraints.tight(physicalSize);
 
