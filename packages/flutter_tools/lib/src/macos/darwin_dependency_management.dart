@@ -80,7 +80,9 @@ class DarwinDependencyManagement {
       await _xcodeProjectInterpreter?.prefetchSwiftPackages(
         xcodeProject.hostAppRoot.path,
         waitForCompletion: false,
-        buildDirectory: _fileSystem.directory(platform.buildDirectory(_config, _fileSystem)),
+        buildDirectory: _fileSystem.directory(
+          platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+        ),
       );
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already

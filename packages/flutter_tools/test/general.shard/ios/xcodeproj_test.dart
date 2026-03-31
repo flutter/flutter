@@ -274,6 +274,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -320,6 +322,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -366,6 +370,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -412,6 +418,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -458,6 +466,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -502,6 +512,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -546,6 +558,8 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        const FakeCommand(command: <String>['pgrep', '-n', 'xcrun', 'xcodebuild', '-clonedSourcePackagesDirPath', '/build/macos/SourcePackages', '-resolvePackageDependencies']),
+        const FakeCommand(command: <String>['xcrun', 'xcodebuild', '-clonedSourcePackagesDirPath', '/build/macos/SourcePackages', '-resolvePackageDependencies']),
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -592,6 +606,8 @@ void main() {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
+      kFindProcessResolvePackagesCommand,
+      kResolvePackagesCommand,
       FakeCommand(
         command: <String>[
           'xcrun',
@@ -2415,6 +2431,64 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
       );
     },
   );
+
+  testWithoutContext('prefetchSwiftPackages skips running if already completed', () async {
+    final fs = MemoryFileSystem.test();
+    final testLogger = BufferLogger.test();
+    final platform = FakePlatform(operatingSystem: 'macos');
+    const projectPath = 'path/to/project';
+    final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+    final fakeProcessManager = FakeProcessManager.empty();
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'pgrep',
+          '-n',
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+        exitCode: 1,
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+      ),
+    ]);
+
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: testLogger,
+      fileSystem: fs,
+      platform: platform,
+      processManager: fakeProcessManager,
+      analytics: const NoOpAnalytics(),
+    );
+
+    await xcodeProjectInterpreter.prefetchSwiftPackages(
+      projectPath,
+      buildDirectory: buildDirectory,
+      quiet: false,
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+
+    await xcodeProjectInterpreter.prefetchSwiftPackages(
+      projectPath,
+      buildDirectory: buildDirectory,
+      quiet: false,
+    );
+
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
 
   testWithoutContext('prefetchSwiftPackages does not print when quiet is true', () async {
     final fs = MemoryFileSystem.test();

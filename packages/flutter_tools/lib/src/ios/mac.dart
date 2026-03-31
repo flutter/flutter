@@ -291,10 +291,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
   final buildCommands = <String>[
-    ...globals.xcode!.xcodebuildCommand(
+    ...(await globals.xcode!.xcodebuildProjectCommand(
+      app.project.hostAppRoot.path,
       globals.fs.directory(buildDirectoryPath),
       skipPackageResolution: false,
-    ),
+    )),
     '-configuration',
     configuration,
   ];

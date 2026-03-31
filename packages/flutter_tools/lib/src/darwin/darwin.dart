@@ -128,12 +128,12 @@ enum FlutterDarwinPlatform {
   }
 
   /// Returns the corresponding build directory for the platform.
-  String buildDirectory([Config? config, FileSystem? fileSystem]) {
+  String buildDirectory({Config? config, FileSystem? fileSystem}) {
     switch (this) {
       case FlutterDarwinPlatform.ios:
-        return getIosBuildDirectory(config, fileSystem);
+        return getIosBuildDirectory(config: config, fileSystem: fileSystem);
       case FlutterDarwinPlatform.macos:
-        return getMacOSBuildDirectory(config, fileSystem);
+        return getMacOSBuildDirectory(config: config, fileSystem: fileSystem);
     }
   }
 }

@@ -177,7 +177,11 @@ class XcodeProjectInterpreter {
     return xcrunCommand;
   }
 
-  /// A list of required arguments for the `xcodebuild` command.
+  /// Prefetches SwiftPM dependencies needed for `xcodebuild` command and then returns a list of
+  /// required arguments for the `xcodebuild` Xcode project command.
+  ///
+  /// This is not required when running commands that don't require a project (e.g.
+  /// `xcodebuild -version`).
   ///
   /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
   /// and that the Swift package cache is properly configured.
@@ -185,7 +189,26 @@ class XcodeProjectInterpreter {
   /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
   /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
   /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
-  List<String> xcodebuildCommand(Directory buildDirectory, {bool skipPackageResolution = true}) {
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async {
+    // All `xcodebuild` project commands will download and resolve Swift packages.
+    // We should always prefetch Swift packages before running any `xcodebuild` project command
+    // to control the output.
+    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
+
+    return _xcodebuildProjectCommandArguments(
+      buildDirectory,
+      skipPackageResolution: skipPackageResolution,
+    );
+  }
+
+  List<String> _xcodebuildProjectCommandArguments(
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) {
     final String cachePath = buildDirectory
         .childDirectory(kSwiftPackageCacheDirectoryName)
         .absolute
@@ -225,7 +248,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final showBuildSettingsCommand = <String>[
-      ...xcodebuildCommand(_fileSystem.directory(buildDir)),
+      ...(await xcodebuildProjectCommand(projectPath, _fileSystem.directory(buildDir))),
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -336,11 +359,12 @@ class XcodeProjectInterpreter {
   Future<void> cleanWorkspace(
     String workspacePath,
     String scheme, {
-    bool verbose = false,
     required Directory buildDirectory,
+    bool verbose = false,
   }) async {
+    final String projectPath = _fileSystem.currentDirectory.path;
     await _processUtils.run(<String>[
-      ...xcodebuildCommand(buildDirectory),
+      ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
       '-workspace',
       workspacePath,
       '-scheme',
@@ -348,7 +372,7 @@ class XcodeProjectInterpreter {
       if (!verbose) '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
-    ], workingDirectory: _fileSystem.currentDirectory.path);
+    ], workingDirectory: projectPath);
   }
 
   /// The process used to fetch Swift packages.
@@ -377,7 +401,7 @@ class XcodeProjectInterpreter {
     Status? status;
     try {
       final command = <String>[
-        ...xcodebuildCommand(buildDirectory, skipPackageResolution: false),
+        ..._xcodebuildProjectCommandArguments(buildDirectory, skipPackageResolution: false),
         '-resolvePackageDependencies',
       ];
       if (_swiftPackageFetchProcess == null) {
@@ -426,9 +450,9 @@ class XcodeProjectInterpreter {
           .transform<String>(const Utf8Decoder(reportErrors: false))
           .listen(stderrBuffer.write);
 
-      final int exitCode = await process.exitCode.whenComplete(() {
-        _swiftPackageFetchStdoutSubscription?.cancel();
-        _swiftPackageFetchStderrSubscription?.cancel();
+      final int exitCode = await process.exitCode.whenComplete(() async {
+        await _swiftPackageFetchStdoutSubscription?.cancel();
+        await _swiftPackageFetchStderrSubscription?.cancel();
       });
       if (exitCode != 0) {
         throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
@@ -443,8 +467,6 @@ class XcodeProjectInterpreter {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
-    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
-
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -454,7 +476,7 @@ class XcodeProjectInterpreter {
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
-        ...xcodebuildCommand(buildDirectory),
+        ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],

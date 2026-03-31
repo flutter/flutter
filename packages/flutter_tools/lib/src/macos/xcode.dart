@@ -231,11 +231,15 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  List<String> xcodebuildCommand(Directory dartToolDir, {bool skipPackageResolution = true}) =>
-      _xcodeProjectInterpreter.xcodebuildCommand(
-        dartToolDir,
-        skipPackageResolution: skipPackageResolution,
-      );
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
+    projectPath,
+    buildDirectory,
+    skipPackageResolution: skipPackageResolution,
+  );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);
 
