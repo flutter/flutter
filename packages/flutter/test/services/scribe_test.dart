@@ -80,7 +80,7 @@ void main() {
       return Future<void>.value();
     });
 
-    await Scribe.startStylusHandwriting();
+    Scribe.startStylusHandwriting();
     expect(calls, hasLength(1));
     expect(calls.first.method, 'Scribe.startStylusHandwriting');
   }, skip: kIsWeb); // [intended]

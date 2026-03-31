@@ -41,7 +41,7 @@ Future<void> execute() async {
   );
 
   // Lists may not be scrolled into frame in landscape.
-  await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+  SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);

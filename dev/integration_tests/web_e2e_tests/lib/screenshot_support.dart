@@ -22,7 +22,7 @@ Future<void> runTestWithScreenshots({
 
   (await driver.webDriver.window).setSize(Rectangle<int>(0, 0, browserWidth, browserHeight));
 
-  await test.integrationDriver(
+  test.integrationDriver(
     driver: driver,
     onScreenshot:
         (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {

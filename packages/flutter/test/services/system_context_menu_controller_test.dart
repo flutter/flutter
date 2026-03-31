@@ -180,7 +180,7 @@ void main() {
     // Showing calls the platform.
     const rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     final items = <IOSSystemContextMenuItemData>[const IOSSystemContextMenuItemDataCopy()];
-    await controller.showWithItems(rect1, items);
+    controller.showWithItems(rect1, items);
     expect(controller.isVisible, isTrue);
     expect(targetRects, hasLength(1));
     expect(targetRects.last['x'], rect1.left);
@@ -202,7 +202,7 @@ void main() {
     expect(systemHideCount, 1);
 
     // Hiding does not call the platform, since the menu was already hidden.
-    await controller.hide();
+    controller.hide();
     expect(controller.isVisible, isFalse);
     expect(hideCount, 0);
   });
@@ -528,7 +528,7 @@ void main() {
     });
 
     expect(systemContextMenuController.isVisible, isFalse);
-    await systemContextMenuController.showWithItems(anchor, defaultItemDatas);
+    systemContextMenuController.showWithItems(anchor, defaultItemDatas);
     expect(systemContextMenuController.isVisible, isTrue);
   });
 
