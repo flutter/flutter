@@ -45,7 +45,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
       appBar: AppBar(title: const Text('SnackBar Sample')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             SegmentedButton<AnimationStyles>(
               selected: _animationStyleSelection,

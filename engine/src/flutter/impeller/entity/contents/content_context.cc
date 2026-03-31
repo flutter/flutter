@@ -303,6 +303,7 @@ struct ContentContext::Pipelines {
   Variants<TiledTexturePipeline> tiled_texture;
   Variants<VerticesUber1Shader> vertices_uber_1_;
   Variants<VerticesUber2Shader> vertices_uber_2_;
+  Variants<UberSDFPipeline> uber_sdf;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 // Web doesn't support external texture OpenGL extensions
@@ -634,6 +635,9 @@ ContentContext::ContentContext(
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
+    if (context_->GetFlags().use_sdfs) {
+      pipelines_->uber_sdf.CreateDefault(*context_, options);
+    }
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
       pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
@@ -1195,6 +1199,11 @@ PipelineRef ContentContext::GetGlyphAtlasPipeline(
 PipelineRef ContentContext::GetYUVToRGBFilterPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->yuv_to_rgb_filter, opts);
+}
+
+PipelineRef ContentContext::GetUberSDFPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->uber_sdf, opts);
 }
 
 PipelineRef ContentContext::GetPorterDuffPipeline(
