@@ -49,7 +49,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
         ListTile(
           tileColor: colorScheme.primaryContainer,
           title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: <Widget>[
               Text('enabled: true'),
               Text('requestFocusOnTap: true'),
@@ -78,7 +78,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
         ListTile(
           tileColor: colorScheme.primaryContainer,
           title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: <Widget>[
               Text('enabled: true'),
               Text('requestFocusOnTap: false'),
@@ -107,7 +107,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
         ListTile(
           tileColor: colorScheme.onInverseSurface,
           title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: <Widget>[
               Text('enabled: false'),
               Text('requestFocusOnTap: true'),
@@ -137,7 +137,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
         ListTile(
           tileColor: colorScheme.onInverseSurface,
           title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: <Widget>[
               Text('enabled: false'),
               Text('requestFocusOnTap: false'),

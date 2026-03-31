@@ -36,7 +36,7 @@ class _SliderExampleState extends State<SliderExample> {
       appBar: AppBar(title: const Text('Slider')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           spacing: 16,
           children: <Widget>[
             Slider(

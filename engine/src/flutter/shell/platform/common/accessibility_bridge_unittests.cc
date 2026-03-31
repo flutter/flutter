@@ -592,5 +592,48 @@ TEST(AccessibilityBridgeTest, LineBreakingObjectTest) {
       ax::mojom::BoolAttribute::kIsLineBreakingObject));
 }
 
+TEST(AccessibilityBridgeTest, IsSelectedAttribute) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  std::vector<int32_t> children{1, 2};
+  FlutterSemanticsNode2 node0 = CreateSemanticsNode(0, "node 0", &children);
+  auto flags0 = FlutterSemanticsFlags{
+      .is_selected = FlutterTristate::kFlutterTristateNone,
+  };
+  node0.flags2 = &flags0;
+
+  FlutterSemanticsNode2 node1 = CreateSemanticsNode(1, "node 1");
+  auto flags1 = FlutterSemanticsFlags{
+      .is_selected = FlutterTristate::kFlutterTristateTrue,
+  };
+  node1.flags2 = &flags1;
+
+  FlutterSemanticsNode2 node2 = CreateSemanticsNode(2, "node 2");
+  auto flags2 = FlutterSemanticsFlags{
+      .is_selected = FlutterTristate::kFlutterTristateFalse,
+  };
+  node2.flags2 = &flags2;
+
+  bridge->AddFlutterSemanticsNodeUpdate(node0);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->CommitUpdates();
+
+  auto delegate0 = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto delegate1 = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  auto delegate2 = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
+
+  // For kFlutterTristateNone, selected should be false.
+  EXPECT_FALSE(delegate0->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected));
+  // For kFlutterTristateTrue, selected should be true.
+  EXPECT_TRUE(delegate1->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected));
+  // For kFlutterTristateFalse, selected should be false.
+  EXPECT_FALSE(delegate2->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected));
+}
+
 }  // namespace testing
 }  // namespace flutter

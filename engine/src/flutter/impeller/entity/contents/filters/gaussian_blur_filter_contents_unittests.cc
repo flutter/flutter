@@ -229,6 +229,26 @@ TEST(GaussianBlurFilterContentsTest, FilterSourceCoverage) {
   }
 }
 
+TEST(GaussianBlurFilterContentsTest, FilterSourceCoverageNegativeScale) {
+  fml::StatusOr<Scalar> sigma_radius_1 =
+      CalculateSigmaForBlurRadius(1.0, Matrix());
+  ASSERT_TRUE(sigma_radius_1.ok());
+  auto contents = std::make_unique<GaussianBlurFilterContents>(
+      sigma_radius_1.value(), sigma_radius_1.value(), Entity::TileMode::kDecal,
+      /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
+      /*mask_geometry=*/nullptr);
+
+  // Negative scale should still result in an expanded coverage rect.
+  std::optional<Rect> coverage = contents->GetFilterSourceCoverage(
+      /*effect_transform=*/Matrix::MakeScale({-2.0, 2.0, 1.0}),
+      /*output_limit=*/Rect::MakeLTRB(100, 100, 200, 200));
+  ASSERT_TRUE(coverage.has_value());
+  if (coverage.has_value()) {
+    EXPECT_RECT_NEAR(coverage.value(),
+                     Rect::MakeLTRB(100 - 2, 100 - 2, 200 + 2, 200 + 2));
+  }
+}
+
 TEST(GaussianBlurFilterContentsTest, CalculateSigmaValues) {
   EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(1.0f), 1);
   EXPECT_EQ(GaussianBlurFilterContents::CalculateScale(2.0f), 1);

@@ -33,11 +33,13 @@
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/shadow_vertices_contents.h"
+#include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/solid_rsuperellipse_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/entity/contents/uber_sdf_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -59,6 +61,8 @@
 namespace impeller {
 
 namespace {
+
+constexpr Scalar kAntialiasPadding = 1.0f;
 
 bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
   return filter->type() == flutter::DlColorFilterType::kMatrix ||
@@ -537,10 +541,10 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   } else {
     geom = std::make_unique<CircleGeometry>(center, radius);
   }
+  geom->SetAntialiasPadding(kAntialiasPadding);
 
   auto contents =
       CircleContents::Make(std::move(geom), paint.color, is_stroked);
-
   entity.SetContents(std::move(contents));
   AddRenderEntityToCurrentPass(entity);
 
@@ -770,7 +774,8 @@ void Canvas::DrawLine(const Point& p0,
 
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
-  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+  if ((renderer_.GetContext()->GetFlags().antialiased_lines ||
+       renderer_.GetContext()->GetFlags().use_sdfs) &&
       !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
     auto contents = LineContents::Make(std::move(geometry), paint.color);
@@ -819,6 +824,29 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+    Scalar expand_size = kAntialiasPadding;
+    if (paint.style == Paint::Style::kStroke) {
+      expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
+                                                         paint.stroke.width);
+    }
+
+    FillRectGeometry geometry(rect);
+    geometry.SetAntialiasPadding(expand_size);
+
+    auto contents = UberSDFContents::MakeRect(
+        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
+        /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
+
+    const Geometry* geom = contents->GetGeometry();
+
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                            /*reuse_depth=*/false,
+                                            /*override_contents=*/
+                                            std::move(contents));
+    return;
+  }
 
   if (paint.style == Paint::Style::kStroke) {
     StrokeRectGeometry geom(rect, paint.stroke);
@@ -1002,6 +1030,33 @@ void Canvas::DrawCircle(const Point& center,
     if (AttemptDrawBlur(shape, paint)) {
       return;
     }
+  }
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+    const bool is_stroked = paint.style == Paint::Style::kStroke;
+
+    std::optional<CircleGeometry> geometry;
+    if (is_stroked) {
+      geometry.emplace(center, radius, paint.stroke.width);
+    } else {
+      geometry.emplace(center, radius);
+    }
+    geometry->SetAntialiasPadding(1.0f);
+
+    auto contents = UberSDFContents::MakeCircle(
+        /*color=*/paint.color, /*stroked=*/is_stroked, &geometry.value());
+
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    const Geometry* geom = contents->GetGeometry();
+
+    AddRenderEntityWithFiltersToCurrentPass(
+        entity, geom, paint,
+        /*reuse_depth=*/false,
+        /*override_contents=*/std::move(contents));
+    return;
   }
 
   if (AttemptDrawAntialiasedCircle(center, radius, paint)) {
@@ -1266,8 +1321,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   src_paint.color = paint.color.WithAlpha(1.0);
 
   std::shared_ptr<ColorSourceContents> src_contents =
-      src_paint.CreateContents();
-  src_contents->SetGeometry(vertices.get());
+      src_paint.CreateContents(vertices.get());
 
   // If the color source has an intrinsic size, then we use that to
   // create the src contents as a simplification. Otherwise we use
@@ -1291,10 +1345,8 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
       src_coverage = cvg.value();
     }
   }
-  src_contents = src_paint.CreateContents();
-
   clip_geometry_.push_back(Geometry::MakeRect(Rect::Round(src_coverage)));
-  src_contents->SetGeometry(clip_geometry_.back().get());
+  src_contents = src_paint.CreateContents(clip_geometry_.back().get());
 
   auto contents = std::make_shared<VerticesSimpleBlendContents>();
   contents->SetBlendMode(blend_mode);
@@ -1302,7 +1354,8 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   contents->SetGeometry(vertices);
   contents->SetLazyTextureCoverage(src_coverage);
   contents->SetLazyTexture(
-      [src_contents, src_coverage](const ContentContext& renderer) {
+      [src_contents, src_coverage](
+          const ContentContext& renderer) -> std::shared_ptr<Texture> {
         // Applying the src coverage as the coverage limit prevents the 1px
         // coverage pad from adding a border that is picked up by developer
         // specified UVs.
@@ -1908,14 +1961,16 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   AddRenderEntityToCurrentPass(entity, false);
 }
 
-void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
-                                                     const Geometry* geometry,
-                                                     const Paint& paint,
-                                                     bool reuse_depth) {
-  std::shared_ptr<ColorSourceContents> contents = paint.CreateContents();
+void Canvas::AddRenderEntityWithFiltersToCurrentPass(
+    Entity& entity,
+    const Geometry* geometry,
+    const Paint& paint,
+    bool reuse_depth,
+    const std::shared_ptr<ColorSourceContents>& override_contents) {
+  std::shared_ptr<ColorSourceContents> contents =
+      override_contents ? override_contents : paint.CreateContents(geometry);
   if (!paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value()) {
-    contents->SetGeometry(geometry);
     entity.SetContents(std::move(contents));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
     return;
@@ -1939,17 +1994,15 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
   }
 
   bool can_apply_mask_filter = geometry->CanApplyMaskFilter();
-  contents->SetGeometry(geometry);
 
   if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value()) {
     // If there's a mask blur and we need to apply the color filter on the GPU,
     // we need to be careful to only apply the color filter to the source
     // colors. CreateMaskBlur is able to handle this case.
     FillRectGeometry out_rect(Rect{});
-    auto filter_contents = paint.mask_blur_descriptor->CreateMaskBlur(
-        contents, needs_color_filter ? paint.color_filter : nullptr,
-        needs_color_filter ? paint.invert_colors : false, &out_rect);
-    entity.SetContents(std::move(filter_contents));
+    auto filter = paint.mask_blur_descriptor->CreateMaskBlur(
+        paint, geometry, contents, needs_color_filter, &out_rect);
+    entity.SetContents(std::move(filter));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
     return;
   }
