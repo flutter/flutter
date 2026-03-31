@@ -154,7 +154,7 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue(bridge->observations[0].action == flutter::SemanticsAction::kShowOnScreen);
 }
 
--(void)testFlutterScrollableSemanticsObjectIsNotAccessibilityElementWhenVoiceOverIsRunning {
+- (void)testFlutterScrollableSemanticsObjectIsNotAccessibilityElementWhenVoiceOverIsRunning {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
@@ -163,7 +163,8 @@ const float kFloatCompareEpsilon = 0.001;
   flutter::SemanticsNode node;
   node.flags.hasImplicitScrolling = true;
 
-  node.actions = flutter::kHorizontalScrollSemanticsActions | static_cast<int32_t>(flutter::SemanticsAction::kCustomAction);
+  node.actions = flutter::kHorizontalScrollSemanticsActions |
+                 static_cast<int32_t>(flutter::SemanticsAction::kCustomAction);
 
   node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
   node.scrollExtentMax = 100.0;
