@@ -9,14 +9,6 @@
 
 @interface FlutterView ()
 
-/**
- * Updates the wide gamut setting on the surface manager. Called when
- * the window moves to a screen with different gamut support.
- *
- * Must be called on the platform thread.
- */
-- (void)setEnableWideGamut:(BOOL)enableWideGamut;
-
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERVIEW_INTERNAL_H_
