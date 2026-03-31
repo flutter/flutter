@@ -550,6 +550,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         enableTapToDismiss: widget.enableTapToDismiss,
         onTriggered: widget.onTriggered,
         dismissDelay: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
+        preferBelow: widget.preferBelow ?? _tooltipTheme.preferBelow ?? _defaultPreferBelow,
+        verticalOffset:
+            widget.verticalOffset ?? _tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
         positionDelegate: _getDefaultPositionDelegate,
         ignorePointer: widget.ignorePointer ?? widget.message != null,
         child: effectiveChild,

@@ -265,6 +265,8 @@ class RawTooltip extends StatefulWidget {
     this.enableFeedback = true,
     this.onTriggered,
     this.animationStyle = _kDefaultAnimationStyle,
+    this.preferBelow = true,
+    this.verticalOffset = 0.0,
     this.positionDelegate,
     this.ignorePointer = false,
     required this.child,
@@ -426,6 +428,29 @@ class RawTooltip extends StatefulWidget {
   // the tooltip's underlying animation.
   final AnimationStyle animationStyle;
 
+  /// {@template flutter.widgets.RawTooltip.preferBelow}
+  /// Whether the tooltip defaults to being displayed below the widget.
+  ///
+  /// If there is insufficient space to display the tooltip in the preferred
+  /// direction, the tooltip will be displayed in the opposite direction.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool preferBelow;
+
+  /// {@template flutter.widgets.RawTooltip.verticalOffset}
+  /// The vertical gap between the widget and the displayed tooltip.
+  ///
+  /// When [preferBelow] is set to true and tooltips have sufficient space to
+  /// display themselves, this property defines how much vertical space
+  /// tooltips will position themselves under their corresponding widgets.
+  /// Otherwise, tooltips will position themselves above their corresponding
+  /// widgets with the given offset.
+  ///
+  /// Defaults to 0.0.
+  /// {@endtemplate}
+  final double verticalOffset;
+
   /// {@template flutter.widgets.RawTooltip.positionDelegate}
   /// A custom position delegate function for computing where the tooltip should
   /// be positioned.
@@ -536,6 +561,16 @@ class RawTooltip extends StatefulWidget {
       FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
     );
     properties.add(
+      FlagProperty(
+        'position',
+        value: preferBelow,
+        ifTrue: 'below',
+        ifFalse: 'above',
+        showName: true,
+      ),
+    );
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: 0.0));
+    properties.add(
       DiagnosticsProperty<TooltipPositionDelegate>(
         'positionDelegate',
         positionDelegate,
@@ -579,11 +614,13 @@ class _WindowTooltipShowController implements _TooltipShowController {
   _WindowTooltipShowController({
     required this.parent,
     required this.anchorRectGetter,
+    required this.positionerBuilder,
     required this.onChanged,
   });
 
   final BaseWindowController parent;
   final Rect? Function() anchorRectGetter;
+  final WindowPositioner Function() positionerBuilder;
   final VoidCallback onChanged;
 
   TooltipWindowController? _controller;
@@ -602,10 +639,7 @@ class _WindowTooltipShowController implements _TooltipShowController {
     _controller = TooltipWindowController(
       parent: parent,
       anchorRect: anchorRect,
-      positioner: const WindowPositioner(
-        parentAnchor: WindowPositionerAnchor.bottom,
-        childAnchor: WindowPositionerAnchor.top,
-      ),
+      positioner: positionerBuilder(),
       delegate: _RawTooltipWindowControllerDelegate(onDestroyed: hide),
     );
     onChanged();
@@ -917,10 +951,12 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     if (!_showControllerInitialized) {
       _showControllerInitialized = true;
       final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
-      if (windowRegistry != null && isWindowingEnabled) {
+      final BaseWindowController? windowController = WindowScope.maybeOf(context);
+      if (windowRegistry != null && windowController != null && isWindowingEnabled) {
         _showController = _WindowTooltipShowController(
-          parent: WindowScope.of(context),
+          parent: windowController,
           anchorRectGetter: _getAnchorRect,
+          positionerBuilder: _buildWindowPositioner,
           onChanged: () => setState(() {}),
         );
       } else {
@@ -936,6 +972,14 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       return position & renderBox.size;
     }
     return null;
+  }
+
+  WindowPositioner _buildWindowPositioner() {
+    return WindowPositioner(
+      parentAnchor: widget.preferBelow ? WindowPositionerAnchor.bottom : WindowPositionerAnchor.top,
+      childAnchor: widget.preferBelow ? WindowPositionerAnchor.top : WindowPositionerAnchor.bottom,
+      offset: Offset(0.0, widget.preferBelow ? widget.verticalOffset : -widget.verticalOffset),
+    );
   }
 
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
@@ -964,6 +1008,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
         delegate: _TooltipPositionDelegate(
           target: target,
           targetSize: layoutInfo.childSize,
+          preferBelow: widget.preferBelow,
+          verticalOffset: widget.verticalOffset,
           positionDelegate: widget.positionDelegate,
         ),
         child: tooltip,
@@ -1057,7 +1103,13 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 /// below a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
-  _TooltipPositionDelegate({required this.target, required this.targetSize, this.positionDelegate});
+  _TooltipPositionDelegate({
+    required this.target,
+    required this.targetSize,
+    this.preferBelow = true,
+    this.verticalOffset = 0.0,
+    this.positionDelegate,
+  });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -1065,6 +1117,12 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   /// The size of the target widget that triggers the tooltip.
   final Size targetSize;
+
+  /// Whether the tooltip prefers to be positioned below the target.
+  final bool preferBelow;
+
+  /// The vertical gap between the widget and the displayed tooltip.
+  final double verticalOffset;
 
   /// A custom position delegate function for computing where the tooltip should be positioned.
   ///
@@ -1084,7 +1142,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
           targetSize: targetSize,
           tooltipSize: childSize,
           overlaySize: size,
-          verticalOffset: 0.0,
+          verticalOffset: verticalOffset,
+          preferBelow: preferBelow,
         ),
       );
     }
@@ -1092,7 +1151,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
       size: size,
       childSize: childSize,
       target: target,
-      preferBelow: true,
+      verticalOffset: verticalOffset,
+      preferBelow: preferBelow,
     );
   }
 
@@ -1100,6 +1160,8 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target ||
         targetSize != oldDelegate.targetSize ||
+        preferBelow != oldDelegate.preferBelow ||
+        verticalOffset != oldDelegate.verticalOffset ||
         positionDelegate != oldDelegate.positionDelegate;
   }
 }
