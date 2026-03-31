@@ -53,6 +53,7 @@ const String _kFlutterIntegrationPackageName = 'FlutterNativeIntegration';
 const String _kSources = 'Sources';
 const String _kScripts = 'Scripts';
 const String _kTools = 'Tools';
+const String _kTests = 'Tests';
 const String _kSwiftPlugins = 'Plugins';
 const List<String> _kSupportedPlatforms = ['ios', 'macos'];
 const String _kCodesignIdentityFile = '.codesign_identity';
@@ -433,12 +434,10 @@ class BuildSwiftPackage extends BuildSubCommand {
     }
   }
 
-  /// Creates relative symlinks for Sources and Package.swift using the [defaultBuildMode] so that
+  /// Creates relative symlinks for FlutterPluginRegistrant using the [defaultBuildMode] so that
   /// the package may easily be switched to a different build mode by updating the symlink.
   ///
-  /// Creates a symlink from the Sources directory to the './[defaultBuildMode]' directory.
-  ///
-  /// Creates a symlink from Package.swift to "./[defaultBuildMode]/Package.swift"
+  /// Creates a symlink for the FlutterPluginRegistrant directory to the './[defaultBuildMode]' directory.
   @visibleForTesting
   void createSourcesSymlink(Directory flutterIntegrationPackage, String defaultBuildMode) {
     final Link flutterPluginRegistrant = flutterIntegrationPackage.childLink(
@@ -1629,9 +1628,8 @@ class FlutterNativeIntegrationSwiftPackage {
   /// occurs after the Flutter.framework and App.framework are embedded into the app bundle.
   static const String _kFlutterAssembleTool = 'FlutterAssembleTool';
 
-  // ignore: comment_references
-  /// The name of the Swift package executable tool that will be used to for the "Switch to
-  /// [insert build mode]" plugins.
+  /// The name of the Swift package executable tool that will be used by the "Switch to..."
+  /// plugins.
   static const String _kFlutterPluginTool = 'FlutterPluginTool';
 
   /// The name of the Swift test target that will be used to test the Flutter tools in CI.
@@ -1680,7 +1678,7 @@ class FlutterNativeIntegrationSwiftPackage {
       flutterIntegrationPackage.childDirectory(_kSwiftPlugins),
       buildInfos,
     );
-    await _generateTestSources(flutterIntegrationPackage.childDirectory('Tests'));
+    await _generateTestSources(flutterIntegrationPackage.childDirectory(_kTests));
   }
 
   /// Generates bash scripts and xcfilelists to be used for integrating SwiftPM into the
@@ -1740,7 +1738,7 @@ class FlutterNativeIntegrationSwiftPackage {
     ErrorHandlingFileSystem.deleteIfExists(testDirectory, recursive: true);
     if (_generateTests) {
       final Template testsTemplate = await Template.fromName(
-        _utils.fileSystem.path.join('add_to_app', 'darwin', 'Tests'),
+        _utils.fileSystem.path.join('add_to_app', 'darwin', _kTests),
         fileSystem: _utils.fileSystem,
         templateManifest: null,
         logger: _utils.logger,

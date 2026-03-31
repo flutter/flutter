@@ -8,10 +8,10 @@ import Foundation
 /// This tool is expected to run after the Flutter.framework and App.framework have been embedded
 /// in the app.
 ///
-/// This tool verifies the embedded Flutter framework is the correct build mode and throws an error
-/// if not.
+/// This tool verifies the embedded Flutter framework is the correct build mode. Otherwise, it will
+/// re-embed and codesign the correct version of the framework if possible or throw an error if not.
 ///
-/// This tool then calls into the Flutter CLI to re-build and embed the App.framework.
+/// This tool also calls into the Flutter CLI to re-build and embed the App.framework if possible.
 @main
 struct FlutterAssembleTool {
   static func main() {

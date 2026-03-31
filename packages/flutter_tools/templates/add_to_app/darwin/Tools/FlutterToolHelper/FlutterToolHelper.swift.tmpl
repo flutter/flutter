@@ -175,7 +175,7 @@ public class FlutterToolHelper {
   ///
   /// - Parameter message: The message to print.
   public static func xcodeWarning(message: String) {
-    fputs("error: \(message)\n", stdout)
+    fputs("warning: \(message)\n", stdout)
   }
 
   /// Prints an note message to `stdout` to be reported to the Xcode build system.

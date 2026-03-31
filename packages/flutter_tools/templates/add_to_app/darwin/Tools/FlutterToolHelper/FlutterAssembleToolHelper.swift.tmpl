@@ -22,7 +22,7 @@ public class FlutterAssembleToolHelper {
   ///   - env: A dictionary of environment variables.
   ///   - fileManager: The file manager to use for file operations.
   ///   - processManager: The process runner to use.
-  /// - Throws: `XcodeErrorAndExit.error` if the assembly fails.
+  /// - Throws: `XcodeErrorAndExit.error` on failure.
   public static func run(
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
@@ -78,18 +78,19 @@ public class FlutterAssembleToolHelper {
     )
   }
 
-  /// Runs the assembly process within a sandbox.
+  /// Verify the Flutter framework build mode throw guided error if the build mode is incorrect.
   ///
   /// If sandboxing is enabled, `flutter assemble` cannot be run. This method
   /// verifies the Flutter framework and updates the symlink if necessary.
   ///
   /// - Parameters:
   ///   - appPath: The path to the Flutter application.
+  ///   - packagePath: The path to the native integration package.
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
   ///   - fileManager: The file manager to use for file operations.
-  /// - Throws: `XcodeErrorAndExit.error` if sandboxing is enabled and `FLUTTER_APPLICATION_PATH` is set.
+  /// - Throws: `XcodeErrorAndExit.error` if build mode is incorrect.
   static func runInSandbox(
     appPath: String?,
     packagePath: String,
@@ -154,6 +155,7 @@ public class FlutterAssembleToolHelper {
   /// Verifies that the Flutter framework has the correct build mode.
   ///
   /// - Parameters:
+  ///   - packagePath: The path to the native integration package.
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - verifyBuiltProducts: Whether to verify `BUILT_PRODUCTS_DIR`.
@@ -216,7 +218,7 @@ public class FlutterAssembleToolHelper {
     }
   }
 
-  /// Verifies a framework's build mode.
+  /// Verifies the Flutter framework's build mode.
   ///
   /// Parses the framework's Info.plist for the `BuildMode` key and compares it to the expected
   /// build mode.
@@ -224,6 +226,7 @@ public class FlutterAssembleToolHelper {
   /// - Parameters:
   ///   - buildDirectory: The directory containing the framework.
   ///   - expectedBuildMode: The expected build mode.
+  ///   - packagePath: The path to the native integration package.
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
@@ -371,6 +374,7 @@ public class FlutterAssembleToolHelper {
   /// that the Flutter and App frameworks match the target build mode.
   ///
   /// - Parameters:
+  ///   - packagePath: The path to the native integration package.
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
@@ -402,7 +406,7 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager
       )
       // Copy and codesign
-      try FlutterAssembleToolHelper.copyFlutterFramework(
+      try FlutterAssembleToolHelper.copyAndCodesignFramework(
         frameworkName: targetPlatform == .ios ? "Flutter" : "FlutterMacOS",
         packagePath: packagePath,
         targetBuildMode: targetBuildMode,
@@ -411,7 +415,7 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
-      try FlutterAssembleToolHelper.copyFlutterFramework(
+      try FlutterAssembleToolHelper.copyAndCodesignFramework(
         frameworkName: "App",
         packagePath: packagePath,
         targetBuildMode: targetBuildMode,
@@ -420,6 +424,23 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
+
+      let cocoaPodsPath = "\(packagePath)/FlutterPluginRegistrant/Frameworks/CocoaPods"
+      if fileManager.fileExists(atPath: cocoaPodsPath) {
+        let messages =
+          [
+            "CocoaPod plugin framework were detected in the FlutterNativeIntegration package that were built with a different build mode.",
+            "To switch to the correct build mode, please re-run or complete one of the following actions before building:",
+          ]
+          + pluginInstructions(
+            targetBuildMode: targetBuildMode,
+            packagePath: packagePath
+          )
+        for message in messages {
+          FlutterToolHelper.xcodeWarning(message: message)
+        }
+      }
+
       updated = true
     }
     if updated == true {
@@ -437,7 +458,7 @@ public class FlutterAssembleToolHelper {
   /// Calls the Flutter tool to assemble the App framework.
   ///
   /// - Parameters:
-  ///   - command: The command to run (e.g., "build-native").
+  ///   - appPath: The path to the Flutter application.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
   ///   - fileManager: The file manager to use for file operations.
@@ -619,12 +640,15 @@ public class FlutterAssembleToolHelper {
   /// Copies the Flutter framework to `BUILT_PRODUCTS_DIR`.
   ///
   /// - Parameters:
+  ///   - frameworkName: The name of the framework to copy.
+  ///   - packagePath: The path to the native integration package.
   ///   - targetBuildMode: The build mode the app is being built for.
+  ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
   ///   - fileManager: The file manager to use for file operations.
   ///   - processManager: The process runner to use.
   /// - Throws: `XcodeErrorAndExit.error` if the copy fails.
-  static func copyFlutterFramework(
+  static func copyAndCodesignFramework(
     frameworkName: String,
     packagePath: String,
     targetBuildMode: String,

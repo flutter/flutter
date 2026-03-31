@@ -238,6 +238,10 @@ enum SwiftPackageLibraryType {
   final String name;
 }
 
+/// Types of package products.
+///
+/// Representation of Product from
+/// https://developer.apple.com/documentation/packagedescription/product.
 enum SwiftPackageProductType {
   library(name: '.library'),
   executable(name: '.executable'),
