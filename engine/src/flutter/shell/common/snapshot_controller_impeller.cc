@@ -154,12 +154,6 @@ void SnapshotControllerImpeller::MakeImpellerSnapshot(
             }
           })
           .SetIfFalse([&] {
-#if FML_OS_IOS_SIMULATOR
-            if (!GetDelegate().GetAiksContext()) {
-              callback(nullptr);
-              return;
-            }
-#endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
                                           GetDelegate(), pixel_format));
           }));

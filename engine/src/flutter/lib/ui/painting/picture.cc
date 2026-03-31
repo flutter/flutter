@@ -147,13 +147,7 @@ static sk_sp<DlImage> MakeImpellerImage(
     return impeller::DlImageImpeller::Make(texture,
                                            DlImage::OwningContext::kRaster);
   }
-#if FML_OS_IOS_SIMULATOR
-  return impeller::DlImageImpeller::Make(nullptr,
-                                         DlImage::OwningContext::kRaster,
-                                         /*is_fake_image=*/true);
-#else
   return nullptr;
-#endif
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
