@@ -255,7 +255,10 @@ tasks.register("clean", Delete) {
       });
 
       testUsingContext('skip if Built-in Kotlin flag exists', () async {
-        topLevelGradlePropertiesFile.writeAsStringSync(gradlePropertiesFileContentToMigrateTo);
+        topLevelGradlePropertiesFile.writeAsStringSync('''
+android.newDsl=false
+android.builtInKotlin=false
+''');
 
         // Built-in Kotlin flag already exists
         expect(
@@ -295,7 +298,9 @@ tasks.register("clean", Delete) {
       );
 
       testUsingContext('add flag if it does not exist in gradle.properties file', () async {
-        topLevelGradlePropertiesFile.writeAsStringSync(gradlePropertiesFileContentToMigrate);
+        topLevelGradlePropertiesFile.writeAsStringSync('''
+android.newDsl=false
+''');
         expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
         expect(
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
@@ -311,6 +316,36 @@ tasks.register("clean", Delete) {
         );
         expect(
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+          isTrue,
+        );
+      });
+
+      testUsingContext('add both flags if they do not exist in gradle.properties file', () async {
+        topLevelGradlePropertiesFile.writeAsStringSync('''
+''');
+        expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+          isFalse,
+        );
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
+          isFalse,
+        );
+        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+
+        await androidProjectMigration.migrate();
+
+        expect(
+          bufferLogger.traceText,
+          contains('Migrating to disable Built-in Kotlin by default.'),
+        );
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
+          isTrue,
+        );
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
           isTrue,
         );
       });
