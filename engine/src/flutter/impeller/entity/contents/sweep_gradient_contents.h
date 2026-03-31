@@ -17,9 +17,11 @@ namespace impeller {
 
 class SweepGradientContents final : public ColorSourceContents {
  public:
-  SweepGradientContents();
+  explicit SweepGradientContents(const Geometry* geometry);
 
   ~SweepGradientContents() override;
+
+  const Geometry* GetGeometry() const override;
 
   // |Contents|
   bool IsOpaque(const Matrix& transform) const override;
@@ -58,6 +60,7 @@ class SweepGradientContents final : public ColorSourceContents {
                      const Entity& entity,
                      RenderPass& pass) const;
 
+  const Geometry* geometry_ = nullptr;
   Point center_;
   Scalar bias_;
   Scalar scale_;
