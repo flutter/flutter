@@ -7290,6 +7290,11 @@ abstract class Canvas {
   /// Whether this shape is filled or stroked (or both) is controlled by
   /// [Paint.style]. If the path is filled, then sub-paths within it are
   /// implicitly closed (see [Path.close]).
+  ///
+  /// When drawing simple shapes (such as rectangles, ovals, or rounded
+  /// rectangles), prefer using methods such as [drawRect], [drawOval], or
+  /// [drawRRect] over [drawPath]. Methods that draw simple shapes are generally
+  /// more efficient than drawing a [Path].
   void drawPath(Path path, Paint paint);
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
