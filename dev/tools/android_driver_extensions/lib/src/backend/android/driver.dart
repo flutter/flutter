@@ -109,12 +109,12 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<void> rotateToLandscape() async {
-    await _driver.sendCommand(NativeCommand.rotateLandscape);
+    _driver.sendCommand(NativeCommand.rotateLandscape);
   }
 
   @override
   Future<void> rotateResetDefault() async {
-    await _driver.sendCommand(NativeCommand.rotateDefault);
+    _driver.sendCommand(NativeCommand.rotateDefault);
   }
 
   /// Background the app by pressing the home button.

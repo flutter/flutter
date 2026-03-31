@@ -25,7 +25,7 @@ void main() async {
   enableFlutterDriverExtension(commands: <CommandExtension>[nativeDriverCommands]);
 
   // Run on full screen.
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
   // Fetch the texture ID.
   final Future<int> textureId = _fetchTexture(512, 512);
