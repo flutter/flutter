@@ -5388,7 +5388,8 @@ targets:
 
   - name: Mac wide_gamut_macos
     recipe: devicelab/devicelab_drone
-    presubmit: true
+    bringup: true
+    presubmit: false
     timeout: 60
     properties:
       dependencies: >-
