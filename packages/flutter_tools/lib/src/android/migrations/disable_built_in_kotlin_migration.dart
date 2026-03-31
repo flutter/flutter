@@ -56,7 +56,6 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
       return fileContents;
     }
 
-    // Build the string of missing properties to append
     final propertiesToAppend = StringBuffer();
     if (!hasNewDsl) {
       logger.printTrace('Migrating to disable new DSL by default.');
@@ -69,7 +68,6 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
 
     final String prefix = fileContents.isEmpty || fileContents.endsWith('\n') ? '' : '\n';
 
-    // propertiesToAppend.toString() already includes a trailing newline via writeln()
     return '$fileContents$prefix${propertiesToAppend.toString()}';
   }
 }
