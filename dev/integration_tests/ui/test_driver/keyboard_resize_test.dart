@@ -14,9 +14,7 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(() async {
-      await driver.close();
-    });
+    tearDownAll(driver.close);
 
     test('Ensure keyboard dismissal resizes the view to original size', () async {
       final SerializableFinder heightText = find.byValueKey(keys.kHeightText);

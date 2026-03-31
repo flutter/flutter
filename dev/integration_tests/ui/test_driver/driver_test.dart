@@ -17,9 +17,7 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(() async {
-      await driver.close();
-    });
+    tearDownAll(driver.close);
 
     test('waitFor should find text "present"', () async {
       await driver.waitFor(presentText);
