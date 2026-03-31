@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
-import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_migration.dart';
+import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_and_new_dsl_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
@@ -267,7 +267,10 @@ android.builtInKotlin=false
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
           isTrue,
         );
-        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+        final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
+          project,
+          bufferLogger,
+        );
 
         await androidProjectMigration.migrate();
         expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
@@ -296,7 +299,10 @@ android.builtInKotlin    false
             ),
             isTrue,
           );
-          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
+            project,
+            bufferLogger,
+          );
 
           await androidProjectMigration.migrate();
           expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
@@ -312,7 +318,10 @@ android.builtInKotlin    false
       testUsingContext(
         'create gradle.properties file and add flag if gradle.properties file is missing',
         () async {
-          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
+            project,
+            bufferLogger,
+          );
           expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
           await androidProjectMigration.migrate();
           expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
@@ -340,7 +349,10 @@ android.newDsl=false
             topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
             isFalse,
           );
-          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+          final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
+            project,
+            bufferLogger,
+          );
 
           await androidProjectMigration.migrate();
 
@@ -373,7 +385,10 @@ android.builtInKotlin=false
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
           isFalse,
         );
-        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+        final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
+          project,
+          bufferLogger,
+        );
 
         await androidProjectMigration.migrate();
 
@@ -405,7 +420,10 @@ android.builtInKotlin=false
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
           isFalse,
         );
-        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+        final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
+          project,
+          bufferLogger,
+        );
 
         await androidProjectMigration.migrate();
 

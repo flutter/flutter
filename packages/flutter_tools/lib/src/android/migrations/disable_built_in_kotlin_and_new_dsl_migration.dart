@@ -22,8 +22,8 @@ final RegExp _builtInKotlinRegex = RegExp(
 
 /// Migrate from enabled Built-in Kotlin by default to disabled Built-in Kotlin by default.
 /// For more details see: http://flutter.dev/go/android-built-in-kotlin-support
-class DisableBuiltInKotlinMigration extends ProjectMigrator {
-  DisableBuiltInKotlinMigration(AndroidProject project, super.logger)
+class DisableBuiltInKotlinAndNewDslMigration extends ProjectMigrator {
+  DisableBuiltInKotlinAndNewDslMigration(AndroidProject project, super.logger)
     : _gradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
 
   final File _gradlePropertiesFile;
