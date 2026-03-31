@@ -39,10 +39,10 @@ abstract class CkShader implements ui.Shader {
 /// [SkShader] object, ignoring contextual filter quality.
 abstract class SimpleCkShader implements CkShader {
   SimpleCkShader() {
-    _ref = UniqueRef<SkShader>(this, createSkiaObject(), debugOwnerLabel);
+    _ref = CkUniqueRef<SkShader>(this, createSkiaObject(), debugOwnerLabel);
   }
 
-  late final UniqueRef<SkShader> _ref;
+  late final CkUniqueRef<SkShader> _ref;
 
   @override
   SkShader getSkShader(ui.FilterQuality contextualQuality) => _ref.nativeObject;
@@ -258,7 +258,7 @@ class CkImageShader implements ui.ImageShader, CkShader {
   /// This reference changes when [withQuality] is called with different filter
   /// quality levels.
   @visibleForTesting
-  UniqueRef<SkShader>? ref;
+  CkUniqueRef<SkShader>? ref;
 
   /// The filter quality at which the latest [SkShader] was initialized.
   @visibleForTesting
@@ -303,13 +303,25 @@ class CkImageShader implements ui.ImageShader, CkShader {
 
     currentQuality = quality;
     ref?.dispose();
-    ref = UniqueRef<SkShader>(this, skShader, 'ImageShader');
+    ref = CkUniqueRef<SkShader>(this, skShader, 'ImageShader');
   }
 
   bool _isDisposed = false;
 
   @override
-  bool get debugDisposed => _isDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   void dispose() {

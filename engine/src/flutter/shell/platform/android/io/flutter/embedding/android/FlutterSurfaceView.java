@@ -40,6 +40,8 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
   private boolean isPaused = false;
   @Nullable private FlutterRenderer flutterRenderer;
 
+  private boolean isContentSizingEnabled = false;
+
   private boolean shouldNotify() {
     return flutterRenderer != null && !isPaused;
   }
@@ -116,6 +118,8 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
       setZOrderOnTop(true);
     }
 
+    isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
+
     // Grab a reference to our underlying Surface and register callbacks with that Surface so we
     // can monitor changes and forward those changes on to native Flutter code.
     getHolder().addCallback(surfaceHolderCallbackCompat);
@@ -123,7 +127,11 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+    if (isContentSizingEnabled) {
+      FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+    } else {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
   }
 
   // This is a work around for TalkBack.

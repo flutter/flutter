@@ -6,6 +6,8 @@
 #
 # bin/cache/engine.stamp <-- SHA of the commit that engine artifacts were built
 # bin/cache/engine.realm <-- optional; ; whether the SHA is from presubmit builds or staging (bringup: true).
+#
+# *DOES NOT* update engine.version.
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
@@ -61,7 +63,29 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 }
 
 # Write the engine version out so downstream tools know what to look for.
-Set-Content -Path $flutterRoot/bin/cache/engine.stamp -Value $engineVersion -Encoding Ascii
+# Use a temporary file and a retry logic to minimize chances of a race condition during
+# parallel flutter executions.
+$esTmp = "$flutterRoot/bin/cache/engine.stamp.tmp.$PID"
+try {
+    Set-Content -Path $esTmp -Value $engineVersion -Encoding Ascii
+    $retryCount = 0
+    while ($true) {
+        try {
+            Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
+            break
+        } catch {
+            if ($retryCount -ge 2) {
+                throw
+            }
+            $retryCount++
+            Start-Sleep -Milliseconds 50
+        }
+    }
+} finally {
+    if (Test-Path -Path $esTmp) {
+        Remove-Item -Path $esTmp -Force -ErrorAction SilentlyContinue
+    }
+}
 
 # The realm on CI is passed in.
 if ($env:FLUTTER_REALM) {

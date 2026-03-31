@@ -214,7 +214,9 @@ mixin CommandHandlerFactory {
       );
     }
     final sendTextInputAction = command as SendTextInputAction;
-    _testTextInput.receiveAction(TextInputAction.values[sendTextInputAction.textInputAction.index]);
+    await _testTextInput.receiveAction(
+      TextInputAction.values[sendTextInputAction.textInputAction.index],
+    );
     return Result.empty;
   }
 

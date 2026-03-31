@@ -110,6 +110,7 @@ final class DartHooksResult {
   List<Uri> get filesToBeBundled => <Uri>[
     for (final FlutterCodeAsset code in codeAssets)
       if (code.codeAsset.linkMode is DynamicLoadingBundled) code.codeAsset.file!,
+    for (final DataAsset asset in dataAssets) asset.file,
   ];
 
   FlutterHookResult get asFlutterResult {

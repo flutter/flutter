@@ -3113,134 +3113,239 @@ TEST(RectTest, IRectRound) {
   }
 }
 
-TEST(RectTest, TransformAndClipBounds) {
-  {
-    // This matrix should clip no corners.
-    auto matrix = impeller::Matrix::MakeColumn(
-        // clang-format off
-        2.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 4.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 8.0f
-        // clang-format on
-    );
-    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // None of these should have a W<0
-    EXPECT_EQ(matrix.TransformHomogenous(src.GetLeftTop()),
-              Vector3(200.0f, 400.0f, 8.0f));
-    EXPECT_EQ(matrix.TransformHomogenous(src.GetRightTop()),
-              Vector3(400.0f, 400.0f, 8.0f));
-    EXPECT_EQ(matrix.TransformHomogenous(src.GetLeftBottom()),
-              Vector3(200.0f, 800.0f, 8.0f));
-    EXPECT_EQ(matrix.TransformHomogenous(src.GetRightBottom()),
-              Vector3(400.0f, 800.0f, 8.0f));
+TEST(RectTest, TransformAndClipBoundsNoCornersClipped) {
+  // This matrix should clip no corners.
+  auto matrix = impeller::Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 4.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 8.0f
+      // clang-format on
+  );
+  Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
 
-    Rect expect = Rect::MakeLTRB(25.0f, 50.0f, 50.0f, 100.0f);
-    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_EQ(src.TransformAndClipBounds(matrix), expect);
-  }
+  // None of these should have a W<0
 
-  {
-    // This matrix should clip one corner.
-    auto matrix = impeller::Matrix::MakeColumn(
-        // clang-format off
-        2.0f, 0.0f, 0.0f, -0.01f,
-        0.0f, 2.0f, 0.0f, -0.006f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 3.0f
-        // clang-format on
-    );
-    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // Exactly one of these should have a W<0
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
-                        Vector3(200.0f, 200.0f, 1.4f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
-                        Vector3(400.0f, 200.0f, 0.4f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
-                        Vector3(200.0f, 400.0f, 0.8f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
-                        Vector3(400.0f, 400.0f, -0.2f));
+  EXPECT_EQ(matrix.TransformHomogenous(src.GetLeftTop()),
+            Vector3(200.0f, 400.0f, 8.0f));
+  EXPECT_EQ(matrix.TransformHomogenous(src.GetRightTop()),
+            Vector3(400.0f, 400.0f, 8.0f));
+  EXPECT_EQ(matrix.TransformHomogenous(src.GetLeftBottom()),
+            Vector3(200.0f, 800.0f, 8.0f));
+  EXPECT_EQ(matrix.TransformHomogenous(src.GetRightBottom()),
+            Vector3(400.0f, 800.0f, 8.0f));
 
-    Rect expect = Rect::MakeLTRB(142.85715f, 142.85715f, 6553600.f, 6553600.f);
-    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
-  }
+  Rect expect = Rect::MakeLTRB(25.0f, 50.0f, 50.0f, 100.0f);
+  EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+  EXPECT_EQ(src.TransformAndClipBounds(matrix), expect);
+}
 
-  {
-    // This matrix should clip two corners.
-    auto matrix = impeller::Matrix::MakeColumn(
-        // clang-format off
-        2.0f, 0.0f, 0.0f, -.015f,
-        0.0f, 2.0f, 0.0f, -.006f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 3.0f
-        // clang-format on
-    );
-    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // Exactly two of these should have a W<0
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
-                        Vector3(200.0f, 200.0f, 0.9f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
-                        Vector3(400.0f, 200.0f, -0.6f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
-                        Vector3(200.0f, 400.0f, 0.3f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
-                        Vector3(400.0f, 400.0f, -1.2f));
+TEST(RectTest, TransformAndClipBoundsOneCornerClipped) {
+  // This matrix should clip one corner.
+  auto matrix = impeller::Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 0.0f, 0.0f, -0.01f,
+      0.0f, 2.0f, 0.0f, -0.006f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 3.0f
+      // clang-format on
+  );
+  Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
 
-    Rect expect = Rect::MakeLTRB(222.2222f, 222.2222f, 5898373.f, 6553600.f);
-    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
-  }
+  // Exactly one of these should have a W<0
+  //
+  // When W<0 we interpolate the point back towards the adjacent points
+  // that have W>0 to a location just greater than the W=0 half-plane.
+  // We interpolate them to W=epsilon where epsilon == 2^-14.
 
-  {
-    // This matrix should clip three corners.
-    auto matrix = impeller::Matrix::MakeColumn(
-        // clang-format off
-        2.0f, 0.0f, 0.0f, -.02f,
-        0.0f, 2.0f, 0.0f, -.006f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 3.0f
-        // clang-format on
-    );
-    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // Exactly three of these should have a W<0
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
-                        Vector3(200.0f, 200.0f, 0.4f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
-                        Vector3(400.0f, 200.0f, -1.6f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
-                        Vector3(200.0f, 400.0f, -0.2f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
-                        Vector3(400.0f, 400.0f, -2.2f));
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                      Vector3(200.0f, 200.0f, 1.4f));
+  // Contributes (200, 200) / 1.4 == (142.85714, 142.85714)
 
-    Rect expect = Rect::MakeLTRB(499.99988f, 499.99988f, 5898340.f, 4369400.f);
-    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
-  }
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                      Vector3(400.0f, 200.0f, 0.4f));
+  // Contributes (400, 200) / 0.4 == (1000, 500)
 
-  {
-    // This matrix should clip all four corners.
-    auto matrix = impeller::Matrix::MakeColumn(
-        // clang-format off
-        2.0f, 0.0f, 0.0f, -.025f,
-        0.0f, 2.0f, 0.0f, -.006f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 3.0f
-        // clang-format on
-    );
-    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // All of these should have a W<0
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
-                        Vector3(200.0f, 200.0f, -0.1f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
-                        Vector3(400.0f, 200.0f, -2.6f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
-                        Vector3(200.0f, 400.0f, -0.7f));
-    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
-                        Vector3(400.0f, 400.0f, -3.2f));
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                      Vector3(200.0f, 400.0f, 0.8f));
+  // Contributes (200, 400) / 0.8 == (250, 500)
 
-    EXPECT_TRUE(src.TransformAndClipBounds(matrix).IsEmpty());
-  }
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                      Vector3(400.0f, 400.0f, -0.2f));
+  // Interpolates at epsilon against RightTop to produce:
+  // t = (epsilon - -.2) / (.4 - -.2)
+  //   = (epsilon + .2) / .6
+  //   = 0.333435
+  // Lerp(RightBottom, RightTop, 0.333435) = (400, 333.313, epsilon)
+  //                                       = (6553600, 5461000)
+  //
+  // It also interpolates at epsilon against LeftBottom to produce:
+  // t = (epsilon - -.2) / (.8 - -.2)
+  //   = (epsilon + .2) / 1
+  //   = 0.200061
+  // Lerp(RightBottom, LeftBottom, 0.200061) = (359.988, 400, epsilon)
+  //                                         = (5898040, 6553600)
+
+  // Min/Max X and Y of all the points generated above are:
+  // Min X == 142.85714
+  // Min Y == 142.85714
+  // Max X == 6553600
+  // Max Y == 6553600
+
+  Rect expect = Rect::MakeLTRB(142.85714f, 142.85714f, 6553600.f, 6553600.f);
+  EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+  EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
+}
+
+TEST(RectTest, TransformAndClipBoundsTwoCornersClipped) {
+  // This matrix should clip two corners.
+  auto matrix = impeller::Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 0.0f, 0.0f, -.015f,
+      0.0f, 2.0f, 0.0f, -.006f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 3.0f
+      // clang-format on
+  );
+  Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+
+  // Exactly two of these homogenous results should have a W<0
+  //
+  // When W<0 we interpolate the point back towards the adjacent points
+  // that have W>0 to a location just greater than the W=0 half-plane.
+  // We interpolate them to W=epsilon where epsilon == 2^-14.
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                      Vector3(200.0f, 200.0f, 0.9f));
+  // Contributes (200, 200) / 0.9 == (222.2222, 222.2222) to bounds
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                      Vector3(400.0f, 200.0f, -0.6f));
+  // Interpolates at epsilon against LeftTop to produce:
+  // t = (epsilon - -.6) / (.9 - -.6)
+  //   = (epsilon + .6) / 1.5
+  //   = 0.4000407
+  // Lerp(RightTop, LeftTop, 0.4000407) = (319.9919, 200, epsilon)
+  //                                    = (5242747, 3276800)
+  // Cannot interpolate against RightBottom because it also has W<0
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                      Vector3(200.0f, 400.0f, 0.3f));
+  // Contributes (200, 400) / 0.3 == (666.6667, 1333.3333) to bounds
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                      Vector3(400.0f, 400.0f, -1.2f));
+  // Interpolates at epsilon against LeftBottom to produce:
+  // t = (epsilon - -1.2) / (.3 - -1.2)
+  //   = (epsilon + 1.2) / 1.5
+  //   = 0.8000407
+  // Lerp(RightBottom, LeftBottom, 0.8000407) = (239.9919, 400, epsilon)
+  //                                          = (3932026.667, 6553600)
+  // Cannot interpolate against RightTop because it also has W<0
+
+  // Min/Max X and Y of all the points generated above are:
+  // Min X == 222.2222
+  // Min Y == 222.2222
+  // Max X == 5242747
+  // Max Y == 6553600
+
+  Rect expect = Rect::MakeLTRB(222.2222f, 222.2222f, 5242747.f, 6553600.f);
+
+  EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+  EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
+}
+
+TEST(RectTest, TransformAndClipBoundsThreeCornersClipped) {
+  // This matrix should clip three corners.
+  auto matrix = impeller::Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 0.0f, 0.0f, -.02f,
+      0.0f, 2.0f, 0.0f, -.006f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 3.0f
+      // clang-format on
+  );
+  Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+
+  // Exactly three of these homogenous results should have a W<0
+  //
+  // When W<0 we interpolate the point back towards the adjacent points
+  // that have W>0 to a location just greater than the W=0 half-plane.
+  // We interpolate them to W=epsilon where epsilon == 2^-14.
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                      Vector3(200.0f, 200.0f, 0.4f));
+  // Contributes (200, 200) / 0.4 == (500, 500) to bounds
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                      Vector3(400.0f, 200.0f, -1.6f));
+  // Interpolates at epsilon against LeftTop to produce:
+  // t = (epsilon - -1.6) / (.4 - -1.6)
+  //   = (epsilon + 1.6) / 2
+  //   = 0.8000305
+  // Lerp(RightTop, LeftTop, 0.8000305) = (239.9939, 200, epsilon)
+  //                                    = (3932060, 3276800)
+  // Cannot interpolate against RightBottom because it also has W<0
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                      Vector3(200.0f, 400.0f, -0.2f));
+  // Interpolates against LeftTop to produce:
+  // t = (epsilon - -.2) / (.4 - -.2)
+  //   = (epsilon + .2) / .6
+  //   = 0.333435
+  // Lerp(LeftBottom, LeftTop, .333435) = (200, 333.31299, epsilon)
+  //                                    = (3276800, 5461000)
+  // Cannot interpolate against RightBottom because it also has W<0
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                      Vector3(400.0f, 400.0f, -2.2f));
+  // Cannot interpolate against either RightTop or LeftBottom because
+  // both of those adjacent points transformed to a W<0 homogenous point.
+
+  // Min/Max X and Y of all the points generated above are:
+  // Min X == 500
+  // Min Y == 500
+  // Max X == 3932060
+  // Max Y == 5461000
+
+  Rect expect = Rect::MakeLTRB(500.0f, 500.0f, 3932060.f, 5461000.f);
+
+  EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+  EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
+}
+
+TEST(RectTest, TransformAndClipBoundsAllFourCornersClipped) {
+  // This matrix should clip all four corners.
+  auto matrix = impeller::Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 0.0f, 0.0f, -.025f,
+      0.0f, 2.0f, 0.0f, -.006f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 3.0f
+      // clang-format on
+  );
+  Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+
+  // All of these should have a W<0
+  //
+  // When W<0 we interpolate the point back towards the adjacent points
+  // that have W>0 to a location just greater than the W=0 half-plane.
+  // We interpolate them to W=epsilon where epsilon == 2^-14.
+
+  // In this case, none of the homogenous results are in bounds (W > 0)
+  // so we can perform no interpolation - the operation is not visible.
+
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                      Vector3(200.0f, 200.0f, -0.1f));
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                      Vector3(400.0f, 200.0f, -2.6f));
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                      Vector3(200.0f, 400.0f, -0.7f));
+  EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                      Vector3(400.0f, 400.0f, -3.2f));
+
+  EXPECT_TRUE(src.TransformAndClipBounds(matrix).IsEmpty());
 }
 
 }  // namespace testing

@@ -12,7 +12,7 @@
   "shareButtonLabel": "Deli",
   "pasteButtonLabel": "Prilepi",
   "selectAllButtonLabel": "Izberi vse",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Najdeni so rezultati iskanja",
+  "noResultsFound": "Ni rezultatov",
+  "radioButtonUnselectedLabel": "Ni izbrano"
 }

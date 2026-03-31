@@ -28,7 +28,7 @@ import 'menu_style.dart';
 ///
 ///  * [DropdownMenu], which is the underlying text field without the [Form]
 ///    integration.
-class DropdownMenuFormField<T extends Object> extends FormField<T> {
+class DropdownMenuFormField<T> extends FormField<T> {
   /// Creates a [DropdownMenu] widget that is a [FormField].
   ///
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
@@ -40,6 +40,8 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     double? menuHeight,
     Widget? leadingIcon,
     Widget? trailingIcon,
+    bool showTrailingIcon = true,
+    FocusNode? trailingIconFocusNode,
     Widget? label,
     String? hintText,
     String? helperText,
@@ -58,6 +60,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     this.onSelected,
     FocusNode? focusNode,
     bool? requestFocusOnTap,
+    bool selectOnly = false,
     EdgeInsetsGeometry? expandedInsets,
     Offset? alignmentOffset,
     FilterCallback<T>? filterCallback,
@@ -67,6 +70,8 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     DropdownMenuCloseBehavior closeBehavior = DropdownMenuCloseBehavior.all,
     int maxLines = 1,
     TextInputAction? textInputAction,
+    double? cursorHeight,
+    MenuController? menuController,
     super.restorationId,
     super.onSaved,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
@@ -110,6 +115,8 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                menuHeight: menuHeight,
                leadingIcon: leadingIcon,
                trailingIcon: trailingIcon,
+               showTrailingIcon: showTrailingIcon,
+               trailingIconFocusNode: trailingIconFocusNode,
                selectedTrailingIcon: selectedTrailingIcon,
                enableFilter: enableFilter,
                enableSearch: enableSearch,
@@ -124,6 +131,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                onSelected: field.didChange,
                focusNode: focusNode,
                requestFocusOnTap: requestFocusOnTap,
+               selectOnly: selectOnly,
                expandedInsets: expandedInsets,
                alignmentOffset: alignmentOffset,
                filterCallback: filterCallback,
@@ -133,6 +141,8 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                dropdownMenuEntries: dropdownMenuEntries,
                maxLines: maxLines,
                textInputAction: textInputAction,
+               cursorHeight: cursorHeight,
+               menuController: menuController,
              ),
            );
          },
@@ -164,7 +174,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
   FormFieldState<T> createState() => _DropdownMenuFormFieldState<T>();
 }
 
-class _DropdownMenuFormFieldState<T extends Object> extends FormFieldState<T> {
+class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
   DropdownMenuFormField<T> get _dropdownMenuFormField => widget as DropdownMenuFormField<T>;
 
   // The controller used to restore the selected item.

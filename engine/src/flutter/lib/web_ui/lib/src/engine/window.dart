@@ -276,6 +276,9 @@ class EngineFlutterView implements ui.FlutterView {
   List<ui.DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
 
   @override
+  ui.DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
+
+  @override
   EngineFlutterDisplay get display => EngineFlutterDisplay.instance;
 
   @override
@@ -376,8 +379,8 @@ final class _EngineFlutterViewImpl extends EngineFlutterView {
   _EngineFlutterViewImpl(
     EnginePlatformDispatcher platformDispatcher,
     DomElement hostElement, {
-    JsViewConstraints? viewConstraints,
-  }) : super._(_nextViewId++, platformDispatcher, hostElement, viewConstraints: viewConstraints);
+    super.viewConstraints,
+  }) : super._(_nextViewId++, platformDispatcher, hostElement);
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].

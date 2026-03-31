@@ -1,4 +1,6 @@
 {
+  "searchResultsFound": "搜尋到結果",
+  "noResultsFound": "搵唔到任何結果",
   "reorderItemToStart": "移到開頭",
   "reorderItemToEnd": "移到最後",
   "reorderItemUp": "向上移",
@@ -12,5 +14,5 @@
   "shareButtonLabel": "分享",
   "pasteButtonLabel": "貼上",
   "selectAllButtonLabel": "全部選取",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "未揀選"
 }

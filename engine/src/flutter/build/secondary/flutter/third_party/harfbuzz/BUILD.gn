@@ -13,6 +13,14 @@ config("harfbuzz_flags") {
       "-Wno-missing-field-initializers",
       "-Wno-unused-variable",
       "-Wno-sign-compare",
+
+      # Workaround for an incompatibility with current versions of Clang
+      # (see https://github.com/harfbuzz/harfbuzz/issues/5738)
+      "-Wno-array-bounds",
+
+      # Workaround for the lack of a newline at the end of some HarfBuzz
+      # source files.
+      "-Wno-newline-eof",
     ]
   }
 
@@ -30,6 +38,7 @@ config("harfbuzz_flags") {
 
 source_set("harfbuzz_sources") {
   sources = [
+    "src/OT/Var/VARC/VARC.cc",
     "src/hb-aat-layout.cc",
     "src/hb-aat-map.cc",
     "src/hb-blob.cc",
@@ -73,6 +82,7 @@ source_set("harfbuzz_sources") {
     "src/hb-ot-tag.cc",
     "src/hb-ot-var.cc",
     "src/hb-outline.cc",
+    "src/hb-paint-bounded.cc",
     "src/hb-paint-extents.cc",
     "src/hb-paint.cc",
     "src/hb-set.cc",
@@ -97,6 +107,7 @@ source_set("harfbuzz_sources") {
 
 source_set("harfbuzz_subset") {
   sources = [
+    "src/OT/Var/VARC/VARC.cc",
     "src/graph/gsubgpos-context.cc",
     "src/hb-aat-layout.cc",
     "src/hb-aat-map.cc",
@@ -141,6 +152,7 @@ source_set("harfbuzz_subset") {
     "src/hb-ot-tag.cc",
     "src/hb-ot-var.cc",
     "src/hb-outline.cc",
+    "src/hb-paint-bounded.cc",
     "src/hb-paint-extents.cc",
     "src/hb-paint.cc",
     "src/hb-set.cc",
@@ -155,7 +167,14 @@ source_set("harfbuzz_subset") {
     "src/hb-subset-input.cc",
     "src/hb-subset-instancer-iup.cc",
     "src/hb-subset-instancer-solver.cc",
+    "src/hb-subset-plan-layout.cc",
+    "src/hb-subset-plan-var.cc",
     "src/hb-subset-plan.cc",
+    "src/hb-subset-table-cff.cc",
+    "src/hb-subset-table-color.cc",
+    "src/hb-subset-table-layout.cc",
+    "src/hb-subset-table-other.cc",
+    "src/hb-subset-table-var.cc",
     "src/hb-subset.cc",
     "src/hb-ucd.cc",
     "src/hb-unicode.cc",

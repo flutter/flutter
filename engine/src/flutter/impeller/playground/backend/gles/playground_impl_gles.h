@@ -42,6 +42,8 @@ class PlaygroundImplGLES final : public PlaygroundImpl {
   Playground::GLProcAddressResolver CreateGLProcAddressResolver()
       const override;
 
+  RuntimeStageBackend GetRuntimeStageBackend() const override;
+
   PlaygroundImplGLES(const PlaygroundImplGLES&) = delete;
 
   PlaygroundImplGLES& operator=(const PlaygroundImplGLES&) = delete;

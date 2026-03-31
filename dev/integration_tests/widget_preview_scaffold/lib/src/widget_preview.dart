@@ -62,7 +62,7 @@ class WidgetPreview {
   ///
   /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
   /// will have the value 'foo'.
-  final String? packageName;
+  final String packageName;
 
   /// A description to be displayed alongside the preview.
   ///

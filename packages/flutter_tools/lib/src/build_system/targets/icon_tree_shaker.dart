@@ -164,6 +164,7 @@ class IconTreeShaker {
     required File input,
     required String outputPath,
     required String relativePath,
+    bool quiet = false,
   }) async {
     if (!enabled) {
       return false;
@@ -223,7 +224,12 @@ class IconTreeShaker {
       _logger.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
       throw IconTreeShakerException._('Font subsetting failed with exit code $code.');
     }
-    _logger.printStatus(getSubsetSummaryMessage(input, _fs.file(outputPath)));
+    final String message = getSubsetSummaryMessage(input, _fs.file(outputPath));
+    if (quiet) {
+      _logger.printTrace(message);
+    } else {
+      _logger.printStatus(message);
+    }
     return true;
   }
 

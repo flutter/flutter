@@ -65,7 +65,12 @@ Future<void> processPodsIfNeeded(
         ? FlutterDarwinPlatform.ios
         : FlutterDarwinPlatform.macos;
 
-    await swiftPackageManager.generatePluginsSwiftPackage(const <Plugin>[], platform, xcodeProject);
+    await swiftPackageManager.generatePluginsSwiftPackage(
+      const <Plugin>[],
+      platform,
+      xcodeProject,
+      flutterAsADependency: false,
+    );
   }
 
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper

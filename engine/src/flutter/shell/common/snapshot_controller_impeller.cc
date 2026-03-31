@@ -78,13 +78,14 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
   // before calling GetAiksContext because constructing the AiksContext may
   // invoke graphics APIs.
   std::unique_ptr<Surface> pbuffer_surface;
+  std::unique_ptr<GLContextResult> context_result;
   if (delegate.GetSurface()) {
-    delegate.GetSurface()->MakeRenderContextCurrent();
+    context_result = delegate.GetSurface()->MakeRenderContextCurrent();
   } else if (delegate.GetSnapshotSurfaceProducer()) {
     pbuffer_surface =
         delegate.GetSnapshotSurfaceProducer()->CreateSnapshotSurface();
     if (pbuffer_surface) {
-      pbuffer_surface->MakeRenderContextCurrent();
+      context_result = pbuffer_surface->MakeRenderContextCurrent();
     }
   }
 
@@ -245,7 +246,7 @@ void SnapshotControllerImpeller::CacheRuntimeStage(
   if (!context) {
     return;
   }
-  impeller::RuntimeEffectContents runtime_effect;
+  impeller::RuntimeEffectContents runtime_effect(nullptr);
   runtime_effect.SetRuntimeStage(runtime_stage);
   runtime_effect.BootstrapShader(context->GetContentContext());
 }

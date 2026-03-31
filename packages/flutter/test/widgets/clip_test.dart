@@ -226,9 +226,8 @@ void main() {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 100.0,
-          height: 100.0,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: ClipRect(
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
@@ -252,9 +251,8 @@ void main() {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 100.0,
-          height: 100.0,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: ClipRect(
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
@@ -272,9 +270,8 @@ void main() {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: ClipRect(
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
@@ -292,9 +289,8 @@ void main() {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: ClipRect(
             clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
@@ -312,9 +308,8 @@ void main() {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: ClipRect(
             clipper: ValueClipper<Rect>('b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
@@ -332,9 +327,8 @@ void main() {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: ClipRect(
             clipper: ValueClipper<Rect>('c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
             child: GestureDetector(
@@ -387,9 +381,8 @@ void main() {
             color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipRect(
@@ -451,9 +444,8 @@ void main() {
             color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipRRect(
@@ -491,9 +483,8 @@ void main() {
             color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipOval(
@@ -525,9 +516,8 @@ void main() {
             color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipPath(
@@ -563,9 +553,8 @@ void main() {
           color: white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
-            child: SizedBox(
-              height: 100.0,
-              width: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: Transform.rotate(
                 angle: 1.0, // radians
                 child: PhysicalModel(
@@ -623,9 +612,8 @@ void main() {
             color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: PhysicalModel(
@@ -658,9 +646,8 @@ void main() {
           color: white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
-            child: SizedBox(
-              height: 100.0,
-              width: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: Transform.rotate(
                 angle: 1.0, // radians
                 child: PhysicalShape(
@@ -720,9 +707,8 @@ void main() {
             color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: PhysicalShape(
@@ -892,9 +878,8 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return Directionality(
             textDirection: textDirection,
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: ClipRRect(
                 borderRadius: const BorderRadiusDirectional.horizontal(
                   start: startRadius,

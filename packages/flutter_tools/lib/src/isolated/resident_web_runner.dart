@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -96,11 +97,11 @@ class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
     String? target,
-    bool stayResident = true,
-    bool machine = false,
-    String? projectRootPath,
+    super.stayResident = true,
+    super.machine = false,
+    super.projectRootPath,
     required this.flutterProject,
-    required DebuggingOptions debuggingOptions,
+    required super.debuggingOptions,
     required FileSystem fileSystem,
     required Logger logger,
     required Terminal terminal,
@@ -120,9 +121,6 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
-         debuggingOptions: debuggingOptions,
-         stayResident: stayResident,
-         machine: machine,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
@@ -130,7 +128,6 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
-         projectRootPath: projectRootPath,
        );
 
   final FileSystem _fileSystem;
@@ -377,24 +374,32 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on HttpException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on DartDevelopmentServiceException catch (error) {
+      // The application may have started shutting down before DDS was able to finish establishing
+      // its connection to DWDS. Don't treat this as an unhandled exception.
+      appFailedToStart();
+      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
+        throwToolExit(kExitMessage);
+      }
+      rethrow;
     } on Exception {
       appFailedToStart();
       rethrow;
@@ -938,14 +943,13 @@ class ResidentWebRunner extends ResidentRunner {
           // TODO(bkonyi): consider removing this log message and using only the standard VM
           // service message instead.
           _logger.printStatus('Debug service listening on $websocketUri');
-          printDebuggerList();
-          connectionInfoCompleter?.complete(
-            DebugConnectionInfo(
-              wsUri: websocketUri,
-              devToolsUri: debugConnection.devToolsUri?.toUri(),
-              dtdUri: debugConnection.dtdUri?.toUri(),
-            ),
+          final connectionInfo = DebugConnectionInfo(
+            wsUri: websocketUri,
+            devToolsUri: debugConnection.devToolsUri?.toUri(),
+            dtdUri: debugConnection.dtdUri?.toUri(),
           );
+          printDebuggerList(connectionInfo: connectionInfo);
+          connectionInfoCompleter?.complete(connectionInfo);
         }),
       );
     } else {

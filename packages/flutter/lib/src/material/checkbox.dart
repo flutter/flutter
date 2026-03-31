@@ -737,7 +737,11 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
-    canvas.drawPath(shape.getOuterPath(outer), paint);
+    if (shape.preferPaintInterior) {
+      shape.paintInterior(canvas, outer, paint);
+    } else {
+      canvas.drawPath(shape.getOuterPath(outer), paint);
+    }
     if (side != null) {
       shape.copyWith(side: side).paint(canvas, outer);
     }

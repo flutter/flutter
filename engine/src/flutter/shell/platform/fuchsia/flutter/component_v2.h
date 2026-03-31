@@ -24,10 +24,10 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 
-#include "engine.h"
-#include "flutter_runner_product_configuration.h"
-#include "program_metadata.h"
-#include "unique_fdio_ns.h"
+#include "flutter/shell/platform/fuchsia/flutter/engine.h"
+#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h"
+#include "flutter/shell/platform/fuchsia/flutter/program_metadata.h"
+#include "flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h"
 
 namespace flutter_runner {
 

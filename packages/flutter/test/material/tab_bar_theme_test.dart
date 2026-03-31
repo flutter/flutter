@@ -1820,11 +1820,11 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: DefaultTabController(
+          child: const DefaultTabController(
             length: 1,
             child: TabBarTheme(
-              data: TabBarThemeData(splashBorderRadius: BorderRadius.circular(radius)),
-              child: const TabBar(
+              data: TabBarThemeData(splashBorderRadius: BorderRadius.all(Radius.circular(radius))),
+              child: TabBar(
                 overlayColor: WidgetStateMapper<Color>(<WidgetStatesConstraint, Color>{
                   WidgetState.hovered: hoverColor,
                   WidgetState.any: Colors.black54,
@@ -1852,6 +1852,6 @@ void main() {
         rrect: RRect.fromRectAndRadius(tester.getRect(findInkWell), const Radius.circular(radius)),
       ),
     );
-    gesture.removePointer();
+    await gesture.removePointer();
   });
 }

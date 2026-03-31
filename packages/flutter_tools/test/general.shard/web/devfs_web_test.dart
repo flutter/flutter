@@ -80,6 +80,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
           globals.fs.file('main.dart').uri,
@@ -352,6 +353,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       expect(webAssetServer.basePath, 'foo/bar');
@@ -376,6 +378,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       // Defaults to "/" when there's no base element.
@@ -402,6 +405,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         ),
         throwsToolExit(),
       );
@@ -427,6 +431,7 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          logger: logger,
         ),
         throwsToolExit(),
       );
@@ -500,6 +505,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: true,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1530,6 +1536,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       expect(await webAssetServer.metadataContents('foo/main_module.ddc_merged_metadata'), null);
@@ -1596,7 +1603,7 @@ void main() {
   );
 
   test(
-    'WebAssetServer serves index.html with web-define variables',
+    'WebAssetServer serves index.html without user defined web-define variables',
     () => testbed.run(() async {
       // Simple test case with no custom variables - should work like before
       globals.fs.file(
@@ -1619,6 +1626,7 @@ void main() {
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(
@@ -1629,7 +1637,7 @@ void main() {
   );
 
   test(
-    'WebAssetServer throws error for missing web-define variables in index.html',
+    'WebAssetServer warns for missing user defined web-define variables in index.html',
     () => testbed.run(() async {
       const htmlContent = '''
 <!DOCTYPE html>
@@ -1670,11 +1678,78 @@ void main() {
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
         webDefines: <String, String>{}, // Empty webDefines
+        logger: logger,
       );
 
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      // Verify the placeholder is preserved
+      expect(await response.readAsString(), contains("const apiUrl = '{{MISSING_VAR}}';"));
+      expect(logger.warningText, contains('Missing web-define variable: MISSING_VAR'));
+    }),
+  );
+
+  test(
+    'WebAssetServer logs warning for multiple missing web-define variables in index.html',
+    () => testbed.run(() async {
+      const htmlContent = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{MISSING_VAR_1}}';
+    const apiKey = '{{MISSING_VAR_2}}';
+  </script>
+</body>
+</html>''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(htmlContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{}, // Empty webDefines
+        logger: logger,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      // Verify the placeholders are preserved
+      final String responseBody = await response.readAsString();
+      expect(responseBody, contains("const apiUrl = '{{MISSING_VAR_1}}';"));
+      expect(responseBody, contains("const apiKey = '{{MISSING_VAR_2}}';"));
       expect(
-        () async => webAssetServer.handleRequest(Request('GET', Uri.parse('http://foobar/'))),
-        throwsToolExit(message: 'Missing web-define variable: MISSING_VAR'),
+        logger.warningText,
+        contains('Missing web-define variables: MISSING_VAR_1, MISSING_VAR_2'),
       );
     }),
   );
@@ -1715,6 +1790,7 @@ const config = {
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
         webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
+        logger: logger,
       );
 
       final Response response = await webAssetServer.handleRequest(

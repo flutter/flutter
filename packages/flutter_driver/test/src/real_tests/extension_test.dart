@@ -829,13 +829,11 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Center(
-            child: SizedBox(
-              height: 200,
-              width: 200,
+            child: SizedBox.square(
+              dimension: 200,
               child: Center(
-                child: SizedBox(
-                  height: 100,
-                  width: 100,
+                child: SizedBox.square(
+                  dimension: 100,
                   child: Center(
                     child: SizedBox(key: ValueKey<String>('leaf'), height: 50, width: 50),
                   ),

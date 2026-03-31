@@ -12,7 +12,7 @@
   "shareButtonLabel": "გაზიარება",
   "pasteButtonLabel": "ჩასმა",
   "selectAllButtonLabel": "ყველას არჩევა",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "ძიების შედეგები ნაპოვნია",
+  "noResultsFound": "შედეგები ვერ მოიძებნა",
+  "radioButtonUnselectedLabel": "არ არის არჩეული"
 }

@@ -255,3 +255,22 @@ start(.*)stop(.*)last
   ASSERT_EQ(match->size(), 1u);
   EXPECT_EQ(match->at(0).GetMatchedText(), "startstoplast");
 }
+
+TEST(CatalogTest, OptionalGroups) {
+  std::string entry_text = R"entry(entry
+start.*middle(?:foo)?end
+start(.*)middle(?:(foo))?end
+)entry";
+  std::stringstream ss;
+  ss << entry_text;
+  absl::StatusOr<Catalog::Entry> entry = Catalog::ParseEntry(ss);
+  ASSERT_TRUE(entry.ok()) << entry.status();
+  absl::StatusOr<Catalog> catalog = Catalog::Make({*entry});
+  ASSERT_TRUE(catalog.ok());
+
+  std::string text = "start hello middleend";
+  absl::StatusOr<std::vector<Catalog::Match>> match = catalog->FindMatch(text);
+  EXPECT_TRUE(match.ok()) << match.status();
+  ASSERT_EQ(match->size(), 1u);
+  EXPECT_EQ(match->at(0).GetMatchedText(), "startmiddleend");
+}
