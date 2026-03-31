@@ -12,7 +12,7 @@ android.builtInKotlin=false
 ''';
 
 // Gradle Properties are case sensitive so the AGP config must be this exact flag
-final RegExp _builtInKotlinRegex = RegExp(r'android\.builtInKotlin');
+final RegExp _builtInKotlinRegex = RegExp(r'^android\.builtInKotlin\s*=', multiLine: true);
 
 /// Migrate from enabled Built-in Kotlin by default to disabled Built-in Kotlin by default.
 /// For more details see: [link here]
