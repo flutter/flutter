@@ -93,14 +93,17 @@ Future<void> testMain() async {
       expect(createCount, 1);
       expect(disposeCount, 0);
 
+      // The original picture should call onDispose when it is disposed,
+      // regardless of whether there are live clones.
       picture1.dispose();
       expect(createCount, 1);
-      expect(disposeCount, 0);
+      expect(disposeCount, 1);
 
+      // Disposing the clone should not call onDispose again.
       picture2.dispose();
       expect(createCount, 1);
       expect(disposeCount, 1);
-      expect(lastDisposedPicture, same(picture2));
+      expect(lastDisposedPicture, same(picture1));
 
       ui.Picture.onCreate = null;
       ui.Picture.onDispose = null;

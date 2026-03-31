@@ -12,9 +12,7 @@ Future<void> main() async {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll(() {
-    driver.close();
-  });
+  tearDownAll(driver.close);
 
   // Each test below must return back to the home page after finishing.
   test('MotionEvent recomposition', () async {
