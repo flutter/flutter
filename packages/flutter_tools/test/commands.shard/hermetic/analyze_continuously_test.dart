@@ -333,8 +333,8 @@ void main() {
     final stdin = StreamController<List<int>>();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
-        command: const <String>[
-          'Artifact.engineDartSdkPath/bin/dart',
+        command: <String>[
+          fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
           'language-server',
           '--dart-sdk',
           'Artifact.engineDartSdkPath',
