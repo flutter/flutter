@@ -254,13 +254,15 @@ tasks.register("clean", Delete) {
         topLevelGradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
       });
 
-      testUsingContext('skip if Built-in Kotlin flag exists', () async {
+      testUsingContext('skip if Built-in Kotlin flag and new DSL exists', () async {
         topLevelGradlePropertiesFile.writeAsStringSync('''
 android.newDsl=false
 android.builtInKotlin=false
 ''');
-
-        // Built-in Kotlin flag already exists
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
+          isTrue,
+        );
         expect(
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
           isTrue,
@@ -276,6 +278,36 @@ android.builtInKotlin=false
           ),
         );
       });
+
+      testUsingContext(
+        'skip if Built-in Kotlin flag and new DSL uses valid nonstandard separators and exists',
+        () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+android.newDsl   :   false
+android.builtInKotlin    false
+''');
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl   :   false'),
+            isTrue,
+          );
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains(
+              'android.builtInKotlin    false',
+            ),
+            isTrue,
+          );
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
+
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The developer has already configured the Built-In Kotlin and new DSL flags, skipping migration.',
+            ),
+          );
+        },
+      );
 
       testUsingContext(
         'create gradle.properties file and add flag if gradle.properties file is missing',

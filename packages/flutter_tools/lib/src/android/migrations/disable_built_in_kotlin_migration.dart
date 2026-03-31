@@ -14,8 +14,11 @@ const String _builtInKotlinFlag = '''
 android.builtInKotlin=false''';
 
 // Gradle Properties are case sensitive so the AGP config must be this exact flag
-final RegExp _newDslRegex = RegExp(r'android\.newDsl');
-final RegExp _builtInKotlinRegex = RegExp(r'android\.builtInKotlin');
+final RegExp _newDslRegex = RegExp(r'^\s*android\.newDsl(?=[ \t=:])', multiLine: true);
+final RegExp _builtInKotlinRegex = RegExp(
+  r'^\s*android\.builtInKotlin(?=[ \t=:])',
+  multiLine: true,
+);
 
 /// Migrate from enabled Built-in Kotlin by default to disabled Built-in Kotlin by default.
 /// For more details see: http://flutter.dev/go/android-built-in-kotlin-support
