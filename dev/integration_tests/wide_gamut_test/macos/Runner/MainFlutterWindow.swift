@@ -11,7 +11,7 @@ class WideGamutViewController: FlutterViewController {
   // Override the method in the view controller to force wide-gamut support.
   @objc(updateWideGamutForScreen)
   func updateWideGamutForScreen() {
-    if let flutterView = self.view as? PrivateFlutterView {
+    if let flutterView = self.view as AnyObject as? PrivateFlutterView {
       flutterView.setEnableWideGamut(true) // Always force true
     }
   }
