@@ -284,8 +284,8 @@ extension on DomElement {
     dispatchKeyboardEvent(type: 'keydown', key: 'Tab', shiftKey: shift);
   }
 
-  void releaseTabKey({bool shift = false}) {
-    dispatchKeyboardEvent(type: 'keyup', key: 'Tab', shiftKey: shift);
+  void releaseTabKey() {
+    dispatchKeyboardEvent(type: 'keyup', key: 'Tab');
   }
 
   void dispatchKeyboardEvent({required String type, required String key, bool shiftKey = false}) {
