@@ -50,42 +50,44 @@ float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
   return length(d);
 }
 
+float filledSDF(vec2 p) {
+  if (frag_info.type < 0.5) {  // Circle
+    return distanceFromCircle(p, frag_info.size.x);
+  } else {  // Rect
+    return distanceFromRect(p, frag_info.size);
+  }
+}
+
+float strokedSDF(vec2 p) {
+  float half_stroke = max(frag_info.stroke_width, 0.0) * 0.5;
+  float outer;
+  float inner;
+
+  if (frag_info.type < 0.5) {  // Circle
+    outer = distanceFromCircle(p, frag_info.size.x + half_stroke);
+    inner = distanceFromCircle(p, frag_info.size.x - half_stroke);
+  } else {                              // Rect
+    if (frag_info.stroke_join < 0.5) {  // Miter
+      // Rectangle expanded by half_stroke
+      outer = distanceFromRect(p, frag_info.size + half_stroke);
+    } else if (frag_info.stroke_join < 1.5) {  // Bevel
+      // Rectangle expanded by half_stroke, with half_stroke chamfer
+      outer =
+          distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
+    } else {  // Round
+      // Rectangle sdf expanded by half_stroke, to give a half_stroke radius
+      outer = distanceFromRect(p, frag_info.size) - half_stroke;
+    }
+    inner = distanceFromRect(p, frag_info.size - half_stroke);
+  }
+
+  return max(outer, -inner);
+}
+
 void main() {
   vec2 p = v_position - frag_info.center;
 
-  float dist;
-
-  if (frag_info.stroked < 0.5) {  // Filled
-    if (frag_info.type < 0.5) {   // Circle
-      dist = distanceFromCircle(p, frag_info.size.x);
-    } else {  // Rect
-      dist = distanceFromRect(p, frag_info.size);
-    }
-  } else {  // Stroked
-    float outer;
-    float inner;
-    float half_stroke = max(frag_info.stroke_width, 0.0) * 0.5;
-
-    if (frag_info.type < 0.5) {  // Circle
-      outer = distanceFromCircle(p, frag_info.size.x + half_stroke);
-      inner = distanceFromCircle(p, frag_info.size.x - half_stroke);
-    } else {                              // Rect
-      if (frag_info.stroke_join < 0.5) {  // Miter
-        // Rectangle expanded by half_stroke
-        outer = distanceFromRect(p, frag_info.size + half_stroke);
-      } else if (frag_info.stroke_join < 1.5) {  // Bevel
-        // Rectangle expanded by half_stroke, with half_stroke chamfer
-        outer = distanceFromChamferRect(p, frag_info.size + half_stroke,
-                                        half_stroke);
-      } else {  // Round
-        // Rectangle sdf expanded by half_stroke, to give a half_stroke radius
-        outer = distanceFromRect(p, frag_info.size) - half_stroke;
-      }
-      inner = distanceFromRect(p, frag_info.size - half_stroke);
-    }
-
-    dist = max(outer, -inner);
-  }
+  float dist = (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
 
   // Anti-aliasing
   // fwidth(dist) gives the change in SDF per pixel.
