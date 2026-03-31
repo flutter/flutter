@@ -17,7 +17,9 @@ void main() {
       await driver.waitUntilFirstFrameRasterized();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      driver.close();
+    });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {
       // The slight initial delay avoids starting the timing during a

@@ -257,9 +257,9 @@ class _SettingsIcon extends AnimatedWidget {
                 : Theme.of(context).colorScheme.secondaryContainer,
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onTap: () async {
+              onTap: () {
                 toggleSettings();
-                await SemanticsService.sendAnnouncement(
+                SemanticsService.sendAnnouncement(
                   View.of(context),
                   _settingsSemanticLabel(isSettingsOpenNotifier.value, context),
                   GalleryOptions.of(context).resolvedTextDirection()!,
