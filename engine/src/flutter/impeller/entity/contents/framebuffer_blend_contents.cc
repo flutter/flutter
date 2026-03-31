@@ -13,6 +13,10 @@ FramebufferBlendContents::FramebufferBlendContents() = default;
 
 FramebufferBlendContents::~FramebufferBlendContents() = default;
 
+const Geometry* FramebufferBlendContents::GetGeometry() const {
+  return nullptr;
+}
+
 void FramebufferBlendContents::SetBlendMode(BlendMode blend_mode) {
   blend_mode_ = blend_mode;
 }

@@ -114,7 +114,6 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.4
-  mdns_dart: ^2.2.1
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -129,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ftmpgr
+# PUBSPEC CHECKSUM: k1n8ad

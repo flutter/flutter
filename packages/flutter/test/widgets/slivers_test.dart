@@ -1610,6 +1610,47 @@ void main() {
     // Verify correct scroll extent
     expect(controller.position.maxScrollExtent, 0.0);
   });
+
+  testWidgets(
+    'RenderSliverFixedExtentBoxAdaptor.layoutDimensions reflects the current constraints',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverFixedExtentList(
+                itemExtent: 100.0,
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) =>
+                      SizedBox(height: 100.0, child: Text('Item $index')),
+                  childCount: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverFixedExtentBoxAdaptor renderSliver = tester
+          .renderObject<RenderSliverFixedExtentBoxAdaptor>(find.byType(SliverFixedExtentList));
+      expect(renderSliver.layoutDimensions.scrollOffset, 0.0);
+      expect(renderSliver.layoutDimensions.precedingScrollExtent, 0.0);
+      expect(renderSliver.layoutDimensions.viewportMainAxisExtent, 600.0);
+      expect(renderSliver.layoutDimensions.crossAxisExtent, 800.0);
+
+      controller.jumpTo(150.0);
+      await tester.pump();
+
+      expect(renderSliver.layoutDimensions.scrollOffset, 150.0);
+      expect(renderSliver.layoutDimensions.precedingScrollExtent, 0.0);
+      expect(renderSliver.layoutDimensions.viewportMainAxisExtent, 600.0);
+      expect(renderSliver.layoutDimensions.crossAxisExtent, 800.0);
+    },
+  );
 }
 
 bool isRight(Offset a, Offset b) => b.dx > a.dx;
