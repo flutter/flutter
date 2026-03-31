@@ -14,6 +14,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/_features.dart' show isWindowingEnabled;
+
+import '_window.dart'
+    show
+        BaseWindowController,
+        TooltipWindow,
+        TooltipWindowController,
+        TooltipWindowControllerDelegate,
+        WindowRegistry,
+        WindowScope;
+
+import '_window_positioner.dart' show WindowPositioner, WindowPositionerAnchor;
+
 import 'basic.dart';
 import 'debug.dart';
 import 'feedback.dart';
@@ -22,6 +35,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 
 const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
   curve: Curves.fastOutSlowIn,
@@ -531,12 +545,109 @@ class RawTooltip extends StatefulWidget {
   }
 }
 
+/// Common interface for showing/hiding the tooltip, abstracting over the
+/// [OverlayPortal]-based and [TooltipWindowController]-based implementations.
+abstract class _TooltipShowController {
+  void show();
+  void hide();
+  bool get isShowing;
+  void dispose();
+}
+
+/// Shows the tooltip using an [OverlayPortalController] (the non-windowing path).
+class _OverlayTooltipShowController implements _TooltipShowController {
+  final OverlayPortalController overlayController = OverlayPortalController();
+
+  @override
+  void show() => overlayController.show();
+
+  @override
+  void hide() => overlayController.hide();
+
+  @override
+  bool get isShowing => overlayController.isShowing;
+
+  @override
+  void dispose() {
+    // OverlayPortalController has no dispose.
+  }
+}
+
+/// Shows the tooltip using a [TooltipWindowController] and [WindowRegistry]
+/// (the windowing path).
+class _WindowTooltipShowController implements _TooltipShowController {
+  _WindowTooltipShowController({
+    required this.parent,
+    required this.anchorRectGetter,
+    required this.onChanged,
+  });
+
+  final BaseWindowController parent;
+  final Rect? Function() anchorRectGetter;
+  final VoidCallback onChanged;
+
+  TooltipWindowController? _controller;
+
+  TooltipWindowController? get windowController => _controller;
+
+  @override
+  void show() {
+    if (_controller != null) {
+      return;
+    }
+    final Rect? anchorRect = anchorRectGetter();
+    if (anchorRect == null) {
+      return;
+    }
+    _controller = TooltipWindowController(
+      parent: parent,
+      anchorRect: anchorRect,
+      positioner: const WindowPositioner(
+        parentAnchor: WindowPositionerAnchor.bottom,
+        childAnchor: WindowPositionerAnchor.top,
+      ),
+      delegate: _RawTooltipWindowControllerDelegate(onDestroyed: hide),
+    );
+    onChanged();
+  }
+
+  @override
+  void hide() {
+    _controller?.destroy();
+    _controller = null;
+    onChanged();
+  }
+
+  @override
+  bool get isShowing => _controller != null;
+
+  @override
+  void dispose() {
+    if (isShowing) {
+      _controller?.destroy();
+      _controller = null;
+    }
+  }
+}
+
+class _RawTooltipWindowControllerDelegate extends TooltipWindowControllerDelegate {
+  _RawTooltipWindowControllerDelegate({required this.onDestroyed});
+
+  final VoidCallback onDestroyed;
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+}
+
 /// Contains the state for a [RawTooltip].
 ///
 /// This class can be used to programmatically show the [RawTooltip]. See the
 /// [ensureTooltipVisible] method.
 class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
-  final OverlayPortalController _overlayController = OverlayPortalController();
+  late final _TooltipShowController _showController;
 
   Timer? _timer;
   AnimationController? _backingController;
@@ -572,9 +683,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
         RawTooltip._openedTooltips.remove(this);
-        _overlayController.hide();
+        _showController.hide();
       case (true, false):
-        _overlayController.show();
+        _showController.show();
         RawTooltip._openedTooltips.add(this);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
@@ -798,6 +909,35 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
   }
 
+  bool _showControllerInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_showControllerInitialized) {
+      _showControllerInitialized = true;
+      final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
+      if (windowRegistry != null && isWindowingEnabled) {
+        _showController = _WindowTooltipShowController(
+          parent: WindowScope.of(context),
+          anchorRectGetter: _getAnchorRect,
+          onChanged: () => setState(() {}),
+        );
+      } else {
+        _showController = _OverlayTooltipShowController();
+      }
+    }
+  }
+
+  Rect? _getAnchorRect() {
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox != null && renderBox.hasSize) {
+      final Offset position = renderBox.localToGlobal(Offset.zero);
+      return position & renderBox.size;
+    }
+    return null;
+  }
+
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
     if (layoutInfo.childPaintTransform.determinant() == 0.0) {
       // The child is not visible.
@@ -851,6 +991,9 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     _timer?.cancel();
     _backingController?.dispose();
     _backingOverlayAnimation?.dispose();
+    if (_showControllerInitialized) {
+      _showController.dispose();
+    }
     super.dispose();
   }
 
@@ -862,7 +1005,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     if (widget.semanticsTooltip?.isEmpty ?? false) {
       return widget.child;
     }
-    assert(debugCheckHasOverlay(context));
+
     final bool excludeFromSemantics =
         widget.semanticsTooltip == null || widget.semanticsTooltip!.isEmpty;
     // TODO(victorsanni): https://github.com/flutter/flutter/issues/180320
@@ -883,11 +1026,30 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       ),
     );
 
-    return OverlayPortal.overlayChildLayoutBuilder(
-      controller: _overlayController,
-      overlayChildBuilder: _buildTooltipOverlay,
-      child: result,
-    );
+    final _TooltipShowController showController = _showController;
+    if (showController is _OverlayTooltipShowController) {
+      assert(debugCheckHasOverlay(context));
+      return OverlayPortal.overlayChildLayoutBuilder(
+        controller: showController.overlayController,
+        overlayChildBuilder: _buildTooltipOverlay,
+        child: result,
+      );
+    }
+
+    if (showController is _WindowTooltipShowController) {
+      final TooltipWindowController? windowController = showController.windowController;
+      if (windowController != null) {
+        return ViewAnchor(
+          view: TooltipWindow(
+            controller: windowController,
+            child: widget.tooltipBuilder(context, _overlayAnimation),
+          ),
+          child: result,
+        );
+      }
+    }
+
+    return result;
   }
 }
 
