@@ -1310,7 +1310,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     assert(_selectionStartsInScrollable != null);
     final box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
-    if (_selectionStartsInScrollable == false) {
+    if (!_selectionStartsInScrollable!) {
       // If the selection starts outside of the scrollable, selecting across the
       // scrollable boundary will act as selecting the entire content in the
       // scrollable. This logic move the offset to the 0.0 or infinity to cover
@@ -1374,7 +1374,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
-    assert(_selectionStartsInScrollable == null);
     final SelectionResult result = super.handleSelectAll(event);
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex != -1) {
