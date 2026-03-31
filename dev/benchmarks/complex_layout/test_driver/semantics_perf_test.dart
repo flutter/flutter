@@ -33,9 +33,7 @@ void main() {
       driver = await FlutterDriver.connect(printCommunication: true);
     });
 
-    tearDownAll(() async {
-      driver.close();
-    });
+    tearDownAll(driver.close);
 
     test('initial tree creation', () async {
       // Let app become fully idle.
