@@ -90,6 +90,9 @@ object DependencyVersionChecker {
     // flutter.dev/go/android-dependency-versions for more.
     // Advice for maintainers for other areas of code that are impacted are documented
     // in packages/flutter_tools/lib/src/android/README.md.
+
+    // When bumping, also update:
+    //  * Gradle template version in packages/flutter_tools/lib/src/android/gradle_utils.dart
     @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 14, 0)
 
     @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 7, 0)
@@ -99,12 +102,18 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
+    // When bumping, also update:
+    //  * AGP template version in packages/flutter_tools/lib/src/android/gradle_utils.dart
     @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
 
     @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
 
+    // When bumping, also update:
+    //  * KGP template version in packages/flutter_tools/lib/src/android/gradle_utils.dart
     @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 2, 20)
 
+    // When bumping, also update: packages/flutter_tools/lib/src/android/gradle_utils.dart
+    //  * KGP implementation dependency in packages/flutter_tools/gradle/build.gradle.kts
     @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 0, 0)
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
