@@ -882,6 +882,7 @@ class _GtkWidget extends _GObject {
     return _gtkWidgetGetScaleFactor(instance);
   }
 
+  /// Translates coordinates from this widget to the [destWidget]. Returns null if the widgets do not have a common ancestor.
   (int, int)? translateCoordinates(_GtkWidget destWidget, (int, int) src) {
     final ffi.Pointer<ffi.Int> dest = _gMalloc0(ffi.sizeOf<ffi.Int>() * 2).cast<ffi.Int>();
     final bool translated = _gtkWidgetTranslateCoordinates(
@@ -892,9 +893,7 @@ class _GtkWidget extends _GObject {
       dest.elementAt(0),
       dest.elementAt(1),
     );
-    final (int, int)? result = translated
-        ? (dest[0], dest[1])
-        : null;
+    final (int, int)? result = translated ? (dest[0], dest[1]) : null;
     _gFree(dest);
     return result;
   }
