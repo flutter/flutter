@@ -33,13 +33,13 @@ class TooltipSample extends StatelessWidget {
     return Tooltip(
       message: 'I am a Tooltip',
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: .circular(25),
         gradient: const LinearGradient(
           colors: <Color>[Colors.amber, Colors.red],
         ),
       ),
       constraints: const BoxConstraints(minWidth: 250),
-      padding: const EdgeInsets.all(8.0),
+      padding: const .all(8.0),
       preferBelow: true,
       textStyle: const TextStyle(fontSize: 24),
       showDuration: const Duration(seconds: 2),
