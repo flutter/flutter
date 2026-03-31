@@ -320,8 +320,9 @@ void main() {
 
     final logger = BufferLogger.test();
 
-    final String fooUri = fileSystem.path.toUri(fileSystem.path.absolute('directoryA', 'foo')).toString();
-    final String diagnosticsJson = '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
+    final fooUri = fileSystem.path.toUri(fileSystem.path.absolute('directoryA', 'foo')).toString();
+    final diagnosticsJson =
+        '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
         '"uri":"$fooUri","diagnostics":[{"range":{"start":{"line":99,'
         '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
         '"message":"It\'s an error."}]}}';
