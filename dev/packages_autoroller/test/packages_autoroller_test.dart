@@ -262,16 +262,19 @@ void main() {
       FakeCommand(
         command: const <String>[
           '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/dart',
-          'compile',
-          'exe',
+          'build',
+          'cli',
+          '--target',
           '$checkoutsParentDirectory/package_autoroller_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
           '-o',
-          '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+          '/.tmp_rand0/rand0',
         ],
-        onRun: (_) => fileSystem.file('/.tmp_rand0/rand0/generate_gradle_lockfiles').createSync(),
+        onRun: (_) => fileSystem
+            .file('/.tmp_rand0/rand0/bundle/bin/generate_gradle_lockfiles')
+            .createSync(recursive: true),
       ),
       const FakeCommand(
-        command: <String>['chmod', '+x', '/.tmp_rand0/rand0/generate_gradle_lockfiles'],
+        command: <String>['chmod', '+x', '/.tmp_rand0/rand0/bundle/bin/generate_gradle_lockfiles'],
       ),
       const FakeCommand(command: <String>['git', 'ls-remote', '--heads', 'mirror']),
       const FakeCommand(command: <String>['git', 'checkout', '-b', 'packages-autoroller-branch-1']),
@@ -354,16 +357,19 @@ void main() {
       FakeCommand(
         command: const <String>[
           '$checkoutsParentDirectory/package_autoroller_checkouts/framework/bin/dart',
-          'compile',
-          'exe',
+          'build',
+          'cli',
+          '--target',
           '$checkoutsParentDirectory/package_autoroller_checkouts/framework/dev/tools/bin/generate_gradle_lockfiles.dart',
           '-o',
-          '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+          '/.tmp_rand0/rand0',
         ],
-        onRun: (_) => fileSystem.file('/.tmp_rand0/rand0/generate_gradle_lockfiles').createSync(),
+        onRun: (_) => fileSystem
+            .file('/.tmp_rand0/rand0/bundle/bin/generate_gradle_lockfiles')
+            .createSync(recursive: true),
       ),
       const FakeCommand(
-        command: <String>['chmod', '+x', '/.tmp_rand0/rand0/generate_gradle_lockfiles'],
+        command: <String>['chmod', '+x', '/.tmp_rand0/rand0/bundle/bin/generate_gradle_lockfiles'],
       ),
       const FakeCommand(command: <String>['git', 'ls-remote', '--heads', 'mirror']),
       const FakeCommand(command: <String>['git', 'checkout', '-b', 'packages-autoroller-branch-1']),
@@ -404,7 +410,7 @@ void main() {
       const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: '000deadbeef'),
       const FakeCommand(
         command: <String>[
-          '/.tmp_rand0/rand0/generate_gradle_lockfiles',
+          '/.tmp_rand0/rand0/bundle/bin/generate_gradle_lockfiles',
           '--no-gradle-generation',
           '--no-exclusion',
         ],

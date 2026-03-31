@@ -22,7 +22,7 @@ class _SwitchAppState extends State<SwitchApp> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = ThemeData(
-      platform: isMaterial ? TargetPlatform.android : TargetPlatform.iOS,
+      platform: isMaterial ? .android : .iOS,
       adaptations: <Adaptation<Object>>[
         if (isCustomized) const _SwitchThemeAdaptation(),
       ],
@@ -36,7 +36,7 @@ class _SwitchAppState extends State<SwitchApp> {
       home: Scaffold(
         appBar: AppBar(title: const Text('Adaptive Switches')),
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             OutlinedButton(
               style: style,
@@ -90,11 +90,11 @@ class _SwitchWithLabelState extends State<SwitchWithLabel> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         Container(
           width: 150,
-          padding: const EdgeInsets.only(right: 20),
+          padding: const .only(right: 20),
           child: Text(widget.label),
         ),
         Switch.adaptive(
@@ -118,13 +118,13 @@ class _SwitchThemeAdaptation extends Adaptation<SwitchThemeData> {
   @override
   SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) {
     switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      case .android:
+      case .fuchsia:
+      case .linux:
+      case .windows:
         return defaultValue;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
+      case .iOS:
+      case .macOS:
         return const SwitchThemeData(
           thumbColor: WidgetStateProperty<Color?>.fromMap(<WidgetState, Color>{
             WidgetState.selected: Colors.yellow,

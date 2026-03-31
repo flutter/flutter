@@ -22,6 +22,7 @@ static std::weak_ptr<MockGLES> g_mock_gles;
 static std::vector<const char*> g_extensions;
 
 static const char* g_version;
+static std::string g_extensions_string;
 
 template <typename T, typename U>
 struct CheckSameSignature : std::false_type {};
@@ -65,6 +66,9 @@ const unsigned char* mockGetString(GLenum name) {
       return reinterpret_cast<const unsigned char*>(kMockVendor);
     case GL_VERSION:
       return reinterpret_cast<const unsigned char*>(g_version);
+    case GL_EXTENSIONS:
+      return reinterpret_cast<const unsigned char*>(
+          g_extensions_string.c_str());
     case GL_SHADING_LANGUAGE_VERSION:
       return reinterpret_cast<const unsigned char*>(
           kMockShadingLanguageVersion);
@@ -180,8 +184,54 @@ static_assert(CheckSameSignature<decltype(mockDeleteQueriesEXT),  //
 void mockUniform1fv(GLint location, GLsizei count, const GLfloat* value) {
   CallMockMethod(&IMockGLESImpl::Uniform1fv, location, count, value);
 }
-static_assert(CheckSameSignature<decltype(mockUniform1fv),  //
-                                 decltype(glUniform1fv)>::value);
+// Uniform1fv is already here, adding others
+void mockUniform2fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform2fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform2fv),  //
+                                 decltype(glUniform2fv)>::value);
+
+void mockUniform3fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform3fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform3fv),  //
+                                 decltype(glUniform3fv)>::value);
+
+void mockUniform4fv(GLint location, GLsizei count, const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::Uniform4fv, location, count, value);
+}
+static_assert(CheckSameSignature<decltype(mockUniform4fv),  //
+                                 decltype(glUniform4fv)>::value);
+
+void mockUniformMatrix2fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix2fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix2fv),  //
+                                 decltype(glUniformMatrix2fv)>::value);
+
+void mockUniformMatrix3fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix3fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix3fv),  //
+                                 decltype(glUniformMatrix3fv)>::value);
+
+void mockUniformMatrix4fv(GLint location,
+                          GLsizei count,
+                          GLboolean transpose,
+                          const GLfloat* value) {
+  CallMockMethod(&IMockGLESImpl::UniformMatrix4fv, location, count, transpose,
+                 value);
+}
+static_assert(CheckSameSignature<decltype(mockUniformMatrix4fv),  //
+                                 decltype(glUniformMatrix4fv)>::value);
 
 void mockGenTextures(GLsizei n, GLuint* textures) {
   CallMockMethod(&IMockGLESImpl::GenTextures, n, textures);
@@ -206,6 +256,21 @@ void mockObjectLabelKHR(GLenum identifier,
 }
 static_assert(CheckSameSignature<decltype(mockObjectLabelKHR),  //
                                  decltype(glObjectLabelKHR)>::value);
+
+void mockTexSubImage2D(GLenum target,
+                       GLint level,
+                       GLint xoffset,
+                       GLint yoffset,
+                       GLsizei width,
+                       GLsizei height,
+                       GLenum format,
+                       GLenum type,
+                       const void* pixels) {
+  CallMockMethod(&IMockGLESImpl::TexSubImage2D, target, level, xoffset, yoffset,
+                 width, height, format, type, pixels);
+}
+static_assert(CheckSameSignature<decltype(mockTexSubImage2D),  //
+                                 decltype(glTexSubImage2D)>::value);
 
 GLboolean mockIsTexture(GLuint texture) {
   return CallMockMethod(&IMockGLESImpl::IsTexture, texture);
@@ -256,14 +321,32 @@ void mockDiscardFramebufferEXT(GLenum target,
 static_assert(CheckSameSignature<decltype(mockDiscardFramebufferEXT),  //
                                  decltype(glDiscardFramebufferEXT)>::value);
 
+void mockInvalidateFramebuffer(GLenum target,
+                               GLsizei numAttachments,
+                               const GLenum* attachments) {
+  return CallMockMethod(&IMockGLESImpl::InvalidateFramebuffer, target,
+                        numAttachments, attachments);
+}
+
+static_assert(CheckSameSignature<decltype(mockInvalidateFramebuffer),  //
+                                 decltype(glInvalidateFramebuffer)>::value);
+
 // static
 std::shared_ptr<MockGLES> MockGLES::Init(
     std::unique_ptr<MockGLESImpl> impl,
-    const std::optional<std::vector<const char*>>& extensions) {
+    const std::optional<std::vector<const char*>>& extensions,
+    const char* version_string) {
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
   g_extensions = extensions.value_or(kExtensions);
-  g_version = "OpenGL ES 3.0";
+  g_extensions_string.clear();
+  for (const auto& ext : g_extensions) {
+    if (!g_extensions_string.empty()) {
+      g_extensions_string += " ";
+    }
+    g_extensions_string += ext;
+  }
+  g_version = version_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES());
   mock_gles->impl_ = std::move(impl);
   g_mock_gles = mock_gles;
@@ -278,6 +361,13 @@ std::shared_ptr<MockGLES> MockGLES::Init(
   FML_CHECK(g_test_lock.try_lock())
       << "MockGLES is already being used by another test.";
   g_extensions = extensions.value_or(kExtensions);
+  g_extensions_string.clear();
+  for (const auto& ext : g_extensions) {
+    if (!g_extensions_string.empty()) {
+      g_extensions_string += " ";
+    }
+    g_extensions_string += ext;
+  }
   g_version = version_string;
   auto mock_gles = std::shared_ptr<MockGLES>(new MockGLES(std::move(resolver)));
   g_mock_gles = mock_gles;
@@ -313,8 +403,22 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGetQueryObjectuivEXT);
   } else if (strcmp(name, "glUniform1fv") == 0) {
     return reinterpret_cast<void*>(mockUniform1fv);
+  } else if (strcmp(name, "glUniform2fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform2fv);
+  } else if (strcmp(name, "glUniform3fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform3fv);
+  } else if (strcmp(name, "glUniform4fv") == 0) {
+    return reinterpret_cast<void*>(mockUniform4fv);
+  } else if (strcmp(name, "glUniformMatrix2fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix2fv);
+  } else if (strcmp(name, "glUniformMatrix3fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix3fv);
+  } else if (strcmp(name, "glUniformMatrix4fv") == 0) {
+    return reinterpret_cast<void*>(mockUniformMatrix4fv);
   } else if (strcmp(name, "glGenTextures") == 0) {
     return reinterpret_cast<void*>(mockGenTextures);
+  } else if (strcmp(name, "glTexSubImage2D") == 0) {
+    return reinterpret_cast<void*>(mockTexSubImage2D);
   } else if (strcmp(name, "glObjectLabelKHR") == 0) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
   } else if (strcmp(name, "glGenBuffers") == 0) {
@@ -331,6 +435,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockBindFramebuffer);
   } else if (strcmp(name, "glDiscardFramebufferEXT") == 0) {
     return reinterpret_cast<void*>(mockDiscardFramebufferEXT);
+  } else if (strcmp(name, "glInvalidateFramebuffer") == 0) {
+    return reinterpret_cast<void*>(mockInvalidateFramebuffer);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

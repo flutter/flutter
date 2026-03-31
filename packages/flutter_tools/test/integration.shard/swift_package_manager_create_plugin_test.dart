@@ -40,8 +40,16 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
+          String pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isFalse);
           expect(
-            pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isFalse,
+          );
+          expect(
+            pbxprojFileContents.contains(
+              '78DABEA22ED26510000E7860 /* ${createdCocoaPodsPlugin.pluginName} */',
+            ),
             isFalse,
           );
 
@@ -63,9 +71,12 @@ void main() {
               .childDirectory(platformName)
               .childFile('${createdCocoaPodsPlugin.pluginName}.podspec');
           expect(podspec.existsSync(), isTrue);
-          expect(podspec.readAsStringSync(), contains('Classes'));
-          expect(podspec.readAsStringSync().contains('Sources'), isFalse);
+          // New plugins always use SwiftPM structure.
+          expect(podspec.readAsStringSync(), contains('Sources'));
+          expect(podspec.readAsStringSync().contains('Classes'), isFalse);
 
+          // Even though the plugin uses SwiftPM structure, building with SwiftPM disabled
+          // should fall back to CocoaPods at runtime.
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,
@@ -73,6 +84,7 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              // Use cocoaPodsPlugin because the plugin is installed via CocoaPods when SwiftPM is disabled.
               cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
@@ -80,6 +92,29 @@ void main() {
               appDirectoryPath: appDirectoryPath,
               cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
+          );
+
+          await SwiftPackageManagerUtils.enableSwiftPackageManager(
+            flutterBin,
+            workingDirectoryPath,
+          );
+
+          await SwiftPackageManagerUtils.buildApp(
+            flutterBin,
+            appDirectoryPath,
+            options: <String>[platformName, '--debug', '-v'],
+          );
+          pbxprojFileContents = pbxprojFile.readAsStringSync();
+          expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isTrue);
+          expect(
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isTrue,
+          );
+          expect(
+            pbxprojFileContents.contains(
+              '78DABEA22ED26510000E7860 /* ${createdCocoaPodsPlugin.pluginName} */',
+            ),
+            isTrue,
           );
         } finally {
           await SwiftPackageManagerUtils.disableSwiftPackageManager(
@@ -120,8 +155,13 @@ void main() {
               .childDirectory(platformName)
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
+          final String pbxprojFileContents = pbxprojFile.readAsStringSync();
           expect(pbxprojFile.existsSync(), isTrue);
-          expect(pbxprojFile.readAsStringSync(), contains('FlutterGeneratedPluginSwiftPackage'));
+          expect(pbxprojFileContents, contains('FlutterGeneratedPluginSwiftPackage'));
+          expect(
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isTrue,
+          );
 
           final File xcschemeFile = fileSystem
               .directory(appDirectoryPath)
@@ -140,6 +180,19 @@ void main() {
           expect(podspec.existsSync(), isTrue);
           expect(podspec.readAsStringSync(), contains('Sources'));
           expect(podspec.readAsStringSync().contains('Classes'), isFalse);
+
+          final File swiftManifest = fileSystem
+              .directory(createdSwiftPackagePlugin.pluginPath)
+              .childDirectory(platformName)
+              .childDirectory(createdSwiftPackagePlugin.pluginName)
+              .childFile('Package.swift');
+          expect(swiftManifest.existsSync(), isTrue);
+          expect(
+            swiftManifest.readAsStringSync().contains(
+              '.package(name: "FlutterFramework", path: "../FlutterFramework")',
+            ),
+            isTrue,
+          );
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,

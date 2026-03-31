@@ -326,7 +326,7 @@ void main() {
 
         testWithoutContext('version checks fail when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(9, null, null);
+          xcodeProjectInterpreter.version = Version(14, null, null);
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
@@ -343,7 +343,7 @@ void main() {
           'version checks pass when version meets minimum but not recommended',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(14, null, null);
+            xcodeProjectInterpreter.version = Version(15, 4, null);
 
             expect(xcode.isRequiredVersionSatisfactory, isTrue);
             expect(xcode.isRecommendedVersionSatisfactory, isFalse);
@@ -352,28 +352,28 @@ void main() {
 
         testWithoutContext('version checks pass when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(15, 0, 0);
+          xcodeProjectInterpreter.version = Version(26, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(14, 3, 0);
+          xcodeProjectInterpreter.version = Version(15, 4, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(14, 0, 2);
+          xcodeProjectInterpreter.version = Version(15, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
         testWithoutContext('version checks pass when major version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(16, 0, 0);
+          xcodeProjectInterpreter.version = Version(26, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
@@ -381,7 +381,7 @@ void main() {
 
         testWithoutContext('version checks pass when minor version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(15, 3, 0);
+          xcodeProjectInterpreter.version = Version(16, 4, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
@@ -389,7 +389,7 @@ void main() {
 
         testWithoutContext('version checks pass when patch version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(15, 0, 2);
+          xcodeProjectInterpreter.version = Version(16, 0, 1);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
@@ -406,7 +406,7 @@ void main() {
           'isInstalledAndMeetsVersionCheck is false when version not satisfied',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(10, 2, 0);
+            xcodeProjectInterpreter.version = Version(14, 2, 0);
 
             expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
             expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -417,7 +417,7 @@ void main() {
           'isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(14, null, null);
+            xcodeProjectInterpreter.version = Version(15, null, null);
 
             expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
             expect(fakeProcessManager, hasNoRemainingExpectations);

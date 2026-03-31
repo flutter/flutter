@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('PinnedHeaderSliver basics', (WidgetTester tester) async {
     Widget buildFrame({required Axis axis, required bool reverse}) {
-      return MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            scrollDirection: axis,
-            reverse: reverse,
-            slivers: <Widget>[
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
-              SliverList.builder(
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          scrollDirection: axis,
+          reverse: reverse,
+          slivers: <Widget>[
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ],
         ),
       );
     }
@@ -147,19 +149,17 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
-              SliverList.builder(
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ],
         ),
       ),
     );
@@ -181,31 +181,29 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.builder(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) => Text('Item 0.$index'),
-              ),
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
-              SliverList.builder(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) => Text('Item 1.$index'),
-              ),
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
-              SliverList.builder(
-                itemCount: 2,
-                itemBuilder: (BuildContext context, int index) => Text('Item 2.$index'),
-              ),
-              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
-              SliverList.builder(
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) => Text('Item 0.$index'),
+            ),
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 0')),
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) => Text('Item 1.$index'),
+            ),
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 1')),
+            SliverList.builder(
+              itemCount: 2,
+              itemBuilder: (BuildContext context, int index) => Text('Item 2.$index'),
+            ),
+            const PinnedHeaderSliver(child: Text('PinnedHeaderSliver 2')),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ],
         ),
       ),
     );
@@ -248,4 +246,73 @@ void main() {
     expect(tester.getRect(find.text('PinnedHeaderSliver 1')), rect1);
     expect(tester.getRect(find.text('PinnedHeaderSliver 2')), rect2);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/179022.
+  testWidgets(
+    'PinnedHeaderSliver: presence of RenderViewport.excludeFromScrolling tag when pinned',
+    (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('First child'))),
+              const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+              SliverList.builder(
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      Rect getHeaderRect() => tester.getRect(find.text('PinnedHeaderSliver'));
+      Rect getFirstChildRect() => tester.getRect(find.text('First child'));
+
+      // Pinned header appears after first child initially.
+      final Rect firstChildRect = getFirstChildRect();
+      expect(firstChildRect.top, 0.0);
+      expect(firstChildRect.height, 100.0);
+      expect(getHeaderRect().top, 100.0);
+
+      expect(
+        semantics,
+        isNot(
+          includesNodeWith(
+            tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+          ),
+        ),
+      );
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+      await tester.pumpAndSettle();
+
+      // Pinned header should be pinned to the top after drag.
+      expect(getHeaderRect().top, 0.0);
+
+      expect(
+        semantics,
+        isNot(
+          includesNodeWith(
+            tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+          ),
+        ),
+      );
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -20));
+      await tester.pumpAndSettle();
+
+      final SemanticsNode? semanticNode = semantics
+          .nodesWith(label: 'PinnedHeaderSliver')
+          .firstOrNull;
+      expect(semanticNode?.parent?.tags, {
+        RenderViewport.excludeFromScrolling,
+        RenderViewport.useTwoPaneSemantics,
+      });
+
+      semantics.dispose();
+    },
+  );
 }

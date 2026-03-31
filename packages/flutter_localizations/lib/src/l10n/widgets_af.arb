@@ -12,7 +12,7 @@
   "shareButtonLabel": "Deel",
   "pasteButtonLabel": "Plak",
   "selectAllButtonLabel": "Kies alles",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Soekresultate gevind",
+  "noResultsFound": "Geen resultate gekry nie",
+  "radioButtonUnselectedLabel": "Nie gekies nie"
 }

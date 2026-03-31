@@ -9,7 +9,6 @@ import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'application_package.dart';
-import 'artifacts.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
@@ -44,35 +43,11 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
-    TargetModel targetModel = TargetModel.flutter,
-    this.targetPlatform,
-    ResidentCompiler? generator,
-    this.userIdentifier,
+    required this.targetPlatform,
+    required this.generator,
     required this.developmentShaderCompiler,
-  }) : generator =
-           generator ??
-           ResidentCompiler(
-             globals.artifacts!.getArtifactPath(
-               Artifact.flutterPatchedSdkPath,
-               platform: targetPlatform,
-               mode: buildInfo.mode,
-             ),
-             buildMode: buildInfo.mode,
-             trackWidgetCreation: buildInfo.trackWidgetCreation,
-             fileSystemRoots: buildInfo.fileSystemRoots,
-             fileSystemScheme: buildInfo.fileSystemScheme,
-             targetModel: targetModel,
-             dartDefines: buildInfo.dartDefines,
-             packagesPath: buildInfo.packageConfigPath,
-             frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-             extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-             artifacts: globals.artifacts!,
-             processManager: globals.processManager,
-             logger: globals.logger,
-             platform: globals.platform,
-             fileSystem: globals.fs,
-             shutdownHooks: globals.shutdownHooks,
-           );
+    this.userIdentifier,
+  });
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
@@ -80,14 +55,10 @@ class FlutterDevice {
     required String? target,
     required BuildInfo buildInfo,
     required Platform platform,
-    TargetModel targetModel = TargetModel.flutter,
-    List<String>? experimentalFlags,
     String? userIdentifier,
+    TargetModel? targetModelOverride,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    if (device.platformType == PlatformType.fuchsia) {
-      targetModel = TargetModel.flutterRunner;
-    }
     final shaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
         artifacts: globals.artifacts!,
@@ -98,104 +69,21 @@ class FlutterDevice {
       fileSystem: globals.fs,
     );
 
-    final ResidentCompiler generator;
-
-    // For both web and non-web platforms we initialize dill to/from
-    // a shared location for faster bootstrapping. If the compiler fails
-    // due to a kernel target or version mismatch, no error is reported
-    // and the compiler starts up as normal. Unexpected errors will print
-    // a warning message and dump some debug information which can be
-    // used to file a bug, but the compiler will still start up correctly.
-    if (targetPlatform == TargetPlatform.web_javascript) {
-      // TODO(zanderso): consistently provide these flags across platforms.
-      const platformDillName = 'ddc_outline.dill';
-
-      final String platformDillPath = globals.fs.path.join(
-        globals.artifacts!.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
-        platformDillName,
-      );
-      final extraFrontEndOptions = <String>[
-        ...buildInfo.extraFrontEndOptions,
-        if (buildInfo.webEnableHotReload)
-        // These flags are only valid to be passed when compiling with DDC.
-        ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
-      ];
-
-      generator = ResidentCompiler(
-        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
-        buildMode: buildInfo.mode,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        includeUnsupportedPlatformLibraryStubs: buildInfo.includeUnsupportedPlatformLibraryStubs,
-        fileSystemRoots: buildInfo.fileSystemRoots,
-        // Override the filesystem scheme so that the frontend_server can find
-        // the generated entrypoint code.
-        fileSystemScheme: 'org-dartlang-app',
-        initializeFromDill:
-            buildInfo.initializeFromDill ??
-            getDefaultCachedKernelPath(
-              trackWidgetCreation: buildInfo.trackWidgetCreation,
-              dartDefines: buildInfo.dartDefines,
-              extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-            ),
-        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
-        targetModel: TargetModel.dartdevc,
-        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: extraFrontEndOptions,
-        platformDill: globals.fs.file(platformDillPath).absolute.uri.toString(),
-        dartDefines: buildInfo.dartDefines,
-        librariesSpec: globals.fs
-            .file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
-            .uri
-            .toString(),
-        packagesPath: buildInfo.packageConfigPath,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
-        platform: platform,
-        shutdownHooks: globals.shutdownHooks,
-      );
-    } else {
-      List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
-      extraFrontEndOptions = <String>[
-        '--enable-experiment=alternative-invalidation-strategy',
-        ...extraFrontEndOptions,
-      ];
-      generator = ResidentCompiler(
-        globals.artifacts!.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: targetPlatform,
-          mode: buildInfo.mode,
-        ),
-        buildMode: buildInfo.mode,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        fileSystemRoots: buildInfo.fileSystemRoots,
-        fileSystemScheme: buildInfo.fileSystemScheme,
-        targetModel: targetModel,
-        dartDefines: buildInfo.dartDefines,
-        frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-        extraFrontEndOptions: extraFrontEndOptions,
-        initializeFromDill:
-            buildInfo.initializeFromDill ??
-            getDefaultCachedKernelPath(
-              trackWidgetCreation: buildInfo.trackWidgetCreation,
-              dartDefines: buildInfo.dartDefines,
-              extraFrontEndOptions: extraFrontEndOptions,
-            ),
-        assumeInitializeFromDillUpToDate: buildInfo.assumeInitializeFromDillUpToDate,
-        packagesPath: buildInfo.packageConfigPath,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        platform: platform,
-        fileSystem: globals.fs,
-        shutdownHooks: globals.shutdownHooks,
-      );
-    }
+    final ResidentCompiler generator = residentCompilerFactory.create(
+      artifacts: globals.artifacts!,
+      processManager: globals.processManager,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      platform: platform,
+      shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
+      targetPlatform: targetPlatform,
+      buildInfo: buildInfo,
+      targetModelOverride: targetModelOverride,
+    );
 
     return FlutterDevice(
       device,
-      targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
       buildInfo: buildInfo,
@@ -204,7 +92,7 @@ class FlutterDevice {
     );
   }
 
-  final TargetPlatform? targetPlatform;
+  final TargetPlatform targetPlatform;
   final Device? device;
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
@@ -1314,6 +1202,8 @@ abstract class ResidentRunner extends ResidentHandlers {
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+        config: globals.config,
+        fileSystem: globals.fs,
       );
       globals.fs.file(copyPath).parent.createSync(recursive: true);
       outputDill.copySync(copyPath);
@@ -1447,7 +1337,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   var _reportedDebuggers = false;
 
-  void printDebuggerList() {
+  /// Prints connection information for various services and tools.
+  ///
+  /// [connectionInfo] should be provided if the [DartDevelopmentService] for
+  /// the target device if not set (e.g., web targets).
+  void printDebuggerList({DebugConnectionInfo? connectionInfo}) {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
         continue;
@@ -1457,9 +1351,10 @@ abstract class ResidentRunner extends ResidentHandlers {
         'A Dart VM Service on ${device.device!.name} is available at: '
         '${device.vmService!.httpAddress}',
       );
-
-      final DartDevelopmentService dds = device.device!.dds;
-      final Uri? dtdUri = dds.dtdUri;
+      // DWDS hosts its own DDS, so the instance associated with the device won't actually be
+      // active for web targets. Use the connectionInfo to get the DTD URI instead.
+      // See https://github.com/flutter/flutter/issues/182052
+      final Uri? dtdUri = connectionInfo?.dtdUri ?? device.device!.dds.dtdUri;
       if (debuggingOptions.printDtd && dtdUri != null) {
         globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
       }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
 
 #include <dlfcn.h>
 #include <fcntl.h>
@@ -18,10 +18,9 @@
 #include <zircon/status.h>
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.h"
 #include "third_party/dart/runtime/include/dart_api.h"
-
-#include "inlines.h"
-#include "vmo.h"
 
 namespace dart_utils {
 

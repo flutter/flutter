@@ -281,6 +281,32 @@ void testGlyphInfo() {
   });
 }
 
+void testTextDecoration() {
+  test('maskValue returns correct bit mask for predefined decorations', () {
+    expect(TextDecoration.none.maskValue, 0x0);
+    expect(TextDecoration.underline.maskValue, 0x1);
+    expect(TextDecoration.overline.maskValue, 0x2);
+    expect(TextDecoration.lineThrough.maskValue, 0x4);
+  });
+
+  test('maskValue returns combined bit mask for TextDecoration.combine', () {
+    final combined = TextDecoration.combine(<TextDecoration>[
+      TextDecoration.underline,
+      TextDecoration.lineThrough,
+    ]);
+    expect(combined.maskValue, 0x1 | 0x4);
+  });
+
+  test('maskValue returns combined bit mask for all decorations', () {
+    final all = TextDecoration.combine(<TextDecoration>[
+      TextDecoration.underline,
+      TextDecoration.overline,
+      TextDecoration.lineThrough,
+    ]);
+    expect(all.maskValue, 0x1 | 0x2 | 0x4);
+  });
+}
+
 void testLoadFontFromList() {
   test('loadFontFromList will send platform message after font is loaded', () async {
     late String message;
@@ -466,6 +492,7 @@ void main() {
   testTextHeightBehavior();
   testTextRange();
   testGlyphInfo();
+  testTextDecoration();
   testLoadFontFromList();
   testFontFeatureClass();
   testFontVariation();

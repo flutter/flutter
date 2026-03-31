@@ -49,11 +49,10 @@ TEST(SamplingProfilerTest, DeleteAfterStart) {
   // Ignore calls to PostTask since that would require mocking out calls to
   // Dart.
   EXPECT_CALL(*task_runner, PostDelayedTask(_, _))
-      .WillRepeatedly(
-          Invoke([&](const fml::closure& task, fml::TimeDelta delay) {
-            invoke_count.fetch_add(1);
-            thread->GetTaskRunner()->PostTask(task);
-          }));
+      .WillRepeatedly([&](const fml::closure& task, fml::TimeDelta delay) {
+        invoke_count.fetch_add(1);
+        thread->GetTaskRunner()->PostTask(task);
+      });
 
   {
     auto profiler = SamplingProfiler(

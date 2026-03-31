@@ -1045,12 +1045,12 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
   );
 
   @JS('MakeMatrixTransform')
-  external SkImageFilter _MakeMatrixTransform(
+  external SkImageFilter? _MakeMatrixTransform(
     JSFloat32Array matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
   );
-  SkImageFilter MakeMatrixTransform(
+  SkImageFilter? MakeMatrixTransform(
     Float32List matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
@@ -2114,7 +2114,10 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
   external set value(double? v);
 }
 
-extension type SkTypeface(JSObject _) implements JSObject {}
+extension type SkTypeface(JSObject _) implements JSObject {
+  /// Returns the family name of the typeface.
+  external String? getFamilyName();
+}
 
 @JS('window.flutterCanvasKit.Font')
 extension type SkFont._(JSObject _) implements JSObject {

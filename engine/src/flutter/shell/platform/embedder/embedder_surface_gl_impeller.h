@@ -16,6 +16,11 @@ class ContextGLES;
 }  // namespace impeller
 
 namespace flutter {
+namespace testing {
+FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders);
+FML_TEST_CLASS(EmbedderSurfaceGLImpellerTest,
+               GLES2ContextDoesNotHaveGLES3Shaders);
+}  // namespace testing
 
 class ReactorWorker;
 
@@ -30,6 +35,10 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
   ~EmbedderSurfaceGLImpeller() override;
 
  private:
+  FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
+                  GLES3ContextHasGLES3Shaders);
+  FML_FRIEND_TEST(testing::EmbedderSurfaceGLImpellerTest,
+                  GLES2ContextDoesNotHaveGLES3Shaders);
   bool valid_ = false;
   EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;

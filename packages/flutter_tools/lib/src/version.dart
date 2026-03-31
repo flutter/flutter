@@ -235,7 +235,18 @@ abstract class FlutterVersion {
       ? _clock.now().difference(DateTime.parse(engineBuildDate!)).ago()
       : _getTimeSinceCommit(revision: engineRevision);
 
+  /// Populates bin/cache/flutter.version.json with the current version information, if it does not
+  /// already exist.
   void ensureVersionFile();
+
+  /// Deletes bin/cache/flutter.version.json so it can be regenerated on the next invocation of the
+  /// tool.
+  void deleteVersionFile() {
+    final File versionFile = getVersionFile(fs, flutterRoot);
+    if (versionFile.existsSync()) {
+      versionFile.deleteSync();
+    }
+  }
 
   @override
   String toString() {
@@ -689,7 +700,6 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   void ensureVersionFile() {
     _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
-
     const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!newVersionFile.existsSync()) {

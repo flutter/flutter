@@ -336,6 +336,12 @@ class FlutterView {
   ///  * [MediaQuery.of], a simpler mechanism to access this data.
   List<DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
 
+  /// The radii of the display corners in physical pixels.
+  ///
+  /// This is currently populated only on Android API 31+. On earlier Android
+  /// versions, iOS, and other platforms, this value is `null`.
+  DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
+
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
   ///
   /// This function must be called within the scope of the
@@ -570,11 +576,11 @@ class SingletonFlutterWindow extends FlutterView {
   /// service is specified.
   bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
 
-  /// Whether the spell check service is supported on the current platform.
+  /// Whether showing system context menu is supported on the current platform.
   ///
-  /// This option is used by [EditableTextState] to define its
-  /// [SpellCheckConfiguration] when a default spell check service
-  /// is requested.
+  /// This option is used by [AdaptiveTextSelectionToolbar] to decide whether
+  /// to show system context menu, or to fallback to the default Flutter context
+  /// menu.
   bool get supportsShowingSystemContextMenu => platformDispatcher.supportsShowingSystemContextMenu;
 
   /// Whether briefly displaying the characters as you type in obscured text

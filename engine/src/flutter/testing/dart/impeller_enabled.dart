@@ -5,3 +5,21 @@
 import 'dart:io';
 
 bool get impellerEnabled => Platform.executableArguments.contains('--enable-impeller');
+
+bool get flutterGpuEnabled => Platform.executableArguments.contains('--enable-flutter-gpu');
+
+String? get impellerBackend {
+  if (!impellerEnabled) {
+    return null;
+  }
+  const backendFlag = '--impeller-backend=';
+  for (final String arg in Platform.executableArguments) {
+    if (arg.startsWith(backendFlag)) {
+      return arg.substring(backendFlag.length);
+    }
+  }
+  if (Platform.isMacOS || Platform.isIOS) {
+    return 'metal';
+  }
+  return 'vulkan';
+}

@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 
 const int kSingleTapUpTimeout = 500;
@@ -568,7 +569,8 @@ void main() {
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (_, int index) => index == 0 ? const TextField() : const SizedBox(height: 50),
+                    (_, int index) =>
+                        index == 0 ? const TestTextField() : const SizedBox(height: 50),
                     childCount: 200,
                     addAutomaticKeepAlives: false,
                   ),
@@ -582,7 +584,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
       // gesture is not accepted and is cancelled when the recognizer is disposed.
-      await tester.startGesture(tester.getCenter(find.byType(TextField)));
+      await tester.startGesture(tester.getCenter(find.byType(TestTextField)));
       await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpAndSettle();
 
@@ -1236,7 +1238,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: TextField(autofocus: true, controller: controller)),
+          home: Scaffold(body: TestTextField(autofocus: true, controller: controller)),
         ),
       );
 
@@ -1253,7 +1255,7 @@ void main() {
       expect(gestureDetector, findsOneWidget);
       // The GestureDetector's size should not exceed that of the TextField.
       final Rect hitRect = tester.getRect(gestureDetector);
-      final Rect textFieldRect = tester.getRect(find.byType(TextField));
+      final Rect textFieldRect = tester.getRect(find.byType(TestTextField));
 
       expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
       expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
@@ -1640,7 +1642,7 @@ void main() {
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.notPasteable);
 
-        mockClipboard.handleMethodCall(
+        await mockClipboard.handleMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{'text': 'pasteablestring'}),
         );
         await expectLater(notifier.update(), completes);
