@@ -315,7 +315,10 @@ void main() {
   });
 
   testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
-    final fileSystem = MemoryFileSystem.test();
+    // Use Windows style on Windows host so Uri.toFilePath() parses it correctly with drive letters.
+    final fileSystem = MemoryFileSystem.test(
+      style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+    );
     fileSystem.directory('directoryA').childFile('foo').createSync(recursive: true);
 
     final logger = BufferLogger.test();
