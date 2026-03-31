@@ -76,6 +76,97 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
+    ],
+    targets: [
+        .target(
+            name: "FlutterGeneratedPluginSwiftPackage",
+            dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ]
+        )
+    ]
+)
+''');
+
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory.childFile('Package.swift').existsSync(),
+              isTrue,
+            );
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory
+                  .childFile('Package.swift')
+                  .readAsStringSync(),
+              '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [
+$_doubleIndent
+    ],
+    targets: [
+        .target(
+            name: "FlutterFramework"
+        )
+    ]
+)
+''',
+            );
+          });
+
+          testWithoutContext(
+            'generate if no dependencies, no Flutter dependency, and already migrated',
+            () async {
+              final fs = MemoryFileSystem();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+              project.xcodeProjectInfoFile.createSync(recursive: true);
+              project.xcodeProjectInfoFile.writeAsStringSync('''
+'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
+''');
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[],
+                platform,
+                project,
+                flutterAsADependency: false,
+              );
+
+              final supportedPlatform = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("13.0")'
+                  : '.macOS("10.15")';
+              expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+              expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterGeneratedPluginSwiftPackage",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
+    ],
+    dependencies: [
 $_doubleIndent
     ],
     targets: [
@@ -85,7 +176,8 @@ $_doubleIndent
     ]
 )
 ''');
-          });
+            },
+          );
 
           testWithoutContext('generate with single dependency', () async {
             final fs = MemoryFileSystem();
@@ -134,13 +226,15 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1")
+        .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
-                .product(name: "valid-plugin-1", package: "valid_plugin_1")
+                .product(name: "valid-plugin-1", package: "valid_plugin_1"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
         )
     ]
@@ -237,103 +331,21 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "../.packages/valid_plugin_1"),
-        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2")
+        .package(name: "valid_plugin_2", path: "../.packages/valid_plugin_2"),
+        .package(name: "FlutterFramework", path: "../.packages/FlutterFramework")
     ],
     targets: [
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
                 .product(name: "valid-plugin-1", package: "valid_plugin_1"),
-                .product(name: "valid-plugin-2", package: "valid_plugin_2")
+                .product(name: "valid-plugin-2", package: "valid_plugin_2"),
+                .product(name: "FlutterFramework", package: "FlutterFramework")
             ]
         )
     ]
 )
 ''');
-          });
-        });
-
-        group('updateMinimumDeployment', () {
-          testWithoutContext('return if invalid deploymentTarget', () {
-            final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
-            final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
-            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
-            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
-            SwiftPackageManager.updateMinimumDeployment(
-              project: project,
-              platform: platform,
-              deploymentTarget: '',
-            );
-            expect(
-              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
-              contains(supportedPlatform),
-            );
-          });
-
-          testWithoutContext('return if deploymentTarget is lower than default', () {
-            final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
-            final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
-            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
-            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
-            SwiftPackageManager.updateMinimumDeployment(
-              project: project,
-              platform: platform,
-              deploymentTarget: '9.0',
-            );
-            expect(
-              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
-              contains(supportedPlatform),
-            );
-          });
-
-          testWithoutContext('return if deploymentTarget is same than default', () {
-            final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
-            final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
-            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
-            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
-            SwiftPackageManager.updateMinimumDeployment(
-              project: project,
-              platform: platform,
-              deploymentTarget: platform == FlutterDarwinPlatform.ios ? '13.0' : '10.15',
-            );
-            expect(
-              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
-              contains(supportedPlatform),
-            );
-          });
-
-          testWithoutContext('update if deploymentTarget is higher than default', () {
-            final fs = MemoryFileSystem();
-            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
-            final supportedPlatform = platform == FlutterDarwinPlatform.ios
-                ? '.iOS("13.0")'
-                : '.macOS("10.15")';
-            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
-            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
-            SwiftPackageManager.updateMinimumDeployment(
-              project: project,
-              platform: platform,
-              deploymentTarget: '14.0',
-            );
-            expect(
-              project.flutterPluginSwiftPackageManifest.readAsLinesSync().contains(
-                supportedPlatform,
-              ),
-              isFalse,
-            );
-            expect(
-              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
-              contains(platform == FlutterDarwinPlatform.ios ? '.iOS("14.0")' : '.macOS("14.0")'),
-            );
           });
         });
       });
@@ -366,6 +378,10 @@ class FakeXcodeProject extends Fake implements IosProject {
       flutterSwiftPackagesDirectory.childDirectory('.packages');
 
   @override
+  Directory get flutterFrameworkSwiftPackageDirectory =>
+      relativeSwiftPackagesDirectory.childDirectory('FlutterFramework');
+
+  @override
   Directory get flutterPluginSwiftPackageDirectory =>
       flutterSwiftPackagesDirectory.childDirectory('FlutterGeneratedPluginSwiftPackage');
 
@@ -393,7 +409,7 @@ class FakePlugin extends Fake implements Plugin {
   final Map<String, PluginPlatform> platforms;
 
   @override
-  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform) {
+  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform, {String? overridePath}) {
     return _pluginSwiftPackagePath;
   }
 

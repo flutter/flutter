@@ -15,9 +15,14 @@
 
 namespace impeller {
 
-LinearGradientContents::LinearGradientContents() = default;
+LinearGradientContents::LinearGradientContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 LinearGradientContents::~LinearGradientContents() = default;
+
+const Geometry* LinearGradientContents::GetGeometry() const {
+  return geometry_;
+}
 
 void LinearGradientContents::SetEndPoints(Point start_point, Point end_point) {
   start_point_ = start_point;

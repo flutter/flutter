@@ -206,6 +206,13 @@ TEST(DisplayListImageFilter, BlurEquals) {
   DlBlurImageFilter filter2(5.0, 6.0, DlTileMode::kMirror);
 
   TestEquals(filter1, filter2);
+
+  DlBlurImageFilter filter3(5.0, 6.0, DlTileMode::kMirror,
+                            DlRect::MakeLTRB(1, 2, 3, 4));
+  DlBlurImageFilter filter4(5.0, 6.0, DlTileMode::kMirror,
+                            DlRect::MakeLTRB(1, 2, 3, 4));
+
+  TestEquals(filter3, filter4);
 }
 
 TEST(DisplayListImageFilter, BlurWithLocalMatrixEquals) {
@@ -222,10 +229,16 @@ TEST(DisplayListImageFilter, BlurNotEquals) {
   DlBlurImageFilter filter2(7.0, 6.0, DlTileMode::kMirror);
   DlBlurImageFilter filter3(5.0, 8.0, DlTileMode::kMirror);
   DlBlurImageFilter filter4(5.0, 6.0, DlTileMode::kRepeat);
+  DlBlurImageFilter filter5(5.0, 6.0, DlTileMode::kRepeat,
+                            DlRect::MakeLTRB(1, 2, 3, 4));
+  DlBlurImageFilter filter6(5.0, 6.0, DlTileMode::kRepeat,
+                            DlRect::MakeLTRB(4, 2, 3, 4));
 
   TestNotEquals(filter1, filter2, "Sigma X differs");
   TestNotEquals(filter1, filter3, "Sigma Y differs");
   TestNotEquals(filter1, filter4, "Tile Mode differs");
+  TestNotEquals(filter4, filter5, "Bounds differs");
+  TestNotEquals(filter5, filter6, "Bounds differs");
 }
 
 TEST(DisplayListImageFilter, BlurBounds) {

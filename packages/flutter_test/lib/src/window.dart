@@ -33,6 +33,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.highContrast = false,
     this.onOffSwitchLabels = false,
     this.supportsAnnounce = false,
+    this.autoPlayAnimatedImages = false,
+    this.autoPlayVideos = false,
+    this.deterministicCursor = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -45,6 +48,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     highContrast: true,
     onOffSwitchLabels: true,
     supportsAnnounce: true,
+    autoPlayAnimatedImages: true,
+    autoPlayVideos: true,
+    deterministicCursor: true,
   );
 
   @override
@@ -72,6 +78,15 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool supportsAnnounce;
 
   @override
+  final bool autoPlayAnimatedImages;
+
+  @override
+  final bool autoPlayVideos;
+
+  @override
+  final bool deterministicCursor;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -84,7 +99,10 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
-        other.supportsAnnounce == supportsAnnounce;
+        other.supportsAnnounce == supportsAnnounce &&
+        other.autoPlayAnimatedImages == autoPlayAnimatedImages &&
+        other.autoPlayVideos == autoPlayVideos &&
+        other.deterministicCursor == deterministicCursor;
   }
 
   @override
@@ -98,6 +116,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       highContrast,
       onOffSwitchLabels,
       supportsAnnounce,
+      autoPlayAnimatedImages,
+      autoPlayVideos,
+      deterministicCursor,
     );
   }
 

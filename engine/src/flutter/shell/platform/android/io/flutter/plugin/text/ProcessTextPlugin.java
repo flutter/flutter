@@ -13,7 +13,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -126,7 +125,6 @@ public class ProcessTextPlugin
    * <p>When an activity does not return a value. the request is completed successfully and returns
    * null.
    */
-  @RequiresApi(API_LEVELS.API_23)
   public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
     // Return early if the result is not related to a request sent by this plugin.
     if (!requestsByCode.containsKey(requestCode)) {

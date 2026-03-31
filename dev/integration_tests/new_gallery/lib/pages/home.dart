@@ -814,6 +814,7 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
         child: Stack(
           children: <Widget>[
             ListView.builder(
+              key: const ValueKey<String>('studyDemoList'),
               padding: EdgeInsets.symmetric(
                 horizontal: isDesktop
                     ? _horizontalDesktopPadding - _carouselItemDesktopMargin

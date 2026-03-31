@@ -79,7 +79,12 @@ class WebAssetServer implements AssetReader {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
+    required this.logger,
+    String? baseHref,
+    Map<String, String> webDefines = const <String, String>{},
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       _baseHref = baseHref,
+       _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -196,6 +201,7 @@ class WebAssetServer implements AssetReader {
     required Logger logger,
     required Platform platform,
     bool shouldEnableMiddleware = true,
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -263,7 +269,13 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
+      logger: logger,
+      baseHref: webDevServerConfig.baseHref,
+      webDefines: webDefines,
     );
+    if (webDevServerConfig.baseHref case final String baseHref?) {
+      server.basePath = stripLeadingSlash(baseHref.substring(0, baseHref.length - 1));
+    }
     final int selectedPort = server.selectedPort;
 
     final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
@@ -343,6 +355,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
                 reloadedSourcesUri: server._baseUri.replace(
@@ -359,6 +372,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
               ).strategy,
@@ -398,6 +412,8 @@ class WebAssetServer implements AssetReader {
 
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
+  final Map<String, String> _webDefines;
+  final String? _baseHref;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -588,6 +604,7 @@ class WebAssetServer implements AssetReader {
   final bool useLocalCanvasKit;
 
   final FileSystem fileSystem;
+  final Logger logger;
 
   String get _buildConfigString {
     final buildConfig = <String, Object>{
@@ -623,10 +640,12 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
     return bootstrapTemplate.withSubstitutions(
-      baseHref: '/',
+      baseHref: _baseHref ?? '/',
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
+      logger: logger,
+      webDefines: _webDefines,
     );
   }
 
@@ -641,14 +660,15 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     final WebTemplate indexHtml = getWebTemplate(fileSystem, 'index.html', _kDefaultIndex);
     return shelf.Response.ok(
       indexHtml.withSubstitutions(
-        // Currently, we don't support --base-href for the "run" command.
-        baseHref: '/',
+        baseHref: _baseHref ?? '/',
         // Currently, we don't support --static-assets-url for the "run" command.
         staticAssetsUrl: '/',
         serviceWorkerVersion: null,
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
+        logger: logger,
+        webDefines: _webDefines,
       ),
       encoding: utf8,
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},

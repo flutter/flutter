@@ -1,0 +1,4 @@
+# The generated web assets aren't needed for widget_preview_scaffold widget tests
+# This is ignored here rather than in widget_preview_scaffold/ since the .gitignore
+# in that directory is overwritten by the .gitignore template for the scaffold.
+/widget_preview_scaffold/web/

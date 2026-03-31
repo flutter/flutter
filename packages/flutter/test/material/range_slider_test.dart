@@ -536,6 +536,92 @@ void main() {
     expect(values.start, equals(0));
   });
 
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (ltr)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (rtl)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
@@ -1532,7 +1618,7 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildApp(divisions: 3));
+      await tester.pumpWidget(buildApp(divisions: 5));
 
       final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
@@ -1643,6 +1729,7 @@ void main() {
     expect(
       sliderBox,
       paints
+        ..circle(color: sliderTheme.overlayColor)
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.overlappingShapeStrokeColor)
         ..circle(color: sliderTheme.thumbColor),
@@ -2416,52 +2503,52 @@ void main() {
   });
 
   testWidgets('RangeSlider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
-    var values = const RangeValues(50, 70);
-    const MouseCursor disabledCursor = SystemMouseCursors.basic;
-    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
+    var values = const RangeValues(20, 75);
+    const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
+    const MouseCursor disabledCursor = SystemMouseCursors.forbidden;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
+    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
 
     Widget buildFrame({required bool enabled}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Center(
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.forbidden,
-                    child: RangeSlider(
-                      mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((
-                        Set<WidgetState> states,
-                      ) {
-                        if (states.contains(WidgetState.disabled)) {
-                          return disabledCursor;
-                        }
-                        if (states.contains(WidgetState.dragged)) {
-                          return draggedCursor;
-                        }
-                        if (states.contains(WidgetState.hovered)) {
-                          return hoveredCursor;
-                        }
-
-                        return SystemMouseCursors.none;
-                      }),
-                      values: values,
-                      max: 100.0,
-                      onChanged: enabled
-                          ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                          : null,
-                      onChangeStart: enabled ? (RangeValues newValues) {} : null,
-                      onChangeEnd: enabled ? (RangeValues newValues) {} : null,
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return RangeSlider(
+                        mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return disabledCursor;
+                          }
+                          if (states.contains(WidgetState.dragged)) {
+                            return draggedCursor;
+                          }
+                          if (states.contains(WidgetState.hovered)) {
+                            return hoveredCursor;
+                          }
+                          return SystemMouseCursors.click;
+                        }),
+                        values: values,
+                        max: 100.0,
+                        onChanged: enabled
+                            ? (RangeValues newValues) {
+                                setState(() {
+                                  values = newValues;
+                                });
+                              }
+                            : null,
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ),
@@ -2472,22 +2559,38 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
 
+    // System default.
+    await gesture.addPointer(location: Offset.zero);
     await tester.pumpWidget(buildFrame(enabled: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
+
+    // Disabled.
+    await gesture.moveTo(tester.getCenter(find.byType(RangeSlider)));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
+    // Hovered.
     await tester.pumpWidget(buildFrame(enabled: true));
-    await gesture.moveTo(tester.getCenter(find.byType(RangeSlider))); // start hover
-    await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
 
-    await tester.timedDrag(
-      find.byType(RangeSlider),
-      const Offset(20.0, 0.0),
-      const Duration(milliseconds: 100),
-    );
+    // Dragged.
+    await gesture.down(tester.getCenter(find.byType(RangeSlider)));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
+
+    // Hovered.
+    await gesture.up();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    // System default.
+    await gesture.moveTo(Offset.zero);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
   });
 
   testWidgets('RangeSlider can be hovered and has correct hover color', (
@@ -3273,8 +3376,8 @@ void main() {
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
-    // 2 thumbs and 1 overlay.
-    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 3));
+    // 2 thumbs, 1 overlay for hover, and 1 overlay for focus.
+    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 4));
 
     // Move away from thumb
     await gesture.moveTo(tester.getTopRight(find.byType(RangeSlider)));
@@ -3792,6 +3895,183 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(RangeSlider)), Size.zero);
+  });
+
+  testWidgets('RangeSlider taps should set focus on start/end thumbs', (WidgetTester tester) async {
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                  onChangeStart: (RangeValues newValues) {},
+                  onChangeEnd: (RangeValues newValues) {},
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state: root focus scope has focus
+    final FocusNode initialFocus = FocusManager.instance.primaryFocus!;
+    expect(initialFocus, isNotNull);
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+
+    // Tap near the start thumb (0.3)
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    await tester.tapAt(startThumbPos);
+    await tester.pump();
+
+    // Verify focus changed to start thumb
+    final startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
+
+    // Reset focus
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+
+    // Tap near the end thumb (0.7)
+    final Offset endThumbPos = topLeft + (bottomRight - topLeft) * 0.7;
+    await tester.tapAt(endThumbPos);
+    await tester.pump();
+
+    // Verify focus changed to end thumb
+    final endFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
+  });
+
+  testWidgets('RangeSlider drag should set focus on start/end thumbs', (WidgetTester tester) async {
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state
+    final FocusNode initialFocus = FocusManager.instance.primaryFocus!;
+    expect(initialFocus, isNotNull);
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+
+    // Drag start thumb
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    final TestGesture gesture = await tester.startGesture(startThumbPos);
+    await tester.pump();
+
+    // Verify focus on start drag
+    final startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus on drag start');
+    expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
+
+    await gesture.moveBy(const Offset(10, 0));
+    await gesture.up();
+    await tester.pump();
+
+    // Reset focus
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+
+    // Drag end thumb
+    final Offset endThumbPos = topLeft + (bottomRight - topLeft) * 0.7;
+    final TestGesture endGesture = await tester.startGesture(endThumbPos);
+    await tester.pump();
+
+    // Verify focus on end drag
+    final endFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus on drag start');
+    expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
+
+    await endGesture.moveBy(const Offset(-10, 0));
+    await endGesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('RangeSlider tap start thumb then tab should focus end thumb', (
+    WidgetTester tester,
+  ) async {
+    var values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+
+    // Tap near the start thumb (0.3)
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    await tester.tapAt(startThumbPos);
+    await tester.pump();
+
+    // Verify start thumb has focus
+    final startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
+
+    // Press Tab
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    // Verify end thumb has focus
+    final endFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
+    expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
   });
 }
 

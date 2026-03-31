@@ -89,4 +89,18 @@ void main() {
     await pumpWithColor(Colors.green);
     expect(renderObject.debugLayer, same(originalLayer));
   });
+
+  testWidgets('ColorFiltered does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: ColorFiltered(colorFilter: ColorFilter.mode(Colors.blue, BlendMode.color)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ColorFiltered)), Size.zero);
+  });
 }

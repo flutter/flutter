@@ -118,6 +118,7 @@ abstract class BundleWindowsAssets extends Target {
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart',
     ),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];

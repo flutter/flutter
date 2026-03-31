@@ -48,6 +48,8 @@
 #include "impeller/entity/rrect_blur.frag.h"
 #include "impeller/entity/rrect_like_blur.vert.h"
 #include "impeller/entity/rsuperellipse_blur.frag.h"
+#include "impeller/entity/shadow_vertices.frag.h"
+#include "impeller/entity/shadow_vertices.vert.h"
 #include "impeller/entity/solid_fill.frag.h"
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/entity/srgb_to_linear_filter.frag.h"
@@ -55,11 +57,13 @@
 #include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
 #include "impeller/entity/texture_downsample.frag.h"
+#include "impeller/entity/texture_downsample_bounded.frag.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/texture_fill_strict_src.frag.h"
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
+#include "impeller/entity/uber_sdf.frag.h"
 #include "impeller/entity/vertices_uber_1.frag.h"
 #include "impeller/entity/vertices_uber_2.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
@@ -144,17 +148,20 @@ using RadialGradientSSBOFillPipeline = GradientPipelineHandle<RadialGradientSsbo
 using RadialGradientUniformFillPipeline = GradientPipelineHandle<RadialGradientUniformFillFragmentShader>;
 using RRectBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader, RrectBlurFragmentShader>;
 using RSuperellipseBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader, RsuperellipseBlurFragmentShader>;
+using ShadowVerticesShader = RenderPipelineHandle<ShadowVerticesVertexShader, ShadowVerticesFragmentShader>;
 using SolidFillPipeline = RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>;
 using SrgbToLinearFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, SrgbToLinearFilterFragmentShader>;
 using SweepGradientFillPipeline = GradientPipelineHandle<SweepGradientFillFragmentShader>;
 using SweepGradientSSBOFillPipeline = GradientPipelineHandle<SweepGradientSsboFillFragmentShader>;
 using SweepGradientUniformFillPipeline = GradientPipelineHandle<SweepGradientUniformFillFragmentShader>;
 using TextureDownsamplePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureDownsampleFragmentShader>;
+using TextureDownsampleBoundedPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureDownsampleBoundedFragmentShader>;
 using TexturePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
 using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillStrictSrcFragmentShader>;
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
 using VerticesUber1Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber1FragmentShader>;
 using VerticesUber2Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber2FragmentShader>;
+using UberSDFPipeline = RenderPipelineHandle<CircleVertexShader, UberSdfFragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on
 

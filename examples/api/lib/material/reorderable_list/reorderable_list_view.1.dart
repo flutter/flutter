@@ -63,7 +63,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     }
 
     return ReorderableListView(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       proxyDecorator: proxyDecorator,
       children: <Widget>[
         for (int index = 0; index < _items.length; index += 1)
@@ -73,11 +73,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
             title: Text('Item ${_items[index]}'),
           ),
       ],
-      onReorder: (int oldIndex, int newIndex) {
+      onReorderItem: (int oldIndex, int newIndex) {
         setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
           final int item = _items.removeAt(oldIndex);
           _items.insert(newIndex, item);
         });

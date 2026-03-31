@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const red = Color(0xffff0000);
+
   testWidgets('RenderAnimatedOpacityMixin does not drop layer when animating to 1', (
     WidgetTester tester,
   ) async {
@@ -19,7 +21,7 @@ void main() {
     final opacityTween = Tween<double>(begin: 0, end: 1);
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.red,
+        color: red,
         child: FadeTransition(opacity: controller.drive(opacityTween), child: const TestWidget()),
       ),
     );
@@ -55,7 +57,7 @@ void main() {
     final opacityTween = Tween<double>(begin: 0, end: 0.99); // Layer is dropped at 1
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.red,
+        color: red,
         child: FadeTransition(opacity: controller.drive(opacityTween), child: const TestWidget()),
       ),
     );
@@ -92,7 +94,7 @@ void main() {
 
       await tester.pumpWidget(
         ColoredBox(
-          color: Colors.red,
+          color: red,
           child: FadeTransition(opacity: controller.drive(opacityTween), child: const TestWidget()),
         ),
       );

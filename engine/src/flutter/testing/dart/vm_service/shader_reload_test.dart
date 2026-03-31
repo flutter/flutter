@@ -76,7 +76,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    await _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -84,7 +84,7 @@ void main() {
       final UniformFloatSlot slot = shader.getUniformFloat('iVec2Uniform');
       expect(slot.shaderIndex, 1);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      await _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
       expect(slot.shaderIndex, 5);
     } finally {
@@ -110,7 +110,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    await _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -118,11 +118,48 @@ void main() {
       final UniformFloatSlot slot = shader.getUniformFloat('iMat2Uniform', 3);
       expect(slot.shaderIndex, 6);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      await _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
       expect(slot.shaderIndex, 7);
       // Make sure there is no crash here.
       slot.set(1.0);
+    } finally {
+      if (fileC.existsSync()) {
+        fileC.deleteSync();
+      }
+    }
+  });
+
+  test('rename uniforms', () async {
+    if (impellerEnabled) {
+      // Needs https://github.com/flutter/flutter/issues/129659
+      return;
+    }
+    final testAssetName = 'test_rename_uniforms_${DateTime.now().millisecondsSinceEpoch}.frag.iplr';
+    final String buildDir = Platform.environment['FLUTTER_BUILD_DIRECTORY']!;
+    final String assetsDir = path.join(buildDir, 'gen/flutter/lib/ui/assets');
+    final String shaderSrcA = path.join(assetsDir, 'uniforms.frag.iplr');
+    final String shaderSrcB = path.join(assetsDir, 'uniforms_renamed.frag.iplr');
+    final String shaderSrcC = path.join(assetsDir, testAssetName);
+
+    final fileC = File(shaderSrcC);
+    final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
+    final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
+
+    await _deleteAndWrite(fileC, sourceA);
+
+    try {
+      final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
+      final FragmentShader shader = program.fragmentShader();
+      final UniformFloatSlot slotA = shader.getUniformFloat('iFloatUniform');
+      slotA.set(1.0);
+
+      await _deleteAndWrite(fileC, sourceB);
+      await _performReload(testAssetName);
+
+      final UniformFloatSlot slotB = shader.getUniformFloat('iFloatUniformRenamed');
+      // Make sure this doesn't break.
+      slotB.set(0.0);
     } finally {
       if (fileC.existsSync()) {
         fileC.deleteSync();
@@ -147,7 +184,7 @@ void main() {
     final Uint8List sourceA = File(shaderSrcA).readAsBytesSync();
     final Uint8List sourceB = File(shaderSrcB).readAsBytesSync();
 
-    fileC.writeAsBytesSync(sourceA, flush: true);
+    await _deleteAndWrite(fileC, sourceA);
 
     try {
       final FragmentProgram program = await FragmentProgram.fromAsset(testAssetName);
@@ -155,7 +192,7 @@ void main() {
       final ImageSamplerSlot slot = shader.getImageSampler('tex_a');
       expect(slot.shaderIndex, 0);
 
-      fileC.writeAsBytesSync(sourceB, flush: true);
+      await _deleteAndWrite(fileC, sourceB);
       await _performReload(testAssetName);
       expect(slot.shaderIndex, 1);
     } finally {
@@ -167,3 +204,18 @@ void main() {
 }
 
 void _use(Shader shader) {}
+
+/// Delete the file first, if it exists, to ensure the engine doesn't attempt
+/// to read a memory-mapped file that is actively being truncated and written to.
+Future<void> _deleteAndWrite(File file, Uint8List bytes) async {
+  if (file.existsSync()) {
+    file.deleteSync();
+  }
+  file.writeAsBytesSync(bytes, flush: true);
+  // Allow time for the macOS file system metadata caching to settle.
+  // Otherwise, the engine's subsequent `fstat` may read a `0` st_size
+  // or `openat` may fail entirely due to APFS asynchronous directory updates.
+  //
+  // renameSync() was tried but it was not sufficient to fix the issue.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
+}

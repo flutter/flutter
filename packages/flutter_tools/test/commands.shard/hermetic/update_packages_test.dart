@@ -86,9 +86,34 @@ dependencies:
 
 dev_dependencies:
   flutter_tools:
-    path: ../../../
+    path: ../../../packages/flutter_tools/
 
-# PUBSPEC CHECKSUM: rseq17
+# PUBSPEC CHECKSUM: 55t4hi
+''';
+
+// An example pubspec.yaml from flutter, not necessary for it to be up to date.
+const kNonWorkspacePubspecYaml = r'''
+name: hook_user_defines
+description: 'Project for testing user-defines.'
+version: 0.0.1
+
+environment:
+  sdk: ^3.10.0-0
+
+hooks:
+  user_defines:
+    hook_user_defines: # package name
+      magic_value: 1000
+
+dependencies:
+  hooks: 1.0.0
+  logging: 1.3.0
+  native_toolchain_c: 0.17.4
+
+dev_dependencies:
+  test: 1.28.0
+
+# PUBSPEC CHECKSUM: qlfuuh
 ''';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
@@ -197,6 +222,7 @@ void main() {
     late Directory flutterSdk;
     late Directory flutterTools;
     late Directory widgetPreviewScaffold;
+    late Directory hookUserDefinesIntegrationTest;
     late _FakePub pub;
     late FakeProcessManager processManager;
     late BufferLogger logger;
@@ -237,16 +263,21 @@ void main() {
         ..createSync()
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
       widgetPreviewScaffold = flutterSdk
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('test')
-          .childDirectory('widget_preview_scaffold.shard')
+          .childDirectory('dev')
+          .childDirectory('integration_tests')
           .childDirectory('widget_preview_scaffold');
       widgetPreviewScaffold.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(kWidgetTestPubspecYaml);
+      hookUserDefinesIntegrationTest = flutterSdk
+          .childDirectory('dev')
+          .childDirectory('integration_tests')
+          .childDirectory('hook_user_defines');
+      hookUserDefinesIntegrationTest.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kNonWorkspacePubspecYaml);
       Cache.flutterRoot = flutterSdk.absolute.path;
-      pub = _FakePub();
+      pub = _FakePub(flutterTools: flutterTools);
       processManager = FakeProcessManager.empty();
     });
 
@@ -271,6 +302,17 @@ void main() {
     testUsingContext(
       '--force-upgrade updates packages',
       () async {
+        //
+        expect(
+          Pubspec.parse(kFlutterToolsPubspecYaml).dependencies['test_api'],
+          HostedDependency(version: VersionConstraint.parse('0.7.4')),
+        );
+
+        expect(
+          Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies['test_api'],
+          HostedDependency(version: VersionConstraint.parse('0.7.4')),
+        );
+
         final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
         expect(
@@ -278,6 +320,9 @@ void main() {
           (Pubspec.parse(kFlutterWorkspacePubspecYaml)
                 ..dependencies['typed_data'] = HostedDependency(
                   version: VersionConstraint.parse('^1.1.1'),
+                )
+                ..dependencies['test_api'] = HostedDependency(
+                  version: VersionConstraint.parse('0.7.5'),
                 ))
               .dependencies,
         );
@@ -286,6 +331,9 @@ void main() {
           (Pubspec.parse(kFlutterToolsPubspecYaml)
                 ..dependencies['unified_analytics'] = HostedDependency(
                   version: VersionConstraint.parse('8.0.10'),
+                )
+                ..dependencies['test_api'] = HostedDependency(
+                  version: VersionConstraint.parse('0.7.5'),
                 ))
               .dependencies,
         );
@@ -402,7 +450,9 @@ void main() {
 }
 
 class _FakePub extends Fake implements Pub {
-  _FakePub();
+  _FakePub({required this.flutterTools});
+
+  final Directory flutterTools;
 
   Map<String, List<Pubspec>> pubspecs = <String, List<Pubspec>>{};
 
@@ -459,12 +509,20 @@ class _FakePub extends Fake implements Pub {
   }
 
   Pubspec _upgrade(List<String> arguments, {required FlutterProject project}) {
-    final String pubspec = project.pubspecFile.readAsStringSync();
-    project.pubspecFile.writeAsStringSync(
-      pubspec
-          .replaceFirst('typed_data: ^1.1.6', 'typed_data: ^1.1.1')
-          .replaceFirst('unified_analytics: ^8.0.5', 'unified_analytics: ^8.0.10'),
-    );
+    final String pubspec = project.pubspecFile
+        .readAsStringSync()
+        .replaceFirst('typed_data: ^1.1.6', 'typed_data: ^1.1.1')
+        .replaceFirst('unified_analytics: ^8.0.5', 'unified_analytics: ^8.0.10')
+        .replaceFirst(
+          'test_api: ^0.7.4',
+          // Set test_api to a newer version for flutter_tools to verify that the version in the
+          // updated flutter_tools pubspec is pinned to the same version as the framework.
+          //
+          // Regression test for https://github.com/flutter/flutter/issues/180503.
+          project.directory == flutterTools ? 'test_api: ^10.0.0' : 'test_api: ^0.7.5',
+        );
+    project.pubspecFile.writeAsStringSync(pubspec);
+
     final upgradedPubspec = Pubspec.parse(project.pubspecFile.readAsStringSync());
     for (final MapEntry<String, Dependency>(key: packageName, value: dependency) in [
       ...upgradedPubspec.dependencies.entries,

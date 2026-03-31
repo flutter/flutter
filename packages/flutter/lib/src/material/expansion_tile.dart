@@ -152,6 +152,7 @@ class ExpansionTile extends StatefulWidget {
     this.enabled = true,
     this.expansionAnimationStyle,
     this.internalAddSemanticForOnTap = false,
+    this.statesController,
   }) : assert(
          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
          'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -272,7 +273,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
-  final Alignment? expandedAlignment;
+  final AlignmentGeometry? expandedAlignment;
 
   /// Specifies the alignment of each child within [children] when the tile is expanded.
   ///
@@ -484,6 +485,16 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// The controller that notifies when the widget's [WidgetState]s change.
+  ///
+  /// This allows listening to and controlling states such as
+  /// [WidgetState.hovered], [WidgetState.focused], [WidgetState.pressed],
+  /// and [WidgetState.disabled] for the tile's header.
+  ///
+  /// If null, the backing [ListTile] will create and manage its own
+  /// [WidgetStatesController].
+  final WidgetStatesController? statesController;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -550,7 +561,10 @@ class _ExpansionTileState extends State<ExpansionTile> {
         _timer?.cancel();
         _timer = null;
       });
-    } else {
+    }
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
+    else if (defaultTargetPlatform != TargetPlatform.android) {
       SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
@@ -604,31 +618,41 @@ class _ExpansionTileState extends State<ExpansionTile> {
       _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
     };
 
-    return Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
-      child: ListTileTheme.merge(
-        iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
-        textColor: _headerColor.value,
-        child: ListTile(
-          enabled: widget.enabled,
-          onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
-          dense: widget.dense,
-          splashColor: widget.splashColor,
-          visualDensity: widget.visualDensity,
-          enableFeedback: widget.enableFeedback,
-          contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-          leading: widget.leading ?? _buildLeadingIcon(context, animation),
-          title: widget.title,
-          subtitle: widget.subtitle,
-          trailing: widget.showTrailingIcon
-              ? widget.trailing ?? _buildTrailingIcon(context, animation)
-              : null,
-          minTileHeight: widget.minTileHeight,
-          internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-        ),
+    final Widget child = ListTileTheme.merge(
+      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+      textColor: _headerColor.value,
+      child: ListTile(
+        enabled: widget.enabled,
+        onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
+        dense: widget.dense,
+        splashColor: widget.splashColor,
+        visualDensity: widget.visualDensity,
+        enableFeedback: widget.enableFeedback,
+        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+        leading: widget.leading ?? _buildLeadingIcon(context, animation),
+        title: widget.title,
+        subtitle: widget.subtitle,
+        trailing: widget.showTrailingIcon
+            ? widget.trailing ?? _buildTrailingIcon(context, animation)
+            : null,
+        minTileHeight: widget.minTileHeight,
+        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        statesController: widget.statesController,
       ),
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
+        // without taking focus.
+        // blockNode prevents this node from being part of the focus traversal.
+        label: semanticsHint,
+        liveRegion: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
+      );
+    }
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {
@@ -669,7 +693,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
       shape: expansionTileBorder,
     );
 
-    final Widget tile = Padding(
+    Widget tile = Padding(
       padding: decoration.padding,
       child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]),
     );
@@ -687,6 +711,14 @@ class _ExpansionTileState extends State<ExpansionTile> {
         shape: expansionTileBorder,
         child: tile,
       );
+    }
+
+    // If the background color is not transparent, wrap the tile in a Material widget.
+    // This is needed to ensure that the ListTile background color or ink splashes
+    // are visible. A DecoratedBox with a non-transparent color will hide the
+    // background color or ink splashes of the ListTile.
+    if (backgroundColor.a > 0) {
+      tile = Material(type: MaterialType.transparency, child: tile);
     }
 
     return DecoratedBox(decoration: decoration, child: tile);

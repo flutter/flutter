@@ -1,4 +1,6 @@
 {
+  "searchResultsFound": "Pronađeni su rezultati pretrage",
+  "noResultsFound": "Nije pronađen nijedan rezultat",
   "reorderItemToStart": "Pomerite na početak",
   "reorderItemToEnd": "Pomerite na kraj",
   "reorderItemUp": "Pomerite nagore",
@@ -12,5 +14,5 @@
   "shareButtonLabel": "Deli",
   "pasteButtonLabel": "Nalepi",
   "selectAllButtonLabel": "Izaberi sve",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "Nije izabrano"
 }

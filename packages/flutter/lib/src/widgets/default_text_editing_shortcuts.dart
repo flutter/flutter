@@ -179,14 +179,13 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
           const DeleteToNextWordBoundaryIntent(forward: false),
       SingleActivator(LogicalKeyboardKey.backspace, alt: true, shift: pressShift):
           const DeleteToLineBreakIntent(forward: false),
-      SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): const DeleteCharacterIntent(
-        forward: true,
-      ),
       SingleActivator(LogicalKeyboardKey.delete, control: true, shift: pressShift):
           const DeleteToNextWordBoundaryIntent(forward: true),
       SingleActivator(LogicalKeyboardKey.delete, alt: true, shift: pressShift):
           const DeleteToLineBreakIntent(forward: true),
     },
+
+    const SingleActivator(LogicalKeyboardKey.delete): const DeleteCharacterIntent(forward: true),
 
     // Arrow: Move selection.
     const SingleActivator(LogicalKeyboardKey.arrowLeft): const ExtendSelectionByCharacterIntent(
@@ -290,13 +289,32 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
       forward: true,
       collapseSelection: false,
     ),
+  };
 
+  static final Map<ShortcutActivator, Intent> _clipboardShortcuts = <ShortcutActivator, Intent>{
+    // Xerox/Apple: ^X ^C ^V
+    // -> Standard on Windows
+    // -> Standard on Linux
+    // -> Standard on Mac OS X (with Command as modifier)
     const SingleActivator(LogicalKeyboardKey.keyX, control: true):
         const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
     const SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
     const SingleActivator(LogicalKeyboardKey.keyV, control: true): const PasteTextIntent(
       SelectionChangedCause.keyboard,
     ),
+
+    // IBM CUA guidelines: Shift-Del Ctrl-Ins Shift-Ins
+    // -> Standard on Windows
+    // -> Standard on Linux (traditionally mapped to the Selection buffer rather than the Clipboard,
+    //                       but the distinction is often no longer present with modern toolkits)
+    // -> Not standard on Mac OS X
+    const SingleActivator(LogicalKeyboardKey.delete, shift: true):
+        const CopySelectionTextIntent.cut(SelectionChangedCause.keyboard),
+    const SingleActivator(LogicalKeyboardKey.insert, control: true): CopySelectionTextIntent.copy,
+    const SingleActivator(LogicalKeyboardKey.insert, shift: true): const PasteTextIntent(
+      SelectionChangedCause.keyboard,
+    ),
+
     const SingleActivator(LogicalKeyboardKey.keyA, control: true): const SelectAllTextIntent(
       SelectionChangedCause.keyboard,
     ),
@@ -326,6 +344,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + shift? + backspace
   static final Map<ShortcutActivator, Intent> _androidShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._clipboardShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
       forward: false,
       collapseSelection: true,
@@ -526,6 +545,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
   static final Map<ShortcutActivator, Intent> _linuxShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._clipboardShortcuts,
     ..._linuxNumpadShortcuts,
     const SingleActivator(LogicalKeyboardKey.home): const ExtendSelectionToLineBreakIntent(
       forward: false,
@@ -758,6 +778,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   //   * Meta + backspace
   static final Map<ShortcutActivator, Intent> _windowsShortcuts = <ShortcutActivator, Intent>{
     ..._commonShortcuts,
+    ..._clipboardShortcuts,
     const SingleActivator(
       LogicalKeyboardKey.pageUp,
     ): const ExtendSelectionVerticallyToAdjacentPageIntent(
@@ -825,15 +846,11 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
               const DoNothingAndStopPropagationTextIntent(),
         },
         ..._commonDisablingTextShortcuts,
-        const SingleActivator(LogicalKeyboardKey.keyX, control: true):
-            const DoNothingAndStopPropagationTextIntent(),
+        for (final ShortcutActivator activator in _clipboardShortcuts.keys)
+          activator as SingleActivator: const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyX, meta: true):
             const DoNothingAndStopPropagationTextIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyC, control: true):
-            const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyC, meta: true):
-            const DoNothingAndStopPropagationTextIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyV, control: true):
             const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyV, meta: true):
             const DoNothingAndStopPropagationTextIntent(),

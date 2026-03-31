@@ -175,4 +175,21 @@ void main() {
     await pumpWithEnabledState(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));
   });
+
+  testWidgets('ImageFiltered does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ImageFiltered)), Size.zero);
+  });
 }

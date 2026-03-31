@@ -17,6 +17,7 @@ void main() {
       view: tester.view,
       configuration: TestViewConfiguration.fromView(view: tester.view, size: const Size(400, 200)),
     );
+    addTearDown(renderView.dispose);
 
     // The configuration above defines a view with a resolution of 2400x1800
     // physical pixels. With a device pixel ratio of 3x, this yields a

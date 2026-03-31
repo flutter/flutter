@@ -186,7 +186,7 @@ void main() {
 
     testWidgets('push unknown route when onUnknownRoute is null', (WidgetTester tester) async {
       final key = GlobalKey<NavigatorState>();
-      expectFlutterError(
+      await expectFlutterError(
         key: key,
         tester: tester,
         widget: MaterialApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
@@ -210,7 +210,7 @@ void main() {
 
     testWidgets('push unknown route when onUnknownRoute returns null', (WidgetTester tester) async {
       final key = GlobalKey<NavigatorState>();
-      expectFlutterError(
+      await expectFlutterError(
         key: key,
         tester: tester,
         widget: MaterialApp(
@@ -777,6 +777,17 @@ void main() {
       skip: kIsWeb, // [intended] predictive back is only native Android.
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
+  });
+
+  testWidgets('WidgetsApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox.shrink(
+          child: WidgetsApp(builder: (_, _) => const Text('X'), color: const Color(0xFFAABBCC)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(WidgetsApp)), Size.zero);
   });
 }
 

@@ -78,6 +78,7 @@ template("display_list_unittests_component") {
     "aiks_dl_opacity_unittests.cc",
     "aiks_dl_path_unittests.cc",
     "aiks_dl_runtime_effect_unittests.cc",
+    "aiks_dl_shadow_unittests.cc",
     "aiks_dl_text_unittests.cc",
     "aiks_dl_unittests.cc",
     "aiks_dl_vertices_unittests.cc",

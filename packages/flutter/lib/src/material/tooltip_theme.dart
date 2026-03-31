@@ -4,7 +4,6 @@
 
 /// @docImport 'app.dart';
 /// @docImport 'tooltip.dart';
-/// @docImport 'tooltip_visibility.dart';
 library;
 
 import 'dart:ui' show lerpDouble;
@@ -361,36 +360,4 @@ class TooltipTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
-}
-
-/// The method of interaction that will trigger a tooltip.
-/// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
-///
-/// On desktop, a tooltip will be shown as soon as a pointer hovers over
-/// the widget, regardless of the value of [Tooltip.triggerMode].
-///
-/// See also:
-///
-///   * [Tooltip.waitDuration], which defines the length of time that
-///     a pointer must hover over a tooltip's widget before the tooltip
-///     will be shown.
-enum TooltipTriggerMode {
-  /// Tooltip will only be shown by calling `ensureTooltipVisible`.
-  manual,
-
-  /// Tooltip will be shown after a long press.
-  ///
-  /// See also:
-  ///
-  ///   * [GestureDetector.onLongPress], the event that is used for trigger.
-  ///   * [Feedback.forLongPress], the feedback method called when feedback is enabled.
-  longPress,
-
-  /// Tooltip will be shown after a single tap.
-  ///
-  /// See also:
-  ///
-  ///   * [GestureDetector.onTap], the event that is used for trigger.
-  ///   * [Feedback.forTap], the feedback method called when feedback is enabled.
-  tap,
 }

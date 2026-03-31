@@ -37,7 +37,8 @@ static constexpr const char* kBadSocs[] = {
     // `exynos9820` and `exynos9825` have graphical errors:
     // https://github.com/flutter/flutter/issues/171992.
     "exynos9820",  //
-    "exynos9825"   //
+    "exynos9825",  //
+    "rk30sdk"      // https://github.com/flutter/flutter/issues/183510
 };
 
 static bool IsDeviceEmulator() {
@@ -126,7 +127,6 @@ GetActualRenderingAPIForImpeller(
           .enable_surface_control = settings.enable_surface_control,
           .impeller_flags =
               {
-                  .lazy_shader_mode = settings.impeller_flags.lazy_shader_mode,
                   .antialiased_lines =
                       settings.impeller_flags.antialiased_lines,
               },

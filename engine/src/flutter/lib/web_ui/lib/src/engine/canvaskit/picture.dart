@@ -18,18 +18,19 @@ import 'surface.dart';
 /// Implements [ui.Picture] on top of [SkPicture].
 class CkPicture implements LayerPicture, StackTraceDebugger {
   CkPicture(SkPicture skPicture) : _isClone = false {
-    _ref = CountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
+    _ref = CkCountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
     _initStackTrace();
   }
 
-  CkPicture._clone(CountedRef<CkPicture, SkPicture> ref) : _isClone = true {
+  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) : _isClone = true {
     _ref = ref;
     ref.ref(this);
     _initStackTrace();
   }
 
-  late final CountedRef<CkPicture, SkPicture> _ref;
   final bool _isClone;
+
+  late final CkCountedRef<CkPicture, SkPicture> _ref;
 
   SkPicture get skiaObject => _ref.nativeObject;
 
@@ -113,12 +114,18 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   }) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    final CkSurface ckSurface = surface.createOrUpdateSurface(BitmapSize(width, height));
-    final CkCanvas ckCanvas = ckSurface.getCanvas();
+    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    surface.setSize(BitmapSize(width, height));
+    final SkSurface skiaSurface = surface.skSurface!;
+
+    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);
-    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
+    final SkImage skImage = skiaSurface.makeImageSnapshot();
+
+    // TODO(hterkelsen): This is a hack to get the pixels from the SkImage.
+    // We should be able to do this without creating a new image. This is
+    // a workaround for a bug in CanvasKit.
     final imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
@@ -127,8 +134,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
       height: height.toDouble(),
     );
     final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
+    skImage.delete();
     if (pixels == null) {
-      throw StateError('Unable to read pixels from SkImage.');
+      throw StateError('Unable to convert read pixels from SkImage.');
     }
     final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
     if (rasterImage == null) {
@@ -153,4 +161,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
 
   @override
   StackTrace get debugStackTrace => _debugStackTrace;
+
+  @override
+  bool get isDisposed => _isDisposed;
 }

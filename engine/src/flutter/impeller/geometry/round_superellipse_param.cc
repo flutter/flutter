@@ -306,6 +306,19 @@ bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
 }
 
 class RoundSuperellipseBuilder {
+ private:
+  // The parameters that describes a conic curve.
+  struct ConicParam {
+    // The end point closer to point A.
+    Point p1;
+    // The control point.
+    Point c;
+    // The end point closer to point J.
+    Point p2;
+    // The conic weight.
+    Scalar weight;
+  };
+
  public:
   explicit RoundSuperellipseBuilder(PathReceiver& receiver)
       : receiver_(receiver) {}
@@ -346,21 +359,37 @@ class RoundSuperellipseBuilder {
   }
 
  private:
-  std::array<Point, 4> SuperellipseArcPoints(
+  std::tuple<ConicParam, ConicParam> SuperellipseArcPoints(
       const RoundSuperellipseParam::Octant& param) {
-    Point start = {0, param.se_a};
-    const Point& end = param.circle_start;
-    constexpr Point start_tangent = {1, 0};
-    Point circle_start_vector = param.circle_start - param.circle_center;
-    Point end_tangent =
-        Point{-circle_start_vector.y, circle_start_vector.x}.Normalize();
+    // The superellipse arc consists of two conic curves: A-H and H-J.
+    Point A = {0, param.se_a};
+    const Point& J = param.circle_start;
 
-    std::array<Scalar, 2> factors = SuperellipseBezierFactors(param.se_n);
+    std::tuple<Scalar, Scalar, Scalar> factors = SuperellipseBezierFactors(
+        param.se_n, J.x / param.se_a, J.y / param.se_a);
+    Scalar weight1 = std::get<0>(factors);
+    Scalar weight2 = std::get<1>(factors);
+    Scalar yHOverA = std::get<2>(factors);
 
-    return std::array<Point, 4>{
-        start, start + start_tangent * factors[0] * param.se_a,
-        end + end_tangent * factors[1] * param.se_a, end};
-  };
+    Point H = {
+        powf(1.f - powf(yHOverA, param.se_n), 1.f / param.se_n) * param.se_a,
+        yHOverA * param.se_a};
+
+    Scalar kA = 0;
+    Scalar kJ = -powf(J.x / J.y, param.se_n - 1.f);
+    Scalar kH = -powf(H.x / H.y, param.se_n - 1.f);
+
+    // The control points are determined by the intersection of the tangents for
+    // smoothness.
+    return {ConicParam{.p1 = A,
+                       .c = Intersection(A, kA, H, kH),
+                       .p2 = H,
+                       .weight = weight1},
+            ConicParam{.p1 = H,
+                       .c = Intersection(H, kH, J, kJ),
+                       .p2 = J,
+                       .weight = weight2}};
+  }
 
   std::array<Point, 4> CircularArcPoints(
       const RoundSuperellipseParam::Octant& param) {
@@ -401,11 +430,15 @@ class RoundSuperellipseBuilder {
     }
 
     auto circle_points = CircularArcPoints(param);
-    auto se_points = SuperellipseArcPoints(param);
+    auto se_conics = SuperellipseArcPoints(param);
 
     if (!reverse) {
-      receiver_.CubicTo(transform * se_points[1], transform * se_points[2],
-                        transform * se_points[3]);
+      receiver_.ConicTo(transform * std::get<0>(se_conics).c,
+                        transform * std::get<0>(se_conics).p2,
+                        std::get<0>(se_conics).weight);
+      receiver_.ConicTo(transform * std::get<1>(se_conics).c,
+                        transform * std::get<1>(se_conics).p2,
+                        std::get<1>(se_conics).weight);
       receiver_.CubicTo(transform * circle_points[1],
                         transform * circle_points[2],
                         transform * circle_points[3]);
@@ -413,34 +446,51 @@ class RoundSuperellipseBuilder {
       receiver_.CubicTo(transform * circle_points[2],
                         transform * circle_points[1],
                         transform * circle_points[0]);
-      receiver_.CubicTo(transform * se_points[2], transform * se_points[1],
-                        transform * se_points[0]);
+      receiver_.ConicTo(transform * std::get<1>(se_conics).c,
+                        transform * std::get<1>(se_conics).p1,
+                        std::get<1>(se_conics).weight);
+      receiver_.ConicTo(transform * std::get<0>(se_conics).c,
+                        transform * std::get<0>(se_conics).p1,
+                        std::get<0>(se_conics).weight);
     }
   };
 
   // Get the Bezier factor for the superellipse arc in a rounded superellipse.
   //
-  // The result will be assigned to output, where [0] will be the factor for the
-  // starting tangent and [1] for the ending tangent.
-  //
-  // These values are computed by brute-force searching for the minimal distance
-  // on a rounded superellipse and are not for general purpose superellipses.
-  std::array<Scalar, 2> SuperellipseBezierFactors(Scalar n) {
-    constexpr Scalar kPrecomputedVariables[][2] = {
-        /*n=2.0*/ {0.01339448, 0.05994973},
-        /*n=3.0*/ {0.13664115, 0.13592082},
-        /*n=4.0*/ {0.24545546, 0.14099516},
-        /*n=5.0*/ {0.32353151, 0.12808021},
-        /*n=6.0*/ {0.39093068, 0.11726264},
-        /*n=7.0*/ {0.44847800, 0.10808278},
-        /*n=8.0*/ {0.49817452, 0.10026175},
-        /*n=9.0*/ {0.54105583, 0.09344429},
-        /*n=10.0*/ {0.57812578, 0.08748984},
-        /*n=11.0*/ {0.61050961, 0.08224722},
-        /*n=12.0*/ {0.63903989, 0.07759639},
-        /*n=13.0*/ {0.66416338, 0.07346530},
-        /*n=14.0*/ {0.68675338, 0.06974996},
-        /*n=15.0*/ {0.70678034, 0.06529512}};
+  // The resulting tuple consists of:
+  //  [0] weight1, weight for the conic A-H
+  //  [1] weight2, weight for the conic H-J
+  //  [2] yHOverA
+  std::tuple<Scalar, Scalar, Scalar> SuperellipseBezierFactors(Scalar n,
+                                                               Scalar xJOverA,
+                                                               Scalar yJOverA) {
+    // Precomputed (factor1, factor2) tuples for interpolation and
+    // extrapolation.
+    //
+    // These factors are normalized conic weights defined as:
+    //   weight1 = factor1 * sqrt(n)
+    //   weight2 = factor2 * xJOverA
+    //
+    // Rationale: Empirical analysis shows these quotients converge to stable
+    // constants as n -> infinity. Normalizing by sqrt(n) and xJOverA ensures
+    // the table remains well-behaved for linear extrapolation when 'n' exceeds
+    // the precomputed range.
+    //
+    // Optimal weights were originally derived via brute-force search for
+    // minimal curve distance on a rounded superellipse.
+    constexpr Scalar kPrecomputedVariables[][2] = {/*n= 2.0*/ {0.7078, 8.3194},
+                                                   /*n= 3.0*/ {0.7895, 2.4523},
+                                                   /*n= 4.0*/ {0.8379, 1.8528},
+                                                   /*n= 5.0*/ {0.8701, 1.6891},
+                                                   /*n= 6.0*/ {0.8932, 1.5806},
+                                                   /*n= 7.0*/ {0.9107, 1.5043},
+                                                   /*n= 8.0*/ {0.9244, 1.4470},
+                                                   /*n= 9.0*/ {0.9355, 1.4037},
+                                                   /*n=10.0*/ {0.9448, 1.3701},
+                                                   /*n=11.0*/ {0.9526, 1.3431},
+                                                   /*n=12.0*/ {0.9594, 1.3212},
+                                                   /*n=13.0*/ {0.9653, 1.3032},
+                                                   /*n=14.0*/ {0.9705, 1.2880}};
     constexpr size_t kNumRecords =
         sizeof(kPrecomputedVariables) / sizeof(kPrecomputedVariables[0]);
     constexpr Scalar kStep = 1.00f;
@@ -448,20 +498,54 @@ class RoundSuperellipseBuilder {
     constexpr Scalar kMaxN = kMinN + (kNumRecords - 1) * kStep;
 
     if (n >= kMaxN) {
-      // Heuristic formula derived from fitting.
-      return {1.07f - expf(1.307649835) * powf(n, -0.8568516731),
-              -0.01f + expf(-0.9287690322) * powf(n, -0.6120901398)};
+      // The optimized factors stabilize as n grows large.
+      n = kMaxN;
     }
+
+    // Compute weight1 and weight 2
 
     Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);
     size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
                                      kNumRecords - 2);
     Scalar frac = steps - left;
 
-    return std::array<Scalar, 2>{(1 - frac) * kPrecomputedVariables[left][0] +
-                                     frac * kPrecomputedVariables[left + 1][0],
-                                 (1 - frac) * kPrecomputedVariables[left][1] +
-                                     frac * kPrecomputedVariables[left + 1][1]};
+    Scalar weight1 = (1.f - frac) * kPrecomputedVariables[left][0] +
+                     frac * kPrecomputedVariables[left + 1][0] * sqrt(n);
+    Scalar weight2 = (1.f - frac) * kPrecomputedVariables[left][1] +
+                     frac * kPrecomputedVariables[left + 1][1] * xJOverA;
+
+    // Compute yHOverA
+
+    // H, the splitting point between the two conic curves, is picked by its y
+    // coordinate proportionally between A and J.
+    //
+    // The proportion between (yA-yH) and (yH-yJ) is positively correlated to n,
+    // so that when n increases, H moves closer to A. This is because the
+    // flatter segment of the superellipse curve is much harder to approximate.
+    // The exact formula of sqrt(n) is found empirically.
+    Scalar yH_proportion = sqrt(n);
+    constexpr Scalar yAOverA = 1.0;
+    Scalar yHOverA =
+        (yAOverA * yH_proportion + yJOverA) / (yH_proportion + 1.0f);
+
+    return {weight1, weight2, yHOverA};
+  }
+
+  // Find the intersection point of two lines defined by two points and their
+  // slopes.
+  static Point Intersection(Point p1, Scalar k1, Point p2, Scalar k2) {
+    if (std::fabs(k1 - k2) < kEhCloseEnough) {
+      return (p1 + p2) / 2;
+    }
+
+    // Line 1: y - y1 = k1(x - x1)
+    // Line 2: y - y2 = k2(x - x2)
+    //      => x = (k1*x1 - k2*x2 + y2 - y1) / (k1 - k2)
+
+    Scalar x = (k1 * p1.x - k2 * p2.x + p2.y - p1.y) / (k1 - k2);
+    Scalar y = k1 * (x - p1.x) + p1.y;
+
+    return Point(x, y);
   }
 
   PathReceiver& receiver_;

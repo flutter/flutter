@@ -147,8 +147,8 @@ class SemanticsController {
   ///   expect(
   ///     tester.semantics.simulatedAccessibilityTraversal(),
   ///     containsAllInOrder(<Matcher>[
-  ///       containsSemantics(label: 'My Widget'),
-  ///       containsSemantics(label: 'is awesome!', isChecked: true),
+  ///       isSemantics(label: 'My Widget'),
+  ///       isSemantics(label: 'is awesome!', isChecked: true),
   ///     ]),
   ///   );
   /// });
@@ -156,7 +156,7 @@ class SemanticsController {
   ///
   /// See also:
   ///
-  /// * [containsSemantics] and [matchesSemantics], which can be used to match
+  /// * [isSemantics] and [matchesSemantics], which can be used to match
   ///   against a single node in the traversal.
   /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
   ///   match the order allowing extra nodes before after and between matching
@@ -334,6 +334,11 @@ class SemanticsController {
   ///
   /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
   /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+  //
+  // TODO(quncheng): If this method is modified, please also update the copy of
+  // this method located in `packages/flutter/lib/src/widgets/_accessibility_evaluations.dart`.
+  // This private method will be removed once the feature flag
+  // `isAccessibilityEvaluationsEnabled` is turned on.
   bool _isImportantForAccessibility(SemanticsNode node) {
     if (node.isMergedIntoParent) {
       // If this node is merged, all its information are present on an ancestor
@@ -1030,6 +1035,20 @@ abstract class WidgetController {
   }
 
   // INTERACTION
+
+  /// Sends a 'handleScrollToTop' message to the test application via the
+  /// [SystemChannels.statusBar] channel, to simulate an iOS status bar tap
+  /// event.
+  void simulateStatusBarTap() {
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('handleScrollToTop'),
+    );
+    binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.statusBar.name,
+      message,
+      (ByteData? data) {},
+    );
+  }
 
   /// Dispatch a pointer down / pointer up sequence at the center of
   /// the given widget, assuming it is exposed.
@@ -2102,7 +2121,9 @@ abstract class WidgetController {
       final FlutterView view = _viewOf(finder);
       final result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
-      final bool found = result.path.any((HitTestEntry entry) => entry.target == box);
+      final bool found = result.path.any(
+        (HitTestEntry entry) => finders.isRenderObjectAncestorOfTarget(box, entry.target),
+      );
       if (!found) {
         final RenderView renderView = binding.renderViews.firstWhere(
           (RenderView r) => r.flutterView == view,

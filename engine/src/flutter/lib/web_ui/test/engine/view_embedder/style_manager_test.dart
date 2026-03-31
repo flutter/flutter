@@ -5,7 +5,6 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/matchers.dart';
 
@@ -18,6 +17,9 @@ void doTests() {
     test('attachGlobalStyles hides the outline when focused', () {
       final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
 
+      // Set a tab index so that the element is focusable.
+      flutterViewElement.tabIndex = 0;
+
       domDocument.body!.append(flutterViewElement);
       StyleManager.attachGlobalStyles(
         node: flutterViewElement,
@@ -25,10 +27,11 @@ void doTests() {
         styleNonce: 'testing',
         cssSelectorPrefix: DomManager.flutterViewTagName,
       );
-      final expected = ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
-          ? 'rgb(0, 0, 0) 0px'
-          : 'rgb(0, 0, 0) none 0px';
-      final String got = domWindow.getComputedStyle(flutterViewElement, 'focus').outline;
+      final expected = isFirefox ? 'rgb(0, 0, 0) 0px' : 'rgb(0, 0, 0) none 0px';
+
+      // Focus the element.
+      flutterViewElement.focusWithoutScroll();
+      final String got = domWindow.getComputedStyle(flutterViewElement).outline;
 
       expect(got, expected);
     });

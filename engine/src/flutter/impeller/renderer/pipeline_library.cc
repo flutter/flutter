@@ -74,4 +74,8 @@ PipelineLibrary::GetPipelineUseCounts() const {
   return counts;
 }
 
+PipelineCompileQueue* PipelineLibrary::GetPipelineCompileQueue() const {
+  return nullptr;
+}
+
 }  // namespace impeller

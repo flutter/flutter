@@ -77,7 +77,7 @@ void main() {
   });
 
   test('RenderSliverAnimatedOpacity does not composite if it is transparent', () async {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.0;
 
     final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
@@ -99,7 +99,7 @@ void main() {
   });
 
   test('RenderSliverAnimatedOpacity does composite if it is partially opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.5;
 
     final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
@@ -121,7 +121,7 @@ void main() {
   });
 
   test('RenderSliverAnimatedOpacity does composite if it is opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 1.0;
 
     final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
@@ -143,7 +143,7 @@ void main() {
   });
 
   test('RenderSliverAnimatedOpacity reuses its layer', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(

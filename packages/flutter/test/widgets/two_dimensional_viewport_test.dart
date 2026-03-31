@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'two_dimensional_utils.dart';
@@ -24,9 +24,8 @@ void main() {
               maxXIndex: 0,
               maxYIndex: 0,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                return SizedBox(
-                  height: 200,
-                  width: 200,
+                return SizedBox.square(
+                  dimension: 200,
                   child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
                 );
               },
@@ -57,9 +56,8 @@ void main() {
               maxYIndex: 0,
               addRepaintBoundaries: false,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                return SizedBox(
-                  height: 200,
-                  width: 200,
+                return SizedBox.square(
+                  dimension: 200,
                   child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
                 );
               },
@@ -91,9 +89,8 @@ void main() {
             addRepaintBoundaries: false,
             builder: (BuildContext context, ChildVicinity vicinity) {
               capturedContext = context;
-              return SizedBox(
-                height: 200,
-                width: 200,
+              return SizedBox.square(
+                dimension: 200,
                 child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
               );
             },
@@ -498,28 +495,20 @@ void main() {
 
         // In the tests below the number of RepaintBoundary widgets depends on:
         // ModalRoute - builds 2
-        // GlowingOverscrollIndicator - builds 2
         // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
 
-        void expectModalRoute() {
-          expect(
-            ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))),
-            isA<MaterialPageRoute<void>>(),
-          );
-        }
-
+        expect(
+          ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))),
+          isA<PageRoute<void>>(),
+        );
         switch (defaultTargetPlatform) {
-          case TargetPlatform.fuchsia:
-            expectModalRoute();
-            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
-            expect(find.byType(RepaintBoundary), findsNWidgets(7));
-
           case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(7));
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(3));
         }
 
@@ -539,18 +528,18 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        expect(
+          ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))),
+          isA<PageRoute<void>>(),
+        );
         switch (defaultTargetPlatform) {
-          case TargetPlatform.fuchsia:
-            expectModalRoute();
-            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
-            expect(find.byType(RepaintBoundary), findsNWidgets(6));
-
           case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(6));
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(2));
         }
       }, variant: TargetPlatformVariant.all());
@@ -2110,12 +2099,11 @@ void main() {
       expect(viewport.viewportDimension, const Size(800.0, 600.0));
       tester.view.physicalSize = const Size(300.0, 300.0);
       tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
       await tester.pumpAndSettle();
       viewport = getViewport(tester, childKey);
       expect(viewport.viewportDimension, const Size(300.0, 300.0));
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Rebuilds when delegate changes', (WidgetTester tester) async {
@@ -2169,11 +2157,13 @@ void main() {
           return SizedBox.square(
             dimension: 200,
             child: Center(
-              child: FloatingActionButton(
+              child: GestureDetector(
                 key: childKeys[vicinity],
-                onPressed: () {
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
                   taps.add(vicinity);
                 },
+                child: const SizedBox.square(dimension: 56),
               ),
             ),
           );
@@ -2936,7 +2926,7 @@ void main() {
             ChildVicinity(xIndex: 1, yIndex: 1) => const ValueKey<int>(2),
             _ => null,
           };
-          return Checkbox(key: key, value: false, onChanged: (_) {});
+          return _TestToggleable(key: key);
         },
       );
       final delegate2 = TwoDimensionalChildBuilderDelegate(
@@ -2951,7 +2941,7 @@ void main() {
           } else if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
             key = const ValueKey<int>(2);
           }
-          return Checkbox(key: key, value: false, onChanged: (_) {});
+          return _TestToggleable(key: key);
         },
       );
       addTearDown(delegate1.dispose);
@@ -2966,7 +2956,138 @@ void main() {
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
       expect(tester.state(find.byKey(const ValueKey<int>(2))), stateBeforeReordering);
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Child sorting and layout logic remain consistent', (WidgetTester tester) async {
+      // Verify that sorting rules are unchanged after removing nested loops:
+      // - Main axis vertical → Row-major order (y-index first, then x-index).
+      // - Main axis horizontal → Column-major order (x-index first, then y-index).
+      final childKeys = <ChildVicinity, UniqueKey>{};
+
+      // Configure grid dimensions: create a dense grid of child widgets to simulate the original nested loop scenario.
+      const maxXCount = 5; // Total number of columns (x-axis).
+      const maxYCount = 10; // Total number of rows (y-axis).
+
+      // Create delegate to build child widgets with fixed size (200x200).
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: maxXCount - 1,
+        maxYIndex: maxYCount - 1,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
+          return SizedBox.square(key: childKeys[vicinity], dimension: 200);
+        },
+      );
+
+      // Set viewport size to fit all children exactly (no overflow, no partial visibility).
+      tester.view.physicalSize = Size(200 * maxXCount.toDouble(), 200 * maxYCount.toDouble());
+      tester.view.devicePixelRatio = 1.0;
+      // Clean up resources after test: dispose delegate and reset viewport settings.
+      addTearDown(() {
+        delegate.dispose();
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      // 1. Test with main axis set to vertical (default behavior).
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      await tester.pumpAndSettle();
+      RenderTwoDimensionalViewport viewport = getViewport(tester, childKeys.values.first);
+      final verticalOrder = <ChildVicinity>[];
+      RenderBox? child = viewport.firstChild;
+
+      // Traverse all children in the viewport's paint order.
+      while (child != null) {
+        final ParentData? parentData = child.parentData;
+        if (parentData is TwoDimensionalViewportParentData) {
+          verticalOrder.add(parentData.vicinity);
+        }
+        child = viewport.childAfter(child);
+      }
+
+      // Verify row-major order for vertical main axis.
+      for (var y = 0; y < maxYCount; y++) {
+        for (var x = 0; x < maxXCount; x++) {
+          final expectedVicinity = ChildVicinity(xIndex: x, yIndex: y);
+          final int expectedListIndex = y * maxXCount + x;
+          expect(
+            verticalOrder[expectedListIndex],
+            expectedVicinity,
+            reason:
+                'Vertical main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
+                'got ${verticalOrder[expectedListIndex]}',
+          );
+        }
+      }
+
+      // 2. Test with main axis set to horizontal.
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate, mainAxis: Axis.horizontal));
+      await tester.pumpAndSettle();
+      viewport = getViewport(tester, childKeys.values.first);
+      final horizontalOrder = <ChildVicinity>[];
+      child = viewport.firstChild;
+
+      // Traverse all children in the viewport's paint order.
+      while (child != null) {
+        final ParentData? parentData = child.parentData;
+        if (parentData is TwoDimensionalViewportParentData) {
+          horizontalOrder.add(parentData.vicinity);
+        }
+        child = viewport.childAfter(child);
+      }
+
+      // Verify column-major order for horizontal main axis.
+      for (var x = 0; x < maxXCount; x++) {
+        for (var y = 0; y < maxYCount; y++) {
+          final expectedVicinity = ChildVicinity(xIndex: x, yIndex: y);
+          // Calculate expected index in the horizontalOrder list (column * rows + row)
+          final int expectedListIndex = x * maxYCount + y;
+          expect(
+            horizontalOrder[expectedListIndex],
+            expectedVicinity,
+            reason:
+                'Horizontal main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
+                'got ${horizontalOrder[expectedListIndex]}',
+          );
+        }
+      }
+    }, variant: TargetPlatformVariant.all());
   });
+}
+
+class _TestToggleable extends StatefulWidget {
+  const _TestToggleable({super.key});
+
+  @override
+  State<_TestToggleable> createState() => _TestToggleableState();
+}
+
+class _TestToggleableState extends State<_TestToggleable>
+    with TickerProviderStateMixin, ToggleableStateMixin {
+  final _NoOpToggleablePainter _painter = _NoOpToggleablePainter();
+
+  @override
+  ValueChanged<bool?>? get onChanged => null;
+
+  @override
+  bool get tristate => false;
+
+  @override
+  bool? get value => false;
+
+  @override
+  void dispose() {
+    _painter.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return buildToggleable(size: const Size(200, 200), painter: _painter..position = position);
+  }
+}
+
+class _NoOpToggleablePainter extends ToggleablePainter {
+  @override
+  void paint(Canvas canvas, Size size) {}
 }
 
 class _TestVicinity extends ChildVicinity {

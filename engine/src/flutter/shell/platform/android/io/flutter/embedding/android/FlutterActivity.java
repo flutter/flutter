@@ -629,7 +629,6 @@ public class FlutterActivity extends Activity
   }
 
   @Override
-  @RequiresApi(API_LEVELS.API_24)
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     switchLaunchThemeForNormalTheme();
 
@@ -799,7 +798,6 @@ public class FlutterActivity extends Activity
   }
 
   @NonNull
-  @RequiresApi(API_LEVELS.API_24)
   private View createFlutterView() {
     return delegate.onCreateView(
         /* inflater=*/ null,
@@ -897,7 +895,6 @@ public class FlutterActivity extends Activity
   }
 
   @Override
-  @RequiresApi(API_LEVELS.API_24)
   public void detachFromFlutterEngine() {
     Log.w(
         TAG,
@@ -913,7 +910,6 @@ public class FlutterActivity extends Activity
   }
 
   @Override
-  @RequiresApi(API_LEVELS.API_24)
   protected void onDestroy() {
     super.onDestroy();
     if (stillAttachedForEvent("onDestroy")) {

@@ -679,7 +679,9 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Defaults to true.
   static bool debugIsVibrancePainted = true;
 
-  ImageFilter? _buildFilter(Brightness? brightness) {
+  // TODO(davidhicks980): Set `bounded` to true on ImageFilterConfig.blur after
+  // https://github.com/flutter/flutter/issues/182066 is resolved.
+  ImageFilterConfig? _buildFilter(Brightness? brightness) {
     var isVibrancePainted = true;
     assert(() {
       isVibrancePainted = debugIsVibrancePainted;
@@ -689,27 +691,27 @@ class CupertinoPopupSurface extends StatelessWidget {
       if (blurSigma == 0) {
         return null;
       }
-      return ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma);
+      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma);
     }
 
-    final ColorFilter colorFilter = switch (brightness) {
+    final colorFilter = ImageFilterConfig(switch (brightness) {
       Brightness.dark => const ColorFilter.matrix(_darkSaturationMatrix),
       Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix),
-    };
+    });
 
     if (blurSigma == 0) {
       return colorFilter;
     }
 
-    return ImageFilter.compose(
+    return ImageFilterConfig.compose(
       inner: colorFilter,
-      outer: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final ImageFilter? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
+    final ImageFilterConfig? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
     Widget contents = child;
 
     if (isSurfacePainted) {
@@ -722,7 +724,7 @@ class CupertinoPopupSurface extends StatelessWidget {
     if (filter != null) {
       return ClipRSuperellipse(
         borderRadius: _clipper,
-        child: BackdropFilter(filter: filter, child: contents),
+        child: BackdropFilter(filterConfig: filter, child: contents),
       );
     }
 

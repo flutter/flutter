@@ -3,14 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kOrangeColor = Color(0xFFFF8800);
+  const kBlueColor = Color(0xFF0000FF);
+
   group(LogicalKeySet, () {
     test('LogicalKeySet passes parameters correctly.', () {
       final set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
@@ -915,7 +920,7 @@ void main() {
       addTearDown(testManager.dispose);
       var invoked = false;
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Shortcuts.manager(
             manager: testManager,
             child: Actions(
@@ -959,12 +964,10 @@ void main() {
         );
         addTearDown(testManager.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: Shortcuts.manager(
-                manager: testManager,
-                child: TextField(key: textFieldKey, autofocus: true),
-              ),
+          TestWidgetsApp(
+            home: Shortcuts.manager(
+              manager: testManager,
+              child: TestTextField(key: textFieldKey, autofocus: true),
             ),
           ),
         );
@@ -989,21 +992,19 @@ void main() {
       addTearDown(testManager.dispose);
       var invoked = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Shortcuts.manager(
-              manager: testManager,
-              child: Actions(
-                actions: <Type, Action<Intent>>{
-                  TestIntent: TestAction(
-                    onInvoke: (Intent intent) {
-                      invoked = true;
-                      return invoked;
-                    },
-                  ),
-                },
-                child: TextField(key: textFieldKey, autofocus: true),
-              ),
+        TestWidgetsApp(
+          home: Shortcuts.manager(
+            manager: testManager,
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                TestIntent: TestAction(
+                  onInvoke: (Intent intent) {
+                    invoked = true;
+                    return invoked;
+                  },
+                ),
+              },
+              child: TestTextField(key: textFieldKey, autofocus: true),
             ),
           ),
         ),
@@ -1029,23 +1030,21 @@ void main() {
       addTearDown(testManager.dispose);
       var invoked = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Shortcuts.manager(
-              manager: testManager,
-              child: Actions(
-                actions: <Type, Action<Intent>>{
-                  TestIntent: TestAction(
-                    onInvoke: (Intent intent) {
-                      invoked = true;
-                      return invoked;
-                    },
-                  ),
-                },
-                child: Actions(
-                  actions: <Type, Action<Intent>>{TestIntent: DoNothingAction(consumesKey: false)},
-                  child: TextField(key: textFieldKey, autofocus: true),
+        TestWidgetsApp(
+          home: Shortcuts.manager(
+            manager: testManager,
+            child: Actions(
+              actions: <Type, Action<Intent>>{
+                TestIntent: TestAction(
+                  onInvoke: (Intent intent) {
+                    invoked = true;
+                    return invoked;
+                  },
                 ),
+              },
+              child: Actions(
+                actions: <Type, Action<Intent>>{TestIntent: DoNothingAction(consumesKey: false)},
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1071,26 +1070,24 @@ void main() {
         addTearDown(testManager.dispose);
         var invoked = false;
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: Shortcuts.manager(
-                manager: testManager,
-                child: Actions(
-                  actions: <Type, Action<Intent>>{
-                    TestIntent: TestAction(
-                      onInvoke: (Intent intent) {
-                        invoked = true;
-                        return invoked;
-                      },
-                    ),
-                  },
-                  child: Shortcuts(
-                    shortcuts: <LogicalKeySet, Intent>{
-                      LogicalKeySet(LogicalKeyboardKey.keyA):
-                          const DoNothingAndStopPropagationIntent(),
+          TestWidgetsApp(
+            home: Shortcuts.manager(
+              manager: testManager,
+              child: Actions(
+                actions: <Type, Action<Intent>>{
+                  TestIntent: TestAction(
+                    onInvoke: (Intent intent) {
+                      invoked = true;
+                      return invoked;
                     },
-                    child: TextField(key: textFieldKey, autofocus: true),
                   ),
+                },
+                child: Shortcuts(
+                  shortcuts: <LogicalKeySet, Intent>{
+                    LogicalKeySet(LogicalKeyboardKey.keyA):
+                        const DoNothingAndStopPropagationIntent(),
+                  },
+                  child: TestTextField(key: textFieldKey, autofocus: true),
                 ),
               ),
             ),
@@ -1210,11 +1207,25 @@ void main() {
       );
     });
 
+    testWidgets('Shortcuts pass debug label to focus node.', (WidgetTester tester) async {
+      const debugLabel = '<My Shortcuts Debug Label>';
+      await tester.pumpWidget(
+        const Shortcuts(
+          debugLabel: debugLabel,
+          shortcuts: <LogicalKeySet, Intent>{},
+          child: SizedBox(),
+        ),
+      );
+
+      final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
+      expect(focusNode.debugLabel, 'Shortcuts: <My Shortcuts Debug Label>');
+    });
+
     testWidgets('Shortcuts support multiple intents', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       bool? value = true;
       Widget buildApp() {
-        return MaterialApp(
+        return TestWidgetsApp(
           shortcuts: <LogicalKeySet, Intent>{
             LogicalKeySet(LogicalKeyboardKey.space): const PrioritizedIntents(
               orderedIntents: <Intent>[
@@ -1228,25 +1239,36 @@ void main() {
               type: ScrollIncrementType.page,
             ),
           },
-          home: Material(
-            child: Center(
-              child: ListView(
-                primary: true,
-                children: <Widget>[
-                  StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (bool? newValue) => setState(() {
-                          value = newValue;
-                        }),
-                        focusColor: Colors.orange[500],
-                      );
-                    },
-                  ),
-                  Container(color: Colors.blue, height: 1000),
-                ],
-              ),
+          home: Center(
+            child: ListView(
+              primary: true,
+              children: <Widget>[
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    // A focusable widget that handles ActivateIntent.
+                    return Actions(
+                      actions: <Type, Action<Intent>>{
+                        ActivateIntent: CallbackAction<ActivateIntent>(
+                          onInvoke: (ActivateIntent intent) {
+                            setState(() {
+                              value = !(value ?? false);
+                            });
+                            return null;
+                          },
+                        ),
+                      },
+                      child: Focus(
+                        child: Container(
+                          color: value! ? kOrangeColor : kBlueColor,
+                          width: 48,
+                          height: 48,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Container(color: kBlueColor, height: 1000),
+              ],
             ),
           ),
         );
@@ -1276,7 +1298,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
-      // Focus is now on the checkbox.
+      // Focus is now on the focusable widget.
       expect(
         tester.binding.focusManager.primaryFocus!.toStringShort(),
         equalsIgnoringHashCodes('FocusNode#00000([PRIMARY FOCUS])'),
@@ -1286,7 +1308,7 @@ void main() {
 
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pumpAndSettle();
-      // Checkbox is toggled, scroll view does not scroll.
+      // Focusable widget is toggled, scroll view does not scroll.
       expect(value, isFalse);
       expect(controller.position.pixels, 0.0);
 
@@ -1790,11 +1812,11 @@ void main() {
       expect(invokedB, equals(1));
     });
 
-    testWidgets('MaterialApp has a ShortcutRegistrar listening', (WidgetTester tester) async {
+    testWidgets('WidgetsApp has a ShortcutRegistrar listening', (WidgetTester tester) async {
       var invokedA = 0;
       var invokedB = 0;
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: TestCallbackRegistration(
             shortcuts: <ShortcutActivator, Intent>{
               const SingleActivator(LogicalKeyboardKey.keyA): VoidCallbackIntent(() {
@@ -1834,17 +1856,15 @@ void main() {
       final controller = TextEditingController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ShortcutRegistrar(
-              child: TestCallbackRegistration(
-                shortcuts: const <ShortcutActivator, Intent>{
-                  SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(
-                    SelectionChangedCause.keyboard,
-                  ),
-                },
-                child: TextField(autofocus: true, controller: controller),
-              ),
+        TestWidgetsApp(
+          home: ShortcutRegistrar(
+            child: TestCallbackRegistration(
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(
+                  SelectionChangedCause.keyboard,
+                ),
+              },
+              child: TestTextField(autofocus: true, controller: controller),
             ),
           ),
         ),
@@ -2119,6 +2139,12 @@ void main() {
         await memoryEvents(() => ShortcutRegistry().dispose(), ShortcutRegistry),
         areCreateAndDispose,
       );
+    });
+
+    testWidgets('sets debug label on focus node', (WidgetTester tester) async {
+      await tester.pumpWidget(const ShortcutRegistrar(child: SizedBox()));
+      final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
+      expect(focusNode.debugLabel, 'Shortcuts: <Shortcut Registrar>');
     });
   });
 }

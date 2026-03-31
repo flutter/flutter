@@ -155,6 +155,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         osUtils: globals.os,
         projectFactory: globals.projectFactory,
+        stdio: globals.stdio,
       ),
       CocoaPods: () => CocoaPods(
         fileSystem: globals.fs,
@@ -224,7 +225,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           globalConfig: globals.config,
           platform: globals.platform,
           projectManifest: FlutterManifest.createFromPath(
-            globals.fs.path.join(globals.fs.currentDirectory.path, 'pubspec.yaml'),
+            globals.fs.path.join(
+              findProjectRoot(globals.fs) ?? globals.fs.currentDirectory.path,
+              'pubspec.yaml',
+            ),
             fileSystem: globals.fs,
             logger: globals.logger,
           ),

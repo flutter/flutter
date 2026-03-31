@@ -35,7 +35,6 @@ public class LocalizationPlugin {
         public String getStringResource(@NonNull String key, @Nullable String localeString) {
           Context localContext = context;
           String stringToReturn = null;
-          Locale savedLocale = null;
 
           if (localeString != null) {
             Locale locale = localeFromString(localeString);
@@ -105,7 +104,6 @@ public class LocalizationPlugin {
       if (platformResolvedLocale != null) {
         return platformResolvedLocale;
       }
-      return supportedLocales.get(0);
     } else {
       // Modern locale resolution without languageRange
       // https://developer.android.com/guide/topics/resources/multilingual-support#postN
@@ -131,8 +129,8 @@ public class LocalizationPlugin {
           }
         }
       }
-      return supportedLocales.get(0);
     }
+    return supportedLocales.get(0);
   }
 
   /**

@@ -615,6 +615,13 @@ class RenderTable extends RenderBox {
   final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
   final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
 
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _cachedRows.clear();
+    _cachedCells.clear();
+  }
+
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
@@ -960,6 +967,9 @@ class RenderTable extends RenderBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
+    if (rows * columns == 0) {
+      return 0.0;
+    }
     var totalMinWidth = 0.0;
     for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
@@ -972,6 +982,9 @@ class RenderTable extends RenderBox {
   @override
   double computeMaxIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
+    if (rows * columns == 0) {
+      return 0.0;
+    }
     var totalMaxWidth = 0.0;
     for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
@@ -986,6 +999,9 @@ class RenderTable extends RenderBox {
     // winner of the 2016 world's most expensive intrinsic dimension function award
     // honorable mention, most likely to improve if taught about memoization award
     assert(_children.length == rows * columns);
+    if (rows * columns == 0) {
+      return 0.0;
+    }
     final List<double> widths = _computeColumnWidths(BoxConstraints.tightForFinite(width: width));
     var rowTop = 0.0;
     for (var y = 0; y < rows; y += 1) {

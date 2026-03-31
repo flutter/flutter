@@ -192,13 +192,13 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
        }},
       {"SetImageFilter",
        {
-           {0, 32, 0,
+           {0, 48, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestBlurImageFilter1); }},
-           {0, 32, 0,
+           {0, 48, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestBlurImageFilter2); }},
-           {0, 32, 0,
+           {0, 48, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestBlurImageFilter3); }},
-           {0, 32, 0,
+           {0, 48, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestBlurImageFilter4); }},
            {0, 24, 0,
             [](DlOpReceiver& r) {

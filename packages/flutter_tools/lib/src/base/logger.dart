@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import '../convert.dart';
 import 'common.dart';
 import 'io.dart';
-import 'terminal.dart' show OutputPreferences, Terminal, TerminalColor;
+import 'terminal.dart' show AnsiTerminal, OutputPreferences, Terminal, TerminalColor;
 import 'utils.dart';
 
 const kDefaultStatusPadding = 59;
@@ -405,7 +405,6 @@ class DelegatingLogger implements Logger {
 /// the first delegate with the matching type.
 ///
 /// Throws a [StateError] if no matching delegate is found.
-@override
 T asLogger<T extends Logger>(Logger logger) {
   final original = logger;
   while (true) {
@@ -1405,7 +1404,7 @@ class AnonymousSpinnerStatus extends Status {
     assert(_timer != null);
     assert(_timer!.isActive);
     if (_terminal.supportsColor) {
-      _writeToStdOut('\r\x1B[K'); // go to start of line and clear line
+      _writeToStdOut(AnsiTerminal.clearAndReturnCode);
     } else {
       _clear(_currentLineLength);
     }
