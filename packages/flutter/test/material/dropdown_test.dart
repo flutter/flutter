@@ -2654,7 +2654,7 @@ void main() {
     final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
+      paints..rrect(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
     );
 
     // Focus color from Decoration.
@@ -2670,7 +2670,7 @@ void main() {
 
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ffff)),
+      paints..rrect(style: PaintingStyle.fill, color: const Color(0xff00ffff)),
     );
 
     // Focus color from focusColor property.
@@ -2687,7 +2687,7 @@ void main() {
 
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
+      paints..rrect(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
     );
   });
 
@@ -2715,7 +2715,7 @@ void main() {
     ).colorScheme.surfaceContainerHighest;
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: defaultBorderColor),
+      paints..rrect(style: PaintingStyle.fill, color: defaultBorderColor),
     );
 
     // Replace focusNode and request focus.
@@ -2727,7 +2727,7 @@ void main() {
     await tester.pump(); // Wait for requestFocus to take effect.
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
+      paints..rrect(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
     );
 
     // Replace focusNode and request focus.
@@ -2740,7 +2740,7 @@ void main() {
     await tester.pump(); // Wait for unfocus to take effect.
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: defaultBorderColor),
+      paints..rrect(style: PaintingStyle.fill, color: defaultBorderColor),
     );
   });
 
@@ -2830,7 +2830,7 @@ void main() {
     final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(
+      paints..rrect(
         style: PaintingStyle.fill,
         color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
       ),
@@ -2848,7 +2848,7 @@ void main() {
     );
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(
+      paints..rrect(
         style: PaintingStyle.fill,
         color: Color.alphaBlend(hoverColor, theme.colorScheme.surfaceContainerHighest),
       ),
