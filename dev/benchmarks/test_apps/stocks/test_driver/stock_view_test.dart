@@ -15,9 +15,7 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(() async {
-      driver.close();
-    });
+    tearDownAll(driver.close);
 
     test('Stock list is shown', () async {
       final SerializableFinder stockList = find.byValueKey('stock-list');
