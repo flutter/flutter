@@ -183,7 +183,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in error range results in DependencyValidationException`() {
-        val exampleErrorGradleVersion = "7.0.0"
+        val exampleErrorGradleVersion = "8.6.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleErrorGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
