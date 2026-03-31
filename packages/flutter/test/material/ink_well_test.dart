@@ -639,7 +639,7 @@ void main() {
               dimension: 100,
               child: InkWell(
                 focusNode: focusNode,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
                 focusColor: const Color(0xff0000ff),
                 onTap: () {},
               ),
@@ -676,7 +676,7 @@ void main() {
               dimension: 100,
               child: MouseRegion(
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   hoverColor: const Color(0xff00ff00),
                   onTap: () {},
                 ),
@@ -722,7 +722,7 @@ void main() {
               child: MouseRegion(
                 child: InkWell(
                   focusNode: focusNode,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   customBorder: const CircleBorder(),
                   hoverColor: const Color(0xff00ff00),
                   onTap: () {},
@@ -772,7 +772,7 @@ void main() {
               dimension: 100,
               child: MouseRegion(
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                   customBorder: const CircleBorder(),
                   hoverColor: const Color(0xff00ff00),
                   onTap: () {},
@@ -867,7 +867,7 @@ void main() {
               child: InkResponse(
                 focusNode: focusNode,
                 highlightShape: shape,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
                 focusColor: const Color(0xff0000ff),
                 onTap: () {},
               ),
@@ -917,7 +917,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(10)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(10))));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = getInkFeatures(tester);
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 0));
@@ -933,7 +933,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(30)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(30))));
     await tester.pumpAndSettle();
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
     expect(
@@ -971,7 +971,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(20))));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = getInkFeatures(tester);
     expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
@@ -994,7 +994,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(40))));
     await tester.pumpAndSettle();
     expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));
@@ -1038,7 +1038,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(20))));
     await tester.pumpAndSettle();
 
     final RenderObject inkFeatures = getInkFeatures(tester);
@@ -1074,7 +1074,7 @@ void main() {
         ),
     );
 
-    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpWidget(boilerplate(const BorderRadius.all(Radius.circular(40))));
     await tester.pumpAndSettle();
     expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(40)));

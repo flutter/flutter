@@ -14,9 +14,7 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(() async {
-      await driver.close();
-    });
+    tearDownAll(driver.close);
 
     test('Textfield scrolls back into view after covered by keyboard', () async {
       await driver.setTextEntryEmulation(enabled: false); // we want the keyboard to come up
