@@ -408,7 +408,7 @@ class DialogWindowControllerLinux extends DialogWindowController {
     if (parent != null) {
       final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
       if (parentWindow == null) {
-        throw Exception("Failed to find dialog parent window");
+        throw Exception('Failed to find dialog parent window');
       }
       _window.setTransientFor(parentWindow);
       _window.setModal(true);
@@ -599,7 +599,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
 
     final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
     if (parentWindow == null) {
-      throw Exception("Failed to find tooltip parent window");
+      throw Exception('Failed to find tooltip parent window');
     }
     _window.setTransientFor(parentWindow);
     updatePosition(anchorRect: anchorRect, positioner: positioner);
