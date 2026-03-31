@@ -264,6 +264,7 @@ class EngineFlutterView implements ui.FlutterView {
   @override
   ViewPadding get viewInsets => _viewInsets;
   ViewPadding _viewInsets = ui.ViewPadding.zero as ViewPadding;
+  bool _hasNotifiedMetrics = false;
 
   @override
   ViewPadding get viewPadding => _viewConfiguration.viewPadding;
@@ -320,6 +321,8 @@ class EngineFlutterView implements ui.FlutterView {
   void _handleBrowserResize(ui.Size? _) {
     StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
     final ui.Size newPhysicalSize = _computePhysicalSize();
+    final ui.Size previousPhysicalSize = _physicalSize ?? ui.Size.zero;
+    final ViewPadding previousViewInsets = _viewInsets;
     if (_shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize)) {
       _computeOnScreenKeyboardInsets(true);
     } else {
@@ -327,7 +330,16 @@ class EngineFlutterView implements ui.FlutterView {
       // When physical size changes this value has to be recalculated.
       _computeOnScreenKeyboardInsets(false);
     }
-    platformDispatcher.invokeOnMetricsChanged();
+    final bool sizeChanged = newPhysicalSize != previousPhysicalSize;
+    final bool insetsChanged =
+        _viewInsets.bottom != previousViewInsets.bottom ||
+        _viewInsets.top != previousViewInsets.top ||
+        _viewInsets.left != previousViewInsets.left ||
+        _viewInsets.right != previousViewInsets.right;
+    if (sizeChanged || insetsChanged || !_hasNotifiedMetrics) {
+      _hasNotifiedMetrics = true;
+      platformDispatcher.invokeOnMetricsChanged();
+    }
   }
 
   /// Uses the previous physical size and current innerHeight/innerWidth
