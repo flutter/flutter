@@ -951,7 +951,7 @@ class FlutterPluginSwiftDependencies {
         if (dependencyData case {'fileSystem': final List<Object?> fileSystemData}) {
           for (final Map<String, Object?> fileSystemData
               in fileSystemData.whereType<Map<String, Object?>>()) {
-            if (fileSystemData['identity'] == 'flutterframework') {
+            if (fileSystemData['identity'] == kFlutterGeneratedFrameworkSwiftPackageTargetName.toLowerCase()) {
               return true;
             }
           }
@@ -988,7 +988,7 @@ class FlutterPluginSwiftDependencies {
       'swift',
       'package',
       'add-dependency',
-      './FlutterFramework',
+      '../FlutterFramework',
       '--type',
       'path',
     ], workingDirectory: workingDirectory.path);
@@ -996,17 +996,17 @@ class FlutterPluginSwiftDependencies {
       throwToolExit('Failed to add FlutterFramework as a dependency. ${result.stderr}');
     }
     for (final targetName in targetNames) {
-      final ProcessResult result = await _utils.processManager.run([
+      final ProcessResult targetResult = await _utils.processManager.run([
         'swift',
         'package',
         'add-target-dependency',
-        'FlutterFramework',
+        kFlutterGeneratedFrameworkSwiftPackageTargetName,
         targetName,
         '--package',
-        'FlutterFramework',
+        kFlutterGeneratedFrameworkSwiftPackageTargetName,
       ], workingDirectory: workingDirectory.path);
-      if (result.exitCode != 0) {
-        throwToolExit('Failed to add FlutterFramework as a target dependency. ${result.stderr}');
+      if (targetResult.exitCode != 0) {
+        throwToolExit('Failed to add FlutterFramework as a target dependency. ${targetResult.stderr}');
       }
     }
   }

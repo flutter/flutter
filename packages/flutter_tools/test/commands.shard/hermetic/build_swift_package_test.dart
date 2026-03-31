@@ -1676,7 +1676,14 @@ let package = Package(
 ''',
           ),
           const FakeCommand(
-            command: ['swift', 'package', 'add-dependency', './FlutterFramework', '--type', 'path'],
+            command: [
+              'swift',
+              'package',
+              'add-dependency',
+              '../FlutterFramework',
+              '--type',
+              'path',
+            ],
           ),
           const FakeCommand(
             command: [
@@ -1847,7 +1854,14 @@ let package = Package(
 ''',
           ),
           const FakeCommand(
-            command: ['swift', 'package', 'add-dependency', './FlutterFramework', '--type', 'path'],
+            command: [
+              'swift',
+              'package',
+              'add-dependency',
+              '../FlutterFramework',
+              '--type',
+              'path',
+            ],
           ),
           const FakeCommand(
             command: [
@@ -1951,7 +1965,14 @@ let package = Package(
                 '{"platforms": [{"platformName": "ios", "version": "13.0"}], "targets": [{"name": "PluginA", "type": "regular"}], "dependencies": []}',
           ),
           const FakeCommand(
-            command: ['swift', 'package', 'add-dependency', './FlutterFramework', '--type', 'path'],
+            command: [
+              'swift',
+              'package',
+              'add-dependency',
+              '../FlutterFramework',
+              '--type',
+              'path',
+            ],
           ),
           const FakeCommand(
             command: [
@@ -1970,7 +1991,14 @@ let package = Package(
                 '{"platforms": [{"platformName": "ios", "version": "14.0"}], "targets": [{"name": "PluginC", "type": "regular"}], "dependencies": []}',
           ),
           const FakeCommand(
-            command: ['swift', 'package', 'add-dependency', './FlutterFramework', '--type', 'path'],
+            command: [
+              'swift',
+              'package',
+              'add-dependency',
+              '../FlutterFramework',
+              '--type',
+              'path',
+            ],
           ),
           const FakeCommand(
             command: [
