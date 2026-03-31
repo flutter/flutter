@@ -468,10 +468,11 @@ class WrittenError {
   AnalysisSeverity get severityLevel => _severityMap[severity] ?? AnalysisSeverity.none;
 
   String get messageSentenceFragment {
-    if (message.endsWith('.')) {
-      return message.substring(0, message.length - 1);
+    final String cleanMessage = message.replaceAll('\n', ' ');
+    if (cleanMessage.endsWith('.')) {
+      return cleanMessage.substring(0, cleanMessage.length - 1);
     }
-    return message;
+    return cleanMessage;
   }
 
   @override
