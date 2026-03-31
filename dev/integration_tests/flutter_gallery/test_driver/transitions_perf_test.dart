@@ -185,9 +185,7 @@ void main([List<String> args = const <String>[]]) {
       }
     });
 
-    tearDownAll(() async {
-      await driver.close();
-    });
+    tearDownAll(driver.close);
 
     test(
       'find.bySemanticsLabel',
