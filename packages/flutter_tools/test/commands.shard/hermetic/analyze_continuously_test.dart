@@ -320,6 +320,12 @@ void main() {
 
     final logger = BufferLogger.test();
 
+    final String fooUri = fileSystem.path.toUri(fileSystem.path.absolute('directoryA', 'foo')).toString();
+    final String diagnosticsJson = '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
+        '"uri":"$fooUri","diagnostics":[{"range":{"start":{"line":99,'
+        '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
+        '"message":"It\'s an error."}]}}';
+
     final stdin = StreamController<List<int>>();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -338,11 +344,8 @@ void main() {
             'Content-Length: 93\r\n\r\n'
             r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
             '"value":{"kind":"begin"}}}'
-            'Content-Length: 249\r\n\r\n'
-            '{"jsonrpc":"2.0","method":"textDocument/publishDiagnostics","params":{'
-            '"uri":"file:///directoryA/foo","diagnostics":[{"range":{"start":{"line":99,'
-            '"character":4},"end":{"line":99,"character":4}},"severity":2,"code":"500",'
-            '"message":"It\'s an error."}]}}'
+            'Content-Length: ${diagnosticsJson.length}\r\n\r\n'
+            '$diagnosticsJson'
             'Content-Length: 91\r\n\r\n'
             r'{"jsonrpc":"2.0","method":"$/progress","params":{"token":"analyze",'
             '"value":{"kind":"end"}}}',
@@ -368,7 +371,8 @@ void main() {
     while (!logger.statusText.contains('analyzed 1 file')) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
-    expect(logger.statusText, contains("warning • It's an error • directoryA/foo:100:5 • 500"));
+    final String expectedPath = fileSystem.path.join('directoryA', 'foo');
+    expect(logger.statusText, contains("warning • It's an error • $expectedPath:100:5 • 500"));
     expect(logger.statusText, contains('1 issue found. (1 new)'));
     expect(logger.errorText, isEmpty);
     expect(processManager, hasNoRemainingExpectations);

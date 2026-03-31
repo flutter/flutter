@@ -290,7 +290,6 @@ class AnalysisServer {
               _handleAnalysisIssues(paramsMap);
             case 'window/showMessage':
               _handleShowMessage(paramsMap);
-              break;
           }
         }
       }
@@ -314,9 +313,9 @@ class AnalysisServer {
   }
 
   void _handleShowMessage(Map<String, Object?> params) {
-    final int? typeId = params['type'] as int?;
+    final typeId = params['type'] as int?;
     final _ShowMessageType? type = _ShowMessageType.fromId(typeId);
-    final String message = params['message']! as String;
+    final message = params['message']! as String;
 
     switch (type) {
       case _ShowMessageType.error:
