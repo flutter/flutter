@@ -10,6 +10,8 @@ import 'package:flutter_api_samples/material/selection_area/selection_area.2.dar
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
+// This was taken directly from selectable_region_test.dart
+// in the frameworks' Widget library tests.
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset =

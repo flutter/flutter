@@ -6650,6 +6650,7 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+
   testWidgets('selects all text including trailing newline using mouse drag', (
     WidgetTester tester,
   ) async {
