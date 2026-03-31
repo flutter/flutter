@@ -14,57 +14,31 @@ class LineMetricsExampleApp extends StatelessWidget {
     return const MaterialApp(
       home: Scaffold(
         body: Center(
-          child: LineMetricsRenderDemo(),
+          child: LineMetricsDemo(),
         ),
       ),
     );
   }
 }
 
-class LineMetricsRenderDemo extends LeafRenderObjectWidget {
-  const LineMetricsRenderDemo({super.key});
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return RenderLineMetricsDemo();
-  }
-}
-
-class RenderLineMetricsDemo extends RenderBox {
-  late RenderParagraph _paragraph;
-
-  RenderLineMetricsDemo() {
-  _paragraph = RenderParagraph(
-    const TextSpan(
-      text: 'This is a multi-line example demonstrating computeLineMetrics on RenderParagraph.',
-      style: TextStyle(fontSize: 18, color: Colors.black),
-    ),
-    textDirection: TextDirection.ltr,
-  );
-
-  adoptChild(_paragraph); 
-}
-
-  @override
-  void performLayout() {
-    _paragraph.layout(constraints, parentUsesSize: true);
-    size = _paragraph.size;
-  }
+class RenderLineMetricsParagraph extends RenderParagraph {
+  RenderLineMetricsParagraph(
+    super.text, {
+    required super.textDirection,
+  });
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _paragraph.paint(context, offset);
+    super.paint(context, offset);
 
-    final List<ui.LineMetrics> lines = _paragraph.computeLineMetrics();
-
+    final List<ui.LineMetrics> lines = computeLineMetrics();
     final Canvas canvas = context.canvas;
     final Paint paint = Paint()
       ..color = Colors.red
       ..strokeWidth = 2;
 
-    for (final line in lines) {
-      final y = offset.dy + line.baseline + 2;
-
+    for (final ui.LineMetrics line in lines) {
+      final double y = offset.dy + line.baseline + 2;
       canvas.drawLine(
         Offset(offset.dx, y),
         Offset(offset.dx + line.width, y),
@@ -72,26 +46,19 @@ class RenderLineMetricsDemo extends RenderBox {
       );
     }
   }
+}
+
+class LineMetricsDemo extends LeafRenderObjectWidget {
+  const LineMetricsDemo({super.key});
 
   @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _paragraph.attach(owner);
-  }
-
-  @override
-  void detach() {
-    _paragraph.detach();
-    super.detach();
-  }
-
-  @override
-  void redepthChildren() {
-    _paragraph.redepthChildren();
-  }
-
-  @override
-  void visitChildren(RenderObjectVisitor visitor) {
-    visitor(_paragraph);
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderLineMetricsParagraph(
+      const TextSpan(
+        text: 'This is a multi-line example demonstrating computeLineMetrics on RenderParagraph.',
+        style: TextStyle(fontSize: 18, color: Colors.black),
+      ),
+      textDirection: TextDirection.ltr,
+    );
   }
 }
