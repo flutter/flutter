@@ -2575,16 +2575,28 @@ String _getFlutterLicense() {
       '\n';
 }
 
-String _removeLicenseIfPresent(String fileContents, String license) {
+String _getFlutterLicenseHtml() {
+  return '''
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+''';
+}
+
+String _removeLicenseIfPresent(String fileContents) {
+  final String license = _getFlutterLicense();
   if (fileContents.startsWith(license)) {
     return fileContents.substring(license.length);
+  }
+  final String licenseHtml = _getFlutterLicenseHtml();
+  if (fileContents.contains(licenseHtml)) {
+    return fileContents.replaceFirst(licenseHtml, '');
   }
   return fileContents;
 }
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
-  final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
   final Iterable<Directory> subDirs = Directory(
@@ -2616,7 +2628,7 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
         ); // Substitute template project name
       }
       String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
-      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      appFileContents = _removeLicenseIfPresent(appFileContents);
       if (appFileContents != templateFileContents) {
         int indexOfDifference;
         for (
