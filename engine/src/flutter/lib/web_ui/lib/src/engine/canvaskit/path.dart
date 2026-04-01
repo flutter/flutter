@@ -38,10 +38,10 @@ class CkPath implements DisposablePath {
   }
 
   CkPath._(SkPathBuilder nativeObject, this._fillType) {
-    _ref = UniqueRef<SkPathBuilder>(this, nativeObject, 'PathBuilder');
+    _ref = CkUniqueRef<SkPathBuilder>(this, nativeObject, 'PathBuilder');
   }
 
-  late final UniqueRef<SkPathBuilder> _ref;
+  late final CkUniqueRef<SkPathBuilder> _ref;
 
   SkPathBuilder get _skiaPathBuilder => _ref.nativeObject;
 

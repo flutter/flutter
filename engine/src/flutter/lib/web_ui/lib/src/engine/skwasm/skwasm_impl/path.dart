@@ -23,11 +23,8 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements LayerPath, Disp
     return SkwasmPath.fromHandle(pathCopy(source.handle));
   }
 
-  SkwasmPath.fromHandle(PathHandle handle) : super(handle, _registry);
-
-  static final SkwasmFinalizationRegistry<RawPath> _registry = SkwasmFinalizationRegistry<RawPath>(
-    (PathHandle handle) => pathDispose(handle),
-  );
+  SkwasmPath.fromHandle(PathHandle handle)
+    : super(handle, (PathHandle h) => pathDispose(h), 'Path');
 
   @override
   ui.PathFillType get fillType => ui.PathFillType.values[pathGetFillType(handle)];
