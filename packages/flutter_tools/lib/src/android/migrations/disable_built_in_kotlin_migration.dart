@@ -29,7 +29,7 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
     if (_gradlePropertiesFile.existsSync()) {
       final String contents = await _gradlePropertiesFile.readAsString();
 
-      // Skip migration if Built-in Kotlin flag already exists
+      // Skip migration if the Built-in Kotlin flag already exists
       if (contents.contains(_builtInKotlinRegex)) {
         logger.printTrace(
           'The developer has already configured the Built-In Kotlin flag, skipping migration.',
