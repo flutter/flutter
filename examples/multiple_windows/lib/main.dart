@@ -40,12 +40,12 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
     delegate: MainControllerWindowDelegate(),
   );
   final WindowSettings settings = WindowSettings();
-  late final WindowManager windowManager;
+  late final KeyedWindowManager windowManager;
 
   @override
   void initState() {
     super.initState();
-    windowManager = WindowManager(
+    windowManager = KeyedWindowManager(
       initialWindows: <KeyedWindow>[
         KeyedWindow(
           isMainWindow: true,
@@ -66,9 +66,9 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
   Widget build(BuildContext context) {
     final Widget mainWindowWidget = RegularWindow(
       controller: controller,
-      child: MaterialApp(home: MainWindow()),
+      child: MaterialApp(home: MainWindow(controller: controller)),
     );
-    return WindowManagerAccessor(
+    return KeyedWindowManagerAccessor(
       windowManager: windowManager,
       child: WindowSettingsAccessor(
         windowSettings: settings,
@@ -76,12 +76,10 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
           listenable: windowManager,
           builder: (BuildContext context, Widget? child) {
             final List<Widget> childViews = <Widget>[mainWindowWidget];
-            for (final KeyedWindow window in windowManager.windows) {
-              // This check renders windows that are not nested below another window as
-              // a child window (e.g. a popup as a child of another window) in addition
-              // to the main window, which is special as it is the one that is currently
-              // being rendered.
-              if (window.parent == null && !window.isMainWindow) {
+            for (final KeyedWindow window in windowManager.getWindows(
+              parent: null,
+            )) {
+              if (!window.isMainWindow) {
                 childViews.add(
                   WindowContent(
                     controller: window.controller,

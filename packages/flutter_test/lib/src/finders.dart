@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -27,6 +28,26 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
+
+/// Returns true if [renderObject] is equal to [target] or is an ancestor of
+/// [target] in the render tree.
+///
+/// This is useful for hit testing because some render objects (like
+/// [RenderTransform]) don't add themselves to the hit test path but instead
+/// just transform the hit test point and pass it to their children.
+bool isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget target) {
+  if (target == renderObject) {
+    return true;
+  }
+  if (target is RenderObject) {
+    for (RenderObject? current = target.parent; current != null; current = current.parent) {
+      if (current == renderObject) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 /// The `CandidateType` of finders that search for and filter substrings,
 /// within static text rendered by [RenderParagraph]s.
@@ -374,20 +395,22 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
-      // In cases where Tooltip.excludeFromSemantics is true, Tooltip provides
-      // no semantics tooltip to RawTooltip, so its message must be checked
-      // directly.
-      if (widget is Tooltip && (widget.excludeFromSemantics ?? false)) {
-        return (message is RegExp
-            ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                  (widget.richMessage != null &&
-                      message.hasMatch(widget.richMessage!.toPlainText())))
-            : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+      // Compare RawTooltip's semantics tooltip with the given message.
+      // However, Tooltip's message needs to be checked directly if:
+      // 1. Tooltip.excludeFromSemantics is true, since in this case Tooltip
+      //    provides no semantics tooltip to the underlying RawTooltip.
+      // 2. Tooltip.message and Tooltip.richMessage are empty, since in this
+      //    case no RawTooltip is created.
+      if (widget is Tooltip) {
+        final String tooltipMessage = widget.message ?? widget.richMessage!.toPlainText();
+        if ((widget.excludeFromSemantics ?? false) || tooltipMessage.isEmpty) {
+          return message is RegExp ? message.hasMatch(tooltipMessage) : tooltipMessage == message;
+        }
       }
       return widget is RawTooltip &&
           (message is RegExp
               ? message.hasMatch(widget.semanticsTooltip ?? '')
-              : (widget.semanticsTooltip == message));
+              : widget.semanticsTooltip == message);
     }, skipOffstage: skipOffstage);
   }
 
@@ -1462,11 +1485,11 @@ class _HitTestableWidgetFinder extends ChainedFinder {
       final Offset absoluteOffset = object.localToGlobal(alignment.alongSize(object.size));
       final hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
-      for (final HitTestEntry entry in hitResult.path) {
-        if (entry.target == candidate.renderObject) {
-          yield candidate;
-          break;
-        }
+      final bool found = hitResult.path.any(
+        (HitTestEntry entry) => isRenderObjectAncestorOfTarget(object, entry.target),
+      );
+      if (found) {
+        yield candidate;
       }
     }
   }

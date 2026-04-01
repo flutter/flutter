@@ -146,6 +146,7 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
 
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   const auto& shaders = bundle->shaders;
+
   const auto* vertex = FindByName(shaders, "UnlitVertex");
   const auto* fragment = FindByName(shaders, "UnlitFragment");
   ASSERT_NE(vertex, nullptr);

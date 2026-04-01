@@ -43,45 +43,47 @@ class SemanticButton extends SemanticRole {
 ///
 /// See also [ClickDebouncer].
 class Tappable extends SemanticBehavior {
-  Tappable(super.semanticsObject, super.owner) {
-    _clickListener = createDomEventListener((DomEvent click) {
-      PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
-    });
-    owner.element.addEventListener('click', _clickListener);
-  }
+  Tappable(super.semanticsObject, super.owner);
 
   @override
-  bool get shouldAcceptPointerEvents => true;
+  bool get shouldAcceptPointerEvents => _isListening;
 
   DomEventListener? _clickListener;
   bool _isListening = false;
 
   @override
   void update() {
-    final bool wasListening = _isListening;
-    _isListening =
+    final bool shouldListen =
         semanticsObject.enabledState() != EnabledState.disabled && semanticsObject.isTappable;
-    if (wasListening != _isListening) {
-      _updateAttribute();
+
+    if (_isListening == shouldListen) {
+      return;
+    }
+
+    if (shouldListen) {
+      _clickListener = createDomEventListener((DomEvent click) {
+        PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
+      });
+      owner.element.addEventListener('click', _clickListener);
+      owner.element.setAttribute('flt-tappable', '');
+      _isListening = true;
+    } else {
+      _cleanUp();
     }
   }
 
-  void _updateAttribute() {
-    // The `flt-tappable` attribute marks the element for the ClickDebouncer to
-    // to know that it should debounce click events on this element. The
-    // contract is that the element that has this attribute is also the element
-    // that receives pointer and "click" events.
-    if (_isListening) {
-      owner.element.setAttribute('flt-tappable', '');
-    } else {
-      owner.element.removeAttribute('flt-tappable');
-    }
+  void _cleanUp() {
+    owner.element.removeEventListener('click', _clickListener);
+    owner.element.removeAttribute('flt-tappable');
+    _clickListener = null;
+    _isListening = false;
   }
 
   @override
   void dispose() {
-    owner.removeEventListener('click', _clickListener);
-    _clickListener = null;
+    if (_isListening) {
+      _cleanUp();
+    }
     super.dispose();
   }
 }

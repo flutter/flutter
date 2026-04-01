@@ -35,16 +35,16 @@ class _StepStyleExampleState extends State<StepStyleExample> {
     color: Colors.white,
     connectorColor: Colors.red,
     indexStyle: const TextStyle(color: Colors.black, fontSize: 20),
-    border: Border.all(width: 2),
+    border: .all(width: 2),
   );
 
   @override
   Widget build(BuildContext context) {
     return Stepper(
-      type: StepperType.horizontal,
+      type: .horizontal,
       stepIconHeight: 48,
       stepIconWidth: 48,
-      stepIconMargin: EdgeInsets.zero,
+      stepIconMargin: .zero,
       steps: <Step>[
         Step(
           title: const SizedBox.shrink(),
@@ -77,7 +77,7 @@ class _StepStyleExampleState extends State<StepStyleExample> {
             StepStyle(
               color: Colors.white,
               indexStyle: const TextStyle(color: Colors.black, fontSize: 20),
-              border: Border.all(width: 2),
+              border: .all(width: 2),
             ),
           ),
         ),

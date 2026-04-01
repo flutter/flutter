@@ -4,7 +4,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,9 +23,8 @@ void main() {
       CupertinoApp(
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
               onSelectedItemChanged: (_) {},
@@ -60,9 +58,8 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: SizedBox(
-          height: 300.0,
-          width: 300.0,
+        home: SizedBox.square(
+          dimension: 300.0,
           child: CupertinoPicker(
             itemExtent: 50.0,
             onSelectedItemChanged: (_) {},
@@ -111,9 +108,8 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: SizedBox(
-          height: 300.0,
-          width: 300.0,
+        home: SizedBox.square(
+          dimension: 300.0,
           child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 50.0,
@@ -202,9 +198,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              height: 300.0,
-              width: 300.0,
+            child: SizedBox.square(
+              dimension: 300.0,
               child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
@@ -237,9 +232,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               backgroundColor: const CupertinoDynamicColor.withBrightness(
                 color: Color(
@@ -267,9 +261,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               backgroundColor: const CupertinoDynamicColor.withBrightness(
                 color: Color(0xFF123456),
@@ -297,9 +290,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
               onSelectedItemChanged: (int i) {},
@@ -322,9 +314,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
               onSelectedItemChanged: (int i) {},
@@ -697,17 +688,14 @@ void main() {
     );
   });
 
-  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
-  // https://github.com/flutter/flutter/issues/177028
-  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('Picker adapts to CupertinoApp dark mode', (WidgetTester tester) async {
     Widget buildCupertinoPicker(Brightness brightness) {
-      return MaterialApp(
-        theme: ThemeData(brightness: brightness),
+      return CupertinoApp(
+        theme: CupertinoThemeData(brightness: brightness),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
               onSelectedItemChanged: (_) {},
@@ -723,14 +711,20 @@ void main() {
     // CupertinoPicker with light theme.
     await tester.pumpWidget(buildCupertinoPicker(Brightness.light));
     RenderParagraph paragraph = tester.renderObject(find.text('1'));
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedLight = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoPicker)),
+    );
+    expect(paragraph.text.style!.color, expectedLight);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
 
     // CupertinoPicker with dark theme.
     await tester.pumpWidget(buildCupertinoPicker(Brightness.dark));
     paragraph = tester.renderObject(find.text('1'));
-    expect(paragraph.text.style!.color, CupertinoColors.label);
+    final Color expectedDark = CupertinoColors.label.resolveFrom(
+      tester.element(find.byType(CupertinoPicker)),
+    );
+    expect(paragraph.text.style!.color, expectedDark);
     // Text style should not return unresolved color.
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
@@ -821,9 +815,8 @@ void main() {
                         onTap: () {
                           tappedChildren.add(index);
                         },
-                        child: SizedBox(
-                          width: 55,
-                          height: 55,
+                        child: SizedBox.square(
+                          dimension: 55,
                           child: CustomPaint(
                             painter: TestCallbackPainter(
                               onPaint: () {

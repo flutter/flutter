@@ -83,8 +83,6 @@ class AnalyzeOnce extends AnalyzeBase {
       );
 
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
-
         errors.addAll(fileErrors.errors);
       }
 

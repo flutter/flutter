@@ -726,6 +726,56 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
+    test('TextInputClient onFocusReceived method is called', () async {
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
+      final TextInputConnection connection = TextInput.attach(client, configuration);
+
+      expect(connection.attached, isTrue);
+      expect(client.latestMethodCall, isEmpty);
+
+      connection.connectionClosedReceived();
+
+      expect(connection.attached, isFalse);
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send refocu message to re-establish the connection.
+      final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1],
+        'method': 'TextInputClient.onFocusReceived',
+      });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes2,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'onFocusReceived');
+    });
+
+    test('TextInputClient onFocusReceived method is called even if already connected', () async {
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
+      final TextInputConnection connection = TextInput.attach(client, configuration);
+
+      expect(connection.attached, isTrue);
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send onFocusReceived message to re-establish the connection.
+      final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1],
+        'method': 'TextInputClient.onFocusReceived',
+      });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes2,
+        (ByteData? _) {},
+      );
+
+      expect(connection.attached, isTrue);
+      expect(client.latestMethodCall, 'onFocusReceived');
+    });
+
     test('TextInputClient insertContent method is called', () async {
       final client = FakeTextInputClient(TextEditingValue.empty);
       const configuration = TextInputConfiguration();
@@ -1352,14 +1402,10 @@ void main() {
       expect(sentList[0][5], TextDirection.rtl.index); // direction
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setSelectionRects');
 
-      connection.setStyle(
-        fontFamily: null,
-        fontSize: null,
-        fontWeight: null,
-        textDirection: TextDirection.ltr,
-        textAlign: TextAlign.left,
+      connection.updateStyle(
+        const TextInputStyle(textDirection: TextDirection.ltr, textAlign: TextAlign.left),
       );
-      expectedMethodCalls.add('setStyle');
+      expectedMethodCalls.add('updateStyle');
       expect(control.methodCalls, expectedMethodCalls);
       expect(fakeTextChannel.outgoingCalls.length, 9);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setStyle');
@@ -1465,6 +1511,91 @@ void main() {
     expect(diagnosticsNodes.first.name, 'title');
     expect(diagnosticsNodes.first.value, title);
   });
+
+  group('TextInputStyle', () {
+    const style1 = TextInputStyle(
+      fontFamily: 'Roboto',
+      fontSize: 16.0,
+      fontWeight: FontWeight.bold,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+      letterSpacing: 1.2,
+      wordSpacing: 2.0,
+      lineHeight: 24.0,
+    );
+    const style2 = TextInputStyle(
+      fontFamily: 'Roboto',
+      fontSize: 16.0,
+      fontWeight: FontWeight.bold,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+      letterSpacing: 1.2,
+      wordSpacing: 2.0,
+      lineHeight: 24.0,
+    );
+    const style3 = TextInputStyle(
+      fontFamily: 'Other',
+      fontSize: 16.0,
+      fontWeight: FontWeight.bold,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+
+    test('equality operator works correctly', () {
+      expect(style1, equals(style2));
+      expect(style1.hashCode, equals(style2.hashCode));
+      expect(style1, isNot(equals(style3)));
+
+      expect(style1.fontFamily, equals(style2.fontFamily));
+      expect(style1.fontSize, equals(style2.fontSize));
+      expect(style1.fontWeight, equals(style2.fontWeight));
+      expect(style1.textDirection, equals(style2.textDirection));
+      expect(style1.textAlign, equals(style2.textAlign));
+      expect(style1.letterSpacing, equals(style2.letterSpacing));
+      expect(style1.wordSpacing, equals(style2.wordSpacing));
+      expect(style1.lineHeight, equals(style2.lineHeight));
+    });
+
+    test('hashCode works correctly', () {
+      expect(style1.hashCode, equals(style2.hashCode));
+
+      expect(style1.fontFamily.hashCode, equals(style2.fontFamily.hashCode));
+      expect(style1.fontSize.hashCode, equals(style2.fontSize.hashCode));
+      expect(style1.fontWeight.hashCode, equals(style2.fontWeight.hashCode));
+      expect(style1.textDirection.hashCode, equals(style2.textDirection.hashCode));
+      expect(style1.textAlign.hashCode, equals(style2.textAlign.hashCode));
+      expect(style1.letterSpacing.hashCode, equals(style2.letterSpacing.hashCode));
+      expect(style1.wordSpacing.hashCode, equals(style2.wordSpacing.hashCode));
+      expect(style1.lineHeight.hashCode, equals(style2.lineHeight.hashCode));
+    });
+
+    test('toJson produces expected map', () {
+      final Map<String, dynamic> json = style1.toJson();
+
+      expect(json['fontFamily'], 'Roboto');
+      expect(json['fontSize'], 16.0);
+      expect(json['fontWeightIndex'], FontWeight.bold.index);
+      expect(json['textAlignIndex'], TextAlign.center.index);
+      expect(json['textDirectionIndex'], TextDirection.ltr.index);
+      expect(json['letterSpacing'], 1.2);
+      expect(json['wordSpacing'], 2.0);
+      expect(json['lineHeight'], 24.0);
+    });
+
+    test('toJson handles null values', () {
+      const style = TextInputStyle(textDirection: TextDirection.ltr, textAlign: TextAlign.left);
+      final Map<String, dynamic> json = style.toJson();
+
+      expect(json['fontFamily'], isNull);
+      expect(json['fontSize'], isNull);
+      expect(json['fontWeightIndex'], isNull);
+      expect(json['letterSpacing'], isNull);
+      expect(json['wordSpacing'], isNull);
+      expect(json['lineHeight'], isNull);
+      expect(json['textAlignIndex'], TextAlign.left.index);
+      expect(json['textDirectionIndex'], TextDirection.ltr.index);
+    });
+  });
 }
 
 class FakeTextInputClient with TextInputClient {
@@ -1543,6 +1674,12 @@ class FakeTextInputClient with TextInputClient {
     latestMethodCall = 'performSelector';
     performedSelectors.add(selectorName);
   }
+
+  @override
+  bool onFocusReceived() {
+    latestMethodCall = 'onFocusReceived';
+    return true;
+  }
 }
 
 class FakeTextInputControl with TextInputControl {
@@ -1610,6 +1747,11 @@ class FakeTextInputControl with TextInputControl {
     required TextAlign textAlign,
   }) {
     methodCalls.add('setStyle');
+  }
+
+  @override
+  void updateStyle(TextInputStyle style) {
+    methodCalls.add('updateStyle');
   }
 
   @override

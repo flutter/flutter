@@ -57,12 +57,6 @@ struct Paint {
     bool respect_ctm = true;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
-        std::shared_ptr<ColorSourceContents> color_source_contents,
-        const flutter::DlColorFilter* color_filter,
-        bool invert_colors,
-        FillRectGeometry* rect_geom) const;
-
-    std::shared_ptr<FilterContents> CreateMaskBlur(
         std::shared_ptr<TextureContents> texture_contents,
         FillRectGeometry* rect_geom) const;
 
@@ -70,6 +64,13 @@ struct Paint {
         const FilterInput::Ref& input,
         bool is_solid_color,
         const Matrix& ctm) const;
+
+    std::shared_ptr<Contents> CreateMaskBlur(
+        const Paint& paint,
+        const Geometry* geometry,
+        std::shared_ptr<ColorSourceContents> contents,
+        bool needs_color_filter,
+        FillRectGeometry* out_geom) const;
   };
 
   Color color = Color::Black();
@@ -106,7 +107,8 @@ struct Paint {
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;
 
-  std::shared_ptr<ColorSourceContents> CreateContents() const;
+  std::shared_ptr<ColorSourceContents> CreateContents(
+      const Geometry* geometry) const;
 
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
                                          bool is_solid_color,

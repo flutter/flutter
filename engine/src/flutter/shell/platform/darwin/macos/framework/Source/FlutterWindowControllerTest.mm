@@ -8,6 +8,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterWindowController.h"
 #import "flutter/testing/testing.h"
 #import "third_party/googletest/googletest/include/gtest/gtest.h"
@@ -79,6 +80,50 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
     EXPECT_EQ(size.width, 800);
     EXPECT_EQ(size.height, 600);
   }
+}
+
+TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
+  IsolateScope isolate_scope(isolate());
+  FlutterEngine* engine = GetFlutterEngine();
+  int64_t engineId = reinterpret_cast<int64_t>(engine);
+
+  auto request = FlutterWindowCreationRequest{
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  int64_t parentViewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  EXPECT_EQ(parentViewId, 1);
+
+  auto position_callback = [](const FlutterWindowSize& child_size,
+                              const FlutterWindowRect& parent_rect,
+                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
+    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  request = FlutterWindowCreationRequest{
+      .has_constraints = true,
+      .constraints{
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .parent_view_id = parentViewId,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+      .on_get_window_position = position_callback,
+  };
+
+  const int64_t tooltipViewId =
+      InternalFlutter_WindowController_CreateTooltipWindow(engineId, &request);
+  EXPECT_NE(tooltipViewId, 0);
 }
 
 TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
@@ -201,5 +246,106 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   InternalFlutter_Window_Minimize(windowHandle);
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, false);
   EXPECT_EQ(window.miniaturized, YES);
+}
+
+TEST_F(FlutterWindowControllerTest, ClosesAllWindowsOnEngineRestart) {
+  FlutterWindowCreationRequest request{
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  FlutterEngine* engine = GetFlutterEngine();
+  int64_t engine_id = reinterpret_cast<int64_t>(engine);
+
+  IsolateScope isolate_scope(isolate());
+
+  // Create multiple windows
+  int64_t handle1 = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
+  int64_t handle2 = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
+  int64_t handle3 = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
+
+  // Verify windows are created
+  FlutterViewController* viewController1 = [engine viewControllerForIdentifier:handle1];
+  FlutterViewController* viewController2 = [engine viewControllerForIdentifier:handle2];
+  FlutterViewController* viewController3 = [engine viewControllerForIdentifier:handle3];
+  EXPECT_NE(viewController1, nil);
+  EXPECT_NE(viewController2, nil);
+  EXPECT_NE(viewController3, nil);
+
+  // Close all windows on engine restart
+  [engine engineCallbackOnPreEngineRestart];
+
+  // Verify all windows are closed and view controllers are disposed
+  viewController1 = [engine viewControllerForIdentifier:handle1];
+  viewController2 = [engine viewControllerForIdentifier:handle2];
+  viewController3 = [engine viewControllerForIdentifier:handle3];
+  EXPECT_EQ(viewController1, nil);
+  EXPECT_EQ(viewController2, nil);
+  EXPECT_EQ(viewController3, nil);
+};
+
+TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraints) {
+  IsolateScope isolate_scope(isolate());
+  FlutterEngine* engine = GetFlutterEngine();
+  int64_t engineId = reinterpret_cast<int64_t>(engine);
+
+  // Create parent window.
+  auto parentRequest = FlutterWindowCreationRequest{
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  int64_t parentViewId =
+      InternalFlutter_WindowController_CreateRegularWindow(engineId, &parentRequest);
+  EXPECT_EQ(parentViewId, 1);
+
+  auto position_callback = [](const FlutterWindowSize& child_size,
+                              const FlutterWindowRect& parent_rect,
+                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
+    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
+    rect->left = parent_rect.left;
+    rect->top = parent_rect.top;
+    rect->width = 500;
+    rect->height = 400;
+    return rect;
+  };
+
+  auto tooltipRequest = FlutterWindowCreationRequest{
+      .has_constraints = true,
+      .constraints{
+          .min_width = 0,
+          .min_height = 0,
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .parent_view_id = parentViewId,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+      .on_get_window_position = position_callback,
+  };
+
+  const int64_t tooltipViewId =
+      InternalFlutter_WindowController_CreateTooltipWindow(engineId, &tooltipRequest);
+  EXPECT_NE(tooltipViewId, 0);
+
+  FlutterViewController* viewController = [engine viewControllerForIdentifier:tooltipViewId];
+  FlutterView* flutterView = viewController.flutterView;
+
+  EXPECT_EQ(flutterView.sizedToContents, YES);
+
+  CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
+
+  [flutterView.sizingDelegate viewDidUpdateContents:flutterView withSize:NSMakeSize(1000, 1000)];
+
+  // The constraints from request are 1000x1000, but additional constraints came from the positioner
+  // and must be respected.
+  CGSize maxSize = flutterView.maximumContentSize;
+  EXPECT_LE(maxSize.width, 500);
+  EXPECT_LE(maxSize.height, 400);
 }
 }  // namespace flutter::testing

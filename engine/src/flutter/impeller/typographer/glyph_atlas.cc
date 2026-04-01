@@ -100,6 +100,15 @@ FontGlyphAtlas* GlyphAtlas::GetOrCreateFontGlyphAtlas(
   return &iter->second;
 }
 
+const FontGlyphAtlas* GlyphAtlas::GetFontGlyphAtlas(
+    const ScaledFont& scaled_font) const {
+  const auto& found = font_atlas_map_.find(scaled_font);
+  if (found == font_atlas_map_.end()) {
+    return nullptr;
+  }
+  return &found->second;
+}
+
 size_t GlyphAtlas::GetGlyphCount() const {
   return std::accumulate(font_atlas_map_.begin(), font_atlas_map_.end(), 0,
                          [](const int a, const auto& b) {

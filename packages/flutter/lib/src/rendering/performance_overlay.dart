@@ -66,6 +66,13 @@ class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
   RenderPerformanceOverlay({int optionsMask = 0}) : _optionsMask = optionsMask;
 
+  static final int _rasterizerMask =
+      (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) |
+      (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index);
+  static final int _engineMask =
+      (1 << PerformanceOverlayOption.displayEngineStatistics.index) |
+      (1 << PerformanceOverlayOption.visualizeEngineStatistics.index);
+
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.
   int get optionsMask => _optionsMask;
@@ -97,12 +104,10 @@ class RenderPerformanceOverlay extends RenderBox {
   double get _intrinsicHeight {
     const kDefaultGraphHeight = 80.0;
     var result = 0.0;
-    if ((optionsMask | (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index) > 0)) {
+    if ((optionsMask & _rasterizerMask) != 0) {
       result += kDefaultGraphHeight;
     }
-    if ((optionsMask | (1 << PerformanceOverlayOption.displayEngineStatistics.index) > 0) ||
-        (optionsMask | (1 << PerformanceOverlayOption.visualizeEngineStatistics.index) > 0)) {
+    if ((optionsMask & _engineMask) != 0) {
       result += kDefaultGraphHeight;
     }
     return result;

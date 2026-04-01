@@ -3,33 +3,35 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    const Widget widget = TickerMode(enabled: false, child: CircularProgressIndicator());
+    const Widget widget = TickerMode(enabled: false, child: _TickerWidget());
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(const TickerMode(enabled: true, child: CircularProgressIndicator()));
+    await tester.pumpWidget(const TickerMode(enabled: true, child: _TickerWidget()));
 
     expect(tester.binding.transientCallbackCount, 1);
 
-    await tester.pumpWidget(const TickerMode(enabled: false, child: CircularProgressIndicator()));
+    await tester.pumpWidget(const TickerMode(enabled: false, child: _TickerWidget()));
 
     expect(tester.binding.transientCallbackCount, 0);
   });
 
   testWidgets('Navigation with TickerMode', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const LinearProgressIndicator(),
+      TestWidgetsApp(
+        home: const _TickerWidget(),
         routes: <String, WidgetBuilder>{'/test': (BuildContext context) => const Text('hello')},
       ),
     );
@@ -333,6 +335,35 @@ class _SingleTickerCreateMultipleTickerState extends State<_SingleTickerCreateMu
     super.initState();
     AnimationController(duration: const Duration(seconds: 5), vsync: this);
     AnimationController(duration: const Duration(seconds: 6), vsync: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+/// A widget that creates and runs a ticker for testing purposes.
+class _TickerWidget extends StatefulWidget {
+  const _TickerWidget();
+
+  @override
+  State<_TickerWidget> createState() => _TickerWidgetState();
+}
+
+class _TickerWidgetState extends State<_TickerWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

@@ -78,7 +78,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Displays a Flutter UI on an Android device.
@@ -115,13 +114,11 @@ public class FlutterView extends FrameLayout
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
-  // Boolean that gates if view port metrics should be sent.  When the
-  // engine informs the embedder of a resize, it is not necessary to send
-  // the viewport metrics back to the engine.
-  private AtomicBoolean shouldSendViewportMetrics = new AtomicBoolean(true);
-
   // Maximum size allowed for a content sized view.
   @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
+
+  // Flag to enable content sizing.
+  @VisibleForTesting boolean isContentSizingEnabled = false;
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -207,7 +204,6 @@ public class FlutterView extends FrameLayout
               surfaceParams.width = width;
             }
             if (changed) {
-              shouldSendViewportMetrics.set(false);
               flutterEngineView.setLayoutParams(surfaceParams);
             }
           } else {
@@ -424,6 +420,8 @@ public class FlutterView extends FrameLayout
       addView(flutterImageView);
     }
 
+    isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
+
     // FlutterView needs to be focusable so that the InputMethodManager can interact with it.
     setFocusable(true);
     setFocusableInTouchMode(true);
@@ -521,7 +519,7 @@ public class FlutterView extends FrameLayout
     viewportMetrics.width = width;
     viewportMetrics.height = height;
 
-    if (heightMode == MeasureSpec.UNSPECIFIED) {
+    if (isContentSizingEnabled && heightMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minHeight = 0;
       viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
@@ -529,7 +527,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.minHeight = viewportMetrics.height;
       viewportMetrics.maxHeight = viewportMetrics.height;
     }
-    if (widthMode == MeasureSpec.UNSPECIFIED) {
+    if (isContentSizingEnabled && widthMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minWidth = 0;
       viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
@@ -538,13 +536,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.maxWidth = viewportMetrics.width;
     }
 
-    if (shouldSendViewportMetrics.compareAndSet(false, true)) {
-      Log.d(
-          TAG,
-          "Resize was in response to the engine resizing the view. Not sending viewport metrics.");
-    } else {
-      sendViewportMetricsToFlutter();
-    }
+    sendViewportMetricsToFlutter();
   }
 
   @VisibleForTesting()
@@ -1186,7 +1178,9 @@ public class FlutterView extends FrameLayout
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    }
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -1333,7 +1327,9 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    }
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
@@ -1589,12 +1585,20 @@ public class FlutterView extends FrameLayout
   @Override
   public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
     super.onProvideAutofillVirtualStructure(structure, flags);
-    textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    }
   }
 
   @Override
   public void autofill(@NonNull SparseArray<AutofillValue> values) {
-    textInputPlugin.autofill(values);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.autofill(values);
+    }
   }
 
   @Override

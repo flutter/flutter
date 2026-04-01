@@ -405,9 +405,9 @@ void main() {
       expect(
         swiftPackageManager,
         allOf(<Matcher>[
-          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('master', available: true, enabledByDefault: true),
           _onChannelIs('stable', available: true, enabledByDefault: false),
-          _onChannelIs('beta', available: true, enabledByDefault: false),
+          _onChannelIs('beta', available: true, enabledByDefault: true),
         ]),
       );
     });

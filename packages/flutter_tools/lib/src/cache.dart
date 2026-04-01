@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' show max;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
@@ -24,13 +25,15 @@ import 'base/io.dart'
         HttpClientResponse,
         HttpHeaders,
         HttpStatus,
-        SocketException;
+        SocketException,
+        Stdio;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
+import 'base/utils.dart' show getElapsedAsSeconds, getSizeAsPlatformMB;
 import 'convert.dart';
 import 'features.dart';
 
@@ -152,11 +155,13 @@ class Cache {
     required FileSystem fileSystem,
     required Platform platform,
     required OperatingSystemUtils osUtils,
+    Stdio? stdio,
   }) : _rootOverride = rootOverride,
        _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
        _osUtils = osUtils,
+       _stdio = stdio,
        _net = Net(logger: logger, platform: platform),
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _artifacts = artifacts ?? <ArtifactSet>[];
@@ -172,6 +177,7 @@ class Cache {
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
+    Stdio? stdio,
     required ProcessManager processManager,
   }) {
     if (rootOverride?.fileSystem != null &&
@@ -192,6 +198,7 @@ class Cache {
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
+      stdio: stdio,
       osUtils: OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: logger,
@@ -207,6 +214,7 @@ class Cache {
   final OperatingSystemUtils _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
+  final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
 
@@ -228,6 +236,7 @@ class Cache {
       platform: _platform,
       httpClient: HttpClient(),
       allowedBaseUrls: <String>[storageBaseUrl, realmlessStorageBaseUrl, cipdBaseUrl],
+      stdio: _stdio,
     );
   }
 
@@ -744,11 +753,12 @@ class Cache {
     return true;
   }
 
-  /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
-    if (!_lockEnabled) {
-      return;
-    }
+  /// Returns the list of artifacts that need updating from [requiredArtifacts].
+  Future<List<ArtifactSet>> _collectArtifactsToUpdate(
+    Set<DevelopmentArtifact> requiredArtifacts,
+  ) async {
+    final artifactsToUpdate = <ArtifactSet>[];
+
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
@@ -757,6 +767,41 @@ class Cache {
       if (await artifact.isUpToDate(_fileSystem)) {
         continue;
       }
+      artifactsToUpdate.add(artifact);
+    }
+    return artifactsToUpdate;
+  }
+
+  /// Update the cache to contain all `requiredArtifacts`.
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+    if (!_lockEnabled) {
+      return;
+    }
+
+    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
+
+    if (artifactsToUpdate.isEmpty) {
+      return;
+    }
+
+    // Download artifacts and display progress
+    final int total = artifactsToUpdate.length;
+    for (var i = 0; i < artifactsToUpdate.length; i++) {
+      final ArtifactSet artifact = artifactsToUpdate[i];
+      final int current = i + 1;
+
+      // Set progress context for the artifact updater
+      _artifactUpdater.setProgressContext(
+        artifactIndex: current,
+        artifactTotal: total,
+        downloadTotal: artifact.downloadCount,
+      );
+
+      // For artifacts containing multiple downloads, print the artifact name
+      if (artifact.downloadCount > 1) {
+        _logger.printStatus('[$current/$total] ${artifact.displayName}');
+      }
+
       try {
         await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
       } on SocketException catch (e) {
@@ -771,6 +816,7 @@ class Cache {
         rethrow;
       }
     }
+    _artifactUpdater.resetProgressContext();
   }
 
   Future<bool> areRemoteArtifactsAvailable({
@@ -828,10 +874,20 @@ abstract class ArtifactSet {
   /// The canonical name of the artifact.
   String get name;
 
+  /// A prettier display name.
+  ///
+  /// Defaults to the canonical name.
+  String get displayName => name;
+
   /// The name of the stamp file.
   ///
   /// Defaults to the same as the artifact name.
   String get stampName => name;
+
+  /// The number of individual downloads this artifact will perform.
+  ///
+  /// Defaults to 1.
+  int get downloadCount => 1;
 }
 
 /// An artifact set managed by the cache.
@@ -930,6 +986,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   @override
   String? get version => cache.engineRevision;
 
+  @override
+  int get downloadCount => getPackageDirs().length + getBinaryDirs().length;
+
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
 
@@ -975,11 +1034,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
-      await artifactUpdater.downloadZipArchive(
-        'Downloading package $pkgName...',
-        Uri.parse('$url$pkgName.zip'),
-        pkgDir,
-      );
+      await artifactUpdater.downloadZipArchive(pkgName, Uri.parse('$url$pkgName.zip'), pkgDir);
     }
 
     for (final List<String> toolsDir in getBinaryDirs()) {
@@ -987,13 +1042,8 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String urlPath = toolsDir[1];
       final Directory dir = fileSystem.directory(fileSystem.path.join(location.path, cacheDir));
 
-      // Avoid printing things like 'Downloading linux-x64 tools...' multiple times.
       final String friendlyName = urlPath.replaceAll('/artifacts.zip', '').replaceAll('.zip', '');
-      await artifactUpdater.downloadZipArchive(
-        'Downloading $friendlyName tools...',
-        Uri.parse(url + urlPath),
-        dir,
-      );
+      await artifactUpdater.downloadZipArchive(friendlyName, Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir, operatingSystemUtils);
     }
@@ -1062,13 +1112,15 @@ class ArtifactUpdater {
     required HttpClient httpClient,
     required Platform platform,
     required List<String> allowedBaseUrls,
+    Stdio? stdio,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _httpClient = httpClient,
        _logger = logger,
        _fileSystem = fileSystem,
        _tempStorage = tempStorage,
        _platform = platform,
-       _allowedBaseUrls = allowedBaseUrls;
+       _allowedBaseUrls = allowedBaseUrls,
+       _stdio = stdio;
 
   /// The number of times the artifact updater will repeat the artifact download loop.
   static const _kRetryCount = 2;
@@ -1087,12 +1139,52 @@ class ArtifactUpdater {
   /// non-compliant URL is made.
   final List<String> _allowedBaseUrls;
 
+  final Stdio? _stdio;
+
   /// Keep track of the files we've downloaded for this execution so we
   /// can delete them after completion. We don't delete them right after
   /// extraction in case [ArtifactSet.update] is interrupted, so we can
   /// restart without starting from scratch.
   @visibleForTesting
   final downloadedFiles = <File>[];
+
+  // Progress tracking state for download output formatting.
+  int _artifactIndex = 0;
+  int _artifactTotal = 0;
+  int _downloadIndex = 0;
+  int _downloadTotal = 0;
+
+  /// Sets the progress context for artifact downloads.
+  ///
+  /// This is called before each artifact update to enable progress output.
+  /// The [downloadIndex] can be used to set the current download index
+  /// within an artifact (1-based).
+  void setProgressContext({
+    required int artifactIndex,
+    required int artifactTotal,
+    required int downloadTotal,
+    int downloadIndex = 0,
+  }) {
+    _artifactIndex = artifactIndex;
+    _artifactTotal = artifactTotal;
+    _downloadIndex = downloadIndex;
+    _downloadTotal = downloadTotal;
+  }
+
+  void resetProgressContext() {
+    _artifactIndex = 0;
+    _artifactTotal = 0;
+    _downloadIndex = 0;
+    _downloadTotal = 0;
+  }
+
+  /// Creates the appropriate display for the current terminal capabilities.
+  _DownloadDisplay _createDisplay(String statusMessage) {
+    if (_stdio != null && _logger.supportsColor) {
+      return _ProgressBarDisplay(stdio: _stdio, statusMessage: statusMessage);
+    }
+    return _SpinnerDisplay(logger: _logger, statusMessage: statusMessage);
+  }
 
   /// These filenames, should they exist after extracting an archive, should be deleted.
   static const _denylistedBasenames = <String>{
@@ -1112,47 +1204,64 @@ class ArtifactUpdater {
   }
 
   /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, _operatingSystemUtils.unzip);
+  Future<void> downloadZipArchive(String artifactName, Uri url, Directory location) {
+    return _downloadArchive(artifactName, url, location, _operatingSystemUtils.unzip);
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, _operatingSystemUtils.unpack);
+  Future<void> downloadZippedTarball(String artifactName, Uri url, Directory location) {
+    return _downloadArchive(artifactName, url, location, _operatingSystemUtils.unpack);
   }
 
   /// Download a file from the given [url] and copy it to [location].
-  Future<void> downloadFile(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, (File file, Directory dir) {
+  Future<void> downloadFile(String artifactName, Uri url, Directory location) {
+    return _downloadArchive(artifactName, url, location, (File file, Directory dir) {
       file.copySync(dir.childFile(file.basename).path);
     });
   }
 
+  /// Formats a download message with progress context.
+  @visibleForTesting
+  String formatProgressMessage(String artifactName) {
+    final int displayIndex = _downloadIndex + 1;
+    if (_downloadTotal == 1) {
+      return '[$_artifactIndex/$_artifactTotal] $artifactName';
+    } else {
+      final prefix = displayIndex == _downloadTotal ? '└─' : '├─';
+      return '  $prefix [$displayIndex/$_downloadTotal] $artifactName';
+    }
+  }
+
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(
-    String message,
+    String artifactName,
     Uri url,
     Directory location,
     void Function(File, Directory) extractor,
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
-    Status status;
     int retries = _kRetryCount;
+    final String formattedMessage = formatProgressMessage(artifactName);
+    _downloadIndex++;
 
     while (retries > 0) {
-      status = _logger.startProgress(message);
+      final _DownloadDisplay display = _createDisplay(formattedMessage);
+      display.start();
+
       try {
         _ensureExists(tempFile.parent);
         if (tempFile.existsSync()) {
           tempFile.deleteSync();
         }
-        await _download(url, tempFile, status);
+        await _download(url, tempFile, display);
 
         if (!tempFile.existsSync()) {
           throw Exception('Did not find downloaded file ${tempFile.path}');
         }
+        display.finish();
       } on Exception catch (err) {
+        display.cancel();
         _logger.printTrace(err.toString());
         retries -= 1;
         if (retries == 0) {
@@ -1162,6 +1271,7 @@ class ArtifactUpdater {
         }
         continue;
       } on ArgumentError catch (error) {
+        display.cancel();
         final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
         if (overrideUrl != null && url.toString().contains(overrideUrl)) {
           _logger.printError(error.toString());
@@ -1176,8 +1286,6 @@ class ArtifactUpdater {
         // This error should not be hit if there was not a storage URL override, allow the
         // tool to crash.
         rethrow;
-      } finally {
-        status.stop();
       }
 
       /// Unzipping multiple file into a directory will not remove old files
@@ -1229,7 +1337,7 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(Uri url, File file, Status status) async {
+  Future<void> _download(Uri url, File file, _DownloadDisplay display) async {
     final bool isAllowedUrl = _allowedBaseUrls.any(
       (String baseUrl) => url.toString().startsWith(baseUrl),
     );
@@ -1243,12 +1351,12 @@ class ArtifactUpdater {
 
     // In production, issue a warning but allow the download to proceed.
     if (!isAllowedUrl) {
-      status.pause();
+      display.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
         'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=01_activation.yml',
       );
-      status.resume();
+      display.resume();
     }
 
     final HttpClientRequest request = await _httpClient.getUrl(url);
@@ -1265,10 +1373,12 @@ class ArtifactUpdater {
       digests = StreamController<Digest>();
       inputSink = md5.startChunkedConversion(digests);
     }
+    final int contentLength = response.contentLength;
     final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
     await response.forEach((List<int> chunk) {
       inputSink?.add(chunk);
       randomAccessFile.writeFromSync(chunk);
+      display.onChunk(chunk.length, contentLength);
     });
     randomAccessFile.closeSync();
     if (inputSink != null) {
@@ -1398,3 +1508,257 @@ final _flattenNameSubstitutions = <int, List<int>>{
   r'|'.codeUnitAt(0): '@pip@'.codeUnits,
   r'?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
+
+/// Abstraction for displaying download progress.
+///
+/// Two implementations exist:
+/// - [_ProgressBarDisplay]: ANSI progress bar for terminals with color support.
+/// - [_SpinnerDisplay]: Spinner-based display via [Logger.startProgress].
+abstract class _DownloadDisplay {
+  /// Called when the download begins.
+  void start();
+
+  /// Called when a chunk of data is received.
+  void onChunk(int chunkSize, int contentLength);
+
+  /// Called when the download completes successfully.
+  void finish();
+
+  /// Called when the download is cancelled or fails.
+  void cancel();
+
+  /// Pauses the display (e.g. when another status message needs the terminal).
+  void pause();
+
+  /// Resumes the display after a pause.
+  void resume();
+}
+
+/// Displays an ANSI progress bar with speed, ETA, and percentage.
+class _ProgressBarDisplay extends _DownloadDisplay {
+  _ProgressBarDisplay({required Stdio stdio, required this.statusMessage}) : _stdio = stdio;
+
+  static const int _maxTerminalWidth = 80;
+  static const int _progressUpdateIntervalMs = 100;
+
+  final Stdio _stdio;
+  final String statusMessage;
+  final DownloadProgress _progress = DownloadProgress();
+  final Stopwatch _stopwatch = Stopwatch();
+  int _lastUpdateMs = 0;
+
+  int get _terminalWidth =>
+      (_stdio.terminalColumns ?? _maxTerminalWidth).clamp(0, _maxTerminalWidth);
+
+  @override
+  void start() {
+    _stopwatch.start();
+    _stdio.stdoutWrite('$statusMessage\n');
+  }
+
+  @override
+  void onChunk(int chunkSize, int contentLength) {
+    if (_progress.totalBytes < 0) {
+      _progress.totalBytes = contentLength;
+    }
+    _progress.addBytesReceived(chunkSize);
+    final int currentMs = _stopwatch.elapsedMilliseconds;
+    if (currentMs >= _lastUpdateMs + _progressUpdateIntervalMs) {
+      _lastUpdateMs = currentMs;
+      final String line = _progress.formatProgressLine(
+        elapsed: _stopwatch.elapsed,
+        terminalWidth: _terminalWidth,
+      );
+      _stdio.stdoutWrite('${AnsiTerminal.clearAndReturnCode}$line');
+    }
+  }
+
+  void _stopAndClear() {
+    _stopwatch.stop();
+    _stdio.stdoutWrite(
+      '${AnsiTerminal.clearAndReturnCode}'
+      '${AnsiTerminal.cursorUpLineCode}'
+      '${AnsiTerminal.clearAndReturnCode}',
+    );
+  }
+
+  @override
+  void finish() {
+    _stopAndClear();
+    final String summary = _progress.formatCompletionSummary(_stopwatch.elapsed);
+    final int padding = _terminalWidth - statusMessage.length - summary.length;
+    final line = '$statusMessage${' ' * max(1, padding)}$summary';
+    _stdio.stdoutWrite('$line\n');
+  }
+
+  @override
+  void cancel() {
+    _stopAndClear();
+  }
+
+  @override
+  void pause() {}
+
+  @override
+  void resume() {}
+}
+
+/// Displays a spinner via [Logger.startProgress].
+class _SpinnerDisplay extends _DownloadDisplay {
+  _SpinnerDisplay({required Logger logger, required String statusMessage})
+    : _logger = logger,
+      _statusMessage = statusMessage;
+
+  final Logger _logger;
+  final String _statusMessage;
+  Status? _status;
+
+  @override
+  void start() {
+    _status = _logger.startProgress(_statusMessage);
+  }
+
+  @override
+  void onChunk(int chunkSize, int contentLength) {}
+
+  @override
+  void finish() {
+    _status?.stop();
+  }
+
+  @override
+  void cancel() {
+    _status?.stop();
+  }
+
+  @override
+  void pause() {
+    _status?.pause();
+  }
+
+  @override
+  void resume() {
+    _status?.resume();
+  }
+}
+
+/// Tracks download progress and provides formatted display strings.
+@visibleForTesting
+class DownloadProgress {
+  /// Total expected bytes, or -1 if unknown.
+  int totalBytes = -1;
+
+  int _bytesReceived = 0;
+  int get bytesReceived => _bytesReceived;
+
+  void addBytesReceived(int bytes) {
+    _bytesReceived += bytes;
+  }
+
+  bool get hasKnownSize => totalBytes > 0;
+
+  double get fractionReceived => hasKnownSize ? (_bytesReceived / totalBytes).clamp(0.0, 1.0) : 0.0;
+
+  int get percentReceived => (fractionReceived * 100).round();
+
+  /// Download speed in bytes per second.
+  double speedBytesPerSecond(Duration elapsed) {
+    if (elapsed.inMilliseconds == 0) {
+      return 0;
+    }
+    return _bytesReceived * 1000 / elapsed.inMilliseconds;
+  }
+
+  /// Estimated time remaining.
+  Duration? timeRemaining(Duration elapsed) {
+    final double speed = speedBytesPerSecond(elapsed);
+    if (!hasKnownSize || speed == 0) {
+      return null;
+    }
+    final int totalRemainingBytes = totalBytes - _bytesReceived;
+    return Duration(milliseconds: (totalRemainingBytes * 1000 / speed).round());
+  }
+
+  static const _subBlocks = ['▏', '▎', '▍', '▌', '▋', '▊', '▉'];
+
+  /// Renders a progress bar with sub-character precision.
+  ///
+  /// Uses 1/8-block characters for a smooth fill edge.
+  String renderProgressBar(int width) {
+    if (!hasKnownSize || width <= 0) {
+      return '';
+    }
+    final int totalEighths = (fractionReceived * width * 8).round();
+    final int fullBlocks = totalEighths ~/ 8;
+    final int remainder = totalEighths % 8;
+    final int emptyBlocks = width - fullBlocks - 1;
+    final String filled = '█' * fullBlocks;
+    final String partial = remainder > 0 ? _subBlocks[remainder - 1] : ' ';
+    final String empty = ' ' * emptyBlocks;
+    return '$filled$partial$empty';
+  }
+
+  /// Formats download speed as a human-readable string.
+  String formatSpeed(Duration elapsed) {
+    return '${getSizeAsPlatformMB(speedBytesPerSecond(elapsed).round())}/s';
+  }
+
+  /// Formats bytes received and total.
+  String formatBytes() {
+    if (hasKnownSize) {
+      return '${getSizeAsPlatformMB(_bytesReceived)}'
+          '/${getSizeAsPlatformMB(totalBytes)}';
+    }
+    return getSizeAsPlatformMB(_bytesReceived);
+  }
+
+  /// Formats estimated time remaining.
+  String formatRemaining(Duration elapsed) {
+    final Duration? rem = timeRemaining(elapsed);
+    if (rem == null) {
+      return '';
+    }
+    return 'ETA ${getElapsedAsSeconds(rem)}';
+  }
+
+  /// Formats the full progress line for terminal display.
+  String formatProgressLine({required Duration elapsed, required int terminalWidth}) {
+    final String indent = ' ' * 5;
+    final percentReceivedStr = hasKnownSize ? '${percentReceived.toString().padLeft(3)}%' : '';
+    final String bytesStr = formatBytes();
+    final String speedStr = formatSpeed(elapsed);
+    final String etaStr = formatRemaining(elapsed);
+
+    final parts = <String>[percentReceivedStr, bytesStr, speedStr, etaStr];
+    final String info = parts.where((String s) => s.isNotEmpty).join('  ');
+
+    // The progress bar is 28 characters wide and terminated on either side by
+    // thin vertical lines which take up another 2 characters. 28 characters was
+    // chosen empirically to make the progress bar take up enough space to look
+    // good while leaving enough space for the detailed info under "normal"
+    // conditions (artifact size <1GB, download speed >1MB/s).
+    const barInner = 28;
+    const int barTotal = barInner + 2; // ▕ + bar + ▏
+    final String line;
+
+    // Only show the progress bar if we have enough room to show it along with
+    // the info, otherwise just show the info right-aligned.
+    if (hasKnownSize && terminalWidth >= indent.length + barTotal + info.length) {
+      final String bar = renderProgressBar(barInner);
+      final int padding = terminalWidth - indent.length - barTotal - info.length;
+      line = '$indent▕$bar▏${' ' * padding}$info';
+    } else {
+      final int padding = terminalWidth - indent.length - info.length;
+      final unclipped = '$indent${' ' * max(0, padding)}$info';
+      line = unclipped.length <= terminalWidth ? unclipped : unclipped.substring(0, terminalWidth);
+    }
+    return line;
+  }
+
+  /// Formats the completion summary like `(21.1MB in 5.0s)`.
+  String formatCompletionSummary(Duration elapsed) {
+    final String size = getSizeAsPlatformMB(_bytesReceived);
+    final String time = getElapsedAsSeconds(elapsed);
+    return '($size in $time)';
+  }
+}

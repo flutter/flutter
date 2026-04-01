@@ -24,7 +24,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 
-#include "fake_flatland_types.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/scenic/fake_flatland_types.h"
 
 namespace flutter_runner::testing {
 

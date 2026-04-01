@@ -15,8 +15,8 @@ import 'package:flutter/services.dart';
 // late BuildContext context;
 // late Set<WidgetState> states;
 
-/// This class allows [WidgetState] enum values to be combined
-/// using [WidgetStateOperators].
+/// This mixin allows [WidgetState] enum values to be combined
+/// using the `&`, `|`, and `~` operators.
 ///
 /// A [Map] with [WidgetStatesConstraint] objects as keys can be used
 /// in the [WidgetStateProperty.fromMap] constructor to resolve to
@@ -24,7 +24,7 @@ import 'package:flutter/services.dart';
 /// the current set of states.
 ///
 /// {@macro flutter.widgets.WidgetStateMap}
-abstract interface class WidgetStatesConstraint {
+mixin WidgetStatesConstraint {
   /// Whether the provided [states] satisfy this object's criteria.
   ///
   /// If the constraint is a single [WidgetState] object,
@@ -44,10 +44,19 @@ abstract interface class WidgetStatesConstraint {
   /// ```
   /// {@endtemplate}
   bool isSatisfiedBy(Set<WidgetState> states);
+
+  /// Combines two [WidgetStatesConstraint] values using logical "and".
+  WidgetStatesConstraint operator &(WidgetStatesConstraint other) => _WidgetStateAnd(this, other);
+
+  /// Combines two [WidgetStatesConstraint] values using logical "or".
+  WidgetStatesConstraint operator |(WidgetStatesConstraint other) => _WidgetStateOr(this, other);
+
+  /// Takes a [WidgetStatesConstraint] and applies the logical "not".
+  WidgetStatesConstraint operator ~() => _WidgetStateNot(this);
 }
 
 @immutable
-sealed class _WidgetStateCombo implements WidgetStatesConstraint {
+sealed class _WidgetStateCombo with WidgetStatesConstraint {
   const _WidgetStateCombo(this.first, this.second);
 
   final WidgetStatesConstraint first;
@@ -95,7 +104,7 @@ class _WidgetStateOr extends _WidgetStateCombo {
 }
 
 @immutable
-class _WidgetStateNot implements WidgetStatesConstraint {
+class _WidgetStateNot with WidgetStatesConstraint {
   const _WidgetStateNot(this.value);
 
   final WidgetStatesConstraint value;
@@ -115,29 +124,8 @@ class _WidgetStateNot implements WidgetStatesConstraint {
   String toString() => '~$value';
 }
 
-/// These operators can be used inside a [WidgetStateMap] to combine states
-/// and find a match.
-///
-/// Example:
-///
-/// {@macro flutter.widgets.WidgetStatesConstraint.isSatisfiedBy}
-///
-/// Since enums can't extend other classes, [WidgetState] instead `implements`
-/// the [WidgetStatesConstraint] interface. This `extension` ensures that
-/// the operators can be used without being directly inherited.
-extension WidgetStateOperators on WidgetStatesConstraint {
-  /// Combines two [WidgetStatesConstraint] values using logical "and".
-  WidgetStatesConstraint operator &(WidgetStatesConstraint other) => _WidgetStateAnd(this, other);
-
-  /// Combines two [WidgetStatesConstraint] values using logical "or".
-  WidgetStatesConstraint operator |(WidgetStatesConstraint other) => _WidgetStateOr(this, other);
-
-  /// Takes a [WidgetStatesConstraint] and applies the logical "not".
-  WidgetStatesConstraint operator ~() => _WidgetStateNot(this);
-}
-
 // A private class, used to create [WidgetState.any].
-class _AnyWidgetStates implements WidgetStatesConstraint {
+class _AnyWidgetStates with WidgetStatesConstraint {
   const _AnyWidgetStates();
 
   @override
@@ -177,7 +165,7 @@ class _AnyWidgetStates implements WidgetStatesConstraint {
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
 ///    a [TextStyle] or a [WidgetStateProperty<TextStyle>].
 /// {@endtemplate}
-enum WidgetState implements WidgetStatesConstraint {
+enum WidgetState with WidgetStatesConstraint {
   /// The state when the user drags their mouse cursor over the given widget.
   ///
   /// See: https://material.io/design/interaction/states.html#hover.
