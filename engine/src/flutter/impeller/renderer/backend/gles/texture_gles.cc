@@ -142,7 +142,6 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
   if (!GetTextureDescriptor().IsValid()) {
-    VALIDATION_LOG << "Invalid texture descriptor.";
     return;
   }
   // Ensure the texture doesn't exceed device capabilities.

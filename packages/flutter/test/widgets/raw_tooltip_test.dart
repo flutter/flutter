@@ -2781,6 +2781,23 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
+  testWidgets('RawTooltip does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (_, _) => const Text('Y'),
+            child: const Text('X'),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawTooltip)), Size.zero);
+  });
+
   testWidgets('RawTooltip debugFillProperties with preferBelow false and verticalOffset', (
     WidgetTester tester,
   ) async {
