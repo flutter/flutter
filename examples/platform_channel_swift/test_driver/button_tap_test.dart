@@ -13,7 +13,9 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      driver.close();
+    });
 
     test('tap on the button, verify result', () async {
       final SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');

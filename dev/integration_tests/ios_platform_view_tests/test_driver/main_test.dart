@@ -14,7 +14,7 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() => driver.close());
 
     test('Merge thread to create and remove platform views should not crash', () async {
       // Start pushing in a page with platform view, merge threads.

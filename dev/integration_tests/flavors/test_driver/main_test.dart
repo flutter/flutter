@@ -19,6 +19,8 @@ void main() {
       expect(flavor, 'paid');
     }, timeout: Timeout.none);
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      driver.close();
+    });
   });
 }
