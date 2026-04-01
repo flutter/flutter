@@ -89,6 +89,13 @@ import 'tooltip_visibility.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.3.dart **
 /// {@end-tool}
 ///
+/// {@tool snippet}
+/// This example shows how a [Tooltip] can be used in a multi-window
+/// scenario, where the app runs within a [RegularWindow].
+///
+/// ** See code in examples/api/lib/material/tooltip/tooltip.4.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>
