@@ -267,9 +267,9 @@ class _PosixUtils extends OperatingSystemUtils {
     if (_hostPlatform == null) {
       final abi = Abi.current();
       _hostPlatform = switch (abi) {
-        Abi.linuxArm64 || Abi.fuchsiaArm64 || Abi.androidArm64 => HostPlatform.linux_arm64,
-        Abi.linuxX64 || Abi.fuchsiaX64 || Abi.androidX64 => HostPlatform.linux_x64,
-        Abi.linuxRiscv64 || Abi.fuchsiaRiscv64 || Abi.androidRiscv64 => HostPlatform.linux_riscv64,
+        Abi.linuxArm64 => HostPlatform.linux_arm64,
+        Abi.linuxX64 => HostPlatform.linux_x64,
+        Abi.linuxRiscv64 => HostPlatform.linux_riscv64,
         _ => throwToolExit('Host platform and architecture "$abi" not supported for Posix.'),
       };
     }
