@@ -632,4 +632,19 @@ void main() {
     expect(renderButtonBar.debugNeedsLayout, isTrue);
     expect(() => renderButtonBar.constraints, throwsStateError);
   });
+
+  testWidgets('ButtonBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ButtonBar(
+              children: <Widget>[TextButton(onPressed: () {}, child: const Text('X'))],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ButtonBar)), Size.zero);
+  });
 }
