@@ -15,7 +15,9 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      driver.close();
+    });
 
     test('measure', () async {
       final Timeline timeline = await driver.traceAction(() async {

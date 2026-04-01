@@ -12,7 +12,9 @@ Future<void> main() async {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll(driver.close);
+  tearDownAll(() {
+    driver.close();
+  });
 
   // Run `run_release_test.sh` to also test release engine deferred components code. This
   // drive test runs as debug and thus only tests framework side deferred components handling.

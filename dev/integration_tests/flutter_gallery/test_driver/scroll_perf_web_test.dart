@@ -13,7 +13,9 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      driver.close();
+    });
 
     test('measure', () async {
       await driver.tap(find.text('Material'));
