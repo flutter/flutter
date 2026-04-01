@@ -704,6 +704,7 @@ class FlutterPluginSwiftDependencies {
       ErrorHandlingFileSystem.deleteIfExists(pluginsDirectory, recursive: true);
     } on FileSystemException catch (e, stackTrace) {
       // Delete may fail due to Xcode writing hidden files to the directory at the same time.
+      // The delete succeeds in deleting the non-XCode generated contents so it's okay to ignore.
       _utils.logger.printTrace('Failed to delete ${pluginsDirectory.path}: $e\n$stackTrace');
     }
     try {
