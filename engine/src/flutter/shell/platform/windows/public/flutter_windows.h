@@ -60,6 +60,17 @@ typedef enum {
   RunOnSeparateThread,
 } FlutterDesktopUIThreadPolicy;
 
+// Configures the accessibility implementation used by Flutter.
+typedef enum {
+  // Default value. Flutter will automatically select the best available
+  // implementation.
+  DefaultAccessibilityMode,
+  // Use the IAccessible implementation.
+  IAccessibleMode,
+  // Use the experimental IAccessibleEx implementation.
+  IAccessibleExMode,
+} FlutterDesktopAccessibilityMode;
+
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
@@ -98,6 +109,10 @@ typedef struct {
 
   // Policy for the thread that runs UI isolate.
   FlutterDesktopUIThreadPolicy ui_thread_policy;
+
+  // The accessibility mode.
+  // This can be used to enable the experimental IAccessibleEx implementation.
+  FlutterDesktopAccessibilityMode accessibility_mode;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
