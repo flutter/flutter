@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
-import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_and_new_dsl_migration.dart';
+import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
@@ -239,7 +239,7 @@ tasks.register("clean", Delete) {
       });
     });
 
-    group('Migrate to opt-out of Built-in Kotlin and new DSL', () {
+    group('Migrate to opt-out of Built-in Kotlin', () {
       late MemoryFileSystem memoryFileSystem;
       late BufferLogger bufferLogger;
       late FakeAndroidProject project;
@@ -254,81 +254,62 @@ tasks.register("clean", Delete) {
         topLevelGradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
       });
 
-      testUsingContext('skip if Built-in Kotlin flag and new DSL exists', () async {
+      testUsingContext('skip if Built-in Kotlin flag exists', () async {
         topLevelGradlePropertiesFile.writeAsStringSync('''
-android.newDsl=false
 android.builtInKotlin=false
 ''');
-        expect(
-          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
-          isTrue,
-        );
         expect(
           topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
           isTrue,
         );
-        final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
-          project,
-          bufferLogger,
-        );
+        final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
 
         await androidProjectMigration.migrate();
         expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
         expect(
           bufferLogger.traceText,
           contains(
-            'The developer has already configured the Built-In Kotlin and new DSL flags, skipping migration.',
+            'The developer has already configured the Built-In Kotlin flag, skipping migration.',
           ),
         );
       });
 
       testUsingContext(
-        'skip if Built-in Kotlin flag and new DSL uses valid nonstandard separators and exists',
+        'skip if Built-in Kotlin flag uses a nonstandard separator and exists',
         () async {
           topLevelGradlePropertiesFile.writeAsStringSync('''
-android.newDsl   :   false
 android.builtInKotlin    false
 ''');
-          expect(
-            topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl   :   false'),
-            isTrue,
-          );
           expect(
             topLevelGradlePropertiesFile.readAsStringSync().contains(
               'android.builtInKotlin    false',
             ),
             isTrue,
           );
-          final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
-            project,
-            bufferLogger,
-          );
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
 
           await androidProjectMigration.migrate();
           expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
           expect(
             bufferLogger.traceText,
             contains(
-              'The developer has already configured the Built-In Kotlin and new DSL flags, skipping migration.',
+              'The developer has already configured the Built-In Kotlin flag, skipping migration.',
             ),
           );
         },
       );
 
       testUsingContext(
-        'create gradle.properties file and add flag if gradle.properties file is missing',
+        'create gradle.properties file and add the Built-in Kotlin flag if gradle.properties file is missing',
         () async {
-          final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
-            project,
-            bufferLogger,
-          );
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
           expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
           await androidProjectMigration.migrate();
           expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
           expect(
             bufferLogger.traceText,
             contains(
-              'The gradle.properties file was not found. Creating it with disabled Built-in Kotlin and disabled new DSL flag.',
+              'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
             ),
           );
           expect(
@@ -342,17 +323,13 @@ android.builtInKotlin    false
         'add Built-in Kotlin flag if it does not exist in gradle.properties file',
         () async {
           topLevelGradlePropertiesFile.writeAsStringSync('''
-android.newDsl=false
 ''');
           expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
           expect(
             topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
             isFalse,
           );
-          final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
-            project,
-            bufferLogger,
-          );
+          final androidProjectMigration = DisableBuiltInKotlinMigration(project, bufferLogger);
 
           await androidProjectMigration.migrate();
 
@@ -364,90 +341,13 @@ android.newDsl=false
           final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
           expect(
             fileContents.contains(
-              '# The builtInKotlin flag was added automatically by Flutter migrator',
+              '# This builtInKotlin flag was added automatically by Flutter migrator',
             ),
             isTrue,
           );
           expect(fileContents.contains('android.builtInKotlin=false'), isTrue);
-          expect(
-            fileContents.contains('# The newDsl flag was added automatically by Flutter migrator'),
-            isFalse,
-          );
         },
       );
-
-      testUsingContext('add new DSL flag if it does not exist in gradle.properties file', () async {
-        topLevelGradlePropertiesFile.writeAsStringSync('''
-android.builtInKotlin=false
-''');
-        expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-        expect(
-          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
-          isFalse,
-        );
-        final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
-          project,
-          bufferLogger,
-        );
-
-        await androidProjectMigration.migrate();
-
-        expect(bufferLogger.traceText, contains('Migrating to disable new DSL by default.'));
-
-        final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
-        expect(
-          fileContents.contains('# The newDsl flag was added automatically by Flutter migrator'),
-          isTrue,
-        );
-        expect(fileContents.contains('android.newDsl=false'), isTrue);
-        expect(
-          fileContents.contains(
-            '# The builtInKotlin flag was added automatically by Flutter migrator',
-          ),
-          isFalse,
-        );
-      });
-
-      testUsingContext('add both flags if they do not exist in gradle.properties file', () async {
-        topLevelGradlePropertiesFile.writeAsStringSync('''
-''');
-        expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
-        expect(
-          topLevelGradlePropertiesFile.readAsStringSync().contains('android.builtInKotlin=false'),
-          isFalse,
-        );
-        expect(
-          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
-          isFalse,
-        );
-        final androidProjectMigration = DisableBuiltInKotlinAndNewDslMigration(
-          project,
-          bufferLogger,
-        );
-
-        await androidProjectMigration.migrate();
-
-        expect(
-          bufferLogger.traceText,
-          contains('Migrating to disable Built-in Kotlin by default.'),
-        );
-
-        expect(bufferLogger.traceText, contains('Migrating to disable new DSL by default.'));
-
-        final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
-        expect(
-          fileContents.contains('# The newDsl flag was added automatically by Flutter migrator'),
-          isTrue,
-        );
-        expect(fileContents.contains('android.newDsl=false'), isTrue);
-        expect(
-          fileContents.contains(
-            '# The builtInKotlin flag was added automatically by Flutter migrator',
-          ),
-          isTrue,
-        );
-        expect(fileContents.contains('android.builtInKotlin=false'), isTrue);
-      });
     });
 
     group('migrate the gradle version to one that does not conflict with the '
