@@ -277,7 +277,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                       if (sk_image) {
                         image = DlImage::Make(sk_image);
                       }
-                      ui_task(image);
+                      ui_task(std::move(image));
                     });
               },
               SnapshotPixelFormat::kDontCare);
