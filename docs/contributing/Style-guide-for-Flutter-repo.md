@@ -794,7 +794,7 @@ Use `switch` with no `default` case if you are examining an enum, since the anal
 Avoid using `if` chains, `? ... : ...`, or, in general, any expressions involving enums.
 
 
-### Use explicit types and avoid `dynamic`
+### Prefer explicit types and avoid `dynamic`
 
 Avoid `dynamic` or `Object` in any case where you could figure out the
 actual type. Always specialize generic types where possible. Explicitly
