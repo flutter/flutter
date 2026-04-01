@@ -2568,29 +2568,24 @@ final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
 
-String _getFlutterLicense() {
-  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
-      '// Use of this source code is governed by a BSD-style license that can be\n'
-      '// found in the LICENSE file.\n'
-      '\n';
-}
+const String _kFlutterLicense =
+    '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+    '// Use of this source code is governed by a BSD-style license that can be\n'
+    '// found in the LICENSE file.\n'
+    '\n';
 
-String _getFlutterLicenseHtml() {
-  return '''
+const String _kFlutterLicenseHtml = '''
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 ''';
-}
 
 String _removeLicenseIfPresent(String fileContents) {
-  final String license = _getFlutterLicense();
-  if (fileContents.startsWith(license)) {
-    return fileContents.substring(license.length);
+  if (fileContents.startsWith(_kFlutterLicense)) {
+    return fileContents.substring(_kFlutterLicense.length);
   }
-  final String licenseHtml = _getFlutterLicenseHtml();
-  if (fileContents.contains(licenseHtml)) {
-    return fileContents.replaceFirst(licenseHtml, '');
+  if (fileContents.contains(_kFlutterLicenseHtml)) {
+    return fileContents.replaceFirst(_kFlutterLicenseHtml, '');
   }
   return fileContents;
 }
