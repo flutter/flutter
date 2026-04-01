@@ -14,7 +14,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../dart/analysis.dart';
-import '../globals.dart';
 import '../project.dart';
 import 'analytics.dart';
 import 'dependency_graph.dart';
@@ -42,10 +41,12 @@ class LspPreviewDetector {
     required this.terminal,
     required this.suppressAnalytics,
     this.analysisServerFactory,
+    required this.artifacts,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
     @visibleForTesting this.onPackageConfigChangeDetected,
   }) : projectRoot = project.directory;
 
+  final Artifacts artifacts;
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
   final FlutterProject project;
@@ -133,7 +134,7 @@ class LspPreviewDetector {
 
   Future<AnalysisServer> launchAnalysisServer() async {
     final analysisServer = AnalysisServer(
-      artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
+      artifacts.getArtifactPath(Artifact.engineDartSdkPath),
       [projectRoot.path],
       fileSystem: fs,
       logger: logger,

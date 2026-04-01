@@ -4,9 +4,9 @@
 
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
+
+import '../convert.dart';
 
 /// The set of widget previews defined in a script of an analyzed Flutter
 /// project.
@@ -28,7 +28,11 @@ class FlutterWidgetPreviews {
   final List<Uri> scriptUris;
 
   @override
-  int get hashCode => Object.hash(namespaces, previews, scriptUris);
+  int get hashCode => Object.hash(
+    const DeepCollectionEquality().hash(namespaces),
+    const DeepCollectionEquality().hash(previews),
+    const DeepCollectionEquality().hash(scriptUris),
+  );
 
   @override
   bool operator ==(Object other) {
@@ -74,7 +78,7 @@ class FlutterWidgetPreviews {
 /// A representation of a widget preview declaration containing all information
 /// needed to import the preview into the widget previewer.
 class FlutterWidgetPreviewDetails {
-  FlutterWidgetPreviewDetails({
+  const FlutterWidgetPreviewDetails({
     required this.functionName,
     required this.hasError,
     required this.dependencyHasErrors,
@@ -135,6 +139,7 @@ class FlutterWidgetPreviewDetails {
   int get hashCode => Object.hash(
     functionName,
     hasError,
+    dependencyHasErrors,
     isBuilder,
     isMultiPreview,
     packageName,
@@ -150,6 +155,7 @@ class FlutterWidgetPreviewDetails {
         other.runtimeType == FlutterWidgetPreviewDetails &&
         functionName == other.functionName &&
         hasError == other.hasError &&
+        dependencyHasErrors == other.dependencyHasErrors &&
         isBuilder == other.isBuilder &&
         isMultiPreview == other.isMultiPreview &&
         packageName == other.packageName &&
@@ -163,6 +169,7 @@ class FlutterWidgetPreviewDetails {
     final result = <String, Object?>{};
     result['functionName'] = functionName;
     result['hasError'] = hasError;
+    result['dependencyHasErrors'] = dependencyHasErrors;
     result['isBuilder'] = isBuilder;
     result['isMultiPreview'] = isMultiPreview;
     result['packageName'] = packageName;
@@ -213,7 +220,7 @@ class FlutterWidgetPreviewDetails {
 }
 
 class Position {
-  Position({required this.character, required this.line});
+  const Position({required this.character, required this.line});
 
   /// Character offset on a line in a document (zero-based).
   ///

@@ -49,8 +49,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   Uri? get dtdUri => Uri.parse('ws://localhost:1234');
 
   @override
-  bool get lspServiceAvailable => _lspServiceAvailable;
-  bool _lspServiceAvailable = false;
+  bool get lspServiceAvailable => false;
 
   @override
   final String widgetPreviewService = WidgetPreviewDtdServices.kWidgetPreviewServiceRoot;
@@ -475,7 +474,7 @@ List<_i1.WidgetPreview> previews() => [
                 isBuilder: false,
                 isMultiPreview: false,
                 packageName: 'flutter_project',
-                position: Position(character: 1, line: 4),
+                position: const Position(character: 1, line: 4),
                 previewAnnotation: "const _i4.Preview(name: 'preview')",
                 scriptUri: Uri.file('/user/flutter_project/lib/foo.dart'),
                 libraryUri: Uri.parse('package:flutter_project/foo.dart'),
@@ -531,7 +530,7 @@ List<_i1.WidgetPreview> previews() => [
                 isBuilder: false,
                 isMultiPreview: false,
                 packageName: 'flutter_project',
-                position: Position(character: 1, line: 4),
+                position: const Position(character: 1, line: 4),
                 previewAnnotation: "const _i4.Preview(name: 'preview')",
                 scriptUri: Uri.file('/user/flutter_project/lib/foo.dart'),
                 libraryUri: Uri.parse('package:flutter_project/foo.dart'),
@@ -591,7 +590,7 @@ List<_i1.WidgetPreview> previews() => [
                 isBuilder: false,
                 isMultiPreview: false,
                 packageName: 'flutter_project',
-                position: Position(character: 1, line: 4),
+                position: const Position(character: 1, line: 4),
                 previewAnnotation: "const _i4.Preview(name: 'preview')",
                 scriptUri: Uri.file('/user/flutter_project/lib/foo.dart'),
                 libraryUri: Uri.parse('package:flutter_project/foo.dart'),

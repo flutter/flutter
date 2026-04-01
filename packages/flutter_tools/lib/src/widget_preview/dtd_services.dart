@@ -39,7 +39,6 @@ class WidgetPreviewDtdServices {
     required this.shutdownHooks,
     required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
-    required this.onWidgetPreviewUpdateReceived,
     required this.project,
     required this.addUuidToServiceName,
   }) {
@@ -122,8 +121,6 @@ class WidgetPreviewDtdServices {
   /// scaffold.
   final VoidCallback onHotRestartPreviewerRequest;
 
-  final void Function(FlutterWidgetPreviews) onWidgetPreviewUpdateReceived;
-
   /// The widget_preview_scaffold project.
   final FlutterProject project;
 
@@ -168,7 +165,6 @@ class WidgetPreviewDtdServices {
         registeredServices.clientServices.any((service) => service.name == kLspStream);
 
     await _registerServices();
-    await _listenToStreams();
     logger.printTrace('Connected to DTD and registered services.');
   }
 
@@ -301,17 +297,6 @@ class WidgetPreviewDtdServices {
     ]);
   }
 
-  Future<void> _listenToStreams() async {
-    final DartToolingDaemon dtd = _dtd!;
-    dtd.onEvent(kLspStream).listen(_onLspEvent);
-    await dtd.streamListen(kLspStream);
-  }
-
-  Future<void> _onLspEvent(DTDEvent event) async {
-    if (event case DTDEvent(kind: kLspWidgetPreviewEventKind, data: final data)) {
-      onWidgetPreviewUpdateReceived(FlutterWidgetPreviews.fromJson(data));
-    }
-  }
 
   Future<Map<String, Object?>> _hotRestart(Parameters params) async {
     onHotRestartPreviewerRequest();

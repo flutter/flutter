@@ -183,11 +183,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         hide: !verbose,
       )
       ..addFlag(
-        'legacy-preview-detection',
+        kLegacyPreviewDetection,
         help:
             'Enables the legacy preview detection mechanism that uses '
             'package:analyzer instead of LSP.',
-        hide: true,
+        hide: !verbose,
       );
   }
 
@@ -198,6 +198,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const kWebServer = 'web-server';
   static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
   static const kDisableDtdServiceUuid = 'disable-dtd-service-uuid';
+  static const kLegacyPreviewDetection = 'legacy-preview-detection';
 
   @visibleForTesting
   static const kBrowserNotFoundErrorMessage =
@@ -270,13 +271,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     project: rootProject,
     logger: logger,
     fs: fs,
-    onChangeDetected: onWidgetPreviewUpdateReceived,
+    onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
     dtd: _dtdService,
     processManager: processManager,
     terminal: terminal,
     suppressAnalytics: !analytics.okToSend,
     analysisServerFactory: _analysisServerFactoryOverride,
+    artifacts: artifacts,
   );
 
   late final Future<AnalysisServer> Function()? _analysisServerFactoryOverride;
@@ -295,7 +297,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
-    onWidgetPreviewUpdateReceived: onWidgetPreviewUpdateReceived,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
     project: rootProject.widgetPreviewScaffoldProject,
     addUuidToServiceName: !boolArg(kDisableDtdServiceUuid),
@@ -448,7 +449,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     await _widgetPreviewApp?.restart(fullRestart: true);
   }
 
-  void onWidgetPreviewUpdateReceived(FlutterWidgetPreviews update) {
+  void onChangeDetected(FlutterWidgetPreviews update) {
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
     logger.printStatus('Triggering reload based on update to script: ${update.scriptUris}');
     _widgetPreviewApp?.restart();
