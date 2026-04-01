@@ -15,7 +15,9 @@ void main() {
       await driver.waitUntilFirstFrameRasterized();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      driver.close();
+    });
 
     test('measure', () async {
       final Timeline timeline = await driver.traceAction(() async {

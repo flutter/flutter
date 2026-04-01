@@ -12,7 +12,9 @@ void main() {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll(driver.close);
+  tearDownAll(() async {
+    await driver.close();
+  });
 
   test('check that we are in normal mode', () async {
     expect(await driver.requestData('status'), 'log: paint');
