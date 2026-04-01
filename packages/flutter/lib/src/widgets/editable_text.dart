@@ -2848,21 +2848,6 @@ class EditableTextState extends State<EditableText>
     }
   }
 
-  Future<void> _pasteTextWithReporting(SelectionChangedCause cause) async {
-    try {
-      await pasteText(cause);
-    } catch (error, stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: error,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while pasting text to EditableText'),
-        ),
-      );
-    }
-  }
-
   /// Select the entire text value.
   @override
   void selectAll(SelectionChangedCause cause) {
@@ -3075,8 +3060,8 @@ class EditableTextState extends State<EditableText>
         ),
       if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
-          onPressed: () async {
-            await _pasteTextWithReporting(SelectionChangedCause.toolbar);
+          onPressed: () {
+            pasteText(SelectionChangedCause.toolbar);
           },
           type: ContextMenuButtonType.paste,
         ),
@@ -3183,9 +3168,7 @@ class EditableTextState extends State<EditableText>
             clipboardStatus: clipboardStatus.value,
             onCopy: copyEnabled ? () => copySelection(SelectionChangedCause.toolbar) : null,
             onCut: cutEnabled ? () => cutSelection(SelectionChangedCause.toolbar) : null,
-            onPaste: pasteEnabled
-                ? () => _pasteTextWithReporting(SelectionChangedCause.toolbar)
-                : null,
+            onPaste: pasteEnabled ? () => pasteText(SelectionChangedCause.toolbar) : null,
             onSelectAll: selectAllEnabled ? () => selectAll(SelectionChangedCause.toolbar) : null,
             onLookUp: lookUpEnabled ? () => lookUpSelection(SelectionChangedCause.toolbar) : null,
             onSearchWeb: searchWebEnabled
@@ -4078,6 +4061,15 @@ class EditableTextState extends State<EditableText>
       oldControl?.hide();
       newControl?.show();
     }
+  }
+
+  @override
+  bool onFocusReceived() {
+    if (mounted && !_hasFocus && widget.focusNode.canRequestFocus) {
+      widget.focusNode.requestFocus();
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -5273,9 +5265,9 @@ class EditableTextState extends State<EditableText>
                 ? pasteEnabled
                 : pasteEnabled && (widget.selectionControls?.canPaste(this) ?? false)) &&
             (clipboardStatus.value == ClipboardStatus.pasteable)
-        ? () async {
-            await controls?.handlePaste(this);
-            await _pasteTextWithReporting(SelectionChangedCause.toolbar);
+        ? () {
+            controls?.handlePaste(this);
+            pasteText(SelectionChangedCause.toolbar);
           }
         : null;
   }
@@ -6700,7 +6692,7 @@ class _PasteSelectionAction extends ContextAction<PasteTextIntent> {
       return;
     }
 
-    state._pasteTextWithReporting(intent.cause);
+    state.pasteText(intent.cause);
   }
 }
 
