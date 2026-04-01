@@ -999,8 +999,8 @@ class _RenderSnackBarLayout extends RenderBox
     // Overflow check
     var willOverflow = false;
     if (hasButtons && availableWidth > 0 && availableWidth < double.infinity) {
-      final double buttonsWidth = dryActionSize.width + dryCloseIconSize.width;
-      willOverflow = (buttonsWidth / availableWidth) > actionOverflowThreshold;
+      final double buttonsAndMarginsWidth = actionFootprint + iconFootprint;
+      willOverflow = (buttonsAndMarginsWidth / availableWidth) > actionOverflowThreshold;
     }
 
     // Calculate content sizes
