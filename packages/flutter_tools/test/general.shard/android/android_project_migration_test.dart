@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'package:flutter_tools/src/android/migrations/disable_new_dsl_migration.dart';
 import 'package:flutter_tools/src/android/migrations/disable_built_in_kotlin_migration.dart';
 import 'package:flutter_tools/src/android/migrations/min_sdk_version_migration.dart';
 import 'package:flutter_tools/src/android/migrations/multidex_removal_migration.dart';
@@ -346,6 +347,118 @@ android.builtInKotlin    false
             isTrue,
           );
           expect(fileContents.contains('android.builtInKotlin=false'), isTrue);
+        },
+      );
+    });
+
+
+    group('Migrate to opt-out of new DSL', () {
+      late MemoryFileSystem memoryFileSystem;
+      late BufferLogger bufferLogger;
+      late FakeAndroidProject project;
+      late File topLevelGradlePropertiesFile;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem.test();
+        bufferLogger = BufferLogger.test();
+        project = FakeAndroidProject(
+          root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
+        );
+        topLevelGradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
+      });
+
+      testUsingContext('skip if new DSL flag exists', () async {
+        topLevelGradlePropertiesFile.writeAsStringSync('''
+android.newDsl=false
+''');
+        expect(
+          topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
+          isTrue,
+        );
+        final androidProjectMigration = DisableNewDslMigration(project, bufferLogger);
+
+        await androidProjectMigration.migrate();
+        expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+        expect(
+          bufferLogger.traceText,
+          contains(
+            'The developer has already configured the new DSL flag, skipping migration.',
+          ),
+        );
+      });
+
+      testUsingContext(
+        'skip if new DSL flag uses a nonstandard separator and exists',
+            () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+android.newDsl  :  false
+''');
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains(
+              'android.newDsl  :  false',
+            ),
+            isTrue,
+          );
+          final androidProjectMigration = DisableNewDslMigration(project, bufferLogger);
+
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The developer has already configured the new DSL flag, skipping migration.',
+            ),
+          );
+        },
+      );
+
+      testUsingContext(
+        'create gradle.properties file and add the new DSL flag if gradle.properties file is missing',
+            () async {
+          final androidProjectMigration = DisableNewDslMigration(project, bufferLogger);
+          expect(topLevelGradlePropertiesFile.existsSync(), isFalse);
+          await androidProjectMigration.migrate();
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            bufferLogger.traceText,
+            contains(
+              'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
+            ),
+          );
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
+            isTrue,
+          );
+        },
+      );
+
+      testUsingContext(
+        'add new DSL flag if it does not exist in gradle.properties file',
+            () async {
+          topLevelGradlePropertiesFile.writeAsStringSync('''
+''');
+          expect(topLevelGradlePropertiesFile.existsSync(), isTrue);
+          expect(
+            topLevelGradlePropertiesFile.readAsStringSync().contains('android.newDsl=false'),
+            isFalse,
+          );
+          final androidProjectMigration = DisableNewDslMigration(project, bufferLogger);
+
+          await androidProjectMigration.migrate();
+
+          expect(
+            bufferLogger.traceText,
+            contains('Migrating to disable new DSL by default.'),
+          );
+
+          final String fileContents = topLevelGradlePropertiesFile.readAsStringSync();
+          expect(
+            fileContents.contains(
+              '# This newDsl flag was added automatically by Flutter migrator',
+            ),
+            isTrue,
+          );
+          expect(fileContents.contains('android.newDsl=false'), isTrue);
         },
       );
     });
