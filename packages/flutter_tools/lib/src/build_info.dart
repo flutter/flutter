@@ -951,13 +951,23 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.ios.name);
+String getIosBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  return localFilesystem.path.join(
+    getBuildDirectory(localConfig, localFilesystem),
+    FlutterDarwinPlatform.ios.name,
+  );
 }
 
 /// Returns the macOS build output directory.
-String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.macos.name);
+String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  return localFilesystem.path.join(
+    getBuildDirectory(localConfig, localFilesystem),
+    FlutterDarwinPlatform.macos.name,
+  );
 }
 
 /// Returns the web build output directory.

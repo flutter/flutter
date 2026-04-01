@@ -24,5 +24,7 @@ void main() {
     expect(bytes.sublist(0, 8), <int>[137, 80, 78, 71, 13, 10, 26, 10]);
   });
 
-  tearDownAll(driver.close);
+  tearDownAll(() async {
+    await driver.close();
+  });
 }
