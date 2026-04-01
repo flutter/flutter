@@ -1227,7 +1227,7 @@ Future<bool> _isPluginSwiftPackageOnly({
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
-  final List<Plugin> plugins = await project.plugins;
+  final List<Plugin> plugins = await project.getPlugins();
   final Plugin? matched = plugins
       .where(
         (Plugin plugin) =>
