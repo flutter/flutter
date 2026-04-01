@@ -1930,6 +1930,7 @@ flutter:
         ddsLauncherCallback =
             ({
               required Uri remoteVmServiceUri,
+              String appName = 'Fake App',
               Uri? serviceUri,
               bool enableAuthCodes = true,
               bool serveDevTools = false,
@@ -1999,6 +2000,7 @@ flutter:
         ddsLauncherCallback =
             ({
               required Uri remoteVmServiceUri,
+              String appName = 'Fake App',
               Uri? serviceUri,
               bool enableAuthCodes = true,
               bool serveDevTools = false,

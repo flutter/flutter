@@ -539,6 +539,7 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,

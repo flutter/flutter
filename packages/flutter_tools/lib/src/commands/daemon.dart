@@ -1280,6 +1280,9 @@ class DeviceDomain extends Domain {
 
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
+      appName:
+          'Kind: Flutter - Device: ${device.displayName} - '
+          'Package: ${FlutterProject.current().manifest.appName}',
       disableServiceAuthCodes: disableServiceAuthCodes,
       enableDevTools: enableDevTools,
       devToolsServerAddress: devToolsServerAddress,
