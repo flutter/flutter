@@ -25,7 +25,7 @@ export 'package:dds/dds.dart'
 typedef DDSLauncherCallback =
     Future<DartDevelopmentServiceLauncher> Function({
       required Uri remoteVmServiceUri,
-      required String appName,
+      String? appName,
       Uri? serviceUri,
       bool enableAuthCodes,
       bool serveDevTools,
@@ -66,7 +66,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required String appName,
+    String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
     bool? ipv6,
@@ -133,7 +133,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required String appName,
+    String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
     bool? ipv6,
@@ -147,7 +147,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   /// from a [DebuggingOptions] instance.
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
-    required String appName,
+    String? appName,
     required DebuggingOptions debuggingOptions,
   }) => startDartDevelopmentService(
     vmServiceUri,

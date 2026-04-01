@@ -852,7 +852,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required String appName,
+    String? appName,
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
