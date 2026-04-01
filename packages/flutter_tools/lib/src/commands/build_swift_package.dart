@@ -274,13 +274,8 @@ class BuildSwiftPackage extends BuildSubCommand {
   );
 
   /// Whether to generate tests for the Swift package integration tools and plugins.
-  ///
-  /// Tests should only be generated in CI and when the target platform is macOS. Tests will not
-  /// run when targeting iOS because `swift test` targets macOS and the dependency on the iOS
-  /// Flutter.xcframework will not be able to resolve to a valid binary.
   bool get generateTests {
-    return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true) &&
-        _targetPlatform == FlutterDarwinPlatform.macos;
+    return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
   }
 
   @override

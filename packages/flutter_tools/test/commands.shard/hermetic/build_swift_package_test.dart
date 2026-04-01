@@ -2749,9 +2749,7 @@ let package = Package(
         .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
     ],
-    dependencies: [
-
-    ],
+    dependencies: [\n        \n    ],
     targets: [
         .target(
             name: "FlutterToolHelper"
@@ -2971,9 +2969,7 @@ let package = Package(
         .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
     ],
-    dependencies: [
-
-    ],
+    dependencies: [\n        \n    ],
     targets: [
         .target(
             name: "FlutterToolHelper"
