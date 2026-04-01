@@ -145,6 +145,8 @@ extern std::ostream& operator<<(
   switch (type) {
     DLT_OSTREAM_CASE(DlPathFillType, Odd);
     DLT_OSTREAM_CASE(DlPathFillType, NonZero);
+
+    default: return os << "DlPathFillType::????";
   }
 }
 
@@ -188,6 +190,8 @@ std::ostream& operator<<(std::ostream& os, const flutter::DlClipOp& op) {
   switch (op) {
     case flutter::DlClipOp::kDifference: return os << "DlClipOp::kDifference";
     case flutter::DlClipOp::kIntersect:  return os << "DlClipOp::kIntersect";
+
+    default: return os << "DlClipOp::????";
   }
 }
 
@@ -197,6 +201,8 @@ std::ostream& operator<<(std::ostream& os, const flutter::DlSrcRectConstraint& c
       return os << "SrcRectConstraint::kFast";
     case flutter::DlSrcRectConstraint::kStrict:
       return os << "SrcRectConstraint::kStrict";
+
+    default: return os << "SrcRectConstraint::????";
   }
 }
 
@@ -205,6 +211,8 @@ std::ostream& operator<<(std::ostream& os, const DlStrokeCap& cap) {
     case DlStrokeCap::kButt:   return os << "Cap::kButt";
     case DlStrokeCap::kRound:  return os << "Cap::kRound";
     case DlStrokeCap::kSquare: return os << "Cap::kSquare";
+
+    default: return os << "Cap::????";
   }
 }
 
@@ -213,6 +221,8 @@ std::ostream& operator<<(std::ostream& os, const DlStrokeJoin& join) {
     case DlStrokeJoin::kMiter: return os << "Join::kMiter";
     case DlStrokeJoin::kRound: return os << "Join::kRound";
     case DlStrokeJoin::kBevel: return os << "Join::kBevel";
+
+    default: return os << "Join::????";
   }
 }
 
@@ -221,6 +231,8 @@ std::ostream& operator<<(std::ostream& os, const DlDrawStyle& style) {
     case DlDrawStyle::kFill:          return os << "Style::kFill";
     case DlDrawStyle::kStroke:        return os << "Style::kStroke";
     case DlDrawStyle::kStrokeAndFill: return os << "Style::kStrokeAnFill";
+
+    default: return os << "Style::????";
   }
 }
 
@@ -230,6 +242,8 @@ std::ostream& operator<<(std::ostream& os, const DlBlurStyle& style) {
     case DlBlurStyle::kSolid:  return os << "BlurStyle::kSolid";
     case DlBlurStyle::kOuter:  return os << "BlurStyle::kOuter";
     case DlBlurStyle::kInner:  return os << "BlurStyle::kInner";
+
+    default: return os << "BlurStyle::????";
   }
 }
 
@@ -238,6 +252,8 @@ std::ostream& operator<<(std::ostream& os, const flutter::DlPointMode& mode) {
     case flutter::DlPointMode::kPoints:  return os << "PointMode::kPoints";
     case flutter::DlPointMode::kLines:   return os << "PointMode::kLines";
     case flutter::DlPointMode::kPolygon: return os << "PointMode::kPolygon";
+
+    default: return os << "PointMode::????";
   }
 }
 
@@ -285,6 +301,8 @@ std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {
     case DlImageSampling::kCubic: {
       return os << "CubicSampling";
     }
+
+    default: return os << "DlImageSampling::????";
   }
 }
 
