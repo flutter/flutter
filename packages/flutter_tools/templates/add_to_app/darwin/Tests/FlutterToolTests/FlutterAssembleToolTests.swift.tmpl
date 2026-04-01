@@ -481,7 +481,7 @@ func assembleUsesMergedEnv() async throws {
     ("iphoneos", "ios-arm64"),
   ]
 )
-func copyFlutterFrameworkForIOS(
+func copyAndCodesignFrameworkForIOS(
   platformName: String,
   expectedArch: String
 ) async throws {
@@ -501,17 +501,26 @@ func copyFlutterFrameworkForIOS(
     URL(fileURLWithPath: "\(xcframework)/ios-arm64_x86_64-simulator"),
   ]
   processManager.expectedProcesses.append(
-    MockProcess(
-      expectedURL: "/usr/bin/rsync",
-      expectedArguments: [
-        "-av", "--delete", "--filter", "- .DS_Store/",
-        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
-        "\(xcframework)/\(expectedArch)/Flutter.framework",
-        "\(buildDir)/\(frameworksDir)",
-      ]
-    )
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(xcframework)/\(expectedArch)/Flutter.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/codesign",
+        expectedArguments: [
+          "--force", "--verbose", "--sign", "-", "--",
+          "\(buildDir)/\(frameworksDir)/Flutter.framework/Flutter",
+        ]
+      ),
+    ]
   )
-  try FlutterAssembleToolHelper.copyFlutterFramework(
+  try FlutterAssembleToolHelper.copyAndCodesignFramework(
     frameworkName: "Flutter",
     packagePath: flutterPackagePath,
     targetBuildMode: targetBuildMode,
@@ -521,6 +530,7 @@ func copyFlutterFrameworkForIOS(
       "PLATFORM_NAME": platformName, "SDKROOT": "\(platformName)26.2",
       "BUILT_PRODUCTS_DIR": buildDir, "TARGET_BUILD_DIR": buildDir,
       "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "EXPANDED_CODE_SIGN_IDENTITY": "-",
     ],
     fileManager: fileManager,
     processManager: processManager
@@ -528,7 +538,7 @@ func copyFlutterFrameworkForIOS(
 }
 
 @Test
-func copyFlutterFrameworkForMacOS() async throws {
+func copyAndCodesignFrameworkForMacOS() async throws {
   let fileManager = MockFileManager()
   let processManager = MockFlutterProcessManager()
 
@@ -544,17 +554,26 @@ func copyFlutterFrameworkForMacOS() async throws {
     URL(fileURLWithPath: "\(xcframework)/macos-arm64_x86_64")
   ]
   processManager.expectedProcesses.append(
-    MockProcess(
-      expectedURL: "/usr/bin/rsync",
-      expectedArguments: [
-        "-av", "--delete", "--filter", "- .DS_Store/",
-        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
-        "\(xcframework)/macos-arm64_x86_64/FlutterMacOS.framework",
-        "\(buildDir)/\(frameworksDir)",
-      ]
-    )
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(xcframework)/macos-arm64_x86_64/FlutterMacOS.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/codesign",
+        expectedArguments: [
+          "--force", "--verbose", "--sign", "-", "--",
+          "\(buildDir)/\(frameworksDir)/FlutterMacOS.framework/FlutterMacOS",
+        ]
+      ),
+    ]
   )
-  try FlutterAssembleToolHelper.copyFlutterFramework(
+  try FlutterAssembleToolHelper.copyAndCodesignFramework(
     frameworkName: "FlutterMacOS",
     packagePath: flutterPackagePath,
     targetBuildMode: targetBuildMode,
@@ -564,6 +583,7 @@ func copyFlutterFrameworkForMacOS() async throws {
       "PLATFORM_NAME": "macosx", "SDKROOT": "macosx",
       "BUILT_PRODUCTS_DIR": buildDir, "TARGET_BUILD_DIR": buildDir,
       "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "EXPANDED_CODE_SIGN_IDENTITY": "-",
     ],
     fileManager: fileManager,
     processManager: processManager

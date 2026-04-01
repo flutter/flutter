@@ -701,7 +701,7 @@ public class FlutterAssembleToolHelper {
             executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
             arguments: [
               "--force", "--verbose", "--sign", codesignIdentity, "--",
-              "\(embeddedFrameworks)/\(frameworkPath.lastPathComponent)",
+              "\(embeddedFrameworks)/\(frameworkPath.lastPathComponent)/\(frameworkName)",
             ],
             env: nil,
             failOnError: true
