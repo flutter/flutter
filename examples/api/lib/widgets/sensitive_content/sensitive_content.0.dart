@@ -202,23 +202,25 @@ class _AccountDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Checking Account',
-          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 12.0),
-        Text('Account number: 123456789'),
-        Text('Routing number: 987654321'),
-        SizedBox(height: 12.0),
-        Text('One-time passcode: 246810'),
-        SizedBox(height: 12.0),
-        Text(
-          'Use ContentSensitivity.sensitive for screens that should be obscured when the app screen is shared.',
-        ),
-      ],
+    return const SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Checking Account',
+            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 12.0),
+          Text('Account number: 123456789'),
+          Text('Routing number: 987654321'),
+          SizedBox(height: 12.0),
+          Text('One-time passcode: 246810'),
+          SizedBox(height: 12.0),
+          Text(
+            'Use ContentSensitivity.sensitive for screens that should be obscured when the app screen is shared.',
+          ),
+        ],
+      ),
     );
   }
 }

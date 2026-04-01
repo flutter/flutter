@@ -624,6 +624,9 @@ class _ClosedStdinController extends Fake implements StreamSink<List<int>> {
   @override
   Future<Object?> addStream(Stream<List<int>> stream) async =>
       throw const SocketException('Bad pipe');
+
+  @override
+  Future<void> close() async {}
 }
 
 IOSDeploy setUpIOSDeploy(ProcessManager processManager, {Artifacts? artifacts}) {

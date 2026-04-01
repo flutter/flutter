@@ -3560,6 +3560,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollWillResignFirstResponder {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
@@ -3584,6 +3588,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollToTopOfKeyboardWillTakeScreenshot {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3627,6 +3635,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedDownAfterUserScroll {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3677,6 +3689,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedToOrginalPositionAfterUserScroll {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3782,6 +3798,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardDidResignFirstResponderDelegateisCalledAfterDismissedKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3830,6 +3850,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotDismissedAfterPointerLiftedAboveMiddleYOfKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3882,6 +3906,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardReappearsAfterPointerLiftedAboveMiddleYOfKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3941,6 +3969,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardAnimatesToOriginalPositionalOnPointerUp {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3993,6 +4025,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardAnimatesToDismissalPositionalOnPointerUp {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
