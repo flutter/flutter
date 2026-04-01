@@ -69,8 +69,8 @@ class DisableBuiltInKotlinAndNewDslMigration extends ProjectMigrator {
       propertiesToAppend.writeln(_builtInKotlinFlag);
     }
 
-    final String prefix = fileContents.isEmpty || fileContents.endsWith('\n') ? '' : '\n';
+    final prefix = fileContents.isEmpty || fileContents.endsWith('\n') ? '' : '\n';
 
-    return '$fileContents$prefix${propertiesToAppend.toString()}';
+    return '$fileContents$prefix$propertiesToAppend';
   }
 }
