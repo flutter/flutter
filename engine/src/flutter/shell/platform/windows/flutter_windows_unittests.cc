@@ -423,10 +423,10 @@ TEST_F(WindowsTest, GetGraphicsAdapter) {
   WindowsConfigBuilder builder(context);
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
-  auto view = FlutterDesktopViewControllerGetView(controller.get());
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
   Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -443,10 +443,10 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
   builder.SetGpuPreference(FlutterDesktopGpuPreference::LowPowerPreference);
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
-  auto view = FlutterDesktopViewControllerGetView(controller.get());
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
   Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -466,10 +466,10 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithHighPerformancePreference) {
       FlutterDesktopGpuPreference::HighPerformancePreference);
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
-  auto view = FlutterDesktopViewControllerGetView(controller.get());
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
   Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));

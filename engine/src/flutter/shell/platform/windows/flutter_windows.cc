@@ -254,8 +254,9 @@ HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
   return ViewFromHandle(view)->GetWindowHandle();
 }
 
-IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
-  auto egl_manager = ViewFromHandle(view)->GetEngine()->egl_manager();
+IDXGIAdapter* FlutterDesktopEngineGetGraphicsAdapter(
+    FlutterDesktopEngineRef engine) {
+  auto egl_manager = EngineFromHandle(engine)->egl_manager();
   if (egl_manager) {
     Microsoft::WRL::ComPtr<ID3D11Device> d3d_device;
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgi_device;
