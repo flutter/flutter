@@ -679,12 +679,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       widget.textEditingController?.addListener(_onChangedField);
     }
     if (!identical(oldWidget.focusNode, widget.focusNode)) {
-      oldWidget.focusNode?.removeListener(_updateOptionsViewVisibility);
+      oldWidget.focusNode?.removeListener(_onFocusChange);
       if (oldWidget.focusNode == null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
       }
-      widget.focusNode?.addListener(_updateOptionsViewVisibility);
+      widget.focusNode?.addListener(_onFocusChange);
     }
   }
 
@@ -692,7 +692,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void dispose() {
     widget.textEditingController?.removeListener(_onChangedField);
     _internalTextEditingController?.dispose();
-    widget.focusNode?.removeListener(_updateOptionsViewVisibility);
+    widget.focusNode?.removeListener(_onFocusChange);
     _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
     super.dispose();
