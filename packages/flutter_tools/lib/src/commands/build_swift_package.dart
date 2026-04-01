@@ -109,7 +109,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       ..addMultiOption(
         'build-mode',
         allowed: ['debug', 'profile', 'release'],
-        defaultsTo: ['debug', 'profile', 'release'],
+        defaultsTo: availableBuildModes.map((e) => e.cliName).toList(),
       )
       ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.');
   }
@@ -122,6 +122,12 @@ class BuildSwiftPackage extends BuildSubCommand {
       'Produces Swift packages and scripts for a Flutter project and its plugins for integration '
       'into existing, native non-Flutter iOS and macOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
+
+  static const availableBuildModes = <BuildMode>[
+    BuildMode.debug,
+    BuildMode.profile,
+    BuildMode.release,
+  ];
 
   final Platform _platform;
   final BuildSystem _buildSystem;
@@ -166,9 +172,8 @@ class BuildSwiftPackage extends BuildSubCommand {
   Future<List<BuildInfo>> _getBuildInfos() async {
     final List<String> buildModes = stringsArg('build-mode');
     return <BuildInfo>[
-      if (buildModes.contains('debug')) await getBuildInfo(forcedBuildMode: .debug),
-      if (buildModes.contains('profile')) await getBuildInfo(forcedBuildMode: .profile),
-      if (buildModes.contains('release')) await getBuildInfo(forcedBuildMode: .release),
+      for (final mode in availableBuildModes)
+        if (buildModes.contains(mode.cliName)) await getBuildInfo(forcedBuildMode: mode),
     ];
   }
 
@@ -352,7 +357,6 @@ class BuildSwiftPackage extends BuildSubCommand {
       outputDirectory: outputDirectory,
       flutterIntegrationPackage: flutterIntegrationPackage,
       highestSupportedVersion: pluginSwiftDependencies.highestSupportedVersion,
-      buildInfos: buildInfos,
     );
     createSourcesSymlink(flutterIntegrationPackage, buildInfos.first.mode.uppercaseName);
 
@@ -1621,6 +1625,9 @@ class FlutterNativeIntegrationSwiftPackage {
   final BuildSwiftPackageUtils _utils;
   final bool _generateTests;
 
+  /// The name of the Swift package that vends the executable and plugin tools.
+  static const String _kFlutterNativeTools = 'FlutterNativeTools';
+
   /// The name of the Swift package library with common logic shared among the other tools.
   static const String _kFlutterToolHelper = 'FlutterToolHelper';
 
@@ -1635,50 +1642,80 @@ class FlutterNativeIntegrationSwiftPackage {
   /// The name of the Swift test target that will be used to test the Flutter tools in CI.
   static const String _kFlutterToolTests = 'FlutterToolTests';
 
-  static const List<String> _executableTools = <String>[_kFlutterAssembleTool, _kFlutterPluginTool];
-
   /// Generates the Swift package and its sources that will be used to integrate a Flutter app
   /// into a native iOS or macOS app.
   Future<void> generateSwiftPackages({
     required Directory outputDirectory,
     required Directory flutterIntegrationPackage,
     required SwiftPackageSupportedPlatform highestSupportedVersion,
-    required List<BuildInfo> buildInfos,
   }) async {
+    final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+      _kFlutterNativeTools,
+    );
     await _generateSourceFiles(
       outputDirectory: outputDirectory,
-      flutterIntegrationPackage: flutterIntegrationPackage,
-      buildInfos: buildInfos,
+      nativeToolsPackage: nativeToolsPackage,
     );
 
     final integrationPackage = SwiftPackage(
       manifest: flutterIntegrationPackage.childFile('Package.swift'),
       name: _kFlutterIntegrationPackageName,
       platforms: <SwiftPackageSupportedPlatform>[highestSupportedVersion],
-      products: _products,
+      products: [
+        SwiftPackageProduct.library(
+          name: _kFlutterIntegrationPackageName,
+          targets: [_kFlutterIntegrationPackageName],
+        ),
+      ],
       dependencies: [
+        SwiftPackagePackageDependency(name: _kFlutterNativeTools, path: _kFlutterNativeTools),
         SwiftPackagePackageDependency(name: kPluginSwiftPackageName, path: kPluginSwiftPackageName),
       ],
-      targets: [...getTargets(buildInfos)],
+      targets: [
+        SwiftPackageTarget.defaultTarget(
+          name: _kFlutterIntegrationPackageName,
+          dependencies: [
+            SwiftPackageTargetDependency.product(
+              name: kPluginSwiftPackageName,
+              packageName: kPluginSwiftPackageName,
+            ),
+          ],
+        ),
+      ],
       templateRenderer: _utils.templateRenderer,
     );
 
     integrationPackage.createSwiftPackage();
+
+    final toolsPackage = SwiftPackage(
+      manifest: nativeToolsPackage.childFile('Package.swift'),
+      name: _kFlutterNativeTools,
+      platforms: <SwiftPackageSupportedPlatform>[],
+      products: [_pluginTool.product, _assembleTool.product],
+      dependencies: [],
+      targets: [
+        SwiftPackageTarget.defaultTarget(name: _kFlutterToolHelper),
+        _assembleTool.target,
+        ..._pluginTool.targets,
+        if (_generateTests) _testTarget,
+      ],
+      templateRenderer: _utils.templateRenderer,
+    );
+
+    toolsPackage.createSwiftPackage();
   }
 
   /// Copies files from the template to the output directory.
   Future<void> _generateSourceFiles({
     required Directory outputDirectory,
-    required Directory flutterIntegrationPackage,
-    required List<BuildInfo> buildInfos,
+    required Directory nativeToolsPackage,
   }) async {
     await _generateScripts(outputDirectory.childDirectory(_kScripts));
-    await _generateToolsSources(flutterIntegrationPackage.childDirectory(_kSources));
+    await _generateToolsSources(nativeToolsPackage.childDirectory(_kSources));
     await _generatePluginsSources(
-      flutterIntegrationPackage.childDirectory(_kSwiftPlugins),
-      buildInfos,
+      pluginsDirectory: nativeToolsPackage.childDirectory(_kSwiftPlugins),
     );
-    await _generateTestSources(flutterIntegrationPackage.childDirectory(_kTests));
+    await _generateTestSources(nativeToolsPackage.childDirectory(_kTests));
   }
 
   /// Generates bash scripts and xcfilelists to be used for integrating SwiftPM into the
@@ -1711,10 +1748,7 @@ class FlutterNativeIntegrationSwiftPackage {
 
   /// Generate source files for Swift package plugins to be used for integrating SwiftPM into the
   /// [pluginsDirectory].
-  Future<void> _generatePluginsSources(
-    Directory pluginsDirectory,
-    List<BuildInfo> buildInfos,
-  ) async {
+  Future<void> _generatePluginsSources({required Directory pluginsDirectory}) async {
     // Copy swift plugins to be used for integrating SwiftPM into an native project.
     final Template pluginsTemplate = await Template.fromName(
       _utils.fileSystem.path.join('add_to_app', 'darwin', 'Plugins'),
@@ -1723,12 +1757,11 @@ class FlutterNativeIntegrationSwiftPackage {
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    for (final buildInfo in buildInfos) {
-      final Directory pluginsModeDirectory = pluginsDirectory.childDirectory(
-        buildInfo.mode.uppercaseName,
-      );
+
+    for (final BuildMode mode in BuildSwiftPackage.availableBuildModes) {
+      final Directory pluginsModeDirectory = pluginsDirectory.childDirectory(mode.uppercaseName);
       pluginsTemplate.render(pluginsModeDirectory, <String, Object>{
-        'buildMode': buildInfo.mode.uppercaseName,
+        'buildMode': mode.uppercaseName,
       }, printStatusWhenWriting: false);
     }
   }
@@ -1748,65 +1781,54 @@ class FlutterNativeIntegrationSwiftPackage {
     }
   }
 
-  /// The products the FlutterNativeIntegration swift package vends.
-  List<SwiftPackageProduct> get _products => <SwiftPackageProduct>[
-    SwiftPackageProduct.library(
-      name: _kFlutterIntegrationPackageName,
-      targets: [_kFlutterIntegrationPackageName],
-    ),
-    SwiftPackageProduct.executable(name: 'flutter-assemble-tool', targets: [_kFlutterAssembleTool]),
-  ];
-
-  /// The library, plugin, executable, and test targets for the FlutterNativeIntegration swift package.
-  List<SwiftPackageTarget> getTargets(List<BuildInfo> buildInfos) {
-    final swiftPackagePlugins = <SwiftPackageTarget>[
-      for (final buildInfo in buildInfos)
+  ({SwiftPackageProduct product, List<SwiftPackageTarget> targets}) get _pluginTool {
+    final product = SwiftPackageProduct.plugin(
+      name: 'FlutterConfigurationPlugin',
+      targets: BuildSwiftPackage.availableBuildModes
+          .map((mode) => 'Switch to ${mode.uppercaseName} Mode')
+          .toList(),
+    );
+    final targets = <SwiftPackageTarget>[
+      SwiftPackageTarget.executableTarget(
+        name: _kFlutterPluginTool,
+        dependencies: [SwiftPackageTargetDependency.target(name: _kFlutterToolHelper)],
+      ),
+      for (final mode in BuildSwiftPackage.availableBuildModes)
         SwiftPackageTarget.pluginTarget(
-          name: 'Switch to ${buildInfo.mode.uppercaseName} Mode',
+          name: 'Switch to ${mode.uppercaseName} Mode',
           dependencies: <SwiftPackageTargetDependency>[
             SwiftPackageTargetDependency.target(name: _kFlutterPluginTool),
           ],
-          path: '$_kSwiftPlugins/${buildInfo.mode.uppercaseName}',
+          path: '$_kSwiftPlugins/${mode.uppercaseName}',
           commandCapability: SwiftPackageCommandCapability(
-            verb: 'switch-to-${buildInfo.mode.cliName}',
-            description:
-                'Updates package to use the ${buildInfo.mode.uppercaseName} mode Flutter framework',
+            verb: 'switch-to-${mode.cliName}',
+            description: 'Updates package to use the ${mode.uppercaseName} mode Flutter framework',
           ),
         ),
     ];
-
-    final executableTargets = <SwiftPackageTarget>[
-      for (final String tool in _executableTools)
-        SwiftPackageTarget.executableTarget(
-          name: tool,
-          dependencies: [SwiftPackageTargetDependency.target(name: _kFlutterToolHelper)],
-        ),
-    ];
-
-    return <SwiftPackageTarget>[
-      SwiftPackageTarget.defaultTarget(
-        name: _kFlutterIntegrationPackageName,
-        dependencies: [
-          SwiftPackageTargetDependency.product(
-            name: kPluginSwiftPackageName,
-            packageName: kPluginSwiftPackageName,
-          ),
-        ],
-      ),
-      ...swiftPackagePlugins,
-      SwiftPackageTarget.defaultTarget(name: _kFlutterToolHelper),
-      ...executableTargets,
-      if (_generateTests)
-        SwiftPackageTarget.testTarget(
-          name: _kFlutterToolTests,
-          dependencies: [
-            SwiftPackageTargetDependency.target(name: _kFlutterPluginTool),
-            SwiftPackageTargetDependency.target(name: _kFlutterToolHelper),
-            SwiftPackageTargetDependency.target(name: _kFlutterAssembleTool),
-          ],
-        ),
-    ];
+    return (product: product, targets: targets);
   }
+
+  ({SwiftPackageProduct product, SwiftPackageTarget target}) get _assembleTool {
+    final product = SwiftPackageProduct.executable(
+      name: 'flutter-assemble-tool',
+      targets: [_kFlutterAssembleTool],
+    );
+    final target = SwiftPackageTarget.executableTarget(
+      name: _kFlutterAssembleTool,
+      dependencies: [SwiftPackageTargetDependency.target(name: _kFlutterToolHelper)],
+    );
+    return (product: product, target: target);
+  }
+
+  SwiftPackageTarget get _testTarget => SwiftPackageTarget.testTarget(
+    name: _kFlutterToolTests,
+    dependencies: [
+      SwiftPackageTargetDependency.target(name: _kFlutterPluginTool),
+      SwiftPackageTargetDependency.target(name: _kFlutterToolHelper),
+      SwiftPackageTargetDependency.target(name: _kFlutterAssembleTool),
+    ],
+  );
 }
 
 /// Create an XCFramework from a list of frameworks.

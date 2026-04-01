@@ -2686,7 +2686,6 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
       final Directory outputDirectory = fs.directory('output')..createSync();
       final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
         ..createSync();
-      final buildInfos = <BuildInfo>[BuildInfo.debug, BuildInfo.profile, BuildInfo.release];
 
       final integrationPackage = FlutterNativeIntegrationSwiftPackage(
         utils: testUtils,
@@ -2696,7 +2695,6 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         outputDirectory: outputDirectory,
         flutterIntegrationPackage: flutterIntegrationPackage,
         highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
-        buildInfos: buildInfos,
       );
 
       expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
@@ -2715,10 +2713,10 @@ let package = Package(
         .iOS("13.0")
     ],
     products: [
-        .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"]),
-        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+        .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
     ],
     dependencies: [
+        .package(name: "FlutterNativeTools", path: "FlutterNativeTools"),
         .package(name: "FlutterPluginRegistrant", path: "FlutterPluginRegistrant")
     ],
     targets: [
@@ -2726,6 +2724,48 @@ let package = Package(
             name: "FlutterNativeIntegration",
             dependencies: [
                 .product(name: "FlutterPluginRegistrant", package: "FlutterPluginRegistrant")
+            ]
+        )
+    ]
+)
+''');
+
+      final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+        'FlutterNativeTools',
+      );
+      expect(nativeToolsPackage.childFile('Package.swift'), exists);
+      expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterNativeTools",
+    products: [
+        .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+    ],
+    dependencies: [
+
+    ],
+    targets: [
+        .target(
+            name: "FlutterToolHelper"
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
             ]
         ),
         .plugin(
@@ -2766,27 +2806,13 @@ let package = Package(
                 .target(name: "FlutterPluginTool")
             ],
             path: "Plugins/Release"
-        ),
-        .target(
-            name: "FlutterToolHelper"
-        ),
-        .executableTarget(
-            name: "FlutterAssembleTool",
-            dependencies: [
-                .target(name: "FlutterToolHelper")
-            ]
-        ),
-        .executableTarget(
-            name: "FlutterPluginTool",
-            dependencies: [
-                .target(name: "FlutterToolHelper")
-            ]
         )
     ]
 )
 ''');
+
       expect(
-        flutterIntegrationPackage
+        nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Debug')
             .childFile('UpdateConfiguration.swift')
@@ -2794,7 +2820,7 @@ let package = Package(
         contains('let configuration = "Debug"'),
       );
       expect(
-        flutterIntegrationPackage
+        nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Profile')
             .childFile('UpdateConfiguration.swift')
@@ -2802,7 +2828,7 @@ let package = Package(
         contains('let configuration = "Profile"'),
       );
       expect(
-        flutterIntegrationPackage
+        nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Release')
             .childFile('UpdateConfiguration.swift')
@@ -2810,15 +2836,15 @@ let package = Package(
         contains('let configuration = "Release"'),
       );
       expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
+        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
         exists,
       );
       expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
+        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
         exists,
       );
       expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
+        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
         exists,
       );
       expect(
@@ -2827,7 +2853,7 @@ let package = Package(
             .childDirectory('FlutterNativeIntegration'),
         exists,
       );
-      expect(flutterIntegrationPackage.childDirectory('Tests'), isNot(exists));
+      expect(nativeToolsPackage.childDirectory('Tests'), isNot(exists));
     });
 
     testUsingContext('generateSwiftPackage with tests', () async {
@@ -2882,7 +2908,6 @@ let package = Package(
       final Directory outputDirectory = fs.directory('output')..createSync();
       final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
         ..createSync();
-      final buildInfos = <BuildInfo>[BuildInfo.debug, BuildInfo.profile, BuildInfo.release];
 
       final integrationPackage = FlutterNativeIntegrationSwiftPackage(
         utils: testUtils,
@@ -2892,7 +2917,6 @@ let package = Package(
         outputDirectory: outputDirectory,
         flutterIntegrationPackage: flutterIntegrationPackage,
         highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
-        buildInfos: buildInfos,
       );
 
       expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
@@ -2911,10 +2935,10 @@ let package = Package(
         .macOS("10.15")
     ],
     products: [
-        .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"]),
-        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+        .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
     ],
     dependencies: [
+        .package(name: "FlutterNativeTools", path: "FlutterNativeTools"),
         .package(name: "FlutterPluginRegistrant", path: "FlutterPluginRegistrant")
     ],
     targets: [
@@ -2922,6 +2946,48 @@ let package = Package(
             name: "FlutterNativeIntegration",
             dependencies: [
                 .product(name: "FlutterPluginRegistrant", package: "FlutterPluginRegistrant")
+            ]
+        )
+    ]
+)
+''');
+
+      final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+        'FlutterNativeTools',
+      );
+      expect(nativeToolsPackage.childFile('Package.swift'), exists);
+      expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterNativeTools",
+    products: [
+        .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+    ],
+    dependencies: [
+
+    ],
+    targets: [
+        .target(
+            name: "FlutterToolHelper"
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
             ]
         ),
         .plugin(
@@ -2963,21 +3029,6 @@ let package = Package(
             ],
             path: "Plugins/Release"
         ),
-        .target(
-            name: "FlutterToolHelper"
-        ),
-        .executableTarget(
-            name: "FlutterAssembleTool",
-            dependencies: [
-                .target(name: "FlutterToolHelper")
-            ]
-        ),
-        .executableTarget(
-            name: "FlutterPluginTool",
-            dependencies: [
-                .target(name: "FlutterToolHelper")
-            ]
-        ),
         .testTarget(
             name: "FlutterToolTests",
             dependencies: [
@@ -2989,8 +3040,9 @@ let package = Package(
     ]
 )
 ''');
+
       expect(
-        flutterIntegrationPackage
+        nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Debug')
             .childFile('UpdateConfiguration.swift')
@@ -2998,7 +3050,7 @@ let package = Package(
         contains('let configuration = "Debug"'),
       );
       expect(
-        flutterIntegrationPackage
+        nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Profile')
             .childFile('UpdateConfiguration.swift')
@@ -3006,7 +3058,7 @@ let package = Package(
         contains('let configuration = "Profile"'),
       );
       expect(
-        flutterIntegrationPackage
+        nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Release')
             .childFile('UpdateConfiguration.swift')
@@ -3014,15 +3066,15 @@ let package = Package(
         contains('let configuration = "Release"'),
       );
       expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
+        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
         exists,
       );
       expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
+        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
         exists,
       );
       expect(
-        flutterIntegrationPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
+        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
         exists,
       );
       expect(
@@ -3031,7 +3083,7 @@ let package = Package(
             .childDirectory('FlutterNativeIntegration'),
         exists,
       );
-      expect(flutterIntegrationPackage.childDirectory('Tests'), exists);
+      expect(nativeToolsPackage.childDirectory('Tests'), exists);
     });
   });
 }
