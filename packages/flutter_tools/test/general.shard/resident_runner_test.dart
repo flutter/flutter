@@ -2011,6 +2011,8 @@ flutter:
               String? google3WorkspaceRoot,
             }) async {
               expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
+              expect(appName, contains('Kind: Flutter'));
+              expect(appName, contains('Device: FakeDevice'));
               expect(enableAuthCodes, isFalse);
               expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
               expect(cachedUserTags, isEmpty);

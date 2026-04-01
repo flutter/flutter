@@ -304,6 +304,8 @@ void main() {
             String? dartExecutable,
             String? google3WorkspaceRoot,
           }) async {
+            expect(appName, contains('Kind: Flutter'));
+            expect(appName, contains('Device: flutter tester'));
             return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
           };
     });

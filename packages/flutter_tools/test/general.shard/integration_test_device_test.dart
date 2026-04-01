@@ -103,6 +103,9 @@ void main() {
           String? dartExecutable,
           String? google3WorkspaceRoot,
         }) async {
+          expect(appName, contains('Kind: Flutter'));
+          expect(appName, contains('Device: ephemeral'));
+          expect(appName, contains('Package: Fake Integration Test Package'));
           return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
         };
   });
@@ -344,7 +347,10 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => FakeApplicationPackage();
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage {
+  @override
+  String get name => 'Fake Integration Test Package';
+}
 
 class FakeDeviceTrackingUninstall extends FakeDevice {
   FakeDeviceTrackingUninstall()
