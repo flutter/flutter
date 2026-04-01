@@ -29,6 +29,7 @@ class SliverConstrainedCrossAxisExample extends StatelessWidget {
       slivers: <Widget>[
         SliverConstrainedCrossAxis(
           maxExtent: 200,
+          alignment: Alignment.center,
           sliver: SliverList.builder(
             itemBuilder: (BuildContext context, int index) {
               return Container(

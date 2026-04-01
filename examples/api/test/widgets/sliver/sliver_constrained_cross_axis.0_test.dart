@@ -20,5 +20,7 @@ void main() {
       find.byType(SliverList),
     );
     expect(renderSliverList.constraints.crossAxisExtent, equals(200));
+    final SliverPhysicalParentData parentData = renderSliverList.parentData! as SliverPhysicalParentData;
+    expect(parentData.paintOffset.dx, equals(300.0));
   });
 }
