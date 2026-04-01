@@ -8,7 +8,6 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
@@ -387,7 +386,7 @@ class FlutterPlugin : Plugin<Project> {
                 val processResources: ProcessAndroidResources =
                     try {
                         variantOutput.processResourcesProvider.get()
-                    } catch (e: UnknownTaskException) {
+                    } catch (_: UnknownTaskException) {
                         // TODO(gmackall): Migrate to AGPs variant api.
                         //    https://github.com/flutter/flutter/issues/166550
                         @Suppress("DEPRECATION")
@@ -559,7 +558,7 @@ class FlutterPlugin : Plugin<Project> {
         ): Task? =
             try {
                 project.tasks.named(taskName).get()
-            } catch (ignored: UnknownTaskException) {
+            } catch (_: UnknownTaskException) {
                 null
             }
 
@@ -573,35 +572,35 @@ class FlutterPlugin : Plugin<Project> {
             // Shorthand
             val project: Project = flutterPlugin.project!!
 
-            val fileSystemRootsValue: Array<String>? =
+            val fileSystemRootsValue =
                 project
                     .findProperty("filesystem-roots")
                     ?.toString()
                     ?.split("\\|")
                     ?.toTypedArray()
-            val fileSystemSchemeValue: String? =
+            val fileSystemSchemeValue =
                 project.findProperty("filesystem-scheme")?.toString()
-            val trackWidgetCreationValue: Boolean =
+            val trackWidgetCreationValue =
                 project.findProperty("track-widget-creation")?.toString()?.toBoolean() ?: true
-            val frontendServerStarterPathValue: String? =
+            val frontendServerStarterPathValue =
                 project.findProperty("frontend-server-starter-path")?.toString()
-            val extraFrontEndOptionsValue: String? =
+            val extraFrontEndOptionsValue =
                 project.findProperty("extra-front-end-options")?.toString()
-            val extraGenSnapshotOptionsValue: String? =
+            val extraGenSnapshotOptionsValue =
                 project.findProperty("extra-gen-snapshot-options")?.toString()
-            val splitDebugInfoValue: String? = project.findProperty("split-debug-info")?.toString()
-            val dartObfuscationValue: Boolean =
+            val splitDebugInfoValue = project.findProperty("split-debug-info")?.toString()
+            val dartObfuscationValue =
                 project.findProperty("dart-obfuscation")?.toString()?.toBoolean() ?: false
-            val treeShakeIconsOptionsValue: Boolean =
+            val treeShakeIconsOptionsValue =
                 project.findProperty("tree-shake-icons")?.toString()?.toBoolean() ?: false
-            val dartDefinesValue: String? = project.findProperty("dart-defines")?.toString()
-            val performanceMeasurementFileValue: String? =
+            val dartDefinesValue = project.findProperty("dart-defines")?.toString()
+            val performanceMeasurementFileValue =
                 project.findProperty("performance-measurement-file")?.toString()
-            val codeSizeDirectoryValue: String? =
+            val codeSizeDirectoryValue =
                 project.findProperty("code-size-directory")?.toString()
-            val deferredComponentsValue: Boolean =
+            val deferredComponentsValue =
                 project.findProperty("deferred-components")?.toString()?.toBoolean() ?: false
-            val validateDeferredComponentsValue: Boolean =
+            val validateDeferredComponentsValue =
                 project.findProperty("validate-deferred-components")?.toString()?.toBoolean() ?: true
 
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
@@ -611,7 +610,7 @@ class FlutterPlugin : Plugin<Project> {
                     //    https://github.com/flutter/flutter/issues/166550
                     @Suppress("DEPRECATION")
                     output as com.android.build.gradle.api.ApkVariantOutput
-                    val versionCodeIfPresent: Int? = if (variant is ApkVariant) variant.versionCode else null
+                    val versionCodeIfPresent = variant.mergedFlavor.versionCode
 
                     // TODO(gmackall): Migrate to AGPs variant api.
                     //    https://github.com/flutter/flutter/issues/166550
@@ -647,9 +646,9 @@ class FlutterPlugin : Plugin<Project> {
             val isUsedAsSubproject: Boolean =
                 packageAssets != null && cleanPackageAssets != null && !isBuildingAar
 
-            val variantBuildMode: String = FlutterPluginUtils.buildModeFor(variant.buildType)
-            val flavorValue: String = variant.flavorName
-            val taskName: String =
+            val variantBuildMode = FlutterPluginUtils.buildModeFor(variant.buildType)
+            val flavorValue = variant.flavorName
+            val taskName =
                 FlutterPluginUtils.toCamelCase(
                     listOf(
                         "compile",
@@ -699,8 +698,8 @@ class FlutterPlugin : Plugin<Project> {
                     validateDeferredComponents = validateDeferredComponentsValue
                     flavor = flavorValue
                 }
-            val flutterCompileTask: FlutterTask = compileTaskProvider.get()
-            val libJar: File =
+            val flutterCompileTask = compileTaskProvider.get()
+            val libJar =
                 project.file(
                     project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar")
                 )
@@ -731,7 +730,7 @@ class FlutterPlugin : Plugin<Project> {
                         }
                     }
                 }
-            val packJniLibsTask: Task = packJniLibsTaskProvider.get()
+            val packJniLibsTask = packJniLibsTaskProvider.get()
             FlutterPluginUtils.addApiDependencies(
                 project,
                 variant.name,
@@ -761,7 +760,7 @@ class FlutterPlugin : Plugin<Project> {
                     val mergeAssets =
                         try {
                             variant.mergeAssetsProvider.get()
-                        } catch (e: IllegalStateException) {
+                        } catch (_: IllegalStateException) {
                             // TODO(gmackall): Migrate to AGPs variant api.
                             //    https://github.com/flutter/flutter/issues/166550
                             @Suppress("DEPRECATION")
@@ -781,7 +780,7 @@ class FlutterPlugin : Plugin<Project> {
                 val processResources =
                     try {
                         variantOutput.processResourcesProvider.get()
-                    } catch (e: IllegalStateException) {
+                    } catch (_: IllegalStateException) {
                         // TODO(gmackall): Migrate to AGPs variant api.
                         //    https://github.com/flutter/flutter/issues/166550
                         @Suppress("DEPRECATION")
@@ -803,7 +802,7 @@ class FlutterPlugin : Plugin<Project> {
                     project.tasks.named(taskTocheck).configure {
                         dependsOn(copyFlutterAssetsTask)
                     }
-                } catch (ignored: UnknownTaskException) {
+                } catch (_: UnknownTaskException) {
                     // ignored
                 }
             }
@@ -811,11 +810,4 @@ class FlutterPlugin : Plugin<Project> {
         }
     }
 
-    /**
-     * Returns true if the Gradle task is invoked by Android Studio.
-     *
-     * This is true when the property `android.injected.invoked.from.ide` is passed to Gradle.
-     * This property is set by Android Studio when it invokes a Gradle task.
-     */
-    private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
 }
