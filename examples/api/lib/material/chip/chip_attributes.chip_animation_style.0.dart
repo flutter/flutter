@@ -36,13 +36,13 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: .spaceEvenly,
       children: <Widget>[
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FilterChip.elevated(
                   chipAnimationStyle: ChipAnimationStyle(
@@ -68,7 +68,7 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
               ],
             ),
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FilterChip.elevated(
                   chipAnimationStyle: ChipAnimationStyle(
@@ -98,10 +98,10 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
           ],
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FilterChip.elevated(
                   chipAnimationStyle: ChipAnimationStyle(
@@ -128,7 +128,7 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
               ],
             ),
             Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 FilterChip.elevated(
                   chipAnimationStyle: ChipAnimationStyle(

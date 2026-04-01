@@ -17,6 +17,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -71,6 +72,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   FlutterProject get parent;
 
   Directory get hostAppRoot;
+
+  FlutterDarwinPlatform get darwinPlatform;
 
   List<Plugin>? _plugins;
   Future<List<Plugin>> get plugins async {
@@ -224,7 +227,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
+      hostAppRoot.path,
+      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+    );
   }
 
   XcodeProjectInfo? _projectInfo;
@@ -380,6 +386,9 @@ class IosProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
   // build setting keys
   static const kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
@@ -1132,6 +1141,9 @@ class MacOSProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => MacOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   bool existsSync() => hostAppRoot.existsSync();

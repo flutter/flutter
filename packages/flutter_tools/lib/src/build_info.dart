@@ -951,7 +951,7 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory([Config? config, FileSystem? fileSystem]) {
+String getIosBuildDirectory({Config? config, FileSystem? fileSystem}) {
   final Config localConfig = config ?? globals.config;
   final FileSystem localFilesystem = fileSystem ?? globals.fs;
   return localFilesystem.path.join(
@@ -961,7 +961,7 @@ String getIosBuildDirectory([Config? config, FileSystem? fileSystem]) {
 }
 
 /// Returns the macOS build output directory.
-String getMacOSBuildDirectory([Config? config, FileSystem? fileSystem]) {
+String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
   final Config localConfig = config ?? globals.config;
   final FileSystem localFilesystem = fileSystem ?? globals.fs;
   return localFilesystem.path.join(

@@ -726,6 +726,56 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
 
+    test('TextInputClient onFocusReceived method is called', () async {
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
+      final TextInputConnection connection = TextInput.attach(client, configuration);
+
+      expect(connection.attached, isTrue);
+      expect(client.latestMethodCall, isEmpty);
+
+      connection.connectionClosedReceived();
+
+      expect(connection.attached, isFalse);
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send refocu message to re-establish the connection.
+      final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1],
+        'method': 'TextInputClient.onFocusReceived',
+      });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes2,
+        (ByteData? _) {},
+      );
+
+      expect(client.latestMethodCall, 'onFocusReceived');
+    });
+
+    test('TextInputClient onFocusReceived method is called even if already connected', () async {
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
+      final TextInputConnection connection = TextInput.attach(client, configuration);
+
+      expect(connection.attached, isTrue);
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send onFocusReceived message to re-establish the connection.
+      final ByteData? messageBytes2 = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1],
+        'method': 'TextInputClient.onFocusReceived',
+      });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes2,
+        (ByteData? _) {},
+      );
+
+      expect(connection.attached, isTrue);
+      expect(client.latestMethodCall, 'onFocusReceived');
+    });
+
     test('TextInputClient insertContent method is called', () async {
       final client = FakeTextInputClient(TextEditingValue.empty);
       const configuration = TextInputConfiguration();
@@ -1623,6 +1673,12 @@ class FakeTextInputClient with TextInputClient {
   void performSelector(String selectorName) {
     latestMethodCall = 'performSelector';
     performedSelectors.add(selectorName);
+  }
+
+  @override
+  bool onFocusReceived() {
+    latestMethodCall = 'onFocusReceived';
+    return true;
   }
 }
 

@@ -25,6 +25,7 @@ class PlaygroundImpl;
 
 enum class PlaygroundBackend {
   kMetal,
+  kMetalSDF,
   kOpenGLES,
   kVulkan,
 };
