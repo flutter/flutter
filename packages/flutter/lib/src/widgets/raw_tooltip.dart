@@ -966,7 +966,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   }
 
   Rect? _getAnchorRect() {
-    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox != null && renderBox.hasSize) {
       final Offset position = renderBox.localToGlobal(Offset.zero);
       return position & renderBox.size;
