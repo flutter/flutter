@@ -680,8 +680,15 @@ class FlutterPluginSwiftDependencies {
       _targetPlatform.supportedPackagePlatform;
 
   @visibleForTesting
-  /// A list of plugin name, path to the copied Swift package, and the plugin's supported version.
-  final List<({String name, String swiftPackagePath, SwiftPackageSupportedPlatform? version})>
+  /// A list of plugin name, path to the copied Swift package, and the plugin's required minimum
+  /// [SwiftPackageSupportedPlatform].
+  final List<
+    ({
+      String name,
+      String swiftPackagePath,
+      SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+    })
+  >
   copiedPlugins = [];
 
   /// Copy plugins from pubcache to [pluginsDirectory] and sets [highestSupportedVersion] to later
@@ -711,7 +718,7 @@ class FlutterPluginSwiftDependencies {
         final ({
           String name,
           String swiftPackagePath,
-          SwiftPackageSupportedPlatform? version,
+          SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
           bool restoredFromCache,
         })
         result = await _processPlugin(plugin, pluginsDirectory, cacheDirectory);
@@ -721,7 +728,7 @@ class FlutterPluginSwiftDependencies {
         copiedPlugins.add((
           name: result.name,
           swiftPackagePath: result.swiftPackagePath,
-          version: result.version,
+          packageMinimumSupportedPlatform: result.packageMinimumSupportedPlatform,
         ));
       }
       _highestSupportedVersion = _determineHighestSupportedVersion(copiedPlugins);
@@ -742,7 +749,7 @@ class FlutterPluginSwiftDependencies {
     ({
       String name,
       String swiftPackagePath,
-      SwiftPackageSupportedPlatform? version,
+      SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
       bool restoredFromCache,
     })
   >
@@ -756,28 +763,31 @@ class FlutterPluginSwiftDependencies {
     final File cachedManifest = pluginCache.childFile('Package.swift');
     final File cachedVersionFile = pluginCache.childFile('${_targetPlatform.name}.version');
 
-    final ({String name, String swiftPackagePath, SwiftPackageSupportedPlatform? version})? cached =
-        await _restoreFromCache(
-          pluginCache: pluginCache,
-          manifest: manifest,
-          swiftPackagePath: swiftPackagePath,
-          plugin: plugin,
-          cachedManifest: cachedManifest,
-          cachedVersionFile: cachedVersionFile,
-        );
+    final ({
+      String name,
+      String swiftPackagePath,
+      SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+    })?
+    cached = await _restoreFromCache(
+      pluginCache: pluginCache,
+      manifest: manifest,
+      swiftPackagePath: swiftPackagePath,
+      plugin: plugin,
+      cachedManifest: cachedManifest,
+      cachedVersionFile: cachedVersionFile,
+    );
     if (cached != null) {
       return (
         name: cached.name,
         swiftPackagePath: cached.swiftPackagePath,
-        version: cached.version,
+        packageMinimumSupportedPlatform: cached.packageMinimumSupportedPlatform,
         restoredFromCache: true,
       );
     }
 
     final Map<String, Object?> manifestAsJson = await _parseSwiftPackage(manifest);
-    final SwiftPackageSupportedPlatform? parsedPlatform = _parseSwiftPackageSupportedPlatform(
-      manifestAsJson,
-    );
+    final SwiftPackageSupportedPlatform? parsedPlatformVersion =
+        _parseSwiftPackageSupportedPlatform(manifestAsJson);
     final bool flutterDependencyFound = _hasFlutterDependency(manifestAsJson);
     if (!flutterDependencyFound) {
       final List<String> targetNames = _getTargetNames(manifestAsJson);
@@ -795,12 +805,12 @@ class FlutterPluginSwiftDependencies {
       manifest: manifest,
       cachedManifest: cachedManifest,
       cachedVersionFile: cachedVersionFile,
-      parsedPlatform: parsedPlatform,
+      parsedPlatformVersion: parsedPlatformVersion,
     );
     return (
       name: plugin.name,
       swiftPackagePath: swiftPackagePath,
-      version: parsedPlatform,
+      packageMinimumSupportedPlatform: parsedPlatformVersion,
       restoredFromCache: false,
     );
   }
@@ -838,7 +848,13 @@ class FlutterPluginSwiftDependencies {
 
   /// Restores the plugin info from the cache if the original manifest has not changed and the
   /// cached files exist.
-  Future<({String name, String swiftPackagePath, SwiftPackageSupportedPlatform? version})?>
+  Future<
+    ({
+      String name,
+      String swiftPackagePath,
+      SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+    })?
+  >
   _restoreFromCache({
     required Directory pluginCache,
     required File manifest,
@@ -879,7 +895,11 @@ class FlutterPluginSwiftDependencies {
           version: version,
         );
       }
-      return (name: plugin.name, swiftPackagePath: swiftPackagePath, version: parsedPlatform);
+      return (
+        name: plugin.name,
+        swiftPackagePath: swiftPackagePath,
+        packageMinimumSupportedPlatform: parsedPlatform,
+      );
     }
 
     fingerprinter.writeFingerprint();
@@ -892,20 +912,27 @@ class FlutterPluginSwiftDependencies {
     required File manifest,
     required File cachedVersionFile,
     required String basename,
-    required SwiftPackageSupportedPlatform? parsedPlatform,
+    required SwiftPackageSupportedPlatform? parsedPlatformVersion,
   }) {
     // Append the basename to the manifest to force Xcode to re-cache the package when the version changes.
     cachedManifest.writeAsStringSync('${manifest.readAsStringSync()}\n\n// $basename');
-    cachedVersionFile.writeAsStringSync(parsedPlatform?.version.toString() ?? '');
+    cachedVersionFile.writeAsStringSync(parsedPlatformVersion?.version.toString() ?? '');
   }
 
   /// Determine the highest [SwiftPackageSupportedPlatform] from the list of plugins.
   SwiftPackageSupportedPlatform _determineHighestSupportedVersion(
-    List<({String name, String swiftPackagePath, SwiftPackageSupportedPlatform? version})> plugins,
+    List<
+      ({
+        String name,
+        String swiftPackagePath,
+        SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+      })
+    >
+    plugins,
   ) {
     SwiftPackageSupportedPlatform highest = _targetPlatform.supportedPackagePlatform;
     for (final plugin in plugins) {
-      final SwiftPackageSupportedPlatform? pluginVersion = plugin.version;
+      final SwiftPackageSupportedPlatform? pluginVersion = plugin.packageMinimumSupportedPlatform;
       if (pluginVersion != null && pluginVersion.version > highest.version) {
         highest = pluginVersion;
       }
@@ -937,7 +964,12 @@ class FlutterPluginSwiftDependencies {
     if (manifestAsJson case {'platforms': final List<Object?> platformsData}) {
       for (final Map<String, Object?> platformData
           in platformsData.whereType<Map<String, Object?>>()) {
-        return SwiftPackageSupportedPlatform.fromJson(platformData);
+        final SwiftPackageSupportedPlatform? platform = SwiftPackageSupportedPlatform.fromJson(
+          platformData,
+        );
+        if (platform != null && platform.platform == _targetPlatform.swiftPackagePlatform) {
+          return platform;
+        }
       }
     }
     return null;
@@ -951,7 +983,8 @@ class FlutterPluginSwiftDependencies {
         if (dependencyData case {'fileSystem': final List<Object?> fileSystemData}) {
           for (final Map<String, Object?> fileSystemData
               in fileSystemData.whereType<Map<String, Object?>>()) {
-            if (fileSystemData['identity'] == kFlutterGeneratedFrameworkSwiftPackageTargetName.toLowerCase()) {
+            if (fileSystemData['identity'] ==
+                kFlutterGeneratedFrameworkSwiftPackageTargetName.toLowerCase()) {
               return true;
             }
           }
@@ -1006,7 +1039,9 @@ class FlutterPluginSwiftDependencies {
         kFlutterGeneratedFrameworkSwiftPackageTargetName,
       ], workingDirectory: workingDirectory.path);
       if (targetResult.exitCode != 0) {
-        throwToolExit('Failed to add FlutterFramework as a target dependency. ${targetResult.stderr}');
+        throwToolExit(
+          'Failed to add FlutterFramework as a target dependency. ${targetResult.stderr}',
+        );
       }
     }
   }
@@ -1019,7 +1054,11 @@ class FlutterPluginSwiftDependencies {
   }) {
     final List<SwiftPackagePackageDependency> packageDependencies = [];
     final List<SwiftPackageTargetDependency> targetDependencies = [];
-    for (final ({String name, String swiftPackagePath, SwiftPackageSupportedPlatform? version})
+    for (final ({
+          String name,
+          String swiftPackagePath,
+          SwiftPackageSupportedPlatform? packageMinimumSupportedPlatform,
+        })
         plugin
         in copiedPlugins) {
       // Symlink the swift package inside the packagesForConfiguration directory
