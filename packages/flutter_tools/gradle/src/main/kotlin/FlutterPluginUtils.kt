@@ -542,7 +542,16 @@ object FlutterPluginUtils {
             if (!hasAppPlugin && !hasLibPlugin) return@subprojects
 
             if (!hasKgpPlugin) {
-                pluginManager.apply("kotlin-android")
+                try {
+                    pluginManager.apply("kotlin-android")
+                } catch (_: Exception) {
+                    logger
+                        .quiet(
+                            "Applying the Kotlin Android plugin was unsuccessful. " +
+                                "The Kotlin Android plugin was not found on the classpath. " +
+                                "Ensure it is declared in the root plugins block."
+                        )
+                }
                 return@subprojects
             }
 
