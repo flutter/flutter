@@ -604,7 +604,7 @@ class _OverlayTooltipShowController implements _TooltipShowController {
 
   @override
   void dispose() {
-    // OverlayPortalController has no dispose.
+    // OverlayPortalController has nothing to dispose.
   }
 }
 
