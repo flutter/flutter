@@ -161,9 +161,9 @@ HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef controller) {
   return reinterpret_cast<HWND>(-1);
 }
 
-IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
+IDXGIAdapter* FlutterDesktopEngineGetGraphicsAdapter(FlutterDesktopEngineRef engine) {
   if (s_stub_implementation) {
-    return s_stub_implementation->ViewGetGraphicsAdapter();
+    return s_stub_implementation->EngineGetGraphicsAdapter();
   }
   return nullptr;
 }

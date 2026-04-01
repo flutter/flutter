@@ -17,9 +17,6 @@ namespace {
 class TestWindowsApi : public testing::StubFlutterWindowsApi {
   HWND ViewGetHWND() override { return reinterpret_cast<HWND>(7); }
 
-  IDXGIAdapter* ViewGetGraphicsAdapter() override {
-    return reinterpret_cast<IDXGIAdapter*>(8);
-  }
 };
 
 }  // namespace
@@ -32,14 +29,5 @@ TEST(FlutterViewTest, HwndAccessPassesThrough) {
   EXPECT_EQ(view.GetNativeWindow(), reinterpret_cast<HWND>(7));
 }
 
-TEST(FlutterViewTest, GraphicsAdapterAccessPassesThrough) {
-  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
-      std::make_unique<TestWindowsApi>());
-  auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
-  FlutterView view(reinterpret_cast<FlutterDesktopViewRef>(2));
-
-  IDXGIAdapter* adapter = view.GetGraphicsAdapter();
-  EXPECT_EQ(adapter, reinterpret_cast<IDXGIAdapter*>(8));
-}
 
 }  // namespace flutter

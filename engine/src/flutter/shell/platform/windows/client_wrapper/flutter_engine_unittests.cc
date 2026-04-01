@@ -227,4 +227,13 @@ TEST(FlutterEngineTest, ProcessExternalWindowMessage) {
   EXPECT_EQ(test_api->last_external_message(), 1234);
 }
 
+TEST(FlutterEngineTest, GetGraphicsAdapter) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  FlutterEngine engine(DartProject(L"fake/project/path"));
+
+  IDXGIAdapter* adapter = engine.GetGraphicsAdapter();
+  EXPECT_NE(adapter, nullptr);
+}
+
 }  // namespace flutter
