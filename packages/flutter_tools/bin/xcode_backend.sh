@@ -37,9 +37,9 @@ DART="$FLUTTER_ROOT/bin/dart"
 # primary installation of Git on the host.  If another Git is found when all
 # Xcode directories are removed from the PATH, then tell Flutter's scripts to
 # use that version of Git.
-NO_XCODE_PATH=$(echo $PATH | tr ":" "\n" | grep -v /Xcode.app/ | tr "\n" ":")
-if NO_XCODE_GIT=$(env PATH=$NO_XCODE_PATH which git); then
-  export FLUTTER_GIT=$NO_XCODE_GIT
+NO_XCODE_PATH=$(echo "$PATH" | tr ":" "\n" | grep -v "/Xcode.app/" | paste -sd ":" -)
+if NO_XCODE_GIT=$(env PATH="$NO_XCODE_PATH" which git); then
+  export FLUTTER_GIT="$NO_XCODE_GIT"
 fi
 
 "$DART" "$BIN_DIR/xcode_backend.dart" "$@" "ios"
