@@ -825,7 +825,8 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
     Scalar expand_size = kAntialiasPadding;
     if (paint.style == Paint::Style::kStroke) {
       expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
@@ -841,10 +842,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
     const Geometry* geom = contents->GetGeometry();
 
-    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
-                                            /*reuse_depth=*/false,
-                                            /*override_contents=*/
-                                            std::move(contents));
+    AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     return;
   }
 
@@ -1032,7 +1030,8 @@ void Canvas::DrawCircle(const Point& center,
     }
   }
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs && !paint.color_source) {
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
     const bool is_stroked = paint.style == Paint::Style::kStroke;
 
     std::optional<CircleGeometry> geometry;
@@ -1052,10 +1051,7 @@ void Canvas::DrawCircle(const Point& center,
 
     const Geometry* geom = contents->GetGeometry();
 
-    AddRenderEntityWithFiltersToCurrentPass(
-        entity, geom, paint,
-        /*reuse_depth=*/false,
-        /*override_contents=*/std::move(contents));
+    AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     return;
   }
 
@@ -1961,14 +1957,49 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   AddRenderEntityToCurrentPass(entity, false);
 }
 
+void Canvas::AddRenderSDFEntityToCurrentPass(
+    Entity& entity,
+    const Geometry* geom,
+    const Paint& paint,
+    std::shared_ptr<ColorSourceContents> contents) {
+  if (paint.color_source) {
+    // UberSDF doesn't perform things like gradients so we blend the SDF
+    // with the color source.
+    std::shared_ptr<Contents> color_source_contents =
+        paint.CreateContents(geom);
+    std::shared_ptr<Contents> final_contents = ColorFilterContents::MakeBlend(
+        BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                            FilterInput::Make(color_source_contents)});
+
+    Paint new_paint = paint;
+    new_paint.color_source = nullptr;
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
+                                            /*reuse_depth=*/false,
+                                            /*override_contents=*/
+                                            std::move(final_contents));
+  } else {
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                            /*reuse_depth=*/false,
+                                            /*override_contents=*/
+                                            std::move(contents));
+  }
+}
+
 void Canvas::AddRenderEntityWithFiltersToCurrentPass(
     Entity& entity,
     const Geometry* geometry,
     const Paint& paint,
     bool reuse_depth,
-    const std::shared_ptr<ColorSourceContents>& override_contents) {
-  std::shared_ptr<ColorSourceContents> contents =
-      override_contents ? override_contents : paint.CreateContents(geometry);
+    std::shared_ptr<Contents> override_contents) {
+  std::shared_ptr<ColorSourceContents> color_source_contents;
+  std::shared_ptr<Contents> contents;
+  if (override_contents) {
+    contents = std::move(override_contents);
+  } else {
+    color_source_contents = paint.CreateContents(geometry);
+    contents = color_source_contents;
+  }
+
   if (!paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value()) {
     entity.SetContents(std::move(contents));
@@ -1999,9 +2030,11 @@ void Canvas::AddRenderEntityWithFiltersToCurrentPass(
     // If there's a mask blur and we need to apply the color filter on the GPU,
     // we need to be careful to only apply the color filter to the source
     // colors. CreateMaskBlur is able to handle this case.
+    FML_DCHECK(color_source_contents) << "Mask blur is only supported when no "
+                                         "override contents are provided.";
     FillRectGeometry out_rect(Rect{});
     auto filter = paint.mask_blur_descriptor->CreateMaskBlur(
-        paint, geometry, contents, needs_color_filter, &out_rect);
+        paint, geometry, color_source_contents, needs_color_filter, &out_rect);
     entity.SetContents(std::move(filter));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
     return;

@@ -66,4 +66,14 @@ void main() {
     );
     expect(find.text('Label'), findsOneWidget);
   });
+
+  testWidgets('Placeholder does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Placeholder)), Size.zero);
+  });
 }
