@@ -166,8 +166,10 @@ void GoldenPlaygroundTest::SetUp() {
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
-    case PlaygroundBackend::kMetal:
     case PlaygroundBackend::kMetalSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
+    case PlaygroundBackend::kMetal:
       if (!DoesSupportWideGamutTests()) {
         GTEST_SKIP()
             << "This metal device doesn't support wide gamut golden tests.";

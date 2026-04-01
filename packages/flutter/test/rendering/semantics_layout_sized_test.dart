@@ -123,6 +123,53 @@ void main() {
     // State after removal: exposes originalChild again.
     expect(parentSemantics.childrenCount, 1);
   });
+
+  test('Skip update for invisible child being dropped from tree', () {
+    final child = RenderTestLayoutSemanticsBoundary();
+    child.isSemanticBoundary = true;
+    child.targetSize = Size.zero; // Geometry will be invisible.
+
+    final parent = RenderTestParentUsesSize(child: child);
+    parent.isSemanticBoundary = true;
+    parent.explicitChildNode = true;
+
+    final grandParent = RenderTestLastChildSemanticsMultiChildParent(children: <RenderBox>[parent]);
+    grandParent.explicitChildNode = true;
+
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+    layout(grandParent, phase: EnginePhase.flushSemantics);
+
+    // Initial state: grandParent visits parent (because parent is the last child).
+    // parent visits child. Thus all nodes are in the semantics tree.
+    expect(grandParent.debugSemantics!.childrenCount, 1);
+
+    // To trigger the scenario, we need grandParent to drop parent,
+    // explicitly marking parent and child as needing semantics update.
+    parent.markNeedsLayout();
+    child.markNeedsLayout();
+
+    // Adding a new child to grandParent makes it the new `lastChild`.
+    // Because grandParent only visits `lastChild` in `visitChildrenForSemantics`,
+    // the original `parent` and `child` will be dropped from the semantics tree
+    // without their parentDataDirty flags being cleared during the update phase.
+    final newChild = RenderTestLayoutSemanticsBoundary();
+    newChild.isSemanticBoundary = true;
+    grandParent.add(newChild);
+
+    pumpFrame(phase: EnginePhase.flushSemantics);
+  });
+}
+
+class RenderTestParentUsesSize extends RenderTestParent {
+  RenderTestParentUsesSize({super.child});
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child!.layout(constraints.loosen(), parentUsesSize: true);
+    }
+    size = constraints.biggest;
+  }
 }
 
 class RenderTestParent extends RenderBox with RenderObjectWithChildMixin<RenderBox> {

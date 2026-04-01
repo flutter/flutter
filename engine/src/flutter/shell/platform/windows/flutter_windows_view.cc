@@ -726,8 +726,24 @@ void FlutterWindowsView::SendPointerEventWithData(
   }
 }
 
+void FlutterWindowsView::SetFirstFrameCallback(fml::closure callback) {
+  std::scoped_lock lock(first_frame_callback_mutex_);
+  first_frame_callback_ = std::move(callback);
+}
+
+void FlutterWindowsView::FireFirstFrameCallbackIfSet() {
+  std::scoped_lock lock(first_frame_callback_mutex_);
+  if (first_frame_callback_) {
+    fml::closure callback = std::move(first_frame_callback_);
+    first_frame_callback_ = nullptr;
+    engine_->task_runner()->PostTask(std::move(callback));
+  }
+}
+
 void FlutterWindowsView::OnFramePresented() {
   // Called on the engine's raster thread.
+  FireFirstFrameCallbackIfSet();
+
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
   switch (resize_status_) {
@@ -766,8 +782,14 @@ bool FlutterWindowsView::ClearSoftwareBitmap() {
 bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
                                                size_t row_bytes,
                                                size_t height) {
-  return binding_handler_->OnBitmapSurfaceUpdated(allocation, row_bytes,
-                                                  height);
+  bool result =
+      binding_handler_->OnBitmapSurfaceUpdated(allocation, row_bytes, height);
+  if (result) {
+    // The software compositor does not call OnFramePresented, so fire the
+    // first frame callback here.
+    FireFirstFrameCallbackIfSet();
+  }
+  return result;
 }
 
 FlutterViewId FlutterWindowsView::view_id() const {
