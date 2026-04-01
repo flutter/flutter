@@ -1278,11 +1278,19 @@ class DeviceDomain extends Domain {
       devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
     }
 
+
+    FlutterProject? project;
+    try {
+      project = FlutterProject.current();
+    } on ToolExit catch (_) {
+      // In daemon mode the cwd may not be a Flutter project, so we just ignore
+      // these errors and use 'Unknown' as the package name below.
+    }
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
       appName:
           'Kind: Flutter - Device: ${device.displayName} - '
-          'Package: ${FlutterProject.current().manifest.appName}',
+          'Package: ${project?.manifest.appName ?? 'Unknown'}',
       disableServiceAuthCodes: disableServiceAuthCodes,
       enableDevTools: enableDevTools,
       devToolsServerAddress: devToolsServerAddress,
