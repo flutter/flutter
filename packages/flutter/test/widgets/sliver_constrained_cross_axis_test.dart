@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,11 +63,83 @@ void main() {
     final RenderSliver sliver = tester.renderObject(find.byType(SliverConstrainedCrossAxis));
     expect((sliver.parentData! as SliverPhysicalParentData).crossAxisFlex, equals(0));
   });
+
+  testWidgets('SliverConstrainedCrossAxis aligns child correctly', (WidgetTester tester) async {
+    final Key sliverKey = UniqueKey();
+    await tester.pumpWidget(
+      _buildSliverConstrainedCrossAxis(
+        maxExtent: 200,
+        alignment: Alignment.center,
+        sliver: SliverToBoxAdapter(
+          child: Container(key: sliverKey, color: Colors.red, height: 60),
+        ),
+      ),
+    );
+
+    // The viewport width is 300.
+    // maxExtent is 200.
+    // Child should be centered, so local offset.dx should be (300 - 200) / 2 = 50.
+    final double scrollViewDx = tester.getTopLeft(find.byType(CustomScrollView)).dx;
+    expect(tester.getTopLeft(find.byKey(sliverKey)).dx, scrollViewDx + 50.0);
+  });
+
+  testWidgets('SliverConstrainedCrossAxis aligns child center right', (WidgetTester tester) async {
+    final Key sliverKey = UniqueKey();
+    await tester.pumpWidget(
+      _buildSliverConstrainedCrossAxis(
+        maxExtent: 200,
+        alignment: Alignment.centerRight,
+        sliver: SliverToBoxAdapter(
+          child: Container(key: sliverKey, color: Colors.red, height: 60),
+        ),
+      ),
+    );
+
+    // The viewport width is 300.
+    // maxExtent is 200.
+    // Child should be right aligned, so local offset.dx should be 300 - 200 = 100.
+    final double scrollViewDx = tester.getTopLeft(find.byType(CustomScrollView)).dx;
+    expect(tester.getTopLeft(find.byKey(sliverKey)).dx, scrollViewDx + 100.0);
+  });
+
+  testWidgets('SliverConstrainedCrossAxis aligns child in RTL correctly', (WidgetTester tester) async {
+    final Key sliverKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
+          child: SizedBox(
+            width: VIEWPORT_WIDTH,
+            height: VIEWPORT_HEIGHT,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverConstrainedCrossAxis(
+                  maxExtent: 200,
+                  alignment: AlignmentDirectional.centerEnd,
+                  sliver: SliverToBoxAdapter(
+                    child: Container(key: sliverKey, color: Colors.red, height: 60),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The viewport width is 300.
+    // maxExtent is 200.
+    // RTL + AlignmentDirectional.centerEnd = Alignment.centerLeft = local offset.dx = 0.
+    final double scrollViewDx = tester.getTopLeft(find.byType(CustomScrollView)).dx;
+    expect(tester.getTopLeft(find.byKey(sliverKey)).dx, scrollViewDx + 0.0);
+  });
 }
 
 Widget _buildSliverConstrainedCrossAxis({
   required double maxExtent,
   Axis scrollDirection = Axis.vertical,
+  AlignmentGeometry alignment = Alignment.centerLeft,
+  Widget? sliver,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -79,7 +152,8 @@ Widget _buildSliverConstrainedCrossAxis({
           slivers: <Widget>[
             SliverConstrainedCrossAxis(
               maxExtent: maxExtent,
-              sliver: SliverToBoxAdapter(
+              alignment: alignment,
+              sliver: sliver ?? SliverToBoxAdapter(
                 child: scrollDirection == Axis.vertical
                     ? Container(height: 100)
                     : Container(width: 100),

@@ -12,6 +12,7 @@ import 'package:flutter/semantics.dart';
 import 'layer.dart';
 import 'object.dart';
 import 'proxy_box.dart';
+import 'package:flutter/painting.dart';
 import 'sliver.dart';
 
 /// A base class for sliver render objects that resemble their children.
@@ -450,9 +451,14 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   /// Creates a render object that constrains the cross axis extent of its sliver child.
   ///
   /// The [maxExtent] parameter must be nonnegative.
-  RenderSliverConstrainedCrossAxis({required double maxExtent})
-    : _maxExtent = maxExtent,
-      assert(maxExtent >= 0.0);
+  RenderSliverConstrainedCrossAxis({
+    required double maxExtent,
+    AlignmentGeometry alignment = Alignment.centerLeft,
+    TextDirection? textDirection,
+  }) : _maxExtent = maxExtent,
+       _alignment = alignment,
+       _textDirection = textDirection,
+       assert(maxExtent >= 0.0);
 
   /// The cross axis extent to apply to the sliver child.
   ///
@@ -467,22 +473,119 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     markNeedsLayout();
   }
 
+  /// The alignment of the sliver child in the cross axis.
+  ///
+  /// If [alignment] is [Alignment.centerLeft], the child will be aligned to the
+  /// start of the cross axis.
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
+    if (_alignment == value) {
+      return;
+    }
+    _alignment = value;
+    markNeedsLayout();
+  }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be null if the [alignment] is not direction-sensitive.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    markNeedsLayout();
+  }
+
   @override
   void performLayout() {
+    final RenderSliver? child = this.child;
     assert(child != null);
     assert(maxExtent >= 0.0);
+    final double crossAxisExtent = min(_maxExtent, constraints.crossAxisExtent);
     child!.layout(
-      constraints.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent)),
+      constraints.copyWith(crossAxisExtent: crossAxisExtent),
       parentUsesSize: true,
     );
-    final SliverGeometry childLayoutGeometry = child!.geometry!;
+    final SliverGeometry childLayoutGeometry = child.geometry!;
     geometry = childLayoutGeometry.copyWith(
-      crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
+      crossAxisExtent: crossAxisExtent,
     );
+
+    final double freeSpace = constraints.crossAxisExtent - crossAxisExtent;
+    final double crossAxisOffset = alignment.resolve(textDirection).alongOffset(Offset(freeSpace, 0.0)).dx;
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    childParentData.paintOffset = switch (constraints.axis) {
+      Axis.horizontal => Offset(0.0, crossAxisOffset),
+      Axis.vertical => Offset(crossAxisOffset, 0.0),
+    };
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderSliver? child = this.child;
+    if (child != null && child.geometry!.visible) {
+      final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+      context.paintChild(child, offset + childParentData.paintOffset);
+    }
+  }
+
+  @override
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    final RenderSliver? child = this.child;
+    if (child != null && child.geometry!.hitTestExtent > 0.0) {
+      final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+      return result.addWithAxisOffset(
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+        mainAxisOffset: childMainAxisPosition(child),
+        crossAxisOffset: childCrossAxisPosition(child),
+        paintOffset: childParentData.paintOffset,
+        hitTest: child.hitTest,
+      );
+    }
+    return false;
+  }
+
+  @override
+  double childMainAxisPosition(RenderSliver child) {
+    assert(child == this.child);
+    return 0.0;
+  }
+
+  @override
+  double childCrossAxisPosition(RenderSliver child) {
+    assert(child == this.child);
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    return switch (constraints.axis) {
+      Axis.horizontal => childParentData.paintOffset.dy,
+      Axis.vertical => childParentData.paintOffset.dx,
+    };
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child == this.child);
+    final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+    childParentData.applyPaintTransform(transform);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('maxExtent', maxExtent));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
-/// Add annotations to the [SemanticsNode] for this subtree.
 class RenderSliverSemanticsAnnotations extends RenderProxySliver with SemanticsAnnotationsMixin {
   /// Creates a render object that attaches a semantic annotation.
   ///
