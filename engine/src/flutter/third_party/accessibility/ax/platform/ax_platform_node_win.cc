@@ -5313,6 +5313,8 @@ std::optional<PROPERTYID> AXPlatformNodeWin::MojoEventToUIAProperty(
         return UIA_ToggleToggleStatePropertyId;
       }
       return std::nullopt;
+    case ax::mojom::Event::kStateChanged:
+      return UIA_IsEnabledPropertyId;
     default:
       return std::nullopt;
   }

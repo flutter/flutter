@@ -103,6 +103,10 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
       DispatchWinAccessibilityEvent(win_delegate,
                                     ax::mojom::Event::kStateChanged);
       break;
+    case ui::AXEventGenerator::Event::ENABLED_CHANGED:
+      DispatchWinAccessibilityEvent(win_delegate,
+                                    ax::mojom::Event::kStateChanged);
+      break;
     case ui::AXEventGenerator::Event::ACCESS_KEY_CHANGED:
     case ui::AXEventGenerator::Event::ACTIVE_DESCENDANT_CHANGED:
     case ui::AXEventGenerator::Event::ATK_TEXT_OBJECT_ATTRIBUTE_CHANGED:
@@ -116,7 +120,6 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
     case ui::AXEventGenerator::Event::DESCRIPTION_CHANGED:
     case ui::AXEventGenerator::Event::DOCUMENT_TITLE_CHANGED:
     case ui::AXEventGenerator::Event::DROPEFFECT_CHANGED:
-    case ui::AXEventGenerator::Event::ENABLED_CHANGED:
     case ui::AXEventGenerator::Event::EXPANDED:
     case ui::AXEventGenerator::Event::FLOW_FROM_CHANGED:
     case ui::AXEventGenerator::Event::FLOW_TO_CHANGED:
