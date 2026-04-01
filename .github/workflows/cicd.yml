@@ -1,0 +1,66 @@
+# Copyright 2024 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Remove outdated CICD Label
+
+on:
+  pull_request_target:
+    types: [synchronize]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  remove_cicd_label:
+    name: remove_cicd_label
+    if: contains(github.event.pull_request.labels.*.name, 'CICD')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if label was added before push
+        id: check_timing
+        run: |
+          # Get push time (commit date of the head SHA)
+          PUSH_TIME='${{ github.event.pull_request.updated_at }}'
+          echo "Push time: $PUSH_TIME"
+
+          # Get latest CICD labeling event time from the last 100 events
+          LABEL_TIME=$(gh api graphql -f query='
+            query($owner: String!, $repo: String!, $pr: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $pr) {
+                  timelineItems(last: 100, itemTypes: [LABELED_EVENT]) {
+                    nodes {
+                      ... on LabeledEvent {
+                        label { name }
+                        createdAt
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -F pr=${{ github.event.pull_request.number }} \
+            --jq '.data.repository.pullRequest.timelineItems.nodes | map(select(.label.name == "CICD")) | last | .createdAt')
+          echo "Label time: $LABEL_TIME"
+
+          if [[ -z "$LABEL_TIME" ]]; then
+            # Label exists on PR (checked by job 'if') but not in last 100 events -> must be very old
+            echo "should_remove=true" >> "$GITHUB_OUTPUT"
+            echo "Result: Label found on PR but not in recent timeline events. Assuming it is old."
+          elif [[ "$LABEL_TIME" < "$PUSH_TIME" ]]; then
+            echo "should_remove=true" >> "$GITHUB_OUTPUT"
+            echo "Result: Label added at $LABEL_TIME is older than push at $PUSH_TIME. Removing."
+          else
+            echo "should_remove=false" >> "$GITHUB_OUTPUT"
+            echo "Result: Label added at $LABEL_TIME is newer than or same as push at $PUSH_TIME. Skipping removal."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Remove outdated CICD label
+        if: steps.check_timing.outputs.should_remove == 'true'
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} -R ${{ github.repository }} --remove-label "CICD"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

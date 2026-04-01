@@ -984,6 +984,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
+    this.enableHcpp = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -992,7 +993,6 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-    this.enableLocalDiscovery = false,
     this.webDevServerConfig,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
@@ -1019,12 +1019,12 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
+    this.enableHcpp = false,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
-    this.enableLocalDiscovery = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1103,6 +1103,7 @@ class DebuggingOptions {
     required this.uninstallFirst,
     required this.uninstallApp,
     required this.enableDartProfiling,
+    required this.enableHcpp,
     required this.profileStartup,
     required this.enableEmbedderApi,
     required this.usingCISystem,
@@ -1111,7 +1112,6 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
-    required this.enableLocalDiscovery,
     this.webDevServerConfig,
   });
 
@@ -1149,6 +1149,7 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
+  final bool enableHcpp;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1157,7 +1158,6 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
-  final bool enableLocalDiscovery;
   final WebDevServerConfig? webDevServerConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
@@ -1306,6 +1306,7 @@ class DebuggingOptions {
     'enableVulkanValidation': enableVulkanValidation,
     'uninstallApp': uninstallApp,
     'enableDartProfiling': enableDartProfiling,
+    'enableHcpp': enableHcpp,
     'profileStartup': profileStartup,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
@@ -1324,7 +1325,6 @@ class DebuggingOptions {
     // with the google3 checked in binary.
     'dumpSkpOnShaderCompilation': false,
     'cacheSkSL': false,
-    'enableLocalDiscovery': enableLocalDiscovery,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1376,6 +1376,7 @@ class DebuggingOptions {
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
+        enableHcpp: (json['enableHcpp'] as bool?) ?? false,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
@@ -1384,7 +1385,6 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
-        enableLocalDiscovery: (json['enableLocalDiscovery'] as bool?) ?? false,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',

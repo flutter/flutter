@@ -821,12 +821,11 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     };
   }
 
-  Future<void> _rebuild([void value]) {
+  void _rebuild() {
     setState(() {
       /* routerDelegate is ready to rebuild */
     });
     _maybeNeedToReportRouteInformation();
-    return SynchronousFuture<void>(value);
   }
 
   void _handleRouterDelegateNotification() {
