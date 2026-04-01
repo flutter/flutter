@@ -951,8 +951,15 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     if (!_showControllerInitialized) {
       _showControllerInitialized = true;
       final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
-      final BaseWindowController? windowController = WindowScope.maybeOf(context);
-      if (windowRegistry != null && windowController != null && isWindowingEnabled) {
+      if (windowRegistry != null && isWindowingEnabled) {
+        final BaseWindowController? windowController = WindowScope.maybeOf(context);
+        if (windowController == null) {
+          // If there's no window controller in the widget tree, we won't be able
+          // to show the tooltip window, so we fallback to using the overlay.
+          _showController = _OverlayTooltipShowController();
+          return;
+        }
+
         _showController = _WindowTooltipShowController(
           parent: windowController,
           anchorRectGetter: _getAnchorRect,
