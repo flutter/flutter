@@ -29,16 +29,24 @@ import 'android_sdk.dart';
 //
 // Please see the README before changing any of these values.
 
+// When bumping, also update:
+//  * Gradle warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+//  * Gradle test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://gradle.org/releases
 const templateDefaultGradleVersion = '8.14';
 
 // When bumping, also update:
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
 const templateAndroidGradlePluginVersion = '8.11.1';
 const templateAndroidGradlePluginVersionForModule = '8.11.1';
 
+// When bumping, also update:
+//  * KGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * KGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+//  * KGP jvm constant in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://kotlinlang.org/docs/releases.html#release-details
 const templateKotlinGradlePluginVersion = '2.2.20';
 
