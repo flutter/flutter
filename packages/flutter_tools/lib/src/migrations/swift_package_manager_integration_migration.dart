@@ -1221,7 +1221,7 @@ $newContent
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;
-          final List<Plugin> plugins = await xcodeProject.plugins;
+          final List<Plugin> plugins = await xcodeProject.getPlugins();
           final String? absolutePath = plugins
               .where((plugin) => plugin.name == pluginName)
               .firstOrNull

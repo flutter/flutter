@@ -1131,7 +1131,7 @@ class FakeIosProject extends Fake implements IosProject {
   final List<Plugin> _plugins;
 
   @override
-  Future<List<Plugin>> get plugins async {
+  Future<List<Plugin>> getPlugins() async {
     return _plugins;
   }
 }

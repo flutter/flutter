@@ -75,8 +75,14 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   FlutterDarwinPlatform get darwinPlatform;
 
+  /// Cached list of [Plugin]s for the [FlutterProject].
   List<Plugin>? _plugins;
-  Future<List<Plugin>> get plugins async {
+
+  /// Returns the list of [Plugin]s for the [FlutterProject].
+  ///
+  /// On the first call, this will find plugins in the project.
+  /// On subsequent calls, this will return the cached list of plugins.
+  Future<List<Plugin>> getPlugins() async {
     _plugins ??= await findPlugins(parent);
     return _plugins!;
   }
@@ -567,7 +573,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
     final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
     final pluginNames = <String>{
-      for (final Plugin plugin in await plugins)
+      for (final Plugin plugin in await getPlugins())
         if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
     };
     final targetHeaderPattern = RegExp(

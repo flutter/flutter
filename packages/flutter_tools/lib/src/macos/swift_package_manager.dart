@@ -265,7 +265,7 @@ class SwiftPackageManager {
     final String destination = _fileSystem
         .directory(
           _fileSystem.path.join(
-            platform.buildDirectory(_config, _fileSystem),
+            platform.buildDirectory(config: _config, fileSystem: _fileSystem),
             'SourcePackages',
             basename,
           ),
@@ -274,14 +274,14 @@ class SwiftPackageManager {
         .path;
     final RunResult result = _processUtils.runSync([
       'rsync',
-      '-8',
-      '-av',
-      '--delete',
+      '-8', // Avoid mangling filenames with encodings that do not match the current locale.
+      '-av', // Archive mode and verbose: preserve permissions, ownership, timestamps, etc.
+      '--delete', // Delete files in the destination that are not in the source.
       plugin.path,
       destination,
     ]);
     if (result.exitCode != 0) {
-      throwToolExit('Failed to copy plugin ${plugin.name}: ${result.stderr}');
+      throwToolExit('Failed to copy plugin ${plugin.name}: \n${result.stdout}\n${result.stderr}');
     }
 
     final String? packagePath = plugin.pluginSwiftPackagePath(
@@ -294,7 +294,10 @@ class SwiftPackageManager {
     }
     final File copiedManifest = _fileSystem.directory(packagePath).childFile('Package.swift');
     if (!copiedManifest.existsSync()) {
-      throwToolExit('Failed to find Package.swift for plugin ${plugin.name} at $packagePath');
+      throwToolExit(
+        'Failed to find path to copied Package.swift at ${copiedManifest.path}:\n'
+        'rsync stdout: \n${result.stdout}\nrsync stderr: \n${result.stderr}',
+      );
     }
     var newManifestContent = manifestContent;
     for (final dependency in pluginDependencies) {

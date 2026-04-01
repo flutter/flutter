@@ -523,7 +523,7 @@ class CocoaPods {
     if (matches.isEmpty) {
       return null;
     }
-    final List<Plugin> plugins = await xcodeProject.plugins;
+    final List<Plugin> plugins = await xcodeProject.getPlugins();
     for (final match in matches) {
       final String? missingPlugin = match.group(1);
       final String? requiringPlugin = match.group(2);
