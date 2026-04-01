@@ -297,7 +297,6 @@ class WidgetPreviewDtdServices {
     ]);
   }
 
-
   Future<Map<String, Object?>> _hotRestart(Parameters params) async {
     onHotRestartPreviewerRequest();
     return const Success().toJson();
