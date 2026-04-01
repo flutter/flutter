@@ -1736,6 +1736,270 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
+  testWidgets('can re-acquire focus when the platform sends onFocusReceived', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+
+    final bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('can re-acquire focus in Offstage', (WidgetTester tester) async {
+    final editableTextKey = GlobalKey<EditableTextState>();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Offstage(
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                key: editableTextKey,
+                backgroundCursorColor: Colors.grey,
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+                autofocus: true,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = editableTextKey.currentState!;
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+
+    final bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('does not refocus when it is unmounted', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text('Text field does not exist anymore!'),
+        ),
+      ),
+    );
+
+    final bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isFalse);
+    await tester.pump();
+
+    expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('does not refocus when it is hidden by a new route', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final focusNode = FocusNode(debugLabel: 'EditableText Node');
+    addTearDown(() {
+      focusNode.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Column(
+          children: [
+            EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+            ),
+            TextButton(
+              onPressed: () async {
+                if (navigatorKey.currentState == null) {
+                  return;
+                }
+                await navigatorKey.currentState!.push(
+                  MaterialPageRoute<void>(
+                    settings: const RouteSettings(name: '/TestMaterialRoute'),
+                    builder: (BuildContext innerContext) {
+                      return SizedBox(
+                        width: 600,
+                        height: 600,
+                        child: Container(color: Colors.blue),
+                      );
+                    },
+                  ),
+                );
+              },
+              child: const Text('Push Route'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Push a new route.
+    await tester.tap(find.text('Push Route'));
+    await tester.pumpAndSettle();
+
+    // The text field is hidden by the new route, so it should not regain focus.
+    bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isFalse);
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Pop the route.
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // The text field is visible again, so it should regain focus this time.
+    acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+  }, skip: true); // https://github.com/flutter/flutter/issues/46235
+
+  testWidgets('does not refocus when scrolled away in a ListView', (WidgetTester tester) async {
+    final focusNode = FocusNode(debugLabel: 'EditableText Node');
+    final scrollController = ScrollController();
+    addTearDown(() {
+      focusNode.dispose();
+      scrollController.dispose();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 500,
+            height: 300,
+            child: ListView(
+              controller: scrollController,
+              children: [
+                EditableText(
+                  backgroundCursorColor: Colors.grey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  // autofocus: true,
+                  cursorColor: cursorColor,
+                ),
+                for (var i = 0; i < 50; i++)
+                  Text('Line of text $i', style: const TextStyle(fontSize: 20, height: 2)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+    editableText.connectionClosed();
+    await tester.pump();
+
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Scroll far away from the text field.
+    final ScrollPosition position = scrollController.position;
+    scrollController.jumpTo(position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    // The text field is unmounted, so it should not regain focus.
+    bool acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isFalse);
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isFalse);
+
+    // Scroll back to the text field.
+    scrollController.jumpTo(position.minScrollExtent);
+    await tester.pumpAndSettle();
+
+    // The text field is visible again, so it should regain focus this time.
+    editableText = tester.state(find.byType(EditableText));
+    acquiredFocus = editableText.onFocusReceived();
+    expect(acquiredFocus, isTrue);
+    await tester.pump();
+    expect(editableText.widget.focusNode.hasFocus, isTrue);
+  });
+
   // Test case for
   // https://github.com/flutter/flutter/issues/123523
   // https://github.com/flutter/flutter/issues/134846 .

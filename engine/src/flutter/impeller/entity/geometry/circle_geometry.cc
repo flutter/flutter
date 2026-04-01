@@ -58,6 +58,10 @@ void CircleGeometry::SetAntialiasPadding(Scalar extra_padding) {
   padding_pixels_ = extra_padding;
 }
 
+Scalar CircleGeometry::GetAntialiasPadding() const {
+  return padding_pixels_;
+}
+
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
