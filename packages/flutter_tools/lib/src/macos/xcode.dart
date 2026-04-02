@@ -231,6 +231,16 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
+    projectPath,
+    buildDirectory,
+    skipPackageResolution: skipPackageResolution,
+  );
+
   Future<RunResult> cc(List<String> args) => _run('cc', args);
 
   Future<RunResult> clang(List<String> args) => _run('clang', args);
