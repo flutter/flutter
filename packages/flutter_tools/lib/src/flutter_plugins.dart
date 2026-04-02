@@ -31,6 +31,37 @@ import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
+/// Cache of parsed pubspec YAML content keyed by package root URI string.
+///
+/// Pre-built once per workspace via [buildPubspecCache] and passed to
+/// [findPlugins] to avoid re-reading the same pubspec files for every
+/// workspace project during `flutter pub get`.
+typedef PubspecCache = Map<String, YamlMap?>;
+
+/// Builds a [PubspecCache] for all packages in [packageConfig].
+Future<PubspecCache> buildPubspecCache(
+  PackageConfig packageConfig, {
+  FileSystem? fileSystem,
+}) async {
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final cache = <String, YamlMap?>{};
+  for (final Package package in packageConfig.packages) {
+    final key = package.root.toString();
+    final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
+    if (!pubspecFile.existsSync()) {
+      cache[key] = null;
+      continue;
+    }
+    try {
+      final Object? parsed = loadYaml(await pubspecFile.readAsString());
+      cache[key] = parsed is YamlMap ? parsed : null;
+    } on YamlException {
+      cache[key] = null;
+    }
+  }
+  return cache;
+}
+
 Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
   if (!await file.exists()) {
     return false;
@@ -60,21 +91,26 @@ Future<Plugin?> _pluginFromPackage(
   Set<String> appDependencies, {
   required bool isDevDependency,
   FileSystem? fileSystem,
+  PubspecCache? pubspecCache,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
-  final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
-  if (!pubspecFile.existsSync()) {
-    return null;
+  YamlMap? pubspec;
+  if (pubspecCache != null) {
+    pubspec = pubspecCache[packageRoot.toString()];
+  } else {
+    final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
+    if (!pubspecFile.existsSync()) {
+      return null;
+    }
+    try {
+      final Object? parsed = loadYaml(await pubspecFile.readAsString());
+      pubspec = parsed is YamlMap ? parsed : null;
+    } on YamlException catch (err) {
+      globals.printTrace('Failed to parse plugin manifest for $name: $err');
+      // Do nothing, potentially not a plugin.
+    }
   }
-  Object? pubspec;
-
-  try {
-    pubspec = loadYaml(await pubspecFile.readAsString());
-  } on YamlException catch (err) {
-    globals.printTrace('Failed to parse plugin manifest for $name: $err');
-    // Do nothing, potentially not a plugin.
-  }
-  if (pubspec == null || pubspec is! YamlMap) {
+  if (pubspec == null) {
     return null;
   }
   final Object? flutterConfig = pubspec['flutter'];
@@ -103,22 +139,42 @@ Future<Plugin?> _pluginFromPackage(
 /// Returns a list of all plugins to be registered with the provided [project].
 ///
 /// If [throwOnError] is `true`, an empty package configuration is an error.
-Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = true}) async {
+Future<List<Plugin>> findPlugins(
+  FlutterProject project, {
+  bool throwOnError = true,
+  PubspecCache? pubspecCache,
+  PackageGraph? packageGraph,
+  PackageConfig? packageConfig,
+}) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
-  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-    packageConfigFile,
-    logger: globals.logger,
-    throwOnError: throwOnError,
-  );
+
+  // Shared workspace resources (packageGraph, packageConfig) are only valid
+  // when the project is actually a member of the workspace — i.e. its name
+  // appears in the shared graph. Outside a workspace we load project-specific
+  // resources instead.
+  final bool useSharedResources = packageGraph != null &&
+      packageGraph.dependencies.containsKey(project.manifest.appName);
+
+  final PackageConfig resolvedPackageConfig;
+  if (useSharedResources && packageConfig != null) {
+    resolvedPackageConfig = packageConfig;
+  } else {
+    final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
+    resolvedPackageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: globals.logger,
+      throwOnError: throwOnError,
+    );
+  }
   final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
     project,
-    packageConfig,
+    resolvedPackageConfig,
+    packageGraph: useSharedResources ? packageGraph : null,
   );
   for (final dependency in transitiveDependencies) {
     final String packageName = dependency.name;
-    final Package? package = packageConfig[packageName];
+    final Package? package = resolvedPackageConfig[packageName];
     if (package == null) {
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
@@ -133,6 +189,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, {bool throwOnError = tr
       project.manifest.dependencies,
       isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
+      pubspecCache: pubspecCache,
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -1206,8 +1263,16 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  PubspecCache? pubspecCache,
+  PackageGraph? packageGraph,
+  PackageConfig? packageConfig,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(
+    project,
+    pubspecCache: pubspecCache,
+    packageGraph: packageGraph,
+    packageConfig: packageConfig,
+  );
   // Sort the plugins by name to keep ordering stable in generated files.
   plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
 
@@ -1292,8 +1357,16 @@ Future<void> injectPlugins(
   bool macOSPlatform = false,
   bool windowsPlatform = false,
   DarwinDependencyManagement? darwinDependencyManagement,
+  PubspecCache? pubspecCache,
+  PackageGraph? packageGraph,
+  PackageConfig? packageConfig,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(
+    project,
+    pubspecCache: pubspecCache,
+    packageGraph: packageGraph,
+    packageConfig: packageConfig,
+  );
 
   // Filter out dev dependencies for release builds.
   final List<Plugin> filteredPlugins;
