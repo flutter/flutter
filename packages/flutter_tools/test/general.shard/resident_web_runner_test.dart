@@ -2026,12 +2026,6 @@ class FakeDevice extends Fake implements WebDevice {
   String name = 'FakeDevice';
 
   @override
-  String get id => 'fake_device_id';
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
-
-  @override
   String get displayName => name;
 
   @override
