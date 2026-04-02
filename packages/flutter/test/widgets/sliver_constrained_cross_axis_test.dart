@@ -161,7 +161,7 @@ void main() {
       _buildSliverConstrainedCrossAxis(
         maxExtent: 100,
         textDirection: TextDirection.ltr,
-        alignment: Alignment.center,
+        alignment: Alignment.bottomCenter,
         scrollDirection: Axis.horizontal,
       ),
     );
@@ -170,8 +170,33 @@ void main() {
     // In horizontal scroll, cross axis is vertical. VIEWPORT_HEIGHT = 500.
     expect(box.size.height, 100);
     final Offset scrollViewOffset = tester.getTopLeft(find.byType(CustomScrollView));
-    // (500 - 100) / 2 = 200
-    expect(tester.getTopLeft(find.byType(Container)), scrollViewOffset + const Offset(0, 200));
+    // (500 - 100) / 1.0 = 400. Bottom is 1.0.
+    expect(tester.getTopLeft(find.byType(Container)), scrollViewOffset + const Offset(0, 400));
+  });
+
+  testWidgets('SliverConstrainedCrossAxis does not require TextDirection for non-directional alignment', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverConstrainedCrossAxis(
+              maxExtent: 100,
+              alignment: Alignment.center,
+              sliver: SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(SizedBox));
+    expect(box.size.width, 100);
+    final Offset scrollViewOffset = tester.getTopLeft(find.byType(CustomScrollView));
+    // Default test viewport is 800x600. (800 - 100) / 2 = 350
+    expect(tester.getTopLeft(find.byType(SizedBox)), scrollViewOffset + const Offset(350, 0));
   });
 
   testWidgets('SliverConstrainedCrossAxis hit testing', (WidgetTester tester) async {
@@ -201,9 +226,9 @@ void main() {
   });
 
   testWidgets(
-    'SliverConstrainedCrossAxis asserts when alignment requires TextDirection but none is provided',
+    'SliverConstrainedCrossAxis asserts during layout when alignment requires TextDirection but none is provided',
     (WidgetTester tester) async {
-      final exceptions = <Object>[];
+      final List<Object> exceptions = <Object>[];
       final void Function(FlutterErrorDetails) oldHandler = FlutterError.onError!;
       FlutterError.onError = (FlutterErrorDetails details) {
         exceptions.add(details.exception);
@@ -213,16 +238,14 @@ void main() {
         await tester.pumpWidget(
           const Directionality(
             textDirection: TextDirection.ltr,
-            child: Center(
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  _TestSliverConstrainedCrossAxis(
-                    maxExtent: 100,
-                    alignment: AlignmentDirectional.centerEnd,
-                    sliver: SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
-                  ),
-                ],
-              ),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                _TestSliverConstrainedCrossAxis(
+                  maxExtent: 100,
+                  alignment: AlignmentDirectional.centerEnd,
+                  sliver: SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
+                ),
+              ],
             ),
           ),
         );
@@ -235,68 +258,11 @@ void main() {
     },
   );
 
-  testWidgets('SliverConstrainedCrossAxis alignment setter asserts immediately', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverConstrainedCrossAxis(
-              maxExtent: 100,
-              sliver: SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    final RenderSliverConstrainedCrossAxis renderObject = tester
-        .renderObject<RenderSliverConstrainedCrossAxis>(find.byType(SliverConstrainedCrossAxis));
-
-    expect(() => renderObject.alignment = AlignmentDirectional.centerEnd, throwsAssertionError);
-  });
-
-  testWidgets('SliverConstrainedCrossAxis textDirection setter asserts immediately', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverConstrainedCrossAxis(
-              maxExtent: 100,
-              alignment: AlignmentDirectional.centerEnd,
-              sliver: SliverToBoxAdapter(child: SizedBox(height: 100, width: 100)),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    final RenderSliverConstrainedCrossAxis renderObject = tester
-        .renderObject<RenderSliverConstrainedCrossAxis>(find.byType(SliverConstrainedCrossAxis));
-
-    expect(() => renderObject.textDirection = null, throwsAssertionError);
-  });
-
   testWidgets('RenderSliverConstrainedCrossAxis constructor asserts on negative maxExtent', (
     WidgetTester tester,
   ) async {
     expect(() => RenderSliverConstrainedCrossAxis(maxExtent: -1.0), throwsAssertionError);
   });
-
-  testWidgets(
-    'RenderSliverConstrainedCrossAxis constructor asserts on missing textDirection when alignment is provided',
-    (WidgetTester tester) async {
-      expect(
-        () => RenderSliverConstrainedCrossAxis(maxExtent: 100.0, alignment: Alignment.center),
-        throwsAssertionError,
-      );
-    },
-  );
 }
 
 class _TestSliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
@@ -325,34 +291,42 @@ class _TestSliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
 Widget _buildSliverConstrainedCrossAxis({
   required double maxExtent,
   AlignmentGeometry? alignment,
-  required TextDirection textDirection,
+  TextDirection? textDirection,
   Axis scrollDirection = Axis.vertical,
   VoidCallback? onTap,
 }) {
-  return Directionality(
-    textDirection: textDirection,
-    child: Center(
-      child: SizedBox(
-        width: VIEWPORT_WIDTH,
-        height: VIEWPORT_HEIGHT,
-        child: CustomScrollView(
-          scrollDirection: scrollDirection,
-          slivers: <Widget>[
-            SliverConstrainedCrossAxis(
-              maxExtent: maxExtent,
-              alignment: alignment,
-              sliver: SliverToBoxAdapter(
-                child: GestureDetector(
-                  onTap: onTap,
-                  child: scrollDirection == Axis.vertical
-                      ? Container(height: 100, color: const Color(0xFF0000FF))
-                      : Container(width: 100, color: const Color(0xFF0000FF)),
-                ),
-              ),
-            ),
-          ],
+  final Widget result = CustomScrollView(
+    scrollDirection: scrollDirection,
+    slivers: <Widget>[
+      SliverConstrainedCrossAxis(
+        maxExtent: maxExtent,
+        alignment: alignment,
+        sliver: SliverToBoxAdapter(
+          child: GestureDetector(
+            onTap: onTap,
+            child: scrollDirection == Axis.vertical
+                ? Container(height: 100, color: const Color(0xFF0000FF))
+                : Container(width: 100, color: const Color(0xFF0000FF)),
+          ),
         ),
       ),
+    ],
+  );
+
+  final Widget sizedResult = Center(
+    child: SizedBox(
+      width: VIEWPORT_WIDTH,
+      height: VIEWPORT_HEIGHT,
+      child: result,
     ),
+  );
+
+  if (textDirection == null) {
+    return sizedResult;
+  }
+
+  return Directionality(
+    textDirection: textDirection,
+    child: sizedResult,
   );
 }
