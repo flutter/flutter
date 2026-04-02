@@ -1218,7 +1218,7 @@ class _RenderSnackBarLayout extends RenderBox
     final double totalActionAreaWidth = buttonsAndMarginsWidth + edgeWrapPadding;
 
     if (isMin) {
-      return math.max(contentWidth, buttonsAndMarginsWidth) + contentSpacePadding + edgeWrapPadding;
+      return math.max(contentWidth + contentSpacePadding, buttonsAndMarginsWidth) + edgeWrapPadding;
     }
 
     return contentWidth + contentSpacePadding + totalActionAreaWidth;
