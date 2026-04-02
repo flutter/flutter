@@ -26,6 +26,8 @@ import '../foundation/_features.dart';
 import '_window.dart';
 import '_window_positioner.dart';
 import 'binding.dart';
+import 'focus_manager.dart';
+import 'view.dart';
 
 /// A Win32 window handle.
 ///
@@ -1057,12 +1059,21 @@ class PopupWindowControllerWin32 extends PopupWindowController
     if (_destroyed) {
       return;
     }
+    // Unfocus any focused node within this popup before destroying it.
+    final FocusNode? primaryFocus = WidgetsBinding.instance.focusManager.primaryFocus;
+    if (primaryFocus?.context != null) {
+      final FlutterView? focusedView = View.maybeOf(primaryFocus!.context!);
+      if (focusedView?.viewId == rootView.viewId) {
+        primaryFocus.unfocus();
+      }
+    }
     _Win32PlatformInterface.destroyWindow(getWindowHandle());
     _destroyed = true;
   }
 
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+     _ensureNotDestroyed();
     if (anchorRect != null) {
       _anchorRect = anchorRect;
     }
