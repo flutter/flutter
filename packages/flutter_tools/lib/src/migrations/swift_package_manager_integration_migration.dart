@@ -5,6 +5,7 @@
 import 'package:xml/xml.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -28,6 +29,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required Logger logger,
     required FileSystem fileSystem,
     required PlistParser plistParser,
+    required Config config,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
@@ -35,6 +37,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _fileSystem = fileSystem,
        _plistParser = plistParser,
+       _config = config,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -44,6 +47,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
+  final Config _config;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -221,7 +225,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       }
 
       // Get the project info to make sure it compiles with xcodebuild
-      await _xcodeProjectInterpreter.getInfo(_xcodeProject.hostAppRoot.path);
+      await _xcodeProjectInterpreter.getInfo(
+        _xcodeProject.hostAppRoot.path,
+        buildDirectory: _fileSystem.directory(
+          _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+        ),
+      );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       if (optionalOnly) {

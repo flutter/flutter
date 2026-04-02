@@ -400,6 +400,10 @@ void main() {
         fakeTextInputConfiguration.enableDeltaModel,
         equals(fakeTextInputConfiguration2.enableDeltaModel),
       );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction),
+      );
     });
 
     test('copyWith method works correctly', () {
@@ -464,6 +468,10 @@ void main() {
       expect(
         fakeTextInputConfiguration.enableDeltaModel,
         equals(fakeTextInputConfiguration2.enableDeltaModel),
+      );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction),
       );
     });
 
@@ -538,6 +546,10 @@ void main() {
         fakeTextInputConfiguration.enableDeltaModel.hashCode,
         equals(fakeTextInputConfiguration2.enableDeltaModel.hashCode),
       );
+      expect(
+        fakeTextInputConfiguration.enableInlinePrediction.hashCode,
+        equals(fakeTextInputConfiguration2.enableInlinePrediction.hashCode),
+      );
     });
 
     test('sets expected defaults', () {
@@ -550,6 +562,7 @@ void main() {
       expect(configuration.actionLabel, null);
       expect(configuration.textCapitalization, TextCapitalization.none);
       expect(configuration.keyboardAppearance, Brightness.light);
+      expect(configuration.enableInlinePrediction, null);
     });
 
     test('text serializes to JSON', () async {
@@ -569,6 +582,21 @@ void main() {
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
       expect(json['actionLabel'], 'xyzzy');
+      expect(json['enableInlinePrediction'], null);
+    });
+
+    test('enableInlinePrediction serializes to JSON', () {
+      const configuration = TextInputConfiguration(enableInlinePrediction: true);
+      final Map<String, dynamic> json = configuration.toJson();
+      expect(json['enableInlinePrediction'], true);
+
+      const configuration2 = TextInputConfiguration(enableInlinePrediction: false);
+      final Map<String, dynamic> json2 = configuration2.toJson();
+      expect(json2['enableInlinePrediction'], false);
+
+      const configuration3 = TextInputConfiguration();
+      final Map<String, dynamic> json3 = configuration3.toJson();
+      expect(json3['enableInlinePrediction'], null);
     });
 
     test('number serializes to JSON', () async {
