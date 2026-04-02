@@ -47,20 +47,20 @@ func runInSandboxSuccessWhenBuildModeCorrect() async throws {
   arguments: [
     (
       FlutterPlatform.ios, "/path/to/flutter_app", "/path/to/flutter_app",
-      "ios/Flutter/flutter_export_environment.sh"
+      "ios/Flutter/ephemeral/flutter_native_integration.env"
     ),
     (
       FlutterPlatform.ios, "../flutter_app",
       "/path/to/native_app/../flutter_app",
-      "ios/Flutter/flutter_export_environment.sh"
+      "ios/Flutter/ephemeral/flutter_native_integration.env"
     ),
     (
       FlutterPlatform.ios, "/path/to/flutter_app", "/path/to/flutter_app",
-      ".ios/Flutter/flutter_export_environment.sh"
+      ".ios/Flutter/ephemeral/flutter_native_integration.env"
     ),
     (
       FlutterPlatform.macos, "/path/to/flutter_app", "/path/to/flutter_app",
-      "macos/Flutter/ephemeral/flutter_export_environment.sh"
+      "macos/Flutter/ephemeral/flutter_native_integration.env"
     ),
   ]
 )
@@ -96,11 +96,9 @@ func runWithAssemble(
     ]
 
   let exportedEnv = """
-    #!/bin/sh
-    # This is a generated file; do not edit or check into version control.
-    export "FLUTTER_ROOT=\(flutterRoot)"
-    export "FLUTTER_APPLICATION_PATH=\(flutterAppPath)"
-    export "FLUTTER_TARGET=lib/main.dart"
+    FLUTTER_ROOT=\(flutterRoot)
+    FLUTTER_APPLICATION_PATH=\(flutterAppPath)
+    FLUTTER_TARGET=lib/main.dart
     """
   let appExportedEnvPath =
     "\(resolvedAppPath)/\(exportEnvPath)"
@@ -422,20 +420,18 @@ func assembleUsesMergedEnv() async throws {
   fileManager.filesExist[flutterAppPath] = true
   fileManager.filesExist[flutterRootFromXcodeEnv] = true
   let exportedEnvPath =
-    "\(flutterAppPath)/\(targetPlatform)/Flutter/flutter_export_environment.sh"
+    "\(flutterAppPath)/\(targetPlatform)/Flutter/ephemeral/flutter_native_integration.env"
   let exportedEnv = """
-    #!/bin/sh
-    # This is a generated file; do not edit or check into version control.
-    export "FLUTTER_ROOT=\(flutterRootFromFlutterEnv)"
-    export "FLUTTER_APPLICATION_PATH=\(flutterAppPath)"
-    export "FLUTTER_TARGET=lib/main.dart"
-    export "FLUTTER_BUILD_DIR=build"
-    export "FLUTTER_BUILD_NAME=1.0.0"
-    export "FLUTTER_BUILD_NUMBER=1"
-    export "DART_OBFUSCATION=false"
-    export "TRACK_WIDGET_CREATION=true"
-    export "TREE_SHAKE_ICONS=false"
-    export "PACKAGE_CONFIG=.dart_tool/package_config.json"
+    FLUTTER_ROOT=\(flutterRootFromFlutterEnv)
+    FLUTTER_APPLICATION_PATH=\(flutterAppPath)
+    FLUTTER_TARGET=lib/main.dart
+    FLUTTER_BUILD_DIR=build
+    FLUTTER_BUILD_NAME=1.0.0
+    FLUTTER_BUILD_NUMBER=1
+    DART_OBFUSCATION=false
+    TRACK_WIDGET_CREATION=true
+    TREE_SHAKE_ICONS=false
+    PACKAGE_CONFIG=.dart_tool/package_config.json
     """
   fileManager.fileContents[exportedEnvPath] = [Data(exportedEnv.utf8)]
   fileManager.filesExist[exportedEnvPath] = true

@@ -471,7 +471,7 @@ public class FlutterAssembleToolHelper {
     fileManager: FlutterToolsFileManager,
     processManager: FlutterProcessRunner
   ) throws {
-    // Get the environment by parsing flutter_export_environment.sh and merging the exported
+    // Get the environment by parsing flutter_native_integration.env and merging the exported
     // variables with the Xcode environment.
     let exportedEnvPath = try exportedEnvPath(
       appPath: appPath,
@@ -542,30 +542,28 @@ public class FlutterAssembleToolHelper {
     return resolvedPath
   }
 
-  /// Finds the path to the `flutter_export_environment.sh` file.
+  /// Finds the path to the `flutter_native_integration.env` file.
   ///
   /// - Parameters:
   ///   - appPath: The path to the Flutter application.
   ///   - platform: The platform (iOS or macOS) the app is being built for.
   ///   - fileManager: The file manager to use for file operations.
-  /// - Returns: The path to the `flutter_export_environment.sh` file.
+  /// - Returns: The path to the `flutter_native_integration.env` file.
   /// - Throws: `XcodeErrorAndExit.error` if the file cannot be located.
   static func exportedEnvPath(
     appPath: String,
     platform: FlutterPlatform,
     fileManager: FlutterToolsFileManager
   ) throws -> String {
-    if platform == FlutterPlatform.macos {
-      return
-        "\(appPath)/\(platform)/Flutter/ephemeral/flutter_export_environment.sh"
-    }
-    let path = "\(appPath)/\(platform)/Flutter/flutter_export_environment.sh"
+    let path = "\(appPath)/\(platform)/Flutter/ephemeral/flutter_native_integration.env"
     if fileManager.fileExists(atPath: path) {
       return path
     }
-    let modulePath = "\(appPath)/.ios/Flutter/flutter_export_environment.sh"
-    if fileManager.fileExists(atPath: modulePath) {
-      return modulePath
+    if platform == FlutterPlatform.ios {
+      let modulePath = "\(appPath)/.ios/Flutter/ephemeral/flutter_native_integration.env"
+      if fileManager.fileExists(atPath: modulePath) {
+        return modulePath
+      }
     }
     throw XcodeErrorAndExit.error([
       "Unable to run \"flutter assemble\". Failed to find \(path)"
@@ -574,10 +572,10 @@ public class FlutterAssembleToolHelper {
 
   /// Parses environment variables from a bash script.
   ///
-  /// The `flutter_export_environment.sh` is a bash file that exports the variables.
+  /// The `flutter_native_integration.env` is a bash file that exports the variables.
   /// ```
-  /// export "FLUTTER_TARGET=lib/main.dart"
-  /// export "FLUTTER_BUILD_DIR=build"
+  /// FLUTTER_TARGET=lib/main.dart
+  /// FLUTTER_BUILD_DIR=build
   /// ```
   ///
   /// - Parameters:
@@ -601,25 +599,13 @@ public class FlutterAssembleToolHelper {
     }
 
     var exportedEnv: [String: String] = [:]
-
-    // Remove the "export " prefix and split by newline
-    let lines = contents.replacingOccurrences(of: "export ", with: "")
-      .components(separatedBy: CharacterSet.newlines)
-    for line in lines {
-      // Remove the surrounding quotations
-      let trimmedLine = line.trimmingCharacters(
-        in: CharacterSet(charactersIn: "\"")
-      )
-
-      // Get the key and value by splitting by "="
-      guard let splitIndex = trimmedLine.firstIndex(of: "=") else {
-        continue
+    contents.enumerateLines { line, _ in
+      guard let equalIndex = line.firstIndex(of: "=") else {
+        return
       }
-      let prevousIndex = trimmedLine.index(before: splitIndex)
-      let nextIndex = trimmedLine.index(after: splitIndex)
-      let key = String(trimmedLine[...prevousIndex])
-      let value = String(trimmedLine[nextIndex...])
-      exportedEnv.updateValue(value, forKey: key)
+      let key = String(line[..<equalIndex]).trimmingCharacters(in: .whitespaces)
+      let value = String(line[line.index(after: equalIndex)...])
+      exportedEnv[key] = value
     }
     return exportedEnv
   }
