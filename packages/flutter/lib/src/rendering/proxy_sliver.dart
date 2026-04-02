@@ -455,7 +455,6 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     AlignmentGeometry? alignment,
     TextDirection? textDirection,
   }) : assert(maxExtent >= 0.0),
-       assert(alignment == null || textDirection != null),
        _maxExtent = maxExtent,
        _alignment = alignment,
        _textDirection = textDirection;
@@ -475,7 +474,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
 
   /// How to align the child within the cross axis.
   ///
-  /// For example, if the [alignment] is [Alignment.center], the [child] will
+  /// For example, if the [alignment] is [Alignment.center], the child will
   /// be centered within the [SliverConstraints.crossAxisExtent].
   ///
   /// If this is null, the child is positioned at the start of the cross axis
@@ -488,13 +487,10 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       return;
     }
     _alignment = value;
-    assert(_alignment == null || textDirection != null);
     _markNeedResolution();
   }
 
   /// The direction in which text flows, used to resolve [alignment].
-  ///
-  /// This must be non-null if [alignment] is non-null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
@@ -502,7 +498,6 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       return;
     }
     _textDirection = value;
-    assert(alignment == null || _textDirection != null);
     _markNeedResolution();
   }
 
@@ -516,7 +511,6 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       _resolvedAlignment ??= alignment?.resolve(textDirection);
 
   Offset get _alignmentOffset {
-    assert(alignment == null || textDirection != null);
     final Alignment? resolvedAlignment = _resolvedAlignmentValue;
     if (resolvedAlignment == null) {
       return Offset.zero;
@@ -527,11 +521,9 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     if (freeSpace <= 0.0) {
       return Offset.zero;
     }
-    final double x = resolvedAlignment.x;
-    final double paintOffset = (x + 1.0) / 2.0 * freeSpace;
     return switch (constraints.axis) {
-      Axis.vertical => Offset(paintOffset, 0.0),
-      Axis.horizontal => Offset(0.0, paintOffset),
+      Axis.vertical => Offset((resolvedAlignment.x + 1.0) / 2.0 * freeSpace, 0.0),
+      Axis.horizontal => Offset(0.0, (resolvedAlignment.y + 1.0) / 2.0 * freeSpace),
     };
   }
 

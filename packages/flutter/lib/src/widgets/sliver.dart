@@ -1659,13 +1659,13 @@ class SliverConstrainedCrossAxis extends StatelessWidget {
   /// This value must be nonnegative.
   final double maxExtent;
 
-  /// How to align the child within the cross axis.
+  /// How to align the sliver within the cross axis.
   ///
-  /// For example, if the [alignment] is [Alignment.center], the [child] will
+  /// For example, if the [alignment] is [Alignment.center], the [sliver] will
   /// be centered within the [SliverConstraints.crossAxisExtent].
   ///
-  /// If this is null, the child is positioned at the start of the cross axis
-  /// (0.0). If the child consumes the full cross axis extent, the alignment
+  /// If this is null, the sliver is positioned at the start of the cross axis
+  /// (0.0). If the sliver consumes the full cross axis extent, the alignment
   /// has no effect.
   final AlignmentGeometry? alignment;
 
