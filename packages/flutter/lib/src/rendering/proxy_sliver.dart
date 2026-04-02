@@ -455,6 +455,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     AlignmentGeometry? alignment,
     TextDirection? textDirection,
   }) : assert(maxExtent >= 0.0),
+       assert(alignment == null || textDirection != null),
        _maxExtent = maxExtent,
        _alignment = alignment,
        _textDirection = textDirection;
@@ -472,13 +473,14 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     markNeedsLayout();
   }
 
-  /// How to alleviate any extra space in the cross axis.
+  /// How to align the child within the cross axis.
   ///
   /// For example, if the [alignment] is [Alignment.center], the [child] will
   /// be centered within the [SliverConstraints.crossAxisExtent].
   ///
   /// If this is null, the child is positioned at the start of the cross axis
-  /// (0.0).
+  /// (0.0). If the child consumes the full cross axis extent, the alignment
+  /// has no effect.
   AlignmentGeometry? get alignment => _alignment;
   AlignmentGeometry? _alignment;
   set alignment(AlignmentGeometry? value) {
@@ -486,13 +488,13 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       return;
     }
     _alignment = value;
+    assert(_alignment == null || textDirection != null);
     _markNeedResolution();
   }
 
   /// The direction in which text flows, used to resolve [alignment].
   ///
-  /// This must be non-null if [alignment] is non-null and contains
-  /// directional information (e.g. [AlignmentDirectional.centerStart]).
+  /// This must be non-null if [alignment] is non-null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
   set textDirection(TextDirection? value) {
@@ -500,6 +502,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       return;
     }
     _textDirection = value;
+    assert(alignment == null || _textDirection != null);
     _markNeedResolution();
   }
 
@@ -513,6 +516,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       _resolvedAlignment ??= alignment?.resolve(textDirection);
 
   Offset get _alignmentOffset {
+    assert(alignment == null || textDirection != null);
     final Alignment? resolvedAlignment = _resolvedAlignmentValue;
     if (resolvedAlignment == null) {
       return Offset.zero;
