@@ -5,6 +5,8 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
@@ -29,6 +31,8 @@ class TooltipWindowContent extends StatelessWidget {
         ),
       ]),
       duration: const Duration(seconds: 1),
+      // Disable animation on Linux as it doesn't support position updates.
+      paused: Platform.isLinux,
       builder: (context, double value, Widget? child) {
         final double padding = 20 + value * 16;
         return Container(
