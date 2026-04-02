@@ -94,6 +94,19 @@ TEST_P(TextureGLESTest, Binds2DTexture) {
   }
 }
 
+
+TEST_P(TextureGLESTest, ZeroSizedTextureIsClampedValid) {
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {0, 0};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  ASSERT_TRUE(texture);
+  EXPECT_TRUE(TextureGLES::Cast(*texture).IsValid());
+}
+
 TEST_P(TextureGLESTest, Leak) {
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kDevicePrivate;

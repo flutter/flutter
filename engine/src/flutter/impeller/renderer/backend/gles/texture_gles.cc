@@ -128,7 +128,15 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                          bool threadsafe,
                          std::optional<GLuint> fbo,
                          std::optional<HandleGLES> external_handle)
-    : Texture(desc),
+    : Texture([](TextureDescriptor d) {
+        if (d.size.width <= 0) {
+          d.size.width = 1;
+        }
+        if (d.size.height <= 0) {
+          d.size.height = 1;
+        }
+        return d;
+      }(desc)),
       reactor_(std::move(reactor)),
       type_(GetTextureTypeFromDescriptor(
           GetTextureDescriptor(),
