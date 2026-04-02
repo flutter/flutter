@@ -15783,6 +15783,24 @@ void main() {
     expect(decorator.decoration, expectedDecoration);
   });
 
+  testWidgets('TextField passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: TextField(enableInlinePrediction: true))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
+
+  testWidgets('TextField enableInlinePrediction defaults to null', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: TextField())));
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, isNull);
+  });
+
   group('MaxLengthEnforcement', () {
     const maxLength = 5;
 
