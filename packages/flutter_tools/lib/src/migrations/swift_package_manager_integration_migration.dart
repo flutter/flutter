@@ -16,6 +16,7 @@ import '../darwin/darwin.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_package_manager.dart';
+import '../plugins.dart';
 import '../project.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
@@ -131,12 +132,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// the example app.
   ///
   /// If the app is not an example app or the plugin cannot be found, this will return null.
-  late final ({String name, String path})? _examplePlugin = _loadPluginFromExampleProject(
-    xcodeProject: _xcodeProject,
-    fileSystem: _fileSystem,
-    logger: logger,
-    platform: _platform,
-  );
+  late final ({String name, String path})? _examplePlugin;
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
@@ -177,6 +173,13 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       if (!_xcodeProjectInfoFile.existsSync()) {
         throw Exception('Xcode project not found.');
       }
+
+      _examplePlugin = await _loadPluginFromExampleProject(
+        xcodeProject: _xcodeProject,
+        fileSystem: _fileSystem,
+        logger: logger,
+        platform: _platform,
+      );
 
       schemeInfo = await _getSchemeFile();
 
@@ -1203,12 +1206,12 @@ $newContent
   /// path relative to ios/macos directory the [xcodeProject] is in.
   ///
   /// If the [xcodeProject] is not within an example app or the plugin can't be found, return null.
-  static ({String name, String path})? _loadPluginFromExampleProject({
+  Future<({String name, String path})?> _loadPluginFromExampleProject({
     required XcodeBasedProject xcodeProject,
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterDarwinPlatform platform,
-  }) {
+  }) async {
     try {
       final FlutterProject flutterProject = xcodeProject.parent;
       if (flutterProject.directory.path.endsWith('example') &&
@@ -1218,28 +1221,30 @@ $newContent
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;
-          final Link linkedPlugin = xcodeProject.relativeSwiftPackagesDirectory.childLink(
-            pluginName,
-          );
-          if (linkedPlugin.existsSync()) {
-            final String absolutePath = linkedPlugin.targetSync();
-            final String relativePath;
-            switch (platform) {
-              case FlutterDarwinPlatform.ios:
-                relativePath = fileSystem.path.relative(
-                  absolutePath,
-                  from: xcodeProject.hostAppRoot.path,
-                );
-              case FlutterDarwinPlatform.macos:
-                // The path is relative to the "Flutter" [managedDirectory] on macOS because the
-                // Flutter `PBXGroup` in macOS pbxproj files uses `path` instead of `name`.
-                relativePath = fileSystem.path.relative(
-                  absolutePath,
-                  from: xcodeProject.managedDirectory.path,
-                );
-            }
-            return (name: pluginName, path: relativePath);
+          final List<Plugin> plugins = await xcodeProject.getPlugins();
+          final String? absolutePath = plugins
+              .where((plugin) => plugin.name == pluginName)
+              .firstOrNull
+              ?.pluginSwiftPackagePath(fileSystem, platform.name);
+          if (absolutePath == null) {
+            return null;
           }
+          final String relativePath;
+          switch (platform) {
+            case FlutterDarwinPlatform.ios:
+              relativePath = fileSystem.path.relative(
+                absolutePath,
+                from: xcodeProject.hostAppRoot.path,
+              );
+            case FlutterDarwinPlatform.macos:
+              // The path is relative to the "Flutter" [managedDirectory] on macOS because the
+              // Flutter `PBXGroup` in macOS pbxproj files uses `path` instead of `name`.
+              relativePath = fileSystem.path.relative(
+                absolutePath,
+                from: xcodeProject.managedDirectory.path,
+              );
+          }
+          return (name: pluginName, path: relativePath);
         }
       }
     } on Exception catch (e) {

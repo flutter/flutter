@@ -81,14 +81,15 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
     return SimpleDialog(
       contentPadding: const EdgeInsets.all(4),
       titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
       title: const Center(child: Text('Window Settings')),
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.7,
-          height: MediaQuery.of(context).size.height * 0.8,
+          width: size.width * 0.7,
+          height: size.height * 0.8,
           child: Column(
             children: [
               Expanded(

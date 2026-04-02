@@ -607,6 +607,7 @@ Future<T> _warnIfSlow<T>({
   required String message,
 }) async {
   final completer = Completer<void>();
+  // ignore: unawaited_futures
   completer.future.timeout(
     timeout,
     onTimeout: () {
