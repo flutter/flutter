@@ -381,7 +381,8 @@ TEST_P(AiksTest, SupportsBlitToOnscreen) {
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
-  if (GetBackend() != PlaygroundBackend::kMetal) {
+  if (GetBackend() != PlaygroundBackend::kMetal &&
+      GetBackend() != PlaygroundBackend::kMetalSDF) {
     EXPECT_FALSE(canvas->SupportsBlitToOnscreen());
   } else {
     EXPECT_TRUE(canvas->SupportsBlitToOnscreen());

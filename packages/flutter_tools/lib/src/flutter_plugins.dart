@@ -32,7 +32,7 @@ import 'plugins.dart';
 import 'project.dart';
 
 Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     return false;
   }
   final List<int> fileBytes = await file.readAsBytes();
@@ -1347,12 +1347,16 @@ Future<void> injectPlugins(
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
+            processUtils: globals.processUtils,
+            config: globals.config,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           logger: globals.logger,
           analytics: globals.analytics,
           platform: globals.platform,
+          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          config: globals.config,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1808,7 +1812,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
-      if (await newMainDart.exists()) {
+      if (newMainDart.existsSync()) {
         await newMainDart.delete();
       }
     } on FileSystemException catch (error) {
