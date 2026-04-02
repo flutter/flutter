@@ -1278,7 +1278,6 @@ class DeviceDomain extends Domain {
       devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
     }
 
-
     FlutterProject? project;
     try {
       project = FlutterProject.current();
