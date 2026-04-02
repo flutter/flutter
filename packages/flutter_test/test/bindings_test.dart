@@ -123,6 +123,7 @@ void main() {
   ) async {
     var responded = false;
     // The particular asset does not matter, as long as it exists.
+    // ignore: unawaited_futures
     rootBundle.load('AssetManifest.bin').then((ByteData data) {
       responded = true;
     });

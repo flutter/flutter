@@ -916,6 +916,7 @@ class EditableText extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
     this.hintLocales,
+    this.enableInlinePrediction,
   }) : assert(obscuringCharacter.length == 1),
        autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
@@ -2067,6 +2068,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
+  final bool? enableInlinePrediction;
+
   /// The default value for [selectionHeightStyle].
   ///
   /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
@@ -2438,6 +2442,13 @@ class EditableText extends StatefulWidget {
         'enableIMEPersonalizedLearning',
         enableIMEPersonalizedLearning,
         defaultValue: true,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool?>(
+        'enableInlinePrediction',
+        enableInlinePrediction,
+        defaultValue: null,
       ),
     );
     properties.add(
@@ -5216,6 +5227,7 @@ class EditableTextState extends State<EditableText>
           ? const <String>[]
           : widget.contentInsertionConfiguration!.allowedMimeTypes,
       hintLocales: widget.hintLocales,
+      enableInlinePrediction: widget.enableInlinePrediction,
     );
   }
 
