@@ -56,9 +56,14 @@ class TestWidgetsApp extends StatelessWidget {
     super.key,
     this.navigatorKey,
     this.home,
+    this.initialRoute,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
     this.pageRouteBuilder = _defaultPageRouteBuilder,
+    this.builder,
+    this.shortcuts,
+    this.actions,
+    this.restorationScopeId,
   });
 
   /// A key to use when building the [Navigator].
@@ -90,6 +95,15 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.home], the equivalent property in [WidgetsApp].
   final Widget? home;
+
+  /// The name of the first route to show when the app launches.
+  ///
+  /// Defaults to [Navigator.defaultRouteName] (typically `/`).
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.initialRoute], the equivalent property in [WidgetsApp].
+  final String? initialRoute;
 
   /// The application's top-level routing table.
   ///
@@ -148,6 +162,44 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.pageRouteBuilder], the equivalent property in [WidgetsApp].
   final PageRouteFactory pageRouteBuilder;
 
+  /// A builder for inserting widgets above the [Navigator].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.builder], the equivalent property in [WidgetsApp].
+  final TransitionBuilder? builder;
+
+  /// The application's keyboard shortcut map.
+  ///
+  /// In tests, this allows registering custom keyboard shortcuts to verify
+  /// that key combinations trigger the expected [Intent]s.
+  ///
+  /// When null, [WidgetsApp.defaultShortcuts] are used.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.shortcuts], the equivalent property in [WidgetsApp].
+  final Map<ShortcutActivator, Intent>? shortcuts;
+
+  /// The application's action map.
+  ///
+  /// In tests, this allows registering custom [Action]s that respond to
+  /// [Intent]s dispatched by [Shortcuts] or programmatic invocation.
+  ///
+  /// When null, [WidgetsApp.defaultActions] are used.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.actions], the equivalent property in [WidgetsApp].
+  final Map<Type, Action<Intent>>? actions;
+
+  /// The identifier to use for state restoration of the app's [Navigator].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.restorationScopeId], the equivalent property in [WidgetsApp].
+  final String? restorationScopeId;
+
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
     return PageRouteBuilder<T>(
       settings: settings,
@@ -173,8 +225,13 @@ class TestWidgetsApp extends StatelessWidget {
       color: color,
       navigatorKey: navigatorKey,
       home: home,
+      initialRoute: initialRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,
+      builder: builder,
+      shortcuts: shortcuts,
+      actions: actions,
+      restorationScopeId: restorationScopeId,
     );
   }
 }

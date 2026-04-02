@@ -250,7 +250,7 @@ class WebDevFS implements DevFS {
 
   Future<void> _validateTemplateFile(String filename) async {
     final File file = fileSystem.currentDirectory.childDirectory('web').childFile(filename);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       return;
     }
 

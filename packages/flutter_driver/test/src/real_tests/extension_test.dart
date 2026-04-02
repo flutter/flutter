@@ -58,6 +58,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -75,6 +76,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -126,6 +128,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoTransientCallbacks()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -146,6 +149,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -166,6 +170,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -183,6 +188,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -204,6 +210,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -227,6 +234,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -255,6 +263,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -275,6 +284,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -303,6 +313,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -350,6 +361,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -401,6 +413,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -453,6 +466,7 @@ void main() {
         driverExtension
             .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
             .then<void>(
+              // ignore: unawaited_futures
               expectAsync1((Map<String, dynamic> r) {
                 result = r;
               }),
@@ -829,13 +843,11 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Center(
-            child: SizedBox(
-              height: 200,
-              width: 200,
+            child: SizedBox.square(
+              dimension: 200,
               child: Center(
-                child: SizedBox(
-                  height: 100,
-                  width: 100,
+                child: SizedBox.square(
+                  dimension: 100,
                   child: Center(
                     child: SizedBox(key: ValueKey<String>('leaf'), height: 50, width: 50),
                   ),
@@ -1238,6 +1250,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -1255,6 +1268,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),
@@ -1275,6 +1289,7 @@ void main() {
       driverExtension
           .call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(
+            // ignore: unawaited_futures
             expectAsync1((Map<String, dynamic> r) {
               result = r;
             }),

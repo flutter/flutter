@@ -52,6 +52,12 @@ List<FakeCommand> xattrCommands(FlutterProject flutterProject) {
   ];
 }
 
+FakeCommand xattrCreatedByBuildSystemCommand(String outputDirPath) {
+  return FakeCommand(
+    command: <String>['xattr', '-w', 'com.apple.xcode.CreatedByBuildSystem', 'true', outputDirPath],
+  );
+}
+
 const kRunReleaseArgs = <String>[
   'xcrun',
   'xcodebuild',
@@ -253,6 +259,7 @@ void main() {
 
         processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
+        processManager.addCommand(xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -369,6 +376,7 @@ void main() {
             ],
           ),
         );
+        processManager.addCommand(xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -514,6 +522,7 @@ void main() {
                 );
               },
             ),
+            xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'),
             FakeCommand(
               command: <String>[
                 iosDeployPath,
@@ -609,6 +618,7 @@ void main() {
                 'COMPILER_INDEX_STORE_ENABLE=NO',
               ],
             ),
+            xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'),
           ]);
 
           await iosDevice.startApp(
@@ -666,6 +676,7 @@ void main() {
           ),
         );
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
+        processManager.addCommand(xattrCreatedByBuildSystemCommand('build/ios/Release-iphoneos'));
         processManager.addCommand(
           FakeCommand(
             command: <String>[
@@ -1543,8 +1554,20 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async =>
-      projectInfo;
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(

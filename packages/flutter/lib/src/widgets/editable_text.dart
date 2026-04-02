@@ -916,6 +916,7 @@ class EditableText extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
     this.hintLocales,
+    this.enableInlinePrediction,
   }) : assert(obscuringCharacter.length == 1),
        autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
@@ -2067,6 +2068,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableInlinePrediction}
+  final bool? enableInlinePrediction;
+
   /// The default value for [selectionHeightStyle].
   ///
   /// On web platforms, this defaults to [ui.BoxHeightStyle.max].
@@ -2438,6 +2442,13 @@ class EditableText extends StatefulWidget {
         'enableIMEPersonalizedLearning',
         enableIMEPersonalizedLearning,
         defaultValue: true,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool?>(
+        'enableInlinePrediction',
+        enableInlinePrediction,
+        defaultValue: null,
       ),
     );
     properties.add(
@@ -4064,6 +4075,15 @@ class EditableTextState extends State<EditableText>
   }
 
   @override
+  bool onFocusReceived() {
+    if (mounted && !_hasFocus && widget.focusNode.canRequestFocus) {
+      widget.focusNode.requestFocus();
+      return true;
+    }
+    return false;
+  }
+
+  @override
   void connectionClosed() {
     if (_hasInputConnection) {
       _textInputConnection!.connectionClosedReceived();
@@ -5207,6 +5227,7 @@ class EditableTextState extends State<EditableText>
           ? const <String>[]
           : widget.contentInsertionConfiguration!.allowedMimeTypes,
       hintLocales: widget.hintLocales,
+      enableInlinePrediction: widget.enableInlinePrediction,
     );
   }
 
@@ -5444,52 +5465,6 @@ class EditableTextState extends State<EditableText>
     _scrollController.jumpTo(destination);
   }
 
-  /// Extend the selection down by page if the `forward` parameter is true, or
-  /// up by page otherwise.
-  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    if (widget.maxLines == 1) {
-      return;
-    }
-
-    final TextSelection nextSelection;
-    final Rect extentRect = renderEditable.getLocalRectForCaret(_value.selection.extent);
-    final state = _scrollableKey.currentState as ScrollableState?;
-    final double increment = ScrollAction.getDirectionalIncrement(
-      state!,
-      ScrollIntent(
-        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
-        type: ScrollIncrementType.page,
-      ),
-    );
-    final ScrollPosition position = _scrollController.position;
-    if (intent.forward) {
-      if (_value.selection.extentOffset >= _value.text.length) {
-        return;
-      }
-      final nextExtentOffset = Offset(extentRect.left, extentRect.top + increment);
-      final double height = position.maxScrollExtent + renderEditable.size.height;
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
-          ? TextPosition(offset: _value.text.length)
-          : renderEditable.getPositionForPoint(renderEditable.localToGlobal(nextExtentOffset));
-      nextSelection = _value.selection.copyWith(extentOffset: nextExtent.offset);
-    } else {
-      if (_value.selection.extentOffset <= 0) {
-        return;
-      }
-      final nextExtentOffset = Offset(extentRect.left, extentRect.top + increment);
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
-          ? const TextPosition(offset: 0)
-          : renderEditable.getPositionForPoint(renderEditable.localToGlobal(nextExtentOffset));
-      nextSelection = _value.selection.copyWith(extentOffset: nextExtent.offset);
-    }
-
-    bringIntoView(nextSelection.extent);
-    userUpdateTextEditingValue(
-      _value.copyWith(selection: nextSelection),
-      SelectionChangedCause.keyboard,
-    );
-  }
-
   void _updateSelection(UpdateSelectionIntent intent) {
     assert(
       intent.newSelection.start <= intent.currentTextEditingValue.text.length,
@@ -5597,9 +5572,6 @@ class EditableTextState extends State<EditableText>
         _moveBeyondTextBoundary,
         ignoreNonCollapsedSelection: false,
       ),
-    ),
-    ExtendSelectionByPageIntent: _makeOverridable(
-      CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage),
     ),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(
       _UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(

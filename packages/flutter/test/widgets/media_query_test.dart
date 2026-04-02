@@ -6,11 +6,15 @@ import 'dart:ui'
     show Brightness, DisplayFeature, DisplayFeatureState, DisplayFeatureType, GestureSettings;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'button_tester.dart';
+import 'widgets_app_tester.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
+
   final void Function(BuildContext) method;
   final MediaQueryData data;
 }
@@ -664,7 +668,7 @@ void main() {
   testWidgets('MediaQueryData.applyDisplayCornerRadii applies specified display corner radii', (
     WidgetTester tester,
   ) async {
-    final data = MediaQueryData(displayCornerRadii: BorderRadius.circular(33));
+    const data = MediaQueryData(displayCornerRadii: BorderRadius.all(Radius.circular(33)));
 
     late MediaQueryData updatedData;
 
@@ -674,7 +678,9 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(context).applyDisplayCornerRadii(BorderRadius.circular(99)),
+              data: MediaQuery.of(
+                context,
+              ).applyDisplayCornerRadii(const BorderRadius.all(Radius.circular(99))),
               child: Builder(
                 builder: (BuildContext context) {
                   updatedData = MediaQuery.of(context);
@@ -710,7 +716,7 @@ void main() {
     expect(updatedData.letterSpacingOverride, data.letterSpacingOverride);
     expect(updatedData.wordSpacingOverride, data.wordSpacingOverride);
     expect(updatedData.paragraphSpacingOverride, data.paragraphSpacingOverride);
-    expect(updatedData.displayCornerRadii, BorderRadius.circular(99));
+    expect(updatedData.displayCornerRadii, const BorderRadius.all(Radius.circular(99)));
 
     await tester.pumpWidget(
       MediaQuery(
@@ -1694,7 +1700,7 @@ void main() {
               children: <Widget>[
                 showSize,
                 showTextScaler,
-                ElevatedButton(
+                TestButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
@@ -1702,7 +1708,7 @@ void main() {
                   },
                   child: const Text('Increase width by 100'),
                 ),
-                ElevatedButton(
+                TestButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(textScaler: TextScaler.noScaling);
@@ -1717,7 +1723,7 @@ void main() {
       },
     );
 
-    await tester.pumpWidget(MaterialApp(home: page));
+    await tester.pumpWidget(TestWidgetsApp(home: page));
     expect(find.text('size: Size(800.0, 600.0)'), findsOneWidget);
     expect(find.text('textScaler: linear (1.1x)'), findsOneWidget);
     expect(sizeBuildCount, 1);
@@ -1760,7 +1766,7 @@ void main() {
             child: ListView(
               children: <Widget>[
                 builder,
-                ElevatedButton(
+                TestButton(
                   onPressed: () {
                     setState(() {
                       data = _MediaQueryAspectVariant.aspect!.data;
@@ -1768,7 +1774,7 @@ void main() {
                   },
                   child: const Text('Change data'),
                 ),
-                ElevatedButton(
+                TestButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith();
@@ -1782,7 +1788,7 @@ void main() {
         },
       );
 
-      await tester.pumpWidget(MaterialApp(home: page));
+      await tester.pumpWidget(TestWidgetsApp(home: page));
       expect(buildCount, 1);
 
       await tester.tap(find.text('Copy data'));
@@ -2009,7 +2015,7 @@ void main() {
               children: <Widget>[
                 showWidth,
                 showHeight,
-                ElevatedButton(
+                TestButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(size: Size(data.size.width + 100, data.size.height));
@@ -2017,7 +2023,7 @@ void main() {
                   },
                   child: const Text('Increase width by 100'),
                 ),
-                ElevatedButton(
+                TestButton(
                   onPressed: () {
                     setState(() {
                       data = data.copyWith(size: Size(data.size.width, data.size.height + 100));
@@ -2032,7 +2038,7 @@ void main() {
       },
     );
 
-    await tester.pumpWidget(MaterialApp(home: page));
+    await tester.pumpWidget(TestWidgetsApp(home: page));
     expect(find.text('width: 800.0'), findsOneWidget);
     expect(find.text('height: 600.0'), findsOneWidget);
     expect(widthBuildCount, 1);

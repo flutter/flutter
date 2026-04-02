@@ -115,6 +115,11 @@ void Switches::PrintHelp(std::ostream& stream) {
             "targeting metal)"
          << std::endl;
   stream << optional_prefix << "--require-framebuffer-fetch" << std::endl;
+  stream << optional_prefix
+         << "--verbose (output full error messages in stderr. If not set, long "
+            "error messages are written to a file, and a truncated version is "
+            "output to stderr)"
+         << std::endl;
 }
 
 Switches::Switches() = default;
@@ -200,6 +205,7 @@ Switches::Switches(const fml::CommandLine& command_line)
       use_half_textures(command_line.HasOption("use-half-textures")),
       require_framebuffer_fetch(
           command_line.HasOption("require-framebuffer-fetch")),
+      verbose(command_line.HasOption("verbose")),
       target_platform_(TargetPlatformFromCommandLine(command_line)),
       runtime_stages_(RuntimeStagesFromCommandLine(command_line)) {
   auto language = ToLowerCase(

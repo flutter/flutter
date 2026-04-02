@@ -559,8 +559,8 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
               child: FadeTransition(
                 opacity: _drawerCurve,
                 child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.heightOf(context),
+                  width: MediaQuery.widthOf(context),
                   color: Theme.of(context).bottomSheetTheme.modalBackgroundColor,
                 ),
               ),
@@ -1084,9 +1084,8 @@ class _ReplyFabState extends State<_ReplyFab> with SingleTickerProviderStateMixi
                   key: const ValueKey<String>('ReplyFab'),
                   customBorder: circleFabBorder,
                   onTap: openContainer,
-                  child: SizedBox(
-                    height: _mobileFabDimension,
-                    width: _mobileFabDimension,
+                  child: SizedBox.square(
+                    dimension: _mobileFabDimension,
                     child: Center(child: fabSwitcher),
                   ),
                 ),

@@ -35,6 +35,7 @@ Future<void> main() async {
     // of the platform view is asynchronous so we might have to tap more than
     // once to  get a response.
     var stop = false;
+    // ignore: unawaited_futures
     inputEventWasVerified.whenComplete(() => stop = true);
     while (!stop) {
       // We must use the Android input tool to get verified input events.

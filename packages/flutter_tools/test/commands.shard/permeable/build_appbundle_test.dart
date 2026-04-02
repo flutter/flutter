@@ -177,6 +177,147 @@ void main() {
       },
     );
 
+    group('Impeller AndroidManifest.xml setting', () {
+      // Adds a key-value `<meta-data>` pair to the `<application>` tag in the
+      // corresponding `AndroidManifest.xml` file, right before the closing
+      // `</application>` tag.
+      void writeManifestMetadata({
+        required String projectPath,
+        required String name,
+        required String value,
+      }) {
+        final String manifestPath = globals.fs.path.join(
+          projectPath,
+          'android',
+          'app',
+          'src',
+          'main',
+          'AndroidManifest.xml',
+        );
+
+        // It would be unnecessarily complicated to parse this XML file and
+        // insert the key-value pair, so we just insert it right before the
+        // closing </application> tag.
+        final String oldManifest = globals.fs.file(manifestPath).readAsStringSync();
+        final String newManifest = oldManifest.replaceFirst(
+          '</application>',
+          '    <meta-data\n'
+              '        android:name="$name"\n'
+              '        android:value="$value" />\n'
+              '    </application>',
+        );
+        globals.fs.file(manifestPath).writeAsStringSync(newManifest);
+      }
+
+      testUsingContext(
+        'a default appbundle build reports Impeller as enabled',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--empty', '--no-pub', '--template=app'],
+          );
+
+          final Directory oldCwd = globals.localFileSystem.currentDirectory;
+          try {
+            globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(
+              projectPath,
+            );
+            await runBuildAppBundleCommand(projectPath);
+          } finally {
+            globals.localFileSystem.currentDirectory = oldCwd;
+          }
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(label: 'manifest-impeller-enabled', buildType: 'android'),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          AndroidBuilder: () => FakeAndroidBuilder(),
+          Analytics: () => fakeAnalytics,
+          ProcessInfo: () => processInfo,
+        },
+      );
+
+      testUsingContext(
+        'EnableImpeller="true" reports an enabled event',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--empty', '--no-pub', '--template=app'],
+          );
+
+          writeManifestMetadata(
+            projectPath: projectPath,
+            name: 'io.flutter.embedding.android.EnableImpeller',
+            value: 'true',
+          );
+
+          final Directory oldCwd = globals.localFileSystem.currentDirectory;
+          try {
+            globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(
+              projectPath,
+            );
+            await runBuildAppBundleCommand(projectPath);
+          } finally {
+            globals.localFileSystem.currentDirectory = oldCwd;
+          }
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(label: 'manifest-impeller-enabled', buildType: 'android'),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          AndroidBuilder: () => FakeAndroidBuilder(),
+          Analytics: () => fakeAnalytics,
+          ProcessInfo: () => processInfo,
+        },
+      );
+
+      testUsingContext(
+        'EnableImpeller="false" reports a disabled event',
+        () async {
+          final String projectPath = await createProject(
+            tempDir,
+            arguments: <String>['--empty', '--no-pub', '--template=app'],
+          );
+
+          writeManifestMetadata(
+            projectPath: projectPath,
+            name: 'io.flutter.embedding.android.EnableImpeller',
+            value: 'false',
+          );
+
+          final Directory oldCwd = globals.localFileSystem.currentDirectory;
+          try {
+            globals.localFileSystem.currentDirectory = globals.localFileSystem.directory(
+              projectPath,
+            );
+            await runBuildAppBundleCommand(projectPath);
+          } finally {
+            globals.localFileSystem.currentDirectory = oldCwd;
+          }
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              Event.flutterBuildInfo(label: 'manifest-impeller-disabled', buildType: 'android'),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          AndroidBuilder: () => FakeAndroidBuilder(),
+          Analytics: () => fakeAnalytics,
+          ProcessInfo: () => processInfo,
+        },
+      );
+    });
+
     testUsingContext(
       'use of the deferred components feature sends a build info event indicating so',
       () async {

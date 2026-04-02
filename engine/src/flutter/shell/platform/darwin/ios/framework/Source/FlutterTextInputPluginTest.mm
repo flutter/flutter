@@ -69,7 +69,8 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, readonly) UIView* keyboardView;
 @property(nonatomic, assign) UIView* cachedFirstResponder;
 @property(nonatomic, readonly) CGRect keyboardRect;
-@property(nonatomic, readonly) BOOL pendingInputHiderRemoval;
+@property(nonatomic, readonly) BOOL pendingAutofillRemoval;
+@property(nonatomic, readonly) BOOL pendingInputViewRemoval;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 
@@ -964,6 +965,33 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
 }
 
+- (void)testEnableInlinePredictionFromConfiguration API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+
+  // Template does not include enableInlinePrediction -> disabled.
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@NO forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@YES forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+
+  // Explicit nil / missing key -> disabled.
+  [config removeObjectForKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  // Key present with NSNull (e.g. framework sent null) -> disabled.
+  [config setValue:[NSNull null] forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+}
+
 - (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
@@ -1009,6 +1037,31 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   } else {
     XCTAssertTrue(respondsToInsertionPointColor);
   }
+}
+
+- (void)testSetAttributedMarkedTextSelectedRange API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSAttributedString* attributedText =
+      [[NSAttributedString alloc] initWithString:@"inline prediction"
+                                      attributes:@{
+                                        NSForegroundColorAttributeName : [UIColor grayColor],
+                                      }];
+  [inputView setAttributedMarkedText:attributedText selectedRange:NSMakeRange(0, 7)];
+
+  XCTAssertEqualObjects(inputView.text, @"inline prediction");
+  NSRange selectedRange = ((FlutterTextRange*)inputView.selectedTextRange).range;
+  XCTAssertEqual(selectedRange.location, 0ul);
+  XCTAssertEqual(selectedRange.length, 7ul);
+  FlutterTextRange* markedRange = (FlutterTextRange*)inputView.markedTextRange;
+  XCTAssertNotNil(markedRange);
+  XCTAssertEqual(markedRange.range.location, 0ul);
+  // Marked range length must match the attributed string length (17 for "inline prediction").
+  XCTAssertEqual(markedRange.range.length, 17ul);
+
+  // Nil attributed string should behave like empty string.
+  [inputView setAttributedMarkedText:nil selectedRange:NSMakeRange(0, 0)];
+  XCTAssertEqualObjects(inputView.text, @"");
+  XCTAssertNil(inputView.markedTextRange);
 }
 
 #pragma mark - TextEditingDelta tests
@@ -2723,17 +2776,115 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   // Verify initial state.
   [self setClientId:123 configuration:config];
   XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
-  XCTAssertFalse(textInputPlugin.pendingInputHiderRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
 
   // Retain autofill context.
   [self setClientClear];
   XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
-  XCTAssertTrue(textInputPlugin.pendingInputHiderRemoval);
+  XCTAssertTrue(textInputPlugin.pendingAutofillRemoval);
 
   // Consume autofill context.
   [self commitAutofillContextAndVerify];
   XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
-  XCTAssertFalse(textInputPlugin.pendingInputHiderRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+}
+
+- (void)testSetClientResetsPendingAutofillRemoval {
+  // When autofill context exists and clearClient sets pendingAutofillRemoval,
+  // a subsequent setClient should reset the flag because a new client is
+  // connecting and the deferred removal is no longer needed.
+  NSMutableDictionary* field = self.mutablePasswordTemplateCopy;
+  [field setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"password" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+           forKey:@"autofill"];
+  [field setValue:@[ field ] forKey:@"fields"];
+
+  // Set up autofill context.
+  [self setClientId:123 configuration:field];
+  XCTAssertGreaterThan(textInputPlugin.autofillContext.count, 0ul);
+
+  // clearClient with autofill context sets pendingAutofillRemoval.
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingAutofillRemoval);
+
+  // A new setClient resets the pending autofill removal flag.
+  [self setClientId:456 configuration:self.mutableTemplateCopy];
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+}
+
+- (void)testPendingInputViewRemovalAfterClearClient {
+  // When autofillContext is empty and the view is first responder,
+  // clearClient should set pendingInputViewRemoval,
+  // and hideTextInput should consume it.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  // Verify initial state.
+  [self setClientId:123 configuration:config];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+
+  // Stub isFirstResponder to simulate the view being first responder.
+  // In the test environment, becomeFirstResponder does not work.
+  id mockActiveView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockActiveView isFirstResponder]).andReturn(YES);
+
+  // clearClient with no autofill context sets pendingInputViewRemoval.
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+
+  // hideTextInput consumes the flag and removes the view.
+  [self setTextInputHide];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertNil(textInputPlugin.activeView.superview);
+}
+
+- (void)testHideBeforeClearClientRemovesViewImmediately {
+  // When hideTextInput is called before clearTextInputClient,
+  // the view is no longer first responder. clearClient should
+  // remove the view immediately since no keyboard dismiss animation is needed.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  [self setClientId:123 configuration:config];
+  [self setTextInputShow];
+  XCTAssertNotNil(textInputPlugin.activeView.superview);
+
+  // Hide first: resignFirstResponder, but no removeFromSuperview.
+  [self setTextInputHide];
+  XCTAssertNotNil(textInputPlugin.activeView.superview);
+
+  // clearClient after hide: view is not first responder,
+  // so removeFromSuperview should happen immediately.
+  [self setClientClear];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertNil(textInputPlugin.activeView.superview);
+}
+
+- (void)testSetClientResetsPendingInputViewRemoval {
+  // When clearClient sets pendingInputViewRemoval (no autofill, first responder),
+  // a subsequent setClient should reset the flag because a new client is
+  // connecting and the deferred removal is no longer needed.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  // Field 1: setClient → show → clearClient (sets pendingInputViewRemoval).
+  [self setClientId:123 configuration:config];
+  [self setTextInputShow];
+
+  // Stub isFirstResponder to simulate the view being first responder.
+  // In the test environment, becomeFirstResponder does not work.
+  id mockActiveView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockActiveView isFirstResponder]).andReturn(YES);
+
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingInputViewRemoval);
+
+  // Field 2: setClient resets the stale flag.
+  [self setClientId:456 configuration:config];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
 }
 
 - (void)testPasswordAutofillHack {
@@ -3461,6 +3612,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollWillResignFirstResponder {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
@@ -3485,6 +3640,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollToTopOfKeyboardWillTakeScreenshot {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3528,6 +3687,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedDownAfterUserScroll {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3578,6 +3741,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedToOrginalPositionAfterUserScroll {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3683,6 +3850,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardDidResignFirstResponderDelegateisCalledAfterDismissedKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3731,6 +3902,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotDismissedAfterPointerLiftedAboveMiddleYOfKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3783,6 +3958,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardReappearsAfterPointerLiftedAboveMiddleYOfKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3842,6 +4021,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardAnimatesToOriginalPositionalOnPointerUp {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3894,6 +4077,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardAnimatesToDismissalPositionalOnPointerUp {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
