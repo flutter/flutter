@@ -26,24 +26,25 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
 
   @override
   Future<void> migrate() async {
-    if (_gradlePropertiesFile.existsSync()) {
-      final String contents = await _gradlePropertiesFile.readAsString();
-
-      // Skip migration if the Built-in Kotlin flag already exists
-      if (contents.contains(_builtInKotlinRegex)) {
-        logger.printTrace(
-          'The developer has already configured the Built-In Kotlin flag, skipping migration.',
-        );
-        return;
-      }
-
-      processFileLines(_gradlePropertiesFile);
-    } else {
+    if (!_gradlePropertiesFile.existsSync()) {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
       );
       await _gradlePropertiesFile.writeAsString('$_builtInKotlinFlag\n');
+      return;
     }
+
+    final String contents = await _gradlePropertiesFile.readAsString();
+
+    // Skip migration if the Built-in Kotlin flag already exists
+    if (contents.contains(_builtInKotlinRegex)) {
+      logger.printTrace(
+        'The developer has already configured the Built-In Kotlin flag, skipping migration.',
+      );
+      return;
+    }
+
+    processFileLines(_gradlePropertiesFile);
   }
 
   @override
@@ -57,9 +58,7 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
     }
 
     final propertyToAppend = StringBuffer();
-    if (!hasBuiltInKotlin) {
-      propertyToAppend.writeln(_builtInKotlinFlag);
-    }
+    propertyToAppend.writeln(_builtInKotlinFlag);
 
     final prefix = fileContents.isEmpty || fileContents.endsWith('\n') ? '' : '\n';
 
