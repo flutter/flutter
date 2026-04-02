@@ -26,6 +26,7 @@ void main() {
   const kOrange = Color(0xFFFF8C00);
   const kPurple = Color(0xFF800080);
   const kYellow = Color(0xFFFFFF00);
+  const kWhite = Color(0xFFFFFFFF);
   const kBlack87 = Color(0xDD000000);
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
@@ -1270,9 +1271,18 @@ void main() {
               controller: controller,
               physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
               children: const <Widget>[
-                Center(child: Text('First Page')),
-                Center(child: Text('Second Page')),
-                Center(child: Text('Third Page')),
+                ColoredBox(
+                  color: kWhite,
+                  child: Center(child: Text('First Page')),
+                ),
+                ColoredBox(
+                  color: kWhite,
+                  child: Center(child: Text('Second Page')),
+                ),
+                ColoredBox(
+                  color: kWhite,
+                  child: Center(child: Text('Third Page')),
+                ),
               ],
             ),
           ),
