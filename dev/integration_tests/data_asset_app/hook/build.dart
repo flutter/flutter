@@ -8,7 +8,7 @@ import 'package:hooks/hooks.dart';
 void main(List<String> args) async {
   await build(args, (BuildInput input, BuildOutputBuilder output) async {
     if (input.config.buildAssetTypes.contains('data_assets/data')) {
-      final List<String> assets = <String>['id1.txt']; // @assets
+      final assets = <String>['id1.txt']; // @assets
       for (final id in assets) {
         output.assets.data.add(
           DataAsset(
@@ -21,4 +21,3 @@ void main(List<String> args) async {
     }
   });
 }
-// @forced_rerun

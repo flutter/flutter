@@ -21,7 +21,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - data/id1.txt
 
 # PUBSPEC CHECKSUM: 2g5j7i

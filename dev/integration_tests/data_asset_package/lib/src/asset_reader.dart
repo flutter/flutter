@@ -4,10 +4,9 @@
 
 import 'package:flutter/services.dart' show rootBundle;
 
-Future<String> readAsset() async {
+Future<String> loadAssetContent() async {
   try {
-    return await rootBundle
-        .loadString('packages/data_asset_package/data/id1.txt');
+    return await rootBundle.loadString('packages/data_asset_package/data/id1.txt');
   } catch (e) {
     return 'Dependency asset not found: $e';
   }

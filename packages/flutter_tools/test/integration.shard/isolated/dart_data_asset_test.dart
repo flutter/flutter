@@ -36,8 +36,8 @@ void main() {
   });
 
   late Directory tempDirectory;
-  late Directory root;
-  late Directory rootDependency;
+  late Directory appRoot;
+  late Directory dependencyRoot;
 
   setUp(() async {
     // Do not reuse project structure to be able to make local changes
@@ -48,26 +48,26 @@ void main() {
         .childDirectory('dev')
         .childDirectory('integration_tests');
 
-    root = integrationTestsDir.childDirectory(packageName);
-    root.createSync(recursive: true);
-    copyTestProject(packageName, root);
-    await pinDependencies(root.childFile('pubspec.yaml'));
+    appRoot = integrationTestsDir.childDirectory(packageName);
+    appRoot.createSync(recursive: true);
+    copyTestProject(packageName, appRoot);
+    await pinDependencies(appRoot.childFile('pubspec.yaml'));
 
-    rootDependency = integrationTestsDir.childDirectory(packageNameDependency);
-    rootDependency.createSync(recursive: true);
-    copyTestProject(packageNameDependency, rootDependency);
-    await pinDependencies(rootDependency.childFile('pubspec.yaml'));
+    dependencyRoot = integrationTestsDir.childDirectory(packageNameDependency);
+    dependencyRoot.createSync(recursive: true);
+    copyTestProject(packageNameDependency, dependencyRoot);
+    await pinDependencies(dependencyRoot.childFile('pubspec.yaml'));
 
     expect(
       await processManager.run(<String>[
         flutterBin,
         'pub',
         'get',
-      ], workingDirectory: rootDependency.path),
+      ], workingDirectory: dependencyRoot.path),
       const ProcessResultMatcher(),
     );
     expect(
-      await processManager.run(<String>[flutterBin, 'pub', 'get'], workingDirectory: root.path),
+      await processManager.run(<String>[flutterBin, 'pub', 'get'], workingDirectory: appRoot.path),
       const ProcessResultMatcher(),
     );
   });
@@ -84,8 +84,8 @@ void main() {
     final modes = <String>['debug', 'release'];
 
     // NOTE: devFS doesn't see the Dart file updates on Windows in the temp
-    // directory in some cases.
-    final bool checkDartVersion = !platform.isWindows;
+    // directory in some cases. https://github.com/flutter/flutter/issues/184505
+    final bool checkDartCodeUpdates = !platform.isWindows;
 
     for (final mode in modes) {
       for (final device in devices) {
@@ -113,9 +113,9 @@ void main() {
 
           final assets = <String, String>{'id1.txt': 'content1', 'id2.txt': 'content2'};
           final available = <String>['id1.txt'];
-          writeAssets(assets, root);
-          writeHookLibrary(root, assets, available: available);
-          writeHelperLibrary(root, 'version1', assets.keys.toList());
+          writeAssets(assets, appRoot);
+          writeHookLibrary(appRoot, assets, available: available);
+          writeHelperLibrary(appRoot, 'version1', assets.keys.toList());
 
           final ProcessTestResult result = await runFlutter(
             <String>[
@@ -129,7 +129,7 @@ void main() {
                 '--web-browser-flag=--no-sandbox',
               ],
             ],
-            root.path,
+            appRoot.path,
             <Transition>[
               Barrier.contains('Launching lib${Platform.pathSeparator}main.dart on'),
               Multiple.contains(
@@ -141,9 +141,9 @@ void main() {
 
                   // Once the app runs it will print whether it found assets.
                   'VERSION: version1',
-                  'DEPENDENCY_ASSET: content1',
                   'FOUND "packages/data_asset_app/data/id1.txt": "content1".',
-                  'NOT-FOUND "packages/data_asset_app/data/id2.txt".',
+                  'NOT_FOUND "packages/data_asset_app/data/id2.txt".',
+                  'DEPENDENCY_ASSET: package_content1',
                 ],
                 handler: (_) {
                   if (!performRestart) {
@@ -152,9 +152,9 @@ void main() {
                   // Now we trigger a hot-restart with new assets & new
                   // application code, we make the build hook now emit also the
                   // `id2.txt` data asset.
-                  writeAssets(assets, root);
-                  writeHookLibrary(root, assets, available: <String>['id1.txt', 'id2.txt']);
-                  writeHelperLibrary(root, 'afterRestart', assets.keys.toList());
+                  writeAssets(assets, appRoot);
+                  writeHookLibrary(appRoot, assets, available: <String>['id1.txt', 'id2.txt']);
+                  writeHelperLibrary(appRoot, 'afterRestart', assets.keys.toList());
                   return 'R';
                 },
               ),
@@ -163,16 +163,16 @@ void main() {
                   <Pattern>[
                     // Once the app runs it will print whether it found assets.
                     // We expect it to having found the new `id2.txt` now.
-                    if (checkDartVersion) 'VERSION: afterRestart',
-                    'DEPENDENCY_ASSET: content1',
+                    if (checkDartCodeUpdates) ...['VERSION: afterRestart'],
                     'FOUND "packages/data_asset_app/data/id1.txt": "content1".',
 
                     // Flutter web doesn't support new assets on hot-restart atm
                     // -> See https://github.com/flutter/flutter/issues/137265
                     if (isWeb)
-                      'NOT-FOUND "packages/data_asset_app/data/id2.txt".'
+                      'NOT_FOUND "packages/data_asset_app/data/id2.txt".'
                     else
                       'FOUND "packages/data_asset_app/data/id2.txt": "content2".',
+                    'DEPENDENCY_ASSET: package_content1',
                     if (isWeb) 'Successful hot restart' else 'Hot restart performed',
                   ],
                   handler: (_) {
@@ -184,13 +184,13 @@ void main() {
                     // `id3.txt` data asset (but not `id4.txt`).
                     assets['id3.txt'] = 'content3';
                     assets['id4.txt'] = 'content4';
-                    writeAssets(assets, root);
+                    writeAssets(assets, appRoot);
                     writeHookLibrary(
-                      root,
+                      appRoot,
                       assets,
                       available: <String>['id1.txt', 'id2.txt', 'id3.txt'],
                     );
-                    writeHelperLibrary(root, 'afterReload', assets.keys.toList());
+                    writeHelperLibrary(appRoot, 'afterReload', assets.keys.toList());
                     return 'r';
                   },
                 ),
@@ -198,19 +198,19 @@ void main() {
                 Multiple.contains(
                   <Pattern>[
                     // Once the app runs it will print whether it found assets.
-                    if (checkDartVersion) 'VERSION: afterReload',
-                    'DEPENDENCY_ASSET: content1',
+                    if (checkDartCodeUpdates) ...['VERSION: afterReload'],
                     'FOUND "packages/data_asset_app/data/id1.txt": "content1".',
                     // Flutter web doesn't support new assets on hot-reload atm
                     // -> See https://github.com/flutter/flutter/issues/137265
                     if (isWeb) ...<Pattern>[
-                      'NOT-FOUND "packages/data_asset_app/data/id2.txt".',
-                      'NOT-FOUND "packages/data_asset_app/data/id3.txt".',
+                      'NOT_FOUND "packages/data_asset_app/data/id2.txt".',
+                      'NOT_FOUND "packages/data_asset_app/data/id3.txt".',
                     ] else ...<Pattern>[
                       'FOUND "packages/data_asset_app/data/id2.txt": "content2".',
                       'FOUND "packages/data_asset_app/data/id3.txt": "content3".',
                     ],
-                    'NOT-FOUND "packages/data_asset_app/data/id4.txt".',
+                    'NOT_FOUND "packages/data_asset_app/data/id4.txt".',
+                    'DEPENDENCY_ASSET: package_content1',
                     if (isWeb) 'Successful hot reload' else 'Hot reload performed',
                   ],
                   handler: (_) {
@@ -233,13 +233,13 @@ void main() {
       testWithoutContext('flutter build $target', () async {
         final assets = <String, String>{'id1.txt': 'content1', 'id2.txt': 'content2'};
         final available = <String>['id1.txt'];
-        writeAssets(assets, root);
-        writeHookLibrary(root, assets, available: <String>['id1.txt']);
-        writeHelperLibrary(root, 'version1', assets.keys.toList());
+        writeAssets(assets, appRoot);
+        writeHookLibrary(appRoot, assets, available: <String>['id1.txt']);
+        writeHelperLibrary(appRoot, 'version1', assets.keys.toList());
 
         final ProcessTestResult result = await runFlutter(
           <String>['build', '-v', target],
-          root.path,
+          appRoot.path,
           <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
         );
         if (result.exitCode != 0) {
@@ -247,7 +247,7 @@ void main() {
             'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
           );
         }
-        final Directory buildTargetDir = root.childDirectory('build').childDirectory(target);
+        final Directory buildTargetDir = appRoot.childDirectory('build').childDirectory(target);
 
         final List<File> manifestFiles = buildTargetDir
             .listSync(recursive: true)
@@ -284,26 +284,26 @@ void main() {
       testWithoutContext('flutter build $target with conflicting assets', () async {
         final assets = <String, String>{'id1.txt': 'content1', 'id2.txt': 'content2'};
         final available = <String>['id1.txt'];
-        writeAssets(assets, root, subdir: '');
-        writeAssets(assets, rootDependency, subdir: '');
-        writeHookLibrary(root, assets, available: available, namePrefix: '', filePrefix: '');
+        writeAssets(assets, appRoot, subdir: '');
+        writeAssets(assets, dependencyRoot, subdir: '');
+        writeHookLibrary(appRoot, assets, available: available, namePrefix: '', filePrefix: '');
         writeHookLibrary(
-          rootDependency,
+          dependencyRoot,
           assets,
           available: available,
           namePrefix: '',
           filePrefix: '',
         );
-        writeHelperLibrary(root, 'version1', assets.keys.toList());
+        writeHelperLibrary(appRoot, 'version1', assets.keys.toList());
 
-        await modifyPubspec(root, (YamlEditor editor) {
+        await modifyPubspec(appRoot, (YamlEditor editor) {
           editor.update(
             <String>['dependencies', packageNameDependency],
             <String, String>{'path': '../$packageNameDependency'},
           );
         });
 
-        await modifyPubspec(rootDependency, (YamlEditor editor) {
+        await modifyPubspec(dependencyRoot, (YamlEditor editor) {
           editor
             ..update(<String>['flutter', 'assets'], <String>[assets.keys.first])
             ..update(
@@ -314,7 +314,7 @@ void main() {
 
         final ProcessTestResult result = await runFlutter(
           <String>['build', '-v', target],
-          root.path,
+          appRoot.path,
           <Transition>[
             Barrier.contains(
               'Conflicting assets: The asset "asset: packages/data_asset_package/id1.txt" was declared in the pubspec and the hook',
@@ -374,17 +374,13 @@ void writeHookLibrary(
   final String content = hookFile.readAsStringSync();
   final assetList = "<String>[${available.map((String id) => "'$id'").join(', ')}]";
   String newContent = content.replaceFirst(
-    RegExp(r'final List<String> assets = <String>\[[^\]]*\]; // @assets'),
-    'final List<String> assets = $assetList; // @assets',
+    RegExp(r'final assets = <String>\[[^\]]*\]; // @assets'),
+    'final assets = $assetList; // @assets',
   );
   newContent = newContent.replaceFirst(RegExp(r"name: '.*\$id'"), "name: '$namePrefix\$id'");
   newContent = newContent.replaceFirst(
     RegExp(r"file: input.packageRoot.resolve\('.*\$id'\)"),
     "file: input.packageRoot.resolve('$filePrefix\$id')",
-  );
-  newContent = newContent.replaceFirst(
-    '// @forced_rerun',
-    '// @forced_rerun - ${DateTime.now().microsecondsSinceEpoch}',
   );
   writeFile(hookFile, newContent);
 
@@ -410,16 +406,12 @@ void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
   final assetList =
       "<String>[${assetIds.map((String id) => "'packages/$packageName/data/$id'").join(', ')}]";
   String newContent = content.replaceFirst(
-    RegExp(r"const String version = '\w+'; // @version"),
-    "const String version = '$version'; // @version",
+    RegExp(r"const version = '\w+'; // @version"),
+    "const version = '$version'; // @version",
   );
   newContent = newContent.replaceFirst(
-    RegExp(r'final List<String> assets = <String>\[[^\]]*\]; // @assets'),
-    'final List<String> assets = $assetList; // @assets',
-  );
-  newContent = newContent.replaceFirst(
-    '// @forced_rerun',
-    '// @forced_rerun - ${DateTime.now().microsecondsSinceEpoch}',
+    RegExp(r'final assets = <String>\[[^\]]*\]; // @assets'),
+    'final assets = $assetList; // @assets',
   );
   helperFile.writeAsStringSync(newContent);
 }

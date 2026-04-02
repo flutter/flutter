@@ -15,8 +15,8 @@ class AssetData {
   final List<String> notFound;
 }
 
-Future<AssetData?> dumpAssets() async {
-  const String version = 'version1'; // @version
+Future<AssetData?> loadAppAssets() async {
+  const version = 'version1'; // @version
   if (lastVersion == version) {
     return null;
   }
@@ -24,10 +24,8 @@ Future<AssetData?> dumpAssets() async {
 
   final found = <String, String>{};
   final notFound = <String>[];
-  final List<String> assets = <String>[
-    'packages/data_asset_app/data/id1.txt'
-  ]; // @assets
-  for (final String assetId in assets) {
+  final assets = <String>['packages/data_asset_app/data/id1.txt']; // @assets
+  for (final assetId in assets) {
     try {
       found[assetId] = await rootBundle.loadString(assetId);
     } catch (e) {
@@ -35,13 +33,6 @@ Future<AssetData?> dumpAssets() async {
       notFound.add(assetId);
     }
   }
-  print('VERSION: $version');
-  for (final MapEntry(:key, :value) in found.entries) {
-    print('FOUND "$key": "$value".');
-  }
-  for (final id in notFound) {
-    print('NOT-FOUND "$id".');
-  }
+
   return AssetData(version, found, notFound);
 }
-// @forced_rerun
