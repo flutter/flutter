@@ -26,15 +26,17 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
 
   @override
   Future<void> migrate() async {
-    if (!_gradlePropertiesFile.existsSync()) {
+    String contents;
+
+    try {
+      contents = await _gradlePropertiesFile.readAsString();
+    } on FileSystemException {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
       );
       await _gradlePropertiesFile.writeAsString('$_builtInKotlinFlag\n');
       return;
     }
-
-    final String contents = await _gradlePropertiesFile.readAsString();
 
     // Skip migration if the Built-in Kotlin flag already exists
     if (contents.contains(_builtInKotlinRegex)) {

@@ -23,7 +23,11 @@ class DisableNewDslMigration extends ProjectMigrator {
 
   @override
   Future<void> migrate() async {
-    if (!_gradlePropertiesFile.existsSync()) {
+    String contents;
+
+    try {
+      contents = await _gradlePropertiesFile.readAsString();
+    } on FileSystemException {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
       );
@@ -31,9 +35,7 @@ class DisableNewDslMigration extends ProjectMigrator {
       return;
     }
 
-    final String contents = await _gradlePropertiesFile.readAsString();
-
-    // Skip migration if the new DSL flag already exists
+    // Skip migration if the Built-in Kotlin flag already exists
     if (contents.contains(_newDslRegex)) {
       logger.printTrace(
         'The developer has already configured the new DSL flag, skipping migration.',
