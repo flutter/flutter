@@ -859,8 +859,7 @@ TEST_F(WindowManagerTest, UndecoratedModelessDialogWindowHasCorrectSize) {
   EXPECT_GE(size.height, 600);
 }
 
-TEST_F(WindowManagerTest,
-       UndecoratedModelessDialogClientRectFillsWindowRect) {
+TEST_F(WindowManagerTest, UndecoratedModelessDialogClientRectFillsWindowRect) {
   IsolateScope isolate_scope(isolate());
 
   DialogWindowCreationRequest creation_request{
