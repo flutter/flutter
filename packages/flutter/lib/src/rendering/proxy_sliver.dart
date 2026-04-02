@@ -450,9 +450,14 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   /// Creates a render object that constrains the cross axis extent of its sliver child.
   ///
   /// The [maxExtent] parameter must be nonnegative.
-  RenderSliverConstrainedCrossAxis({required double maxExtent})
-    : _maxExtent = maxExtent,
-      assert(maxExtent >= 0.0);
+  RenderSliverConstrainedCrossAxis({
+    required double maxExtent,
+    AlignmentGeometry? alignment,
+    TextDirection? textDirection,
+  }) : assert(maxExtent >= 0.0),
+       _maxExtent = maxExtent,
+       _alignment = alignment,
+       _textDirection = textDirection;
 
   /// The cross axis extent to apply to the sliver child.
   ///
@@ -467,6 +472,63 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     markNeedsLayout();
   }
 
+  /// How to alleviate any extra space in the cross axis.
+  ///
+  /// For example, if the [alignment] is [Alignment.center], the [child] will
+  /// be centered within the [SliverConstraints.crossAxisExtent].
+  ///
+  /// If this is null, the child is positioned at the start of the cross axis
+  /// (0.0).
+  AlignmentGeometry? get alignment => _alignment;
+  AlignmentGeometry? _alignment;
+  set alignment(AlignmentGeometry? value) {
+    if (_alignment == value) {
+      return;
+    }
+    _alignment = value;
+    _markNeedResolution();
+  }
+
+  /// The direction in which text flows, used to resolve [alignment].
+  ///
+  /// This must be non-null if [alignment] is non-null and contains
+  /// directional information (e.g. [AlignmentDirectional.centerStart]).
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    _markNeedResolution();
+  }
+
+  void _markNeedResolution() {
+    _resolvedAlignment = null;
+    markNeedsLayout();
+  }
+
+  Alignment? _resolvedAlignment;
+  Alignment? get _resolvedAlignmentValue => _resolvedAlignment ??= alignment?.resolve(textDirection);
+
+  Offset get _alignmentOffset {
+    final Alignment? resolvedAlignment = _resolvedAlignmentValue;
+    if (resolvedAlignment == null) {
+      return Offset.zero;
+    }
+    final double childCrossAxisExtent = child!.geometry!.crossAxisExtent ?? min(_maxExtent, constraints.crossAxisExtent);
+    final double freeSpace = constraints.crossAxisExtent - childCrossAxisExtent;
+    if (freeSpace <= 0.0) {
+      return Offset.zero;
+    }
+    final double x = resolvedAlignment.x;
+    final double paintOffset = (x + 1.0) / 2.0 * freeSpace;
+    return switch (constraints.axis) {
+      Axis.vertical => Offset(paintOffset, 0.0),
+      Axis.horizontal => Offset(0.0, paintOffset),
+    };
+  }
+
   @override
   void performLayout() {
     assert(child != null);
@@ -476,9 +538,58 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       parentUsesSize: true,
     );
     final SliverGeometry childLayoutGeometry = child!.geometry!;
-    geometry = childLayoutGeometry.copyWith(
-      crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
-    );
+    if (alignment == null) {
+      geometry = childLayoutGeometry.copyWith(
+        crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
+      );
+    } else {
+      geometry = childLayoutGeometry.copyWith(
+        crossAxisExtent: constraints.crossAxisExtent,
+      );
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null && geometry!.visible) {
+      context.paintChild(child!, offset + _alignmentOffset);
+    }
+  }
+
+  @override
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    if (child != null) {
+      final Offset offset = _alignmentOffset;
+      return child!.hitTest(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition -
+            switch (constraints.axis) {
+              Axis.vertical => offset.dx,
+              Axis.horizontal => offset.dy,
+            },
+      );
+    }
+    return false;
+  }
+
+  @override
+  void applyPaintTransform(RenderSliver child, Matrix4 transform) {
+    assert(child == this.child);
+    final Offset offset = _alignmentOffset;
+    transform.translate(offset.dx, offset.dy);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('maxExtent', maxExtent));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
