@@ -211,6 +211,7 @@ class FakeProcess implements io.Process {
     } else {
       this.stdout = Stream<List<int>>.value(_stdout);
     }
+    this.exitCode.then((_) => this.stdin.close());
   }
 
   /// The process exit code.
