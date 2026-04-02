@@ -159,8 +159,12 @@ static void init_touch(FlView* self) {
   self->touch_manager = fl_touch_manager_new(self->engine, self->view_id);
 }
 
-static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
+static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   GdkDevice* device = gdk_event_get_source_device(event);
+  if (device == nullptr) {
+    return kFlutterPointerDeviceKindMouse;
+  }
+
   GdkInputSource source = gdk_device_get_source(device);
   switch (source) {
     case GDK_SOURCE_PEN:
@@ -346,8 +350,9 @@ static gboolean button_press_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_press(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor, button);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      button);
 }
 
 // Signal handler for GtkWidget::button-release-event
@@ -366,8 +371,9 @@ static gboolean button_release_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_release(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor, button);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      button);
 }
 
 // Signal handler for GtkWidget::scroll-event
@@ -405,8 +411,8 @@ static gboolean motion_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_motion(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::enter-notify-event
@@ -417,8 +423,8 @@ static gboolean enter_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_enter(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::leave-notify-event
@@ -433,8 +439,8 @@ static gboolean leave_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_leave(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {
