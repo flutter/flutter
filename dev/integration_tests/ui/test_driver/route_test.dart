@@ -14,7 +14,9 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
-    tearDownAll(driver.close);
+    tearDownAll(() async {
+      await driver.close();
+    });
 
     test('sanity check flutter drive --route', () async {
       // This only makes sense if you ran the test as described

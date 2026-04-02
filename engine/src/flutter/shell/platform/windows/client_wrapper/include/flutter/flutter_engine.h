@@ -94,6 +94,11 @@ class FlutterEngine : public PluginRegistry {
                                                       WPARAM wparam,
                                                       LPARAM lparam);
 
+  // Returns the DXGI adapter used for rendering or nullptr in case of error.
+  IDXGIAdapter* GetGraphicsAdapter() {
+    return FlutterDesktopEngineGetGraphicsAdapter(engine_);
+  }
+
  private:
   // For access to the engine handle.
   friend class FlutterViewController;
