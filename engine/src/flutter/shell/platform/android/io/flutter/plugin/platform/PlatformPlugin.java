@@ -25,6 +25,9 @@ import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -243,37 +246,41 @@ public class PlatformPlugin {
   }
 
   private void setSystemChromeChangeListener() {
-    // Set up a listener to notify the framework when the system ui has changed.
+    // Get the decor view of the window
     View decorView = activity.getWindow().getDecorView();
-    decorView.setOnSystemUiVisibilityChangeListener(
-        new View.OnSystemUiVisibilityChangeListener() {
-          @Override
-          public void onSystemUiVisibilityChange(int visibility) {
-            // `platformChannel.systemChromeChanged` may trigger a callback that eventually results
-            // in a call to `setSystemUiVisibility`.
-            // `setSystemUiVisibility` must not be called in the same frame as when
-            // `onSystemUiVisibilityChange` is received though.
-            //
-            // As such, post `platformChannel.systemChromeChanged` to the view handler to ensure
-            // that downstream callbacks are triggered on the next frame.
-            decorView.post(
-                () -> {
-                  if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                    // The system bars are visible. Make any desired adjustments to
-                    // your UI, such as showing the action bar or other navigational
-                    // controls. Another common action is to set a timer to dismiss
-                    // the system bars and restore the fullscreen mode that was
-                    // previously enabled.
-                    platformChannel.systemChromeChanged(true);
-                  } else {
-                    // The system bars are NOT visible. Make any desired adjustments
-                    // to your UI, such as hiding the action bar or other
-                    // navigational controls.
-                    platformChannel.systemChromeChanged(false);
-                  }
-                });
-          }
+
+    // Disable any existing listener
+    ViewCompat.setOnApplyWindowInsetsListener(decorView, null);
+
+    // Set up a listener for window insets changes
+    ViewCompat.setOnApplyWindowInsetsListener(
+        decorView,
+        (view, insets) -> {
+          // Get system bars insets (status bar + navigation bar)
+          Insets systemBarsInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+          // `platformChannel.systemChromeChanged` may trigger a callback that eventually changes
+          // the system UI visibility. To avoid doing this in the same frame as when insets
+          // are applied, post the callback to the view handler to ensure it runs on the next frame.
+
+          // Determine if the system bars are visible
+          boolean systemBarsVisible = systemBarsInsets.top > 0 || systemBarsInsets.bottom > 0;
+
+          // If the system bars are visible, make any desired adjustments to your UI,
+          // such as showing the action bar or other navigational controls.
+          // Another common action is to set a timer to dismiss the system bars
+          // and restore the fullscreen mode that was previously enabled.
+
+          // If the system bars are NOT visible, make any desired adjustments to your UI,
+          // such as hiding the action bar or other navigational controls.
+          view.post(() -> platformChannel.systemChromeChanged(systemBarsVisible));
+
+          // Return the insets so they are not consumed
+          return insets;
         });
+
+    // Request initial insets
+    ViewCompat.requestApplyInsets(decorView);
   }
 
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
