@@ -195,13 +195,13 @@ base class CollectionsPreview extends Preview {
     this.list = const [1, 2],
     this.map = const {'a': 1},
     this.set = const {1},
-    this.record = (1, 'a'),
+    this.record = (1, 'a', named: 'b', nested: (2, 'c')),
   });
 
   final List<int> list;
   final Map<String, int> map;
   final Set<int> set;
-  final (int, String) record;
+  final (int, String, {String named, (int, String) nested}) record;
 
   @override
   Preview transform() => this;
@@ -216,7 +216,7 @@ Widget preview() => Text('Brightness Preview');
   list: [1, 2],
   map: {'a': 1},
   set: {1},
-  record: (1, 'a'),
+  record: (1, 'a', named: 'b', nested: (2, 'c')),
 )
 Widget collectionPreview() => Text('Collections Preview');
 ''';
@@ -398,7 +398,7 @@ List<_i1.WidgetPreview> previews() => [
           list: [1, 2],
           map: {'a': 1},
           set: {1},
-          record: (1, 'a'),
+          record: (1, 'a', named: 'b', nested: (2, 'c')),
         ).transform(),
   ),
   _i2.buildWidgetPreviewError(
