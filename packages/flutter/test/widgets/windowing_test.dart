@@ -149,19 +149,19 @@ class _StubPopupWindowController extends PopupWindowController {
   BaseWindowController get parent => _StubRegularWindowController(tester);
 
   @override
-  bool get isActivated => true;
-
-  @override
   Size get contentSize => Size.zero;
-
-  @override
-  void activate() {}
 
   @override
   void setConstraints(BoxConstraints constraints) {}
 
   @override
   void destroy() {}
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+
+  @override
+  Offset get offsetFromParent => Offset.zero;
 }
 
 class _StubSatelliteWindowController extends SatelliteWindowController {
@@ -1138,7 +1138,7 @@ void main() {
           ),
         );
 
-        expect(isActivated, equals(true));
+        expect(isActivated, isTrue);
       });
 
       testWidgets('Can access WindowScope.maybeIsActivatedOf for satellite windows', (
