@@ -1194,9 +1194,20 @@ name: my_app
       final logger = BufferLogger.test();
       final ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
+        enableHotReload: false,
         logger: logger,
         systemClock: SystemClock.fixed(DateTime(2001)),
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            webEnableHotReload: true,
+          ),
+        ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
         requests: [
@@ -2037,6 +2048,7 @@ flutter:
 
 ResidentRunner setUpResidentRunner(
   FlutterDevice flutterDevice, {
+  bool enableHotReload = true,
   Logger? logger,
   SystemClock? systemClock,
   DebuggingOptions? debuggingOptions,
@@ -2045,6 +2057,7 @@ ResidentRunner setUpResidentRunner(
     flutterDevice,
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
+    enableHotReload: enableHotReload,
     analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,

@@ -1812,11 +1812,16 @@ server:
     late BufferLogger logger;
     late TestDeviceManager testDeviceManager;
     late FileSystem fileSystem;
+    late FakeWebRunnerFactory fakeWebRunnerFactory;
 
     setUp(() {
       logger = BufferLogger.test();
+      fakeWebRunnerFactory = FakeWebRunnerFactory();
 
-      final fakeDevice = FakeDevice();
+      final fakeDevice = FakeDevice(
+        platformType: PlatformType.web,
+        targetPlatform: TargetPlatform.web_javascript,
+      );
       testDeviceManager = TestDeviceManager(logger: logger)..devices = <Device>[fakeDevice];
       testDeviceManager.specifiedDeviceId = fakeDevice.id;
 
@@ -1901,21 +1906,21 @@ server:
     );
 
     testUsingContext(
-      '--no-hot disables web hot reload in BuildInfo',
+      '--no-hot disables web hot reload in the web runner',
       () async {
-        final command = BuildInfoCapturingRunCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+        final CommandRunner<void> runner = createTestCommandRunner(RunCommand());
 
-        await runner.run(<String>['run', '--no-hot']);
+        await runner.run(<String>['run', '--no-pub', '--no-hot']);
 
-        expect(command.capturedBuildInfo, isNotNull);
-        expect(command.capturedBuildInfo!.webEnableHotReload, isFalse);
+        expect(fakeWebRunnerFactory.lastEnableHotReload, isFalse);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Logger: () => logger,
         DeviceManager: () => testDeviceManager,
+        FeatureFlags: () => FakeFeatureFlags(),
+        WebRunnerFactory: () => fakeWebRunnerFactory,
       },
       initializeFlutterRoot: false,
     );
@@ -2147,28 +2152,6 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
   bool get shouldRunPub => false;
 }
 
-class BuildInfoCapturingRunCommand extends RunCommand {
-  BuildInfo? capturedBuildInfo;
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
-    capturedBuildInfo = await getBuildInfo();
-    return FlutterCommandResult.success();
-  }
-
-  @override
-  // ignore: must_call_super
-  Future<void> validateCommand() async {
-    devices = <Device>[
-      FakeDevice(targetPlatform: TargetPlatform.web_javascript, platformType: PlatformType.web)
-        ..supportsHotReload = true,
-    ];
-  }
-
-  @override
-  bool get shouldRunPub => false;
-}
-
 class FakeResidentRunner extends Fake implements ResidentRunner {
   RPCError? rpcError;
 
@@ -2275,6 +2258,7 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
 /// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
 class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   DebuggingOptions? lastOptions;
+  bool? lastEnableHotReload;
   Map<String, String>? lastWebDefines;
 
   @override
@@ -2283,6 +2267,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     String? target,
     required bool stayResident,
     required DebuggingOptions debuggingOptions,
+    bool enableHotReload = true,
     required analytics.Analytics analytics,
     required FileSystem fileSystem,
     required FlutterProject flutterProject,
@@ -2296,6 +2281,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     Map<String, String> webDefines = const <String, String>{},
   }) {
     lastOptions = debuggingOptions;
+    lastEnableHotReload = enableHotReload;
     lastWebDefines = webDefines;
     return FakeResidentRunner();
   }

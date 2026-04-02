@@ -348,6 +348,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     FlutterProject? flutterProject,
     bool? ipv6,
     required DebuggingOptions debuggingOptions,
+    bool enableHotReload = true,
     UrlTunneller? urlTunneller,
     Logger? logger,
     Terminal? terminal,

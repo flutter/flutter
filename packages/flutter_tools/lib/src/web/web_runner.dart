@@ -28,6 +28,7 @@ abstract class WebRunnerFactory {
     required bool stayResident,
     required FlutterProject flutterProject,
     required DebuggingOptions debuggingOptions,
+    bool enableHotReload = true,
     UrlTunneller? urlTunneller,
     required Logger logger,
     required Terminal terminal,
