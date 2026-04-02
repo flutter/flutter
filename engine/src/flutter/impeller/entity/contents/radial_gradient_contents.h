@@ -16,9 +16,11 @@ namespace impeller {
 
 class RadialGradientContents final : public ColorSourceContents {
  public:
-  RadialGradientContents();
+  explicit RadialGradientContents(const Geometry* geometry);
 
   ~RadialGradientContents() override;
+
+  const Geometry* GetGeometry() const override;
 
   // |Contents|
   bool IsOpaque(const Matrix& transform) const override;
@@ -57,6 +59,7 @@ class RadialGradientContents final : public ColorSourceContents {
                      const Entity& entity,
                      RenderPass& pass) const;
 
+  const Geometry* geometry_ = nullptr;
   Point center_;
   Scalar radius_;
   std::vector<Color> colors_;
