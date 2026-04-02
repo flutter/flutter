@@ -126,29 +126,13 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
     required AnimationStatus lastEffective,
     required AnimationStatus current,
   }) {
-    switch (current) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        return current;
-      case AnimationStatus.forward:
-        switch (lastEffective) {
-          case AnimationStatus.dismissed:
-          case AnimationStatus.completed:
-          case AnimationStatus.forward:
-            return current;
-          case AnimationStatus.reverse:
-            return lastEffective;
-        }
-      case AnimationStatus.reverse:
-        switch (lastEffective) {
-          case AnimationStatus.dismissed:
-          case AnimationStatus.completed:
-          case AnimationStatus.reverse:
-            return current;
-          case AnimationStatus.forward:
-            return lastEffective;
-        }
-    }
+    return switch ((current, lastEffective)) {
+      (AnimationStatus.dismissed, _) || (AnimationStatus.completed, _) => current,
+      (AnimationStatus.forward, AnimationStatus.reverse) => lastEffective,
+      (AnimationStatus.forward, _) => current,
+      (AnimationStatus.reverse, AnimationStatus.forward) => lastEffective,
+      (AnimationStatus.reverse, _) => current,
+    };
   }
 
   void _updateAnimations() {
