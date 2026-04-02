@@ -213,15 +213,9 @@ class AnimatedCrossFade extends StatefulWidget {
   /// cross-fade animation.
   final bool excludeBottomFocus;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
   /// Defaults to [Clip.hardEdge].
-  ///
-  /// The [clipBehavior] argument controls how the [ClipRect] widget that
-  /// wraps the [AnimatedSize] clips its child. If set to [Clip.none],
-  /// no clipping will be applied.
-  ///
-  /// See also:
-  ///
-  ///  * [Clip], for a description of the different clip options.
   final Clip clipBehavior;
 
   /// Called every time an animation completes.
@@ -408,6 +402,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         duration: widget.duration,
         reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
+        clipBehavior: widget.clipBehavior,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
       ),
     );
