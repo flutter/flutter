@@ -404,10 +404,15 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image should be decoded at the specified size. The image
-  /// will be rendered to the constraints of the layout or [width] and [height]
-  /// regardless of these parameters. These parameters are primarily intended
-  /// to reduce the memory usage of [ImageCache].
+  /// engine that the image should be decoded at the specified size, in
+  /// physical pixels. The image will be rendered to the constraints of
+  /// the layout or [width] and [height] regardless of these parameters.
+  /// These parameters are primarily intended to reduce the memory usage of
+  /// [ImageCache].
+  ///
+  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
+  /// treated as logical pixels and multiplied by the device's pixel ratio
+  /// at decode time.
   ///
   /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
@@ -471,6 +476,7 @@ class Image extends StatefulWidget {
     Map<String, String>? headers,
     int? cacheWidth,
     int? cacheHeight,
+    bool useLogicalCacheSize = false,
     WebHtmlElementStrategy webHtmlElementStrategy = WebHtmlElementStrategy.never,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
@@ -481,6 +487,7 @@ class Image extends StatefulWidget {
            headers: headers,
            webHtmlElementStrategy: webHtmlElementStrategy,
          ),
+         useLogicalPixels: useLogicalCacheSize,
        ),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -504,10 +511,15 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image must be decoded at the specified size. The image
-  /// will be rendered to the constraints of the layout or [width] and [height]
-  /// regardless of these parameters. These parameters are primarily intended
-  /// to reduce the memory usage of [ImageCache].
+  /// engine that the image must be decoded at the specified size, in
+  /// physical pixels. The image will be rendered to the constraints of
+  /// the layout or [width] and [height] regardless of these parameters.
+  /// These parameters are primarily intended to reduce the memory usage of
+  /// [ImageCache].
+  ///
+  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
+  /// treated as logical pixels and multiplied by the device's pixel ratio
+  /// at decode time.
   ///
   /// Loading an image from a file creates an in memory copy of the file,
   /// which is retained in the [ImageCache]. The underlying file is not
@@ -540,13 +552,19 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
+    bool useLogicalCacheSize = false,
   }) : // FileImage is not supported on Flutter Web therefore neither this method.
        assert(
          !kIsWeb,
          'Image.file is not supported on Flutter Web. '
          'Consider using either Image.asset or Image.network instead.',
        ),
-       image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+       image = ResizeImage.resizeIfNeeded(
+         cacheWidth,
+         cacheHeight,
+         FileImage(file, scale: scale),
+         useLogicalPixels: useLogicalCacheSize,
+       ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -584,10 +602,15 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image must be decoded at the specified size. The image
-  /// will be rendered to the constraints of the layout or [width] and [height]
-  /// regardless of these parameters. These parameters are primarily intended
-  /// to reduce the memory usage of [ImageCache].
+  /// engine that the image must be decoded at the specified size, in
+  /// physical pixels. The image will be rendered to the constraints of
+  /// the layout or [width] and [height] regardless of these parameters.
+  /// These parameters are primarily intended to reduce the memory usage of
+  /// [ImageCache].
+  ///
+  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
+  /// treated as logical pixels and multiplied by the device's pixel ratio
+  /// at decode time.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -703,12 +726,14 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
+    bool useLogicalCacheSize = false,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
          scale != null
              ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
              : AssetImage(name, bundle: bundle, package: package),
+         useLogicalPixels: useLogicalCacheSize,
        ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
@@ -738,10 +763,15 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image must be decoded at the specified size. The image
-  /// will be rendered to the constraints of the layout or [width] and [height]
-  /// regardless of these parameters. These parameters are primarily intended
-  /// to reduce the memory usage of [ImageCache].
+  /// engine that the image must be decoded at the specified size, in
+  /// physical pixels. The image will be rendered to the constraints of
+  /// the layout or [width] and [height] regardless of these parameters.
+  /// These parameters are primarily intended to reduce the memory usage of
+  /// [ImageCache].
+  ///
+  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
+  /// treated as logical pixels and multiplied by the device's pixel ratio
+  /// at decode time.
   Image.memory(
     Uint8List bytes, {
     super.key,
@@ -765,10 +795,12 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
+    bool useLogicalCacheSize = false,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
          MemoryImage(bytes, scale: scale),
+         useLogicalPixels: useLogicalCacheSize,
        ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),

@@ -102,6 +102,52 @@ void main() {
         expect(resizedImageSize, resizeDims);
       });
 
+      // Regression test for https://github.com/flutter/flutter/issues/56239
+      test('useLogicalPixels accounts for devicePixelRatio when decoding', () async {
+        // Source image is 50x50.
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        await _expectImageSize(MemoryImage(bytes), const Size(50, 50));
+
+        // Request 25x25 logical pixels on a 2x device with devicePixelRatio scaling.
+        // Should decode at 50x50 physical pixels (25 * 2).
+        final resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          allowUpscaling: true,
+          useLogicalPixels: true,
+        );
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(50, 50));
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/56239
+      test('useLogicalPixels does not upscale beyond intrinsic size by default', () async {
+        // Source image is 50x50, request 25x25 on a 3x device with devicePixelRatio scaling.
+        // Effective = 75x75, but allowUpscaling=false (default), so clamped to 50x50.
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        final resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          useLogicalPixels: true,
+        );
+        const config = ImageConfiguration(devicePixelRatio: 3.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(50, 50));
+      });
+
+      test('without useLogicalPixels ignores devicePixelRatio', () async {
+        // Source image is 50x50, request 25x25 on a 2x device WITHOUT devicePixelRatio scaling.
+        // Should decode at exactly 25x25 (not 50x50).
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        final resizedImage = ResizeImage(MemoryImage(bytes), width: 25, height: 25);
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(25, 25));
+      });
+
       test('refuses upscaling when allowUpscaling=false', () async {
         final bytes = Uint8List.fromList(kTransparentImage);
         final imageProvider = MemoryImage(bytes);
