@@ -104,6 +104,7 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
                                     ax::mojom::Event::kStateChanged);
       break;
     case ui::AXEventGenerator::Event::ENABLED_CHANGED:
+    case ui::AXEventGenerator::Event::READONLY_CHANGED:
       DispatchWinAccessibilityEvent(win_delegate,
                                     ax::mojom::Event::kStateChanged);
       break;
@@ -145,7 +146,6 @@ void AccessibilityBridgeWindows::OnAccessibilityEvent(
     case ui::AXEventGenerator::Event::PLACEHOLDER_CHANGED:
     case ui::AXEventGenerator::Event::PORTAL_ACTIVATED:
     case ui::AXEventGenerator::Event::POSITION_IN_SET_CHANGED:
-    case ui::AXEventGenerator::Event::READONLY_CHANGED:
     case ui::AXEventGenerator::Event::RELATED_NODE_CHANGED:
     case ui::AXEventGenerator::Event::REQUIRED_STATE_CHANGED:
     case ui::AXEventGenerator::Event::ROLE_CHANGED:
