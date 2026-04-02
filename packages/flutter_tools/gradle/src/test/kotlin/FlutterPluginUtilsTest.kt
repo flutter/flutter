@@ -757,6 +757,7 @@ class FlutterPluginUtilsTest {
         verify { project.afterEvaluate(capture(projectActionSlot)) }
         assertThrows<IllegalArgumentException> { projectActionSlot.captured.execute(project) }
     }
+
     @Test
     fun `detectApplyingKotlinGradlePlugin logs app warning when KGP is only applied in app`(
         @TempDir tempDir: Path
@@ -764,25 +765,27 @@ class FlutterPluginUtilsTest {
         val rootBuildGradleFile = tempDir.resolve("build.gradle").toFile().apply { createNewFile() }
 
         val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-        val appBuildGradleFile = File(appDir, "build.gradle").apply {
-            createNewFile()
-            writeText(
-                """
-                apply plugin: 'com.android.application'
-                apply plugin: 'kotlin-android'
-                """.trimIndent()
-            )
-        }
+        val appBuildGradleFile =
+            File(appDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.application'
+                    apply plugin: 'kotlin-android'
+                    """.trimIndent()
+                )
+            }
 
         val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-        val pluginBuildGradleFile = File(pluginDir, "build.gradle").apply {
-            createNewFile()
-            writeText(
-                """
-                apply plugin: 'com.android.library'
-                """.trimIndent()
-            )
-        }
+        val pluginBuildGradleFile =
+            File(pluginDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.library'
+                    """.trimIndent()
+                )
+            }
 
         val project = mockk<Project>()
         val rootProject = mockk<Project>()
@@ -848,25 +851,27 @@ class FlutterPluginUtilsTest {
         val rootBuildGradleFile = tempDir.resolve("build.gradle").toFile().apply { createNewFile() }
 
         val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
-        val appBuildGradleFile = File(appDir, "build.gradle").apply {
-            createNewFile()
-            writeText(
-                """
-                apply plugin: 'com.android.application'
-                """.trimIndent()
-            )
-        }
+        val appBuildGradleFile =
+            File(appDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.application'
+                    """.trimIndent()
+                )
+            }
 
         val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
-        val pluginBuildGradleFile = File(pluginDir, "build.gradle").apply {
-            createNewFile()
-            writeText(
-                """
-                apply plugin: 'com.android.library'
-                apply plugin: 'kotlin-android'
-                """.trimIndent()
-            )
-        }
+        val pluginBuildGradleFile =
+            File(pluginDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.library'
+                    apply plugin: 'kotlin-android'
+                    """.trimIndent()
+                )
+            }
 
         val project = mockk<Project>()
         val rootProject = mockk<Project>()
@@ -1094,8 +1099,6 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
         verify(exactly = 1) { pluginPluginManager.apply("kotlin-android") }
     }
-
-
 
     // forceNdkDownload
     @Test
