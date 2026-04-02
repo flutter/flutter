@@ -76,6 +76,7 @@ float strokedSDF(vec2 p) {
           distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
     } else {  // Round
       // Rectangle sdf expanded by half_stroke, to give a half_stroke radius
+      // https://www.shadertoy.com/view/NfXSDr
       outer = distanceFromRect(p, frag_info.size) - half_stroke;
     }
     inner = distanceFromRect(p, frag_info.size - half_stroke);
