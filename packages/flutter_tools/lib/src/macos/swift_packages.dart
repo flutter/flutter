@@ -13,7 +13,7 @@ const _swiftPackageTemplate = '''
 // swift-tools-version: {{swiftToolsVersion}}
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -40,7 +40,7 @@ let package = Package(
 
 const _swiftPackageSourceTemplate = '''
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 ''';
 
@@ -343,16 +343,13 @@ class SwiftPackageCommandCapability {
     //         .writeToPackageDirectory(reason: "Updates package to use the debug mode"),
     //     ]
     // ),
-    const threeIndent = '$_singleIndent$_singleIndent$_singleIndent';
-    const fourIndent = '$threeIndent$_singleIndent';
-    const fiveIndent = '$fourIndent$_singleIndent';
     return '''
 capability: .command(
-${fourIndent}intent: .custom(verb: "$verb", description: "$description"),
-${fourIndent}permissions: [
-$fiveIndent.writeToPackageDirectory(reason: "$description"),
-$fourIndent]
-$threeIndent)''';
+${_singleIndent * 4}intent: .custom(verb: "$verb", description: "$description"),
+${_singleIndent * 4}permissions: [
+${_singleIndent * 5}.writeToPackageDirectory(reason: "$description"),
+${_singleIndent * 4}]
+${_singleIndent * 3})''';
   }
 }
 

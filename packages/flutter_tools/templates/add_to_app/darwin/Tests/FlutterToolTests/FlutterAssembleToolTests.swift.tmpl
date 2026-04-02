@@ -109,7 +109,7 @@ func runWithAssemble(
       expectedURL: "\(flutterRoot)/bin/dart",
       expectedArguments: [
         "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart",
-        "build-native", targetPlatform.rawValue,
+        "build-add-to-app", targetPlatform.rawValue,
       ]
     )
   )
@@ -440,7 +440,7 @@ func assembleUsesMergedEnv() async throws {
       expectedURL: "\(flutterRootFromXcodeEnv)/bin/dart",
       expectedArguments: [
         "\(flutterRootFromXcodeEnv)/packages/flutter_tools/bin/xcode_backend.dart",
-        "build-native", targetPlatform.rawValue,
+        "build-add-to-app", targetPlatform.rawValue,
       ],
       expectedEnv: [
         "FLUTTER_APPLICATION_PATH": flutterAppPath,

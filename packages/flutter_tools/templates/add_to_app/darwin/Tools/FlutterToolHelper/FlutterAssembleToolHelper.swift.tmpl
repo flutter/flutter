@@ -1,4 +1,4 @@
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 
 import Foundation
 
@@ -78,7 +78,7 @@ public class FlutterAssembleToolHelper {
     )
   }
 
-  /// Verify the Flutter framework build mode throw guided error if the build mode is incorrect.
+  /// Verify the Flutter framework build mode, throwing guided error if the build mode is incorrect.
   ///
   /// If sandboxing is enabled, `flutter assemble` cannot be run. This method
   /// verifies the Flutter framework and updates the symlink if necessary.
@@ -502,7 +502,7 @@ public class FlutterAssembleToolHelper {
     let dartExecutable = "\(flutterRoot)/bin/dart"
     let xcodeBackendScript =
       "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart"
-    let command = "build-native"
+    let command = "build-add-to-app"
     try processManager.run(
       executableURL: URL(fileURLWithPath: dartExecutable),
       arguments: [xcodeBackendScript, command, targetPlatform.rawValue],
@@ -610,7 +610,7 @@ public class FlutterAssembleToolHelper {
     return exportedEnv
   }
 
-  /// Merges two environment dictionaries.
+  /// Merges two environment dictionaries with the `xcodeEnv` taking precedence.
   ///
   /// - Parameters:
   ///   - xcodeEnv: The primary environment dictionary.

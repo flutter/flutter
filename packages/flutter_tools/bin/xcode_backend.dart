@@ -51,7 +51,7 @@ class Context {
         buildApp(platform, 'build');
       case 'prepare':
         unpackFor(platform, 'prepare');
-      case 'build-native':
+      case 'build-add-to-app':
         buildForNativeApp(platform);
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
@@ -75,7 +75,7 @@ class Context {
       case 'thin':
       case 'embed':
       case 'embed_and_thin':
-      case 'build-native':
+      case 'build-add-to-app':
       case 'test_vm_service_bonjour_service':
         return command;
       default:
@@ -275,7 +275,7 @@ class Context {
   /// Call `flutter assemble` from a build script in a native app (add-to-app).
   /// After building the App.framework, embed it and the Flutter framework into the app.
   void buildForNativeApp(TargetPlatform platform) {
-    buildApp(platform, 'build-native');
+    buildApp(platform, 'build-add-to-app');
     embedFlutterFrameworks(platform);
   }
 

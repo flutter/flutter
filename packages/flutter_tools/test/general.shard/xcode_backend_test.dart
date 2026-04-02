@@ -262,7 +262,7 @@ void main() {
       const srcRoot = '/path/to/project';
       const iOSVersion = '18.3.1';
       final context = TestContext(
-        <String>['build-native', 'ios'],
+        <String>['build-add-to-app', 'ios'],
         <String, String>{
           'ACTION': 'install',
           'ARCHS': archs,
@@ -311,7 +311,7 @@ void main() {
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
-              '-dXcodeBuildScript=build-native',
+              '-dXcodeBuildScript=build-add-to-app',
               '-dTargetDeviceOSVersion=$iOSVersion',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
@@ -372,7 +372,7 @@ void main() {
       const srcRoot = '/path/to/project';
       const iOSVersion = '18.3.1';
       final context = TestContext(
-        <String>['build-native', 'macos'],
+        <String>['build-add-to-app', 'macos'],
         <String, String>{
           'ACTION': 'install',
           'ARCHS': archs,
@@ -421,7 +421,7 @@ void main() {
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
-              '-dXcodeBuildScript=build-native',
+              '-dXcodeBuildScript=build-add-to-app',
               'release_macos_bundle_flutter_assets',
             ],
           ),

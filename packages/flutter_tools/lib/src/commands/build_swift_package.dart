@@ -109,7 +109,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       ..addOption('platform', allowed: _kSupportedPlatforms, defaultsTo: 'ios')
       ..addMultiOption(
         'build-mode',
-        allowed: ['debug', 'profile', 'release'],
+        allowed: availableBuildModes.map((e) => e.cliName).toList(),
         defaultsTo: availableBuildModes.map((e) => e.cliName).toList(),
       )
       ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.');
