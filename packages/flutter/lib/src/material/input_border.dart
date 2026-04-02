@@ -434,12 +434,7 @@ class OutlineInputBorder extends InputBorder {
   @override
   bool get preferPaintInterior => true;
 
-  Path _gapBorderPath(
-    Canvas canvas,
-    RRect scaledRRect,
-    double start,
-    double extent,
-  ) {
+  Path _gapBorderPath(Canvas canvas, RRect scaledRRect, double start, double extent) {
     final double tlRadiusX = scaledRRect.tlRadiusX;
     final double trRadiusX = scaledRRect.trRadiusX;
     final tlCorner = Rect.fromLTWH(
@@ -568,12 +563,7 @@ class OutlineInputBorder extends InputBorder {
         TextDirection.rtl => gapStart + gapPadding - extent,
         TextDirection.ltr => gapStart - gapPadding,
       };
-      final Path path = _gapBorderPath(
-        canvas,
-        scaledRRect,
-        start,
-        extent,
-      );
+      final Path path = _gapBorderPath(canvas, scaledRRect, start, extent);
       canvas.drawPath(path, paint);
     }
   }
