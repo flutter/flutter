@@ -838,6 +838,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
     auto contents = UberSDFContents::MakeRect(
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
+        /*stroke_join=*/paint.stroke.join,
         /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
 
     const Geometry* geom = contents->GetGeometry();
