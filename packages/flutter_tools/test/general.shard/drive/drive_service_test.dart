@@ -460,7 +460,10 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   }) async => applicationPackage;
 }
 
-class FakeApplicationPackage extends Fake implements ApplicationPackage {}
+class FakeApplicationPackage extends Fake implements ApplicationPackage {
+  @override
+  String get name => 'fakeAppPackage';
+}
 
 class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});
@@ -475,6 +478,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   String get name => 'test';
+
+  @override
+  String get displayName => name;
 
   @override
   final bool supportsFlutterExit;
