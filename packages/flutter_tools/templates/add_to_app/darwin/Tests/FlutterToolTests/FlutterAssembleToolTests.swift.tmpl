@@ -302,7 +302,7 @@ func runInSandboxFailsWhenBuildModeWrong() async throws {
     ),
   ]
 )
-func verifyFlutterFrameworkSuccess(
+func verifyFlutterFrameworkBuildModeSuccess(
   targetPlatform: FlutterPlatform,
   infoPlistPath: String,
   sdk: String,
@@ -325,7 +325,7 @@ func verifyFlutterFrameworkSuccess(
       Data(plistContent.utf8)
     ]
 
-  try FlutterAssembleToolHelper.verifyFlutterFramework(
+  try FlutterAssembleToolHelper.verifyFlutterFrameworkBuildMode(
     packagePath: flutterPackagePath,
     targetBuildMode: targetBuildMode,
     targetPlatform: targetPlatform,
@@ -352,7 +352,7 @@ func verifyFlutterFrameworkSuccess(
     ),
   ]
 )
-func verifyFlutterFrameworkThrows(
+func verifyFlutterFrameworkBuildModeThrows(
   targetPlatform: FlutterPlatform,
   infoPlistPath: String,
   sdk: String,
@@ -376,7 +376,7 @@ func verifyFlutterFrameworkThrows(
     ]
 
   #expect(throws: XcodeErrorAndExit.self) {
-    try FlutterAssembleToolHelper.verifyFlutterFramework(
+    try FlutterAssembleToolHelper.verifyFlutterFrameworkBuildMode(
       packagePath: flutterPackagePath,
       targetBuildMode: targetBuildMode,
       targetPlatform: targetPlatform,
@@ -555,6 +555,7 @@ func copyAndCodesignFrameworkForMacOS() async throws {
         expectedURL: "/usr/bin/rsync",
         expectedArguments: [
           "-av", "--delete", "--filter", "- .DS_Store/",
+          "--filter", "- Headers", "--filter", "- Modules",
           "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
           "\(xcframework)/macos-arm64_x86_64/FlutterMacOS.framework",
           "\(buildDir)/\(frameworksDir)",

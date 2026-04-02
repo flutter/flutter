@@ -59,7 +59,7 @@ public class FlutterToolHelper {
   /// - Parameter env: A dictionary of environment variables.
   /// - Returns: `true` if targeting a simulator, `false` otherwise.
   /// - Throws: `XcodeErrorAndExit.error` if `SDKROOT` is not found or does not match expected values for iOS and macOS.
-  public static func usingSimulatorSdk(env: [String: String]) throws -> Bool {
+  public static func usingSimulatorSDK(env: [String: String]) throws -> Bool {
     let sdkRoot = try findOrExit(env: env, key: "SDKROOT")
     let url = URL(fileURLWithPath: sdkRoot)
     let filenameWithExtension = url.lastPathComponent.lowercased()
@@ -106,7 +106,7 @@ public class FlutterToolHelper {
     if !fileManager.fileExists(atPath: newTargetPath) {
       let lowerBuildMode = targetBuildMode.lowercased()
       throw XcodeErrorAndExit.error([
-        "\(currentLinkName) does not exist for configuration \(targetBuildMode). "
+        "\(currentLinkName) does not exist for build mode \(targetBuildMode). "
           + "You may need to run \"flutter build swift-package --build-mode \(lowerBuildMode)\" "
           + "in your Flutter app."
       ])

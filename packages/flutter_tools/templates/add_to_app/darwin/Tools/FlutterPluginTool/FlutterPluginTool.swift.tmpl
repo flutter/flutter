@@ -18,10 +18,10 @@ struct FlutterPluginTool {
     )
   }
 
-  /// Extracts the configuration and package path from the command line arguments.
+  /// Extracts the build mode and package path from the command line arguments.
   ///
   /// - Parameter arguments: The command line arguments.
-  /// - Returns: A tuple containing the configuration and package path.
+  /// - Returns: A tuple containing the build mode and package path.
   /// - Throws: `XcodeErrorAndExit.error` if the arguments are invalid.
   static func extractArguments(arguments: [String]) throws -> (String, String) {
     if arguments.count != 3 {
@@ -30,8 +30,8 @@ struct FlutterPluginTool {
       ])
     }
     let buildMode = arguments[1]
-    let validConfigurations = ["Debug", "Profile", "Release"]
-    if !validConfigurations.contains(buildMode) {
+    let validBuildModes = ["Debug", "Profile", "Release"]
+    if !validBuildModes.contains(buildMode) {
       throw XcodeErrorAndExit.error(["Invalid build mode: \(buildMode)"])
     }
     let packagePath = arguments[2]

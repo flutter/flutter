@@ -6,23 +6,23 @@ import PackagePlugin
 /// Plugin tool used to switch build modes of the `FlutterPluginRegistrant` swift package by
 /// updating its symlink.
 @main
-struct FlutterConfigurationPlugin: CommandPlugin {
+struct FlutterBuildModePlugin: CommandPlugin {
   func performCommand(context: PluginContext, arguments: [String]) async throws {
-    let configuration = "{{buildMode}}"
+    let buildMode = "{{buildMode}}"
     let tool = try context.tool(named: "FlutterPluginTool")
     let process = try Process.run(
       URL(fileURLWithPath: tool.path.string),
       arguments: [
-        configuration,
+        buildMode,
         context.package.directory.string,
       ]
     )
     process.waitUntilExit()
     if process.terminationReason == .exit && process.terminationStatus == 0 {
-      print("Updated configuration to \(configuration)")
+      print("Updated build mode to \(buildMode)")
     } else {
       let problem = "\(process.terminationReason):\(process.terminationStatus)"
-      Diagnostics.error("Updating configuration to \(configuration) failed: \(problem)")
+      Diagnostics.error("Updating build mode to \(buildMode) failed: \(problem)")
     }
   }
 }

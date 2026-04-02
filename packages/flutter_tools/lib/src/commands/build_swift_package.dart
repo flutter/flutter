@@ -124,11 +124,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       'into existing, native non-Flutter iOS and macOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
 
-  static const availableBuildModes = <BuildMode>[
-    BuildMode.debug,
-    BuildMode.profile,
-    BuildMode.release,
-  ];
+  static const availableBuildModes = <BuildMode>[.debug, .profile, .release];
 
   final Platform _platform;
   final BuildSystem _buildSystem;
@@ -275,6 +271,9 @@ class BuildSwiftPackage extends BuildSubCommand {
   );
 
   /// Whether to generate tests for the Swift package integration tools and plugins.
+  ///
+  /// Test are only generated with `--ci` is passed in. This is only expected to be used
+  /// by the Flutter CI. Tests are not needed by regular users of the command.
   bool get generateTests {
     return boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
   }
@@ -1961,7 +1960,7 @@ class FlutterNativeIntegrationSwiftPackage {
 
   ({SwiftPackageProduct product, List<SwiftPackageTarget> targets}) get _pluginTool {
     final product = SwiftPackageProduct.plugin(
-      name: 'FlutterConfigurationPlugin',
+      name: 'FlutterBuildModePlugin',
       targets: BuildSwiftPackage.availableBuildModes
           .map((mode) => 'Switch to ${mode.uppercaseName} Mode')
           .toList(),

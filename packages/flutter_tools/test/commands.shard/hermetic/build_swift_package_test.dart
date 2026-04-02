@@ -2916,7 +2916,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeTools",
     products: [
-        .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
     ],
     dependencies: [\n        \n    ],
@@ -2983,7 +2983,7 @@ let package = Package(
         nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Debug')
-            .childFile('UpdateConfiguration.swift')
+            .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
         contains('let configuration = "Debug"'),
       );
@@ -2991,7 +2991,7 @@ let package = Package(
         nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Profile')
-            .childFile('UpdateConfiguration.swift')
+            .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
         contains('let configuration = "Profile"'),
       );
@@ -2999,7 +2999,7 @@ let package = Package(
         nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Release')
-            .childFile('UpdateConfiguration.swift')
+            .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
         contains('let configuration = "Release"'),
       );
@@ -3136,7 +3136,7 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeTools",
     products: [
-        .plugin(name: "FlutterConfigurationPlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
     ],
     dependencies: [\n        \n    ],
@@ -3211,7 +3211,7 @@ let package = Package(
         nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Debug')
-            .childFile('UpdateConfiguration.swift')
+            .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
         contains('let configuration = "Debug"'),
       );
@@ -3219,7 +3219,7 @@ let package = Package(
         nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Profile')
-            .childFile('UpdateConfiguration.swift')
+            .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
         contains('let configuration = "Profile"'),
       );
@@ -3227,7 +3227,7 @@ let package = Package(
         nativeToolsPackage
             .childDirectory('Plugins')
             .childDirectory('Release')
-            .childFile('UpdateConfiguration.swift')
+            .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
         contains('let configuration = "Release"'),
       );

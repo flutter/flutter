@@ -2,7 +2,7 @@
   "version": 1.0,
   "_comment": "A listing of all possible template output files. Files ending in .img.tmpl correspond to files checked in to the flutter_template_images package in the flutter/packages repo, located at the same path, excluding the .img.tmpl suffix.",
   "files": [
-    "templates/add_to_app/darwin/Plugins/UpdateConfiguration.swift.tmpl",
+    "templates/add_to_app/darwin/Plugins/FlutterBuildModePlugin.swift.tmpl",
     "templates/add_to_app/darwin/Scripts/FlutterAssembleInputs.xcfilelist.tmpl",
     "templates/add_to_app/darwin/Scripts/post_embed.sh.tmpl",
     "templates/add_to_app/darwin/Tests/FlutterToolTests/FlutterAssembleToolTests.swift.tmpl",
