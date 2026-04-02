@@ -32,6 +32,25 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.41 Changes
 
+### [3.41.6](https://github.com/flutter/flutter/releases/tag/3.41.6)
+- [flutter/184025](https://github.com/flutter/flutter/pull/184025) Include a fix from Skia that ensures that the correct atlas for the glyph mask format is used consistently.
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) Visual issues with circles appearing jagged. Especially on thin stroked circles and circles with small radii.
+- [flutter/183887](https://github.com/flutter/flutter/issues/183887) During SCREEN_OFF event a deadlock preventing new frames causing an ANR can occur on android devices running the Android 16 March Security update.
+
+### [3.41.5](https://github.com/flutter/flutter/releases/tag/3.41.5)
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) When using Impeller on any platform, bur artifacts in circles rendering at 45 degree angles.
+
+### [3.41.4](https://github.com/flutter/flutter/releases/tag/3.41.4)
+- [flutter/182748](https://github.com/flutter/flutter/issues/182748) When building for an iOS simulator with Xcode 26, the build will fail when there is a CocoaPod dependency that does not support arm.
+- [flutter/182361](https://github.com/flutter/flutter/issues/182361) When iOS plugins register to receive lifecycle events during an event, a crash may occur.
+- [flutter/182367](https://github.com/flutter/flutter/issues/182367) Crash on Flutter Web Skwasm apps.
+- [flutter/183071](https://github.com/flutter/flutter/issues/183071) Updated test package and related dependencies.
+
+### [3.41.3](https://github.com/flutter/flutter/releases/tag/3.41.3)
+
+- [flutter/182501](https://github.com/flutter/flutter/issues/182501) Reduce CPU utilization of idle Flutter Windows apps.
+- [flutter/182233](https://github.com/flutter/flutter/issues/182233) Tapping on the status bar may crash the app on iOS when there's a primary scroll view that has never been laid out.
+
 ### [3.41.2](https://github.com/flutter/flutter/releases/tag/3.41.2)
 
 - [flutter/179673](https://github.com/flutter/flutter/issues/179673) When content sizing is not enabled on Android, a race condition can sometimes make platform views not render correctly.

@@ -61,7 +61,7 @@ Future<void> postProcess() async {
   // Recreate footer
   final String publishPath = path.join(docsPath, '..', 'docs', 'doc', 'flutter', 'footer.js');
   final footerFile = File(publishPath)..createSync(recursive: true);
-  createFooter(footerFile, version);
+  await createFooter(footerFile, version);
 }
 
 /// Gets the git revision of the current checkout. [fullLength] if true will return

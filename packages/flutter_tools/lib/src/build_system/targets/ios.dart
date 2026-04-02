@@ -294,7 +294,7 @@ abstract class UnpackIOS extends UnpackDarwin {
         .childDirectory(FlutterDarwinPlatform.ios.frameworkName)
         .childFile(FlutterDarwinPlatform.ios.binaryName);
     final String frameworkBinaryPath = frameworkBinary.path;
-    if (!await frameworkBinary.exists()) {
+    if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
@@ -518,6 +518,12 @@ class DebugIosLLDBInit extends Target {
 
   @override
   List<Target> get dependencies => <Target>[];
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    // The `build swift-package` is not run on a device and therefore does not need an LLDB Init File.
+    return environment.defines[kBuildSwiftPackage] == 'true';
+  }
 
   @override
   Future<void> build(Environment environment) async {

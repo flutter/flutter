@@ -205,8 +205,27 @@ Future<void> writeBundle(
             case AssetKind.font:
               break;
             case AssetKind.shader:
+              var inputToCompiler = input;
+              if (entry.value.transformers.isNotEmpty) {
+                final transformedShaderSourcePath = '${file.path}.transformed';
+                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+                  asset: inputToCompiler,
+                  outputPath: transformedShaderSourcePath,
+                  workingDirectory: projectDir.path,
+                  transformerEntries: entry.value.transformers,
+                  logger: logger,
+                );
+                if (failure != null) {
+                  throwToolExit(
+                    'User-defined transformation of shader "${entry.key}" failed.\n'
+                    '${failure.message}',
+                  );
+                }
+                inputToCompiler = fileSystem.file(transformedShaderSourcePath);
+              }
+
               doCopy = !await shaderCompiler.compileShader(
-                input: input,
+                input: inputToCompiler,
                 outputPath: file.path,
                 targetPlatform: targetPlatform,
               );

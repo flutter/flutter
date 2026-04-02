@@ -42,10 +42,17 @@ class CircleGeometry final : public Geometry {
                                    const Entity& entity,
                                    RenderPass& pass) const override;
 
+  // Set the number of pixels to add to the edge(s) of the circle for
+  // SDF-based antialiasing
+  void SetAntialiasPadding(Scalar extra_pixels);
+
+  Scalar GetAntialiasPadding() const;
+
  private:
   Point center_;
   Scalar radius_;
   Scalar stroke_width_;
+  Scalar padding_pixels_;
 
   CircleGeometry(const CircleGeometry&) = delete;
 

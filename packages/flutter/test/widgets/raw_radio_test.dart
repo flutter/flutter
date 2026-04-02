@@ -169,6 +169,32 @@ void main() {
       expect(semantics.hint, anyOf(isNull, isEmpty));
     });
   });
+
+  testWidgets('RawRadio does not crash at zero area', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: RawRadio<int>(
+              value: 1,
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+              toggleable: false,
+              focusNode: focusNode,
+              autofocus: false,
+              groupRegistry: TestRegistry<int>(),
+              enabled: true,
+              builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
+                  const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawRadio<int>)), Size.zero);
+  });
 }
 
 class TestRegistry<T> extends RadioGroupRegistry<T> {

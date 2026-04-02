@@ -19,7 +19,7 @@ class HeadingsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(key: ValueKey<String>('back')),
-        title: const Text('Heading', key: _appBarTitleKey),
+        title: Semantics(headingLevel: 1, child: const Text('Heading', key: _appBarTitleKey)),
       ),
       body: const Center(child: Text('Body text', key: _bodyTextKey)),
     );

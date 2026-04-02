@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -309,7 +311,10 @@ Review licenses that have not been accepted (y/N)?
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.sdkManagerVersion = '26.0.0';
     processManager.addCommand(
-      const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses']),
+      FakeCommand(
+        command: const <String>['/foo/bar/sdkmanager', '--licenses'],
+        stdin: IgnoringStdin(),
+      ),
     );
 
     final licenseValidator = AndroidLicenseValidator(
@@ -393,10 +398,11 @@ Review licenses that have not been accepted (y/N)?
     sdk.sdkManagerPath = sdkManagerPath;
     final logger = BufferLogger.test();
     processManager.addCommand(
-      const FakeCommand(
-        command: <String>[sdkManagerPath, '--licenses'],
+      FakeCommand(
+        command: const <String>[sdkManagerPath, '--licenses'],
         exitCode: 1,
         stderr: 'sdkmanager crash',
+        stdin: IgnoringStdin(),
       ),
     );
 
@@ -666,14 +672,15 @@ Review licenses that have not been accepted (y/N)?
       sdk.sdkManagerPath = sdkManagerPath;
       final logger = BufferLogger.test();
       processManager.addCommand(
-        const FakeCommand(
-          command: <String>[sdkManagerPath, '--licenses'],
+        FakeCommand(
+          command: const <String>[sdkManagerPath, '--licenses'],
           exitCode: 1,
           stderr: '''
 Error: LinkageError occurred while loading main class com.android.sdklib.tool.sdkmanager.SdkManagerCli
         java.lang.UnsupportedClassVersionError: com/android/sdklib/tool/sdkmanager/SdkManagerCli has been compiled by a more recent version of the Java Runtime (class file version 61.0), this version of the Java Runtime only recognizes class file versions up to 55.0
 Android sdkmanager tool was found, but failed to run
 ''',
+          stdin: IgnoringStdin(),
         ),
       );
 
@@ -905,4 +912,30 @@ class ThrowingStdin<T> extends Fake implements IOSink {
   Future<dynamic> addStream(Stream<List<int>> stream) {
     return Future<T>.error(exception);
   }
+
+  @override
+  Future<void> close() async {}
+}
+
+class IgnoringStdin extends Fake implements IOSink {
+  @override
+  Future<void> addStream(Stream<List<int>> stream) async {
+    final completer = Completer<void>();
+    stream.listen(
+      (_) {},
+      onDone: completer.complete,
+      onError: (Object _) => completer.complete(),
+      cancelOnError: true,
+    );
+    await completer.future;
+  }
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<void> flush() async {}
+
+  @override
+  Future<void> get done async {}
 }

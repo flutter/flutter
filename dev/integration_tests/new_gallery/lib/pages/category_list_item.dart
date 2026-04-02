@@ -167,7 +167,7 @@ class _CategoryHeader extends StatelessWidget {
         color: colorScheme.onBackground,
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
-          width: MediaQuery.of(context).size.width,
+          width: MediaQuery.widthOf(context),
           child: InkWell(
             // Makes integration tests possible.
             key: ValueKey<String>('${category.name}CategoryHeader'),

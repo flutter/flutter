@@ -17,6 +17,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -71,6 +72,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   FlutterProject get parent;
 
   Directory get hostAppRoot;
+
+  FlutterDarwinPlatform get darwinPlatform;
 
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist =>
@@ -181,15 +184,11 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         );
   }
 
-  /// True if this project doesn't have Swift Package Manager disabled in the
-  /// pubspec, has either an iOS or macOS platform implementation, is not a
-  /// module project, Xcode is 15 or greater, and the Swift Package Manager
-  /// feature is enabled.
-  bool get usesSwiftPackageManager {
-    if (!featureFlags.isSwiftPackageManagerEnabled) {
-      return false;
-    }
-
+  /// Return true if the project meets the following requirements:
+  ///   - Project is not a module
+  ///   - Xcode project exists
+  ///   - Xcode version is greater or equal to 15
+  bool get compatibleWithSwiftPackageManager {
     // TODO(loic-sharma): Support Swift Package Manager in add-to-app modules.
     // https://github.com/flutter/flutter/issues/146957
     if (parent.isModule) {
@@ -210,6 +209,11 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     return true;
   }
 
+  /// Return true if the Swift Package Manager feature is enabled and the project is
+  /// [compatibleWithSwiftPackageManager].
+  bool get usesSwiftPackageManager =>
+      featureFlags.isSwiftPackageManagerEnabled && compatibleWithSwiftPackageManager;
+
   Future<XcodeProjectInfo?> projectInfo() async {
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
     if (!xcodeProject.existsSync() ||
@@ -217,7 +221,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
+      hostAppRoot.path,
+      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+    );
   }
 
   XcodeProjectInfo? _projectInfo;
@@ -373,6 +380,9 @@ class IosProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
   // build setting keys
   static const kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
@@ -1126,6 +1136,9 @@ class MacOSProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => MacOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   bool existsSync() => hostAppRoot.existsSync();

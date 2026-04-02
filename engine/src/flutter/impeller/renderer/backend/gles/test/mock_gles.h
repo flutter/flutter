@@ -31,6 +31,15 @@ class IMockGLESImpl {
                           GLenum format,
                           GLenum type,
                           const void* pixels) {}
+  virtual void TexSubImage2D(GLenum target,
+                             GLint level,
+                             GLint xoffset,
+                             GLint yoffset,
+                             GLsizei width,
+                             GLsizei height,
+                             GLenum format,
+                             GLenum type,
+                             const void* pixels) {}
   virtual void GenFramebuffers(GLsizei n, GLuint* framebuffers) {}
   virtual void BindFramebuffer(GLenum target, GLuint framebuffer) {}
   virtual void FramebufferTexture2D(GLenum target,
@@ -87,6 +96,9 @@ class IMockGLESImpl {
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
+  virtual void InvalidateFramebuffer(GLenum target,
+                                     GLsizei numAttachments,
+                                     const GLenum* attachments) {};
   virtual void GetIntegerv(GLenum name, GLint* attachments) {};
 };
 
@@ -106,6 +118,18 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei width,
                GLsizei height,
                GLint border,
+               GLenum format,
+               GLenum type,
+               const void* pixels),
+              (override));
+  MOCK_METHOD(void,
+              TexSubImage2D,
+              (GLenum target,
+               GLint level,
+               GLint xoffset,
+               GLint yoffset,
+               GLsizei width,
+               GLsizei height,
                GLenum format,
                GLenum type,
                const void* pixels),
@@ -210,6 +234,12 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei numAttachments,
                const GLenum* attachments),
               (override));
+  MOCK_METHOD(void,
+              InvalidateFramebuffer,
+              (GLenum target,
+               GLsizei numAttachments,
+               const GLenum* attachments),
+              (override));
   MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
 };
 
@@ -225,7 +255,8 @@ class MockGLES final {
  public:
   static std::shared_ptr<MockGLES> Init(
       std::unique_ptr<MockGLESImpl> impl,
-      const std::optional<std::vector<const char*>>& extensions = std::nullopt);
+      const std::optional<std::vector<const char*>>& extensions = std::nullopt,
+      const char* version_string = "OpenGL ES 3.0");
 
   /// @brief      Returns an initialized |MockGLES| instance.
   ///

@@ -32,7 +32,7 @@ class AppBarExample extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const .symmetric(horizontal: 16.0),
             child: TextField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -58,7 +58,7 @@ class AppBarExample extends StatelessWidget {
         ),
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.only(top: 45.0),
+        padding: const .only(top: 45.0),
         itemCount: 20,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(title: Text('Item $index'));
