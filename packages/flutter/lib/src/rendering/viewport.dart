@@ -23,7 +23,17 @@ import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
-/// The amount of additional content to cache around the viewport.
+/// The amount of additional content to display and lay out around the viewport.
+///
+/// The cache area is used to lay out slivers before they are visible on screen.
+/// Items that fall in this cache area are laid out even though they are not
+/// visible on screen. This allows the viewport to render them ahead of time,
+/// enabling a smoother scrolling experience as items scroll into view.
+///
+/// This class encapsulates both the value and the style of the cache extent.
+/// It allows the cache extent to be defined either as a fixed number of logical
+/// pixels using [ScrollCacheExtent.pixels] or as a multiplier of the viewport's
+/// main axis extent using [ScrollCacheExtent.viewport].
 ///
 /// See also:
 ///
@@ -36,6 +46,12 @@ sealed class ScrollCacheExtent {
   const factory ScrollCacheExtent.pixels(double pixels) = _PixelScrollCacheExtent;
 
   /// Creates a cache extent as a multiplier of the viewport's main axis extent.
+  ///
+  /// The main axis extent is the size of the viewport in its main axis. For
+  /// example, for a vertically scrolling list, the main axis extent is the
+  /// height of the viewport. If the viewport is 600 logical pixels tall, then
+  /// `ScrollCacheExtent.viewport(2.0)` results in a cache extent of 1200 logical
+  /// pixels.
   const factory ScrollCacheExtent.viewport(double value) = _ViewportScrollCacheExtent;
 
   /// Returns the cache extent in logical pixels for a given [mainAxisExtent].

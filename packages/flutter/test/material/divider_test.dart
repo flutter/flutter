@@ -43,9 +43,9 @@ void main() {
 
   testWidgets('Divider custom radius', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: Divider(radius: BorderRadius.circular(5))),
+        child: Center(child: Divider(radius: BorderRadius.all(Radius.circular(5)))),
       ),
     );
     final Container container = tester.widget(find.byType(Container));
@@ -201,9 +201,9 @@ void main() {
 
   testWidgets('VerticalDivider custom radius', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(child: VerticalDivider(radius: BorderRadius.circular(5))),
+        child: Center(child: VerticalDivider(radius: BorderRadius.all(Radius.circular(5)))),
       ),
     );
     final Container container = tester.widget(find.byType(Container));

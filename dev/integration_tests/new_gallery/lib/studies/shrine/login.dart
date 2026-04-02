@@ -18,10 +18,7 @@ import 'theme.dart';
 const double _horizontalPadding = 24.0;
 
 double desktopLoginScreenMainAreaWidth({required BuildContext context}) {
-  return min(
-    360 * reducedTextScale(context),
-    MediaQuery.of(context).size.width - 2 * _horizontalPadding,
-  );
+  return min(360 * reducedTextScale(context), MediaQuery.widthOf(context) - 2 * _horizontalPadding);
 }
 
 class LoginPage extends StatelessWidget {

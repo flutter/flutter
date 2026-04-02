@@ -86,7 +86,7 @@ class _DecoratedSliverClipExampleState
                 left: 0,
                 right: 0,
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height - _height,
+                  height: MediaQuery.heightOf(context) - _height,
                   width: double.infinity,
                 ),
               ),
