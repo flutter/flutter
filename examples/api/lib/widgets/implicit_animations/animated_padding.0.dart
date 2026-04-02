@@ -39,6 +39,7 @@ class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -47,8 +48,8 @@ class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
           duration: const Duration(seconds: 2),
           curve: Curves.easeInOut,
           child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 5,
+            width: size.width,
+            height: size.height / 5,
             color: Colors.blue,
           ),
         ),
