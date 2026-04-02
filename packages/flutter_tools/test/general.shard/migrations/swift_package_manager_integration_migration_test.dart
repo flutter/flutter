@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
+import 'package:flutter_tools/src/plugins.dart';
 
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -874,8 +875,11 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
                 projectDir: memoryFileSystem.currentDirectory
-                    .childDirectory('my_app')
-                    .childDirectory('example'),
+                    .childDirectory(pluginName)
+                    .childDirectory('example/ios'),
+                plugins: [
+                  FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
+                ],
               );
               _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
               project.xcodeProjectInfoFile.writeAsStringSync('78DABEA22ED26510000E7860');
@@ -910,8 +914,11 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
                 projectDir: memoryFileSystem.currentDirectory
-                    .childDirectory('my_app')
-                    .childDirectory('example'),
+                    .childDirectory(pluginName)
+                    .childDirectory('example/ios'),
+                plugins: [
+                  FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
+                ],
               );
               _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
               project.xcodeProjectInfoFile.writeAsStringSync('784666492D4C4C64000A1A5F');
@@ -1285,8 +1292,14 @@ void main() {
                     fileSystem: memoryFileSystem,
                     logger: testLogger,
                     projectDir: memoryFileSystem.currentDirectory
-                        .childDirectory('my_app')
-                        .childDirectory('example'),
+                        .childDirectory(pluginName)
+                        .childDirectory('example/${platform.name}'),
+                    plugins: [
+                      FakePlugin(
+                        name: pluginName,
+                        swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                      ),
+                    ],
                   );
                   _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -1954,8 +1967,14 @@ void main() {
                     fileSystem: memoryFileSystem,
                     logger: testLogger,
                     projectDir: memoryFileSystem.currentDirectory
-                        .childDirectory('my_app')
-                        .childDirectory('example'),
+                        .childDirectory(pluginName)
+                        .childDirectory('example/${platform.name}'),
+                    plugins: [
+                      FakePlugin(
+                        name: pluginName,
+                        swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                      ),
+                    ],
                   );
                   _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -3194,8 +3213,14 @@ void main() {
                   fileSystem: memoryFileSystem,
                   logger: testLogger,
                   projectDir: memoryFileSystem.currentDirectory
-                      .childDirectory('my_app')
-                      .childDirectory('example'),
+                      .childDirectory(pluginName)
+                      .childDirectory('example/${platform.name}'),
+                  plugins: [
+                    FakePlugin(
+                      name: pluginName,
+                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                    ),
+                  ],
                 );
                 _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -3256,8 +3281,14 @@ void main() {
                   fileSystem: memoryFileSystem,
                   logger: testLogger,
                   projectDir: memoryFileSystem.currentDirectory
-                      .childDirectory('my_app')
-                      .childDirectory('example'),
+                      .childDirectory(pluginName)
+                      .childDirectory('example/${platform.name}'),
+                  plugins: [
+                    FakePlugin(
+                      name: pluginName,
+                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                    ),
+                  ],
                 );
                 _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -3417,12 +3448,6 @@ flutter:
       ios:
         pluginClass: MyPlugin
 ''');
-    xcodeProject.relativeSwiftPackagesDirectory
-        .childLink(pluginName)
-        .createSync(
-          pluginProjectDir.childDirectory(platform.name).childDirectory(pluginName).path,
-          recursive: true,
-        );
   }
 }
 
@@ -4409,11 +4434,13 @@ class FakeXcodeProject extends Fake implements IosProject {
     required this.logger,
     this.usesSwiftPackageManager = true,
     Directory? projectDir,
+    List<FakePlugin> plugins = const <FakePlugin>[],
   }) : hostAppRoot = projectDir ?? fileSystem.directory('app_name').childDirectory(platform),
        parent = FakeFlutterProject(
          fileSystem: fileSystem,
-         appName: projectDir != null ? projectDir.basename : 'app_name',
-       );
+         appName: projectDir != null ? projectDir.parent.basename : 'app_name',
+       ),
+       _plugins = plugins;
 
   final Logger logger;
   late XcodeProjectInfo? _projectInfo = XcodeProjectInfo(
@@ -4428,6 +4455,13 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   FakeFlutterProject parent;
+
+  final List<FakePlugin> _plugins;
+
+  @override
+  Future<List<Plugin>> getPlugins() async {
+    return _plugins;
+  }
 
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('$hostAppProjectName.xcodeproj');
@@ -4467,13 +4501,6 @@ class FakeXcodeProject extends Fake implements IosProject {
     return xcodeProjectInfoFile.existsSync() &&
         xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
   }
-
-  @override
-  Directory get relativeSwiftPackagesDirectory => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('.packages');
 
   @override
   Directory get flutterFrameworkSwiftPackageDirectory => hostAppRoot
@@ -4541,6 +4568,20 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     } else {
       super.restoreFromBackup(schemeInfo);
     }
+  }
+}
+
+class FakePlugin extends Fake implements Plugin {
+  FakePlugin({required this.name, required this.swiftPackagePath});
+
+  final String swiftPackagePath;
+
+  @override
+  final String name;
+
+  @override
+  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform, {String? overridePath}) {
+    return swiftPackagePath;
   }
 }
 
