@@ -184,8 +184,10 @@ class PreviewCodeGenerator {
     final File generatedPreviewFile = fs.file(
       widgetPreviewScaffoldProject.directory.uri.resolve(getGeneratedPreviewFilePath(fs)),
     );
+    final code = lib.accept(emitter).toString();
     generatedPreviewFile.writeAsStringSync(
-      DartFormatter(languageVersion: Version.none).format(lib.accept(emitter).toString()),
+      // Format the generated file for readability, particularly during feature development.
+      DartFormatter(languageVersion: Version(3, 7, 0)).format(code),
     );
   }
 
@@ -344,6 +346,27 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
+      DartType(isDartCoreList: true) => cb.literalList([
+        for (final item in toListValue()!) item.toExpression(),
+      ]),
+      DartType(isDartCoreMap: true) => cb.literalMap(
+        toMapValue()!.map(
+          (key, value) => MapEntry(
+            key?.toExpression() ?? cb.literalNull,
+            value?.toExpression() ?? cb.literalNull,
+          ),
+        ),
+      ),
+      DartType(isDartCoreSet: true) => cb.literalSet([
+        for (final item in toSetValue()!) item.toExpression(),
+      ]),
+      RecordType() => () {
+        final (:Map<String, DartObject> named, :List<DartObject> positional) = toRecordValue()!;
+        return cb.literalRecord(
+          positional.map((field) => field.toExpression()).toList(),
+          named.map((key, value) => MapEntry(key, value.toExpression())),
+        );
+      }(),
       InterfaceType(element: EnumElement()) => _createEnumInstance(this),
       InterfaceType() => _createInstance(type, this),
       FunctionType() => _createTearoff(toFunctionValue()!),
