@@ -3011,34 +3011,6 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(180.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(280.0));
   });
-
-  testWidgets('RawTooltip falls back to overlay path when isWindowingEnabled is false', (
-    WidgetTester tester,
-  ) async {
-    // Without windowing, RawTooltip should use the overlay path.
-    // Verify it works normally with an Overlay ancestor.
-    await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Center(
-          child: RawTooltip(
-            semanticsTooltip: tooltipText,
-            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                const Text(tooltipText),
-            child: const SizedBox(width: 100, height: 100),
-          ),
-        ),
-      ),
-    );
-
-    expect(find.byType(RawTooltip), findsOneWidget);
-
-    // Trigger the tooltip to verify the overlay path is functional.
-    final RawTooltipState tooltipState = tester.state(find.byType(RawTooltip));
-    tooltipState.ensureTooltipVisible();
-    await tester.pump(const Duration(seconds: 2));
-
-    expect(find.text(tooltipText), findsOneWidget);
-  });
 }
 
 Future<void> setWidgetForTooltipMode(

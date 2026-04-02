@@ -442,10 +442,9 @@ class RawTooltip extends StatefulWidget {
   /// The vertical gap between the widget and the displayed tooltip.
   ///
   /// When [preferBelow] is set to true and tooltips have sufficient space to
-  /// display themselves, this property defines how much vertical space
-  /// tooltips will position themselves under their corresponding widgets.
-  /// Otherwise, tooltips will position themselves above their corresponding
-  /// widgets with the given offset.
+  /// display themselves, this property defines how much vertical space tooltips
+  /// will position themselves above or below their corresponding widgets
+  /// depending on the value of [preferBelow]
   ///
   /// Defaults to 0.0.
   /// {@endtemplate}
@@ -582,7 +581,7 @@ class RawTooltip extends StatefulWidget {
 
 /// Common interface for showing/hiding the tooltip, abstracting over the
 /// [OverlayPortal]-based and [TooltipWindowController]-based implementations.
-abstract class _TooltipShowController {
+sealed class _TooltipShowController {
   void show();
   void hide();
   bool get isShowing;
@@ -948,27 +947,29 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_showControllerInitialized) {
-      _showControllerInitialized = true;
-      final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
-      if (windowRegistry != null && isWindowingEnabled) {
-        final BaseWindowController? windowController = WindowScope.maybeOf(context);
-        if (windowController == null) {
-          // If there's no window controller in the widget tree, we won't be able
-          // to show the tooltip window, so we fallback to using the overlay.
-          _showController = _OverlayTooltipShowController();
-          return;
-        }
+    if (_showControllerInitialized) {
+      return;
+    }
 
-        _showController = _WindowTooltipShowController(
-          parent: windowController,
-          anchorRectGetter: _getAnchorRect,
-          positionerBuilder: _buildWindowPositioner,
-          onChanged: () => setState(() {}),
-        );
-      } else {
+    _showControllerInitialized = true;
+    final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
+    if (windowRegistry != null && isWindowingEnabled) {
+      final BaseWindowController? windowController = WindowScope.maybeOf(context);
+      if (windowController == null) {
+        // If there's no window controller in the widget tree, we won't be able
+        // to show the tooltip window, so we fallback to using the overlay.
         _showController = _OverlayTooltipShowController();
+        return;
       }
+
+      _showController = _WindowTooltipShowController(
+        parent: windowController,
+        anchorRectGetter: _getAnchorRect,
+        positionerBuilder: _buildWindowPositioner,
+        onChanged: () => setState(() {}),
+      );
+    } else {
+      _showController = _OverlayTooltipShowController();
     }
   }
 
@@ -1079,30 +1080,23 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       ),
     );
 
-    final _TooltipShowController showController = _showController;
-    if (showController is _OverlayTooltipShowController) {
-      assert(debugCheckHasOverlay(context));
-      return OverlayPortal.overlayChildLayoutBuilder(
-        controller: showController.overlayController,
-        overlayChildBuilder: _buildTooltipOverlay,
-        child: result,
-      );
-    }
-
-    if (showController is _WindowTooltipShowController) {
-      final TooltipWindowController? windowController = showController.windowController;
-      if (windowController != null) {
+    switch (_showController) {
+      case final _OverlayTooltipShowController overlayTooltipShowController:
+        assert(debugCheckHasOverlay(context));
+        return OverlayPortal.overlayChildLayoutBuilder(
+          controller: overlayTooltipShowController.overlayController,
+          overlayChildBuilder: _buildTooltipOverlay,
+          child: result,
+        );
+      case final _WindowTooltipShowController windowTooltipShowController:
         return ViewAnchor(
           view: TooltipWindow(
-            controller: windowController,
+            controller: windowTooltipShowController.windowController!,
             child: widget.tooltipBuilder(context, _overlayAnimation),
           ),
           child: result,
         );
-      }
     }
-
-    return result;
   }
 }
 

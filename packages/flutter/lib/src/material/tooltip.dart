@@ -89,13 +89,6 @@ import 'tooltip_visibility.dart';
 /// ** See code in examples/api/lib/material/tooltip/tooltip.3.dart **
 /// {@end-tool}
 ///
-/// {@tool snippet}
-/// This example shows how a [Tooltip] can be used in a multi-window
-/// scenario, where the app runs within a [RegularWindow].
-///
-/// ** See code in examples/api/lib/material/tooltip/tooltip.4.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>
@@ -200,13 +193,7 @@ class Tooltip extends StatefulWidget {
   ///  * [constraints], which allow setting an explicit size for the tooltip.
   final EdgeInsetsGeometry? margin;
 
-  /// The vertical gap between the widget and the displayed tooltip.
-  ///
-  /// When [preferBelow] is set to true and tooltips have sufficient space to
-  /// display themselves, this property defines how much vertical space
-  /// tooltips will position themselves under their corresponding widgets.
-  /// Otherwise, tooltips will position themselves above their corresponding
-  /// widgets with the given offset.
+  /// {@macro flutter.widgets.RawTooltip.verticalOffset}
   final double? verticalOffset;
 
   /// Whether the tooltip defaults to being displayed below the widget.
