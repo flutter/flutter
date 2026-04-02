@@ -117,7 +117,7 @@ class _SaveableFormState extends State<_SaveableForm> {
                 // invoking the SystemNavigator. If this wasn't the root route,
                 // then Navigator.maybePop could be used instead.
                 // See https://github.com/flutter/flutter/issues/11490
-                SystemNavigator.pop();
+                await SystemNavigator.pop();
               }
             },
             autovalidateMode: AutovalidateMode.always,
@@ -156,7 +156,7 @@ class _SaveableFormState extends State<_SaveableForm> {
               // invoking the SystemNavigator. If this wasn't the root route,
               // then Navigator.maybePop could be used instead.
               // See https://github.com/flutter/flutter/issues/11490
-              SystemNavigator.pop();
+              await SystemNavigator.pop();
             },
             child: const Text('Go back'),
           ),

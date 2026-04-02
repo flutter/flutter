@@ -172,6 +172,10 @@ class AnalysisServer {
     return completer.future;
   }
 
+  Future<void> connectToDtd({required Uri dtdUri}) async {
+    await sendRequest('dart/connectToDtd', <String, Object?>{'uri': dtdUri.toString()});
+  }
+
   void _sendNotification(String method, Map<String, Object?> params) {
     final String message = json.encode(<String, Object?>{
       'jsonrpc': '2.0',
