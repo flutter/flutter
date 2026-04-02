@@ -55,7 +55,11 @@ Future<PubspecCache> buildPubspecCache(
     try {
       final Object? parsed = loadYaml(await pubspecFile.readAsString());
       cache[key] = parsed is YamlMap ? parsed : null;
-    } on YamlException {
+    } on YamlException catch (err) {
+      globals.printTrace('Failed to parse pubspec.yaml for ${package.name}: $err');
+      cache[key] = null;
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
       cache[key] = null;
     }
   }
