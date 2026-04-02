@@ -60,7 +60,7 @@ class WindowManagerTest : public WindowsTest {
               .preferred_view_width = 800,
               .preferred_view_height = 600,
           },
-  };
+      .decorated = true};
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowManagerTest);
 };
@@ -311,7 +311,8 @@ TEST_F(WindowManagerTest, CreateModelessDialogWindow) {
                          .preferred_view_height = 600},
       .preferred_constraints = {.has_view_constraints = false},
       .title = L"Hello World",
-      .parent_or_null = nullptr};
+      .parent_or_null = nullptr,
+      .decorated = true};
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
           engine_id(), &creation_request);
@@ -337,7 +338,8 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
           },
       .preferred_constraints = {.has_view_constraints = false},
       .title = L"Hello World",
-      .parent_or_null = parent_window_handle};
+      .parent_or_null = parent_window_handle,
+      .decorated = true};
 
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
@@ -361,7 +363,8 @@ TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
                          .preferred_view_height = 600},
       .preferred_constraints = {.has_view_constraints = false},
       .title = L"Hello World",
-      .parent_or_null = nullptr};
+      .parent_or_null = nullptr,
+      .decorated = true};
 
   const int64_t view_id =
       InternalFlutterWindows_WindowManager_CreateDialogWindow(
