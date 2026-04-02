@@ -557,6 +557,441 @@ TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
   EXPECT_EQ(result, MA_NOACTIVATE);
 }
 
+TEST_F(WindowManagerTest, CreateUndecoratedRegularWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  EXPECT_EQ(view_id, 0);
+
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+  EXPECT_NE(window_handle, nullptr);
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowHasCorrectSize) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  // For an undecorated window, the window is initially sized to accommodate an
+  // 800x600 client area for a decorated window (i.e. the window rect includes
+  // frame chrome). But since WM_NCCALCSIZE returns 0, the entire window rect
+  // becomes the client area, so the content is at least as large as requested.
+  ActualWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_GE(size.width, 800);
+  EXPECT_GE(size.height, 600);
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowClientRectFillsWindowRect) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  // For an undecorated window, WM_NCCALCSIZE returns 0, so the client rect
+  // should fill the entire window rect (no non-client chrome).
+  RECT window_rect;
+  GetWindowRect(window_handle, &window_rect);
+  RECT client_rect;
+  GetClientRect(window_handle, &client_rect);
+
+  EXPECT_EQ(client_rect.right - client_rect.left,
+            window_rect.right - window_rect.left);
+  EXPECT_EQ(client_rect.bottom - client_rect.top,
+            window_rect.bottom - window_rect.top);
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowCanSetSize) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  WindowSizeRequest requestedSize{
+      .has_preferred_view_size = true,
+      .preferred_view_width = 640,
+      .preferred_view_height = 480,
+  };
+  InternalFlutterWindows_WindowManager_SetWindowSize(window_handle,
+                                                     &requestedSize);
+
+  // Content area includes frame chrome that becomes part of the client area.
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_GE(actual_size.width, 640);
+  EXPECT_GE(actual_size.height, 480);
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowCanConstrainByMinimumSize) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  WindowConstraints constraints{.has_view_constraints = true,
+                                .view_min_width = 900,
+                                .view_min_height = 700,
+                                .view_max_width = 10000,
+                                .view_max_height = 10000};
+  InternalFlutterWindows_WindowManager_SetWindowConstraints(window_handle,
+                                                            &constraints);
+
+  // Content area includes frame chrome that becomes part of the client area.
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_GE(actual_size.width, 900);
+  EXPECT_GE(actual_size.height, 700);
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowCanConstrainByMaximumSize) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  WindowConstraints constraints{.has_view_constraints = true,
+                                .view_min_width = 0,
+                                .view_min_height = 0,
+                                .view_max_width = 500,
+                                .view_max_height = 500};
+  InternalFlutterWindows_WindowManager_SetWindowConstraints(window_handle,
+                                                            &constraints);
+
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(actual_size.width, 500);
+  EXPECT_EQ(actual_size.height, 500);
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowCanFullscreen) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FullscreenRequest request{.fullscreen = true, .has_display_id = false};
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  int screen_width = GetSystemMetrics(SM_CXSCREEN);
+  int screen_height = GetSystemMetrics(SM_CYSCREEN);
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(actual_size.width, screen_width);
+  EXPECT_EQ(actual_size.height, screen_height);
+  EXPECT_TRUE(
+      InternalFlutterWindows_WindowManager_GetFullscreen(window_handle));
+}
+
+TEST_F(WindowManagerTest, UndecoratedRegularWindowCanUnfullscreen) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 800,
+              .preferred_view_height = 600,
+          },
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FullscreenRequest request{.fullscreen = true, .has_display_id = false};
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  request.fullscreen = false;
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+
+  // Content area includes frame chrome that becomes part of the client area.
+  ActualWindowSize actual_size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_GE(actual_size.width, 800);
+  EXPECT_GE(actual_size.height, 600);
+  EXPECT_FALSE(
+      InternalFlutterWindows_WindowManager_GetFullscreen(window_handle));
+}
+
+TEST_F(WindowManagerTest, CreateUndecoratedModelessDialogWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = true,
+                         .preferred_view_width = 800,
+                         .preferred_view_height = 600},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Undecorated Dialog",
+      .parent_or_null = nullptr,
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  EXPECT_EQ(view_id, 0);
+
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+  EXPECT_NE(window_handle, nullptr);
+}
+
+TEST_F(WindowManagerTest, UndecoratedModelessDialogWindowHasCorrectSize) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = true,
+                         .preferred_view_width = 800,
+                         .preferred_view_height = 600},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Undecorated Dialog",
+      .parent_or_null = nullptr,
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  // For an undecorated dialog, the window is sized with frame chrome that
+  // becomes part of the client area, so content is at least as large as
+  // requested.
+  ActualWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_GE(size.width, 800);
+  EXPECT_GE(size.height, 600);
+}
+
+TEST_F(WindowManagerTest,
+       UndecoratedModelessDialogClientRectFillsWindowRect) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = true,
+                         .preferred_view_width = 800,
+                         .preferred_view_height = 600},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Undecorated Dialog",
+      .parent_or_null = nullptr,
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  // For an undecorated dialog, the client rect should fill the entire window
+  // rect (no non-client chrome).
+  RECT window_rect;
+  GetWindowRect(window_handle, &window_rect);
+  RECT client_rect;
+  GetClientRect(window_handle, &client_rect);
+
+  EXPECT_EQ(client_rect.right - client_rect.left,
+            window_rect.right - window_rect.left);
+  EXPECT_EQ(client_rect.bottom - client_rect.top,
+            window_rect.bottom - window_rect.top);
+}
+
+TEST_F(WindowManagerTest, CreateUndecoratedModalDialogWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 600,
+              .preferred_view_height = 400,
+          },
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Undecorated Modal Dialog",
+      .parent_or_null = parent_window_handle,
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  EXPECT_EQ(view_id, 1);
+
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+  HostWindow* host_window = HostWindow::GetThisFromHandle(window_handle);
+  EXPECT_EQ(host_window->GetOwnerWindow()->GetWindowHandle(),
+            parent_window_handle);
+}
+
+TEST_F(WindowManagerTest, UndecoratedModalDialogClientRectFillsWindowRect) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size =
+          {
+              .has_preferred_view_size = true,
+              .preferred_view_width = 600,
+              .preferred_view_height = 400,
+          },
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Undecorated Modal Dialog",
+      .parent_or_null = parent_window_handle,
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  RECT window_rect;
+  GetWindowRect(window_handle, &window_rect);
+  RECT client_rect;
+  GetClientRect(window_handle, &client_rect);
+
+  EXPECT_EQ(client_rect.right - client_rect.left,
+            window_rect.right - window_rect.left);
+  EXPECT_EQ(client_rect.bottom - client_rect.top,
+            window_rect.bottom - window_rect.top);
+}
+
+TEST_F(WindowManagerTest, UndecoratedDialogCanNeverBeFullscreen) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = true,
+                         .preferred_view_width = 800,
+                         .preferred_view_height = 600},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Undecorated Dialog",
+      .parent_or_null = nullptr,
+      .decorated = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(
+          engine_id(), &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FullscreenRequest request{.fullscreen = true, .has_display_id = false};
+  InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
+  EXPECT_FALSE(
+      InternalFlutterWindows_WindowManager_GetFullscreen(window_handle));
+}
+
 TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
