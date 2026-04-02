@@ -1723,7 +1723,7 @@ class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
   /// This value must be nonnegative.
   final double maxExtent;
 
-  /// How to alleviate any extra space in the cross axis.
+  /// How to align the child within the cross axis.
   final AlignmentGeometry? alignment;
 
   /// The direction in which text flows, used to resolve [alignment].
