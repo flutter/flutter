@@ -4398,6 +4398,46 @@ void main() {
     );
     expect(tester.getSize(find.byType(SnackBarAction)), Size.zero);
   });
+  testWidgets('SnackBar intrinsic width accounts for padding', (WidgetTester tester) async {
+    const horizontalPadding = 20.0;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SnackBar(
+              animation: AlwaysStoppedAnimation<double>(1.0),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              content: SizedBox(width: 100, height: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox renderSnackBarLayout = tester.allRenderObjects
+        .whereType<RenderBox>()
+        .firstWhere((r) => r.runtimeType.toString().contains('RenderSnackBarLayout'));
+
+    final double minWidth = renderSnackBarLayout.getMinIntrinsicWidth(double.infinity);
+    expect(minWidth, greaterThan(100));
+  });
+
+  testWidgets('SnackBar handle infinite width in performLayout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: UnconstrainedBox(
+            child: SnackBar(
+              animation: const AlwaysStoppedAnimation<double>(1.0),
+              content: const Text('Hello'),
+              action: SnackBarAction(label: 'Action', onPressed: () {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Hello'), findsOneWidget);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".

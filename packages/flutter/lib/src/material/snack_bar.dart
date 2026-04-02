@@ -36,6 +36,12 @@ const Curve _snackBarFadeInCurve = Interval(0.4, 1.0);
 const Curve _snackBarM3FadeInCurve = Interval(0.4, 0.6, curve: Curves.easeInCirc);
 const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
+const double _kActionButtonMarginRatio = 0.5;
+const double _kCloseButtonMarginRatio = 1.0 / 12.0;
+
+const double _kFloatingSnackBarHorizontalPadding = 16.0;
+const double _kFixedSnackBarHorizontalPadding = 24.0;
+
 /// Specify how a [SnackBar] was closed.
 ///
 /// The [ScaffoldMessengerState.showSnackBar] function returns a
@@ -686,7 +692,9 @@ class _SnackBarState extends State<SnackBar> {
         widget.showCloseIcon ?? snackBarTheme.showCloseIcon ?? defaults.showCloseIcon!;
 
     final isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
-    final horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
+    final double horizontalPadding = isFloatingSnackBar
+        ? _kFloatingSnackBarHorizontalPadding
+        : _kFixedSnackBarHorizontalPadding;
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
@@ -945,20 +953,30 @@ class _RenderSnackBarLayout extends RenderBox
 
   @override
   void performLayout() {
+    size = _computeSnackBarSize(constraints, performLayout: true);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSnackBarSize(constraints, performLayout: false);
+  }
+
+  Size _computeSnackBarSize(BoxConstraints constraints, {required bool performLayout}) {
     final RenderBox? content = childForSlot(_SnackBarSlot.content);
     final RenderBox? action = childForSlot(_SnackBarSlot.action);
     final RenderBox? closeIcon = childForSlot(_SnackBarSlot.closeIcon);
 
     if (content == null) {
-      size = constraints.smallest;
-      return;
+      return constraints.smallest;
     }
 
     final hasAction = action != null;
     final hasCloseIcon = closeIcon != null;
     final bool hasButtons = hasAction || hasCloseIcon;
     final isLtr = textDirection == TextDirection.ltr;
-    final horizontalPadding = isFloating ? 16.0 : 24.0;
+    final double horizontalPadding = isFloating
+        ? _kFloatingSnackBarHorizontalPadding
+        : _kFixedSnackBarHorizontalPadding;
     final double availableWidth = constraints.maxWidth;
 
     final EdgeInsets resolvedPadding =
@@ -978,8 +996,12 @@ class _RenderSnackBarLayout extends RenderBox
 
     // Dry Layout
     final double baseButtonMargin = _padding?.resolve(TextDirection.ltr).right ?? horizontalPadding;
-    final double actionHorizontalMargin = hasAction ? baseButtonMargin / 2.0 : 0.0;
-    final double iconHorizontalMargin = hasCloseIcon ? baseButtonMargin / 12.0 : 0.0;
+    final double actionHorizontalMargin = hasAction
+        ? baseButtonMargin * _kActionButtonMarginRatio
+        : 0.0;
+    final double iconHorizontalMargin = hasCloseIcon
+        ? baseButtonMargin * _kCloseButtonMarginRatio
+        : 0.0;
 
     final Size dryCloseIconSize = hasCloseIcon
         ? closeIcon.getDryLayout(BoxConstraints(maxHeight: constraints.maxHeight))
@@ -1017,20 +1039,31 @@ class _RenderSnackBarLayout extends RenderBox
     }
 
     final minContentWidth = strictContentMaxWidth == double.infinity ? 0.0 : strictContentMaxWidth;
-    final Size contentSize = ChildLayoutHelper.layoutChild(
-      content,
-      constraints.copyWith(
-        minWidth: minContentWidth,
-        maxWidth: strictContentMaxWidth,
-        minHeight: 0,
-      ),
+    final BoxConstraints contentConstraints = constraints.copyWith(
+      minWidth: minContentWidth,
+      maxWidth: strictContentMaxWidth,
+      minHeight: 0,
     );
 
+    final Size contentSize = performLayout
+        ? ChildLayoutHelper.layoutChild(content, contentConstraints)
+        : content.getDryLayout(contentConstraints);
+
     final Size closeIconSize = hasCloseIcon
-        ? ChildLayoutHelper.layoutChild(closeIcon, BoxConstraints(maxHeight: constraints.maxHeight))
+        ? (performLayout
+              ? ChildLayoutHelper.layoutChild(
+                  closeIcon,
+                  BoxConstraints(maxHeight: constraints.maxHeight),
+                )
+              : dryCloseIconSize)
         : Size.zero;
     final Size actionSize = hasAction
-        ? ChildLayoutHelper.layoutChild(action, BoxConstraints(maxHeight: constraints.maxHeight))
+        ? (performLayout
+              ? ChildLayoutHelper.layoutChild(
+                  action,
+                  BoxConstraints(maxHeight: constraints.maxHeight),
+                )
+              : dryActionSize)
         : Size.zero;
 
     final double naturalHeight = contentSize.height + verticalPadding;
@@ -1041,13 +1074,20 @@ class _RenderSnackBarLayout extends RenderBox
         : (willOverflow
               ? contentSize.height + maxButtonHeight + resolvedPadding.bottom
               : math.max(naturalHeight, maxButtonHeight));
+    final double actualWidth = availableWidth.isFinite
+        ? availableWidth
+        : (contentSize.width + contentSpacePadding + totalActionAreaWidth);
 
-    size = constraints.constrain(Size(availableWidth, totalHeight));
+    final Size finalSize = constraints.constrain(Size(actualWidth, totalHeight));
+
+    if (!performLayout) {
+      return finalSize;
+    }
 
     // Position the content.
     final double contentX = isLtr
         ? resolvedPadding.left
-        : availableWidth - resolvedPadding.left - contentSize.width;
+        : actualWidth - resolvedPadding.left - contentSize.width;
     final double contentY = (!hasButtons || !willOverflow)
         ? (totalHeight - contentSize.height) / 2
         : resolvedPadding.top;
@@ -1055,12 +1095,12 @@ class _RenderSnackBarLayout extends RenderBox
     (content.parentData! as BoxParentData).offset = Offset(contentX, contentY);
 
     if (!hasButtons) {
-      return;
+      return finalSize;
     }
 
     // Position the buttons.
     final double actionRowTop = resolvedPadding.top + contentSize.height;
-    double currentX = isLtr ? availableWidth - edgeWrapPadding : edgeWrapPadding;
+    double currentX = isLtr ? actualWidth - edgeWrapPadding : edgeWrapPadding;
 
     void positionButton(
       RenderBox child,
@@ -1086,6 +1126,8 @@ class _RenderSnackBarLayout extends RenderBox
     if (hasAction) {
       positionButton(action, actionSize, actionHorizontalMargin, buttonYBase);
     }
+
+    return finalSize;
   }
 
   @override
@@ -1121,7 +1163,6 @@ class _RenderSnackBarLayout extends RenderBox
     return false;
   }
 
-  // Boilerplate for intrinsic dimensions. The actual values are not important
   @override
   double computeMinIntrinsicWidth(double height) => _computeIntrinsicWidth(height, true);
   @override
@@ -1137,7 +1178,50 @@ class _RenderSnackBarLayout extends RenderBox
     final double closeWidth = isMin
         ? (childForSlot(_SnackBarSlot.closeIcon)?.getMinIntrinsicWidth(double.infinity) ?? 0)
         : (childForSlot(_SnackBarSlot.closeIcon)?.getMaxIntrinsicWidth(double.infinity) ?? 0);
-    return contentWidth + actionWidth + closeWidth;
+
+    final bool hasAction = actionWidth > 0;
+    final bool hasCloseIcon = closeWidth > 0;
+    final bool hasButtons = hasAction || hasCloseIcon;
+
+    final double horizontalPadding = isFloating
+        ? _kFloatingSnackBarHorizontalPadding
+        : _kFixedSnackBarHorizontalPadding;
+    final EdgeInsets resolvedPadding =
+        _padding?.resolve(textDirection) ??
+        EdgeInsetsDirectional.only(
+          start: horizontalPadding,
+          end: hasButtons ? 0.0 : horizontalPadding,
+        ).resolve(textDirection);
+
+    final double contentSpacePadding = textDirection == TextDirection.ltr
+        ? resolvedPadding.left
+        : resolvedPadding.right;
+    final double edgeWrapPadding = _padding != null
+        ? (textDirection == TextDirection.ltr ? resolvedPadding.right : resolvedPadding.left)
+        : 0.0;
+
+    if (!hasButtons) {
+      return contentWidth + contentSpacePadding + edgeWrapPadding;
+    }
+
+    final double baseButtonMargin = _padding?.resolve(TextDirection.ltr).right ?? horizontalPadding;
+    final double actionHorizontalMargin = hasAction
+        ? baseButtonMargin * _kActionButtonMarginRatio
+        : 0.0;
+    final double iconHorizontalMargin = hasCloseIcon
+        ? baseButtonMargin * _kCloseButtonMarginRatio
+        : 0.0;
+
+    final double actionFootprint = hasAction ? (actionWidth + actionHorizontalMargin * 2) : 0.0;
+    final double iconFootprint = hasCloseIcon ? (closeWidth + iconHorizontalMargin * 2) : 0.0;
+    final double buttonsAndMarginsWidth = actionFootprint + iconFootprint;
+    final double totalActionAreaWidth = buttonsAndMarginsWidth + edgeWrapPadding;
+
+    if (isMin) {
+      return math.max(contentWidth, buttonsAndMarginsWidth) + contentSpacePadding + edgeWrapPadding;
+    }
+
+    return contentWidth + contentSpacePadding + totalActionAreaWidth;
   }
 
   @override
