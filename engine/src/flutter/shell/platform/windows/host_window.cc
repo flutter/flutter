@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/host_window_dialog.h"
+#include "flutter/shell/platform/windows/host_window_popup.h"
 #include "flutter/shell/platform/windows/host_window_regular.h"
 #include "flutter/shell/platform/windows/host_window_tooltip.h"
 
@@ -233,6 +234,17 @@ std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
     GetWindowPositionCallback get_position_callback,
     HWND parent) {
   return std::unique_ptr<HostWindowTooltip>(new HostWindowTooltip(
+      window_manager, engine, FromWindowConstraints(preferred_constraints),
+      get_position_callback, parent));
+}
+
+std::unique_ptr<HostWindow> HostWindow::CreatePopupWindow(
+    WindowManager* window_manager,
+    FlutterWindowsEngine* engine,
+    const WindowConstraints& preferred_constraints,
+    GetWindowPositionCallback get_position_callback,
+    HWND parent) {
+  return std::unique_ptr<HostWindowPopup>(new HostWindowPopup(
       window_manager, engine, FromWindowConstraints(preferred_constraints),
       get_position_callback, parent));
 }

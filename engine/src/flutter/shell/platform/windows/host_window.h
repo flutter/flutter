@@ -66,7 +66,29 @@ class HostWindow {
       LPCWSTR title,
       HWND parent);
 
+  // Creates a tooltip Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_constraints| are the constraints set on
+  // the window's size. |is_sized_to_content| indicates whether the tooltip
+  // should size itself to its content. |get_position_callback| is a callback
+  // that determines the position of the tooltip window. |parent| is the parent
+  // of this tooltip, which must be non-null.
   static std::unique_ptr<HostWindow> CreateTooltipWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
+      HWND parent);
+
+  // Creates a popup Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_constraints| are the constraints set on
+  // the window's size. |get_position_callback| is a callback that determines
+  // the position of the popup window. |parent| is the parent of this popup,
+  // which must be non-null.
+  static std::unique_ptr<HostWindow> CreatePopupWindow(
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,
       const WindowConstraints& preferred_constraints,
