@@ -146,7 +146,6 @@ class WindowingOwnerLinux extends WindowingOwner {
       owner: this,
       delegate: delegate,
       preferredConstraints: preferredConstraints,
-      isSizedToContent: isSizedToContent,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -558,7 +557,6 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     required WindowingOwnerLinux owner,
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -582,7 +580,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
     );
     setConstraints(preferredConstraints);
     final engine = _FlEngine.current();
-    _view = _FlView(engine, isSizedToContent: isSizedToContent);
+    _view = _FlView(engine, isSizedToContent: true);
     _viewMonitor = _FlViewMonitor(
       _view,
       onFirstFrame: () {
