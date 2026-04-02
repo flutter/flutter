@@ -14,8 +14,9 @@
 namespace impeller {
 class CircleContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<CircleContents>
-  Make(std::unique_ptr<CircleGeometry> geometry, Color color, bool stroked);
+  static std::unique_ptr<CircleContents> Make(
+      std::unique_ptr<CircleGeometry> geometry,
+      Color color);
 
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -27,14 +28,10 @@ class CircleContents : public ColorSourceContents {
 
  private:
   explicit CircleContents(std::unique_ptr<CircleGeometry> geometry,
-                          Color color,
-                          bool stroked,
-                          Scalar aa_padding);
+                          Color color);
 
   std::unique_ptr<CircleGeometry> geometry_;
   Color color_;
-  bool stroked_;
-  Scalar aa_padding_;
 };
 }  // namespace impeller
 

@@ -50,19 +50,19 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/point_field_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/entity/geometry/sdf_compatible_geometry.h"
 #include "impeller/entity/geometry/shadow_path_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/rstransform.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 
 namespace {
-
-constexpr Scalar kAntialiasPadding = 1.0f;
 
 bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
   return filter->type() == flutter::DlColorFilterType::kMatrix ||
@@ -522,35 +522,6 @@ bool Canvas::AttemptColorFilterOptimization(
   return true;
 }
 
-bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
-                                          Scalar radius,
-                                          const Paint& paint) {
-  if (paint.HasColorFilter() || paint.image_filter || paint.invert_colors ||
-      paint.color_source || paint.mask_blur_descriptor.has_value()) {
-    return false;
-  }
-
-  Entity entity;
-  entity.SetTransform(GetCurrentTransform());
-  entity.SetBlendMode(paint.blend_mode);
-
-  const bool is_stroked = paint.style == Paint::Style::kStroke;
-  std::unique_ptr<CircleGeometry> geom;
-  if (is_stroked) {
-    geom = std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
-  } else {
-    geom = std::make_unique<CircleGeometry>(center, radius);
-  }
-  geom->SetAntialiasPadding(kAntialiasPadding);
-
-  auto contents =
-      CircleContents::Make(std::move(geom), paint.color, is_stroked);
-  entity.SetContents(std::move(contents));
-  AddRenderEntityToCurrentPass(entity);
-
-  return true;
-}
-
 bool Canvas::IsShadowBlurDrawOperation(const Paint& paint) {
   if (paint.style != Paint::Style::kFill) {
     return false;
@@ -825,34 +796,22 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
-    Scalar expand_size = kAntialiasPadding;
-    if (paint.style == Paint::Style::kStroke) {
-      expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
-                                                         paint.stroke.width);
-    }
-
-    FillRectGeometry geometry(rect);
-    geometry.SetAntialiasPadding(expand_size);
-
-    auto contents = UberSDFContents::MakeRect(
-        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroke_join=*/paint.stroke.join,
-        /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
-
-    const Geometry* geom = contents->GetGeometry();
-
-    AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
-    return;
+  std::unique_ptr<SDFCompatibleGeometry> geom;
+  if (paint.style == Paint::Style::kStroke) {
+    geom = std::make_unique<StrokeRectGeometry>(rect, paint.stroke);
+  } else {
+    geom = std::make_unique<FillRectGeometry>(rect);
   }
 
-  if (paint.style == Paint::Style::kStroke) {
-    StrokeRectGeometry geom(rect, paint.stroke);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
+    // Draw SDF rect.
+    auto contents = UberSDFContents::Make(UberSDFContents::Type::kRect,
+                                          paint.color, geom.get());
+    AddRenderSDFEntityToCurrentPass(entity, paint, std::move(contents));
   } else {
-    FillRectGeometry geom(rect);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    // Draw non-SDF rect.
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom.get(), paint);
   }
 }
 
@@ -1031,45 +990,32 @@ void Canvas::DrawCircle(const Point& center,
     }
   }
 
-  if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
-    const bool is_stroked = paint.style == Paint::Style::kStroke;
-
-    std::optional<CircleGeometry> geometry;
-    if (is_stroked) {
-      geometry.emplace(center, radius, paint.stroke.width);
-    } else {
-      geometry.emplace(center, radius);
-    }
-    geometry->SetAntialiasPadding(1.0f);
-
-    auto contents = UberSDFContents::MakeCircle(
-        /*color=*/paint.color, /*stroked=*/is_stroked, &geometry.value());
-
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
-
-    const Geometry* geom = contents->GetGeometry();
-
-    AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
-    return;
-  }
-
-  if (AttemptDrawAntialiasedCircle(center, radius, paint)) {
-    return;
-  }
-
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  if (paint.style == Paint::Style::kStroke) {
-    CircleGeometry geom(center, radius, paint.stroke.width);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+  std::optional<Scalar> stroke_width =
+      paint.style == Paint::Style::kStroke
+          ? std::make_optional(paint.stroke.width)
+          : std::nullopt;
+  auto geom = std::make_unique<CircleGeometry>(center, radius, stroke_width);
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
+    // Draw SDF circle using UberSDFContents.
+    auto contents = UberSDFContents::Make(UberSDFContents::Type::kCircle,
+                                          paint.color, geom.get());
+    AddRenderSDFEntityToCurrentPass(entity, paint, std::move(contents));
+  } else if (!(paint.HasColorFilter() || paint.image_filter ||
+               paint.invert_colors || paint.color_source ||
+               paint.mask_blur_descriptor.has_value())) {
+    // Draw SDF circle using CircleContents.
+    auto contents = CircleContents::Make(std::move(geom), paint.color);
+    entity.SetContents(std::move(contents));
+    AddRenderEntityToCurrentPass(entity);
   } else {
-    CircleGeometry geom(center, radius);
-    AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    // Draw non-SDF circle.
+    AddRenderEntityWithFiltersToCurrentPass(entity, geom.get(), paint);
   }
 }
 
@@ -1960,9 +1906,9 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
 
 void Canvas::AddRenderSDFEntityToCurrentPass(
     Entity& entity,
-    const Geometry* geom,
     const Paint& paint,
     std::shared_ptr<ColorSourceContents> contents) {
+  const Geometry* geom = contents->GetGeometry();
   if (paint.color_source) {
     // UberSDF doesn't perform things like gradients so we blend the SDF
     // with the color source.

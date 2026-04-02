@@ -6,20 +6,25 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_CIRCLE_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/sdf_compatible_geometry.h"
 
 namespace impeller {
 
 // Geometry class that can generate vertices (with or without texture
 // coordinates) for either filled or stroked circles
-class CircleGeometry final : public Geometry {
+class CircleGeometry final : public SDFCompatibleGeometry {
  public:
-  explicit CircleGeometry(const Point& center, Scalar radius);
-
   explicit CircleGeometry(const Point& center,
                           Scalar radius,
-                          Scalar stroke_width);
+                          std::optional<Scalar> stroke_width);
 
   ~CircleGeometry() override;
+
+  // |SDFCompatibleGeometry|
+  Rect GetBaseShapeBounds() const override;
+
+  // |SDFCompatibleGeometry|
+  std::optional<StrokeParameters> GetStrokeParameters() const override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -30,10 +35,6 @@ class CircleGeometry final : public Geometry {
   // |Geometry|
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
-  Scalar GetRadius() const;
-  Scalar GetStrokeWidth() const;
-  Point GetCenter() const;
-
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
@@ -42,17 +43,10 @@ class CircleGeometry final : public Geometry {
                                    const Entity& entity,
                                    RenderPass& pass) const override;
 
-  // Set the number of pixels to add to the edge(s) of the circle for
-  // SDF-based antialiasing
-  void SetAntialiasPadding(Scalar extra_pixels);
-
-  Scalar GetAntialiasPadding() const;
-
  private:
   Point center_;
   Scalar radius_;
-  Scalar stroke_width_;
-  Scalar padding_pixels_;
+  std::optional<Scalar> stroke_width_;
 
   CircleGeometry(const CircleGeometry&) = delete;
 

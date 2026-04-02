@@ -13,53 +13,36 @@
 
 namespace impeller {
 
-CircleGeometry::CircleGeometry(const Point& center, Scalar radius)
-    : center_(center),
-      radius_(radius),
-      stroke_width_(-1.0f),
-      padding_pixels_(0.0f) {
+CircleGeometry::CircleGeometry(const Point& center,
+                               Scalar radius,
+                               std::optional<Scalar> stroke_width)
+    : center_(center), radius_(radius), stroke_width_(stroke_width) {
   FML_DCHECK(radius >= 0);
+  if (stroke_width_) {
+    FML_DCHECK(stroke_width_.value() >= 0);
+  }
 }
 
 CircleGeometry::~CircleGeometry() = default;
 
-CircleGeometry::CircleGeometry(const Point& center,
-                               Scalar radius,
-                               Scalar stroke_width)
-    : center_(center),
-      radius_(radius),
-      stroke_width_(std::max(stroke_width, 0.0f)),
-      padding_pixels_(0.0) {
-  FML_DCHECK(radius >= 0);
-  FML_DCHECK(stroke_width >= 0);
+Rect CircleGeometry::GetBaseShapeBounds() const {
+  return Rect::MakeXYWH(center_.x - radius_, center_.y - radius_, radius_ * 2,
+                        radius_ * 2);
+}
+
+std::optional<StrokeParameters> CircleGeometry::GetStrokeParameters() const {
+  if (stroke_width_) {
+    return StrokeParameters{.width = *stroke_width_};
+  }
+  return std::nullopt;
 }
 
 // |Geometry|
 Scalar CircleGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
-  if (stroke_width_ < 0) {
+  if (!stroke_width_) {
     return 1;
   }
-  return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
-}
-
-Point CircleGeometry::GetCenter() const {
-  return center_;
-}
-
-Scalar CircleGeometry::GetRadius() const {
-  return radius_;
-}
-
-Scalar CircleGeometry::GetStrokeWidth() const {
-  return stroke_width_;
-}
-
-void CircleGeometry::SetAntialiasPadding(Scalar extra_padding) {
-  padding_pixels_ = extra_padding;
-}
-
-Scalar CircleGeometry::GetAntialiasPadding() const {
-  return padding_pixels_;
+  return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_.value());
 }
 
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
@@ -68,16 +51,16 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
   auto& transform = entity.GetTransform();
 
   Scalar max_basis = transform.GetMaxBasisLengthXY();
-  Scalar expansion = max_basis == 0 ? 0.0 : padding_pixels_ / max_basis;
+  Scalar expansion = max_basis == 0 ? 0.0 : GetAntialiasPadding() / max_basis;
 
-  if (stroke_width_ < 0) {
+  if (!stroke_width_) {
     auto generator = renderer.GetTessellator().FilledCircle(
         transform, center_, radius_ + expansion);
     return ComputePositionGeometry(renderer, generator, entity, pass);
   }
 
   Scalar half_width =
-      LineGeometry::ComputePixelHalfWidth(transform, stroke_width_);
+      LineGeometry::ComputePixelHalfWidth(transform, stroke_width_.value());
 
   auto generator = renderer.GetTessellator().StrokedCircle(
       transform, center_, radius_, half_width + expansion);
@@ -87,9 +70,9 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
 
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
   Scalar max_basis = transform.GetMaxBasisLengthXY();
-  Scalar expansion = max_basis == 0 ? 0.0 : padding_pixels_ / max_basis;
+  Scalar expansion = max_basis == 0 ? 0.0 : GetAntialiasPadding() / max_basis;
 
-  Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
+  Scalar half_width = stroke_width_.value_or(0.0) * 0.5f;
   Scalar outer_radius = radius_ + half_width + expansion;
   return Rect::MakeLTRB(-outer_radius, -outer_radius,  //
                         +outer_radius, +outer_radius)

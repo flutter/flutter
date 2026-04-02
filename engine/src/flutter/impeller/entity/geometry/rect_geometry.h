@@ -6,21 +6,19 @@
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_RECT_GEOMETRY_H_
 
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/sdf_compatible_geometry.h"
 #include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
 
-class FillRectGeometry final : public Geometry {
+class FillRectGeometry final : public SDFCompatibleGeometry {
  public:
   explicit FillRectGeometry(Rect rect);
 
   ~FillRectGeometry() override;
 
-  const Rect& GetRect() const;
-
-  void SetAntialiasPadding(Scalar padding);
-
-  Scalar GetAntialiasPadding() const;
+  // |SDFCompatibleGeometry|
+  Rect GetBaseShapeBounds() const override;
 
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
@@ -38,14 +36,19 @@ class FillRectGeometry final : public Geometry {
 
  private:
   Rect rect_;
-  Scalar padding_pixels_ = 0.0f;
 };
 
-class StrokeRectGeometry final : public Geometry {
+class StrokeRectGeometry final : public SDFCompatibleGeometry {
  public:
   explicit StrokeRectGeometry(const Rect& rect, const StrokeParameters& stroke);
 
   ~StrokeRectGeometry() override;
+
+  // |SDFCompatibleGeometry|
+  Rect GetBaseShapeBounds() const override;
+
+  // |SDFCompatibleGeometry|
+  std::optional<StrokeParameters> GetStrokeParameters() const override;
 
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
@@ -57,10 +60,9 @@ class StrokeRectGeometry final : public Geometry {
 
  private:
   const Rect rect_;
-  const Scalar stroke_width_;
-  const Join stroke_join_;
+  const StrokeParameters stroke_parameters_;
 
-  static Join AdjustStrokeJoin(const StrokeParameters& stroke);
+  static StrokeParameters AdjustStrokeJoin(const StrokeParameters& stroke);
 };
 
 }  // namespace impeller

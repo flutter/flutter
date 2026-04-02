@@ -117,6 +117,44 @@ TEST(EntityGeometryTest, FillRectGeometryPaddingIsAdjustedByInverseMaxBasis) {
   }
 }
 
+TEST(EntityGeometryTest, StrokeRectGeometryPadding) {
+  Rect rect = Rect::MakeLTRB(0, 0, 100, 100);
+  StrokeParameters stroke = {.width = 10.0f};
+  StrokeRectGeometry geometry(rect, stroke);
+  geometry.SetAntialiasPadding(1.0);  // 1 pixel of padding
+
+  // At scale 1, padding should be 1 + 5.0f (half stroke) = 6.0f local.
+  {
+    auto coverage = geometry.GetCoverage(Matrix());
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-6.0, -6.0, 106.0, 106.0));
+    }
+  }
+
+  // At scale 2, padding should be 0.5 + 5.0f (half stroke) = 5.5f local.
+  {
+    auto matrix = Matrix::MakeScale({2.0, 2.0, 1.0});
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-5.5, -5.5, 105.5, 105.5)
+                                      .TransformAndClipBounds(matrix));
+    }
+  }
+
+  // At scale 0.5, padding should be 2.0 + 5.0f (half stroke) = 7.0f local.
+  {
+    auto matrix = Matrix::MakeScale({0.5, 0.5, 1.0});
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-7.0, -7.0, 107.0, 107.0)
+                                      .TransformAndClipBounds(matrix));
+    }
+  }
+}
+
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
   auto path = flutter::DlPathBuilder{}
                   .AddRect(Rect::MakeLTRB(0, 0, 100, 100))

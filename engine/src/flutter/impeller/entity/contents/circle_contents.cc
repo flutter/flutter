@@ -11,6 +11,9 @@
 namespace impeller {
 
 namespace {
+
+static constexpr Scalar kDefaultAntialiasPadding = 1.0f;
+
 using PipelineBuilderCallback =
     std::function<PipelineRef(ContentContextOptions)>;
 
@@ -21,21 +24,16 @@ using FS = CirclePipeline::FragmentShader;
 
 std::unique_ptr<CircleContents> CircleContents::Make(
     std::unique_ptr<CircleGeometry> geometry,
-    Color color,
-    bool stroked) {
-  Scalar aa_padding = geometry->GetAntialiasPadding();
+    Color color) {
   return std::unique_ptr<CircleContents>(
-      new CircleContents(std::move(geometry), color, stroked, aa_padding));
+      new CircleContents(std::move(geometry), color));
 }
 
 CircleContents::CircleContents(std::unique_ptr<CircleGeometry> geometry,
-                               Color color,
-                               bool stroked,
-                               Scalar aa_padding)
-    : geometry_(std::move(geometry)),
-      color_(color),
-      stroked_(stroked),
-      aa_padding_(aa_padding) {}
+                               Color color)
+    : geometry_(std::move(geometry)), color_(color) {
+  geometry_->SetAntialiasPadding(kDefaultAntialiasPadding);
+}
 
 bool CircleContents::Render(const ContentContext& renderer,
                             const Entity& entity,
@@ -45,11 +43,16 @@ bool CircleContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.center = geometry_->GetCenter();
-  frag_info.radius = geometry_->GetRadius();
-  frag_info.stroke_width = geometry_->GetStrokeWidth();
-  frag_info.aa_pixels = aa_padding_;
-  frag_info.stroked = stroked_ ? 1.0f : 0.0f;
+
+  Rect bounds = geometry_->GetBaseShapeBounds();
+  frag_info.center = bounds.GetCenter();
+  frag_info.radius = bounds.GetWidth() * 0.5f;
+
+  auto stroke = geometry_->GetStrokeParameters();
+  frag_info.stroked = stroke ? 1.0f : 0.0f;
+  frag_info.stroke_width = stroke ? stroke->width : 0.0f;
+
+  frag_info.aa_pixels = geometry_->GetAntialiasPadding();
 
   auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
 

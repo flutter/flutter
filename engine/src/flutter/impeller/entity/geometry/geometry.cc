@@ -76,6 +76,10 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(
   return std::make_unique<StrokePathGeometry>(path, parameters);
 }
 
+// TODO(bensonluk): I don't think any of these Make* functions are used outside
+// of unit tests. Insted, all callers just call named constructors of the
+// concrete geometry type. Verify this and delete these functions.
+
 std::unique_ptr<Geometry> Geometry::MakeCover() {
   return std::make_unique<CoverGeometry>();
 }
@@ -96,13 +100,14 @@ std::unique_ptr<Geometry> Geometry::MakeLine(const Point& p0,
 
 std::unique_ptr<Geometry> Geometry::MakeCircle(const Point& center,
                                                Scalar radius) {
-  return std::make_unique<CircleGeometry>(center, radius);
+  return std::make_unique<CircleGeometry>(center, radius, std::nullopt);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
                                                       Scalar radius,
                                                       Scalar stroke_width) {
-  return std::make_unique<CircleGeometry>(center, radius, stroke_width);
+  return std::make_unique<CircleGeometry>(center, radius,
+                                          std::make_optional(stroke_width));
 }
 
 std::unique_ptr<Geometry> Geometry::MakeFilledArc(const Rect& oval_bounds,

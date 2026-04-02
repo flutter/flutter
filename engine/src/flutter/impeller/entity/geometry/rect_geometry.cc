@@ -10,16 +10,8 @@ FillRectGeometry::FillRectGeometry(Rect rect) : rect_(rect) {}
 
 FillRectGeometry::~FillRectGeometry() = default;
 
-const Rect& FillRectGeometry::GetRect() const {
+Rect FillRectGeometry::GetBaseShapeBounds() const {
   return rect_;
-}
-
-void FillRectGeometry::SetAntialiasPadding(Scalar padding) {
-  padding_pixels_ = padding;
-}
-
-Scalar FillRectGeometry::GetAntialiasPadding() const {
-  return padding_pixels_;
 }
 
 GeometryResult FillRectGeometry::GetPositionBuffer(
@@ -28,7 +20,7 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
     RenderPass& pass) const {
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
-  Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
+  Scalar padding = max_basis == 0 ? 0 : GetAntialiasPadding() / max_basis;
   Rect expanded_rect = rect_.Expand(padding);
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
@@ -48,7 +40,7 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
 std::optional<Rect> FillRectGeometry::GetCoverage(
     const Matrix& transform) const {
   Scalar max_basis = transform.GetMaxBasisLengthXY();
-  Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
+  Scalar padding = max_basis == 0 ? 0 : GetAntialiasPadding() / max_basis;
   return rect_.Expand(padding).TransformAndClipBounds(transform);
 }
 
@@ -67,17 +59,24 @@ bool FillRectGeometry::IsAxisAlignedRect() const {
 
 StrokeRectGeometry::StrokeRectGeometry(const Rect& rect,
                                        const StrokeParameters& stroke)
-    : rect_(rect),
-      stroke_width_(stroke.width),
-      stroke_join_(AdjustStrokeJoin(stroke)) {}
+    : rect_(rect), stroke_parameters_(AdjustStrokeJoin(stroke)) {}
 
 StrokeRectGeometry::~StrokeRectGeometry() = default;
+
+Rect StrokeRectGeometry::GetBaseShapeBounds() const {
+  return rect_;
+}
+
+std::optional<StrokeParameters> StrokeRectGeometry::GetStrokeParameters()
+    const {
+  return stroke_parameters_;
+}
 
 GeometryResult StrokeRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  if (stroke_width_ < 0.0) {
+  if (stroke_parameters_.width < 0.0) {
     return {};
   }
   Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
@@ -86,14 +85,18 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
   }
 
   Scalar min_size = kMinStrokeSize / max_basis;
-  Scalar stroke_width = std::max(stroke_width_, min_size);
+  Scalar stroke_width = std::max(stroke_parameters_.width, min_size);
   Scalar half_stroke_width = stroke_width * 0.5f;
+
+  Scalar expansion = GetAntialiasPadding() / max_basis;
+  half_stroke_width += expansion;
 
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   const Rect& rect = rect_;
-  bool interior_filled = (stroke_width >= rect.GetSize().MinDimension());
+  bool interior_filled =
+      (half_stroke_width >= rect.GetSize().MinDimension() * 0.5f);
 
-  switch (stroke_join_) {
+  switch (stroke_parameters_.join) {
     case Join::kRound: {
       Tessellator::Trigs trigs =
           renderer.GetTessellator().GetTrigsForDeviceRadius(half_stroke_width *
@@ -354,13 +357,20 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 
 std::optional<Rect> StrokeRectGeometry::GetCoverage(
     const Matrix& transform) const {
-  return rect_.TransformBounds(transform);
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  Scalar aa_padding = max_basis == 0 ? 0.0 : GetAntialiasPadding() / max_basis;
+  Scalar stroke_padding = stroke_parameters_.width * 0.5f;
+  Scalar padding = stroke_padding + aa_padding;
+  return rect_.Expand(padding).TransformAndClipBounds(transform);
 }
 
-Join StrokeRectGeometry::AdjustStrokeJoin(const StrokeParameters& stroke) {
-  return (stroke.join == Join::kMiter && stroke.miter_limit < kSqrt2)
-             ? Join::kBevel
-             : stroke.join;
+StrokeParameters StrokeRectGeometry::AdjustStrokeJoin(
+    const StrokeParameters& stroke) {
+  StrokeParameters adjusted = stroke;
+  adjusted.join = (stroke.join == Join::kMiter && stroke.miter_limit < kSqrt2)
+                      ? Join::kBevel
+                      : stroke.join;
+  return adjusted;
 }
 
 }  // namespace impeller

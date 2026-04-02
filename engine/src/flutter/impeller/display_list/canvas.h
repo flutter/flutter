@@ -383,7 +383,6 @@ class Canvas {
 
   void AddRenderSDFEntityToCurrentPass(
       Entity& entity,
-      const Geometry* geom,
       const Paint& paint,
       std::shared_ptr<ColorSourceContents> contents);
 
