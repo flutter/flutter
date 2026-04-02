@@ -9,7 +9,7 @@ class MockClipboard {
 
   final bool hasStringsThrows;
 
-  dynamic clipboardData = <String, dynamic>{'text': null};
+  Map<String, Object?>? clipboardData = <String, Object?>{'text': null};
 
   Future<Object?> handleMethodCall(MethodCall methodCall) async {
     switch (methodCall.method) {
@@ -17,13 +17,12 @@ class MockClipboard {
         return clipboardData;
       case 'Clipboard.hasStrings':
         if (hasStringsThrows) {
-          throw Exception();
+          throw Exception('Intentional test exception from Clipboard.hasStrings');
         }
-        final clipboardDataMap = clipboardData as Map<String, dynamic>?;
-        final text = clipboardDataMap?['text'] as String?;
+        final text = clipboardData?['text'] as String?;
         return <String, bool>{'value': text != null && text.isNotEmpty};
       case 'Clipboard.setData':
-        clipboardData = methodCall.arguments;
+        clipboardData = methodCall.arguments as Map<String, Object?>?;
     }
     return null;
   }
