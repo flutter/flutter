@@ -223,6 +223,7 @@ abstract class CkSurface extends Surface {
   @override
   void dispose() {
     _skSurface?.dispose();
+    _skSurface = null;
   }
 
   @override
