@@ -160,7 +160,6 @@ public class FlutterAssembleToolHelper {
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - verifyBuiltProducts: Whether to verify `BUILT_PRODUCTS_DIR`.
-  ///   - verifyTargetBuild: Whether to verify `TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH`.
   ///   - env: A dictionary of environment variables.
   ///   - fileManager: The file manager to use for file operations.
   /// - Throws: `XcodeErrorAndExit.error` if the framework build mode is incorrect.
@@ -169,7 +168,6 @@ public class FlutterAssembleToolHelper {
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
     verifyBuiltProducts: Bool = true,
-    verifyTargetBuild: Bool = true,
     env: [String: String],
     fileManager: FlutterToolsFileManager
   ) throws {
@@ -196,27 +194,25 @@ public class FlutterAssembleToolHelper {
       )
     }
 
-    if verifyTargetBuild {
-      // Verify build mode of framework in TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH
-      let targetBuildDir = try FlutterToolHelper.findOrExit(
-        env: env,
-        key: "TARGET_BUILD_DIR"
-      )
-      let frameworksFolderPath = try FlutterToolHelper.findOrExit(
-        env: env,
-        key: "FRAMEWORKS_FOLDER_PATH"
-      )
-      let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
-      try verifyFrameworkBuildMode(
-        buildDirectory: embeddedFrameworks,
-        expectedBuildMode: expectedBuildMode,
-        packagePath: packagePath,
-        targetBuildMode: targetBuildMode,
-        targetPlatform: targetPlatform,
-        env: env,
-        fileManager: fileManager
-      )
-    }
+    // Verify build mode of framework in TARGET_BUILD_DIR/FRAMEWORKS_FOLDER_PATH
+    let targetBuildDir = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "TARGET_BUILD_DIR"
+    )
+    let frameworksFolderPath = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "FRAMEWORKS_FOLDER_PATH"
+    )
+    let embeddedFrameworks = "\(targetBuildDir)/\(frameworksFolderPath)"
+    try verifyFrameworkBuildMode(
+      buildDirectory: embeddedFrameworks,
+      expectedBuildMode: expectedBuildMode,
+      packagePath: packagePath,
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: env,
+      fileManager: fileManager
+    )
   }
 
   /// Verifies the Flutter framework's build mode.
@@ -567,7 +563,7 @@ public class FlutterAssembleToolHelper {
       }
     }
     throw XcodeErrorAndExit.error([
-      "Unable to run \"flutter assemble\". Failed to find \(path)"
+      "Unable to rebuild Flutter app. Failed to find \(path)"
     ])
   }
 
@@ -590,12 +586,12 @@ public class FlutterAssembleToolHelper {
   ) throws -> [String: String] {
     guard let data = fileManager.contents(atPath: exportedEnvPath) else {
       throw XcodeErrorAndExit.error([
-        "Unable to run \"flutter assemble\". Failed to read contents of \(exportedEnvPath)"
+        "Unable to rebuild Flutter app. Failed to read contents of \(exportedEnvPath)"
       ])
     }
     guard let contents = String(data: data, encoding: .utf8) else {
       throw XcodeErrorAndExit.error([
-        "Unable to run \"flutter assemble\". Failed to encode contents of \(exportedEnvPath)"
+        "Unable to rebuild Flutter app. Failed to encode contents of \(exportedEnvPath)"
       ])
     }
 
