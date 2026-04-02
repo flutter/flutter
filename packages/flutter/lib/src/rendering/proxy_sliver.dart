@@ -509,14 +509,16 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   }
 
   Alignment? _resolvedAlignment;
-  Alignment? get _resolvedAlignmentValue => _resolvedAlignment ??= alignment?.resolve(textDirection);
+  Alignment? get _resolvedAlignmentValue =>
+      _resolvedAlignment ??= alignment?.resolve(textDirection);
 
   Offset get _alignmentOffset {
     final Alignment? resolvedAlignment = _resolvedAlignmentValue;
     if (resolvedAlignment == null) {
       return Offset.zero;
     }
-    final double childCrossAxisExtent = child!.geometry!.crossAxisExtent ?? min(_maxExtent, constraints.crossAxisExtent);
+    final double childCrossAxisExtent =
+        child!.geometry!.crossAxisExtent ?? min(_maxExtent, constraints.crossAxisExtent);
     final double freeSpace = constraints.crossAxisExtent - childCrossAxisExtent;
     if (freeSpace <= 0.0) {
       return Offset.zero;
@@ -543,9 +545,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
         crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
       );
     } else {
-      geometry = childLayoutGeometry.copyWith(
-        crossAxisExtent: constraints.crossAxisExtent,
-      );
+      geometry = childLayoutGeometry.copyWith(crossAxisExtent: constraints.crossAxisExtent);
     }
   }
 
@@ -567,7 +567,8 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       return child!.hitTest(
         result,
         mainAxisPosition: mainAxisPosition,
-        crossAxisPosition: crossAxisPosition -
+        crossAxisPosition:
+            crossAxisPosition -
             switch (constraints.axis) {
               Axis.vertical => offset.dx,
               Axis.horizontal => offset.dy,
@@ -588,7 +589,9 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('maxExtent', maxExtent));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
+    );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
