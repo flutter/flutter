@@ -1173,11 +1173,11 @@ class _RenderSnackBarLayout extends RenderBox
         ? (childForSlot(_SnackBarSlot.content)?.getMinIntrinsicWidth(height) ?? 0)
         : (childForSlot(_SnackBarSlot.content)?.getMaxIntrinsicWidth(height) ?? 0);
     final double actionWidth = isMin
-        ? (childForSlot(_SnackBarSlot.action)?.getMinIntrinsicWidth(double.infinity) ?? 0)
-        : (childForSlot(_SnackBarSlot.action)?.getMaxIntrinsicWidth(double.infinity) ?? 0);
+        ? (childForSlot(_SnackBarSlot.action)?.getMinIntrinsicWidth(height) ?? 0)
+        : (childForSlot(_SnackBarSlot.action)?.getMaxIntrinsicWidth(height) ?? 0);
     final double closeWidth = isMin
-        ? (childForSlot(_SnackBarSlot.closeIcon)?.getMinIntrinsicWidth(double.infinity) ?? 0)
-        : (childForSlot(_SnackBarSlot.closeIcon)?.getMaxIntrinsicWidth(double.infinity) ?? 0);
+        ? (childForSlot(_SnackBarSlot.closeIcon)?.getMinIntrinsicWidth(height) ?? 0)
+        : (childForSlot(_SnackBarSlot.closeIcon)?.getMaxIntrinsicWidth(height) ?? 0);
 
     final bool hasAction = actionWidth > 0;
     final bool hasCloseIcon = closeWidth > 0;
@@ -1196,9 +1196,9 @@ class _RenderSnackBarLayout extends RenderBox
     final double contentSpacePadding = textDirection == TextDirection.ltr
         ? resolvedPadding.left
         : resolvedPadding.right;
-    final double edgeWrapPadding = _padding != null
-        ? (textDirection == TextDirection.ltr ? resolvedPadding.right : resolvedPadding.left)
-        : 0.0;
+    final double edgeWrapPadding = textDirection == TextDirection.ltr
+        ? resolvedPadding.right
+        : resolvedPadding.left;
 
     if (!hasButtons) {
       return contentWidth + contentSpacePadding + edgeWrapPadding;
