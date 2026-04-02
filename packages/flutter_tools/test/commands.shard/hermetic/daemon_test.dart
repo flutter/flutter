@@ -1266,7 +1266,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     startVMServiceUri = vmServiceUri;
     startDisableServiceAuthCodes = disableServiceAuthCodes;
     this.enableDevTools = enableDevTools;
-    this.startAppName = appName;
+    startAppName = appName;
   }
 
   @override
