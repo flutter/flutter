@@ -200,7 +200,7 @@ class CocoaPods {
     switch (installation) {
       case CocoaPodsStatus.notInstalled:
         _logger.printWarning(
-          'Error: CocoaPods not installed. Skipping pod install.\n'
+          'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'For installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
@@ -208,7 +208,7 @@ class CocoaPods {
         return false;
       case CocoaPodsStatus.brokenInstall:
         _logger.printWarning(
-          'Error: CocoaPods is installed but broken. Skipping pod install.\n'
+          'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
           'For re-installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
@@ -223,7 +223,7 @@ class CocoaPods {
         );
       case CocoaPodsStatus.belowMinimumVersion:
         _logger.printWarning(
-          'Error: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
+          'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
           'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
