@@ -2586,6 +2586,63 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
+  testWidgets('pasteText reports error to FlutterError when Clipboard.getData throws', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errors.add(details);
+    };
+
+    try {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        if (methodCall.method == 'Clipboard.getData') {
+          throw PlatformException(code: 'CLIPBOARD_ERROR', message: 'Failed to read clipboard');
+        }
+        return null; // Fall through for other methods
+      });
+
+      final controller = TextEditingController(text: 'text');
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: Colors.red,
+            enableInteractiveSelection: true,
+          ),
+        ),
+      );
+
+      // Get a context inside EditableText to access its internal Actions
+      final BuildContext childContext = tester.element(
+        find
+            .descendant(of: find.byType(EditableText), matching: find.byType(RawGestureDetector))
+            .first,
+      );
+      Actions.invoke(childContext, const PasteTextIntent(SelectionChangedCause.toolbar));
+
+      await tester.idle(); // Allow async work to complete (like platform channels)
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<PlatformException>());
+      expect((errors.first.exception as PlatformException).code, 'CLIPBOARD_ERROR');
+    } finally {
+      FlutterError.onError = oldOnError;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    }
+  });
+
   testWidgets(
     'Copy selection does not collapse selection on desktop and iOS',
     (WidgetTester tester) async {
@@ -3625,7 +3682,7 @@ void main() {
 
     // Populate a fake clipboard.
     const clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
-    Clipboard.setData(const ClipboardData(text: clipboardContent));
+    await Clipboard.setData(const ClipboardData(text: clipboardContent));
 
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byType(EditableText);
