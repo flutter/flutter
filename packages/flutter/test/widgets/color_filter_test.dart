@@ -33,6 +33,9 @@ void main() {
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
+    // A lighter blue so the sepia matrix
+    // produces a visible warm brown instead of near-black.
+    const debugLightBlue = Color(0xFF2196F3);
     const sepia = ColorFilter.matrix(<double>[
       0.39, 0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
@@ -44,32 +47,35 @@ void main() {
         child: ColorFiltered(
           colorFilter: sepia,
           child: TestWidgetsApp(
-            home: Column(
-              children: <Widget>[
-                ColoredBox(
-                  color: debugBlue,
-                  child: SizedBox(
-                    height: 56,
-                    width: double.infinity,
-                    child: Center(child: Text('Sepia ColorFilter Test')),
-                  ),
-                ),
-                Expanded(child: Center(child: Text('Hooray!'))),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
+            home: ColoredBox(
+              color: debugWhite,
+              child: Column(
+                children: <Widget>[
+                  ColoredBox(
+                    color: debugLightBlue,
                     child: SizedBox(
-                      width: 56,
                       height: 56,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(color: debugBlue, shape: BoxShape.circle),
-                        child: Center(child: Text('+')),
+                      width: double.infinity,
+                      child: Center(child: Text('Sepia ColorFilter Test')),
+                    ),
+                  ),
+                  Expanded(child: Center(child: Text('Hooray!'))),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: debugLightBlue, shape: BoxShape.circle),
+                          child: Center(child: Text('+')),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
