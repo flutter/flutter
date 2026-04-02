@@ -112,7 +112,7 @@ Future<void> main() async {
       // Let other isolates and microtasks to run.
       await Future<void>.delayed(Duration.zero);
     }
-    request.response.close();
+    await request.response.close();
   });
 
   runApp(MyApp(port));
