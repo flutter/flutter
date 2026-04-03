@@ -2174,4 +2174,70 @@ void main() {
     expect(visibility.visible, isTrue);
   });
 
+  testWidgets(
+    'ExpansionPanel has semantics label when icon is visible and canTapOnHeader is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SingleChildScrollView(
+            child: ExpansionPanelList(
+              children: <ExpansionPanel>[
+                ExpansionPanel(
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return const ListTile(title: Text('Panel'));
+                  },
+                  body: const ListTile(title: Text('Content')),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final Finder semanticsFinder = find.ancestor(
+        of: find.byType(Visibility),
+        matching: find.byType(Semantics),
+      );
+      expect(semanticsFinder, findsWidgets);
+
+      final Semantics semantics = tester
+          .widgetList<Semantics>(semanticsFinder)
+          .firstWhere(
+            (Semantics s) => s.properties.label != null && s.properties.label!.isNotEmpty,
+          );
+      expect(semantics.properties.label, isNotNull);
+    },
+  );
+
+  testWidgets('ExpansionPanel has no semantics label when icon is hidden', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                trailingIconVisibility: ExpansionPanelIconVisibility.hidden,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder semanticsFinder = find.ancestor(
+      of: find.byType(Visibility),
+      matching: find.byType(Semantics),
+    );
+    final Iterable<Semantics> semanticsList = tester.widgetList<Semantics>(semanticsFinder);
+    final bool hasExpandCollapseLabel = semanticsList.any(
+      (Semantics s) => s.properties.label != null && s.properties.label!.isNotEmpty,
+    );
+    expect(hasExpandCollapseLabel, isFalse);
+  });
 }

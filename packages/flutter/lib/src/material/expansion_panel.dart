@@ -438,7 +438,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         child: Padding(
           padding: const EdgeInsetsDirectional.only(end: 8.0),
           child: IgnorePointer(
-            ignoring: child.canTapOnHeader || !iconVisible,
+            ignoring: child.canTapOnHeader,
             child: ExpandIcon(
               color: widget.expandIconColor,
               isExpanded: _isChildExpanded(index),
@@ -451,7 +451,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         ),
       );
 
-      if (!child.canTapOnHeader) {
+      if (!child.canTapOnHeader && iconVisible) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         expandIconPadded = Semantics(
           label: _isChildExpanded(index)
