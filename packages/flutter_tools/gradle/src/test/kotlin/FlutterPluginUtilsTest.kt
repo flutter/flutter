@@ -1231,6 +1231,94 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) { pluginProjectPluginManager.apply("kotlin-android") }
     }
 
+    @Test
+    fun `detectApplyingKotlinGradlePlugin logs when KGP is applied but fails to apply`(
+        @TempDir tempDir: Path
+    ) {
+        val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+        val appBuildGradleFile =
+            File(appDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.application'
+                    """.trimIndent()
+                )
+            }
+
+        val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+        val pluginBuildGradleFile =
+            File(pluginDir, "build.gradle").apply {
+                createNewFile()
+                writeText(
+                    """
+                    apply plugin: 'com.android.library'
+                    """.trimIndent()
+                )
+            }
+
+        val rootProject = mockk<Project>()
+        val mockGradle = mockk<Gradle>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+
+        val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
+        val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
+
+        val appProject =
+            createMockSubproject(
+                tempDir = tempDir,
+                buildFile = appBuildGradleFile,
+                projectName = "app",
+                mockLogger = mockLogger,
+                rootProjectMock = rootProject,
+                gradleMock = mockGradle,
+                pluginManager = appProjectPluginManager
+            )
+
+        val pluginProject =
+            createMockSubproject(
+                tempDir = tempDir,
+                buildFile = pluginBuildGradleFile,
+                projectName = "plugin",
+                mockLogger = mockLogger,
+                rootProjectMock = rootProject,
+                gradleMock = mockGradle,
+                pluginManager = pluginProjectPluginManager
+            )
+
+        val subprojectsActionSlot = slot<Action<Project>>()
+        val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
+
+        every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
+        every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
+
+        every { appProjectPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+        every { pluginProjectPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+
+        detectApplyingKotlinGradlePlugin(appProject)
+
+        verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
+        subprojectsActionSlot.captured.execute(appProject)
+        subprojectsActionSlot.captured.execute(pluginProject)
+
+        verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
+        projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+        verify(exactly = 0) {
+            mockLogger.error(any())
+        }
+
+        verify {
+            mockLogger.quiet(
+                """
+                Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
+                If your project uses Kotlin, ensure KGP is declared in the root plugins block.
+                For more details check: [link here]
+                """.trimIndent()
+            )
+        }
+    }
+
     private fun createMockSubproject(
         tempDir: Path,
         buildFile: File,

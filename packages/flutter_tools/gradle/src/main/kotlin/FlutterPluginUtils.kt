@@ -558,13 +558,13 @@ object FlutterPluginUtils {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
 //            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
-                    logger
-                        .quiet(
-                            "Applying the Kotlin Android plugin was unsuccessful.\n" +
-                                "The Kotlin Android plugin was not found on the classpath.\n" +
-                                "Ensure it is declared in the root plugins block.\n" +
-                                "For more details check: [link here]"
-                        )
+                    logger.quiet(
+                        """
+                        Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
+                        If your project uses Kotlin, ensure KGP is declared in the root plugins block.
+                        For more details check: [link here]
+                        """.trimIndent()
+                    )
                 }
                 return@subprojects
             }
