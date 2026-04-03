@@ -1053,7 +1053,7 @@ void Canvas::DrawCircle(const Point& center,
     geometry->SetAntialiasPadding(1.0f);
 
     auto contents = CircleSDFContents::Make(
-        /*color=*/paint.color, /*stroked=*/is_stroked, std::move(geometry));
+        /*color=*/paint.color, std::move(geometry));
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());

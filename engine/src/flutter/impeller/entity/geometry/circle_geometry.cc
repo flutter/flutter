@@ -54,6 +54,10 @@ Scalar CircleGeometry::GetStrokeWidth() const {
   return stroke_width_;
 }
 
+bool CircleGeometry::IsStroked() const {
+  return stroke_width_ != -1;
+}
+
 void CircleGeometry::SetAntialiasPadding(Scalar extra_padding) {
   padding_pixels_ = extra_padding;
 }

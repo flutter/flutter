@@ -33,6 +33,7 @@ class CircleGeometry final : public Geometry {
   Scalar GetRadius() const;
   Scalar GetStrokeWidth() const;
   Point GetCenter() const;
+  bool IsStroked() const;
 
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;

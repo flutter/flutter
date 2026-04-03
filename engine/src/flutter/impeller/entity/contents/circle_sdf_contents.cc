@@ -11,18 +11,13 @@ namespace impeller {
 
 std::unique_ptr<CircleSDFContents> CircleSDFContents::Make(
     Color color,
-    bool stroked,
     std::unique_ptr<CircleGeometry> geometry) {
-  return std::make_unique<CircleSDFContents>(color, stroked,
-                                             std::move(geometry));
+  return std::make_unique<CircleSDFContents>(color, std::move(geometry));
 }
 
 CircleSDFContents::CircleSDFContents(Color color,
-                                     bool stroked,
                                      std::unique_ptr<CircleGeometry> geometry)
-    : UberSDFContents(color),
-      stroked_(stroked),
-      geometry_(std::move(geometry)) {}
+    : UberSDFContents(color), geometry_(std::move(geometry)) {}
 
 CircleSDFContents::~CircleSDFContents() = default;
 
@@ -35,7 +30,7 @@ bool CircleSDFContents::BindData(const ContentContext& renderer,
                                  RenderPass& pass,
                                  FS::FragInfo& frag_info) const {
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.stroked = stroked_ ? 1.0f : 0.0f;
+  frag_info.stroked = geometry_->IsStroked() ? 1.0f : 0.0f;
   frag_info.stroke_width = geometry_->GetStrokeWidth();
   frag_info.stroke_join = 0.0f;  // kMiter
   frag_info.type = 0.0f;         // kCircle

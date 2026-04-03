@@ -12,12 +12,11 @@ namespace impeller {
 
 class CircleSDFContents final : public UberSDFContents {
  public:
-  static std::unique_ptr<CircleSDFContents>
-  Make(Color color, bool stroked, std::unique_ptr<CircleGeometry> geometry);
+  static std::unique_ptr<CircleSDFContents> Make(
+      Color color,
+      std::unique_ptr<CircleGeometry> geometry);
 
-  CircleSDFContents(Color color,
-                    bool stroked,
-                    std::unique_ptr<CircleGeometry> geometry);
+  CircleSDFContents(Color color, std::unique_ptr<CircleGeometry> geometry);
 
   ~CircleSDFContents() override;
 
@@ -32,7 +31,6 @@ class CircleSDFContents final : public UberSDFContents {
                 FS::FragInfo& frag_info) const override;
 
  private:
-  bool stroked_;
   std::unique_ptr<CircleGeometry> geometry_;
 
   CircleSDFContents(const CircleSDFContents&) = delete;
