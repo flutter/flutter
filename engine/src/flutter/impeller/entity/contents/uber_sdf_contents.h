@@ -9,9 +9,7 @@
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
-#include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/geometry.h"
-#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 
@@ -19,16 +17,6 @@ namespace impeller {
 
 class UberSDFContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<UberSDFContents> MakeRect(
-      Color color,
-      Scalar stroke_width,
-      Join stroke_join,
-      bool stroked,
-      const FillRectGeometry* geometry);
-
-  static std::unique_ptr<UberSDFContents>
-  MakeCircle(Color color, bool stroked, const CircleGeometry* geometry);
-
   ~UberSDFContents() override;
 
   // |Contents|
@@ -46,82 +34,22 @@ class UberSDFContents : public ColorSourceContents {
   bool ApplyColorFilter(const ColorFilterProc& color_filter_proc) override;
 
  protected:
-  UberSDFContents(Color color,
-                  bool stroked,
-                  Scalar stroke_width,
-                  Join stroke_join);
+  explicit UberSDFContents(Color color);
 
   using VS = UberSDFPipeline::VertexShader;
   using FS = UberSDFPipeline::FragmentShader;
-
-  void SetCommonUniforms(FS::FragInfo& frag_info) const;
 
   virtual bool BindData(const ContentContext& renderer,
                         const Entity& entity,
                         RenderPass& pass,
                         FS::FragInfo& frag_info) const = 0;
 
- private:
   Color color_;
-  bool stroked_;
-  Scalar stroke_width_;
-  Join stroke_join_;
 
+ private:
   UberSDFContents(const UberSDFContents&) = delete;
 
   UberSDFContents& operator=(const UberSDFContents&) = delete;
-};
-
-class CircleSDFContents final : public UberSDFContents {
- public:
-  CircleSDFContents(Color color, bool stroked, const CircleGeometry* geometry);
-
-  ~CircleSDFContents() override;
-
-  // |ColorSourceContents|
-  const Geometry* GetGeometry() const override;
-
- protected:
-  // |UberSDFContents|
-  bool BindData(const ContentContext& renderer,
-                const Entity& entity,
-                RenderPass& pass,
-                FS::FragInfo& frag_info) const override;
-
- private:
-  const CircleGeometry* geometry_;
-
-  CircleSDFContents(const CircleSDFContents&) = delete;
-
-  CircleSDFContents& operator=(const CircleSDFContents&) = delete;
-};
-
-class RectSDFContents final : public UberSDFContents {
- public:
-  RectSDFContents(Color color,
-                  Scalar stroke_width,
-                  Join stroke_join,
-                  bool stroked,
-                  const FillRectGeometry* geometry);
-
-  ~RectSDFContents() override;
-
-  // |ColorSourceContents|
-  const Geometry* GetGeometry() const override;
-
- protected:
-  // |UberSDFContents|
-  bool BindData(const ContentContext& renderer,
-                const Entity& entity,
-                RenderPass& pass,
-                FS::FragInfo& frag_info) const override;
-
- private:
-  const FillRectGeometry* geometry_;
-
-  RectSDFContents(const RectSDFContents&) = delete;
-
-  RectSDFContents& operator=(const RectSDFContents&) = delete;
 };
 
 }  // namespace impeller

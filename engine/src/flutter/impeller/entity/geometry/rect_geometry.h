@@ -47,6 +47,12 @@ class StrokeRectGeometry final : public Geometry {
 
   ~StrokeRectGeometry() override;
 
+  const Rect& GetRect() const;
+
+  Scalar GetStrokeWidth() const;
+
+  Join GetStrokeJoin() const;
+
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,

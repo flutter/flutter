@@ -73,6 +73,18 @@ StrokeRectGeometry::StrokeRectGeometry(const Rect& rect,
 
 StrokeRectGeometry::~StrokeRectGeometry() = default;
 
+const Rect& StrokeRectGeometry::GetRect() const {
+  return rect_;
+}
+
+Scalar StrokeRectGeometry::GetStrokeWidth() const {
+  return stroke_width_;
+}
+
+Join StrokeRectGeometry::GetStrokeJoin() const {
+  return stroke_join_;
+}
+
 GeometryResult StrokeRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
