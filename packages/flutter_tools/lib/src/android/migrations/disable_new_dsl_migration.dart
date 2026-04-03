@@ -6,7 +6,7 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 
-const String _newDslFlag = '''
+const String _newDslFlagText = '''
 # This newDsl flag was added automatically by Flutter migrator
 android.newDsl=false''';
 
@@ -27,7 +27,7 @@ class DisableNewDslMigration extends ProjectMigrator {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
       );
-      await _gradlePropertiesFile.writeAsString('$_newDslFlag\n');
+      await _gradlePropertiesFile.writeAsString('$_newDslFlagText\n');
       return;
     }
 
@@ -62,7 +62,7 @@ class DisableNewDslMigration extends ProjectMigrator {
     }
 
     final propertyToAppend = StringBuffer();
-    propertyToAppend.writeln(_newDslFlag);
+    propertyToAppend.writeln(_newDslFlagText);
 
     final prefix = fileContents.isEmpty || fileContents.endsWith('\n') ? '' : '\n';
 

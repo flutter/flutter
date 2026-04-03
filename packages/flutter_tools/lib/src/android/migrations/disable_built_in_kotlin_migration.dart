@@ -6,7 +6,7 @@ import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 
-const String _builtInKotlinFlag = '''
+const String _builtInKotlinFlagText = '''
 # This builtInKotlin flag was added automatically by Flutter migrator
 android.builtInKotlin=false''';
 
@@ -30,7 +30,7 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
       );
-      await _gradlePropertiesFile.writeAsString('$_builtInKotlinFlag\n');
+      await _gradlePropertiesFile.writeAsString('$_builtInKotlinFlagText\n');
       return;
     }
 
@@ -65,7 +65,7 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
     }
 
     final propertyToAppend = StringBuffer();
-    propertyToAppend.writeln(_builtInKotlinFlag);
+    propertyToAppend.writeln(_builtInKotlinFlagText);
 
     final prefix = fileContents.isEmpty || fileContents.endsWith('\n') ? '' : '\n';
 
