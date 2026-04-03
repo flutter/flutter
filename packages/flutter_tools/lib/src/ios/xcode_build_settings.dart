@@ -105,7 +105,9 @@ void _updateGeneratedEnvironmentVariablesScript({
   final envBuffer = StringBuffer();
 
   exportFileBuffer.writeln('#!/bin/sh');
-  exportFileBuffer.writeln('# This is a generated file; do not edit or check into version control.');
+  exportFileBuffer.writeln(
+    '# This is a generated file; do not edit or check into version control.',
+  );
   for (final line in xcodeBuildSettings) {
     if (!line.contains('[')) {
       // Exported conditional Xcode build settings do not work.

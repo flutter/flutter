@@ -2985,7 +2985,7 @@ let package = Package(
             .childDirectory('Debug')
             .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
-        contains('let configuration = "Debug"'),
+        contains('let buildMode = "Debug"'),
       );
       expect(
         nativeToolsPackage
@@ -2993,7 +2993,7 @@ let package = Package(
             .childDirectory('Profile')
             .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
-        contains('let configuration = "Profile"'),
+        contains('let buildMode = "Profile"'),
       );
       expect(
         nativeToolsPackage
@@ -3001,7 +3001,7 @@ let package = Package(
             .childDirectory('Release')
             .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
-        contains('let configuration = "Release"'),
+        contains('let buildMode = "Release"'),
       );
       expect(
         nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
@@ -3213,7 +3213,7 @@ let package = Package(
             .childDirectory('Debug')
             .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
-        contains('let configuration = "Debug"'),
+        contains('let buildMode = "Debug"'),
       );
       expect(
         nativeToolsPackage
@@ -3221,7 +3221,7 @@ let package = Package(
             .childDirectory('Profile')
             .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
-        contains('let configuration = "Profile"'),
+        contains('let buildMode = "Profile"'),
       );
       expect(
         nativeToolsPackage
@@ -3229,7 +3229,7 @@ let package = Package(
             .childDirectory('Release')
             .childFile('FlutterBuildModePlugin.swift')
             .readAsStringSync(),
-        contains('let configuration = "Release"'),
+        contains('let buildMode = "Release"'),
       );
       expect(
         nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
