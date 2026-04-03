@@ -205,6 +205,9 @@ class FlutterDevice {
               await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
                 vmServiceUri!,
                 debuggingOptions: debuggingOptions,
+                appName:
+                    'Kind: Flutter - Device: ${device!.displayName} - '
+                    'Package: ${FlutterProject.current().manifest.appName}',
               );
               break;
             } on DartDevelopmentServiceException catch (e, st) {

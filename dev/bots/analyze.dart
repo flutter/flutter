@@ -1552,8 +1552,9 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   final List<File> files = await _gitFiles(workingDirectory);
   for (final file in files) {
     if (path.basename(file.path).endsWith('_test.dart') ||
-        path.basename(file.path) == 'analyze.dart') {
-      continue; // Skip tests, they're not public-facing.
+        path.basename(file.path) == 'analyze.dart' ||
+        FileSystemEntity.isLinkSync(file.path)) {
+      continue; // Skip tests, they're not public-facing. Skip symlinks.
     }
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
@@ -2116,6 +2117,9 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
     final List<File> files = await _gitFiles(workingDirectory);
     final problems = <String>[];
     for (final file in files) {
+      if (FileSystemEntity.isLinkSync(file.path)) {
+        continue; // Skip symlinks.
+      }
       final Uint8List bytes = file.readAsBytesSync();
       try {
         utf8.decode(bytes);
@@ -2666,6 +2670,7 @@ Future<CommandResult> _runFlutterAnalyze(
 // These files legitimately require executable permissions
 const Set<String> kExecutableAllowlist = <String>{
   '.autoroller-preupload.sh',
+  '.claude/skills',
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',

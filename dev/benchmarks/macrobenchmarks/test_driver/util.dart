@@ -32,7 +32,7 @@ Future<void> runDriverTestForRoute(String routeName, DriverTestCallBack body) as
 
   await body(driver);
 
-  driver.close();
+  await driver.close();
 }
 
 void macroPerfTest(

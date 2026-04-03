@@ -198,10 +198,10 @@ class _TestFlutterView implements FlutterView {
   @override
   ui.ViewConstraints get physicalConstraints => constraints != null
       ? ui.ViewConstraints(
-          minWidth: constraints!.minWidth,
-          maxWidth: constraints!.maxWidth,
-          minHeight: constraints!.minHeight,
-          maxHeight: constraints!.maxHeight,
+          minWidth: constraints!.minWidth * devicePixelRatio,
+          maxWidth: constraints!.maxWidth * devicePixelRatio,
+          minHeight: constraints!.minHeight * devicePixelRatio,
+          maxHeight: constraints!.maxHeight * devicePixelRatio,
         )
       : ui.ViewConstraints.tight(physicalSize);
 
@@ -569,13 +569,11 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required ui.Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) : _delegate = delegate,
        _constraints = preferredConstraints,
-       _isSizedToContent = isSizedToContent,
        _anchorRect = anchorRect,
        _positioner = positioner,
        _parent = parent,
@@ -585,7 +583,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
       onRender: (size) {
-        if (_isSizedToContent && _lastRenderedSize != size) {
+        if (_lastRenderedSize != size) {
           _lastRenderedSize = size;
           scheduleMicrotask(() {
             notifyListeners();
@@ -602,12 +600,10 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   ui.Rect _anchorRect;
   WindowPositioner _positioner;
   final BaseWindowController _parent;
-  final bool _isSizedToContent;
   Size? _lastRenderedSize;
 
   @override
-  Size get contentSize =>
-      _isSizedToContent && _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
+  Size get contentSize => _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
 
   @override
   BaseWindowController get parent => _parent;
@@ -652,41 +648,42 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
+      onRender: (size) {
+        if (_lastRenderedSize != size) {
+          _lastRenderedSize = size;
+          scheduleMicrotask(() {
+            notifyListeners();
+          });
+        }
+      },
     );
     _addChildToParent(parent, this);
-
-    // Automatically activate the window when created.
-    activate();
   }
 
   final PopupWindowControllerDelegate _delegate;
   final _TestWindowingOwner windowingOwner;
   BoxConstraints _constraints;
-  // ignore: unused_field
-  final ui.Rect _anchorRect;
-  // ignore: unused_field
-  final WindowPositioner _positioner;
+  ui.Rect _anchorRect;
+  WindowPositioner _positioner;
   final BaseWindowController _parent;
+  Size? _lastRenderedSize;
 
   @override
-  Size get contentSize => _constraints.biggest;
+  Size get contentSize => _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
 
   @override
   BaseWindowController get parent => _parent;
 
   @override
-  bool get isActivated => windowingOwner.isWindowControllerActive(this);
-
-  @override
-  void activate() {
-    final BaseWindowController activated = windowingOwner.activateWindowController(this);
-    activated.notifyListeners();
-  }
-
-  @override
   void setConstraints(BoxConstraints constraints) {
     _constraints = constraints;
     notifyListeners();
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    _anchorRect = anchorRect ?? _anchorRect;
+    _positioner = positioner ?? _positioner;
   }
 
   @override
@@ -696,6 +693,9 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(parent, this);
   }
+
+  @override
+  ui.Offset get offsetFromParent => Offset.zero;
 }
 
 class _TestSatelliteWindowController extends SatelliteWindowController
@@ -867,7 +867,7 @@ class _TestWindowingOwner extends WindowingOwner {
       case final DialogWindowController dialogParent:
         dialogParent.activate();
       case final TooltipWindowController _:
-        fail('TooltipWindowController cannot be a parent of DialogWindowController.');
+        fail('TooltipWindowController cannot be a parent of another window controller.');
       case final PopupWindowController popupParent:
         popupParent.activate();
       case final SatelliteWindowController satelliteParent:
@@ -963,7 +963,6 @@ class _TestWindowingOwner extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -973,7 +972,6 @@ class _TestWindowingOwner extends WindowingOwner {
       platformDispatcher: _platformDispatcher,
       windowingOwner: this,
       preferredConstraints: preferredConstraints,
-      isSizedToContent: isSizedToContent,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
