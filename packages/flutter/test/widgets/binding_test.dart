@@ -389,9 +389,9 @@ void main() {
     WidgetsBinding.instance.handlePlatformBrightnessChanged();
     WidgetsBinding.instance.handleTextScaleFactorChanged();
     WidgetsBinding.instance.handleMemoryPressure();
-    WidgetsBinding.instance.handlePopRoute();
-    WidgetsBinding.instance.handlePushRoute('/');
-    WidgetsBinding.instance.handleRequestAppExit();
+    await WidgetsBinding.instance.handlePopRoute();
+    await WidgetsBinding.instance.handlePushRoute('/');
+    await WidgetsBinding.instance.handleRequestAppExit();
     WidgetsBinding.instance.handleViewFocusChanged(
       const ViewFocusEvent(
         viewId: 0,

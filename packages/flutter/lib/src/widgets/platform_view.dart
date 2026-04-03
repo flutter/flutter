@@ -932,7 +932,7 @@ abstract class _DarwinViewState<
     final int id = platformViewsRegistry.getNextPlatformViewId();
     final ControllerT controller = await createNewViewController(id);
     if (!mounted) {
-      controller.dispose();
+      await controller.dispose();
       return;
     }
     widget.onPlatformViewCreated?.call(id);

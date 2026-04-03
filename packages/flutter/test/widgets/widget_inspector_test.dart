@@ -9,6 +9,7 @@
 @TestOn('!chrome')
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -5646,7 +5647,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
         // We need the runTest to setup the fake async in the test binding.
         await binding.runTest(() async {
-          binding.reassembleApplication();
+          unawaited(binding.reassembleApplication());
           await binding.pump();
         }, () {});
         // The run test overrides the flutter error handler, so we should

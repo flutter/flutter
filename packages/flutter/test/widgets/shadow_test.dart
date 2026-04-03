@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,7 +35,7 @@ void main() {
       matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
     );
     debugDisableShadows = false;
-    tester.binding.reassembleApplication();
+    unawaited(tester.binding.reassembleApplication());
     await tester.pump();
     await expectLater(
       find.byType(Container),
@@ -95,7 +97,7 @@ void main() {
       matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
     );
     debugDisableShadows = false;
-    tester.binding.reassembleApplication();
+    unawaited(tester.binding.reassembleApplication());
     await tester.pump();
     await expectLater(
       find.byType(Container),
