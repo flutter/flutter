@@ -12,10 +12,8 @@ namespace impeller {
 
 class CircleSDFContents final : public UberSDFContents {
  public:
-  static std::unique_ptr<CircleSDFContents> Make(
-      Color color,
-      bool stroked,
-      std::unique_ptr<CircleGeometry> geometry);
+  static std::unique_ptr<CircleSDFContents>
+  Make(Color color, bool stroked, std::unique_ptr<CircleGeometry> geometry);
 
   CircleSDFContents(Color color,
                     bool stroked,

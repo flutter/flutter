@@ -16,7 +16,8 @@ class FilledRectSDFContents final : public UberSDFContents {
       Color color,
       std::unique_ptr<FillRectGeometry> geometry);
 
-  FilledRectSDFContents(Color color, std::unique_ptr<FillRectGeometry> geometry);
+  FilledRectSDFContents(Color color,
+                        std::unique_ptr<FillRectGeometry> geometry);
 
   ~FilledRectSDFContents() override;
 

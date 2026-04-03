@@ -20,7 +20,9 @@ std::unique_ptr<CircleSDFContents> CircleSDFContents::Make(
 CircleSDFContents::CircleSDFContents(Color color,
                                      bool stroked,
                                      std::unique_ptr<CircleGeometry> geometry)
-    : UberSDFContents(color), stroked_(stroked), geometry_(std::move(geometry)) {}
+    : UberSDFContents(color),
+      stroked_(stroked),
+      geometry_(std::move(geometry)) {}
 
 CircleSDFContents::~CircleSDFContents() = default;
 

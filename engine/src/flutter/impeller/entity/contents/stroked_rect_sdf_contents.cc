@@ -15,8 +15,9 @@ std::unique_ptr<StrokedRectSDFContents> StrokedRectSDFContents::Make(
   return std::make_unique<StrokedRectSDFContents>(color, std::move(geometry));
 }
 
-StrokedRectSDFContents::StrokedRectSDFContents(Color color,
-                                               std::unique_ptr<StrokeRectGeometry> geometry)
+StrokedRectSDFContents::StrokedRectSDFContents(
+    Color color,
+    std::unique_ptr<StrokeRectGeometry> geometry)
     : UberSDFContents(color), geometry_(std::move(geometry)) {}
 
 StrokedRectSDFContents::~StrokedRectSDFContents() = default;

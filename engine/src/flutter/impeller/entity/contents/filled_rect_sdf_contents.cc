@@ -15,8 +15,9 @@ std::unique_ptr<FilledRectSDFContents> FilledRectSDFContents::Make(
   return std::make_unique<FilledRectSDFContents>(color, std::move(geometry));
 }
 
-FilledRectSDFContents::FilledRectSDFContents(Color color,
-                                             std::unique_ptr<FillRectGeometry> geometry)
+FilledRectSDFContents::FilledRectSDFContents(
+    Color color,
+    std::unique_ptr<FillRectGeometry> geometry)
     : UberSDFContents(color), geometry_(std::move(geometry)) {}
 
 FilledRectSDFContents::~FilledRectSDFContents() = default;
