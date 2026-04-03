@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// A minimal ListTile widget for testing purposes.
+/// A minimal CupertinoListTile widget for testing purposes.
 class TestListTile extends StatelessWidget {
   /// Creates a minimal list tile for testing.
   const TestListTile({super.key, this.title, this.onTap});
