@@ -2804,71 +2804,76 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   });
 
   group('FlutterNativeIntegrationSwiftPackage', () {
-    testUsingContext('generateSwiftPackage without tests', () async {
-      final FileSystem fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final processManager = FakeProcessManager.list([]);
-      final testUtils = BuildSwiftPackageUtils(
-        analytics: FakeAnalytics(),
-        artifacts: FakeArtifacts(engineArtifactPath),
-        buildSystem: FakeBuildSystem(),
-        cache: FakeCache(fs, _flutterRoot),
-        fileSystem: fs,
-        flutterRoot: _flutterRoot,
-        flutterVersion: FakeFlutterVersion(),
-        logger: logger,
-        platform: FakePlatform(),
-        processManager: processManager,
-        project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
-        templateRenderer: const MustacheTemplateRenderer(),
-        xcode: FakeXcode(),
-      );
+    testUsingContext(
+      'generateSwiftPackage without tests',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
 
-      // Set up templates in fs
-      for (final FileSystemEntity fileEntity
-          in fileSystem
-              .directory('${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin')
-              .listSync(recursive: true)) {
-        if (fileEntity is File) {
-          fs.file(fileEntity.path).createSync(recursive: true);
-          fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+        // Set up templates in fs
+        for (final FileSystemEntity fileEntity
+            in fileSystem
+                .directory(
+                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
+                )
+                .listSync(recursive: true)) {
+          if (fileEntity is File) {
+            fs.file(fileEntity.path).createSync(recursive: true);
+            fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+          }
         }
-      }
 
-      // Set up package_config.json for template imageDirectory
-      final File packagesFile = fs.file(
-        '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
-      )..createSync(recursive: true);
-      packagesFile.writeAsStringSync(
-        json.encode(<String, Object>{
-          'configVersion': 2,
-          'packages': <Object>[
-            <String, Object>{
-              'name': 'flutter_template_images',
-              'rootUri': 'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
-              'packageUri': 'lib/',
-              'languageVersion': '3.4',
-            },
-          ],
-        }),
-      );
+        // Set up package_config.json for template imageDirectory
+        final File packagesFile = fs.file(
+          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+        )..createSync(recursive: true);
+        packagesFile.writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'flutter_template_images',
+                'rootUri':
+                    'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+                'packageUri': 'lib/',
+                'languageVersion': '3.4',
+              },
+            ],
+          }),
+        );
 
-      final Directory outputDirectory = fs.directory('output')..createSync();
-      final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
-        ..createSync();
+        final Directory outputDirectory = fs.directory('output')..createSync();
+        final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
+          ..createSync();
 
-      final integrationPackage = FlutterNativeIntegrationSwiftPackage(
-        utils: testUtils,
-        generateTests: false,
-      );
-      await integrationPackage.generateSwiftPackages(
-        outputDirectory: outputDirectory,
-        flutterIntegrationPackage: flutterIntegrationPackage,
-        highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
-      );
+        final integrationPackage = FlutterNativeIntegrationSwiftPackage(
+          utils: testUtils,
+          generateTests: false,
+        );
+        await integrationPackage.generateSwiftPackages(
+          outputDirectory: outputDirectory,
+          flutterIntegrationPackage: flutterIntegrationPackage,
+          highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
+        );
 
-      expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
-      expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
+        expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
+        expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -2900,11 +2905,11 @@ let package = Package(
 )
 ''');
 
-      final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
-        'FlutterNativeTools',
-      );
-      expect(nativeToolsPackage.childFile('Package.swift'), exists);
-      expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
+        final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+          'FlutterNativeTools',
+        );
+        expect(nativeToolsPackage.childFile('Package.swift'), exists);
+        expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -2979,116 +2984,124 @@ let package = Package(
 )
 ''');
 
-      expect(
-        nativeToolsPackage
-            .childDirectory('Plugins')
-            .childDirectory('Debug')
-            .childFile('FlutterBuildModePlugin.swift')
-            .readAsStringSync(),
-        contains('let buildMode = "Debug"'),
-      );
-      expect(
-        nativeToolsPackage
-            .childDirectory('Plugins')
-            .childDirectory('Profile')
-            .childFile('FlutterBuildModePlugin.swift')
-            .readAsStringSync(),
-        contains('let buildMode = "Profile"'),
-      );
-      expect(
-        nativeToolsPackage
-            .childDirectory('Plugins')
-            .childDirectory('Release')
-            .childFile('FlutterBuildModePlugin.swift')
-            .readAsStringSync(),
-        contains('let buildMode = "Release"'),
-      );
-      expect(
-        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
-        exists,
-      );
-      expect(
-        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
-        exists,
-      );
-      expect(
-        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
-        exists,
-      );
-      expect(
-        flutterIntegrationPackage
-            .childDirectory('Sources')
-            .childDirectory('FlutterNativeIntegration'),
-        exists,
-      );
-      expect(nativeToolsPackage.childDirectory('Tests'), isNot(exists));
-    });
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Debug')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Debug"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Profile')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Profile"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Release')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Release"'),
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
+          exists,
+        );
+        expect(
+          flutterIntegrationPackage
+              .childDirectory('Sources')
+              .childDirectory('FlutterNativeIntegration'),
+          exists,
+        );
+        expect(nativeToolsPackage.childDirectory('Tests'), isNot(exists));
+      },
+      // [intended] SwiftPM is only available on macOS and Windows fails with templating setup
+      skip: !platform.isMacOS,
+    );
 
-    testUsingContext('generateSwiftPackage with tests', () async {
-      final FileSystem fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final processManager = FakeProcessManager.list([]);
-      final testUtils = BuildSwiftPackageUtils(
-        analytics: FakeAnalytics(),
-        artifacts: FakeArtifacts(engineArtifactPath),
-        buildSystem: FakeBuildSystem(),
-        cache: FakeCache(fs, _flutterRoot),
-        fileSystem: fs,
-        flutterRoot: _flutterRoot,
-        flutterVersion: FakeFlutterVersion(),
-        logger: logger,
-        platform: FakePlatform(),
-        processManager: processManager,
-        project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
-        templateRenderer: const MustacheTemplateRenderer(),
-        xcode: FakeXcode(),
-      );
+    testUsingContext(
+      'generateSwiftPackage with tests',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
 
-      // Set up templates in fs
-      for (final FileSystemEntity fileEntity
-          in fileSystem
-              .directory('${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin')
-              .listSync(recursive: true)) {
-        if (fileEntity is File) {
-          fs.file(fileEntity.path).createSync(recursive: true);
-          fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+        // Set up templates in fs
+        for (final FileSystemEntity fileEntity
+            in fileSystem
+                .directory(
+                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
+                )
+                .listSync(recursive: true)) {
+          if (fileEntity is File) {
+            fs.file(fileEntity.path).createSync(recursive: true);
+            fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+          }
         }
-      }
 
-      // Set up package_config.json for template imageDirectory
-      final File packagesFile = fs.file(
-        '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
-      )..createSync(recursive: true);
-      packagesFile.writeAsStringSync(
-        json.encode(<String, Object>{
-          'configVersion': 2,
-          'packages': <Object>[
-            <String, Object>{
-              'name': 'flutter_template_images',
-              'rootUri': 'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
-              'packageUri': 'lib/',
-              'languageVersion': '3.4',
-            },
-          ],
-        }),
-      );
+        // Set up package_config.json for template imageDirectory
+        final File packagesFile = fs.file(
+          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+        )..createSync(recursive: true);
+        packagesFile.writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'flutter_template_images',
+                'rootUri':
+                    'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+                'packageUri': 'lib/',
+                'languageVersion': '3.4',
+              },
+            ],
+          }),
+        );
 
-      final Directory outputDirectory = fs.directory('output')..createSync();
-      final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
-        ..createSync();
+        final Directory outputDirectory = fs.directory('output')..createSync();
+        final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
+          ..createSync();
 
-      final integrationPackage = FlutterNativeIntegrationSwiftPackage(
-        utils: testUtils,
-        generateTests: true,
-      );
-      await integrationPackage.generateSwiftPackages(
-        outputDirectory: outputDirectory,
-        flutterIntegrationPackage: flutterIntegrationPackage,
-        highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
-      );
+        final integrationPackage = FlutterNativeIntegrationSwiftPackage(
+          utils: testUtils,
+          generateTests: true,
+        );
+        await integrationPackage.generateSwiftPackages(
+          outputDirectory: outputDirectory,
+          flutterIntegrationPackage: flutterIntegrationPackage,
+          highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+        );
 
-      expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
-      expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
+        expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
+        expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -3120,11 +3133,11 @@ let package = Package(
 )
 ''');
 
-      final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
-        'FlutterNativeTools',
-      );
-      expect(nativeToolsPackage.childFile('Package.swift'), exists);
-      expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
+        final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+          'FlutterNativeTools',
+        );
+        expect(nativeToolsPackage.childFile('Package.swift'), exists);
+        expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -3207,50 +3220,53 @@ let package = Package(
 )
 ''');
 
-      expect(
-        nativeToolsPackage
-            .childDirectory('Plugins')
-            .childDirectory('Debug')
-            .childFile('FlutterBuildModePlugin.swift')
-            .readAsStringSync(),
-        contains('let buildMode = "Debug"'),
-      );
-      expect(
-        nativeToolsPackage
-            .childDirectory('Plugins')
-            .childDirectory('Profile')
-            .childFile('FlutterBuildModePlugin.swift')
-            .readAsStringSync(),
-        contains('let buildMode = "Profile"'),
-      );
-      expect(
-        nativeToolsPackage
-            .childDirectory('Plugins')
-            .childDirectory('Release')
-            .childFile('FlutterBuildModePlugin.swift')
-            .readAsStringSync(),
-        contains('let buildMode = "Release"'),
-      );
-      expect(
-        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
-        exists,
-      );
-      expect(
-        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
-        exists,
-      );
-      expect(
-        nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
-        exists,
-      );
-      expect(
-        flutterIntegrationPackage
-            .childDirectory('Sources')
-            .childDirectory('FlutterNativeIntegration'),
-        exists,
-      );
-      expect(nativeToolsPackage.childDirectory('Tests'), exists);
-    });
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Debug')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Debug"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Profile')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Profile"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Release')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Release"'),
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
+          exists,
+        );
+        expect(
+          flutterIntegrationPackage
+              .childDirectory('Sources')
+              .childDirectory('FlutterNativeIntegration'),
+          exists,
+        );
+        expect(nativeToolsPackage.childDirectory('Tests'), exists);
+      },
+      // [intended] SwiftPM is only available on macOS and Windows fails with templating setup
+      skip: !platform.isMacOS,
+    );
   });
 }
 
