@@ -23,15 +23,20 @@ class DisableNewDslMigration extends ProjectMigrator {
 
   @override
   Future<void> migrate() async {
-    String contents;
-
-    try {
-      contents = await _gradlePropertiesFile.readAsString();
-    } on FileSystemException {
+    if (!_gradlePropertiesFile.existsSync()) {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
       );
       await _gradlePropertiesFile.writeAsString('$_newDslFlag\n');
+      return;
+    }
+
+    String contents;
+
+    try {
+      contents = await _gradlePropertiesFile.readAsString();
+    } on FileSystemException catch (e) {
+      logger.printError('Failed to read gradle.properties during migration: $e');
       return;
     }
 
