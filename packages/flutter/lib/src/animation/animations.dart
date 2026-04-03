@@ -339,12 +339,12 @@ class ReverseAnimation extends Animation<double>
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 ///
 /// A [CurvedAnimation] adds a status listener on its parent and must be
-/// disposed when no longer needed to avoid leaking the listener. If the parent
-/// [AnimationController] is disposed, that will also clean up this object. Do
-/// not create a [CurvedAnimation] inside a `build` method because it would
-/// leak a new listener on every rebuild. If [reverseCurve] is not needed,
-/// prefer `controller.drive(CurveTween(curve: curve))` which does not require
-/// separate disposal.
+/// disposed when no longer needed to avoid leaking the listener. Disposing the
+/// parent animation (typically the [AnimationController]) will also clean up
+/// this object. Do not create a [CurvedAnimation] inside a `build` method
+/// because it would leak a new listener on every rebuild. If [reverseCurve] is
+/// not needed, prefer `parent.drive(CurveTween(curve: curve))` which does not
+/// require separate disposal.
 ///
 /// {@tool snippet}
 ///
@@ -408,9 +408,10 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// Because [CurvedAnimation] adds a listener to its parent, it must be created
   /// once (for example in [State.initState]) and disposed in
-  /// [State.dispose]. Do not recreate it on every build. If [reverseCurve] is
-  /// not needed, prefer `controller.drive(CurveTween(curve: curve))` which does
-  /// not require separate disposal.
+  /// [State.dispose]. Do not recreate it on every build as it would leak a
+  /// new listener on every rebuild. If [reverseCurve] is not needed, prefer
+  /// `parent.drive(CurveTween(curve: curve))` which does not require separate
+  /// disposal.
   ///
   /// If this field is null, uses [curve] in both directions.
   Curve? reverseCurve;
