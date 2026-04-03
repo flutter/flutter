@@ -110,7 +110,7 @@ static gchar* get_program_log(GLuint program) {
 }
 
 static void setup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
     g_warning(
         "Failed to setup compositor shaders, unable to make OpenGL context "
         "current");
@@ -169,7 +169,7 @@ static void setup_shader(FlCompositorOpenGL* self) {
 }
 
 static void cleanup_shader(FlCompositorOpenGL* self) {
-  if (!fl_opengl_manager_make_current(self->opengl_manager)) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
     g_warning(
         "Failed to cleanup compositor shaders, unable to make OpenGL context "
         "current");

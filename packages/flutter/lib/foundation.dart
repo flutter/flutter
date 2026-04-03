@@ -14,6 +14,8 @@ export 'package:meta/meta.dart'
         factory,
         immutable,
         internal,
+        // ignore: experimental_member_use
+        mustBeConst,
         mustCallSuper,
         nonVirtual,
         optionalTypeArgs,

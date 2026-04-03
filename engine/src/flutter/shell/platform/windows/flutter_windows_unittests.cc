@@ -13,7 +13,9 @@
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/egl/manager.h"
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/engine_modifier.h"
+#include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/testing/windows_test_config_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test_context.h"
@@ -430,6 +432,20 @@ TEST_F(WindowsTest, GetGraphicsAdapter) {
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
 }
 
+TEST_F(WindowsTest, GetEngineGraphicsAdapter) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
+  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+}
+
 TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
   std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
   if (!luid) {
@@ -468,6 +484,51 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithHighPerformancePreference) {
 
   Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
   dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+  ASSERT_EQ(desc.AdapterLuid.HighPart, luid->HighPart);
+  ASSERT_EQ(desc.AdapterLuid.LowPart, luid->LowPart);
+}
+
+TEST_F(WindowsTest, GetEngineGraphicsAdapterWithLowPowerPreference) {
+  std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
+  if (!luid) {
+    GTEST_SKIP() << "Not able to find low power GPU, nothing to check.";
+  }
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetGpuPreference(FlutterDesktopGpuPreference::LowPowerPreference);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
+  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+  ASSERT_EQ(desc.AdapterLuid.HighPart, luid->HighPart);
+  ASSERT_EQ(desc.AdapterLuid.LowPart, luid->LowPart);
+}
+
+TEST_F(WindowsTest, GetEngineGraphicsAdapterWithHighPerformancePreference) {
+  std::optional<LUID> luid = egl::Manager::GetHighPerformanceGpuLuid();
+  if (!luid) {
+    GTEST_SKIP() << "Not able to find high performance GPU, nothing to check.";
+  }
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetGpuPreference(
+      FlutterDesktopGpuPreference::HighPerformancePreference);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+
+  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
+  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -722,6 +783,99 @@ TEST_F(WindowsTest, EngineId) {
 
   auto engine = FlutterDesktopViewControllerGetEngine(first_controller.get());
   EXPECT_EQ(engine, FlutterDesktopEngineForId(*engineId));
+}
+
+TEST_F(WindowsTest, EnableIAccessible) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetAccessibilityMode(
+      FlutterDesktopAccessibilityMode::IAccessibleMode);
+  builder.SetDartEntrypoint("sendSemanticsTree");
+
+  // Setup: a signal for when we have send out all of our semantics updates
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  // Setup: Create a view
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  auto view = FlutterDesktopViewControllerGetView(controller.get());
+  ASSERT_NE(view, nullptr);
+
+  // Setup: UpdateSemanticsEnabled will trigger the semantics updates
+  // to get sent.
+  auto windows_view = reinterpret_cast<FlutterWindowsView*>(view);
+  windows_view->OnUpdateSemanticsEnabled(true);
+
+  while (!done) {
+    PumpMessage();
+  }
+
+  HWND hwnd = FlutterDesktopViewGetHWND(view);
+  ASSERT_NE(hwnd, nullptr);
+
+  LRESULT lres = SendMessage(hwnd, WM_GETOBJECT, 0, OBJID_CLIENT);
+  ASSERT_NE(lres, 0);
+
+  // In IAccessible mode, the object returned from WM_GETOBJECT should support
+  // IAccessible but not IAccessibleEx.
+  IAccessible* accessible = nullptr;
+  HRESULT hr = ObjectFromLresult(lres, IID_IAccessible, 0, (void**)&accessible);
+  ASSERT_TRUE(SUCCEEDED(hr));
+  ASSERT_NE(accessible, nullptr);
+
+  IAccessibleEx* accessible_ex = nullptr;
+  hr = ObjectFromLresult(lres, IID_IAccessibleEx, 0, (void**)&accessible_ex);
+  ASSERT_TRUE(FAILED(hr));
+  ASSERT_EQ(accessible_ex, nullptr);
+}
+
+TEST_F(WindowsTest, EnableIAccessibleEx) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetAccessibilityMode(
+      FlutterDesktopAccessibilityMode::IAccessibleExMode);
+  builder.SetDartEntrypoint("sendSemanticsTree");
+
+  // Setup: a signal for when we have send out all of our semantics updates
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  // Setup: Create a view
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  auto view = FlutterDesktopViewControllerGetView(controller.get());
+  ASSERT_NE(view, nullptr);
+
+  // Setup: UpdateSemanticsEnabled will trigger the semantics updates
+  // to get sent.
+  auto windows_view = reinterpret_cast<FlutterWindowsView*>(view);
+  windows_view->OnUpdateSemanticsEnabled(true);
+
+  while (!done) {
+    PumpMessage();
+  }
+
+  HWND hwnd = FlutterDesktopViewGetHWND(view);
+  ASSERT_NE(hwnd, nullptr);
+
+  LRESULT lres = SendMessage(hwnd, WM_GETOBJECT, 0, OBJID_CLIENT);
+  ASSERT_NE(lres, 0);
+
+  // In IAccessibleEx mode, the object returned from WM_GETOBJECT should
+  // support IAccessibleEx.
+  IAccessibleEx* accessible_ex = nullptr;
+  HRESULT hr =
+      ObjectFromLresult(lres, IID_IAccessibleEx, 0, (void**)&accessible_ex);
+  ASSERT_TRUE(SUCCEEDED(hr));
+  ASSERT_NE(accessible_ex, nullptr);
+  accessible_ex->Release();
 }
 
 }  // namespace testing

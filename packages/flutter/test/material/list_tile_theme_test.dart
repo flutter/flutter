@@ -760,13 +760,13 @@ void main() {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final scaffoldKey = GlobalKey<ScaffoldState>();
-    final ShapeBorder shapeBorder = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20.0),
+    const ShapeBorder shapeBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(20.0)),
     );
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(listTileTheme: ListTileThemeData(shape: shapeBorder)),
+        theme: ThemeData(listTileTheme: const ListTileThemeData(shape: shapeBorder)),
         home: Scaffold(
           key: scaffoldKey,
           drawer: const Drawer(child: ListTile()),
