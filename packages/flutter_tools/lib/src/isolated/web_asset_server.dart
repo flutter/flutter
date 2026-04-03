@@ -122,9 +122,8 @@ class WebAssetServer implements AssetReader {
   /// hot reload, writes a file that contains a list of objects each with three
   /// fields:
   ///
-  /// `src`: A string that corresponds to the file path containing a DDC library
-  /// bundle. To support embedded libraries, the path should include the
-  /// `baseUri` of the web server.
+  /// `src`: A string that corresponds to the relative file path containing a
+  /// DDC library bundle.
   /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
@@ -133,7 +132,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "<baseUri>/<file_name>",
+  ///     "src": "<file_name>",
   ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
@@ -150,9 +149,10 @@ class WebAssetServer implements AssetReader {
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      final moduleUri = '$baseUri/$module';
       moduleToLibrary.add(<String, Object>{
-        'src': moduleUri,
+        // Use relative path for module so the app can still find it even if
+        // it's in a different domain than the server.
+        'src': module,
         'module': metadata.name,
         'libraries': libraries,
       });
@@ -358,10 +358,9 @@ class WebAssetServer implements AssetReader {
                   canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                reloadedSourcesUri: server._baseUri.replace(
-                  pathSegments: List<String>.from(server._baseUri.pathSegments)
-                    ..add(_reloadedSourcesFileName),
-                ),
+                // Use relative path for module so the app can still find it
+                // even if it's in a different domain than the server.
+                reloadedSourcesUri: Uri.parse(_reloadedSourcesFileName),
               ).strategy
             : FrontendServerRequireStrategyProvider(
                 ReloadConfiguration.none,
