@@ -157,8 +157,8 @@ Future<List<Plugin>> findPlugins(
   // when the project is actually a member of the workspace — i.e. its name
   // appears in the shared graph. Outside a workspace we load project-specific
   // resources instead.
-  final bool useSharedResources = packageGraph != null &&
-      packageGraph.dependencies.containsKey(project.manifest.appName);
+  final bool useSharedResources =
+      packageGraph != null && packageGraph.dependencies.containsKey(project.manifest.appName);
 
   final PackageConfig resolvedPackageConfig;
   if (useSharedResources && packageConfig != null) {

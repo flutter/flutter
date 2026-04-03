@@ -28,8 +28,8 @@ List<Dependency> computeTransitiveDependencies(
   // in tests), fall back to loading the project-specific graph.
   final PackageGraph resolvedGraph =
       (packageGraph != null && packageGraph.dependencies.containsKey(project.manifest.appName))
-          ? packageGraph
-          : PackageGraph.load(project);
+      ? packageGraph
+      : PackageGraph.load(project);
 
   final String rootName = project.manifest.appName;
 
