@@ -11,7 +11,7 @@ namespace impeller {
 
 // Geometry class that can generate vertices (with or without texture
 // coordinates) for either filled or stroked circles
-class CircleGeometry final : public Geometry {
+class CircleGeometry final : public SDFCompatibleGeometry {
  public:
   explicit CircleGeometry(const Point& center, Scalar radius);
 

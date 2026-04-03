@@ -195,8 +195,6 @@ impeller_component("entity") {
     "contents/solid_rrect_like_blur_contents.h",
     "contents/solid_rsuperellipse_blur_contents.cc",
     "contents/solid_rsuperellipse_blur_contents.h",
-    "contents/stroked_rect_sdf_contents.cc",
-    "contents/stroked_rect_sdf_contents.h",
     "contents/sweep_gradient_contents.cc",
     "contents/sweep_gradient_contents.h",
     "contents/text_contents.cc",

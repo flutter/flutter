@@ -15,9 +15,21 @@
 
 namespace impeller {
 
-class UberSDFContents : public ColorSourceContents {
+template <typename T>
+class UberSDFContents final : public ColorSourceContents {
+  static_assert(std::is_base_of_v<SDFCompatibleGeometry, T>,
+                "T must be an SDFCompatibleGeometry.");
+
  public:
-  ~UberSDFContents() override;
+  static std::unique_ptr<UberSDFContents<T>> Make(Color color,
+                                                  std::unique_ptr<T> geometry) {
+    return std::make_unique<UberSDFContents<T>>(color, std::move(geometry));
+  }
+
+  UberSDFContents(Color color, std::unique_ptr<T> geometry)
+      : color_(color), geometry_(std::move(geometry)) {}
+
+  ~UberSDFContents() override = default;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -25,28 +37,34 @@ class UberSDFContents : public ColorSourceContents {
               RenderPass& pass) const override;
 
   // |Contents|
-  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+  std::optional<Rect> GetCoverage(const Entity& entity) const override {
+    return geometry_->GetCoverage(entity.GetTransform());
+  }
 
   // |ColorSourceContents|
-  Color GetColor() const;
+  const Geometry* GetGeometry() const override { return geometry_.get(); }
 
   // |ColorSourceContents|
-  bool ApplyColorFilter(const ColorFilterProc& color_filter_proc) override;
+  Color GetColor() const { return color_; }
 
- protected:
-  explicit UberSDFContents(Color color);
+  // |ColorSourceContents|
+  bool ApplyColorFilter(const ColorFilterProc& color_filter_proc) override {
+    color_ = color_filter_proc(color_);
+    return true;
+  }
 
+ private:
   using VS = UberSDFPipeline::VertexShader;
   using FS = UberSDFPipeline::FragmentShader;
 
-  virtual bool BindData(const ContentContext& renderer,
-                        const Entity& entity,
-                        RenderPass& pass,
-                        FS::FragInfo& frag_info) const = 0;
+  bool BindData(const ContentContext& renderer,
+                const Entity& entity,
+                RenderPass& pass,
+                FS::FragInfo& frag_info) const;
 
   Color color_;
+  std::unique_ptr<T> geometry_;
 
- private:
   UberSDFContents(const UberSDFContents&) = delete;
 
   UberSDFContents& operator=(const UberSDFContents&) = delete;

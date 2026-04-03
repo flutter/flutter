@@ -41,7 +41,7 @@ class FillRectGeometry final : public Geometry {
   Scalar padding_pixels_ = 0.0f;
 };
 
-class StrokeRectGeometry final : public Geometry {
+class StrokeRectGeometry final : public SDFCompatibleGeometry {
  public:
   explicit StrokeRectGeometry(const Rect& rect, const StrokeParameters& stroke);
 

@@ -47,6 +47,11 @@ static const GeometryResult kEmptyResult = {
         },
 };
 
+class SDFCompatibleGeometry : public Geometry {
+ public:
+  ~SDFCompatibleGeometry() override = default;
+};
+
 class Geometry {
  public:
   virtual ~Geometry() {}

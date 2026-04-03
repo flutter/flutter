@@ -13,8 +13,8 @@ namespace testing {
 TEST(UberSDFContentsTest, ApplyColorFilter) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
   auto geometry = std::make_unique<FillRectGeometry>(rect);
-  auto contents =
-      FilledRectSDFContents::Make(Color::Red(), std::move(geometry));
+  auto contents = UberSDFContents<FillRectGeometry>::Make(Color::Red(),
+                                                           std::move(geometry));
   ASSERT_EQ(contents->GetColor(), Color::Red());
 
   bool result =

@@ -26,11 +26,9 @@
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/circle_contents.h"
-#include "impeller/entity/contents/circle_sdf_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/filled_rect_sdf_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/line_contents.h"
@@ -38,7 +36,6 @@
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/solid_rsuperellipse_blur_contents.h"
-#include "impeller/entity/contents/stroked_rect_sdf_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -836,20 +833,19 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
                                                          paint.stroke.width);
     }
 
-    std::shared_ptr<UberSDFContents> contents;
+    std::shared_ptr<ColorSourceContents> contents;
     if (paint.style == Paint::Style::kStroke) {
-      auto stroke_geom =
-          std::make_unique<StrokeRectGeometry>(rect, paint.stroke);
+      auto stroke_geom = std::make_unique<StrokeRectGeometry>(rect, paint.stroke);
       const Geometry* geom = stroke_geom.get();
-      contents = StrokedRectSDFContents::Make(/*color=*/paint.color,
-                                              std::move(stroke_geom));
+      contents = UberSDFContents<StrokeRectGeometry>::Make(/*color=*/paint.color,
+                                                           std::move(stroke_geom));
       AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     } else {
       auto fill_geom = std::make_unique<FillRectGeometry>(rect);
       fill_geom->SetAntialiasPadding(expand_size);
       const Geometry* geom = fill_geom.get();
-      contents = FilledRectSDFContents::Make(/*color=*/paint.color,
-                                             std::move(fill_geom));
+      contents = UberSDFContents<FillRectGeometry>::Make(/*color=*/paint.color,
+                                                         std::move(fill_geom));
       AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     }
     return;
@@ -1052,7 +1048,7 @@ void Canvas::DrawCircle(const Point& center,
     }
     geometry->SetAntialiasPadding(1.0f);
 
-    auto contents = CircleSDFContents::Make(
+    auto contents = UberSDFContents<CircleGeometry>::Make(
         /*color=*/paint.color, std::move(geometry));
 
     Entity entity;
