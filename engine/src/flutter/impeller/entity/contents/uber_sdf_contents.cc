@@ -7,8 +7,6 @@
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
-#include "impeller/entity/geometry/circle_geometry.h"
-#include "impeller/entity/geometry/rect_geometry.h"
 
 namespace impeller {
 
@@ -24,16 +22,19 @@ using FS = UberSDFPipeline::FragmentShader;
 
 }  // namespace
 
-std::unique_ptr<UberSDFContents>
-UberSDFContents::Make(Type type, Color color, SDFCompatibleGeometry* geometry) {
+std::unique_ptr<UberSDFContents> UberSDFContents::Make(
+    Type type,
+    Color color,
+    std::unique_ptr<SDFCompatibleGeometry> geometry) {
   return std::unique_ptr<UberSDFContents>(
-      new UberSDFContents(type, color, geometry));
+      new UberSDFContents(type, color, std::move(geometry)));
 }
 
-UberSDFContents::UberSDFContents(Type type,
-                                 Color color,
-                                 SDFCompatibleGeometry* geometry)
-    : type_(type), color_(color), geometry_(geometry) {
+UberSDFContents::UberSDFContents(
+    Type type,
+    Color color,
+    std::unique_ptr<SDFCompatibleGeometry> geometry)
+    : type_(type), color_(color), geometry_(std::move(geometry)) {
   geometry_->SetAntialiasPadding(kDefaultAntialiasPadding);
 }
 
@@ -45,7 +46,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info = {};
   frag_info.type = type_ == Type::kCircle ? 0.0f : 1.0f;
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
 
@@ -102,7 +103,7 @@ std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
 }
 
 const Geometry* UberSDFContents::GetGeometry() const {
-  return geometry_;
+  return geometry_.get();
 }
 
 Color UberSDFContents::GetColor() const {

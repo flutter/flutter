@@ -25,11 +25,12 @@ class UberSDFContents : public ColorSourceContents {
     kRect,
   };
 
-  static std::unique_ptr<UberSDFContents> Make(Type type,
-                                               Color color,
-                                               SDFCompatibleGeometry* geometry);
+  static std::unique_ptr<UberSDFContents>
+  Make(Type type, Color color, std::unique_ptr<SDFCompatibleGeometry> geometry);
 
-  UberSDFContents(Type type, Color color, SDFCompatibleGeometry* geometry);
+  explicit UberSDFContents(Type type,
+                           Color color,
+                           std::unique_ptr<SDFCompatibleGeometry> geometry);
 
   ~UberSDFContents() override;
 
@@ -51,7 +52,7 @@ class UberSDFContents : public ColorSourceContents {
   /// The color of the geometry.
   Color color_;
   /// The geometry.
-  SDFCompatibleGeometry* geometry_;
+  std::unique_ptr<SDFCompatibleGeometry> geometry_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 

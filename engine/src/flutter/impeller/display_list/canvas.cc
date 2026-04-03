@@ -807,7 +807,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
       !paint.mask_blur_descriptor.has_value()) {
     // Draw SDF rect.
     auto contents = UberSDFContents::Make(UberSDFContents::Type::kRect,
-                                          paint.color, geom.get());
+                                          paint.color, std::move(geom));
     AddRenderSDFEntityToCurrentPass(entity, paint, std::move(contents));
   } else {
     // Draw non-SDF rect.
@@ -1004,7 +1004,7 @@ void Canvas::DrawCircle(const Point& center,
       !paint.mask_blur_descriptor.has_value()) {
     // Draw SDF circle using UberSDFContents.
     auto contents = UberSDFContents::Make(UberSDFContents::Type::kCircle,
-                                          paint.color, geom.get());
+                                          paint.color, std::move(geom));
     AddRenderSDFEntityToCurrentPass(entity, paint, std::move(contents));
   } else if (!(paint.HasColorFilter() || paint.image_filter ||
                paint.invert_colors || paint.color_source ||

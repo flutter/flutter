@@ -1234,9 +1234,9 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
 
 TEST(EntityTest, UberSDFContentsCoverage) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
-  FillRectGeometry geometry(rect.Expand(1.0f));
+  auto geometry = std::make_unique<FillRectGeometry>(rect);
   auto contents = UberSDFContents::Make(UberSDFContents::Type::kRect,
-                                        Color::Red(), &geometry);
+                                        Color::Red(), std::move(geometry));
 
   Entity entity;
   auto coverage = contents->GetCoverage(entity);

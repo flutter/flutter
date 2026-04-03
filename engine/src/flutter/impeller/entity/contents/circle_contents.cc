@@ -41,7 +41,7 @@ bool CircleContents::Render(const ContentContext& renderer,
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info = {};
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
 
   Rect bounds = geometry_->GetBaseShapeBounds();
