@@ -1577,8 +1577,21 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
-    final double visualPosition =
-        (globalToLocal(globalPosition).dx - _trackRect.left) / _trackRect.width;
+    final Rect trackRect = _trackRect;
+    final double localDx = globalToLocal(globalPosition).dx;
+    final double visualPosition;
+    if (isDiscrete && _sliderTheme.trackShape!.isRounded) {
+      // For discrete sliders with rounded track shapes, the thumb and tick marks
+      // are inset by half the track height on each side. The position calculation
+      // must account for this padding to match the painted tick mark positions.
+      final double padding = trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - padding;
+      visualPosition = adjustedTrackWidth > 0
+          ? (localDx - trackRect.left - padding / 2) / adjustedTrackWidth
+          : 0.0;
+    } else {
+      visualPosition = (localDx - trackRect.left) / trackRect.width;
+    }
     return _getValueFromVisualPosition(visualPosition);
   }
 
@@ -1661,7 +1674,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case SliderInteraction.slideOnly:
       case SliderInteraction.slideThumb:
         if (_active && isInteractive) {
-          final double valueDelta = details.primaryDelta! / _trackRect.width;
+          final double effectiveTrackWidth = isDiscrete && _sliderTheme.trackShape!.isRounded
+              ? _trackRect.width - _trackRect.height
+              : _trackRect.width;
+          final double valueDelta = details.primaryDelta! / effectiveTrackWidth;
           _currentDragValue += switch (textDirection) {
             TextDirection.rtl => -valueDelta,
             TextDirection.ltr => valueDelta,

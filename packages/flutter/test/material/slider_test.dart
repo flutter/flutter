@@ -680,6 +680,69 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
+  testWidgets('Discrete Slider tap position matches tick mark position for rounded tracks', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/184391
+    // For discrete sliders with rounded track shapes, the tap-to-value
+    // calculation must account for the same track padding used when painting
+    // tick marks and positioning the thumb.
+    final Key sliderKey = UniqueKey();
+    var value = 0.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SliderTheme(
+                    data: const SliderThemeData(
+                      trackHeight: 16.0,
+                      trackShape: RoundedRectSliderTrackShape(),
+                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                      overlayShape: RoundSliderOverlayShape(overlayRadius: 12.0),
+                    ),
+                    child: SizedBox(
+                      width: 200.0,
+                      child: Slider(
+                        key: sliderKey,
+                        max: 100.0,
+                        divisions: 20,
+                        value: value,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Tap at the center, which should always give the correct value.
+    await tester.tap(find.byKey(sliderKey));
+    expect(value, equals(50.0));
+
+    // Tap at the left quarter - verify it snaps to the correct division.
+    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+    final Offset bottomRight = tester.getBottomRight(find.byKey(sliderKey));
+    final Offset target25 = topLeft + (bottomRight - topLeft).scale(0.25, 0.5);
+    await tester.tapAt(target25);
+    // Without the fix, the value could incorrectly snap to an adjacent division
+    // due to the mismatch between tap position calculation and tick mark positions.
+    // The value should be close to 25.0 (division 5 out of 20).
+    expect(value, moreOrLessEquals(25.0, epsilon: 5.0));
+  });
+
   testWidgets('Slider can be given zero values', (WidgetTester tester) async {
     final log = <double>[];
     await tester.pumpWidget(
