@@ -3706,7 +3706,7 @@ class EditableTextState extends State<EditableText>
           _hasInputConnection &&
           widget.obscureText &&
           WidgetsBinding.instance.platformDispatcher.brieflyShowPassword &&
-          value.text.length == _value.text.length + 1;
+          value.text.characters.length == _value.text.characters.length + 1;
 
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
       _obscureLatestCharIndex = revealObscuredInput ? _value.selection.baseOffset : null;
@@ -6026,8 +6026,11 @@ class EditableTextState extends State<EditableText>
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
-      String text = _value.text;
-      text = widget.obscuringCharacter * text.length;
+      final String originalText = _value.text;
+      // Use characters.length (grapheme clusters) instead of string length
+      // (code units) so that complex characters like "👨‍👩‍👦" are counted
+      // as a single character.
+      String text = widget.obscuringCharacter * originalText.characters.length;
       // Reveal the latest character in an obscured field only on mobile.
       const mobilePlatforms = <TargetPlatform>{
         TargetPlatform.android,
@@ -6039,8 +6042,13 @@ class EditableTextState extends State<EditableText>
           mobilePlatforms.contains(defaultTargetPlatform);
       if (brieflyShowPassword) {
         final int? o = _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-        if (o != null && o >= 0 && o < text.length) {
-          text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+        if (o != null && o >= 0) {
+          // Convert the code unit offset to a grapheme cluster index.
+          final int graphemeIndex = originalText.substring(0, o).characters.length;
+          if (graphemeIndex < text.length) {
+            final String revealedChar = originalText.characters.elementAt(graphemeIndex);
+            text = text.replaceRange(graphemeIndex, graphemeIndex + 1, revealedChar);
+          }
         }
       }
       return TextSpan(style: _style, text: text);
