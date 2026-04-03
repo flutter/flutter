@@ -1312,7 +1312,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// `cacheHeight` are not both null.
   ///
   /// When `cacheWidth` and `cacheHeight` are both null, this will return the
-  /// `provider` directly.
+  /// `provider` directly. If `useLogicalPixels` is true, the dimensions are
+  /// multiplied by the device's pixel ratio at decode time.
   static ImageProvider<Object> resizeIfNeeded(
     int? cacheWidth,
     int? cacheHeight,
