@@ -76,6 +76,7 @@ class CleanCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
+  /// Deletes ephemeral files and directories for the given [flutterProject].
   void _deleteProjectFiles(FlutterProject flutterProject) {
     deleteFile(flutterProject.dartTool);
 
