@@ -19,11 +19,6 @@ namespace impeller {
 
 class UberSDFContents : public ColorSourceContents {
  public:
-  enum class Type {
-    kCircle,
-    kRect,
-  };
-
   static std::unique_ptr<UberSDFContents> MakeRect(
       Color color,
       Scalar stroke_width,
@@ -34,50 +29,99 @@ class UberSDFContents : public ColorSourceContents {
   static std::unique_ptr<UberSDFContents>
   MakeCircle(Color color, bool stroked, const CircleGeometry* geometry);
 
-  UberSDFContents(Type type,
-                  Rect rect,
-                  Color color,
-                  Scalar stroke_width,
-                  Join stroke_join,
-                  bool stroked,
-                  const Geometry* geometry,
-                  Scalar aa_padding);
-
   ~UberSDFContents() override;
 
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;
 
+  // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
+  // |ColorSourceContents|
   Color GetColor() const;
 
+  // |ColorSourceContents|
   bool ApplyColorFilter(const ColorFilterProc& color_filter_proc) override;
 
-  const Geometry* GetGeometry() const override;
+ protected:
+  UberSDFContents(Color color,
+                  bool stroked,
+                  Scalar stroke_width,
+                  Join stroke_join);
+
+  using VS = UberSDFPipeline::VertexShader;
+  using FS = UberSDFPipeline::FragmentShader;
+
+  void SetCommonUniforms(FS::FragInfo& frag_info) const;
+
+  virtual bool BindData(const ContentContext& renderer,
+                        const Entity& entity,
+                        RenderPass& pass,
+                        FS::FragInfo& frag_info) const = 0;
 
  private:
-  /// The type of geometry (e.g. circle, rect).
-  const Type type_;
-  /// The bounding box of the geometry.
-  Rect bounding_box_;
-  /// The color of the geometry.
   Color color_;
-  /// The width of the stroke.
-  Scalar stroke_width_ = 0.0f;
-  /// The join of the stroke.
-  Join stroke_join_ = Join::kMiter;
-  /// Whether the geometry is stroked.
-  bool stroked_ = false;
-  /// The geometry.
-  const Geometry* geometry_;
-  /// The antialias padding.
-  Scalar aa_padding_;
+  bool stroked_;
+  Scalar stroke_width_;
+  Join stroke_join_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 
   UberSDFContents& operator=(const UberSDFContents&) = delete;
+};
+
+class CircleSDFContents final : public UberSDFContents {
+ public:
+  CircleSDFContents(Color color, bool stroked, const CircleGeometry* geometry);
+
+  ~CircleSDFContents() override;
+
+  // |ColorSourceContents|
+  const Geometry* GetGeometry() const override;
+
+ protected:
+  // |UberSDFContents|
+  bool BindData(const ContentContext& renderer,
+                const Entity& entity,
+                RenderPass& pass,
+                FS::FragInfo& frag_info) const override;
+
+ private:
+  const CircleGeometry* geometry_;
+
+  CircleSDFContents(const CircleSDFContents&) = delete;
+
+  CircleSDFContents& operator=(const CircleSDFContents&) = delete;
+};
+
+class RectSDFContents final : public UberSDFContents {
+ public:
+  RectSDFContents(Color color,
+                  Scalar stroke_width,
+                  Join stroke_join,
+                  bool stroked,
+                  const FillRectGeometry* geometry);
+
+  ~RectSDFContents() override;
+
+  // |ColorSourceContents|
+  const Geometry* GetGeometry() const override;
+
+ protected:
+  // |UberSDFContents|
+  bool BindData(const ContentContext& renderer,
+                const Entity& entity,
+                RenderPass& pass,
+                FS::FragInfo& frag_info) const override;
+
+ private:
+  const FillRectGeometry* geometry_;
+
+  RectSDFContents(const RectSDFContents&) = delete;
+
+  RectSDFContents& operator=(const RectSDFContents&) = delete;
 };
 
 }  // namespace impeller

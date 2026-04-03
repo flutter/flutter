@@ -4,6 +4,8 @@
 
 #include "impeller/entity/contents/uber_sdf_contents.h"
 
+#include <memory>
+
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
@@ -12,72 +14,37 @@
 
 namespace impeller {
 
-namespace {
-using PipelineBuilderCallback =
-    std::function<PipelineRef(ContentContextOptions)>;
-
-using VS = UberSDFPipeline::VertexShader;
-using FS = UberSDFPipeline::FragmentShader;
-
-}  // namespace
-
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
     Color color,
     Scalar stroke_width,
     Join stroke_join,
     bool stroked,
     const FillRectGeometry* geometry) {
-  Rect bounding_box = geometry->GetRect();
-  Scalar aa_padding = 1.0f;
-  return std::make_unique<UberSDFContents>(Type::kRect, bounding_box, color,
-                                           stroke_width, stroke_join, stroked,
-                                           geometry, aa_padding);
+  return std::make_unique<RectSDFContents>(color, stroke_width, stroke_join,
+                                           stroked, geometry);
 }
 
 std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
     Color color,
     bool stroked,
     const CircleGeometry* geometry) {
-  Point center = geometry->GetCenter();
-  Scalar radius = geometry->GetRadius();
-  Rect bounding_box = Rect::MakeXYWH(center.x - radius, center.y - radius,
-                                     radius * 2, radius * 2);
-  Scalar aa_padding = geometry->GetAntialiasPadding();
-  return std::unique_ptr<UberSDFContents>(new UberSDFContents(
-      Type::kCircle, bounding_box, color, geometry->GetStrokeWidth(),
-      Join::kMiter, stroked, geometry, aa_padding));
+  return std::make_unique<CircleSDFContents>(color, stroked, geometry);
 }
 
-UberSDFContents::UberSDFContents(Type type,
-                                 Rect bounding_box,
-                                 Color color,
-                                 Scalar stroke_width,
-                                 Join stroke_join,
+UberSDFContents::UberSDFContents(Color color,
                                  bool stroked,
-                                 const Geometry* geometry,
-                                 Scalar aa_padding)
-    : type_(type),
-      bounding_box_(bounding_box),
-      color_(color),
-      stroke_width_(stroke_width),
-      stroke_join_(stroke_join),
+                                 Scalar stroke_width,
+                                 Join stroke_join)
+    : color_(color),
       stroked_(stroked),
-      geometry_(geometry),
-      aa_padding_(aa_padding) {}
+      stroke_width_(stroke_width),
+      stroke_join_(stroke_join) {}
 
 UberSDFContents::~UberSDFContents() = default;
 
-bool UberSDFContents::Render(const ContentContext& renderer,
-                             const Entity& entity,
-                             RenderPass& pass) const {
-  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
-
-  VS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+void UberSDFContents::SetCommonUniforms(FS::FragInfo& frag_info) const {
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.center = bounding_box_.GetCenter();
-  frag_info.size =
-      Point(bounding_box_.GetWidth() / 2.0f, bounding_box_.GetHeight() / 2.0f);
+  frag_info.stroked = stroked_ ? 1.0f : 0.0f;
   frag_info.stroke_width = stroke_width_;
   switch (stroke_join_) {
     case Join::kMiter:
@@ -90,17 +57,26 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       frag_info.stroke_join = 2.0f;
       break;
   }
-  frag_info.aa_pixels = aa_padding_;
-  frag_info.stroked = stroked_ ? 1.0f : 0.0f;
-  frag_info.type = type_ == Type::kCircle ? 0.0f : 1.0f;
+}
+
+bool UberSDFContents::Render(const ContentContext& renderer,
+                             const Entity& entity,
+                             RenderPass& pass) const {
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+
+  VS::FrameInfo frame_info;
+  FS::FragInfo frag_info;
+
+  if (!BindData(renderer, entity, pass, frag_info)) {
+    return false;
+  }
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
-  PipelineBuilderCallback pipeline_callback =
-      [&renderer](ContentContextOptions options) {
-        return renderer.GetUberSDFPipeline(options);
-      };
+  auto pipeline_callback = [&renderer](ContentContextOptions options) {
+    return renderer.GetUberSDFPipeline(options);
+  };
 
   return ColorSourceContents::DrawGeometry<VS>(
       this, GetGeometry(), renderer, entity, pass, pipeline_callback,
@@ -123,10 +99,6 @@ std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
   return GetGeometry()->GetCoverage(entity.GetTransform());
 }
 
-const Geometry* UberSDFContents::GetGeometry() const {
-  return geometry_;
-}
-
 Color UberSDFContents::GetColor() const {
   return color_;
 }
@@ -134,6 +106,63 @@ Color UberSDFContents::GetColor() const {
 bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
   color_ = color_filter_proc(color_);
+  return true;
+}
+
+// CircleSDFContents
+
+CircleSDFContents::CircleSDFContents(Color color,
+                                     bool stroked,
+                                     const CircleGeometry* geometry)
+    : UberSDFContents(color, stroked, geometry->GetStrokeWidth(), Join::kMiter),
+      geometry_(geometry) {}
+
+CircleSDFContents::~CircleSDFContents() = default;
+
+const Geometry* CircleSDFContents::GetGeometry() const {
+  return geometry_;
+}
+
+bool CircleSDFContents::BindData(const ContentContext& renderer,
+                                 const Entity& entity,
+                                 RenderPass& pass,
+                                 FS::FragInfo& frag_info) const {
+  SetCommonUniforms(frag_info);
+  frag_info.type = 0.0f;  // kCircle
+  frag_info.center = geometry_->GetCenter();
+  Scalar radius = geometry_->GetRadius();
+  frag_info.size = Point(radius, radius);
+  frag_info.aa_pixels = geometry_->GetAntialiasPadding();
+  return true;
+}
+
+// RectSDFContents
+
+RectSDFContents::RectSDFContents(Color color,
+                                 Scalar stroke_width,
+                                 Join stroke_join,
+                                 bool stroked,
+                                 const FillRectGeometry* geometry)
+    : UberSDFContents(color, stroked, stroke_width, stroke_join),
+      geometry_(geometry) {}
+
+RectSDFContents::~RectSDFContents() = default;
+
+const Geometry* RectSDFContents::GetGeometry() const {
+  return geometry_;
+}
+
+bool RectSDFContents::BindData(const ContentContext& renderer,
+                               const Entity& entity,
+                               RenderPass& pass,
+                               FS::FragInfo& frag_info) const {
+  SetCommonUniforms(frag_info);
+  frag_info.type = 1.0f;  // kRect
+  Rect rect = geometry_->GetRect();
+  frag_info.center = rect.GetCenter();
+  frag_info.size = Point(rect.GetWidth() / 2.0f, rect.GetHeight() / 2.0f);
+  // Rects were hardcoded to 1.0 aa_padding in the original implementation.
+  frag_info.aa_pixels = 1.0f;
   return true;
 }
 
