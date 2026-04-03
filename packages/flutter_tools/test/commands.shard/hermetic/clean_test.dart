@@ -57,7 +57,8 @@ void main() {
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          await CleanCommand().runCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -113,7 +114,8 @@ void main() {
 
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          await CleanCommand().runCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean']);
 
           expect(buildDirectory, isNot(exists));
 
@@ -229,7 +231,8 @@ void main() {
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          await CleanCommand().runCommand();
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean']);
 
           expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[]);
         },
@@ -275,7 +278,9 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          await CleanCommand(verbose: true).runCommand();
+          final command = CleanCommand(verbose: true);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          await runner.run(<String>['clean']);
 
           expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
             CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
