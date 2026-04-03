@@ -6,7 +6,6 @@ package com.flutter.gradle
 
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
@@ -409,8 +408,14 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
-    internal fun getAndroidExtension(project: Project): CommonExtension<*, *, *, *, *, *> =
-        project.extensions.findByType(CommonExtension::class.java)!!
+    internal fun getAndroidExtension(project: Project): AgpCommonExtensionWrapper {
+        // Look up by name to completely avoid importing or resolving CommonExtension
+        val androidExtension =
+            project.extensions.findByName("android")
+                ?: throw IllegalStateException("The Android plugin must be applied before accessing the Android extension.")
+
+        return AgpCommonExtensionWrapper(androidExtension)
+    }
 
     internal fun getAndroidLibraryExtension(project: Project): LibraryExtension = project.extensions.getByType(LibraryExtension::class.java)
 
