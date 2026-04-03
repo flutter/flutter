@@ -34,9 +34,14 @@ static std::optional<SamplerAddressMode> TileModeToAddressMode(
   }
 }
 
-TiledTextureContents::TiledTextureContents() = default;
+TiledTextureContents::TiledTextureContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 TiledTextureContents::~TiledTextureContents() = default;
+
+const Geometry* TiledTextureContents::GetGeometry() const {
+  return geometry_;
+}
 
 void TiledTextureContents::SetTexture(std::shared_ptr<Texture> texture) {
   texture_ = std::move(texture);

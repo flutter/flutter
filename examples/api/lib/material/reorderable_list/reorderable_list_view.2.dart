@@ -78,7 +78,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     }
 
     return ReorderableListView(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       proxyDecorator: proxyDecorator,
       onReorderItem: (int oldIndex, int newIndex) {
         setState(() {

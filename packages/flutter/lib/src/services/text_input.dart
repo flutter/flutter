@@ -531,6 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
+    this.enableInlinePrediction,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -702,6 +703,18 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final List<Locale>? hintLocales;
 
+  /// {@template flutter.services.TextInputConfiguration.enableInlinePrediction}
+  /// Whether to enable inline predictive text.
+  ///
+  /// This feature is specific to iOS 17 and later. It has no effect on other
+  /// platforms.
+  ///
+  /// By default, this property is null, which means inline prediction is
+  /// disabled on iOS. Setting this flag overrides the platform behavior:
+  /// when true, inline prediction is enabled; when false, it is disabled.
+  /// {@endtemplate}
+  final bool? enableInlinePrediction;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -723,6 +736,7 @@ class TextInputConfiguration {
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
     List<Locale>? hintLocales,
+    bool? enableInlinePrediction,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -744,6 +758,7 @@ class TextInputConfiguration {
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
       hintLocales: hintLocales ?? this.hintLocales,
+      enableInlinePrediction: enableInlinePrediction ?? this.enableInlinePrediction,
     );
   }
 
@@ -794,6 +809,7 @@ class TextInputConfiguration {
       'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
+      'enableInlinePrediction': enableInlinePrediction,
     };
   }
 
@@ -823,7 +839,8 @@ class TextInputConfiguration {
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
         other.enableDeltaModel == enableDeltaModel &&
-        other.hintLocales == hintLocales;
+        other.hintLocales == hintLocales &&
+        other.enableInlinePrediction == enableInlinePrediction;
   }
 
   @override
@@ -847,6 +864,7 @@ class TextInputConfiguration {
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
       hintLocales,
+      enableInlinePrediction,
     );
   }
 
@@ -871,6 +889,7 @@ class TextInputConfiguration {
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
       if (hintLocales != null) 'hintLocales: $hintLocales',
+      if (enableInlinePrediction != null) 'enableInlinePrediction: $enableInlinePrediction',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }
@@ -1013,6 +1032,10 @@ class TextEditingValue {
   /// iOS, the default software keyboards do not have a dedicated view to show
   /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
+  ///
+  /// On iOS 17 and later, the composing region can also be used
+  /// to display inline text predictions. The user can accept the
+  /// predicted text by tapping the Space bar.
   ///
   /// The composing region should typically only be changed by the IME, or the
   /// user via interacting with the IME.
@@ -1368,6 +1391,14 @@ mixin TextInputClient {
   ///
   /// This method will only be called on iOS.
   void showAutocorrectionPromptRect(int start, int end);
+
+  /// Notifies the client that the platform moved focus back to this input.
+  ///
+  /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
+  /// field and refocus it before autofilling.
+  ///
+  /// Returns true if the client acquired focus, false otherwise.
+  bool onFocusReceived() => false;
 
   /// Platform notified framework of closed connection.
   ///
@@ -2050,6 +2081,7 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
+    _lastConnection = connection;
     _setClient(connection._client, configuration);
   }
 
@@ -2079,6 +2111,7 @@ class TextInput {
 
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
+  TextInputConnection? _lastConnection;
 
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
@@ -2150,6 +2183,13 @@ class TextInput {
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
         return;
+      case 'TextInputClient.onFocusReceived':
+        final args = methodCall.arguments as List<dynamic>;
+        final clientId = args[0] as int;
+        if (_lastConnection != null && _lastConnection!._id == clientId) {
+          return _lastConnection!._client.onFocusReceived();
+        }
+        return false;
     }
     if (_currentConnection == null) {
       return;

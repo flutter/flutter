@@ -3,18 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
@@ -23,41 +19,23 @@ import '../src/context.dart';
 import '../src/fakes.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
-
-final launchingOnDeviceRegExp = RegExp(r'Launching the Widget Preview Scaffold on [a-zA-Z]+...');
-
-final firstLaunchMessagesWeb = <Pattern>[
-  'Creating widget preview scaffolding at:',
-  launchingOnDeviceRegExp,
-  'Done loading previews.',
-];
-
-final firstLaunchMessagesWebServer = <Pattern>[
-  'Creating widget preview scaffolding at:',
-  launchingOnDeviceRegExp,
-  'main.dart is being served at',
-];
-
-final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
+import 'widget_preview_test_helpers.dart';
 
 void main() {
   late Directory tempDir;
-  Process? process;
   Logger? logger;
   DtdLauncher? dtdLauncher;
-  DevtoolsLauncher? devtoolsLauncher;
+  DevtoolsServerLauncher? devtoolsLauncher;
   final project = BasicProject();
   const ProcessManager processManager = LocalProcessManager();
 
   setUp(() async {
     logger = BufferLogger.test();
-    tempDir = createResolvedTempDirectorySync('widget_preview_test.');
+    tempDir = createResolvedTempDirectorySync('widget_preview_smoke_test.');
     await project.setUpIn(tempDir);
   });
 
   tearDown(() async {
-    process?.kill();
-    process = null;
     await dtdLauncher?.dispose();
     await devtoolsLauncher?.close();
     devtoolsLauncher = null;
@@ -65,69 +43,17 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> runWidgetPreview({
-    required List<Pattern> expectedMessages,
-    Uri? dtdUri,
-    bool useWebServer = false,
-    Uri? devToolsServerAddress,
-  }) async {
-    expect(expectedMessages, isNotEmpty);
-    var i = 0;
-    process = await processManager.start(<String>[
-      flutterBin,
-      'widget-preview',
-      'start',
-      '--verbose',
-      '--${WidgetPreviewStartCommand.kHeadless}',
-      '--${WidgetPreviewStartCommand.kDisableDtdServiceUuid}',
-      if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
-      if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
-      if (devToolsServerAddress != null)
-        '--${FlutterCommand.kDevToolsServerAddress}=$devToolsServerAddress',
-    ], workingDirectory: tempDir.path);
-
-    final completer = Completer<void>();
-    process!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      printOnFailure('STDOUT: $msg');
-      if (completer.isCompleted) {
-        return;
-      }
-      if (msg.contains(expectedMessages[i])) {
-        ++i;
-      }
-      if (i == expectedMessages.length) {
-        completer.complete();
-      }
-    });
-
-    process!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-      printOnFailure('STDERR: $msg');
-    });
-
-    unawaited(
-      process!.exitCode.then((int exitCode) {
-        if (completer.isCompleted) {
-          return;
-        }
-        completer.completeError(
-          TestFailure('The widget previewer exited unexpectedly (exit code: $exitCode)'),
-        );
-      }),
-    );
-    await completer.future;
-  }
-
-  void runFlutterClean() {
-    processManager.runSync(<String>[flutterBin, 'clean'], workingDirectory: tempDir.path);
-  }
-
   group('flutter widget-preview start', () {
     testWithoutContext('smoke test', () async {
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
     });
 
     testWithoutContext('--web-server starts a web server instance', () async {
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWebServer, useWebServer: true);
+      await runWidgetPreview(
+        tempDir: tempDir,
+        expectedMessages: firstLaunchMessagesWebServer,
+        useWebServer: true,
+      );
     });
 
     testWithoutContext(
@@ -159,7 +85,7 @@ void main() {
         // Ensure we don't crash due to the package_config.json lookup pointing to
         // the parent project's package_config.json due to
         // widget_preview_scaffold/.dart_tool/package_config.json not existing.
-        await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
+        await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
       },
       // Project is always regenerated.
       skip: true, // See https://github.com/flutter/flutter/issues/179036.
@@ -169,10 +95,10 @@ void main() {
       'does not recreate project on subsequent runs',
       () async {
         // The first run of 'flutter widget-preview start' should generate a new preview scaffold
-        await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
+        await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
 
         // We shouldn't regenerate the scaffold after the initial run.
-        await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
+        await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
       },
       // Project is always regenerated.
       skip: true, // See https://github.com/flutter/flutter/issues/179036.
@@ -204,7 +130,11 @@ void main() {
       await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
 
       // Start the widget preview and wait for the 'Connected' event.
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
+      await runWidgetPreview(
+        tempDir: tempDir,
+        expectedMessages: firstLaunchMessagesWeb,
+        dtdUri: dtdUri,
+      );
       await completer.future;
     });
 
@@ -221,7 +151,8 @@ void main() {
 
       // Start the widget preview and wait for the DevTools message.
       await runWidgetPreview(
-        expectedMessages: [
+        tempDir: tempDir,
+        expectedMessages: <Pattern>[
           'The Flutter DevTools debugger and profiler on Chrome is available at: $devtoolsUri',
         ],
         devToolsServerAddress: devtoolsUri,
@@ -253,7 +184,7 @@ void main() {
         expect(event.kind, 'Connected');
         if (firstConnection) {
           firstConnection = false;
-          runFlutterClean();
+          runFlutterClean(tempDir);
           dtdConnection.call(
             WidgetPreviewDtdServices.kWidgetPreviewServiceRoot,
             WidgetPreviewDtdServices.kHotRestartPreviewer,
@@ -268,7 +199,11 @@ void main() {
       await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
 
       // Start the widget preview and wait for the 'Connected' event.
-      await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
+      await runWidgetPreview(
+        tempDir: tempDir,
+        expectedMessages: firstLaunchMessagesWeb,
+        dtdUri: dtdUri,
+      );
       await completer.future;
     });
   });
