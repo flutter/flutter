@@ -438,15 +438,15 @@ import 'package:flutter_project/foo.dart' as _i3;
 import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
 
 List<_i1.WidgetPreview> previews() => [
-      _i2.buildWidgetPreview(
-        packageName: 'flutter_project',
-        scriptUri: 'STRIPPED',
-        line: 4,
-        column: 1,
-        previewFunction: () => _i3.preview(),
-        transformedPreview: const _i4.Preview(name: 'preview').transform(),
-      )
-    ];
+  _i2.buildWidgetPreview(
+    packageName: 'flutter_project',
+    scriptUri: 'STRIPPED',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i3.preview(),
+    transformedPreview: const _i4.Preview(name: 'preview').transform(),
+  ),
+];
 ''';
 
     group('LSP-based preview detection', () {
