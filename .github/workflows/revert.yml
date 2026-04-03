@@ -65,7 +65,7 @@ jobs:
           repository: flutteractionsbot/flutter
           path: flutter
           ref: master
-          persist-credentials: false
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           fetch-depth: 0
 
       - name: Prepare Git
@@ -102,7 +102,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
         run: |
-          git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/flutter ${{ env.BRANCH_NAME }}
+          git push origin ${{ env.BRANCH_NAME }}
 
           PR_LINK="https://github.com/flutter/flutter/pull/${{ github.event.pull_request.number }}"
           INITIATOR="${{ github.event.sender.login }}"
