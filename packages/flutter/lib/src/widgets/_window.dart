@@ -2291,13 +2291,9 @@ class WindowRegistry extends ChangeNotifier {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   static WindowRegistry of(BuildContext context) {
-    _debugCheckHasWindowRegistry(context);
-    return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()!._registry;
-  }
-
-  static bool _debugCheckHasWindowRegistry(BuildContext context) {
+    final WindowRegistry? registry = maybeOf(context);
     assert(() {
-      if (context.dependOnInheritedWidgetOfExactType<WindowScope>() == null) {
+      if (registry == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('No WindowRegistry found in context.'),
           ErrorDescription(
@@ -2317,7 +2313,7 @@ class WindowRegistry extends ChangeNotifier {
       }
       return true;
     }());
-    return true;
+    return registry!;
   }
 }
 

@@ -49,19 +49,25 @@ class _PopupButtonState extends State<PopupButton> {
       final tracker = ElementPositionTracker(
         element: _popupButtonKey.currentContext!,
       );
+      late final WindowEntry entry;
       final controller = PopupWindowController(
         anchorRect: tracker.getGlobalRect()!,
         positioner: windowSettings.positioner,
         delegate: _PopupWindowControllerDelegate(
           onDestroyed: () {
-            windowRegistry.unregister(_popupWindowEntry!);
+            windowRegistry.unregister(entry);
             tracker.dispose();
-            _popupTracker = null;
+            if (mounted) {
+              setState(() {
+                _popupWindowEntry = null;
+                _popupTracker = null;
+              });
+            }
           },
         ),
         parent: widget.parentController,
       );
-      final WindowEntry entry = WindowEntry(
+      entry = WindowEntry(
         controller: controller,
         builder: (BuildContext context) =>
             PopupWindowContent(controller: controller),

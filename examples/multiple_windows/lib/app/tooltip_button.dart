@@ -38,7 +38,7 @@ class _TooltipButtonState extends State<TooltipButton> {
     // Toggle tooltip visibility.
     if (_tooltipEntry != null) {
       _tooltipEntry!.controller.destroy();
-      _tooltipTracker?.dispose;
+      _tooltipTracker?.dispose();
       setState(() {
         _tooltipEntry = null;
         _tooltipTracker = null;
@@ -48,12 +48,13 @@ class _TooltipButtonState extends State<TooltipButton> {
       final tracker = ElementPositionTracker(
         element: _tooltipButtonKey.currentContext!,
       );
+      late final WindowEntry entry;
       final controller = TooltipWindowController(
         anchorRect: tracker.getGlobalRect()!,
         positioner: windowSettings.positioner,
         delegate: _TooltipWindowControllerDelegate(
           onDestroyed: () {
-            windowRegistry.unregister(_tooltipEntry!);
+            windowRegistry.unregister(entry);
             tracker.dispose();
             if (mounted) {
               setState(() {
@@ -65,7 +66,7 @@ class _TooltipButtonState extends State<TooltipButton> {
         ),
         parent: widget.parentController,
       );
-      final WindowEntry entry = WindowEntry(
+      entry = WindowEntry(
         controller: controller,
         builder: (BuildContext context) =>
             TooltipWindowContent(controller: controller),
