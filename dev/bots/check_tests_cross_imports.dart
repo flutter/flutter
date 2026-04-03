@@ -110,7 +110,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart',
     'packages/flutter/test/widgets/scrollable_restoration_test.dart',
     'packages/flutter/test/widgets/text_golden_test.dart',
-    'packages/flutter/test/widgets/restoration_scopes_moving_test.dart',
     'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/editable_text_scribble_test.dart',
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
