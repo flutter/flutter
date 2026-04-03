@@ -1685,12 +1685,14 @@ class SliverConstrainedCrossAxis extends StatelessWidget {
       ),
     );
   }
-  
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('maxExtent', maxExtent));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
+    );
   }
 }
 

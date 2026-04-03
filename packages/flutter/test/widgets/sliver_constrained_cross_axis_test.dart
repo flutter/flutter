@@ -288,7 +288,19 @@ class _RenderSliverNoGeometryExtent extends RenderProxySliver {
   void performLayout() {
     child!.layout(constraints, parentUsesSize: true);
     final SliverGeometry childLayoutGeometry = child!.geometry!;
-    geometry = childLayoutGeometry.copyWith(crossAxisExtent: null);
+    geometry = SliverGeometry(
+      scrollExtent: childLayoutGeometry.scrollExtent,
+      paintExtent: childLayoutGeometry.paintExtent,
+      paintOrigin: childLayoutGeometry.paintOrigin,
+      layoutExtent: childLayoutGeometry.layoutExtent,
+      maxPaintExtent: childLayoutGeometry.maxPaintExtent,
+      maxScrollObstructionExtent: childLayoutGeometry.maxScrollObstructionExtent,
+      hitTestExtent: childLayoutGeometry.hitTestExtent,
+      visible: childLayoutGeometry.visible,
+      hasVisualOverflow: childLayoutGeometry.hasVisualOverflow,
+      scrollOffsetCorrection: childLayoutGeometry.scrollOffsetCorrection,
+      cacheExtent: childLayoutGeometry.cacheExtent,
+    );
   }
 }
 
