@@ -754,7 +754,7 @@ void main() {
     },
   );
 
-  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (
+  testWidgets('using clipBehaviour and shadow, should clip the shadow', (
     WidgetTester tester,
   ) async {
     final container = Container(
@@ -776,6 +776,58 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
+    );
+  });
+
+  testWidgets('ClipPath wraps DecoratedBox when clipBehavior is set', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          color: Colors.blue,
+        ),
+        child: const SizedBox(width: 100, height: 100),
+      ),
+    );
+
+    final Element clipPathElement = tester.element(find.byType(ClipPath));
+    final Element decoratedBoxElement = tester.element(
+      find.descendant(of: find.byType(ClipPath), matching: find.byType(DecoratedBox)),
+    );
+
+    // ClipPath should be an ancestor of DecoratedBox so that both
+    // the decoration painting and the child content are clipped.
+    expect(clipPathElement.depth, lessThan(decoratedBoxElement.depth));
+  });
+
+  testWidgets('Container clipBehavior clips decoration with borderRadius', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ColoredBox(
+          color: Colors.orange,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              clipBehavior: Clip.antiAlias,
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('container.clipBehaviour.clips.decoration.png'),
     );
   });
 

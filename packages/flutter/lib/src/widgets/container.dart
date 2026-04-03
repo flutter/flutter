@@ -406,6 +406,10 @@ class Container extends StatelessWidget {
       current = ColoredBox(color: color!, isAntiAlias: isAntiAlias, child: current);
     }
 
+    if (decoration != null) {
+      current = DecoratedBox(decoration: decoration!, child: current);
+    }
+
     if (clipBehavior != Clip.none) {
       assert(decoration != null);
       current = ClipPath(
@@ -416,10 +420,6 @@ class Container extends StatelessWidget {
         clipBehavior: clipBehavior,
         child: current,
       );
-    }
-
-    if (decoration != null) {
-      current = DecoratedBox(decoration: decoration!, child: current);
     }
 
     if (foregroundDecoration != null) {
