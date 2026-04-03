@@ -244,7 +244,32 @@ tasks.register("clean", Delete) {
       late BufferLogger bufferLogger;
       late FakeAndroidProject project;
       late File topLevelGradlePropertiesFile;
-      late MemoryFileSystem errorThrowingFileSystem;
+      late MemoryFileSystem errorThrowingFileSystemForRead;
+      late MemoryFileSystem errorThrowingFileSystemForWrite;
+      late MemoryFileSystem errorThrowingFileSystemForProcessFile;
+
+      MemoryFileSystem createErrorThrowingFileSystem({
+        required FileSystemOp failingOperation,
+        int failOnAttempt = 1,
+        String targetFileName = 'gradle.properties',
+        String? customErrorMessage,
+      }) {
+        var attemptCount = 0;
+        final opName = failingOperation == FileSystemOp.read ? 'read' : 'write';
+        final String errorMessage = customErrorMessage ?? 'Mock $opName error';
+
+        return MemoryFileSystem.test(
+          opHandle: (String context, FileSystemOp operation) {
+            if (operation == failingOperation && context.contains(targetFileName)) {
+              attemptCount++;
+
+              if (attemptCount >= failOnAttempt) {
+                throw FileSystemException(errorMessage);
+              }
+            }
+          },
+        );
+      }
 
       setUp(() {
         memoryFileSystem = MemoryFileSystem.test();
@@ -253,14 +278,19 @@ tasks.register("clean", Delete) {
           root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
         );
         topLevelGradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
-        errorThrowingFileSystem = MemoryFileSystem.test(
-          opHandle: (String context, FileSystemOp operation) {
-            if (operation == FileSystemOp.read && context.contains('gradle.properties')) {
-              throw const FileSystemException('Mock read error');
-            }
-          },
+        errorThrowingFileSystemForRead = createErrorThrowingFileSystem(
+          failingOperation: FileSystemOp.read,
+        );
+        errorThrowingFileSystemForWrite = createErrorThrowingFileSystem(
+          failingOperation: FileSystemOp.write,
+        );
+        errorThrowingFileSystemForProcessFile = createErrorThrowingFileSystem(
+          failingOperation: FileSystemOp.write,
+          failOnAttempt: 2,
+          customErrorMessage: 'Mock write error during processing',
         );
       });
+
       group('Migrate to opt-out of Built-in Kotlin', () {
         testUsingContext('skip if Built-in Kotlin flag exists', () async {
           topLevelGradlePropertiesFile.writeAsStringSync('''
@@ -330,10 +360,49 @@ android.builtInKotlin    false
         );
 
         testUsingContext(
+          'logs an error if the gradle.properties file cannot be written to',
+          () async {
+            final projectWithUnwritablePropertiesFile = FakeAndroidProject(
+              root: errorThrowingFileSystemForWrite.currentDirectory.childDirectory('android')
+                ..createSync(),
+            );
+
+            final File unwritablePropertiesFile = projectWithUnwritablePropertiesFile
+                .hostAppGradleRoot
+                .childFile('gradle.properties');
+
+            expect(unwritablePropertiesFile.existsSync(), isFalse);
+
+            final androidProjectMigration = DisableBuiltInKotlinMigration(
+              projectWithUnwritablePropertiesFile,
+              bufferLogger,
+            );
+
+            await androidProjectMigration.migrate();
+
+            expect(
+              bufferLogger.traceText,
+              contains(
+                'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
+              ),
+            );
+
+            expect(
+              bufferLogger.errorText,
+              contains('Failed to write to the gradle.properties during migration'),
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => errorThrowingFileSystemForWrite,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+
+        testUsingContext(
           'logs an error and aborts if the gradle.properties file cannot be read',
           () async {
             final projectWithUnreadablePropertiesFile = FakeAndroidProject(
-              root: errorThrowingFileSystem.currentDirectory.childDirectory('android')
+              root: errorThrowingFileSystemForRead.currentDirectory.childDirectory('android')
                 ..createSync(),
             );
 
@@ -355,7 +424,7 @@ android.builtInKotlin    false
           },
 
           overrides: <Type, Generator>{
-            FileSystem: () => errorThrowingFileSystem,
+            FileSystem: () => errorThrowingFileSystemForRead,
             ProcessManager: () => FakeProcessManager.any(),
           },
         );
@@ -389,6 +458,42 @@ android.builtInKotlin    false
               isTrue,
             );
             expect(fileContents.contains('android.builtInKotlin=false'), isTrue);
+          },
+        );
+
+        testUsingContext(
+          'logs an error if processFileLines fails to write the migrated file',
+          () async {
+            final projectWithProcessError = FakeAndroidProject(
+              root: errorThrowingFileSystemForProcessFile.currentDirectory.childDirectory('android')
+                ..createSync(),
+            );
+
+            final File topLevelGradlePropertiesFile = projectWithProcessError.hostAppGradleRoot
+                .childFile('gradle.properties');
+
+            topLevelGradlePropertiesFile.writeAsStringSync('');
+
+            final androidProjectMigration = DisableBuiltInKotlinMigration(
+              projectWithProcessError,
+              bufferLogger,
+            );
+
+            await androidProjectMigration.migrate();
+
+            expect(
+              bufferLogger.traceText,
+              contains('Migrating to disable Built-in Kotlin by default.'),
+            );
+
+            expect(
+              bufferLogger.errorText,
+              contains('Failed to process/migrate the gradle.properties during migration:'),
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => errorThrowingFileSystemForProcessFile,
+            ProcessManager: () => FakeProcessManager.any(),
           },
         );
       });
@@ -451,10 +556,49 @@ android.newDsl  :  false
         );
 
         testUsingContext(
+          'logs an error if the gradle.properties file cannot be written to',
+          () async {
+            final projectWithUnwritablePropertiesFile = FakeAndroidProject(
+              root: errorThrowingFileSystemForWrite.currentDirectory.childDirectory('android')
+                ..createSync(),
+            );
+
+            final File unwritablePropertiesFile = projectWithUnwritablePropertiesFile
+                .hostAppGradleRoot
+                .childFile('gradle.properties');
+
+            expect(unwritablePropertiesFile.existsSync(), isFalse);
+
+            final androidProjectMigration = DisableNewDslMigration(
+              projectWithUnwritablePropertiesFile,
+              bufferLogger,
+            );
+
+            await androidProjectMigration.migrate();
+
+            expect(
+              bufferLogger.traceText,
+              contains(
+                'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
+              ),
+            );
+
+            expect(
+              bufferLogger.errorText,
+              contains('Failed to write to the gradle.properties during migration'),
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => errorThrowingFileSystemForWrite,
+            ProcessManager: () => FakeProcessManager.any(),
+          },
+        );
+
+        testUsingContext(
           'logs an error and aborts if the gradle.properties file cannot be read',
           () async {
             final projectWithUnreadablePropertiesFile = FakeAndroidProject(
-              root: errorThrowingFileSystem.currentDirectory.childDirectory('android')
+              root: errorThrowingFileSystemForRead.currentDirectory.childDirectory('android')
                 ..createSync(),
             );
 
@@ -476,7 +620,7 @@ android.newDsl  :  false
           },
 
           overrides: <Type, Generator>{
-            FileSystem: () => errorThrowingFileSystem,
+            FileSystem: () => errorThrowingFileSystemForRead,
             ProcessManager: () => FakeProcessManager.any(),
           },
         );
@@ -505,6 +649,39 @@ android.newDsl  :  false
               isTrue,
             );
             expect(fileContents.contains('android.newDsl=false'), isTrue);
+          },
+        );
+
+        testUsingContext(
+          'logs an error if processFileLines fails to write the migrated file',
+          () async {
+            final projectWithProcessError = FakeAndroidProject(
+              root: errorThrowingFileSystemForProcessFile.currentDirectory.childDirectory('android')
+                ..createSync(),
+            );
+
+            final File topLevelGradlePropertiesFile = projectWithProcessError.hostAppGradleRoot
+                .childFile('gradle.properties');
+
+            topLevelGradlePropertiesFile.writeAsStringSync('');
+
+            final androidProjectMigration = DisableNewDslMigration(
+              projectWithProcessError,
+              bufferLogger,
+            );
+
+            await androidProjectMigration.migrate();
+
+            expect(bufferLogger.traceText, contains('Migrating to disable new DSL by default.'));
+
+            expect(
+              bufferLogger.errorText,
+              contains('Failed to process/migrate the gradle.properties during migration:'),
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => errorThrowingFileSystemForProcessFile,
+            ProcessManager: () => FakeProcessManager.any(),
           },
         );
       });
