@@ -39,7 +39,7 @@ class MainWindow extends StatelessWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
-                    child: _WindowsTable(),
+                    child: _WindowsTable(mainWindow: controller),
                   ),
                 ),
               ],
@@ -59,45 +59,51 @@ class MainWindow extends StatelessWidget {
 }
 
 class _WindowsTable extends StatelessWidget {
+  const _WindowsTable({required this.mainWindow});
+
+  final RegularWindowController mainWindow;
+
+  DataRow _buildRow(BaseWindowController controller, BuildContext context) {
+    return DataRow(
+      key: ValueKey(controller.rootView.viewId),
+      color: WidgetStateColor.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Theme.of(context).colorScheme.primary.withAlpha(20);
+        }
+        return Colors.transparent;
+      }),
+      cells: [
+        DataCell(Text('${controller.rootView.viewId}')),
+        DataCell(Text(_getWindowTypeName(controller))),
+        DataCell(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _showWindowEditDialog(controller, context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outlined),
+                onPressed: () async {
+                  controller.destroy();
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   List<DataRow> _buildRows(
     WindowRegistry windowRegistry,
     BuildContext context,
   ) {
-    List<DataRow> rows = [];
+    List<DataRow> rows = [_buildRow(mainWindow, context)];
     for (WindowEntry entry in windowRegistry.windows) {
       final BaseWindowController controller = entry.controller;
-      rows.add(
-        DataRow(
-          key: ValueKey(controller.rootView.viewId),
-          color: WidgetStateColor.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return Theme.of(context).colorScheme.primary.withAlpha(20);
-            }
-            return Colors.transparent;
-          }),
-          cells: [
-            DataCell(Text('${controller.rootView.viewId}')),
-            DataCell(Text(_getWindowTypeName(controller))),
-            DataCell(
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () => _showWindowEditDialog(controller, context),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outlined),
-                    onPressed: () async {
-                      controller.destroy();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+      rows.add(_buildRow(controller, context));
     }
 
     return rows;
