@@ -120,10 +120,6 @@ class DlImage : public SkRefCnt {
   ///             image.
   virtual std::optional<std::string> get_error() const;
 
-#if FML_OS_IOS_SIMULATOR
-  virtual bool IsFakeImage() const { return false; }
-#endif  // FML_OS_IOS_SIMULATOR
-
   bool Equals(const DlImage* other) const {
     if (!other) {
       return false;

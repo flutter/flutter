@@ -69,6 +69,7 @@ Future<double> _runBasicStandardParallel(
   final counter = _Counter();
   watch.start();
   for (var i = 0; i < parallel; ++i) {
+    // ignore: unawaited_futures
     basicStandard.send(payload).then((Object? result) {
       _runBasicStandardParallelRecurse(basicStandard, counter, count, completer, payload);
     });
