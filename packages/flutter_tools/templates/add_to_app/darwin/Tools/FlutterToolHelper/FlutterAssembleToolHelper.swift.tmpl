@@ -441,10 +441,14 @@ public class FlutterAssembleToolHelper {
       updated = true
     }
     if updated {
+      // This only verified the Flutter framework. The App.framework is assumed to be correct if
+      // the Flutter framework is since they come from the same source.
       try verifyFlutterFrameworkBuildMode(
         packagePath: packagePath,
         targetBuildMode: targetBuildMode,
         targetPlatform: targetPlatform,
+        // The tool only copies and codesigns into the app bundle, so we should not verify
+        // `BUILT_PRODUCTS_DIR`.
         verifyBuiltProducts: false,
         env: env,
         fileManager: fileManager
