@@ -30,7 +30,11 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled Built-in Kotlin flag.',
       );
-      await _gradlePropertiesFile.writeAsString('$_builtInKotlinFlagText\n');
+      try {
+        await _gradlePropertiesFile.writeAsString('$_builtInKotlinFlagText\n');
+      } on FileSystemException catch (e) {
+        logger.printError('Failed to write to the gradle.properties during migration: $e');
+      }
       return;
     }
 
@@ -51,7 +55,13 @@ class DisableBuiltInKotlinMigration extends ProjectMigrator {
       return;
     }
 
-    processFileLines(_gradlePropertiesFile);
+    try {
+      processFileLines(_gradlePropertiesFile);
+    } on FileSystemException catch (e) {
+      logger.printError(
+        'Failed to process/migrate the gradle.properties during migration: $e',
+      );
+    }
   }
 
   @override

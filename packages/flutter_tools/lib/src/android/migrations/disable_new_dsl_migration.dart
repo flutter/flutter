@@ -27,7 +27,11 @@ class DisableNewDslMigration extends ProjectMigrator {
       logger.printTrace(
         'The gradle.properties file was not found. Creating it with a disabled new DSL flag.',
       );
-      await _gradlePropertiesFile.writeAsString('$_newDslFlagText\n');
+      try {
+        await _gradlePropertiesFile.writeAsString('$_newDslFlagText\n');
+      } on FileSystemException catch (e) {
+        logger.printError('Failed to write to the gradle.properties during migration: $e');
+      }
       return;
     }
 
@@ -40,7 +44,7 @@ class DisableNewDslMigration extends ProjectMigrator {
       return;
     }
 
-    // Skip migration if the Built-in Kotlin flag already exists
+    // Skip migration if the newDsl flag already exists
     if (contents.contains(_newDslRegex)) {
       logger.printTrace(
         'The developer has already configured the new DSL flag, skipping migration.',
@@ -48,7 +52,11 @@ class DisableNewDslMigration extends ProjectMigrator {
       return;
     }
 
-    processFileLines(_gradlePropertiesFile);
+    try {
+      processFileLines(_gradlePropertiesFile);
+    } on FileSystemException catch (e) {
+      logger.printError('Failed to process/migrate the gradle.properties during migration: $e');
+    }
   }
 
   @override
