@@ -7,9 +7,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
-import 'package:multiple_windows/app/popup_window_content.dart';
 
 import 'models.dart';
+import 'popup_window_content.dart';
 import 'element_position_tracker.dart';
 
 class PopupButton extends StatefulWidget {

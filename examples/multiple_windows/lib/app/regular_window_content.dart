@@ -6,7 +6,7 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
-import 'package:multiple_windows/app/dialog_window_content.dart';
+import 'dialog_window_content.dart';
 
 import 'popup_button.dart';
 import 'models.dart';
