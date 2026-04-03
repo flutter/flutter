@@ -21,7 +21,6 @@
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/entity/contents/filled_rect_sdf_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
@@ -35,6 +34,7 @@
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
+#include "impeller/entity/contents/uber_sdf_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -1236,7 +1236,7 @@ TEST(EntityTest, UberSDFContentsCoverage) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
   auto geometry = std::make_unique<FillRectGeometry>(rect.Expand(1.0f));
   auto contents = UberSDFContents<FillRectGeometry>::Make(Color::Red(),
-                                                           std::move(geometry));
+                                                          std::move(geometry));
   Entity entity;
   auto coverage = contents->GetCoverage(entity);
   ASSERT_TRUE(coverage.has_value());

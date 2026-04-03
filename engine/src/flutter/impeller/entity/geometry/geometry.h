@@ -47,11 +47,6 @@ static const GeometryResult kEmptyResult = {
         },
 };
 
-class SDFCompatibleGeometry : public Geometry {
- public:
-  ~SDFCompatibleGeometry() override = default;
-};
-
 class Geometry {
  public:
   virtual ~Geometry() {}
@@ -136,6 +131,11 @@ class Geometry {
       const Tessellator::VertexGenerator& generator,
       const Entity& entity,
       RenderPass& pass);
+};
+
+class SDFCompatibleGeometry : public Geometry {
+ public:
+  ~SDFCompatibleGeometry() override = default;
 };
 
 }  // namespace impeller

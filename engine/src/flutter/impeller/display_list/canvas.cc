@@ -835,10 +835,11 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
     std::shared_ptr<ColorSourceContents> contents;
     if (paint.style == Paint::Style::kStroke) {
-      auto stroke_geom = std::make_unique<StrokeRectGeometry>(rect, paint.stroke);
+      auto stroke_geom =
+          std::make_unique<StrokeRectGeometry>(rect, paint.stroke);
       const Geometry* geom = stroke_geom.get();
-      contents = UberSDFContents<StrokeRectGeometry>::Make(/*color=*/paint.color,
-                                                           std::move(stroke_geom));
+      contents = UberSDFContents<StrokeRectGeometry>::Make(
+          /*color=*/paint.color, std::move(stroke_geom));
       AddRenderSDFEntityToCurrentPass(entity, geom, paint, std::move(contents));
     } else {
       auto fill_geom = std::make_unique<FillRectGeometry>(rect);

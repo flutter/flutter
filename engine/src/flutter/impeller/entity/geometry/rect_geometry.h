@@ -10,7 +10,7 @@
 
 namespace impeller {
 
-class FillRectGeometry final : public Geometry {
+class FillRectGeometry final : public SDFCompatibleGeometry {
  public:
   explicit FillRectGeometry(Rect rect);
 
