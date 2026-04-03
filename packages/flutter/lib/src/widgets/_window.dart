@@ -2291,7 +2291,33 @@ class WindowRegistry extends ChangeNotifier {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   static WindowRegistry of(BuildContext context) {
+    _debugCheckHasWindowRegistry(context);
     return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()!._registry;
+  }
+
+  static bool _debugCheckHasWindowRegistry(BuildContext context) {
+    assert(() {
+      if (context.dependOnInheritedWidgetOfExactType<WindowScope>() == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('No WindowRegistry found in context.'),
+          ErrorDescription(
+            '${context.widget.runtimeType} widgets require a WindowRegistry widget ancestor.',
+          ),
+          context.describeWidget(
+            'The specific widget that could not find a WindowRegistry ancestor was',
+          ),
+          context.describeOwnershipChain('The ownership chain for the affected widget is'),
+          ErrorHint(
+            'No WindowRegistry ancestor could be found starting from the context '
+            'that was passed to WindowRegistry.of(). This can happen because the '
+            'context used is not a descendant of a WindowManager widget, which introduces '
+            'a WindowRegistry.',
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return true;
   }
 }
 
