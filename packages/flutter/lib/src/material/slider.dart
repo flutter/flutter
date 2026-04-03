@@ -1576,22 +1576,26 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     };
   }
 
-  double _getValueFromGlobalPosition(Offset globalPosition) {
+  // For discrete sliders with rounded track shapes, the thumb and tick marks
+  // are inset by half the track height on each side. This getter returns the
+  // effective track width and left-edge offset used for position calculations,
+  // matching the layout used by tick mark painting and thumb positioning.
+  (double width, double left) get _effectiveTrackMetrics {
     final Rect trackRect = _trackRect;
-    final double localDx = globalToLocal(globalPosition).dx;
-    final double visualPosition;
     if (isDiscrete && _sliderTheme.trackShape!.isRounded) {
-      // For discrete sliders with rounded track shapes, the thumb and tick marks
-      // are inset by half the track height on each side. The position calculation
-      // must account for this padding to match the painted tick mark positions.
       final double padding = trackRect.height;
-      final double adjustedTrackWidth = trackRect.width - padding;
-      visualPosition = adjustedTrackWidth > 0
-          ? (localDx - trackRect.left - padding / 2) / adjustedTrackWidth
-          : 0.0;
-    } else {
-      visualPosition = (localDx - trackRect.left) / trackRect.width;
+      final double adjustedWidth = trackRect.width - padding;
+      return (adjustedWidth > 0 ? adjustedWidth : 0.0, trackRect.left + padding / 2);
     }
+    return (trackRect.width, trackRect.left);
+  }
+
+  double _getValueFromGlobalPosition(Offset globalPosition) {
+    final double localDx = globalToLocal(globalPosition).dx;
+    final (double effectiveWidth, double effectiveLeft) = _effectiveTrackMetrics;
+    final double visualPosition = effectiveWidth > 0
+        ? (localDx - effectiveLeft) / effectiveWidth
+        : 0.0;
     return _getValueFromVisualPosition(visualPosition);
   }
 
@@ -1674,10 +1678,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case SliderInteraction.slideOnly:
       case SliderInteraction.slideThumb:
         if (_active && isInteractive) {
-          final double effectiveTrackWidth = isDiscrete && _sliderTheme.trackShape!.isRounded
-              ? _trackRect.width - _trackRect.height
-              : _trackRect.width;
-          final double valueDelta = details.primaryDelta! / effectiveTrackWidth;
+          final (double effectiveWidth, _) = _effectiveTrackMetrics;
+          final double valueDelta = effectiveWidth > 0
+              ? details.primaryDelta! / effectiveWidth
+              : 0.0;
           _currentDragValue += switch (textDirection) {
             TextDirection.rtl => -valueDelta,
             TextDirection.ltr => valueDelta,

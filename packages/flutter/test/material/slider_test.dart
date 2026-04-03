@@ -739,8 +739,10 @@ void main() {
     await tester.tapAt(target25);
     // Without the fix, the value could incorrectly snap to an adjacent division
     // due to the mismatch between tap position calculation and tick mark positions.
-    // The value should be close to 25.0 (division 5 out of 20).
-    expect(value, moreOrLessEquals(25.0, epsilon: 5.0));
+    // With divisions=20 and max=100, each division is 5.0.
+    // The value should be a multiple of 5.0 close to 25.0.
+    expect(value % 5.0, equals(0.0));
+    expect(value, moreOrLessEquals(25.0, epsilon: 2.5));
   });
 
   testWidgets('Slider can be given zero values', (WidgetTester tester) async {
