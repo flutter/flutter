@@ -2285,8 +2285,7 @@ class WindowRegistry extends ChangeNotifier {
   /// will throw a [TypeError] exception in release builds, and throws
   /// a descriptive [FlutterError] in debug builds.
   ///
-  /// This does not throw when used in a non-windowing environment, as this
-  /// may be a signal to the owner that windowing itself is unavailable.
+  /// This method can still be called when windowin
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
