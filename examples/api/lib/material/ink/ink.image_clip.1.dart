@@ -31,10 +31,10 @@ class ImageClipExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(100),
+      borderRadius: .circular(100),
       child: Material(
         child: Ink.image(
-          fit: BoxFit.fill,
+          fit: .fill,
           width: 300,
           height: 300,
           image: image,
@@ -44,13 +44,10 @@ class ImageClipExample extends StatelessWidget {
             },
             child: const Align(
               child: Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: .all(10.0),
                 child: Text(
                   'PUFFIN',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontWeight: .w900, color: Colors.white),
                 ),
               ),
             ),

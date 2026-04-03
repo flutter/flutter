@@ -25,6 +25,7 @@ const kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
   'material_color_utilities': '0.13.0', // Keep pinned to latest until 1.0.0.
+  'data_assets': '0.19.6', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
