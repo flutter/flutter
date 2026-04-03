@@ -358,7 +358,7 @@ class WebAssetServer implements AssetReader {
                   canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                // Use relative path for module so the app can still find it
+                // Use relative path for the URI so the app can still find it
                 // even if it's in a different domain than the server.
                 reloadedSourcesUri: Uri.parse(_reloadedSourcesFileName),
               ).strategy
