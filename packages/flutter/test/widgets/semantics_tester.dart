@@ -24,7 +24,8 @@ const String _matcherHelp =
 ///
 /// This class should be avoided due to a high frequency of breakages caused by
 /// small semantics tree changes. Instead, prefer [SemanticsController.find],
-/// accessible via [WidgetTester.semantics].
+/// accessible via [WidgetTester.semantics], or the matchers [isSemantics] and
+/// [matchesSemantics].
 @Deprecated(
   'Use `SemanticsController.find`, `isSemantics`, or `matchesSemantics` instead. '
   'This feature was deprecated after v3.43.0-0.3.pre.',
