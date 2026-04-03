@@ -25,6 +25,10 @@ const String _matcherHelp =
 /// This class should be avoided due to a high frequency of breakages caused by
 /// small semantics tree changes. Instead, prefer [SemanticsController.find],
 /// accessible via [WidgetTester.semantics].
+@Deprecated(
+  'Use `SemanticsController.find`, `isSemantics`, or `matchesSemantics` instead. '
+  'This feature was deprecated after v3.43.0-0.3.pre.',
+)
 class TestSemantics {
   /// Creates an object with some test semantics data.
   ///
@@ -40,6 +44,10 @@ class TestSemantics {
   ///
   ///  * [TestSemantics.fullScreen] 800x600, the test screen's size in logical
   ///    pixels, useful for other full-screen widgets.
+  @Deprecated(
+    'Use `SemanticsController.find`, `isSemantics`, or `matchesSemantics` instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
   TestSemantics({
     this.id,
     this.flags = 0,
@@ -77,6 +85,10 @@ class TestSemantics {
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
+  @Deprecated(
+    'Use `SemanticsController.find`, `isSemantics`, or `matchesSemantics` instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
   TestSemantics.root({
     this.flags = 0,
     this.actions = 0,
@@ -122,6 +134,10 @@ class TestSemantics {
   /// The [rect] field is required and has no default. The
   /// [TestSemantics.fullScreen] property may be useful as a value; it describes
   /// an 800x600 rectangle, which is the test screen's size in logical pixels.
+  @Deprecated(
+    'Use `SemanticsController.find`, `isSemantics`, or `matchesSemantics` instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
   TestSemantics.rootChild({
     this.id,
     this.flags = 0,
