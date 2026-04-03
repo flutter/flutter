@@ -516,7 +516,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       return Offset.zero;
     }
     final double childCrossAxisExtent =
-        child!.geometry!.crossAxisExtent ?? min(_maxExtent, constraints.crossAxisExtent);
+        child!.geometry!.crossAxisExtent ?? child!.constraints.crossAxisExtent;
     final double freeSpace = constraints.crossAxisExtent - childCrossAxisExtent;
     if (freeSpace <= 0.0) {
       return Offset.zero;
@@ -537,9 +537,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     );
     final SliverGeometry childLayoutGeometry = child!.geometry!;
     if (alignment == null) {
-      geometry = childLayoutGeometry.copyWith(
-        crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent),
-      );
+      geometry = childLayoutGeometry.copyWith(crossAxisExtent: child!.constraints.crossAxisExtent);
     } else {
       geometry = childLayoutGeometry.copyWith(crossAxisExtent: constraints.crossAxisExtent);
     }
