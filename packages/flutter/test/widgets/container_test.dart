@@ -754,7 +754,7 @@ void main() {
     },
   );
 
-  testWidgets('using clipBehaviour and shadow, should clip the shadow', (
+  testWidgets('using clipBehavior and shadow, should not clip the shadow', (
     WidgetTester tester,
   ) async {
     final container = Container(
@@ -775,7 +775,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
+      matchesGoldenFile('container.clipBehavior.with.shadow.png'),
     );
   });
 
@@ -803,6 +803,37 @@ void main() {
     expect(clipPathElement.depth, lessThan(decoratedBoxElement.depth));
   });
 
+  testWidgets('Container with shadow splits into two DecoratedBoxes when clipping', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          color: Colors.blue,
+          boxShadow: <BoxShadow>[BoxShadow(color: Colors.black, blurRadius: 10)],
+        ),
+        child: const SizedBox(width: 100, height: 100),
+      ),
+    );
+
+    // Shadow decoration outside clip, content decoration inside clip.
+    expect(find.byType(DecoratedBox), findsNWidgets(2));
+    expect(find.byType(ClipPath), findsOneWidget);
+
+    // The outer DecoratedBox (shadow) should be an ancestor of ClipPath.
+    final Element outerDecoratedBox = tester.elementList(find.byType(DecoratedBox)).first;
+    final Element clipPathElement = tester.element(find.byType(ClipPath));
+    expect(outerDecoratedBox.depth, lessThan(clipPathElement.depth));
+
+    // The inner DecoratedBox (content) should be a descendant of ClipPath.
+    final Element innerDecoratedBox = tester.element(
+      find.descendant(of: find.byType(ClipPath), matching: find.byType(DecoratedBox)),
+    );
+    expect(clipPathElement.depth, lessThan(innerDecoratedBox.depth));
+  });
+
   testWidgets('Container clipBehavior clips decoration with borderRadius', (
     WidgetTester tester,
   ) async {
@@ -827,7 +858,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('container.clipBehaviour.clips.decoration.png'),
+      matchesGoldenFile('container.clipBehavior.clips.decoration.png'),
     );
   });
 

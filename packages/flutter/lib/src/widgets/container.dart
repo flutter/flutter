@@ -407,19 +407,45 @@ class Container extends StatelessWidget {
     }
 
     if (decoration != null) {
-      current = DecoratedBox(decoration: decoration!, child: current);
-    }
-
-    if (clipBehavior != Clip.none) {
-      assert(decoration != null);
-      current = ClipPath(
-        clipper: _DecorationClipper(
+      if (clipBehavior != Clip.none) {
+        final Decoration effectiveDecoration = decoration!;
+        final clipper = _DecorationClipper(
           textDirection: Directionality.maybeOf(context),
-          decoration: decoration!,
-        ),
-        clipBehavior: clipBehavior,
-        child: current,
-      );
+          decoration: effectiveDecoration,
+        );
+
+        if (effectiveDecoration is BoxDecoration && effectiveDecoration.boxShadow != null) {
+          // When the decoration has shadows, paint them outside the clip so
+          // they remain visible, and paint the rest inside the clip so the
+          // decoration background is properly clipped to its shape.
+          current = DecoratedBox(
+            decoration: BoxDecoration(
+              color: effectiveDecoration.color,
+              image: effectiveDecoration.image,
+              border: effectiveDecoration.border,
+              borderRadius: effectiveDecoration.borderRadius,
+              gradient: effectiveDecoration.gradient,
+              backgroundBlendMode: effectiveDecoration.backgroundBlendMode,
+              shape: effectiveDecoration.shape,
+            ),
+            child: current,
+          );
+          current = ClipPath(clipper: clipper, clipBehavior: clipBehavior, child: current);
+          current = DecoratedBox(
+            decoration: BoxDecoration(
+              boxShadow: effectiveDecoration.boxShadow,
+              shape: effectiveDecoration.shape,
+              borderRadius: effectiveDecoration.borderRadius,
+            ),
+            child: current,
+          );
+        } else {
+          current = DecoratedBox(decoration: effectiveDecoration, child: current);
+          current = ClipPath(clipper: clipper, clipBehavior: clipBehavior, child: current);
+        }
+      } else {
+        current = DecoratedBox(decoration: decoration!, child: current);
+      }
     }
 
     if (foregroundDecoration != null) {
