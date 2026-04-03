@@ -414,7 +414,7 @@ class Container extends StatelessWidget {
           decoration: effectiveDecoration,
         );
 
-        if (effectiveDecoration is BoxDecoration && effectiveDecoration.boxShadow != null) {
+        if (effectiveDecoration is BoxDecoration && (effectiveDecoration.boxShadow?.isNotEmpty ?? false)) {
           // When the decoration has shadows, paint them outside the clip so
           // they remain visible, and paint the rest inside the clip so the
           // decoration background is properly clipped to its shape.
