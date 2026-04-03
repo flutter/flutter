@@ -518,11 +518,23 @@ object FlutterPluginUtils {
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
 
-        val appPluginRegex = """(?:^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.application\2(?![^/\n]*\bapply\s*[:(]?\s*false\b))|(?:plugins\s*\{[^{}]*?(?<=\n|\{)([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.application\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.application\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b))""".toRegex(RegexOption.MULTILINE)
-        val libPluginRegex = """(?:^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.library\2(?![^/\n]*\bapply\s*[:(]?\s*false\b))|(?:plugins\s*\{[^{}]*?(?<=\n|\{)([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.library\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.library\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b))""".toRegex(RegexOption.MULTILINE)
-        val kgpRegex = """^([^/\n]*?)(?:apply\s+plugin\s*:\s*|id\s*\(?\s*)(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)""".toRegex(RegexOption.MULTILINE)
+        val appPluginRegex =
+            """^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.application\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)|plugins\s*\{[^{}]*?(?<=[\n{])([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.application\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.application\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b)"""
+                .toRegex(
+                    RegexOption.MULTILINE
+                )
+        val libPluginRegex =
+            """^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.library\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)|plugins\s*\{[^{}]*?(?<=[\n{])([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.library\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.library\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b)"""
+                .toRegex(
+                    RegexOption.MULTILINE
+                )
+        val kgpRegex =
+            """^([^/\n]*?)(?:apply\s+plugin\s*:\s*|id\s*\(?\s*)(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)"""
+                .toRegex(
+                    RegexOption.MULTILINE
+                )
 
-        var shouldLogForapp = false
+        var shouldLogForApp = false
         project.rootProject.subprojects {
             // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
             if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
@@ -545,11 +557,13 @@ object FlutterPluginUtils {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
+//            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
                     logger
                         .quiet(
-                            "Applying the Kotlin Android plugin was unsuccessful. " +
-                                "The Kotlin Android plugin was not found on the classpath. " +
-                                "Ensure it is declared in the root plugins block."
+                            "Applying the Kotlin Android plugin was unsuccessful.\n" +
+                                "The Kotlin Android plugin was not found on the classpath.\n" +
+                                "Ensure it is declared in the root plugins block.\n" +
+                                "For more details check: [link here]"
                         )
                 }
                 return@subprojects
@@ -557,7 +571,7 @@ object FlutterPluginUtils {
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
             if (hasAppPlugin) {
-                shouldLogForapp = true
+                shouldLogForApp = true
             }
 
             if (hasLibPlugin) {
@@ -566,23 +580,26 @@ object FlutterPluginUtils {
         }
 
         project.gradle.projectsEvaluated {
-            if (shouldLogForapp) {
+            if (shouldLogForApp) {
+//            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
                 project.logger.error(
                     """
-                    ⚠️ WARNING: Your main Android project "${project.name}" located at: ${project.buildFile.absolutePath}
-                    is applying KGP. Stop and follow the migration guide.
+                    WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
+                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
+                    Please migrate your app to Built-in Kotlin using this guide: [link here]
                     """.trimIndent()
                 )
             }
             if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
+//            TODO(jesswon): Update [link here] with a guide to report Built-in Kotlin issue to plugins doc
             project.logger.error(
                 """
-                ⚠️ WARNING: Your app uses plugin(s) that apply KGP. Upgrade the plugin version you are using
-                to a version that supports Built-in Kotlin by checking the plugin's changelog. If no such 
-                version exists, file an issue against the plugin. If necessary, here is a guide on filing 
-                an issue against a plugin:
-                                
-                Plugin(s) that need to migrate to Built-in Kotlin: ${pluginsWithKGPAppliedList.joinToString()}
+                WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
+                Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+                
+                Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+                an issue against a plugin: [link here]
                 """.trimIndent()
             )
         }
