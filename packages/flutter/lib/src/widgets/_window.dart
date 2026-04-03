@@ -2278,6 +2278,21 @@ class WindowRegistry extends ChangeNotifier {
   static WindowRegistry? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()?._registry;
   }
+
+  /// Retrieves the [WindowRegistry] from the given [context].
+  ///
+  /// If there is no [WindowRegistry] in scope, this method
+  /// will throw a [TypeError] exception in release builds, and throws
+  /// a descriptive [FlutterError] in debug builds.
+  ///
+  /// This does not throw when used in a non-windowing environment, as this
+  /// may be a signal to the owner that windowing itself is unavailable.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  static WindowRegistry of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()!._registry;
+  }
 }
 
 class _WindowRegistryScope extends InheritedWidget {
