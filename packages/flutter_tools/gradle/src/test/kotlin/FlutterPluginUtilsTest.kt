@@ -838,9 +838,12 @@ class FlutterPluginUtilsTest {
                 """.trimIndent()
             )
         }
+
         verify(exactly = 0) {
             mockLogger.error(match { it.contains("Your app uses the following plugins") })
         }
+        verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
+        verify(exactly = 1) { pluginProjectPluginManager.apply("kotlin-android") }
     }
 
     @Test
@@ -914,9 +917,6 @@ class FlutterPluginUtilsTest {
         verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
         projectsEvaluatedActionSlot.captured.execute(mockGradle)
 
-        verify(exactly = 0) {
-            mockLogger.error(match { it.contains("Your Android app project") })
-        }
         verify {
             mockLogger.error(
                 """
@@ -929,6 +929,12 @@ class FlutterPluginUtilsTest {
                 """.trimIndent()
             )
         }
+
+        verify(exactly = 0) {
+            mockLogger.error(match { it.contains("Your Android app project") })
+        }
+        verify(exactly = 1) { appProjectPluginManager.apply("kotlin-android") }
+        verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
     }
 
     @Test
@@ -1025,6 +1031,9 @@ class FlutterPluginUtilsTest {
                 """.trimIndent()
             )
         }
+
+        verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
+        verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
     }
 
     @Test
@@ -1138,6 +1147,10 @@ class FlutterPluginUtilsTest {
                 """.trimIndent()
             )
         }
+
+        verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
+        verify(exactly = 0) { pluginProjectOnePluginManager.apply("kotlin-android") }
+        verify(exactly = 0) { pluginProjectTwoPluginManager.apply("kotlin-android") }
     }
 
     @Test
