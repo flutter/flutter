@@ -219,9 +219,11 @@ class AnimatedCrossFade extends StatefulWidget {
   /// [AnimatedCrossFade] uses a [ClipRect] and [AnimatedSize] internally to
   /// manage the size transition between [firstChild] and [secondChild]. By
   /// default, both clip with [Clip.hardEdge] to prevent content from
-  /// overflowing during the animation. Set this to [Clip.none] to disable
-  /// clipping entirely, which can be useful for widgets with shadows or
-  /// visual effects that extend beyond their bounds.
+  /// overflowing during the animation.
+  ///
+  /// Set this to [Clip.none] to disable clipping entirely, which can be
+  /// useful for widgets with shadows or visual effects that extend beyond
+  /// their bounds.
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
