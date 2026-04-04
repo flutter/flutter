@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:pool/pool.dart';
 import 'package:pub_semver/pub_semver.dart' as semver;
 import 'package:yaml/yaml.dart';
 
@@ -39,30 +40,39 @@ import 'project.dart';
 typedef PubspecCache = Map<String, YamlMap?>;
 
 /// Builds a [PubspecCache] for all packages in [packageConfig].
+///
+/// Reads pubspec.yaml files concurrently, capped at 16 parallel reads to
+/// avoid exhausting file descriptors on large workspaces.
 Future<PubspecCache> buildPubspecCache(
   PackageConfig packageConfig, {
   FileSystem? fileSystem,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final cache = <String, YamlMap?>{};
-  for (final Package package in packageConfig.packages) {
-    final key = package.root.toString();
-    final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
-    if (!pubspecFile.existsSync()) {
-      cache[key] = null;
-      continue;
-    }
+  final pool = Pool(16);
+  await Future.wait(packageConfig.packages.map((Package package) async {
+    final PoolResource resource = await pool.request();
     try {
-      final Object? parsed = loadYaml(await pubspecFile.readAsString());
-      cache[key] = parsed is YamlMap ? parsed : null;
-    } on YamlException catch (err) {
-      globals.printTrace('Failed to parse pubspec.yaml for ${package.name}: $err');
-      cache[key] = null;
-    } on FileSystemException catch (err) {
-      globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
-      cache[key] = null;
+      final key = package.root.toString();
+      final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
+      if (!pubspecFile.existsSync()) {
+        cache[key] = null;
+        return;
+      }
+      try {
+        final Object? parsed = loadYaml(await pubspecFile.readAsString());
+        cache[key] = parsed is YamlMap ? parsed : null;
+      } on YamlException catch (err) {
+        globals.printTrace('Failed to parse pubspec.yaml for ${package.name}: $err');
+        cache[key] = null;
+      } on FileSystemException catch (err) {
+        globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
+        cache[key] = null;
+      }
+    } finally {
+      resource.release();
     }
-  }
+  }));
   return cache;
 }
 
