@@ -868,9 +868,12 @@ class _TestDecorationPainter extends BoxPainter {
       ..strokeCap = StrokeCap.square
       ..strokeWidth = borderSideWidth
       ..style = PaintingStyle.stroke;
-    final Offset indicatorBottomLeft = rect.bottomLeft + const Offset(0.0, -borderSideWidth / 2.0);
-    final Offset indicatorBottomRight =
-        rect.bottomRight + const Offset(0.0, -borderSideWidth / 2.0);
-    canvas.drawLine(indicatorBottomLeft, indicatorBottomRight, paint);
+    final Rect indicator = Rect.fromLTWH(
+      rect.left,
+      rect.bottom - borderSideWidth,
+      rect.width,
+      borderSideWidth,
+    ).deflate(borderSideWidth / 2.0);
+    canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
   }
 }

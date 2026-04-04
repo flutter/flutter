@@ -26,8 +26,6 @@ void main() {
   const kOrange = Color(0xFFFF8C00);
   const kPurple = Color(0xFF800080);
   const kYellow = Color(0xFFFFFF00);
-  const kWhite = Color(0xFFFFFFFF);
-  const kBlack87 = Color(0xDD000000);
 
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
@@ -1256,34 +1254,33 @@ void main() {
 
     const pixel6EmulatorWidth = 411.42857142857144;
 
+    const errorTextStyle = TextStyle(
+      color: Color(0xD0FF0000),
+      fontFamily: 'monospace',
+      fontSize: 48.0,
+      fontWeight: FontWeight.w900,
+      decoration: TextDecoration.underline,
+      decorationColor: Color(0xFFFFFF00),
+      decorationStyle: TextDecorationStyle.double,
+    );
+
     await tester.pumpWidget(
       TestWidgetsApp(
-        builder: (BuildContext context, Widget? child) {
-          return DefaultTextStyle(
-            style: const TextStyle(color: kBlack87, fontSize: 14.0),
-            child: child!,
-          );
-        },
-        home: Center(
-          child: SizedBox(
-            width: pixel6EmulatorWidth,
-            child: PageView(
-              controller: controller,
-              physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
-              children: const <Widget>[
-                ColoredBox(
-                  color: kWhite,
-                  child: Center(child: Text('First Page')),
-                ),
-                ColoredBox(
-                  color: kWhite,
-                  child: Center(child: Text('Second Page')),
-                ),
-                ColoredBox(
-                  color: kWhite,
-                  child: Center(child: Text('Third Page')),
-                ),
-              ],
+        textStyle: errorTextStyle,
+        home: ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+          child: Center(
+            child: SizedBox(
+              width: pixel6EmulatorWidth,
+              child: PageView(
+                controller: controller,
+                physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+                children: const <Widget>[
+                  Center(child: Text('First Page')),
+                  Center(child: Text('Second Page')),
+                  Center(child: Text('Third Page')),
+                ],
+              ),
             ),
           ),
         ),
