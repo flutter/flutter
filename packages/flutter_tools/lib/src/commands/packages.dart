@@ -348,9 +348,9 @@ class PackagesGetCommand extends FlutterCommand {
       // URI. This avoids re-reading the same files for every workspace package
       // during post-processing.
       final PubspecCache pubspecCache = await buildPubspecCache(packageConfig);
-      // Process workspace root packages concurrently, capped to 32 to
+      // Process workspace root packages concurrently, capped to 64 to
       // saturate I/O without exhausting file descriptors or system resources.
-      await Pool(32)
+      await Pool(64)
           .forEach<String, void>(graph.roots, (String workspaceRootName) async {
         final Package? rootPackage = packageConfig[workspaceRootName];
         assert(rootPackage != null);
