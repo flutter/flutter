@@ -1568,7 +1568,10 @@ Build settings for action build and target good_plugin:
           final String configContents = config.readAsStringSync();
           expect(logger.warningText, isEmpty);
           expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
-          expect(configContents, isNot(contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64')));
+          expect(
+            configContents,
+            isNot(contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64')),
+          );
           expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
