@@ -2175,7 +2175,7 @@ void main() {
   });
 
   testWidgets(
-    'ExpansionPanel has semantics label when icon is visible and canTapOnHeader is false',
+    'ExpansionPanel icon has semantics label when visible and canTapOnHeader is false',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2195,7 +2195,7 @@ void main() {
       );
 
       final Finder semanticsFinder = find.ancestor(
-        of: find.byType(Visibility),
+        of: find.byType(ExpandIcon),
         matching: find.byType(Semantics),
       );
       expect(semanticsFinder, findsWidgets);
@@ -2209,7 +2209,7 @@ void main() {
     },
   );
 
-  testWidgets('ExpansionPanel has no semantics label when icon is hidden', (
+  testWidgets('ExpansionPanel icon has no semantics label when hidden', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -2231,7 +2231,7 @@ void main() {
     );
 
     final Finder semanticsFinder = find.ancestor(
-      of: find.byType(Visibility),
+      of: find.byType(ExpandIcon),
       matching: find.byType(Semantics),
     );
     final Iterable<Semantics> semanticsList = tester.widgetList<Semantics>(semanticsFinder);
