@@ -2832,6 +2832,25 @@ flutter:
         expect(freshCache[package.root.toString()], isNull);
       }
     });
+
+    test('packages absent from PackageConfig have no entry, distinguishing them from packages with missing pubspec.yaml', () async {
+      final PackageConfig config = makePackageConfig(<String>['in_resolution']);
+      fs.file(config.packages.first.root.resolve('pubspec.yaml'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('name: in_resolution\n');
+
+      final PubspecCache cache = await buildPubspecCache(config, fileSystem: fs);
+
+      // Package in resolution with pubspec 
+      // this means that the key is present and the value is non-null.
+      expect(cache.containsKey('file:///pkgs/in_resolution/'), isTrue);
+      expect(cache['file:///pkgs/in_resolution/'], isNotNull);
+
+      // Package NOT in resolution (e.g. example-only dep) 
+      // this means that the key is absent entirely.
+      // containsKey must return false so callers can fall back to disk reads.
+      expect(cache.containsKey('file:///pkgs/example_only_plugin/'), isFalse);
+    });
   });
 }
 

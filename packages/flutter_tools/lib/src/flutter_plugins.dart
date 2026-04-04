@@ -99,7 +99,7 @@ Future<Plugin?> _pluginFromPackage(
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   YamlMap? pubspec;
-  if (pubspecCache != null) {
+  if (pubspecCache != null && pubspecCache.containsKey(packageRoot.toString())) {
     pubspec = pubspecCache[packageRoot.toString()];
   } else {
     final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
