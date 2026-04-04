@@ -49,7 +49,7 @@ Future<PubspecCache> buildPubspecCache(
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final cache = <String, YamlMap?>{};
-  await Pool(16).forEach<Package, void>(
+  await Pool(32).forEach<Package, void>(
     packageConfig.packages,
     (Package package) async {
       final key = package.root.toString();
