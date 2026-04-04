@@ -145,7 +145,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder
 /// field (e.g., by pressing a button on the soft keyboard), the text field
 /// calls the [onSubmitted] callback.
 ///
-/// {@macro flutter.widgets.EditableText.onChanged}
+/// {@macro flutter.widgets.editableText.onChangedComplexCharacters}
 ///
 /// {@tool dartpad}
 /// This example shows how to set the initial value of the [CupertinoTextField] using

@@ -1412,9 +1412,12 @@ class EditableText extends StatefulWidget {
   /// isn't necessary to be notified of such changes, since they're
   /// initiated by the app itself.
   ///
+  /// This callback doesn't run if committing a composition range doesn't change
+  /// the TextField's value.
+  ///
   /// To be notified of all changes to the TextField's text, cursor,
-  /// and selection, one can add a listener to its [controller] with
-  /// [TextEditingController.addListener].
+  /// selection, and composing state, one can add a listener to its [controller]
+  /// with [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
   /// of editing, such as when pressing the "done" button on the keyboard. That
@@ -1429,7 +1432,7 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   ///
   /// ## Handling emojis and other complex characters
-  /// {@template flutter.widgets.EditableText.onChanged}
+  /// {@template flutter.widgets.editableText.onChangedComplexCharacters}
   /// It's important to always use
   /// [characters](https://pub.dev/packages/characters) when dealing with user
   /// input text that may contain complex characters. This will ensure that
