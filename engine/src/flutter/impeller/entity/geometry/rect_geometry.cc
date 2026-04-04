@@ -10,10 +10,6 @@ FillRectGeometry::FillRectGeometry(Rect rect) : rect_(rect) {}
 
 FillRectGeometry::~FillRectGeometry() = default;
 
-const Rect& FillRectGeometry::GetRect() const {
-  return rect_;
-}
-
 void FillRectGeometry::SetAntialiasPadding(Scalar padding) {
   padding_pixels_ = padding;
 }

@@ -26,22 +26,21 @@ class UberSDFContents : public ColorSourceContents {
 
   static std::unique_ptr<UberSDFContents> MakeRect(
       Color color,
-      Scalar stroke_width,
-      Join stroke_join,
-      bool stroked,
-      const FillRectGeometry* geometry);
+      const Rect& rect,
+      std::optional<StrokeParameters> stroke);
 
-  static std::unique_ptr<UberSDFContents>
-  MakeCircle(Color color, bool stroked, const CircleGeometry* geometry);
+  static std::unique_ptr<UberSDFContents> MakeCircle(
+      Color color,
+      const Point& center,
+      Scalar radius,
+      std::optional<StrokeParameters> stroke);
 
   UberSDFContents(Type type,
-                  Rect rect,
                   Color color,
-                  Scalar stroke_width,
-                  Join stroke_join,
-                  bool stroked,
-                  const Geometry* geometry,
-                  Scalar aa_padding);
+                  Point center,
+                  Point size,
+                  std::optional<StrokeParameters> stroke,
+                  std::unique_ptr<FillRectGeometry> geometry);
 
   ~UberSDFContents() override;
 
@@ -60,20 +59,13 @@ class UberSDFContents : public ColorSourceContents {
  private:
   /// The type of geometry (e.g. circle, rect).
   const Type type_;
-  /// The bounding box of the geometry.
-  Rect bounding_box_;
   /// The color of the geometry.
   Color color_;
-  /// The width of the stroke.
-  Scalar stroke_width_ = 0.0f;
-  /// The join of the stroke.
-  Join stroke_join_ = Join::kMiter;
-  /// Whether the geometry is stroked.
-  bool stroked_ = false;
+  Point center_;
+  Point size_;
+  std::optional<StrokeParameters> stroke_;
   /// The geometry.
-  const Geometry* geometry_;
-  /// The antialias padding.
-  Scalar aa_padding_;
+  std::unique_ptr<FillRectGeometry> geometry_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 

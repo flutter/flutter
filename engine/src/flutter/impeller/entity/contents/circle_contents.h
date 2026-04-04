@@ -6,16 +6,22 @@
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_CIRCLE_CONTENTS_H_
 
 #include <memory>
+#include <optional>
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
-#include "impeller/entity/geometry/circle_geometry.h"
+#include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 class CircleContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<CircleContents>
-  Make(std::unique_ptr<CircleGeometry> geometry, Color color, bool stroked);
+  static std::unique_ptr<CircleContents> Make(
+      Color color,
+      const Point& center,
+      Scalar radius,
+      std::optional<Scalar> stroke_width);
 
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -26,15 +32,17 @@ class CircleContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  explicit CircleContents(std::unique_ptr<CircleGeometry> geometry,
-                          Color color,
-                          bool stroked,
-                          Scalar aa_padding);
+  explicit CircleContents(Color color,
+                          const Point& center,
+                          Scalar radius,
+                          std::optional<Scalar> stroke_width,
+                          std::unique_ptr<FillRectGeometry> geometry);
 
-  std::unique_ptr<CircleGeometry> geometry_;
   Color color_;
-  bool stroked_;
-  Scalar aa_padding_;
+  Point center_;
+  Scalar radius_;
+  std::optional<Scalar> stroke_width_;
+  std::unique_ptr<FillRectGeometry> geometry_;
 };
 }  // namespace impeller
 

@@ -16,8 +16,6 @@ class FillRectGeometry final : public Geometry {
 
   ~FillRectGeometry() override;
 
-  const Rect& GetRect() const;
-
   void SetAntialiasPadding(Scalar padding);
 
   Scalar GetAntialiasPadding() const;

@@ -62,8 +62,6 @@ namespace impeller {
 
 namespace {
 
-constexpr Scalar kAntialiasPadding = 1.0f;
-
 bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
   return filter->type() == flutter::DlColorFilterType::kMatrix ||
          (filter->type() == flutter::DlColorFilterType::kBlend &&
@@ -534,17 +532,13 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  const bool is_stroked = paint.style == Paint::Style::kStroke;
-  std::unique_ptr<CircleGeometry> geom;
-  if (is_stroked) {
-    geom = std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
-  } else {
-    geom = std::make_unique<CircleGeometry>(center, radius);
-  }
-  geom->SetAntialiasPadding(kAntialiasPadding);
+  std::optional<Scalar> stroke_width =
+      paint.style == Paint::Style::kStroke
+          ? std::make_optional(paint.stroke.width)
+          : std::nullopt;
 
   auto contents =
-      CircleContents::Make(std::move(geom), paint.color, is_stroked);
+      CircleContents::Make(paint.color, center, radius, stroke_width);
   entity.SetContents(std::move(contents));
   AddRenderEntityToCurrentPass(entity);
 
@@ -827,19 +821,11 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    Scalar expand_size = kAntialiasPadding;
-    if (paint.style == Paint::Style::kStroke) {
-      expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
-                                                         paint.stroke.width);
-    }
-
-    FillRectGeometry geometry(rect);
-    geometry.SetAntialiasPadding(expand_size);
-
     auto contents = UberSDFContents::MakeRect(
-        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroke_join=*/paint.stroke.join,
-        /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
+        /*color=*/paint.color, /*rect=*/rect,
+        /*stroke=*/paint.style == Paint::Style::kStroke
+            ? std::make_optional(paint.stroke)
+            : std::nullopt);
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1033,18 +1019,11 @@ void Canvas::DrawCircle(const Point& center,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    const bool is_stroked = paint.style == Paint::Style::kStroke;
-
-    std::optional<CircleGeometry> geometry;
-    if (is_stroked) {
-      geometry.emplace(center, radius, paint.stroke.width);
-    } else {
-      geometry.emplace(center, radius);
-    }
-    geometry->SetAntialiasPadding(1.0f);
-
     auto contents = UberSDFContents::MakeCircle(
-        /*color=*/paint.color, /*stroked=*/is_stroked, &geometry.value());
+        /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
+        /*stroke=*/paint.style == Paint::Style::kStroke
+            ? std::make_optional(paint.stroke)
+            : std::nullopt);
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
