@@ -378,8 +378,8 @@ class _SensitiveContentState extends State<SensitiveContent> {
     ContentSensitivity oldSensitivity,
     ContentSensitivity newSensitivity,
   ) async {
-    SensitiveContentHost.register(newSensitivity);
-    SensitiveContentHost.unregister(oldSensitivity);
+    await SensitiveContentHost.register(newSensitivity);
+    await SensitiveContentHost.unregister(oldSensitivity);
   }
 
   @override
