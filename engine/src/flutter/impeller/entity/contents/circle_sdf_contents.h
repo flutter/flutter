@@ -7,6 +7,8 @@
 
 #include "impeller/entity/contents/uber_sdf_contents.h"
 #include "impeller/entity/geometry/circle_geometry.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
@@ -14,9 +16,18 @@ class CircleSDFContents final : public UberSDFContents {
  public:
   static std::unique_ptr<CircleSDFContents> Make(
       Color color,
-      std::unique_ptr<CircleGeometry> geometry);
+      const Point& center,
+      Scalar radius,
+      Scalar stroke_width,
+      Scalar padding_pixels,
+      std::unique_ptr<FillRectGeometry> geometry);
 
-  CircleSDFContents(Color color, std::unique_ptr<CircleGeometry> geometry);
+  CircleSDFContents(Color color,
+                    const Point& center,
+                    Scalar radius,
+                    Scalar stroke_width,
+                    Scalar padding_pixels,
+                    std::unique_ptr<FillRectGeometry> geometry);
 
   ~CircleSDFContents() override;
 
@@ -31,7 +42,12 @@ class CircleSDFContents final : public UberSDFContents {
                 FS::FragInfo& frag_info) const override;
 
  private:
-  std::unique_ptr<CircleGeometry> geometry_;
+  Point center_;
+  Scalar radius_;
+  Scalar stroke_width_;
+  Scalar padding_pixels_;
+
+  std::unique_ptr<FillRectGeometry> geometry_;
 
   CircleSDFContents(const CircleSDFContents&) = delete;
 

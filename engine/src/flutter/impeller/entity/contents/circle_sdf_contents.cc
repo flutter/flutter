@@ -6,18 +6,36 @@
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/geometry/circle_geometry.h"
+#include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
 std::unique_ptr<CircleSDFContents> CircleSDFContents::Make(
     Color color,
-    std::unique_ptr<CircleGeometry> geometry) {
-  return std::make_unique<CircleSDFContents>(color, std::move(geometry));
+    const Point& center,
+    Scalar radius,
+    Scalar stroke_width,
+    Scalar padding_pixels,
+    std::unique_ptr<FillRectGeometry> geometry) {
+  return std::make_unique<CircleSDFContents>(
+      color, center, radius, stroke_width, padding_pixels, std::move(geometry));
 }
 
 CircleSDFContents::CircleSDFContents(Color color,
-                                     std::unique_ptr<CircleGeometry> geometry)
-    : UberSDFContents(color), geometry_(std::move(geometry)) {}
+                                     const Point& center,
+                                     Scalar radius,
+                                     Scalar stroke_width,
+                                     Scalar padding_pixels,
+                                     std::unique_ptr<FillRectGeometry> geometry)
+    : UberSDFContents(color),
+
+      center_(center),
+      radius_(radius),
+      stroke_width_(stroke_width),
+      padding_pixels_(padding_pixels),
+      geometry_(std::move(geometry)) {}
 
 CircleSDFContents::~CircleSDFContents() = default;
 
@@ -30,14 +48,13 @@ bool CircleSDFContents::BindData(const ContentContext& renderer,
                                  RenderPass& pass,
                                  FS::FragInfo& frag_info) const {
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.stroked = geometry_->IsStroked() ? 1.0f : 0.0f;
-  frag_info.stroke_width = geometry_->GetStrokeWidth();
+  frag_info.stroked = stroke_width_ != 0 ? 1.0 : 0.0;
+  frag_info.stroke_width = stroke_width_;
   frag_info.stroke_join = 0.0f;  // kMiter
   frag_info.type = 0.0f;         // kCircle
-  frag_info.center = geometry_->GetCenter();
-  Scalar radius = geometry_->GetRadius();
-  frag_info.size = Point(radius, radius);
-  frag_info.aa_pixels = geometry_->GetAntialiasPadding();
+  frag_info.center = center_;
+  frag_info.size = Point(radius_, radius_);
+  frag_info.aa_pixels = padding_pixels_;
   return true;
 }
 

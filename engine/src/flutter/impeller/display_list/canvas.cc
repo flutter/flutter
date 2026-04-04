@@ -1041,19 +1041,11 @@ void Canvas::DrawCircle(const Point& center,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    const bool is_stroked = paint.style == Paint::Style::kStroke;
-
-    std::unique_ptr<CircleGeometry> geometry;
-    if (is_stroked) {
-      geometry =
-          std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
-    } else {
-      geometry = std::make_unique<CircleGeometry>(center, radius);
-    }
-    geometry->SetAntialiasPadding(1.0f);
+    std::unique_ptr<FillRectGeometry> geometry;
 
     auto contents = CircleSDFContents::Make(
-        /*color=*/paint.color, std::move(geometry));
+        /*color=*/paint.color, center, radius, paint.stroke.width, 1.0,
+        std::move(geometry));
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
