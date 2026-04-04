@@ -351,84 +351,77 @@ class PackagesGetCommand extends FlutterCommand {
       // Process workspace root packages concurrently, capped to
       // numberOfProcessors to avoid exhausting file descriptors while still
       // getting parallelism on multi-core machines.
-      final pool = Pool(globals.platform.numberOfProcessors);
-      await Future.wait(
-        graph.roots.map((String workspaceRootName) async {
-          final PoolResource resource = await pool.request();
-          try {
-            final Package? rootPackage = packageConfig[workspaceRootName];
-            assert(rootPackage != null);
-            final Uri rootUri = rootPackage!.root;
+      await Pool(globals.platform.numberOfProcessors)
+          .forEach<String, void>(graph.roots, (String workspaceRootName) async {
+        final Package? rootPackage = packageConfig[workspaceRootName];
+        assert(rootPackage != null);
+        final Uri rootUri = rootPackage!.root;
 
-            final FlutterProject project = FlutterProject.fromDirectory(
-              globals.fs.directory(rootUri),
+        final FlutterProject project = FlutterProject.fromDirectory(
+          globals.fs.directory(rootUri),
+        );
+
+        if (project.manifest.generateLocalizations) {
+          final environment = Environment(
+            artifacts: globals.artifacts!,
+            logger: globals.logger,
+            cacheDir: globals.cache.getRoot(),
+            engineVersion: globals.flutterVersion.engineRevision,
+            fileSystem: globals.fs,
+            flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+            outputDir: globals.fs.directory(getBuildDirectory()),
+            processManager: globals.processManager,
+            platform: globals.platform,
+            analytics: analytics,
+            projectDir: project.directory,
+            packageConfigPath: packageConfigPath(),
+            generateDartPluginRegistry: true,
+          );
+          // If localizations were enabled, but we are not using synthetic packages.
+          final BuildResult result = await globals.buildSystem.build(
+            const GenerateLocalizationsTarget(),
+            environment,
+          );
+          if (result.hasException) {
+            throwToolExit(
+              'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+              '\n\n'
+              '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
             );
+          }
+        }
 
-            if (project.manifest.generateLocalizations) {
-              final environment = Environment(
-                artifacts: globals.artifacts!,
-                logger: globals.logger,
-                cacheDir: globals.cache.getRoot(),
-                engineVersion: globals.flutterVersion.engineRevision,
-                fileSystem: globals.fs,
-                flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-                outputDir: globals.fs.directory(getBuildDirectory()),
-                processManager: globals.processManager,
-                platform: globals.platform,
-                analytics: analytics,
-                projectDir: project.directory,
-                packageConfigPath: packageConfigPath(),
-                generateDartPluginRegistry: true,
-              );
-              // If localizations were enabled, but we are not using synthetic packages.
-              final BuildResult result = await globals.buildSystem.build(
-                const GenerateLocalizationsTarget(),
-                environment,
-              );
-              if (result.hasException) {
-                throwToolExit(
-                  'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
-                  '\n\n'
-                  '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
-                );
-              }
-            }
-
-            // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
-            //
-            // `flutter packages get` inherently is neither a debug or release build,
-            // and since a future build (`flutter build apk`) will regenerate tooling
-            // anyway, we assume this is fine.
-            //
-            // It won't be if they do `flutter build --no-pub`, though.
-            const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
-            // We need to regenerate the platform specific tooling for both the
-            // project itself and example (if present).
-            await project.regeneratePlatformSpecificTooling(
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+        //
+        // `flutter packages get` inherently is neither a debug or release build,
+        // and since a future build (`flutter build apk`) will regenerate tooling
+        // anyway, we assume this is fine.
+        //
+        // It won't be if they do `flutter build --no-pub`, though.
+        const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+        // We need to regenerate the platform specific tooling for both the
+        // project itself and example (if present).
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          pubspecCache: pubspecCache,
+          packageGraph: graph,
+          packageConfig: packageConfig,
+        );
+        if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
+          final FlutterProject exampleProject = project.example;
+          // Skip if the example is already a workspace root — it will be
+          // (or has already been) processed in the main loop, avoiding
+          // double post-processing.
+          if (!graph.roots.contains(exampleProject.manifest.appName)) {
+            await exampleProject.regeneratePlatformSpecificTooling(
               releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
               pubspecCache: pubspecCache,
               packageGraph: graph,
               packageConfig: packageConfig,
             );
-            if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
-              final FlutterProject exampleProject = project.example;
-              // Skip if the example is already a workspace root — it will be
-              // (or has already been) processed in the main loop, avoiding
-              // double post-processing.
-              if (!graph.roots.contains(exampleProject.manifest.appName)) {
-                await exampleProject.regeneratePlatformSpecificTooling(
-                  releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-                  pubspecCache: pubspecCache,
-                  packageGraph: graph,
-                  packageConfig: packageConfig,
-                );
-              }
-            }
-          } finally {
-            resource.release();
           }
-        }),
-      );
+        }
+      }).drain<void>();
     }
 
     return FlutterCommandResult.success();

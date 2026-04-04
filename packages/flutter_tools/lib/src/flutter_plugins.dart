@@ -49,10 +49,9 @@ Future<PubspecCache> buildPubspecCache(
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final cache = <String, YamlMap?>{};
-  final pool = Pool(16);
-  await Future.wait(packageConfig.packages.map((Package package) async {
-    final PoolResource resource = await pool.request();
-    try {
+  await Pool(16).forEach<Package, void>(
+    packageConfig.packages,
+    (Package package) async {
       final key = package.root.toString();
       final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
       if (!pubspecFile.existsSync()) {
@@ -69,10 +68,8 @@ Future<PubspecCache> buildPubspecCache(
         globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
         cache[key] = null;
       }
-    } finally {
-      resource.release();
-    }
-  }));
+    },
+  ).drain<void>();
   return cache;
 }
 
