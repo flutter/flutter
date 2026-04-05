@@ -19,7 +19,7 @@ void main() {
 
     // Attach the texture
     textureBox.attach(owner);
-    expect(binding.textureRegistry[42], equals(textureBox));
+    expect(binding.textureRegistry[42], contains(textureBox));
 
     // Detach the texture
     textureBox.detach();
@@ -31,16 +31,36 @@ void main() {
     final owner = PipelineOwner();
 
     textureBox.attach(owner);
-    expect(binding.textureRegistry[1], equals(textureBox));
+    expect(binding.textureRegistry[1], contains(textureBox));
     expect(binding.textureRegistry.containsKey(2), isFalse);
 
     // Change texture ID
     textureBox.textureId = 2;
     expect(binding.textureRegistry.containsKey(1), isFalse);
-    expect(binding.textureRegistry[2], equals(textureBox));
+    expect(binding.textureRegistry[2], contains(textureBox));
 
     textureBox.detach();
     expect(binding.textureRegistry.containsKey(2), isFalse);
+  });
+
+  test('multiple TextureBoxes can share the same texture ID', () {
+    final textureBox1 = TextureBox(textureId: 99);
+    final textureBox2 = TextureBox(textureId: 99);
+    final owner = PipelineOwner();
+
+    textureBox1.attach(owner);
+    textureBox2.attach(owner);
+
+    expect(binding.textureRegistry[99], containsAll(<TextureBox>[textureBox1, textureBox2]));
+
+    // Detaching one does not remove the other
+    textureBox1.detach();
+    expect(binding.textureRegistry[99], contains(textureBox2));
+    expect(binding.textureRegistry[99], isNot(contains(textureBox1)));
+
+    // Detaching the last one removes the entry
+    textureBox2.detach();
+    expect(binding.textureRegistry.containsKey(99), isFalse);
   });
 
   test('TextureBox is marked dirty when texture frame is available', () {
