@@ -18,7 +18,7 @@
     _platformView = [[WKWebView alloc] init];
     NSString *htmlPath = [[NSBundle mainBundle] pathForResource:@"drawing_website" ofType:@"html"];
     NSURL *htmlURL = [NSURL fileURLWithPath:htmlPath];
-    [self.platformView loadFileURL:htmlURL allowingReadAccessToURL: [htmlURL URLByDeletingLastPathComponent]];
+    [self.platformView loadFileURL:htmlURL allowingReadAccessToURL:[htmlURL URLByDeletingLastPathComponent]];
   }
   return self;
 }

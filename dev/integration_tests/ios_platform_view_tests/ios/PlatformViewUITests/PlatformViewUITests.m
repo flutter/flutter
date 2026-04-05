@@ -124,7 +124,7 @@ static const CGFloat kStandardTimeOut = 60.0;
 }
 
 
-- (void)testPlatformViewDrawingWebViewCannotBeDrownWhenContextMenuIsShown {
+- (void)testPlatformViewDrawingWebViewCannotBeDrawnWhenContextMenuIsShown {
   XCUIElement *entranceButton = self.app.buttons[@"drawing web view behind context menu test"];
   XCTAssertTrue([entranceButton waitForExistenceWithTimeout:kStandardTimeOut]);
   [entranceButton tap];
@@ -136,14 +136,19 @@ static const CGFloat kStandardTimeOut = 60.0;
   XCUIElement *showMenuButton = self.app.buttons[@"Show menu"];
   XCTAssertTrue([showMenuButton waitForExistenceWithTimeout:kStandardTimeOut]);
   [showMenuButton tap];
+  XCUIElement *menuItem = self.app.buttons[@"menu button 1"];
+  XCTAssertTrue([menuItem waitForExistenceWithTimeout:kStandardTimeOut]);
 
   // draw on the canvas
   XCUICoordinate *center = [self.app coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.5)];
   XCUICoordinate *end = [center coordinateWithOffset:CGVectorMake(0.0, 100.0)];
   [center pressForDuration:0.1 thenDragToCoordinate:end];
-  
+
   // Dismiss the context menu (so that we can find web view under the accessibility tree).
-  [center tap];
+  // Since context menu is on top right, we tap on the bottom left corner to avoid tapping within the menu area.
+  XCUICoordinate *bottomLeft = [self.app coordinateWithNormalizedOffset:CGVectorMake(0.05, 0.95)];
+  [bottomLeft tap];
+  XCTAssertTrue([menuItem waitForNonExistenceWithTimeout:kStandardTimeOut]);
 
   // Verify that the web view does not have any pixels drawn
   XCUIElement *pixelCountLabel = self.app.staticTexts[@"pixel count: 0"];
