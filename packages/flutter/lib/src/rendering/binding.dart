@@ -73,22 +73,31 @@ mixin RendererBinding
   /// When the engine notifies us of a new frame via
   /// [handleTextureFrameAvailable], this registry is used to look up the
   /// corresponding [TextureBox] and mark it as needing paint.
+  ///
+  /// Multiple [TextureBox] may be registered under the same texture ID
+  /// in which case all of them are marked as needing paint.
   @visibleForTesting
-  final Map<int, TextureBox> textureRegistry = <int, TextureBox>{};
+  final Map<int, Set<TextureBox>> textureRegistry = <int, Set<TextureBox>>{};
 
   /// Registers a [TextureBox] so it can be marked dirty when its backing
   /// texture has a new frame available.
   ///
   /// This is called automatically by [TextureBox] when it is attached.
   void registerTexture(int textureId, TextureBox textureBox) {
-    textureRegistry[textureId] = textureBox;
+    textureRegistry.putIfAbsent(textureId, () => <TextureBox>{}).add(textureBox);
   }
 
   /// Unregisters a [TextureBox] from the texture registry.
   ///
   /// This is called automatically by [TextureBox] when it is detached.
-  void unregisterTexture(int textureId) {
-    textureRegistry.remove(textureId);
+  void unregisterTexture(int textureId, TextureBox textureBox) {
+    final Set<TextureBox>? boxes = textureRegistry[textureId];
+    if (boxes != null) {
+      boxes.remove(textureBox);
+      if (boxes.isEmpty) {
+        textureRegistry.remove(textureId);
+      }
+    }
   }
 
   void _initTextureFrameCallback() {
@@ -104,11 +113,15 @@ mixin RendererBinding
   /// This marks the corresponding [TextureBox] as needing paint.
   @visibleForTesting
   void handleTextureFrameAvailable(int textureId) {
-    final TextureBox? textureBox = textureRegistry[textureId];
-    if (textureBox != null && textureBox.attached) {
-      // Mark the texture as needing paint without scheduling a frame.
-      // The frame is already scheduled by the engine via ScheduleFrame(false).
-      textureBox.markNeedsPaint();
+    final Set<TextureBox>? boxes = textureRegistry[textureId];
+    if (boxes != null) {
+      for (final TextureBox textureBox in boxes) {
+        if (textureBox.attached) {
+          // Mark the texture as needing paint without scheduling a frame.
+          // The frame is already scheduled by the engine via ScheduleFrame(false).
+          textureBox.markNeedsPaint();
+        }
+      }
     }
   }
 
