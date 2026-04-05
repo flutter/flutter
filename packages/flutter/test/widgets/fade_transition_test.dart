@@ -102,4 +102,29 @@ void main() {
     );
     expect(tester.getSize(find.byType(DefaultTextStyleTransition)), Size.zero);
   });
+
+  testWidgets('SizeTransition does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizeTransition(
+            sizeFactor: CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn),
+            axis: Axis.horizontal,
+            alignment: Alignment.topLeft,
+            child: const Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SizeTransition)), Size.zero);
+  });
 }

@@ -550,98 +550,121 @@ void main() {
     expect(actualAlignment, Alignment.topRight);
   });
 
-  testWidgets('RotationTransition animates', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Widget widget = RotationTransition(
-      alignment: Alignment.topRight,
-      turns: controller,
-      child: const Text('Rotation', textDirection: TextDirection.ltr),
-    );
+  group('RotationTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Widget widget = RotationTransition(
+        alignment: Alignment.topRight,
+        turns: controller,
+        child: const Text('Rotation', textDirection: TextDirection.ltr),
+      );
 
-    await tester.pumpWidget(widget);
-    Transform actualRotatedBox = tester.widget(find.byType(Transform));
-    Matrix4 actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, equals(Matrix4.rotationZ(0.0)));
+      await tester.pumpWidget(widget);
+      Transform actualRotatedBox = tester.widget(find.byType(Transform));
+      Matrix4 actualTurns = actualRotatedBox.transform;
+      expect(actualTurns, equals(Matrix4.rotationZ(0.0)));
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualRotatedBox = tester.widget(find.byType(Transform));
-    actualTurns = actualRotatedBox.transform;
-    expect(
-      actualTurns,
-      matrixMoreOrLessEquals(
-        Matrix4.fromList(<double>[
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])..transpose(),
-      ),
-    );
+      controller.value = 0.5;
+      await tester.pump();
+      actualRotatedBox = tester.widget(find.byType(Transform));
+      actualTurns = actualRotatedBox.transform;
+      expect(
+        actualTurns,
+        matrixMoreOrLessEquals(
+          Matrix4.fromList(<double>[
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+          ])..transpose(),
+        ),
+      );
 
-    controller.value = 0.75;
-    await tester.pump();
-    actualRotatedBox = tester.widget(find.byType(Transform));
-    actualTurns = actualRotatedBox.transform;
-    expect(
-      actualTurns,
-      matrixMoreOrLessEquals(
-        Matrix4.fromList(<double>[
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])..transpose(),
-      ),
-    );
-  });
+      controller.value = 0.75;
+      await tester.pump();
+      actualRotatedBox = tester.widget(find.byType(Transform));
+      actualTurns = actualRotatedBox.transform;
+      expect(
+        actualTurns,
+        matrixMoreOrLessEquals(
+          Matrix4.fromList(<double>[
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+          ])..transpose(),
+        ),
+      );
+    });
 
-  testWidgets('RotationTransition maintains chosen alignment during animation', (
-    WidgetTester tester,
-  ) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Widget widget = RotationTransition(
-      alignment: Alignment.topRight,
-      turns: controller,
-      child: const Text('Rotation', textDirection: TextDirection.ltr),
-    );
+    testWidgets('maintains chosen alignment during animation', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Widget widget = RotationTransition(
+        alignment: Alignment.topRight,
+        turns: controller,
+        child: const Text('Rotation', textDirection: TextDirection.ltr),
+      );
 
-    await tester.pumpWidget(widget);
-    RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
-    Alignment actualAlignment = actualRotatedBox.alignment;
-    expect(actualAlignment, Alignment.topRight);
+      await tester.pumpWidget(widget);
+      RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
+      Alignment actualAlignment = actualRotatedBox.alignment;
+      expect(actualAlignment, Alignment.topRight);
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualRotatedBox = tester.widget(find.byType(RotationTransition));
-    actualAlignment = actualRotatedBox.alignment;
-    expect(actualAlignment, Alignment.topRight);
+      controller.value = 0.5;
+      await tester.pump();
+      actualRotatedBox = tester.widget(find.byType(RotationTransition));
+      actualAlignment = actualRotatedBox.alignment;
+      expect(actualAlignment, Alignment.topRight);
+    });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: RotationTransition(
+              turns: CurvedAnimation(parent: controller, curve: Curves.elasticOut),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(RotationTransition)), Size.zero);
+    });
   });
 
   group('FadeTransition', () {
