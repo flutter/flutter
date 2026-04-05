@@ -55,7 +55,7 @@ class TextureBox extends RenderBox {
       final int oldTextureId = _textureId;
       _textureId = value;
       if (attached) {
-        RendererBinding.instance.unregisterTexture(oldTextureId);
+        RendererBinding.instance.unregisterTexture(oldTextureId, this);
         RendererBinding.instance.registerTexture(_textureId, this);
       }
       markNeedsPaint();
@@ -70,7 +70,7 @@ class TextureBox extends RenderBox {
 
   @override
   void detach() {
-    RendererBinding.instance.unregisterTexture(_textureId);
+    RendererBinding.instance.unregisterTexture(_textureId, this);
     super.detach();
   }
 
