@@ -1404,19 +1404,20 @@ class EditableText extends StatefulWidget {
   final TextInputAction? textInputAction;
 
   /// {@template flutter.widgets.editableText.onChanged}
-  /// Called when the user initiates a change to the TextField's
-  /// value: when they have inserted or deleted text.
+  /// Called when the user updates the text within the TextField.
   ///
-  /// This callback doesn't run when the TextField's text is changed
-  /// programmatically, via the TextField's [controller]. Typically it
-  /// isn't necessary to be notified of such changes, since they're
-  /// initiated by the app itself.
+  /// This callback is triggered only by changes to the text by
+  /// user-initiated interactions, such as typing, deleting, or
+  /// pasting text.
   ///
-  /// This callback doesn't run if committing a composition range doesn't change
-  /// the TextField's value.
+  /// This callback is _not_ triggered by:
   ///
-  /// To be notified of all changes to the TextField's text, cursor,
-  /// selection, and composing state, one can add a listener to its [controller]
+  /// 1. Programmatic changes to the text via the [controller].
+  /// 2. Selection or cursor changes.
+  /// 3. IME composition changes that don't alter the text string.
+  ///
+  /// To be notified of all changes to the TextField's text, cursor, selection,
+  /// and composing state, one can add a listener to its [controller]
   /// with [TextEditingController.addListener].
   ///
   /// [onChanged] is called before [onSubmitted] when user indicates completion
