@@ -10,6 +10,43 @@ import '../web/devfs_proxy.dart';
 
 const _kLogEntryPrefix = '[proxyMiddleware]';
 
+/// A regex that splits a merged `Set-Cookie` header value into individual cookies.
+///
+/// HTTP clients that use a [Map<String, String>] for headers (such as
+/// `package:http`) merge multiple `Set-Cookie` headers into a single
+/// comma-separated value. This regex splits them back into individual cookie
+/// strings by matching commas that are followed by a valid HTTP token character
+/// and `=`, which indicates the start of a new `<cookie-name>=<cookie-value>`
+/// pair rather than a comma within an attribute value such as an `Expires` date.
+///
+/// See https://datatracker.ietf.org/doc/html/rfc6265#section-4.1.1
+final _kSetCookieSplitter = RegExp(
+  r"[ \t]*,[ \t]*(?=[!#$%&'*+\-.0-9A-Z^_`a-z|~]+=)",
+);
+
+/// Fixes merged `Set-Cookie` response headers caused by HTTP clients that
+/// represent headers as a flat [Map<String, String>].
+///
+/// When multiple `Set-Cookie` headers are present in a response, some HTTP
+/// clients join them with commas into a single header value. Browsers require
+/// each `Set-Cookie` to be a separate header, so merging them causes cookies
+/// to be dropped or incorrectly parsed.
+///
+/// This function detects merged cookies using [_kSetCookieSplitter] and returns
+/// a new [shelf.Response] with the `set-cookie` header expanded to a list of
+/// individual cookie strings.
+shelf.Response _fixSetCookieHeaders(shelf.Response response) {
+  final String? mergedCookies = response.headers['set-cookie'];
+  if (mergedCookies == null || !mergedCookies.contains(',')) {
+    return response;
+  }
+  final List<String> splitCookies = mergedCookies.split(_kSetCookieSplitter);
+  if (splitCookies.length <= 1) {
+    return response;
+  }
+  return response.change(headers: <String, Object>{'set-cookie': splitCookies});
+}
+
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
 /// The new request will have the same method, headers, body, and context as the
@@ -47,7 +84,7 @@ Future<shelf.Response> _applyProxyRules(
       final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
-      return proxyResponse;
+      return _fixSetCookieHeaders(proxyResponse);
     } on Exception catch (e) {
       logger.printError('$_kLogEntryPrefix Error for $finalTargetUrl: $e. Allowing fall-through.');
       return innerHandler(request);
