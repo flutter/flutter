@@ -40,6 +40,7 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
@@ -529,20 +530,21 @@ public class PlatformPluginTest {
     Activity fakeActivity = controller.get();
     PlatformPlugin platformPlugin = new PlatformPlugin(fakeActivity, mockPlatformChannel);
 
-    // Subscribe to system Ui visibility events.
+    // Subscribe to system UI visibility events.
     platformPlugin.mPlatformMessageHandler.setSystemUiChangeListener();
 
-    // Simulate system UI changed to *not* full screen.
-    fakeActivity.getWindow().getDecorView().dispatchSystemUiVisibilityChanged(0);
+    View decorView = fakeActivity.getWindow().getDecorView();
 
-    // No events should have been sent to the platform channel yet. They are scheduled for
-    // the next frame.
+    // Trigger insets dispatch (this replaces dispatchSystemUiVisibilityChanged)
+    ViewCompat.requestApplyInsets(decorView);
+
+    // No events should have been sent yet (posted to next frame)
     verify(mockPlatformChannel, never()).systemChromeChanged(anyBoolean());
 
-    // Simulate the next frame.
+    // Simulate the next frame
     ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
-    // Now the platform channel should receive the event.
+    // Now the platform channel should receive the event
     verify(mockPlatformChannel).systemChromeChanged(true);
   }
 
