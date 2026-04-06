@@ -41,29 +41,28 @@ object FlutterPluginUtils {
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
 
     internal val appPluginRegexKotlin =
-        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)[ \t]*\(\s*(['"]com\.android\.application['"]|libs\.plugins\.android\.application)\s*\)"""
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.application['"]|libs\.plugins\.android\.application)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
     internal val libPluginRegexKotlin =
-        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)[ \t]*\(\s*(['"]com\.android\.library['"]|libs\.plugins\.android\.library)\s*\)"""
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.library['"]|libs\.plugins\.android\.library)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
     internal val kgpRegexKotlin =
-        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)[ \t]*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)"""
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
     internal val appPluginRegexGroovy =
-        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.application\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.application['"]|libs\.plugins\.android\.application)(?:\s*\))?"""
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.application\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.application['"]|libs\.plugins\.android\.application)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
     internal val libPluginRegexGroovy =
-        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.library\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.library['"]|libs\.plugins\.android\.library)(?:\s*\))?"""
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.library\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.library['"]|libs\.plugins\.android\.library)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
     internal val kgpRegexGroovy =
-        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)(?:\s*\))?"""
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
-
     // ----------------- Methods for string manipulation and comparison. -----------------
 
     @JvmStatic

@@ -766,43 +766,6 @@ class FlutterPluginUtilsTest {
 
     @Nested
     inner class SupportBuiltInKotlinTests {
-        fun assertPluginDetection(
-            regex: Regex,
-            pluginId: String,
-            dslType: DslType
-        ) {
-            if (dslType == DslType.GROOVY) {
-                assertTrue(regex.containsMatchIn("apply plugin: '$pluginId'"))
-                assertTrue(regex.containsMatchIn("apply plugin: \"$pluginId\""))
-                assertTrue(regex.containsMatchIn("plugins { id '$pluginId' }"))
-                assertTrue(regex.containsMatchIn("plugins { id \"$pluginId\" }"))
-                assertTrue(regex.containsMatchIn("plugins {\n  id '$pluginId'\n}"))
-                assertTrue(regex.containsMatchIn("plugins { id('$pluginId') }"))
-
-                assertFalse(regex.containsMatchIn("apply plugin\n:'$pluginId'"), "Newline before colon failure")
-                assertFalse(regex.containsMatchIn("plugins { id\n'$pluginId' }"), "newline before opening quote")
-            }
-            if (dslType == DslType.KOTLIN) {
-                assertTrue(regex.containsMatchIn("plugins { id('$pluginId') }"))
-                assertTrue(regex.containsMatchIn("plugins { id(\"$pluginId\") }"))
-                assertTrue(regex.containsMatchIn("plugins {\n  id(\"$pluginId\")\n}"))
-                assertTrue(regex.containsMatchIn("plugins { id(\n'$pluginId'\n) }"))
-
-                assertFalse(regex.containsMatchIn("plugins { id '$pluginId' }"), "Kotlin DSL requires parentheses")
-                assertFalse(regex.containsMatchIn("apply plugin: '$pluginId'"), "Kotlin DSL does not use apply plugin: for AGP/KGP")
-            }
-
-            // Ignores comments
-            assertFalse(regex.containsMatchIn("// id '$pluginId'"), "Failed to ignore single line comment")
-            assertFalse(regex.containsMatchIn("// id('$pluginId')"), "Failed to ignore single line comment")
-
-            // Check newline constraints
-            assertFalse(regex.containsMatchIn("plugins\n{ id('$pluginId') }"), "Newline before opening bracket should fail")
-            assertFalse(regex.containsMatchIn("plugins { id\n('$pluginId') }"), "Newline before opening parentheses should fail")
-            // Check spacing inside quotes
-            assertFalse(regex.containsMatchIn("id ' $pluginId '"), "Should fail when there are spaces in quotes")
-        }
-
         @Nested
         inner class TestApplyingPluginsRegexTests {
             @Test
@@ -826,90 +789,208 @@ class FlutterPluginUtilsTest {
             }
 
             @Test
-            fun `multiple plugins`() {
-                @Test
-                fun testMultiplePluginsInBlockSuccess() {
-                    val buildScript =
-                        """
-                        plugins {
-                            id("com.android.application")
-                            id("org.jetbrains.kotlin.android")
-                        }
-                        """.trimIndent()
+            fun `test regex when multiple plugins`() {
+                val appProjectBuildGradlePluginsBlock =
+                    """
+                    plugins {
+                        id("com.android.application")
+                        id("kotlin-android")
+                    }
+                    """.trimIndent()
+                assertTrue(
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                )
+                assertTrue(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                )
 
-                    assertTrue(FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(buildScript))
-                    assertTrue(FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(buildScript))
+                assertTrue(
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock),
+                )
+                assertTrue(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock),
+                )
 
-                    assertFalse(FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(buildScript))
-                    assertFalse(FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(buildScript))
-                    assertFalse(FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(buildScript))
-                    assertFalse(FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(buildScript))
+                val libProjectBuildGradlePluginsBlock =
+                    """
+                    plugins {
+                        id("com.android.library")
+                        id("org.jetbrains.kotlin.android")
+                    }
+                    """.trimIndent()
+                assertTrue(
+                    FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                )
+                assertTrue(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                )
 
-                    val buildScriptOne =
-                        """
-                        plugins {
-                            id("com.android.application")
-                            id("kotlin-android")
-                        }
-                        """.trimIndent()
+                assertTrue(
+                    FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                )
+                assertTrue(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                )
 
-                    assertTrue(FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(buildScriptOne))
-                    assertTrue(FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(buildScriptOne))
+                val appProjectBuildGradlePluginsBlockNoParens =
+                    """
+                    plugins {
+                        id 'com.android.application'
+                        id 'kotlin-android'
+                    }
+                    """.trimIndent()
+                assertTrue(
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                )
+                assertTrue(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                )
 
-                    assertFalse(FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(buildScriptOne))
-                    assertFalse(FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(buildScriptOne))
-                    assertFalse(FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(buildScriptOne))
-                    assertFalse(FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(buildScriptOne))
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                )
 
-                    val buildScriptLib =
-                        """
-                        plugins {
-                            id("com.android.library")
-                            id("org.jetbrains.kotlin.android")
-                        }
-                        """.trimIndent()
+                val appProjectBuildGradlePluginsBlockMixed =
+                    """
+                    plugins {
+                        id 'com.android.application'
+                        alias 'kotlin-android'
+                    }
+                    """.trimIndent()
+                assertTrue(
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                )
+                assertTrue(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                )
 
-                    assertTrue(FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(buildScriptLib))
-                    assertTrue(FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(buildScriptLib))
-
-                    assertFalse(FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(buildScriptLib))
-                    assertFalse(FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(buildScriptLib))
-                    assertFalse(FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(buildScriptLib))
-                    assertFalse(FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(buildScriptLib))
-
-                    val buildScriptLIB =
-                        """
-                        plugins {
-                            id("com.android.library")
-                            id("kotlin-android")
-                        }
-                        """.trimIndent()
-
-                    assertTrue(FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(buildScriptLIB))
-                    assertTrue(FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(buildScriptLIB))
-
-                    assertFalse(FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(buildScriptLIB))
-                    assertFalse(FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(buildScriptLIB))
-                    assertFalse(FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(buildScriptLIB))
-                    assertFalse(FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(buildScriptLIB))
-
-                    // Test Groovy style multi-block
-                    val groovyScript =
-                        """
-                        plugins {
-                            id 'com.android.application'
-                            id 'org.jetbrains.kotlin.android'
-                        }
-                        """.trimIndent()
-                    assertTrue(FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(groovyScript))
-                    assertTrue(FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(groovyScript))
-
-                    assertFalse(FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(groovyScript))
-                    assertFalse(FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(groovyScript))
-                    assertFalse(FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(groovyScript))
-                    assertFalse(FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(groovyScript))
-                }
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                )
             }
+
+            @Test
+            fun `test multi-plugin failure cases`() {
+                val kotlinSameLine =
+                    """
+                    plugins {
+                        id("com.android.application") id("kotlin-android")
+                    }
+                    """.trimIndent()
+
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(kotlinSameLine),
+                    "Should fail: multi-id on one line"
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(kotlinSameLine),
+                    "Should fail: multi-id on one line"
+                )
+
+                // Failure: Multiple IDs on the same line (Groovy)
+                val groovySameLine =
+                    """
+                    plugins {
+                        id 'com.android.application' id 'kotlin-android'
+                    }
+                    """.trimIndent()
+
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(groovySameLine),
+                    "Should fail: multi-id on one line"
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(groovySameLine),
+                    "Should fail: multi-id on one line"
+                )
+
+                val appProjectBuildGradlePluginsCommentOnePlugin =
+                    """
+                    plugins {
+                       id 'com.android.application'
+                       // alias 'kotlin-android'
+                    }
+                    """.trimIndent()
+                assertTrue(
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                )
+
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                )
+
+                val appProjectBuildGradlePluginsComment =
+                    """
+                    // plugins {
+                    //    id 'com.android.application'
+                    //    alias 'kotlin-android'
+                    // }
+                    """.trimIndent()
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment)
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment)
+                )
+
+                assertFalse(
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment)
+                )
+                assertFalse(
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment)
+                )
+            }
+        }
+
+        fun assertPluginDetection(
+            regex: Regex,
+            pluginId: String,
+            dslType: DslType
+        ) {
+            if (dslType == DslType.GROOVY) {
+                assertTrue(regex.containsMatchIn("apply plugin: '$pluginId'"))
+                assertTrue(regex.containsMatchIn("apply plugin: \"$pluginId\""))
+                assertTrue(regex.containsMatchIn("plugins { id '$pluginId' }"))
+                assertTrue(regex.containsMatchIn("plugins { id \"$pluginId\" }"))
+                assertTrue(regex.containsMatchIn("plugins {\n  id '$pluginId'\n}"))
+                assertTrue(regex.containsMatchIn("plugins { alias '$pluginId' }"))
+
+                assertFalse(regex.containsMatchIn("apply plugin\n:'$pluginId'"), "Newline before colon failure")
+                assertFalse(regex.containsMatchIn("plugins { id\n'$pluginId' }"), "newline before opening quote")
+            }
+            if (dslType == DslType.KOTLIN) {
+                assertTrue(regex.containsMatchIn("plugins {\n  id(\"$pluginId\")\n}"))
+                assertTrue(regex.containsMatchIn("plugins { id(\n'$pluginId'\n) }"))
+
+                assertFalse(regex.containsMatchIn("plugins { id '$pluginId' }"), "Kotlin DSL requires parentheses")
+                assertFalse(regex.containsMatchIn("apply plugin: '$pluginId'"), "Kotlin DSL does not use apply plugin: for AGP/KGP")
+            }
+
+            assertTrue(regex.containsMatchIn("plugins { id('$pluginId') }"))
+            assertTrue(regex.containsMatchIn("plugins { id(\"$pluginId\") }"))
+            assertTrue(regex.containsMatchIn("plugins { alias('$pluginId') }"))
+            assertTrue(regex.containsMatchIn("plugins { alias(\"$pluginId\") }"))
+
+            assertFalse(regex.containsMatchIn("// id '$pluginId'"), "Failed to ignore single line comment")
+            assertFalse(regex.containsMatchIn("// id('$pluginId')"), "Failed to ignore single line comment")
+
+            // Check newline constraints
+            assertFalse(regex.containsMatchIn("plugins\n{ id('$pluginId') }"), "Newline before opening bracket should fail")
+            assertFalse(regex.containsMatchIn("plugins { id\n('$pluginId') }"), "Newline before opening parentheses should fail")
+            // Check spacing inside quotes
+            assertFalse(regex.containsMatchIn("id ' $pluginId '"), "Should fail when there are spaces in quotes")
         }
 
         @Nested
@@ -924,8 +1005,10 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.application'
-                            apply plugin: 'kotlin-android'
+                            plugins {
+                                id("com.android.application")
+                                id("kotlin-android")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -936,7 +1019,9 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.library'
+                            plugins {
+                                id("com.android.library")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -1012,7 +1097,9 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.application'
+                            plugins {
+                                id("com.android.application")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -1023,8 +1110,10 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.library'
-                            apply plugin: 'kotlin-android'
+                            plugins {
+                                id("com.android.library")
+                                id("kotlin-android")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -1103,8 +1192,10 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.application'
-                            apply plugin: 'kotlin-android'
+                            plugins {
+                                id("com.android.application")
+                                id("kotlin-android")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -1115,8 +1206,10 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.library'
-                            apply plugin: 'kotlin-android'
+                            plugins {
+                                id("com.android.library")
+                                id("kotlin-android")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -1193,33 +1286,29 @@ class FlutterPluginUtilsTest {
             }
 
             @Test
-            fun `logs app and plugin warning when modern KGP configuration is applied in both app and plugins`(
+            fun `logs app and plugin warning when legacy KGP configuration is applied in both app and plugins`(
                 @TempDir tempDir: Path
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
-                    File(appDir, "build.gradle.kts").apply {
+                    File(appDir, "build.gradle").apply {
                         createNewFile()
                         writeText(
                             """
-                            plugins {
-                                id("com.android.application")
-                                id("kotlin-android")
-                            }
+                            apply plugin: 'com.android.application'
+                            apply plugin: 'kotlin-android'
                             """.trimIndent()
                         )
                     }
 
                 val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
                 val pluginBuildGradleFile =
-                    File(pluginDir, "build.gradle.kts").apply {
+                    File(pluginDir, "build.gradle").apply {
                         createNewFile()
                         writeText(
                             """
-                            plugins {
-                                id("com.android.library")
-                                id("kotlin-android")
-                            }
+                            apply plugin: 'com.android.library'
+                            apply plugin: 'kotlin-android'
                             """.trimIndent()
                         )
                     }
@@ -1397,7 +1486,9 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.application'
+                            plugins {
+                                id("com.android.application")
+                            }
                             """.trimIndent()
                         )
                     }
@@ -1408,7 +1499,9 @@ class FlutterPluginUtilsTest {
                         createNewFile()
                         writeText(
                             """
-                            apply plugin: 'com.android.library'
+                            plugins {
+                                id("com.android.library")
+                            }
                             """.trimIndent()
                         )
                     }
