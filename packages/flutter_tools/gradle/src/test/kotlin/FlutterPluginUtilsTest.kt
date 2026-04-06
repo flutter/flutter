@@ -777,9 +777,10 @@ class FlutterPluginUtilsTest {
                 assertTrue(regex.containsMatchIn("plugins { id '$pluginId' }"))
                 assertTrue(regex.containsMatchIn("plugins { id \"$pluginId\" }"))
                 assertTrue(regex.containsMatchIn("plugins {\n  id '$pluginId'\n}"))
+                assertTrue(regex.containsMatchIn("plugins { id('$pluginId') }"))
 
                 assertFalse(regex.containsMatchIn("apply plugin\n:'$pluginId'"), "Newline before colon failure")
-                assertFalse(regex.containsMatchIn("plugins { id('$pluginId') }"), "Groovy DSL should not match Kotlin parens")
+                assertFalse(regex.containsMatchIn("plugins { id\n'$pluginId' }"), "newline before opening quote")
             }
             if (dslType == DslType.KOTLIN) {
                 assertTrue(regex.containsMatchIn("plugins { id('$pluginId') }"))
@@ -797,9 +798,9 @@ class FlutterPluginUtilsTest {
 
             // Check newline constraints
             assertFalse(regex.containsMatchIn("plugins\n{ id('$pluginId') }"), "Newline before opening bracket should fail")
-
+            assertFalse(regex.containsMatchIn("plugins { id\n('$pluginId') }"), "Newline before opening parentheses should fail")
             // Check spacing inside quotes
-            assertFalse(regex.containsMatchIn("id '$pluginId '"), "Should fail due to trailing space in quotes")
+            assertFalse(regex.containsMatchIn("id ' $pluginId '"), "Should fail when there are spaces in quotes")
         }
 
         @Nested
