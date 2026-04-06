@@ -504,17 +504,18 @@ class LazyPath implements ui.Path, Collectable {
 
     final DisposablePathBuilder builder;
     if (_combineSource != null) {
-      final (op, path1, path2) = _combineSource!;
+      final (ui.PathOperation op, LazyPath path1, LazyPath path2) = _combineSource!;
       builder = constructors.combinePaths(op, path1.builtPath, path2.builtPath);
     } else if (_extractSource != null) {
-      final (metric, start, end, startWithMoveTo) = _extractSource!;
+      final (LazyPathMetric metric, double start, double end, bool startWithMoveTo) =
+          _extractSource!;
       builder = metric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo);
     } else {
       builder = constructors.createNew();
     }
 
     builder.fillType = _fillType;
-    for (final command in _commands) {
+    for (final PathCommand command in _commands) {
       command.apply(builder);
     }
 

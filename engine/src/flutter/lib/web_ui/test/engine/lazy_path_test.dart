@@ -308,14 +308,14 @@ void testMain() {
     expect(disposablePathBuilder.builtPaths, isEmpty);
 
     // Force building the path.
-    final FakePath builtPath = path.builtPath;
+    final DisposablePath builtPath = path.builtPath;
 
     expect(disposablePathBuilder.builtPaths, hasLength(1));
     final FakePath disposablePath = disposablePathBuilder.builtPaths.single;
     expect(identical(disposablePath, builtPath), isTrue);
     expect(disposablePath.isDisposed, isFalse);
 
-    final FakePathMetrics metrics = path.computeMetrics();
+    final LazyPathMetrics metrics = path.computeMetrics();
     expect(metrics.iterator.moveNext(), isFalse);
 
     expect(disposablePath.metricsIterators, hasLength(1));
