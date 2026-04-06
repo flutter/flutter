@@ -497,7 +497,7 @@ void main() {
             (Request request) => Response.ok(
               'ok',
               headers: <String, String>{
-                'set-cookie': 'token=abc123; Path=/; HttpOnly',
+                'set-cookie': 'token=abc123; Expires=Wed, 01 Jan 2025 00:00:00 GMT; Path=/; HttpOnly',
               },
             ),
             'localhost',
@@ -520,7 +520,7 @@ void main() {
           expect(response.statusCode, 200);
           final List<String> cookies = response.headersAll['set-cookie'] ?? <String>[];
           expect(cookies, hasLength(1));
-          expect(cookies.first, 'token=abc123; Path=/; HttpOnly');
+          expect(cookies.first, 'token=abc123; Expires=Wed, 01 Jan 2025 00:00:00 GMT; Path=/; HttpOnly');
         } finally {
           await mockServer?.close();
         }
