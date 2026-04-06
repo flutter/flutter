@@ -228,7 +228,7 @@ void main() {
         overrides: <Type, Generator>{},
       );
     },
+    // [intended] because sudo is available only on mac and linux
     skip: !(const LocalPlatform().isMacOS || const LocalPlatform().isLinux),
-    // Intended: because sudo is available only on mac and linux
   );
 }
