@@ -213,6 +213,7 @@ class ContentContext {
   PipelineRef GetTiledTexturePipeline(ContentContextOptions opts) const;
   PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetYUVToRGBFilterPipeline(ContentContextOptions opts) const;
+  PipelineRef GetUberSDFPipeline(ContentContextOptions opts) const;
 #ifdef IMPELLER_ENABLE_OPENGLES
 #if !defined(FML_OS_EMSCRIPTEN)
   PipelineRef GetTiledTextureExternalPipeline(ContentContextOptions opts) const;

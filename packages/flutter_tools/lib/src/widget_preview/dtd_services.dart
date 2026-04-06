@@ -21,9 +21,11 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../convert.dart';
+import '../dart/analysis.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
 import 'analytics.dart';
+import 'dtd_types.dart';
 import 'persistent_preferences.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
@@ -69,6 +71,12 @@ class WidgetPreviewDtdServices {
   ///
   /// If false, no UUID is added to the registered service and stream names.
   final bool addUuidToServiceName;
+
+  /// The name of the language server protocol stream written to by the analysis server.
+  static const kLspStream = 'Lsp';
+
+  /// The name of the event sent from the analysis server for widget preview updates.
+  static const kLspWidgetPreviewEventKind = 'dart/textDocument/publishFlutterWidgetPreviews';
 
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
@@ -130,19 +138,122 @@ class WidgetPreviewDtdServices {
   Uri? get dtdUri => _dtdUri;
   Uri? _dtdUri;
 
+  /// Returns true if the LSP service is registered with the connected DTD instance.
+  bool get lspServiceAvailable => _lspServiceAvailable;
+  bool _lspServiceAvailable = false;
+
   /// Starts DTD in a child process before invoking [connect] with a [Uri] pointing to the new
   /// DTD instance.
-  Future<void> launchAndConnect() async {
+  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {
+    final Uri dtdUri = await dtdLauncher.launch();
+    logger.printStatus('Connecting to DTD');
+    await analysisServer.connectToDtd(dtdUri: dtdUri);
+    logger.printStatus('Connected to DTD');
     // Connect to the new DTD instance.
-    await connect(dtdWsUri: await dtdLauncher.launch());
+    await connect(dtdWsUri: dtdUri);
   }
 
   /// Connects to an existing DTD instance and registers any relevant services.
   Future<void> connect({required Uri dtdWsUri}) async {
     _dtdUri = dtdWsUri;
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
+
+    _lspServiceAvailable = false;
+    final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
+    _lspServiceAvailable =
+        registeredServices.dtdServices.contains(kLspStream) ||
+        registeredServices.clientServices.any((service) => service.name == kLspStream);
+
     await _registerServices();
     logger.printTrace('Connected to DTD and registered services.');
+  }
+
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
+    await _waitForLspService();
+    var attempts = 0;
+    while (attempts < 5) {
+      try {
+        final DTDResponse result = await _dtd!.call(
+          'Lsp',
+          'dart/workspace/getFlutterWidgetPreviews',
+        );
+        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+      } on RpcException catch (e) {
+        if (e.code == -32601 && attempts < 4) {
+          // Method not found
+          attempts++;
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          continue;
+        }
+        rethrow;
+      }
+    }
+    throw StateError('Failed to call getFlutterWidgetPreviews after $attempts attempts.');
+  }
+
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviewsForFile({required String filePath}) async {
+    await _waitForLspService();
+    var attempts = 0;
+    while (attempts < 5) {
+      try {
+        final DTDResponse result = await _dtd!.call(
+          'Lsp',
+          'dart/textDocument/getFlutterWidgetPreviews',
+          params: {'uri': Uri.file(filePath).toString()},
+        );
+        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+      } on RpcException catch (e) {
+        if (e.code == -32601 && attempts < 4) {
+          // Method not found
+          attempts++;
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          continue;
+        }
+        rethrow;
+      }
+    }
+    throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $attempts attempts.');
+  }
+
+  Future<void> _waitForLspService() async {
+    if (_lspServiceAvailable) {
+      return;
+    }
+
+    final lspRegisteredCompleter = Completer<void>();
+
+    const kServiceStream = 'Service';
+    await _dtd!.streamListen(kServiceStream);
+    final StreamSubscription<DTDEvent> serviceSubscription = _dtd!.onEvent(kServiceStream).listen((
+      DTDEvent event,
+    ) {
+      if (lspRegisteredCompleter.isCompleted) {
+        return;
+      }
+      if (event case DTDEvent(kind: 'ServiceRegistered', data: {'service': kLspStream})) {
+        _lspServiceAvailable = true;
+        lspRegisteredCompleter.complete();
+      }
+    });
+
+    try {
+      final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
+      final bool alreadyRegistered =
+          registeredServices.dtdServices.contains(kLspStream) ||
+          registeredServices.clientServices.any((service) => service.name == kLspStream);
+      if (alreadyRegistered) {
+        _lspServiceAvailable = true;
+        lspRegisteredCompleter.complete();
+      } else {
+        logger.printStatus('Waiting for analysis server to register Lsp service with DTD...');
+        await lspRegisteredCompleter.future.timeout(const Duration(seconds: 30));
+      }
+    } on TimeoutException {
+      logger.printWarning('Timed out waiting for the Lsp service to be registered with DTD.');
+      rethrow;
+    } finally {
+      await serviceSubscription.cancel();
+    }
   }
 
   /// Set the DevTools server URI to be used to embed the widget inspector within the
@@ -214,13 +325,11 @@ class WidgetPreviewDtdServices {
     if (value == null) {
       throw RpcException(kNoValueForKey, 'No entry for $key in preferences.');
     }
-    if (value is String) {
-      return StringResponse(value).toJson();
-    }
-    if (value is bool) {
-      return BoolResponse(value).toJson();
-    }
-    throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
+    return switch (value) {
+      final String s => StringResponse(s).toJson(),
+      final bool b => BoolResponse(b).toJson(),
+      _ => throw UnimplementedError('Unexpected preference value: ${value.runtimeType}'),
+    };
   }
 
   Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {

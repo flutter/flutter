@@ -18,7 +18,6 @@ import '../base/project_migrator.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../flutter_plugins.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
@@ -524,7 +523,7 @@ class CocoaPods {
     if (matches.isEmpty) {
       return null;
     }
-    final List<Plugin> plugins = await findPlugins(xcodeProject.parent);
+    final List<Plugin> plugins = await xcodeProject.getPlugins();
     for (final match in matches) {
       final String? missingPlugin = match.group(1);
       final String? requiringPlugin = match.group(2);

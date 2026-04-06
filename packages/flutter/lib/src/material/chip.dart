@@ -2178,8 +2178,12 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         final darkenPaint = Paint()
           ..color = selectionScrimTween.evaluate(checkmarkAnimation)!
           ..blendMode = BlendMode.srcATop;
-        final Path path = avatarBorder!.getOuterPath(avatarRect);
-        context.canvas.drawPath(path, darkenPaint);
+        if (avatarBorder!.preferPaintInterior) {
+          avatarBorder!.paintInterior(context.canvas, avatarRect, darkenPaint);
+        } else {
+          final Path path = avatarBorder!.getOuterPath(avatarRect);
+          context.canvas.drawPath(path, darkenPaint);
+        }
       }
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;
