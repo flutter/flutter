@@ -243,6 +243,58 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
+    if (shouldIterativelyDownscale(src, dst, paint)) {
+      final int targetWidth = dst.width.toInt();
+      final int targetHeight = dst.height.toInt();
+
+      final ui.Image downscaledImage = getOrCreateDownscaledImage(
+        box: (image as SkwasmImage).box,
+        originalImage: image,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+        rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
+          final CanvasHandle tempCanvasHandle = (canvas as SkwasmCanvas)._handle;
+          withStackScope((StackScope scope) {
+            final Pointer<Float> sourceRect = scope.convertRectToNative(s);
+            final Pointer<Float> destRect = scope.convertRectToNative(d);
+            final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.medium;
+            final PaintHandle paintHandle = (tempPaint as SkwasmPaint).toRawPaint(
+              defaultBlurTileMode: ui.TileMode.clamp,
+            );
+            canvasDrawImageRect(
+              tempCanvasHandle,
+              (img as SkwasmImage).handle,
+              sourceRect,
+              destRect,
+              paintHandle,
+              ui.FilterQuality.medium.index,
+            );
+            paintDispose(paintHandle);
+          });
+        },
+      );
+
+      withStackScope((StackScope scope) {
+        final Pointer<Float> sourceRect = scope.convertRectToNative(
+          ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
+        );
+        final Pointer<Float> destRect = scope.convertRectToNative(dst);
+        final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+          defaultBlurTileMode: ui.TileMode.clamp,
+        );
+        canvasDrawImageRect(
+          _handle,
+          (downscaledImage as SkwasmImage).handle,
+          sourceRect,
+          destRect,
+          paintHandle,
+          paint.filterQuality.index,
+        );
+        paintDispose(paintHandle);
+      });
+      return;
+    }
+
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
