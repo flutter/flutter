@@ -342,7 +342,9 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
-            buildCodeAssets: true,
+            buildCodeAssets: BuildCodeAssetsOptions(
+              appBuildDirectory: fileSystem.directory(projectUri),
+            ),
             buildDataAssets: true,
           );
           final Uri nativeAssetsFileUri = flutterTester

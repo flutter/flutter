@@ -470,7 +470,9 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
           ..value = value
           ..previousValue = _previousValue
           ..isActive = widget.onChanged != null
-          ..shape = widget.shape ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0))
+          ..shape =
+              widget.shape ??
+              const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)))
           ..side = effectiveBorderSide
           ..brightness = CupertinoTheme.of(context).brightness,
       ),
@@ -569,7 +571,11 @@ class _CheckboxPainter extends ToggleablePainter {
       colors: <Color>[topColor, bottomColor],
     );
     final gradientPaint = Paint()..shader = fillGradient.createShader(outer);
-    canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
+    if (shape.preferPaintInterior) {
+      shape.paintInterior(canvas, outer, gradientPaint);
+    } else {
+      canvas.drawPath(shape.getOuterPath(outer), gradientPaint);
+    }
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool value) {
@@ -585,6 +591,8 @@ class _CheckboxPainter extends ToggleablePainter {
           isActive ? _kDarkGradientOpacities[1] : _kDisabledDarkGradientOpacities[1],
         ),
       );
+    } else if (shape.preferPaintInterior) {
+      shape.paintInterior(canvas, outer, paint);
     } else {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
@@ -639,7 +647,11 @@ class _CheckboxPainter extends ToggleablePainter {
         ..color = brightness == Brightness.light
             ? CupertinoColors.black.withOpacity(_kPressedOverlayOpacity)
             : CupertinoColors.white.withOpacity(_kPressedOverlayOpacity);
-      canvas.drawPath(shape.getOuterPath(outer), pressedPaint);
+      if (shape.preferPaintInterior) {
+        shape.paintInterior(canvas, outer, pressedPaint);
+      } else {
+        canvas.drawPath(shape.getOuterPath(outer), pressedPaint);
+      }
     }
     if (isFocused) {
       final Rect focusOuter = outer.inflate(1);

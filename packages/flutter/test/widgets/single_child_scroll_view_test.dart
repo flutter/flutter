@@ -790,9 +790,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            height: 200.0,
-            width: 200.0,
+          child: SizedBox.square(
+            dimension: 200.0,
             child: SingleChildScrollView(
               controller: controllerY = ScrollController(initialScrollOffset: 400.0),
               child: SingleChildScrollView(

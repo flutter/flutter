@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class TestItem extends StatelessWidget {
   const TestItem({super.key, required this.item, this.width, this.height});
@@ -48,17 +50,15 @@ Widget buildFrame({
 void main() {
   testWidgets('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverPrototypeExtentList.builder(
-                itemBuilder: (BuildContext context, int index) => TestItem(item: index),
-                prototypeItem: const TestItem(item: -1, height: 100.0),
-                itemCount: 20,
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverPrototypeExtentList.builder(
+              itemBuilder: (BuildContext context, int index) => TestItem(item: index),
+              prototypeItem: const TestItem(item: -1, height: 100.0),
+              itemCount: 20,
+            ),
+          ],
         ),
       ),
     );
@@ -77,25 +77,15 @@ void main() {
 
   testWidgets('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverPrototypeExtentList.list(
-                prototypeItem: const TestItem(item: -1, height: 100.0),
-                children: <int>[
-                  0,
-                  1,
-                  2,
-                  3,
-                  4,
-                  5,
-                  6,
-                  7,
-                ].map((int index) => TestItem(item: index)).toList(),
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverPrototypeExtentList.builder(
+              prototypeItem: const TestItem(item: -1, height: 100.0),
+              itemBuilder: (BuildContext context, int index) => TestItem(item: index),
+              itemCount: 8,
+            ),
+          ],
         ),
       ),
     );

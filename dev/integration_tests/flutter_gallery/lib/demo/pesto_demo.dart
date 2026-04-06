@@ -335,7 +335,7 @@ class _RecipePageState extends State<RecipePage> {
     height: 24.0 / 15.0,
   );
 
-  double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
+  double _getAppBarHeight(BuildContext context) => MediaQuery.heightOf(context) * 0.3;
 
   @override
   Widget build(BuildContext context) {

@@ -465,7 +465,7 @@ class SkwasmRenderer extends Renderer {
     required int height,
     required bool transferOwnership,
   }) async {
-    if (!transferOwnership) {
+    if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
       textureSource = (await createImageBitmap(textureSource, (
         x: 0,
         y: 0,
@@ -482,6 +482,9 @@ class SkwasmRenderer extends Renderer {
       ),
     );
   }
+
+  bool _isTransferable(JSAny object) =>
+      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
 
   @override
   void dumpDebugInfo() {

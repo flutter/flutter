@@ -559,6 +559,7 @@ class IOSSimulator extends Device {
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
     }

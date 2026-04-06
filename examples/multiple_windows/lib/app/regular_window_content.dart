@@ -6,6 +6,8 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
+
+import 'popup_button.dart';
 import 'window_content.dart';
 import 'models.dart';
 import 'rotated_wire_cube.dart';
@@ -34,7 +36,9 @@ class RegularWindowContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final dpr = MediaQuery.of(context).devicePixelRatio;
     final windowSize = WindowScope.contentSizeOf(context);
-    final WindowManager windowManager = WindowManagerAccessor.of(context);
+    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
+      context,
+    );
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     final child = Scaffold(
@@ -63,6 +67,7 @@ class RegularWindowContent extends StatelessWidget {
                             onDestroyed: () => windowManager.remove(key),
                           ),
                           title: 'Regular',
+                          decorated: windowSettings.regularDecorated,
                         ),
                       ),
                     );
@@ -83,6 +88,7 @@ class RegularWindowContent extends StatelessWidget {
                           ),
                           parent: window,
                           title: 'Dialog',
+                          decorated: windowSettings.dialogDecorated,
                         ),
                       ),
                     );
@@ -91,6 +97,8 @@ class RegularWindowContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 TooltipButton(parentController: window),
+                const SizedBox(height: 20),
+                PopupButton(parentController: window),
                 const SizedBox(height: 20),
                 Text(
                   'View #${window.rootView.viewId}\n'

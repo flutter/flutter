@@ -652,12 +652,14 @@ class FlutterTesterOptions():
       self,
       multithreaded: bool = False,
       impeller_backend: str = '',
+      enable_flutter_gpu: bool = True,
       enable_vm_service: bool = False,
       enable_microtask_profiling: bool = False,
       expect_failure: bool = False
   ) -> None:
     self.multithreaded = multithreaded
     self.impeller_backend = impeller_backend
+    self.enable_flutter_gpu = enable_flutter_gpu
     self.enable_vm_service = enable_vm_service
     self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
@@ -667,9 +669,9 @@ class FlutterTesterOptions():
       command_args.append('--disable-vm-service')
 
     if self.impeller_backend != '':
-      command_args += [
-          '--enable-impeller', '--enable-flutter-gpu', f'--impeller-backend={self.impeller_backend}'
-      ]
+      command_args += ['--enable-impeller', f'--impeller-backend={self.impeller_backend}']
+      if self.enable_flutter_gpu:
+        command_args.append('--enable-flutter-gpu')
     else:
       command_args += ['--no-enable-impeller']
 
@@ -686,7 +688,8 @@ class FlutterTesterOptions():
 
   def impeller_enabled(self) -> str:
     if self.impeller_backend != '':
-      return f'impeller {self.impeller_backend}'
+      gpu_str = ' flutter_gpu' if self.enable_flutter_gpu else ''
+      return f'impeller {self.impeller_backend}{gpu_str}'
     return 'skia software'
 
   def tester_name(self) -> str:
@@ -936,16 +939,6 @@ def gather_dart_tests(
   )
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
-  opengles_skipped_tests = [
-      'codec_test.dart',
-      'decode_image_from_pixels_sync_test.dart',
-      'encoding_test.dart',
-      'gpu_test.dart',
-      'high_bitrate_texture_test.dart',
-      'image_dispose_test.dart',
-      'image_resize_test.dart',
-  ]
-
   impeller_backends = ['', 'vulkan', 'opengles']
   if is_mac():
     impeller_backends.append('metal')
@@ -963,10 +956,6 @@ def gather_dart_tests(
       _logger.info("Gathering dart test '%s'", dart_test_file)
 
     for impeller in impeller_backends:
-      if impeller == 'opengles' and dart_test_basename in opengles_skipped_tests:
-        _logger.info("Skipping for opengles: '%s'", dart_test_file)
-        continue
-
       for multithreaded in [False, True]:
         # An opengles implementation that is multithreaded would require the
         # raster thread and the io thread to have their own contexts in a share
@@ -982,6 +971,21 @@ def gather_dart_tests(
                 enable_microtask_profiling=dart_test_basename == 'microtask_profiling_test.dart',
             )
         )
+
+  # Run gpu_test.dart with Impeller enabled but Flutter GPU disabled to test
+  # the "Flutter GPU must be enabled" error message.
+  gpu_test_file = os.path.join(dart_tests_dir, 'gpu_test.dart')
+  if test_filter is None or 'gpu_test.dart' in test_filter:
+    for impeller in impeller_backends:
+      if impeller == '':
+        continue
+      yield gather_dart_test(
+          build_dir, gpu_test_file,
+          FlutterTesterOptions(
+              impeller_backend=impeller,
+              enable_flutter_gpu=False,
+          )
+      )
 
 
 def gather_dart_smoke_test(

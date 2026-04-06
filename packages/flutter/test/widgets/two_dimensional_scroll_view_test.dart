@@ -12,9 +12,8 @@ import 'editable_text_tester.dart';
 import 'two_dimensional_utils.dart';
 
 Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
-  return SizedBox(
-    height: 200,
-    width: 200,
+  return SizedBox.square(
+    dimension: 200.0,
     child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
   );
 }

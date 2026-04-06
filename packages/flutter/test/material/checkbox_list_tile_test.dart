@@ -85,7 +85,7 @@ void main() {
     expect(
       getCheckboxListTileRenderer(),
       paints
-        ..path(color: checkBoxBorderColor)
+        ..rrect(color: checkBoxBorderColor)
         ..path(color: checkBoxCheckColor),
     );
 
@@ -96,7 +96,7 @@ void main() {
     expect(
       getCheckboxListTileRenderer(),
       paints
-        ..path(color: checkBoxBorderColor)
+        ..rrect(color: checkBoxBorderColor)
         ..path(color: checkBoxCheckColor),
     );
   });
@@ -122,7 +122,7 @@ void main() {
     expect(
       getCheckboxListTileRenderer(),
       paints
-        ..path(color: checkBoxBorderColor)
+        ..rrect(color: checkBoxBorderColor)
         ..path(color: checkBoxCheckColor),
     );
 
@@ -133,7 +133,7 @@ void main() {
     expect(
       getCheckboxListTileRenderer(),
       paints
-        ..path(color: checkBoxBorderColor)
+        ..rrect(color: checkBoxBorderColor)
         ..path(color: checkBoxCheckColor),
     );
   });
@@ -164,11 +164,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), null));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFF000000)));
+    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFF000000)));
 
     await tester.pumpWidget(buildFrame(const Color(0xFF000000), const Color(0xFFFFFFFF)));
     await tester.pumpAndSettle();
-    expect(getCheckboxListTileRenderer(), paints..path(color: const Color(0xFFFFFFFF)));
+    expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFFFFFF)));
   });
 
   testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
@@ -683,11 +683,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(enabled: true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeEnabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeEnabledFillColor));
 
     await tester.pumpWidget(buildFrame(enabled: false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: activeDisabledFillColor));
   });
 
   testWidgets('CheckboxListTile respects fillColor in hovered state', (WidgetTester tester) async {
@@ -726,7 +726,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
-    expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
+    expect(getCheckboxRenderer(), paints..rrect(color: hoveredFillColor));
   });
 
   testWidgets('CheckboxListTile respects hoverColor', (WidgetTester tester) async {
@@ -757,7 +757,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(style: PaintingStyle.fill)
+        ..rrect(style: PaintingStyle.fill)
         ..path(style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -771,7 +771,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: Colors.orange[500])
-        ..path(style: PaintingStyle.fill)
+        ..rrect(style: PaintingStyle.fill)
         ..path(style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
@@ -781,7 +781,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(style: PaintingStyle.fill)
+        ..rrect(style: PaintingStyle.fill)
         ..path(style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
@@ -1128,7 +1128,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
-        ..path(color: themeData.colorScheme.error)
+        ..rrect(color: themeData.colorScheme.error)
         ..path(color: themeData.colorScheme.onError),
     );
 
@@ -1142,7 +1142,7 @@ void main() {
       Material.of(tester.element(find.byType(Checkbox))),
       paints
         ..circle(color: themeData.colorScheme.error.withOpacity(0.08))
-        ..path(color: themeData.colorScheme.error),
+        ..rrect(color: themeData.colorScheme.error),
     );
   });
 
