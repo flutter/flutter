@@ -221,6 +221,7 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
+      "framework/Source/SwiftStrictConcurrencyTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
     ]
     frameworks = [ "XCTest.framework" ]

@@ -71,7 +71,8 @@ NS_SWIFT_UI_ACTOR
  * @param bundle The `NSBundle` to use for looking up the asset.
  * @return the file name to be used for lookup in the main bundle.
  */
-+ (NSString*)lookupKeyForAsset:(NSString*)asset fromBundle:(nullable NSBundle*)bundle NS_SWIFT_NONISOLATED;
++ (NSString*)lookupKeyForAsset:(NSString*)asset
+                    fromBundle:(nullable NSBundle*)bundle NS_SWIFT_NONISOLATED;
 
 /**
  * Returns the file name for the given asset which originates from the specified package.

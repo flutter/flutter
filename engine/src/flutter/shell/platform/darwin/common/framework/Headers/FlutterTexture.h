@@ -13,7 +13,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_NONSENDABLE
 /**
  * Represents a texture that can be shared with Flutter.
  *
@@ -22,9 +21,6 @@ NS_SWIFT_NONSENDABLE
 @protocol FlutterTexture <NSObject>
 /**
  * Copy the contents of the texture into a `CVPixelBuffer`.
- 
- * This method is called on the raster thread. The he content of the buffer
- * must not be modified after this method returns.
  *
  * The type of the pixel buffer is one of the following:
  * - `kCVPixelFormatType_32BGRA`
@@ -43,7 +39,6 @@ NS_SWIFT_NONSENDABLE
 @end
 
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_UI_ACTOR
 /**
  * A collection of registered `FlutterTexture`'s.
  */
@@ -57,8 +52,7 @@ NS_SWIFT_UI_ACTOR
 /**
  * Notifies Flutter that the content of the previously registered texture has been updated.
  *
- * This method must be called on the platform thread. Calling this method will trigger a call to
- * `-[FlutterTexture copyPixelBuffer]` on the raster thread.
+ * This will trigger a call to `-[FlutterTexture copyPixelBuffer]` on the raster thread.
  */
 - (void)textureFrameAvailable:(int64_t)textureId;
 /**

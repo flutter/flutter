@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param reply The reply.
  */
-typedef void (NS_SWIFT_SENDABLE ^FlutterReply)(id _Nullable reply);
+typedef void (^FlutterReply)(id _Nullable reply);
 
 /**
  * A strategy for handling incoming messages from Flutter and to send
@@ -27,14 +27,13 @@ typedef void (NS_SWIFT_SENDABLE ^FlutterReply)(id _Nullable reply);
  * @param callback A callback for submitting a reply to the sender which can be invoked from any
  * thread.
  */
-typedef void (NS_SWIFT_UI_ACTOR ^FlutterMessageHandler)(id _Nullable message, FlutterReply callback);
+typedef void (^FlutterMessageHandler)(id _Nullable message, FlutterReply callback);
 
 /**
  * A channel for communicating with the Flutter side using basic, asynchronous
  * message passing.
  */
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_UI_ACTOR
 @interface FlutterBasicMessageChannel : NSObject
 /**
  * Creates a `FlutterBasicMessageChannel` with the specified name and binary
@@ -192,7 +191,7 @@ NS_SWIFT_UI_ACTOR
  *
  * @param result The result.
  */
-typedef void (NS_SWIFT_UI_ACTOR ^FlutterResult)(id _Nullable result);
+typedef void (^FlutterResult)(id _Nullable result);
 
 /**
  * A strategy for handling method calls.
@@ -204,7 +203,7 @@ typedef void (NS_SWIFT_UI_ACTOR ^FlutterResult)(id _Nullable result);
  *     method was unknown. Any other values, including `nil`, are interpreted as
  *     successful results.  This can be invoked from any thread.
  */
-typedef void (NS_SWIFT_UI_ACTOR ^FlutterMethodCallHandler)(FlutterMethodCall* call, void (NS_SWIFT_UI_ACTOR ^result)(id _Nullable result));
+typedef void (^FlutterMethodCallHandler)(FlutterMethodCall* call, FlutterResult result);
 
 /**
  * A constant used with `FlutterMethodCallHandler` to respond to the call of an
@@ -218,7 +217,6 @@ extern NSObject const* FlutterMethodNotImplemented;
  * asynchronous methods.
  */
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_UI_ACTOR
 @interface FlutterMethodChannel : NSObject
 /**
  * Creates a `FlutterMethodChannel` with the specified name and binary messenger.
@@ -349,13 +347,12 @@ NS_SWIFT_UI_ACTOR
  *
  * @param event The event.
  */
-typedef void (NS_SWIFT_UI_ACTOR ^FlutterEventSink)(id _Nullable event);
+typedef void (^FlutterEventSink)(id _Nullable event);
 
 /**
  * A strategy for exposing an event stream to the Flutter side.
  */
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_UI_ACTOR
 @protocol FlutterStreamHandler
 /**
  * Sets up an event stream and begin emitting events.
@@ -400,7 +397,6 @@ extern NSObject const* FlutterEndOfEventStream;
  * A channel for communicating with the Flutter side using event streams.
  */
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_UI_ACTOR
 @interface FlutterEventChannel : NSObject
 /**
  * Creates a `FlutterEventChannel` with the specified name and binary messenger.
