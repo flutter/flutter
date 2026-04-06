@@ -7,9 +7,46 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/feedback_tester.dart';
+class _FeedbackTester {
+  _FeedbackTester() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      _handler,
+    );
+  }
+
+  int get hapticCount => _hapticCount;
+  int _hapticCount = 0;
+
+  int get clickSoundCount => _clickSoundCount;
+  int _clickSoundCount = 0;
+
+  Future<void> _handler(MethodCall methodCall) async {
+    if (methodCall.method == 'HapticFeedback.vibrate') {
+      _hapticCount++;
+    }
+    if (methodCall.method == 'SystemSound.play' &&
+        methodCall.arguments == SystemSoundType.click.toString()) {
+      _clickSoundCount++;
+    }
+  }
+
+  void dispose() {
+    assert(
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
+        SystemChannels.platform.name,
+        _handler,
+      ),
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      null,
+    );
+  }
+}
 
 Widget wrap({required Widget child}) {
   return MediaQuery(
@@ -1185,10 +1222,10 @@ void main() {
   });
 
   group('feedback', () {
-    late FeedbackTester feedback;
+    late _FeedbackTester feedback;
 
     setUp(() {
-      feedback = FeedbackTester();
+      feedback = _FeedbackTester();
     });
 
     tearDown(() {
