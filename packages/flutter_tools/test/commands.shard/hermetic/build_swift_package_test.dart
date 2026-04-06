@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_swift_package.dart';
 import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test_api/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
@@ -42,18 +44,21 @@ void main() {
   const flutterAppBuildPath = '$flutterAppDartToolPath/flutter_build';
   const commandFilePath =
       '/path/to/flutter/packages/flutter_tools/lib/src/commands/build_swift_package.dart';
-  const pluginRegistrantSwiftPackagePath = 'output/FlutterPluginRegistrant';
-  const debugModeDirectoryPath = '$pluginRegistrantSwiftPackagePath/Debug';
+  const nativeIntegrationSwiftPackagePath = 'output/FlutterNativeIntegration';
+  const pluginRegistrantSwiftPackagePath =
+      '$nativeIntegrationSwiftPackagePath/FlutterPluginRegistrant';
+  const debugModeDirectoryPath = '$nativeIntegrationSwiftPackagePath/Debug';
   const debugFrameworksDirectoryPath = '$debugModeDirectoryPath/Frameworks';
   const debugNativeAssetsDirectoryPath = '$debugFrameworksDirectoryPath/NativeAssets';
   const debugCocoaPodsDirectoryPath = '$debugFrameworksDirectoryPath/CocoaPods';
   const debugPackagesDirectoryPath = '$debugModeDirectoryPath/Packages';
-  const releaseModeDirectoryPath = '$pluginRegistrantSwiftPackagePath/Release';
+  const releaseModeDirectoryPath = '$nativeIntegrationSwiftPackagePath/Release';
   const releaseFrameworksDirectoryPath = '$releaseModeDirectoryPath/Frameworks';
   const releaseNativeAssetsDirectoryPath = '$releaseFrameworksDirectoryPath/NativeAssets';
   const cacheDirectoryPath = 'output/.cache';
+  const scriptsDirectoryPath = 'output/Scripts';
   const debugCocoapodCache = '$cacheDirectoryPath/Debug/CocoaPods';
-  const pluginsDirectoryPath = '$pluginRegistrantSwiftPackagePath/Plugins';
+  const pluginsDirectoryPath = '$nativeIntegrationSwiftPackagePath/.plugins';
   const flutterCachePath = '/path/to/flutter/bin/cache';
   const engineArtifactPath = '$flutterCachePath/artifacts/engine/ios/Flutter.xcframework';
   const codesignIdentity = 'Apple Development: Company (TEAM_ID)';
@@ -84,16 +89,47 @@ void main() {
         verboseHelp: false,
         codesign: FakeDarwinAddToAppCodesigning(),
       );
-      final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
+      final Directory swiftPackageOutput = fs.directory(nativeIntegrationSwiftPackagePath);
       swiftPackageOutput.createSync(recursive: true);
       command.createSourcesSymlink(swiftPackageOutput, 'Debug');
-      final Link generatedSourcesLink = swiftPackageOutput.childLink('Sources');
+      final Link generatedSourcesLink = fs.link(pluginRegistrantSwiftPackagePath);
       expect(generatedSourcesLink, exists);
       expect(generatedSourcesLink.targetSync(), './Debug');
+    });
 
-      final Link generatedManifestLink = swiftPackageOutput.childLink('Package.swift');
-      expect(generatedManifestLink, exists);
-      expect(generatedManifestLink.targetSync(), './Debug/Package.swift');
+    testUsingContext('generateLLDBInitFile', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final processManager = FakeProcessManager.list([]);
+      final command = BuildSwiftPackage(
+        analytics: FakeAnalytics(),
+        artifacts: FakeArtifacts(engineArtifactPath),
+        buildSystem: FakeBuildSystem(),
+        cache: FakeCache(fs, _flutterRoot),
+        fileSystem: fs,
+        flutterVersion: FakeFlutterVersion(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        templateRenderer: const MustacheTemplateRenderer(),
+        xcode: FakeXcode(),
+        featureFlags: FakeFeatureFlags(),
+        verboseHelp: false,
+        codesign: FakeDarwinAddToAppCodesigning(),
+      );
+      final Directory appPath = fs.currentDirectory.childDirectory('my_flutter_app');
+      appPath.childFile('ios/Flutter/ephemeral/flutter_lldbinit').createSync(recursive: true);
+      appPath.childFile('ios/Flutter/ephemeral/flutter_lldb_helper.py').createSync(recursive: true);
+      final Directory scriptsOutput = fs.directory(scriptsDirectoryPath);
+      command.generateLLDBInitFile(
+        scriptsDirectory: scriptsOutput,
+        buildInfos: [BuildInfo.debug],
+        project: FakeIosProject(directory: appPath),
+      );
+      final File lldbInitFile = scriptsOutput.childFile('flutter_lldbinit');
+      final File lldbHelperPythonFile = scriptsOutput.childFile('flutter_lldb_helper.py');
+      expect(lldbInitFile, exists);
+      expect(lldbHelperPythonFile, exists);
     });
   });
 
@@ -139,6 +175,7 @@ void main() {
           targetPlatform: targetPlatform,
           utils: testUtils,
         );
+
         // Plugin A represents a SwiftPM plugin
         final Directory modeDirectory = fs.directory(debugModeDirectoryPath);
         final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: targetPlatform);
@@ -186,7 +223,7 @@ void main() {
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -202,8 +239,8 @@ let package = Package(
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
     ],
     dependencies: [
-        .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
+        .package(name: "FlutterFramework", path: "Packages/FlutterFramework"),
+        .package(name: "PluginA", path: "Packages/PluginA")
     ],
     targets: [
         .target(
@@ -218,20 +255,21 @@ let package = Package(
         ),
         .binaryTarget(
             name: "PluginC",
-            path: "Sources/Frameworks/NativeAssets/PluginC.xcframework"
+            path: "Frameworks/NativeAssets/PluginC.xcframework"
         ),
         .binaryTarget(
             name: "App",
-            path: "Sources/Frameworks/App.xcframework"
+            path: "Frameworks/App.xcframework"
         ),
         .binaryTarget(
             name: "PluginB",
-            path: "Sources/Frameworks/CocoaPods/PluginB.xcframework"
+            path: "Frameworks/CocoaPods/PluginB.xcframework"
         )
     ]
 )
 ''');
         final File generatedSource = modeDirectory
+            .childDirectory('Sources')
             .childDirectory('FlutterPluginRegistrant')
             .childFile('GeneratedPluginRegistrant.swift');
         expect(generatedSource, exists);
@@ -407,7 +445,7 @@ import PluginB
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -1099,13 +1137,13 @@ let package = Package(
         expect(packageTargets[0].format(), '''
 .binaryTarget(
             name: "my_native_asset",
-            path: "Sources/Frameworks/NativeAssets/my_native_asset.xcframework"
+            path: "Frameworks/NativeAssets/my_native_asset.xcframework"
         )''');
         expect(targetDependencies[1].format(), contains('.target(name: "App")'));
         expect(packageTargets[1].format(), '''
 .binaryTarget(
             name: "App",
-            path: "Sources/Frameworks/App.xcframework"
+            path: "Frameworks/App.xcframework"
         )''');
       });
 
@@ -1622,7 +1660,7 @@ let package = Package(
         expect(packageTargets[0].format(), '''
 .binaryTarget(
             name: "cocoapod_plugin",
-            path: "Sources/Frameworks/CocoaPods/cocoapod_plugin.xcframework"
+            path: "Frameworks/CocoaPods/cocoapod_plugin.xcframework"
         )''');
         expect(processManager, hasNoRemainingExpectations);
       });
@@ -2329,7 +2367,7 @@ let package = Package(
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -2345,8 +2383,8 @@ let package = Package(
         .library(name: "FlutterPluginRegistrant", type: .static, targets: ["FlutterPluginRegistrant"])
     ],
     dependencies: [
-        .package(name: "FlutterFramework", path: "Sources/Packages/FlutterFramework"),
-        .package(name: "PluginA", path: "Sources/Packages/PluginA")
+        .package(name: "FlutterFramework", path: "Packages/FlutterFramework"),
+        .package(name: "PluginA", path: "Packages/PluginA")
     ],
     targets: [
         .target(
@@ -2359,12 +2397,13 @@ let package = Package(
         ),
         .binaryTarget(
             name: "App",
-            path: "Sources/Frameworks/App.xcframework"
+            path: "Frameworks/App.xcframework"
         )
     ]
 )
 ''');
         final File generatedSourceImplementation = modeDirectory
+            .childDirectory('Sources')
             .childDirectory('FlutterPluginRegistrant')
             .childFile('GeneratedPluginRegistrant.swift');
         expect(generatedSourceImplementation, exists);
@@ -2566,13 +2605,13 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         expect(packageTargets[0].format(), '''
 .binaryTarget(
             name: "my_native_asset",
-            path: "Sources/Frameworks/NativeAssets/my_native_asset.xcframework"
+            path: "Frameworks/NativeAssets/my_native_asset.xcframework"
         )''');
         expect(targetDependencies[1].format(), contains('.target(name: "App")'));
         expect(packageTargets[1].format(), '''
 .binaryTarget(
             name: "App",
-            path: "Sources/Frameworks/App.xcframework"
+            path: "Frameworks/App.xcframework"
         )''');
       });
 
@@ -2757,11 +2796,477 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         expect(packageTargets[0].format(), '''
 .binaryTarget(
             name: "cocoapod_plugin",
-            path: "Sources/Frameworks/CocoaPods/cocoapod_plugin.xcframework"
+            path: "Frameworks/CocoaPods/cocoapod_plugin.xcframework"
         )''');
         expect(processManager, hasNoRemainingExpectations);
       });
     });
+  });
+
+  group('FlutterNativeIntegrationSwiftPackage', () {
+    testUsingContext(
+      'generateSwiftPackage without tests',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+
+        // Set up templates in fs
+        for (final FileSystemEntity fileEntity
+            in fileSystem
+                .directory(
+                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
+                )
+                .listSync(recursive: true)) {
+          if (fileEntity is File) {
+            fs.file(fileEntity.path).createSync(recursive: true);
+            fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+          }
+        }
+
+        // Set up package_config.json for template imageDirectory
+        final File packagesFile = fs.file(
+          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+        )..createSync(recursive: true);
+        packagesFile.writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'flutter_template_images',
+                'rootUri':
+                    'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+                'packageUri': 'lib/',
+                'languageVersion': '3.4',
+              },
+            ],
+          }),
+        );
+
+        final Directory outputDirectory = fs.directory('output')..createSync();
+        final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
+          ..createSync();
+
+        final integrationPackage = FlutterNativeIntegrationSwiftPackage(
+          utils: testUtils,
+          generateTests: false,
+        );
+        await integrationPackage.generateSwiftPackages(
+          outputDirectory: outputDirectory,
+          flutterIntegrationPackage: flutterIntegrationPackage,
+          highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
+        );
+
+        expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
+        expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterNativeIntegration",
+    platforms: [
+        .iOS("13.0")
+    ],
+    products: [
+        .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
+    ],
+    dependencies: [
+        .package(name: "FlutterNativeTools", path: "FlutterNativeTools"),
+        .package(name: "FlutterPluginRegistrant", path: "FlutterPluginRegistrant")
+    ],
+    targets: [
+        .target(
+            name: "FlutterNativeIntegration",
+            dependencies: [
+                .product(name: "FlutterPluginRegistrant", package: "FlutterPluginRegistrant")
+            ]
+        )
+    ]
+)
+''');
+
+        final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+          'FlutterNativeTools',
+        );
+        expect(nativeToolsPackage.childFile('Package.swift'), exists);
+        expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterNativeTools",
+    products: [
+        .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+    ],
+    dependencies: [\n        \n    ],
+    targets: [
+        .target(
+            name: "FlutterToolHelper"
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .plugin(
+            name: "Switch to Debug Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-debug", description: "Updates package to use the Debug mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Debug mode Flutter framework"),
+                ]
+            ),
+            dependencies: [
+                .target(name: "FlutterPluginTool")
+            ],
+            path: "Plugins/Debug"
+        ),
+        .plugin(
+            name: "Switch to Profile Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-profile", description: "Updates package to use the Profile mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Profile mode Flutter framework"),
+                ]
+            ),
+            dependencies: [
+                .target(name: "FlutterPluginTool")
+            ],
+            path: "Plugins/Profile"
+        ),
+        .plugin(
+            name: "Switch to Release Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-release", description: "Updates package to use the Release mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Release mode Flutter framework"),
+                ]
+            ),
+            dependencies: [
+                .target(name: "FlutterPluginTool")
+            ],
+            path: "Plugins/Release"
+        )
+    ]
+)
+''');
+
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Debug')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Debug"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Profile')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Profile"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Release')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Release"'),
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
+          exists,
+        );
+        expect(
+          flutterIntegrationPackage
+              .childDirectory('Sources')
+              .childDirectory('FlutterNativeIntegration'),
+          exists,
+        );
+        expect(nativeToolsPackage.childDirectory('Tests'), isNot(exists));
+      },
+      // [intended] SwiftPM is only available on macOS and Windows fails with templating setup
+      skip: !platform.isMacOS,
+    );
+
+    testUsingContext(
+      'generateSwiftPackage with tests',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final processManager = FakeProcessManager.list([]);
+        final testUtils = BuildSwiftPackageUtils(
+          analytics: FakeAnalytics(),
+          artifacts: FakeArtifacts(engineArtifactPath),
+          buildSystem: FakeBuildSystem(),
+          cache: FakeCache(fs, _flutterRoot),
+          fileSystem: fs,
+          flutterRoot: _flutterRoot,
+          flutterVersion: FakeFlutterVersion(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+          project: FakeFlutterProject(directory: fs.directory(_flutterAppPath)),
+          templateRenderer: const MustacheTemplateRenderer(),
+          xcode: FakeXcode(),
+        );
+
+        // Set up templates in fs
+        for (final FileSystemEntity fileEntity
+            in fileSystem
+                .directory(
+                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
+                )
+                .listSync(recursive: true)) {
+          if (fileEntity is File) {
+            fs.file(fileEntity.path).createSync(recursive: true);
+            fs.file(fileEntity.path).writeAsStringSync(fileEntity.readAsStringSync());
+          }
+        }
+
+        // Set up package_config.json for template imageDirectory
+        final File packagesFile = fs.file(
+          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+        )..createSync(recursive: true);
+        packagesFile.writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'flutter_template_images',
+                'rootUri':
+                    'file:///path/to/.pub-cache/hosted/pub.dev/flutter_template_images-5.0.0',
+                'packageUri': 'lib/',
+                'languageVersion': '3.4',
+              },
+            ],
+          }),
+        );
+
+        final Directory outputDirectory = fs.directory('output')..createSync();
+        final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
+          ..createSync();
+
+        final integrationPackage = FlutterNativeIntegrationSwiftPackage(
+          utils: testUtils,
+          generateTests: true,
+        );
+        await integrationPackage.generateSwiftPackages(
+          outputDirectory: outputDirectory,
+          flutterIntegrationPackage: flutterIntegrationPackage,
+          highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+        );
+
+        expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
+        expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterNativeIntegration",
+    platforms: [
+        .macOS("10.15")
+    ],
+    products: [
+        .library(name: "FlutterNativeIntegration", targets: ["FlutterNativeIntegration"])
+    ],
+    dependencies: [
+        .package(name: "FlutterNativeTools", path: "FlutterNativeTools"),
+        .package(name: "FlutterPluginRegistrant", path: "FlutterPluginRegistrant")
+    ],
+    targets: [
+        .target(
+            name: "FlutterNativeIntegration",
+            dependencies: [
+                .product(name: "FlutterPluginRegistrant", package: "FlutterPluginRegistrant")
+            ]
+        )
+    ]
+)
+''');
+
+        final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
+          'FlutterNativeTools',
+        );
+        expect(nativeToolsPackage.childFile('Package.swift'), exists);
+        expect(nativeToolsPackage.childFile('Package.swift').readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+// Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterNativeTools",
+    products: [
+        .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+    ],
+    dependencies: [\n        \n    ],
+    targets: [
+        .target(
+            name: "FlutterToolHelper"
+        ),
+        .executableTarget(
+            name: "FlutterAssembleTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .executableTarget(
+            name: "FlutterPluginTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .plugin(
+            name: "Switch to Debug Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-debug", description: "Updates package to use the Debug mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Debug mode Flutter framework"),
+                ]
+            ),
+            dependencies: [
+                .target(name: "FlutterPluginTool")
+            ],
+            path: "Plugins/Debug"
+        ),
+        .plugin(
+            name: "Switch to Profile Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-profile", description: "Updates package to use the Profile mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Profile mode Flutter framework"),
+                ]
+            ),
+            dependencies: [
+                .target(name: "FlutterPluginTool")
+            ],
+            path: "Plugins/Profile"
+        ),
+        .plugin(
+            name: "Switch to Release Mode",
+            capability: .command(
+                intent: .custom(verb: "switch-to-release", description: "Updates package to use the Release mode Flutter framework"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Updates package to use the Release mode Flutter framework"),
+                ]
+            ),
+            dependencies: [
+                .target(name: "FlutterPluginTool")
+            ],
+            path: "Plugins/Release"
+        ),
+        .testTarget(
+            name: "FlutterToolTests",
+            dependencies: [
+                .target(name: "FlutterPluginTool"),
+                .target(name: "FlutterToolHelper"),
+                .target(name: "FlutterAssembleTool")
+            ]
+        )
+    ]
+)
+''');
+
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Debug')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Debug"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Profile')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Profile"'),
+        );
+        expect(
+          nativeToolsPackage
+              .childDirectory('Plugins')
+              .childDirectory('Release')
+              .childFile('FlutterBuildModePlugin.swift')
+              .readAsStringSync(),
+          contains('let buildMode = "Release"'),
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterAssembleTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterPluginTool'),
+          exists,
+        );
+        expect(
+          nativeToolsPackage.childDirectory('Sources').childDirectory('FlutterToolHelper'),
+          exists,
+        );
+        expect(
+          flutterIntegrationPackage
+              .childDirectory('Sources')
+              .childDirectory('FlutterNativeIntegration'),
+          exists,
+        );
+        expect(nativeToolsPackage.childDirectory('Tests'), exists);
+      },
+      // [intended] SwiftPM is only available on macOS and Windows fails with templating setup
+      skip: !platform.isMacOS,
+    );
   });
 }
 
@@ -2964,6 +3469,13 @@ class FakeIosProject extends Fake implements IosProject {
   File get flutterPluginSwiftPackageManifest => hostAppRoot.childFile(
     'Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
   );
+
+  @override
+  File get lldbInitFile => hostAppRoot.childFile('Flutter/ephemeral/flutter_lldbinit');
+
+  @override
+  File get lldbHelperPythonFile =>
+      hostAppRoot.childFile('Flutter/ephemeral/flutter_lldb_helper.py');
 }
 
 class FakeMacosProject extends Fake implements MacOSProject {
