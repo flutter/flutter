@@ -1190,7 +1190,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   Offset? _currentDragEndRelatedToOrigin;
 
   // The scrollable only auto scrolls if the selection starts in the scrollable.
-  bool? _selectionStartsInScrollable;
+  bool _selectionStartsInScrollable = false;
 
   ScrollPosition get position => _position;
   ScrollPosition _position;
@@ -1256,14 +1256,15 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     _selectableEndEdgeUpdateRecords.clear();
     _currentDragStartRelatedToOrigin = null;
     _currentDragEndRelatedToOrigin = null;
-    _selectionStartsInScrollable = null;
+    _selectionStartsInScrollable = false;
     return super.handleClearSelection(event);
   }
 
   @override
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
-    if (_currentDragStartRelatedToOrigin == null && _currentDragEndRelatedToOrigin == null) {
-      _selectionStartsInScrollable ??= _globalPositionInScrollable(event.globalPosition);
+    if (_currentDragEndRelatedToOrigin == null && _currentDragStartRelatedToOrigin == null) {
+      assert(!_selectionStartsInScrollable);
+      _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     }
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
     if (event.type == SelectionEventType.endEdgeUpdate) {
@@ -1296,8 +1297,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _autoScroller.stopAutoScroll();
       return result;
     }
-    assert(_selectionStartsInScrollable != null);
-    if (_selectionStartsInScrollable!) {
+    if (_selectionStartsInScrollable) {
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
@@ -1307,10 +1307,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Offset _inferPositionRelatedToOrigin(Offset globalPosition) {
-    assert(_selectionStartsInScrollable != null);
     final box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
-    if (!_selectionStartsInScrollable!) {
+    if (!_selectionStartsInScrollable) {
       // If the selection starts outside of the scrollable, selecting across the
       // scrollable boundary will act as selecting the entire content in the
       // scrollable. This logic move the offset to the 0.0 or infinity to cover
@@ -1374,6 +1373,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
+    assert(!_selectionStartsInScrollable);
     final SelectionResult result = super.handleSelectAll(event);
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex != -1) {
@@ -1397,7 +1397,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     // that are outside of the viewport whose transform may not be valid. Only
     // the edge this event is updating is sure to be accurate.
     _updateDragLocationsFromGeometries(forceUpdateStart: !event.isEnd, forceUpdateEnd: event.isEnd);
-    if (_selectionStartsInScrollable ?? false) {
+    if (_selectionStartsInScrollable) {
       _jumpToEdge(event.isEnd);
     }
     return result;
@@ -1410,7 +1410,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     // that are outside of the viewport whose transform may not be valid. Only
     // the edge this event is updating is sure to be accurate.
     _updateDragLocationsFromGeometries(forceUpdateStart: !event.isEnd, forceUpdateEnd: event.isEnd);
-    if (_selectionStartsInScrollable ?? false) {
+    if (_selectionStartsInScrollable) {
       _jumpToEdge(event.isEnd);
     }
     return result;
