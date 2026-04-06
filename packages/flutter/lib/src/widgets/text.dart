@@ -996,7 +996,6 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectParagraph(event);
     super.didReceiveSelectionBoundaryEvents();
-    captureOriginSelectables();
     return result;
   }
 

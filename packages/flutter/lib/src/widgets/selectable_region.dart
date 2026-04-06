@@ -2135,19 +2135,9 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
     }
   }
 
-  /// Updates the internal selection state after a [SelectionEvent] that
-  /// selects a boundary such as: [SelectWordSelectionEvent],
-  /// [SelectParagraphSelectionEvent], and [SelectAllSelectionEvent].
-  ///
-  /// Call this method after determining the new selection as a result of
-  /// a [SelectionEvent] that selects a boundary. The [currentSelectionStartIndex]
-  /// and [currentSelectionEndIndex] should be set to valid values at the time
-  /// this method is called.
-  ///
-  /// Subclasses should call [clearInternalSelectionStateForSelectable] to clean up any state
-  /// added by this method, for example when removing a [Selectable] from this delegate.
-  @protected
+  @override
   void didReceiveSelectionBoundaryEvents() {
+    super.didReceiveSelectionBoundaryEvents();
     if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
       return;
     }
@@ -2237,26 +2227,11 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
     super.remove(selectable);
   }
 
-  @override
-  SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
-    final SelectionResult result = super.handleSelectAll(event);
-    didReceiveSelectionBoundaryEvents();
-    return result;
-  }
-
-  @override
-  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    final SelectionResult result = super.handleSelectWord(event);
-    didReceiveSelectionBoundaryEvents();
-    return result;
-  }
-
-  @override
-  SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    final SelectionResult result = super.handleSelectParagraph(event);
-    didReceiveSelectionBoundaryEvents();
-    return result;
-  }
+  // handleSelectAll, handleSelectWord, and handleSelectParagraph are inherited
+  // from MultiSelectableSelectionContainerDelegate, which calls
+  // didReceiveSelectionBoundaryEvents() after each. The override in this class
+  // adds event-receipt tracking and edge location capture on top of the base
+  // origin capture.
 
   @override
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
@@ -2557,48 +2532,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       currentSelectionStartIndex -= 1;
     }
     selectable.removeListener(_handleSelectableGeometryChange);
-  }
-
-  /// Records the selectables in the current selection range as origin
-  /// boundary selectables and captures the boundary edge positions.
-  ///
-  /// Call this after [currentSelectionStartIndex] and [currentSelectionEndIndex]
-  /// have been set as the result of a [SelectWordSelectionEvent] or
-  /// [SelectParagraphSelectionEvent].
-  @protected
-  void captureOriginSelectables() {
-    clearOriginSelectables();
-    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
-      return;
-    }
-    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
-    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
-    for (int i = start; i <= end; i++) {
-      _originSelectables.add(selectables[i]);
-    }
-    // Capture the origin boundary edge positions in local coordinates.
-    // These are converted to global on demand so they remain valid after scroll.
-    final Selectable startSelectable = selectables[start];
-    final SelectionPoint? startPoint = startSelectable.value.startSelectionPoint;
-    if (startPoint != null) {
-      _originStartSelectable = startSelectable;
-      _originStartLocalPosition = startPoint.localPosition + Offset(0, -startPoint.lineHeight / 2);
-    }
-    final Selectable endSelectable = selectables[end];
-    final SelectionPoint? endPoint = endSelectable.value.endSelectionPoint;
-    if (endPoint != null) {
-      _originEndSelectable = endSelectable;
-      _originEndLocalPosition = endPoint.localPosition + Offset(0, -endPoint.lineHeight / 2);
-    }
-    // Capture the content-relative offsets of the origin boundary.
-    final SelectedContentRange? startRange = startSelectable.getSelection();
-    if (startRange != null) {
-      _originStartOffset = min(startRange.startOffset, startRange.endOffset);
-    }
-    final SelectedContentRange? endRange = endSelectable.getSelection();
-    if (endRange != null) {
-      _originEndOffset = max(endRange.startOffset, endRange.endOffset);
-    }
   }
 
   /// Whether the given [selectable] is part of the origin text boundary.
@@ -3043,6 +2976,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     currentSelectionStartIndex = 0;
     currentSelectionEndIndex = selectables.length - 1;
+    didReceiveSelectionBoundaryEvents();
     return SelectionResult.none;
   }
 
@@ -3054,6 +2988,55 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         continue;
       }
       dispatchSelectionEventToChild(selectables[i], const ClearSelectionEvent());
+    }
+  }
+
+  /// Called after a boundary selection event ([SelectWordSelectionEvent],
+  /// [SelectParagraphSelectionEvent], or [SelectAllSelectionEvent]) has been
+  /// handled and [currentSelectionStartIndex]/[currentSelectionEndIndex] have
+  /// been set.
+  ///
+  /// The base implementation captures origin text boundary state for the
+  /// selection anchoring feature. Subclasses that override this method must
+  /// call super.
+  @protected
+  @mustCallSuper
+  void didReceiveSelectionBoundaryEvents() {
+    _captureOriginState();
+  }
+
+  void _captureOriginState() {
+    clearOriginSelectables();
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return;
+    }
+    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int i = start; i <= end; i++) {
+      _originSelectables.add(selectables[i]);
+    }
+    // Capture the origin boundary edge positions in local coordinates.
+    // These are converted to global on demand so they remain valid after scroll.
+    final Selectable startSelectable = selectables[start];
+    final SelectionPoint? startPoint = startSelectable.value.startSelectionPoint;
+    if (startPoint != null) {
+      _originStartSelectable = startSelectable;
+      _originStartLocalPosition = startPoint.localPosition + Offset(0, -startPoint.lineHeight / 2);
+    }
+    final Selectable endSelectable = selectables[end];
+    final SelectionPoint? endPoint = endSelectable.value.endSelectionPoint;
+    if (endPoint != null) {
+      _originEndSelectable = endSelectable;
+      _originEndLocalPosition = endPoint.localPosition + Offset(0, -endPoint.lineHeight / 2);
+    }
+    // Capture the content-relative offsets of the origin boundary.
+    final SelectedContentRange? startRange = startSelectable.getSelection();
+    if (startRange != null) {
+      _originStartOffset = min(startRange.startOffset, startRange.endOffset);
+    }
+    final SelectedContentRange? endRange = endSelectable.getSelection();
+    if (endRange != null) {
+      _originEndOffset = max(endRange.startOffset, endRange.endOffset);
     }
   }
 
@@ -3139,7 +3122,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     final SelectionResult result = _handleSelectBoundary(event);
-    captureOriginSelectables();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
@@ -3148,7 +3131,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectBoundary(event);
-    captureOriginSelectables();
+    didReceiveSelectionBoundaryEvents();
     return result;
   }
 
