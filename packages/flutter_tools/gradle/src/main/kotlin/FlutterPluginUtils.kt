@@ -558,19 +558,20 @@ object FlutterPluginUtils {
                     buildFile.readText()
                 }
 
-            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin ) = if (buildFile.extension == "kts") {
-                Triple(
-                    kgpRegexKotlin.containsMatchIn(scriptText),
-                    appPluginRegexKotlin.containsMatchIn(scriptText),
-                    libPluginRegexKotlin.containsMatchIn(scriptText)
-                )
-            } else {
-                Triple(
-                    kgpRegexGroovy.containsMatchIn(scriptText),
-                    appPluginRegexGroovy.containsMatchIn(scriptText),
-                    libPluginRegexGroovy.containsMatchIn(scriptText)
-                )
-            }
+            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+                if (buildFile.extension == "kts") {
+                    Triple(
+                        kgpRegexKotlin.containsMatchIn(scriptText),
+                        appPluginRegexKotlin.containsMatchIn(scriptText),
+                        libPluginRegexKotlin.containsMatchIn(scriptText)
+                    )
+                } else {
+                    Triple(
+                        kgpRegexGroovy.containsMatchIn(scriptText),
+                        appPluginRegexGroovy.containsMatchIn(scriptText),
+                        libPluginRegexGroovy.containsMatchIn(scriptText)
+                    )
+                }
 
             // Ensures applying AGP exists in the build file configuration.
             if (!hasAppPlugin && !hasLibPlugin) return@subprojects

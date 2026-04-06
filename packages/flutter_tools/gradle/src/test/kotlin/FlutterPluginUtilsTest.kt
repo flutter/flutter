@@ -805,10 +805,10 @@ class FlutterPluginUtilsTest {
                 )
 
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock),
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock)
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock),
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock)
                 )
 
                 val libProjectBuildGradlePluginsBlock =
