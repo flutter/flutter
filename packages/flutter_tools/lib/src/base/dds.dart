@@ -25,6 +25,7 @@ export 'package:dds/dds.dart'
 typedef DDSLauncherCallback =
     Future<DartDevelopmentServiceLauncher> Function({
       required Uri remoteVmServiceUri,
+      String? appName,
       Uri? serviceUri,
       bool enableAuthCodes,
       bool serveDevTools,
@@ -65,6 +66,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
     bool? ipv6,
@@ -92,6 +94,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
 
     try {
       _ddsInstance = await ddsLauncherCallback(
+        appName: appName,
         remoteVmServiceUri: vmServiceUri,
         serviceUri: ddsUri,
         enableAuthCodes: disableServiceAuthCodes != true,
@@ -130,6 +133,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName,
     int? ddsPort,
     bool? disableServiceAuthCodes,
     bool? ipv6,
@@ -143,9 +147,11 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   /// from a [DebuggingOptions] instance.
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
+    String? appName,
     required DebuggingOptions debuggingOptions,
   }) => startDartDevelopmentService(
     vmServiceUri,
+    appName: appName,
     ddsPort: debuggingOptions.ddsPort,
     disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
     ipv6: debuggingOptions.ipv6,

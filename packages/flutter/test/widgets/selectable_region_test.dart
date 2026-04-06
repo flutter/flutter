@@ -6650,6 +6650,44 @@ void main() {
       SystemMouseCursors.grab,
     );
   });
+
+  testWidgets('selects all text including trailing newline using mouse drag', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154253.
+    const text = 'Hello world\n';
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Text(
+            text,
+            style: TextStyle(
+              // This is needed to reproduce the issue. This causes the
+              // line height to differ from the character height.
+              height: 1.4,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text(text), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      tester.getTopLeft(find.text(text)),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getBottomRight(find.text(text)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph.selections, isNotEmpty);
+    expect(paragraph.selections.first, const TextSelection(baseOffset: 0, extentOffset: 12));
+  });
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {

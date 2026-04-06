@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
@@ -24,6 +25,11 @@ import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/p
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject();
+}
+
+class FakeAnalysisServer extends Fake implements AnalysisServer {
+  @override
+  Future<void> connectToDtd({required Uri dtdUri}) async {}
 }
 
 void main() {
@@ -64,7 +70,7 @@ void main() {
       project: FakeFlutterProject(),
       addUuidToServiceName: false,
     );
-    await server.launchAndConnect();
+    await server.launchAndConnect(analysisServer: FakeAnalysisServer());
     return server;
   }
 
