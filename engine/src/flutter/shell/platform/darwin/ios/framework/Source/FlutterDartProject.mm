@@ -39,6 +39,7 @@ static BOOL DoesHardwareSupportWideGamut() {
   return result;
 }
 
+// Must be called on the main thread as this calls [UIScreen mainScreen].
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* processInfoOrNil) {
   auto command_line = flutter::CommandLineFromNSProcessInfo(processInfoOrNil);
 

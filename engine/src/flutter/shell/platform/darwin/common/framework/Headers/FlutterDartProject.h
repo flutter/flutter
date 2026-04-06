@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 @interface FlutterDartProject : NSObject
 
 /**
@@ -38,7 +39,7 @@ FLUTTER_DARWIN_EXPORT
  * Returns the default identifier for the bundle where we expect to find the Flutter Dart
  * application.
  */
-+ (NSString*)defaultBundleIdentifier;
++ (NSString*)defaultBundleIdentifier NS_SWIFT_NONISOLATED;
 
 /**
  * An NSArray of NSStrings to be passed as command line arguments to the Dart entrypoint.
@@ -60,7 +61,7 @@ FLUTTER_DARWIN_EXPORT
  * @param asset The name of the asset. The name can be hierarchical.
  * @return the file name to be used for lookup in the main bundle.
  */
-+ (NSString*)lookupKeyForAsset:(NSString*)asset;
++ (NSString*)lookupKeyForAsset:(NSString*)asset NS_SWIFT_NONISOLATED;
 
 /**
  * Returns the file name for the given asset.
@@ -70,7 +71,7 @@ FLUTTER_DARWIN_EXPORT
  * @param bundle The `NSBundle` to use for looking up the asset.
  * @return the file name to be used for lookup in the main bundle.
  */
-+ (NSString*)lookupKeyForAsset:(NSString*)asset fromBundle:(nullable NSBundle*)bundle;
++ (NSString*)lookupKeyForAsset:(NSString*)asset fromBundle:(nullable NSBundle*)bundle NS_SWIFT_NONISOLATED;
 
 /**
  * Returns the file name for the given asset which originates from the specified package.
@@ -80,7 +81,7 @@ FLUTTER_DARWIN_EXPORT
  * @param package The name of the package from which the asset originates.
  * @return the file name to be used for lookup in the main bundle.
  */
-+ (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
++ (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package NS_SWIFT_NONISOLATED;
 
 /**
  * Returns the file name for the given asset which originates from the specified package.
@@ -93,7 +94,7 @@ FLUTTER_DARWIN_EXPORT
  */
 + (NSString*)lookupKeyForAsset:(NSString*)asset
                    fromPackage:(NSString*)package
-                    fromBundle:(nullable NSBundle*)bundle;
+                    fromBundle:(nullable NSBundle*)bundle NS_SWIFT_NONISOLATED;
 
 @end
 

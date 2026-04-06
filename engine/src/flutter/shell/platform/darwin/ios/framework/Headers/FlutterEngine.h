@@ -58,6 +58,7 @@ extern NSString* const FlutterDefaultInitialRoute;
  * One of these methods must be invoked before calling `-setViewController:`.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 @interface FlutterEngine : NSObject <FlutterPluginRegistry>
 
 /**
@@ -453,6 +454,7 @@ FLUTTER_DARWIN_EXPORT
  * This is used when the engine is created implicitly to allow registering
  * plugins, application-level method channels, platform views, etc.
  */
+NS_SWIFT_UI_ACTOR
 @protocol FlutterImplicitEngineBridge <NSObject>
 
 /**
@@ -478,6 +480,7 @@ FLUTTER_DARWIN_EXPORT
  *
  * This provides the engine bridge to the listener.
  */
+NS_SWIFT_UI_ACTOR
 @protocol FlutterImplicitEngineDelegate
 @required
 

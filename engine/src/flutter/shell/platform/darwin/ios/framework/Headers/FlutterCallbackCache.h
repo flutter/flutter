@@ -14,6 +14,7 @@
  * method.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_NONSENDABLE
 @interface FlutterCallbackInformation : NSObject
 /**
  * The name of the callback.
@@ -34,6 +35,7 @@ FLUTTER_DARWIN_EXPORT
  * `FlutterHeadlessDartRunner`.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_NONSENDABLE
 @interface FlutterCallbackCache : NSObject
 /**
  * Returns the callback information for the given callback handle.
@@ -47,7 +49,7 @@ FLUTTER_DARWIN_EXPORT
  *   path of the library which contains the callback. If the provided handle is
  *   invalid, nil is returned.
  */
-+ (FlutterCallbackInformation*)lookupCallbackInformation:(int64_t)handle;
++ (FlutterCallbackInformation*)lookupCallbackInformation:(int64_t)handle NS_SWIFT_NONISOLATED;
 
 @end
 

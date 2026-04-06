@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Wraps a `UIView` for embedding in the Flutter hierarchy
  */
+NS_SWIFT_UI_ACTOR
 @protocol FlutterPlatformView <NSObject>
 /**
  * Returns a reference to the `UIView` that is wrapped by this `FlutterPlatformView`.
@@ -23,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 @protocol FlutterPlatformViewFactory <NSObject>
 /**
  * Create a `FlutterPlatformView`.

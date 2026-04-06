@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  *    occurring in a scene: https://developer.apple.com/documentation/uikit/uiwindowscenedelegate
  */
 API_AVAILABLE(ios(13.0))
+NS_SWIFT_UI_ACTOR
 @protocol FlutterSceneLifeCycleDelegate <NSObject>
 
 @optional
@@ -147,6 +148,7 @@ NS_SWIFT_UI_ACTOR
  */
 FLUTTER_DARWIN_EXPORT
 API_AVAILABLE(ios(13.0))
+NS_SWIFT_UI_ACTOR
 @interface FlutterPluginSceneLifeCycleDelegate : NSObject <FlutterSceneLifeCycleEngineRegistration>
 
 #pragma mark - Connecting and disconnecting the scene
@@ -212,6 +214,7 @@ API_AVAILABLE(ios(13.0))
  * is associated with one and only one `UIScene`.
  */
 API_AVAILABLE(ios(13.0))
+NS_SWIFT_UI_ACTOR
 @protocol FlutterSceneLifeCycleProvider
 
 /**

@@ -13,8 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 FLUTTER_DARWIN_EXPORT
-FLUTTER_SWIFT_CONCURRENCY_EXEMPT("The camera plugin implementation its texture using its own synchronization mechanism. CVPixelBuffer is not Sendable and the camera plugin ")
-NS_SWIFT_NONISOLATED
+NS_SWIFT_NONSENDABLE
 /**
  * Represents a texture that can be shared with Flutter.
  *
@@ -24,15 +23,15 @@ NS_SWIFT_NONISOLATED
 /**
  * Copy the contents of the texture into a `CVPixelBuffer`.
  
- * This method is called on the raster thread. The implementation must relinquish all references to the returned
- * CVPixelBufferRef such that the content of the buffer cannot be modified after this method returns.
+ * This method is called on the raster thread. The he content of the buffer
+ * must not be modified after this method returns.
  *
  * The type of the pixel buffer is one of the following:
  * - `kCVPixelFormatType_32BGRA`
  * - `kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange`
  * - `kCVPixelFormatType_420YpCbCr8BiPlanarFullRange`
  */
-- (CVPixelBufferRef _Nullable)copyPixelBuffer NS_SWIFT_SENDING;
+- (CVPixelBufferRef _Nullable)copyPixelBuffer;
 
 /**
  * Called when the texture is unregistered.

@@ -16,9 +16,12 @@ NS_ASSUME_NONNULL_BEGIN
  * Used for submitting a binary reply back to a Flutter message sender. Also used
  * in for handling a binary message reply received from Flutter.
  *
+ * When replying to a Flutter message, you can call this callback on any thread. When receiving a binary
+ * message reply, you can assume that the callback will be called on the main thread.
+ *
  * @param reply The reply.
  */
-typedef void (^FlutterBinaryReply)(NSData* _Nullable NS_SWIFT_SENDING reply);
+typedef void (NS_SWIFT_UI_ACTOR ^FlutterBinaryReply)(NSData* _Nullable reply);
 
 /**
  * A strategy for handling incoming binary messages from Flutter and to send
@@ -27,7 +30,7 @@ typedef void (^FlutterBinaryReply)(NSData* _Nullable NS_SWIFT_SENDING reply);
  * @param message The message.
  * @param reply A callback for submitting an asynchronous reply to the sender.
  */
-typedef void (NS_SWIFT_SENDABLE ^FlutterBinaryMessageHandler)(NSData* _Nullable NS_SWIFT_SENDING message, FlutterBinaryReply reply);
+typedef void (NS_SWIFT_UI_ACTOR ^FlutterBinaryMessageHandler)(NSData* _Nullable message, void (NS_SWIFT_SENDABLE ^reply)(NSData* _Nullable reply));
 
 typedef int64_t FlutterBinaryMessengerConnection;
 
@@ -47,6 +50,7 @@ NS_SWIFT_UI_ACTOR
  * - `FlutterEventChannel`, which supports commuication using event streams.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 @protocol FlutterBinaryMessenger <NSObject>
 /// TODO(gaaclarke): Remove optional when macos supports Background Platform Channels.
 @optional
