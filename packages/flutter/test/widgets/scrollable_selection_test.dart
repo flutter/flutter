@@ -1650,9 +1650,11 @@ void main() {
       // _inferPositionRelatedToOrigin. That Offset.infinite event is then
       // forwarded to the inner scrollable's delegate, which has
       // _selectionStartsInScrollable=true (it received the outer's remapped
-      // origin as its first event). The inner delegate used to call
-      // startAutoScrollIfNecessary with an Offset.infinite drag rect, triggering
-      // an assertion failure inside EdgeDraggingAutoScroller.
+      // origin as its first event). Before the fix, the inner delegate would
+      // pass Offset.infinite to startAutoScrollIfNecessary via _dragTargetFromEvent,
+      // producing a non-finite Rect that triggers an assertion failure in
+      // EdgeDraggingAutoScroller._scroll. The fix skips auto-scrolling when the
+      // event's globalPosition is non-finite.
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(

@@ -1298,22 +1298,18 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
-      // The root cause fix in _inferPositionRelatedToOrigin ensures that nested
-      // child scrollables receive a position outside their bounds (Offset(-1,-1))
-      // when selection starts outside the parent, so _selectionStartsInScrollable
-      // is accurate. If _selectionStartsInScrollable is true, globalPosition must
-      // always be finite here.
-      assert(
-        event.globalPosition.isFinite,
-        '_ScrollableSelectionContainerDelegate should never call '
-        'startAutoScrollIfNecessary with a non-finite globalPosition. '
-        'A non-finite position indicates the event was synthesized by a parent '
-        'delegate for out-of-bounds selection, in which case '
-        '_selectionStartsInScrollable should be false.',
-      );
-      _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
-      if (_autoScroller.scrolling) {
-        return SelectionResult.pending;
+      // In nested scrollables, a parent delegate may forward Offset.infinite
+      // (from _inferPositionRelatedToOrigin) as the globalPosition to signal
+      // "select everything below". The inner delegate may have
+      // _selectionStartsInScrollable=true from an earlier finite event. Skip
+      // auto-scrolling in this case because the infinite position would produce
+      // a non-finite drag target rect, which triggers an assertion failure in
+      // EdgeDraggingAutoScroller._scroll.
+      if (event.globalPosition.isFinite) {
+        _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
+        if (_autoScroller.scrolling) {
+          return SelectionResult.pending;
+        }
       }
     }
     return result;
@@ -1325,14 +1321,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (!_selectionStartsInScrollable) {
       // If the selection starts outside of the scrollable, selecting across the
       // scrollable boundary will act as selecting the entire content in the
-      // scrollable. This logic moves the offset to just outside the boundary
-      // (or to positive infinity) to cover the entire content. Using a position
-      // just outside the boundary (rather than exactly at (0,0)) ensures that
-      // nested child scrollables do not incorrectly interpret the snapped
-      // position as "selection started inside me", which would cause them to
-      // attempt auto-scrolling with an infinite position.
+      // scrollable. This logic moves the offset to the 0.0 or infinity to cover
+      // the entire content if the input position is outside of the scrollable.
       if (localPosition.dy < 0 || localPosition.dx < 0) {
-        return box.localToGlobal(const Offset(-1, -1));
+        return box.localToGlobal(Offset.zero);
       }
       if (localPosition.dy > box.size.height || localPosition.dx > box.size.width) {
         return Offset.infinite;
