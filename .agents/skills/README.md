@@ -26,3 +26,12 @@ We encourage contributors to follow these practices when authoring skills, thoug
 * **Structure and Rules**: Be extremely strict about your style. The more structured and rule-based your instructions are (with a limited number of exceptions), the better. Agents have an exponential reward function for structure.
 * **Read-Only Mode**: When appropriate, tell agents how to access real data strictly in read-only mode to prevent unintended changes.
 * **Dart Scripts**: Scripts should be written in Dart.
+
+# How to help
+If you are a regular contributor looking for areas where you can author a skill, the following are good places to start:
+
+* When to use a command line tool from the repo, its arguments, and how to interpret its outputs.
+* How to run a particular set of tests.
+* How to run the analyzer or linters that have repo-specific configuration.
+* Productization steps that are required after modifying some area of code.
+* How to debug or differentiate a common class of issues.
