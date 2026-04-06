@@ -45,10 +45,4 @@
 #define FLUTTER_ASSERT_NOT_ARC
 #endif
 
-/**
- * Indicates to flutter internal tests that the annotated type intentionally
- * omitted concurrency annotations, for reasons stated in the given message.
- */
-#define FLUTTER_SWIFT_CONCURRENCY_EXEMPT(msg) __attribute__((annotate(msg)))
-
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_HEADERS_FLUTTERMACROS_H_

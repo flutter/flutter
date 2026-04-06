@@ -22,13 +22,13 @@ NS_SWIFT_SENDABLE
 /**
  * Returns a shared instance of this `FlutterMessageCodec`.
  */
-+ (instancetype)sharedInstance NS_SWIFT_NONISOLATED;
++ (instancetype)sharedInstance;
 
 /**
  * Encodes the specified message into binary.
  *
- * The implementation should typically copy data from `message` to the `NSData`
- * to avoid data races.
+ * The return value should typically avoid sharing memory with `message` to
+ * avoid data races.
  *
  * @param message The message.
  * @return The binary encoding, or `nil`, if `message` was `nil`.
@@ -470,8 +470,6 @@ NS_SWIFT_SENDABLE
  *
  * Values supported as methods arguments and result payloads are
  * those supported as top-level or leaf values by `FlutterJSONMessageCodec`.
- *
- * The implementation must be thread-safe as the codec can be used on any thread.
  */
 FLUTTER_DARWIN_EXPORT
 NS_SWIFT_SENDABLE
