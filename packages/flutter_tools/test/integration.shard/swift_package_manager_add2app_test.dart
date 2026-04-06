@@ -182,6 +182,9 @@ void main() {
           copyDirectory(nativeProjectTemplate, nativeProject);
           final Directory nativeBuildDir = nativeProject.childDirectory('build');
 
+          // CI code-signing is not set up for macOS.
+          final codesign = targetPlatform == .ios;
+
           // When sandboxing is disabled and the application path is set, we use "flutter assemble"
           // to rebuild the App.framework and copy in the correct Flutter framework.
           await _buildNativeProject(
@@ -195,6 +198,7 @@ void main() {
               r'ENABLE_USER_SCRIPT_SANDBOXING=NO',
               'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
             ],
+            codesign: codesign,
             expectedOutput: [
               "Build of product 'flutter-prebuild-tool' complete!",
               'FlutterPluginRegistrant symlink updated to ./Release',
@@ -215,6 +219,7 @@ void main() {
             sdk: sdk,
             platform: targetPlatform,
             buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
+            codesign: codesign,
             expectedOutput: [
               'FlutterPluginRegistrant symlink updated to ./Debug',
               'Verification complete.',
@@ -240,6 +245,7 @@ void main() {
               r'ENABLE_USER_SCRIPT_SANDBOXING=YES',
               'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
             ],
+            codesign: codesign,
             expectedOutput: [
               'FlutterPluginRegistrant symlink updated to ./Release',
               'Verification complete.',
@@ -266,6 +272,7 @@ void main() {
             sdk: sdk,
             platform: targetPlatform,
             buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=YES'],
+            codesign: codesign,
             expectedOutput: ['Verification complete.'],
             unexpectedOutput: [
               'FlutterPluginRegistrant symlink updated to ./Release',
@@ -388,6 +395,7 @@ void main() {
           buildMode: 'Release',
           sdk: sdk,
           platform: targetPlatform,
+          codesign: true,
           buildSettings: [
             r'ENABLE_USER_SCRIPT_SANDBOXING=NO',
             'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
@@ -446,11 +454,26 @@ Future<String> _buildNativeProject({
   bool expectFailure = false,
   List<String> expectedOutput = const [],
   List<String> unexpectedOutput = const [],
+  required bool codesign,
 }) async {
   final Map<String, String> environment = Platform.environment;
-  final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-  final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-  final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+  final List<String> codesignArguments;
+  if (codesign) {
+    final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+    codesignArguments = [
+      'DEVELOPMENT_TEAM=$developmentTeam',
+      if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
+      if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+    ];
+  } else {
+    codesignArguments = [
+      'CODE_SIGNING_ALLOWED=NO',
+      'CODE_SIGNING_REQUIRED=NO',
+      'CODE_SIGNING_IDENTITY=""',
+    ];
+  }
 
   final ProcessResult result = await processManager.run(<String>[
     'xcrun',
@@ -467,9 +490,7 @@ Future<String> _buildNativeProject({
     sdk.genericPlatform,
     'build',
     'BUILD_DIR=$buildDir',
-    'DEVELOPMENT_TEAM=$developmentTeam',
-    if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
-    if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+    ...codesignArguments,
     'FLUTTER_SWIFT_PACKAGE_OUTPUT=\$SRCROOT/../$appName/build/${platform.name}/SwiftPackages',
     r'VERBOSE_SCRIPT_LOGGING=YES',
     ...buildSettings,
