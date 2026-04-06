@@ -40,26 +40,56 @@ object FlutterPluginUtils {
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
 
+    /**
+     * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `id("com.android.application")` or `alias(libs.plugins.android.application)`
+     * within a `plugins { ... }` block.
+     */
     internal val appPluginRegexKotlin =
         """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.application['"]|libs\.plugins\.android\.application)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
+    /**
+     * Matches the AGP library plugin declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `id("com.android.library")` or `alias(libs.plugins.android.library)`
+     * within a `plugins { ... }` block.
+     */
     internal val libPluginRegexKotlin =
         """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.library['"]|libs\.plugins\.android\.library)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
+    /**
+     * Matches the KGP declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `kotlin-android`, `org.jetbrains.kotlin.android`, or version catalog aliases
+     * for Kotlin Android within a `plugins { ... }` block.
+     */
     internal val kgpRegexKotlin =
         """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
+    /**
+     * Matches the AGP application plugin in Groovy DSL (`build.gradle`).
+     * Supports both the legacy `apply plugin: 'com.android.application'` syntax and
+     * the modern `plugins { id 'com.android.application' }` syntax (with or without parentheses).
+     */
     internal val appPluginRegexGroovy =
         """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.application\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.application['"]|libs\.plugins\.android\.application)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
+    /**
+     * Matches the AGO library plugin in Groovy DSL (`build.gradle`).
+     * Supports both the legacy `apply plugin: 'com.android.library'` syntax and
+     * the modern `plugins { id 'com.android.library' }` syntax (with or without parentheses).
+     */
     internal val libPluginRegexGroovy =
         """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.library\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.library['"]|libs\.plugins\.android\.library)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
 
+    /**
+     * Matches the KGP in Groovy DSL (`build.gradle`).
+     * Supports both legacy `apply plugin` and modern `plugins {}` blocks for
+     * `kotlin-android` or `org.jetbrains.kotlin.android`.
+     */
     internal val kgpRegexGroovy =
         """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
             .toRegex()
