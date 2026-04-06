@@ -196,8 +196,9 @@ void main() {
               'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
             ],
             expectedOutput: [
-              "Build of product 'flutter-assemble-tool' complete!",
+              "Build of product 'flutter-prebuild-tool' complete!",
               'FlutterPluginRegistrant symlink updated to ./Release',
+              "Build of product 'flutter-assemble-tool' complete!",
               'flutter --verbose assemble',
               'release_unpack_${targetPlatform.name.toLowerCase()}: Starting',
             ],
@@ -216,15 +217,13 @@ void main() {
             buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
             expectedOutput: [
               'FlutterPluginRegistrant symlink updated to ./Debug',
-              'note: Transfer starting',
-              '${targetPlatform.binaryName}.framework/${targetPlatform.binaryName}',
-              '${targetPlatform.binaryName}.framework/${targetPlatform.binaryName}: signed bundle',
-              'App.framework/App',
-              'App.framework/App: signed bundle',
+              'Verification complete.',
             ],
             unexpectedOutput: [
+              "Build of product 'flutter-prebuild-tool' complete!",
               "Build of product 'flutter-assemble-tool' complete!",
               'flutter --verbose assemble',
+              'note: Transfer starting',
             ],
           );
           expect(pluginRegistrantLink.targetSync(), './Debug');
@@ -241,18 +240,16 @@ void main() {
               r'ENABLE_USER_SCRIPT_SANDBOXING=YES',
               'FLUTTER_APPLICATION_PATH=\$SRCROOT/../$appName',
             ],
-            expectFailure: true,
             expectedOutput: [
+              'FlutterPluginRegistrant symlink updated to ./Release',
+              'Verification complete.',
               'warning: ENABLE_USER_SCRIPT_SANDBOXING is enabled. Flutter is unable to rebuild the Flutter app when sandboxing is enabled.',
               'warning: To rebuild the Flutter app as part of the Xcode build, please set ENABLE_USER_SCRIPT_SANDBOXING=NO in your build settings.',
               'warning: Otherwise, to build any changes to your Flutter app, you will need to re-run "flutter build swift-package" from within your Flutter application.',
               'warning: Alternatively, you can remove FLUTTER_APPLICATION_PATH from your build settings to dismiss this warning.',
-              'error: Flutter build mode has changed. ENABLE_USER_SCRIPT_SANDBOXING is enabled.',
-              'error: Unable to change already built artifacts. Updating build mode for next build...',
-              'note: FlutterPluginRegistrant symlink updated to ./Release.',
-              'error: Please re-run.',
             ],
             unexpectedOutput: [
+              "Build of product 'flutter-prebuild-tool' complete!",
               "Build of product 'flutter-assemble-tool' complete!",
               'flutter --verbose assemble',
               'note: Transfer starting',
@@ -269,12 +266,13 @@ void main() {
             sdk: sdk,
             platform: targetPlatform,
             buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=YES'],
+            expectedOutput: ['Verification complete.'],
             unexpectedOutput: [
+              'FlutterPluginRegistrant symlink updated to ./Release',
+              "Build of product 'flutter-prebuild-tool' complete!",
               "Build of product 'flutter-assemble-tool' complete!",
               'flutter --verbose assemble',
               'note: Transfer starting',
-              'warning: ENABLE_USER_SCRIPT_SANDBOXING is enabled. Flutter is unable to rebuild the Flutter app when sandboxing is enabled.',
-              'note: FlutterPluginRegistrant symlink updated',
             ],
           );
           expect(pluginRegistrantLink.targetSync(), './Release');
@@ -585,7 +583,7 @@ void _verifyModeAgnosticFiles({
 
   // Verify Scripts
   expect(buildDir.childFile('Scripts/FlutterAssembleInputs.xcfilelist'), exists);
-  expect(buildDir.childFile('Scripts/post_embed.sh'), exists);
+  expect(buildDir.childFile('Scripts/flutter_integration.sh'), exists);
 
   // Verify FlutterNativeIntegration
   final Directory packageDir = buildDir.childDirectory('FlutterNativeIntegration');

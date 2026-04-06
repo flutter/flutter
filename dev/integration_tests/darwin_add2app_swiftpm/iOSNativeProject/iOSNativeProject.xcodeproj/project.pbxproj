@@ -160,7 +160,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh $FLUTTER_SWIFT_PACKAGE_OUTPUT/Scripts/post_embed.sh\n";
+			shellScript = "/bin/sh $FLUTTER_SWIFT_PACKAGE_OUTPUT/Scripts/flutter_integration.sh assemble\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

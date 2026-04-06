@@ -1414,7 +1414,7 @@ let package = Package(
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
         const iphoneosCocoapodPluginPath =
-            '$iphoneosDirPath/Release-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
+            '$iphoneosDirPath/Debug-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
         const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
         const simulatorCocoapodPluginPath =
             '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
@@ -1434,7 +1434,7 @@ let package = Package(
               '-sdk',
               'iphoneos',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$iphoneosDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -1537,7 +1537,7 @@ let package = Package(
         const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
         const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
         const iphoneosRegistrantPath =
-            '$iphoneosDirPath/Release-iphoneos/FlutterPluginRegistrant/FlutterPluginRegistrant.framework';
+            '$iphoneosDirPath/Debug-iphoneos/FlutterPluginRegistrant/FlutterPluginRegistrant.framework';
         final File identityFile = fs.file(codesignIdentityFile);
         identityFile
           ..createSync(recursive: true)
@@ -1556,7 +1556,7 @@ let package = Package(
               '-sdk',
               'iphoneos',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$iphoneosDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -1635,7 +1635,7 @@ let package = Package(
         const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
         const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
         const iphoneosPluginPath =
-            '$iphoneosDirPath/Release-iphoneos/swiftpm_plugin/swiftpm_plugin.framework';
+            '$iphoneosDirPath/Debug-iphoneos/swiftpm_plugin/swiftpm_plugin.framework';
         final File identityFile = fs.file(codesignIdentityFile);
         identityFile
           ..createSync(recursive: true)
@@ -1654,7 +1654,7 @@ let package = Package(
               '-sdk',
               'iphoneos',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$iphoneosDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -1740,7 +1740,7 @@ let package = Package(
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
         const iphoneosCocoapodPluginPath =
-            '$iphoneosDirPath/Release-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
+            '$iphoneosDirPath/Debug-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
         const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
         const simulatorCocoapodPluginPath =
             '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
@@ -1755,7 +1755,7 @@ let package = Package(
               '-sdk',
               'iphoneos',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$iphoneosDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -1809,7 +1809,7 @@ let package = Package(
               '-sdk',
               'iphoneos',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$iphoneosDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -1912,7 +1912,7 @@ let package = Package(
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         const iphoneosDirPath = '$debugCocoapodCache/iphoneos';
         const iphoneosCocoapodPluginPath =
-            '$iphoneosDirPath/Release-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
+            '$iphoneosDirPath/Debug-iphoneos/cocoapod_plugin/cocoapod_plugin.framework';
         const simulatorDirPath = '$debugCocoapodCache/iphonesimulator';
         const simulatorCocoapodPluginPath =
             '$simulatorDirPath/Debug-iphonesimulator/cocoapod_plugin/cocoapod_plugin.framework';
@@ -1931,7 +1931,7 @@ let package = Package(
               '-sdk',
               'iphoneos',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$iphoneosDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -3086,7 +3086,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         final Directory xcframeworkOutput = fs.directory(debugFrameworksDirectoryPath);
         const macosCacheDirPath = '$debugCocoapodCache/macosx';
         const cocoapodPluginPath =
-            '$macosCacheDirPath/Release/cocoapod_plugin/cocoapod_plugin.framework';
+            '$macosCacheDirPath/Debug/cocoapod_plugin/cocoapod_plugin.framework';
         const cocoapodPluginXCFrameworkPath =
             '$debugCocoaPodsDirectoryPath/cocoapod_plugin.xcframework';
         final File identityFile = fs.file(codesignIdentityFile);
@@ -3102,7 +3102,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
               '-sdk',
               'macosx',
               '-configuration',
-              'Release',
+              'Debug',
               'SYMROOT=$macosCacheDirPath',
               'ONLY_ACTIVE_ARCH=NO',
               'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
@@ -3282,16 +3282,16 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
           ..createSync();
 
-      final integrationPackage = FlutterNativeIntegrationSwiftPackage(
-        utils: testUtils,
-        generateTests: false,
-        targetPlatform: FlutterDarwinPlatform.ios,
-      );
-      await integrationPackage.generateSwiftPackages(
-        outputDirectory: outputDirectory,
-        flutterIntegrationPackage: flutterIntegrationPackage,
-        highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
-      );
+        final integrationPackage = FlutterNativeIntegrationSwiftPackage(
+          utils: testUtils,
+          generateTests: false,
+          targetPlatform: FlutterDarwinPlatform.ios,
+        );
+        await integrationPackage.generateSwiftPackages(
+          outputDirectory: outputDirectory,
+          flutterIntegrationPackage: flutterIntegrationPackage,
+          highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
+        );
 
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
         expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
@@ -3343,7 +3343,8 @@ let package = Package(
     name: "FlutterNativeTools",
     products: [
         .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
-        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
+        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"])
     ],
     dependencies: [\n        \n    ],
     targets: [
@@ -3352,6 +3353,12 @@ let package = Package(
         ),
         .executableTarget(
             name: "FlutterAssembleTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .executableTarget(
+            name: "FlutterPrebuildTool",
             dependencies: [
                 .target(name: "FlutterToolHelper")
             ]
@@ -3511,16 +3518,16 @@ let package = Package(
         final Directory flutterIntegrationPackage = fs.directory(nativeIntegrationSwiftPackagePath)
           ..createSync();
 
-      final integrationPackage = FlutterNativeIntegrationSwiftPackage(
-        utils: testUtils,
-        generateTests: true,
-        targetPlatform: FlutterDarwinPlatform.macos,
-      );
-      await integrationPackage.generateSwiftPackages(
-        outputDirectory: outputDirectory,
-        flutterIntegrationPackage: flutterIntegrationPackage,
-        highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
-      );
+        final integrationPackage = FlutterNativeIntegrationSwiftPackage(
+          utils: testUtils,
+          generateTests: true,
+          targetPlatform: FlutterDarwinPlatform.macos,
+        );
+        await integrationPackage.generateSwiftPackages(
+          outputDirectory: outputDirectory,
+          flutterIntegrationPackage: flutterIntegrationPackage,
+          highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+        );
 
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
         expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
@@ -3572,7 +3579,8 @@ let package = Package(
     name: "FlutterNativeTools",
     products: [
         .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
-        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"])
+        .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
+        .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"])
     ],
     dependencies: [\n        \n    ],
     targets: [
@@ -3581,6 +3589,12 @@ let package = Package(
         ),
         .executableTarget(
             name: "FlutterAssembleTool",
+            dependencies: [
+                .target(name: "FlutterToolHelper")
+            ]
+        ),
+        .executableTarget(
+            name: "FlutterPrebuildTool",
             dependencies: [
                 .target(name: "FlutterToolHelper")
             ]

@@ -104,13 +104,19 @@ class BuildSwiftPackage extends BuildSubCommand {
         'output',
         abbr: 'o',
         valueHelp: 'path/to/directory/',
-        help: 'Location to write the swift package.',
+        help: 'Directory where the Swift package will be written.',
       )
-      ..addOption('platform', allowed: _kSupportedPlatforms, defaultsTo: 'ios')
+      ..addOption(
+        'platform',
+        allowed: _kSupportedPlatforms,
+        defaultsTo: 'ios',
+        help: 'Target platform for the build.',
+      )
       ..addMultiOption(
         'build-mode',
         allowed: availableBuildModes.map((e) => e.cliName).toList(),
         defaultsTo: availableBuildModes.map((e) => e.cliName).toList(),
+        help: 'Build modes to include.',
       )
       ..addFlag('static', help: 'Build CocoaPods plugins as static frameworks.');
   }
@@ -1789,7 +1795,7 @@ class CocoaPodPluginDependencies {
       // Always build debug for simulator.
       return BuildMode.debug.uppercaseName;
     }
-    return BuildMode.release.uppercaseName;
+    return configuration;
   }
 
   /// The target dependencies and binary targets for the CocoaPod plugin xcframeworks.
@@ -1842,6 +1848,9 @@ class FlutterNativeIntegrationSwiftPackage {
 
   /// The name of the Swift package library with common logic shared among the other tools.
   static const String _kFlutterToolHelper = 'FlutterToolHelper';
+
+  /// The name of the Swift package executable tool that will be used during a scheme pre-action.
+  static const String _kFlutterPrebuildTool = 'FlutterPrebuildTool';
 
   /// The name of the Swift package executable tool that will be used during a build run phase that
   /// occurs after the Flutter.framework and App.framework are embedded into the app bundle.
@@ -1906,11 +1915,12 @@ class FlutterNativeIntegrationSwiftPackage {
       manifest: nativeToolsPackage.childFile('Package.swift'),
       name: _kFlutterNativeTools,
       platforms: <SwiftPackageSupportedPlatform>[],
-      products: [_pluginTool.product, _assembleTool.product],
+      products: [_pluginTool.product, _assembleTool.product, _prebuildTool.product],
       dependencies: [],
       targets: [
         SwiftPackageTarget.defaultTarget(name: _kFlutterToolHelper),
         _assembleTool.target,
+        _prebuildTool.target,
         ..._pluginTool.targets,
         if (_generateTests) _testTarget,
       ],
@@ -2035,6 +2045,18 @@ class FlutterNativeIntegrationSwiftPackage {
     );
     final target = SwiftPackageTarget.executableTarget(
       name: _kFlutterAssembleTool,
+      dependencies: [SwiftPackageTargetDependency.target(name: _kFlutterToolHelper)],
+    );
+    return (product: product, target: target);
+  }
+
+  ({SwiftPackageProduct product, SwiftPackageTarget target}) get _prebuildTool {
+    final product = SwiftPackageProduct.executable(
+      name: 'flutter-prebuild-tool',
+      targets: [_kFlutterPrebuildTool],
+    );
+    final target = SwiftPackageTarget.executableTarget(
+      name: _kFlutterPrebuildTool,
       dependencies: [SwiftPackageTargetDependency.target(name: _kFlutterToolHelper)],
     );
     return (product: product, target: target);
