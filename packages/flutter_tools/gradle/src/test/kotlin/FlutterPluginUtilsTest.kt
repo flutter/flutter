@@ -1075,6 +1075,7 @@ class FlutterPluginUtilsTest {
                         WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
                         Please migrate your app to Built-in Kotlin using this guide: [link here]
+                        
                         """.trimIndent()
                     )
                 }
@@ -1263,6 +1264,7 @@ class FlutterPluginUtilsTest {
                         WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
                         Please migrate your app to Built-in Kotlin using this guide: [link here]
+                        
                         """.trimIndent()
                     )
                 }
@@ -1375,6 +1377,7 @@ class FlutterPluginUtilsTest {
                         WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
                         Please migrate your app to Built-in Kotlin using this guide: [link here]
+                        
                         """.trimIndent()
                     )
                 }

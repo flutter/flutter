@@ -640,6 +640,7 @@ object FlutterPluginUtils {
                     WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
                     applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
                     Please migrate your app to Built-in Kotlin using this guide: [link here]
+                    
                     """.trimIndent()
                 )
             }
