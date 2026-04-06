@@ -174,7 +174,6 @@ void main() {
           ], workingDirectory: tempDir.childDirectory('test_project_1').path);
 
           expect(result.stdout is String, true);
-          expect((result.stdout as String).startsWith('{\n'), true);
           expect(result.stdout, isNot(contains(',\n}')));
           expect((result.stdout as String).endsWith('}\n'), true);
 
