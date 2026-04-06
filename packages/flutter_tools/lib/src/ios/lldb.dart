@@ -11,18 +11,22 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
+import '../macos/xcode.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
 /// launched on a physical iOS device, you can attach to it using LLDB.
 ///
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
-  LLDB({required Logger logger, required ProcessUtils processUtils})
-    : _logger = logger,
+  LLDB({required Logger logger, required ProcessUtils processUtils, required Xcode xcode})
+    : _xcode = xcode,
+      _logger = logger,
       _processUtils = processUtils;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
+  final Xcode _xcode;
 
   _LLDBProcess? _lldbProcess;
 
@@ -111,7 +115,9 @@ return False
         return false;
       }
       await _selectDevice(deviceId);
-      await _setBreakpoint();
+      if (_xcode.currentVersion != Version(26, 4, 0)) {
+        await _setBreakpoint();
+      }
       await _attachToAppProcess(appProcessId);
       await _resumeProcess();
       _isAttached = true;
