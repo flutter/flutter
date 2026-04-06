@@ -769,27 +769,27 @@ class FlutterPluginUtilsTest {
         @Nested
         inner class TestApplyingPluginsRegexTests {
             @Test
-            fun `test agp app regex`() {
-                assertPluginDetection(FlutterPluginUtils.appPluginRegexKotlin, "com.android.application", DslType.KOTLIN)
-                assertPluginDetection(FlutterPluginUtils.appPluginRegexGroovy, "com.android.application", DslType.GROOVY)
+            fun `agp app regex on single line apply`() {
+                assertSingeLinePluginDetection(FlutterPluginUtils.appPluginRegexKotlin, "com.android.application", DslType.KOTLIN)
+                assertSingeLinePluginDetection(FlutterPluginUtils.appPluginRegexGroovy, "com.android.application", DslType.GROOVY)
             }
 
             @Test
-            fun `test agp lib regex`() {
-                assertPluginDetection(FlutterPluginUtils.libPluginRegexKotlin, "com.android.library", DslType.KOTLIN)
-                assertPluginDetection(FlutterPluginUtils.libPluginRegexGroovy, "com.android.library", DslType.GROOVY)
+            fun `agp lib regex on single line apply`() {
+                assertSingeLinePluginDetection(FlutterPluginUtils.libPluginRegexKotlin, "com.android.library", DslType.KOTLIN)
+                assertSingeLinePluginDetection(FlutterPluginUtils.libPluginRegexGroovy, "com.android.library", DslType.GROOVY)
             }
 
             @Test
-            fun `test KGP regex`() {
-                assertPluginDetection(FlutterPluginUtils.kgpRegexKotlin, "kotlin-android", DslType.KOTLIN)
-                assertPluginDetection(FlutterPluginUtils.kgpRegexGroovy, "kotlin-android", DslType.GROOVY)
-                assertPluginDetection(FlutterPluginUtils.kgpRegexKotlin, "org.jetbrains.kotlin.android", DslType.KOTLIN)
-                assertPluginDetection(FlutterPluginUtils.kgpRegexGroovy, "org.jetbrains.kotlin.android", DslType.GROOVY)
+            fun `KGP regex on single line apply`() {
+                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "kotlin-android", DslType.KOTLIN)
+                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "kotlin-android", DslType.GROOVY)
+                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "org.jetbrains.kotlin.android", DslType.KOTLIN)
+                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "org.jetbrains.kotlin.android", DslType.GROOVY)
             }
 
             @Test
-            fun `test regex when multiple plugins`() {
+            fun `Regexes are successful when multiple plugins are applied`() {
                 val appProjectBuildGradlePluginsBlock =
                     """
                     plugins {
@@ -876,7 +876,7 @@ class FlutterPluginUtilsTest {
             }
 
             @Test
-            fun `test multi-plugin failure cases`() {
+            fun `Regexes fail when multiple plugins are applied`() {
                 val kotlinSameLine =
                     """
                     plugins {
@@ -893,7 +893,6 @@ class FlutterPluginUtilsTest {
                     "Should fail: multi-id on one line"
                 )
 
-                // Failure: Multiple IDs on the same line (Groovy)
                 val groovySameLine =
                     """
                     plugins {
@@ -954,7 +953,7 @@ class FlutterPluginUtilsTest {
             }
         }
 
-        fun assertPluginDetection(
+        fun assertSingeLinePluginDetection(
             regex: Regex,
             pluginId: String,
             dslType: DslType
