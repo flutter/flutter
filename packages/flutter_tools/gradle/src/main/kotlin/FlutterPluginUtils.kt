@@ -40,6 +40,30 @@ object FlutterPluginUtils {
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
 
+    internal val appPluginRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)\s*\(\s*(['"]com\.android\.application['"]|libs\.plugins\.android\.application)\s*\)"""
+            .toRegex()
+
+    internal val libPluginRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)\s*\(\s*(['"]com\.android\.library['"]|libs\.plugins\.android\.library)\s*\)"""
+            .toRegex()
+
+    internal val kgpRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)\s*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)"""
+            .toRegex()
+
+    internal val appPluginRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.application\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)\s+(['"]com\.android\.application['"]|libs\.plugins\.android\.application)"""
+            .toRegex()
+
+    internal val libPluginRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.library\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)\s+(['"]com\.android\.library['"]|libs\.plugins\.android\.library)"""
+            .toRegex()
+
+    internal val kgpRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?\b(?:id|alias)\s+(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)"""
+            .toRegex()
+
     // ----------------- Methods for string manipulation and comparison. -----------------
 
     @JvmStatic
@@ -523,22 +547,6 @@ object FlutterPluginUtils {
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
 
-        val appPluginRegex =
-            """^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.application\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)|plugins\s*\{[^{}]*?(?<=[\n{])([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.application\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.application\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b)"""
-                .toRegex(
-                    RegexOption.MULTILINE
-                )
-        val libPluginRegex =
-            """^([^/\n]*?)apply\s+plugin\s*:\s*(['"])com\.android\.library\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)|plugins\s*\{[^{}]*?(?<=[\n{])([^/\n]*?)(?:id\s*\(?\s*(['"])com\.android\.library\4\s*\)?|alias\s*\(\s*libs\.plugins\.android\.library\s*\))(?![^/\n]*\bapply\s*[:(]?\s*false\b)"""
-                .toRegex(
-                    RegexOption.MULTILINE
-                )
-        val kgpRegex =
-            """^([^/\n]*?)(?:apply\s+plugin\s*:\s*|id\s*\(?\s*)(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\2(?![^/\n]*\bapply\s*[:(]?\s*false\b)"""
-                .toRegex(
-                    RegexOption.MULTILINE
-                )
-
         var shouldLogForApp = false
         project.rootProject.subprojects {
             // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
@@ -551,9 +559,19 @@ object FlutterPluginUtils {
                     buildFile.readText()
                 }
 
-            val hasKgpPlugin = kgpRegex.containsMatchIn(scriptText)
-            val hasAppPlugin = appPluginRegex.containsMatchIn(scriptText)
-            val hasLibPlugin = libPluginRegex.containsMatchIn(scriptText)
+            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin ) = if (buildFile.extension == "kts") {
+                Triple(
+                    kgpRegexKotlin.containsMatchIn(scriptText),
+                    appPluginRegexKotlin.containsMatchIn(scriptText),
+                    libPluginRegexKotlin.containsMatchIn(scriptText)
+                )
+            } else {
+                Triple(
+                    kgpRegexGroovy.containsMatchIn(scriptText),
+                    appPluginRegexGroovy.containsMatchIn(scriptText),
+                    libPluginRegexGroovy.containsMatchIn(scriptText)
+                )
+            }
 
             // Ensures applying AGP exists in the build file configuration.
             if (!hasAppPlugin && !hasLibPlugin) return@subprojects
