@@ -599,7 +599,8 @@ class FlutterPluginRegistrantSwiftPackage {
           plugins,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
-          // The registrant needs to be public to be accessible in the app.
+          // The registrant needs to be public to be accessible in the app, since it's within a
+          // Swift package for add-to-app.
           public: true,
         );
     }

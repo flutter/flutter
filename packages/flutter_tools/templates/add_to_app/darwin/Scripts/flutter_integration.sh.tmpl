@@ -28,8 +28,8 @@ FLUTTER_TOOL_BUILD_MODE="release"
 
 buildTool() {
   cd "$FLUTTER_NATIVE_TOOLS_PACKAGE_PATH" || exit 1
-  xcrun --sdk macosx swift package clean --build-path $FLUTTER_TOOL_BUILD_PATH
-  xcrun --sdk macosx swift build --product $FLUTTER_TOOL --build-path $FLUTTER_TOOL_BUILD_PATH -c $FLUTTER_TOOL_BUILD_MODE --disable-sandbox
+  xcrun --sdk macosx swift package clean --build-path "$FLUTTER_TOOL_BUILD_PATH"
+  xcrun --sdk macosx swift build --product $FLUTTER_TOOL --build-path "$FLUTTER_TOOL_BUILD_PATH" -c $FLUTTER_TOOL_BUILD_MODE --disable-sandbox
 }
 
 # Use prebuilt tool if possible, otherwise re-build it for next time
