@@ -13,7 +13,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 
-import '../framework/android_utils.dart';
+import '../framework/android_manifest_utils.dart';
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/host_agent.dart';

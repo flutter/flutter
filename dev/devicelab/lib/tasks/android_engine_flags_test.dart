@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../framework/android_utils.dart';
+import '../framework/android_manifest_utils.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
@@ -35,6 +35,10 @@ TaskFunction androidEngineFlagsTest(String buildMode) {
 
     return TaskResult.success(null);
   };
+}
+
+String getExcepitonMessageForIncompleteTest(int exitCode) {
+  return 'flutter run failed, exitCode=$exitCode';
 }
 
 Future<String> _createTestProject(Directory tempDir) async {
@@ -96,7 +100,11 @@ TaskFunction _testInvalidFlag(String buildMode) {
       ]);
 
       if (result is int) {
-        throw Exception('flutter run failed, exitCode=$result');
+        throw Exception(
+          result == 0
+              ? 'Unsafe AOT shared library name flag was not skipped; test failed.'
+              : getExcepitonMessageForIncompleteTest(result),
+        );
       }
 
       section('Stop listening to STDOUT');
@@ -155,7 +163,11 @@ TaskFunction _testIllegalFlagInReleaseMode() {
       ]);
 
       if (result is int) {
-        throw Exception('flutter run failed, exitCode=$result');
+        throw Exception(
+          result == 0
+              ? 'UseTestFonts flag was allowed in release builds; test failed.'
+              : getExcepitonMessageForIncompleteTest(result),
+        );
       }
 
       section('Stop listening to STDOUT');
@@ -223,7 +235,11 @@ TaskFunction _testCommandLineFlagPrecedence() {
       ]);
 
       if (result is int) {
-        throw Exception('flutter run failed, exitCode=$result');
+        throw Exception(
+          result == 0
+              ? 'Could not confirm that test flag was loaded by the FlutterLoader; test failed.'
+              : getExcepitonMessageForIncompleteTest(result),
+        );
       } else if (result is bool) {
         if (!result) {
           throw Exception(

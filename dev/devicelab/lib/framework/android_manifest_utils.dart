@@ -7,9 +7,16 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 
-void addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs) {
+/// Adds [keyPairs] to the metadata of the Flutter Android app's manifest
+/// specified at [testDirectory].
+///
+/// If any one key in [keyPairs] is already in the manifest, then its value
+/// is overriden with the value specified in [keyPairs].
+///
+/// [testDirectory] is assumed to point to the root of the Flutter project.
+void addMetadataToManifest(String projectDirectory, List<(String, String)> keyPairs) {
   final String manifestPath = path.join(
-    testDirectory,
+    projectDirectory,
     'android',
     'app',
     'src',
