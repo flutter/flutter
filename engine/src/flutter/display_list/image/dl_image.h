@@ -140,6 +140,11 @@ class DlImage : public SkRefCnt {
     if (this == other) {
       return true;
     }
+
+    if (!skia_image()) {
+      // Impeller images have pointer equality
+      return false;
+    }
     return skia_image() == other->skia_image();
   }
 
