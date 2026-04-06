@@ -439,21 +439,27 @@ class EngineAutofillForm {
 
     void addSubscriptionForKey(String key) {
       final DomHTMLElement element = elements[key]!;
-      subscriptions.add(
-        DomSubscription(
-          element,
-          'input',
-          createDomEventListener((DomEvent e) {
-            if (items[key] == null) {
-              throw StateError('AutofillInfo must have a valid uniqueIdentifier.');
-            } else if (key != focusedElementId) {
-              // `input` events on the focused element are handled elsewhere.
-              final AutofillInfo autofillInfo = items[key]!.autofillInfo;
-              _handleChange(element, autofillInfo);
-            }
-          }),
-        ),
-      );
+
+      void onAutofillEvent(DomEvent e) {
+        if (items[key] == null) {
+          throw StateError('AutofillInfo must have a valid uniqueIdentifier.');
+        } else if (e.type == 'change' || key != focusedElementId) {
+          // `input` events on the focused element are handled elsewhere,
+          // but `change` events are also handled here to catch async
+          // credential fills (e.g., after Windows Hello authentication)
+          // that may not fire `input`.
+          // See https://github.com/flutter/flutter/issues/162066
+          final AutofillInfo autofillInfo = items[key]!.autofillInfo;
+          _handleChange(element, autofillInfo);
+        }
+      }
+
+      final DomEventListener listener = createDomEventListener(onAutofillEvent);
+      subscriptions.add(DomSubscription(element, 'input', listener));
+      // The 'change' event is more reliably fired after async credential
+      // fills (e.g., after Windows Hello authentication in Chrome).
+      // See https://github.com/flutter/flutter/issues/162066
+      subscriptions.add(DomSubscription(element, 'change', listener));
     }
 
     keys.forEach(addSubscriptionForKey);

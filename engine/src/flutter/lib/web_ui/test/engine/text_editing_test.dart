@@ -2597,6 +2597,74 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('multiTextField Autofill responds to change event', () async {
+      // Regression test for https://github.com/flutter/flutter/issues/162066
+      // When Chrome fills credentials after a Windows Hello prompt, it may
+      // fire a 'change' event instead of (or in addition to) an 'input' event.
+      const hintForFirstElement = 'familyName';
+      final Map<String, dynamic> flutterMultiAutofillElementConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'email',
+        autofillHintsForFields: <String>[
+          hintForFirstElement,
+          'email',
+          'givenName',
+          'telephoneNumber',
+        ],
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        flutterMultiAutofillElementConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
+      expect(formElement.childNodes, hasLength(5));
+
+      // Simulate a credential manager fill that fires 'change' instead of 'input'.
+      final element = formElement.childNodes.toList()[0] as DomHTMLInputElement;
+      element.value = 'filled_by_credential_manager';
+      element.dispatchEvent(createDomEvent('Event', 'change'));
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithTag');
+      expect(spy.messages[0].methodArguments, <dynamic>[
+        0,
+        <String, dynamic>{
+          hintForFirstElement: <String, dynamic>{
+            'text': 'filled_by_credential_manager',
+            'selectionBase': 28,
+            'selectionExtent': 28,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      ]);
+
+      spy.messages.clear();
+      hideKeyboard();
+    });
+
     test('Multi-line mode also works', () async {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterMultilineConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
