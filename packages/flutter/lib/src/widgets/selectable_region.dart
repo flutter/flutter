@@ -1595,8 +1595,17 @@ class SelectableRegionState extends State<SelectableRegion>
   ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
+    final overlayRenderBox = Overlay.of(
+      context,
+      rootOverlay: true,
+    ).context.findRenderObject()! as RenderBox;
     if (_lastSecondaryTapDownPosition != null) {
-      final anchors = TextSelectionToolbarAnchors(primaryAnchor: _lastSecondaryTapDownPosition!);
+      // Convert the global tap position to overlay-local coordinates so it is
+      // consistent with the coordinate space the toolbar is rendered in.
+      final overlayLocalPosition = overlayRenderBox.globalToLocal(
+        _lastSecondaryTapDownPosition!,
+      );
+      final anchors = TextSelectionToolbarAnchors(primaryAnchor: overlayLocalPosition);
       // Clear the state of _lastSecondaryTapDownPosition after use since a user may
       // access contextMenuAnchors and receive invalid anchors for their context menu.
       _lastSecondaryTapDownPosition = null;
@@ -1608,6 +1617,7 @@ class SelectableRegionState extends State<SelectableRegion>
       startGlyphHeight: startGlyphHeight,
       endGlyphHeight: endGlyphHeight,
       selectionEndpoints: selectionEndpoints,
+      ancestor: overlayRenderBox,
     );
   }
 
