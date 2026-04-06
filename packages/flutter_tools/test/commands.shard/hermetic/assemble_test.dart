@@ -285,20 +285,52 @@ void main() {
         AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true))),
       );
 
-      final command = <String>[
-        'assemble',
-        '--output',
-        'Output',
-        '-DartDefines=flutter.inspector.structuredErrors%3Dtrue',
-        'debug_macos_bundle_flutter_assets',
+      const invalidDartDefines = [
+        'flutter.inspector.structuredErrors%3Dtrue',
+        '///',
+        '@@@@',
+        "'",
+        '"',
+        '`',
+        r'\',
+        r'$',
+        ';',
+        '/*',
+        '*/',
+        '//',
+        '\n',
+        '\r',
+        '<',
+        '>',
+        '{',
+        '}',
+        '[',
+        ']',
+        '(',
+        ')',
+        '%',
+        '=',
+        '&',
+        '?',
+        '#',
       ];
-      expect(
-        commandRunner.run(command),
-        throwsToolExit(
-          message:
-              'Error parsing assemble command: your generated configuration may be out of date',
-        ),
-      );
+      for (final invalidDartDefine in invalidDartDefines) {
+        final command = <String>[
+          'assemble',
+          '--output',
+          'Output',
+          '-DartDefines=$invalidDartDefine',
+          'debug_macos_bundle_flutter_assets',
+        ];
+        expect(
+          commandRunner.run(command),
+          throwsToolExit(
+            message:
+                'Error parsing assemble command: The -Pdart-defines argument contains non-base64 encoded data. '
+                'Check your build command and try again.',
+          ),
+        );
+      }
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),

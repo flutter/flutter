@@ -14633,10 +14633,15 @@ Copyright 2014-2022 The Khronos Group Inc.
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 swiftshader
-vulkan
 vulkan-headers
 
 Copyright 2014-2025 The Khronos Group Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan
+
+Copyright 2014-2026 The Khronos Group Inc.
 
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
@@ -14686,6 +14691,13 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2015 Google LLC
+
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
 --------------------------------------------------------------------------------
 angle
 
@@ -14766,10 +14778,15 @@ Copyright 2015-2023 LunarG, Inc.
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
 swiftshader
-vulkan
 vulkan-headers
 
 Copyright 2015-2025 The Khronos Group Inc.
+
+SPDX-License-Identifier: Apache-2.0
+--------------------------------------------------------------------------------
+vulkan
+
+Copyright 2015-2026 The Khronos Group Inc.
 
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 # Uploading New Java Version to CIPD
 
 We store the Java Version package on CIPD for use on CI. For more information read the internal
-docs [here](http://go/luci-cipd).
+docs [here](https://goto.google.com/luci-cipd).
 
 Some links in the instructions below are Google-internal.
 
@@ -10,7 +10,7 @@ Some links in the instructions below are Google-internal.
 ### Request Access to CIPD
 
 1. Request temporary write access to upload packages to CIPD
-   via http://go/flutter-luci-cipd#requesting-write-read-access-to-cipd-packages.
+   via https://goto.google.com/flutter-luci-cipd#requesting-write-read-access-to-cipd-packages.
 
 2. Wait about 5-30 minutes for access rights to sync. To check if your rights have synced, see if
    you are a member of this
@@ -68,5 +68,5 @@ Some links in the instructions below are Google-internal.
 ### Troubleshooting CIPD (Optional)
 
 If you accidentally uploaded the incorrect package to CIPD, you can delete the tag using these
-instructions [here](http://go/flutter-luci-playbook#remove-duplicated-cipd-tags).
+instructions [here](https://goto.google.com/flutter-luci-playbook#remove-duplicated-cipd-tags).
 Then, re-upload the correct Java version pacakge to CIPD.
