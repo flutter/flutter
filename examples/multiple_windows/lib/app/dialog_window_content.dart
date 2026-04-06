@@ -16,7 +16,6 @@ class DialogWindowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final WindowRegistry windowRegistry = WindowRegistry.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return FocusScope(
@@ -30,6 +29,10 @@ class DialogWindowContent extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
+                    final WindowRegistry windowRegistry = WindowRegistry.of(
+                      context,
+                    );
+
                     late final WindowEntry entry;
                     final controller = DialogWindowController(
                       delegate: CallbackDialogWindowControllerDelegate(
