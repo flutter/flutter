@@ -1904,7 +1904,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// widget, if a subtitle is provided.
   ///
   /// A custom blend mode is applied to the subtitle to mimic the visual effect
-  /// of the iOS menu subtitle. As a result, the kDefaultSubtitleTextColor does
+  /// of the iOS menu subtitle. As a result, the _kDefaultSubtitleTextColor does
   /// not match the reported color on the iOS 18.5 simulator.
   static const Color _kDefaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
