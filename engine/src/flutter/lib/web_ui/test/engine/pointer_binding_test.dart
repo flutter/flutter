@@ -2842,11 +2842,9 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       'clientY': testElement.getBoundingClientRect().y,
     });
 
-    // When no child's tap action was absorbed, pointer events are flushed
-    // so that TapRegionSurface can detect outside taps.
     PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
-    expect(pointerPackets, <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down]);
-    expect(semanticsActions, isEmpty);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });
 
   testWithSemantics('Does not throw when multiple events in the same event loop', () async {
@@ -2881,13 +2879,9 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
     expect(PointerBinding.clickDebouncer.debugState, isNull);
 
-    // The queued pointer events are flushed to the framework.
-    expect(pointerPackets, <ui.PointerChange>[
-      ui.PointerChange.add,
-      ui.PointerChange.down,
-      ui.PointerChange.up,
-    ]);
-    expect(semanticsActions, isEmpty);
+    // The click was sent as a semantics tap.
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
 
     // After the event loop, there should be nothing.
     await nextEventLoop();
@@ -3001,7 +2995,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });
 
-  testWithSemantics('Flushes pointer events when node did not absorb child semantics', () async {
+  testWithSemantics('Forwards click to framework when debouncing and listening', () async {
     expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
     final DomElement testElement = createDomElement('flt-semantics');
@@ -3016,41 +3010,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       'clientY': testElement.getBoundingClientRect().y,
     });
 
-    // Regression test for https://github.com/flutter/flutter/issues/167487.
-    // When no child's tap action was absorbed, pointer events are flushed so
-    // TapRegionSurface can detect outside taps and close MenuAnchor.
     PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
-    expect(pointerPackets, <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down]);
-    expect(semanticsActions, isEmpty);
-  });
-
-  testWithSemantics('Sends SemanticsAction.tap when node absorbed child semantics', () async {
-    expect(PointerBinding.clickDebouncer.isDebouncing, false);
-
-    final DomElement testElement = createDomElement('flt-semantics');
-    testElement.setAttribute('flt-tappable', '');
-    view.dom.semanticsHost.appendChild(testElement);
-    testElement.dispatchEvent(context.primaryDown());
-    expect(PointerBinding.clickDebouncer.isDebouncing, true);
-
-    await nextEventLoop();
-    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-      'clientX': testElement.getBoundingClientRect().x,
-      'clientY': testElement.getBoundingClientRect().y,
-    });
-
-    // When a child's tap action was absorbed (e.g. MergeSemantics wrapping
-    // CheckboxListTile, or Semantics(container: true) absorbing a child
-    // GestureDetector), pointer coords may miss the inner tappable widget.
-    // SemanticsAction.tap is sent directly to bypass spatial hit-testing.
-    // Regression test for https://github.com/flutter/flutter/issues/130162.
-    PointerBinding.clickDebouncer.onClick(
-      click,
-      view.viewId,
-      42,
-      true,
-      absorbedChildSemantics: true,
-    );
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });

@@ -5357,9 +5357,6 @@ class _SemanticsConfigurationProvider {
   SemanticsConfiguration? _originalConfiguration;
   SemanticsConfiguration? _effectiveConfiguration;
 
-  bool _absorbedChildSemantics = false;
-  bool get absorbedChildSemantics => _absorbedChildSemantics;
-
   bool get wasSemanticsBoundary => _originalConfiguration?.isSemanticBoundary ?? false;
 
   /// The latest config that reflect any change done through [updateConfig].
@@ -5401,12 +5398,7 @@ class _SemanticsConfigurationProvider {
   /// Absorb a list of config into [effective].
   void absorbAll(Iterable<SemanticsConfiguration> configs) {
     updateConfig((SemanticsConfiguration config) {
-      for (final child in configs) {
-        if (child.hasBeenAnnotated && child.onTap != null) {
-          _absorbedChildSemantics = true;
-        }
-        config.absorb(child);
-      }
+      configs.forEach(config.absorb);
     });
   }
 
@@ -5414,7 +5406,6 @@ class _SemanticsConfigurationProvider {
   void reset() {
     _effectiveConfiguration = original;
     _isEffectiveConfigWritable = false;
-    _absorbedChildSemantics = false;
   }
 
   /// Remove every cache in this wrapper.
@@ -5425,7 +5416,6 @@ class _SemanticsConfigurationProvider {
     _isEffectiveConfigWritable = false;
     _effectiveConfiguration = null;
     _originalConfiguration = null;
-    _absorbedChildSemantics = false;
   }
 }
 
@@ -6267,7 +6257,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     } else {
       node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
     }
-    node.absorbedChildSemantics = configProvider.absorbedChildSemantics;
   }
 
   void _produceSemanticsNode({required Set<int> usedSemanticsIds}) {

@@ -62,13 +62,7 @@ class Tappable extends SemanticBehavior {
 
     if (shouldListen) {
       _clickListener = createDomEventListener((DomEvent click) {
-        PointerBinding.clickDebouncer.onClick(
-          click,
-          viewId,
-          semanticsObject.id,
-          _isListening,
-          absorbedChildSemantics: semanticsObject.absorbedChildSemantics,
-        );
+        PointerBinding.clickDebouncer.onClick(click, viewId, semanticsObject.id, _isListening);
       });
       owner.element.addEventListener('click', _clickListener);
       owner.element.setAttribute('flt-tappable', '');
