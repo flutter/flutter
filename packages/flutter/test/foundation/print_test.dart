@@ -46,6 +46,13 @@ void main() {
       }),
       equals(<String>['Hello,', 'world']),
     );
+
+    expect(
+      captureOutput(() {
+        debugPrintSynchronously('Hello, \u{FFFD}\u{1F525}\u{FEFF}\u{10FFFE} world');
+      }),
+      equals(<String>['Hello, \u{FFFD}\u{1F525}\u{FEFF}\u{10FFFE} world']),
+    );
   });
 
   test('debugPrint throttling', () {
