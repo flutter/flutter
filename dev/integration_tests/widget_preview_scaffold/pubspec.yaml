@@ -60,6 +60,7 @@ dependencies:
   web_socket_channel: 3.0.3
   webview_flutter: 4.9.0
   webview_flutter_web: ^0.2.3+4
+  path_provider_android: 2.2.23
 
 dev_dependencies:
   flutter_tools:

@@ -687,7 +687,7 @@ flutter:
       'get fetches packages and injects plugin',
       () async {
         final String projectPath = await createProjectWithPlugin(
-          'path_provider',
+          'path_provider_android: 2.2.23\n  path_provider',
           arguments: <String>['--no-pub', '--template=module'],
         );
         removeGeneratedFiles(projectPath);
