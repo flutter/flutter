@@ -2409,6 +2409,24 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   bool _extendSelectionInProgress = false;
 
+  // Origin text boundary tracking.
+  //
+  // When a word or paragraph is selected (e.g. double-click), these fields
+  // record which selectables are part of the origin boundary and the positions
+  // of its edges. During subsequent drag, this enables the container to keep
+  // the origin boundary anchored in the selection — analogous to Chromium's
+  // SelectionModifier::PrepareToModifySelection anchor normalization.
+  final Set<Selectable> _originSelectables = <Selectable>{};
+  Selectable? _originStartSelectable;
+  Offset? _originStartLocalPosition;
+  Selectable? _originEndSelectable;
+  Offset? _originEndLocalPosition;
+  // The content-relative offsets of the origin boundary on the start/end
+  // selectables. Used to detect when the selection has collapsed at the
+  // origin boundary during paragraph-granularity drags.
+  int? _originStartOffset;
+  int? _originEndOffset;
+
   @override
   void add(Selectable selectable) {
     assert(!selectables.contains(selectable));
@@ -2521,6 +2539,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   void _removeSelectable(Selectable selectable) {
     assert(selectables.contains(selectable), 'The selectable is not in this registrar.');
+    _originSelectables.remove(selectable);
+    if (_originStartSelectable == selectable) {
+      _originStartSelectable = null;
+      _originStartLocalPosition = null;
+    }
+    if (_originEndSelectable == selectable) {
+      _originEndSelectable = null;
+      _originEndLocalPosition = null;
+    }
     final int index = selectables.indexOf(selectable);
     selectables.removeAt(index);
     if (index <= currentSelectionEndIndex) {
@@ -2530,6 +2557,64 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       currentSelectionStartIndex -= 1;
     }
     selectable.removeListener(_handleSelectableGeometryChange);
+  }
+
+  /// Records the selectables in the current selection range as origin
+  /// boundary selectables and captures the boundary edge positions.
+  ///
+  /// Call this after [currentSelectionStartIndex] and [currentSelectionEndIndex]
+  /// have been set as the result of a [SelectWordSelectionEvent] or
+  /// [SelectParagraphSelectionEvent].
+  @protected
+  void captureOriginSelectables() {
+    clearOriginSelectables();
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return;
+    }
+    final int start = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int end = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int i = start; i <= end; i++) {
+      _originSelectables.add(selectables[i]);
+    }
+    // Capture the origin boundary edge positions in local coordinates.
+    // These are converted to global on demand so they remain valid after scroll.
+    final Selectable startSelectable = selectables[start];
+    final SelectionPoint? startPoint = startSelectable.value.startSelectionPoint;
+    if (startPoint != null) {
+      _originStartSelectable = startSelectable;
+      _originStartLocalPosition = startPoint.localPosition + Offset(0, -startPoint.lineHeight / 2);
+    }
+    final Selectable endSelectable = selectables[end];
+    final SelectionPoint? endPoint = endSelectable.value.endSelectionPoint;
+    if (endPoint != null) {
+      _originEndSelectable = endSelectable;
+      _originEndLocalPosition = endPoint.localPosition + Offset(0, -endPoint.lineHeight / 2);
+    }
+    // Capture the content-relative offsets of the origin boundary.
+    final SelectedContentRange? startRange = startSelectable.getSelection();
+    if (startRange != null) {
+      _originStartOffset = min(startRange.startOffset, startRange.endOffset);
+    }
+    final SelectedContentRange? endRange = endSelectable.getSelection();
+    if (endRange != null) {
+      _originEndOffset = max(endRange.startOffset, endRange.endOffset);
+    }
+  }
+
+  /// Whether the given [selectable] is part of the origin text boundary.
+  @protected
+  bool isOriginSelectable(Selectable selectable) => _originSelectables.contains(selectable);
+
+  /// Clears all origin text boundary tracking state.
+  @protected
+  void clearOriginSelectables() {
+    _originSelectables.clear();
+    _originStartSelectable = null;
+    _originStartLocalPosition = null;
+    _originEndSelectable = null;
+    _originEndLocalPosition = null;
+    _originStartOffset = null;
+    _originEndOffset = null;
   }
 
   /// Called when this delegate finishes updating the [Selectable]s.
@@ -2943,6 +3028,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (index >= skipStart && index <= skipEnd) {
         continue;
       }
+      if (_originSelectables.contains(selectables[index])) {
+        continue;
+      }
       dispatchSelectionEventToChild(selectables[index], const ClearSelectionEvent());
     }
   }
@@ -3050,19 +3138,24 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// [SelectWordSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
-    return _handleSelectBoundary(event);
+    final SelectionResult result = _handleSelectBoundary(event);
+    captureOriginSelectables();
+    return result;
   }
 
   /// Selects a paragraph in a [Selectable] at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
-    return _handleSelectBoundary(event);
+    final SelectionResult result = _handleSelectBoundary(event);
+    captureOriginSelectables();
+    return result;
   }
 
   /// Removes the selection of all [Selectable]s this delegate manages.
   @protected
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
+    clearOriginSelectables();
     for (final Selectable selectable in selectables) {
       dispatchSelectionEventToChild(selectable, event);
     }
@@ -3211,6 +3304,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   @override
   void dispose() {
+    clearOriginSelectables();
     for (final Selectable selectable in selectables) {
       selectable.removeListener(_handleSelectableGeometryChange);
     }
@@ -3233,9 +3327,121 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   ///
   /// Override this method if subclasses need to generate additional events or
   /// treatments prior to sending the [SelectionEvent].
+  ///
+  /// For origin selectables during text boundary drags (word/paragraph
+  /// granularity), this method dispatches a corrective edge event after the
+  /// original event to maintain the origin boundary anchor — analogous to
+  /// Chromium's `SelectionModifier::PrepareToModifySelection`.
   @protected
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
-    return selectable.dispatchSelectionEvent(event);
+    final SelectionResult result = selectable.dispatchSelectionEvent(event);
+    if (!_isApplyingOriginCorrection &&
+        event is SelectionEdgeUpdateEvent &&
+        event.granularity != TextGranularity.character &&
+        _originSelectables.contains(selectable)) {
+      _correctOriginSelectable(selectable, event);
+    }
+    return result;
+  }
+
+  // Prevents recursive origin correction across nested delegates.
+  // When an outer delegate's corrective event propagates through an inner
+  // delegate (e.g., SelectableRegion → Text widget → fragment), the inner
+  // delegate must not fire its own correction for the outer's corrective event.
+  static bool _isApplyingOriginCorrection = false;
+
+  /// Dispatches a corrective edge event to an origin selectable to maintain
+  /// the origin text boundary anchor.
+  ///
+  /// After the moving edge is updated normally, this method sets the static
+  /// (anchor) edge to the appropriate origin boundary position. Which boundary
+  /// end is used as the anchor depends on the selection direction:
+  ///
+  /// * Forward selection (end ≥ start): anchor at origin start
+  /// * Inverted selection (end < start): anchor at origin end
+  ///
+  /// This mirrors Chromium's `PrepareToModifySelection`, which picks the
+  /// anchor position (wordStart or wordEnd) based on extension direction.
+  void _correctOriginSelectable(Selectable selectable, SelectionEdgeUpdateEvent event) {
+    _isApplyingOriginCorrection = true;
+    try {
+      _correctOriginSelectableImpl(selectable, event);
+    } finally {
+      _isApplyingOriginCorrection = false;
+    }
+  }
+
+  void _correctOriginSelectableImpl(Selectable selectable, SelectionEdgeUpdateEvent event) {
+    // If the selectable lost its selection entirely, restore it.
+    if (!selectable.value.hasSelection) {
+      selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      return;
+    }
+    final SelectedContentRange? range = selectable.getSelection();
+    if (range == null) {
+      return;
+    }
+    if (_originStartSelectable == null ||
+        _originStartLocalPosition == null ||
+        _originEndSelectable == null ||
+        _originEndLocalPosition == null) {
+      return;
+    }
+    final bool isEndEdge = event.type == SelectionEventType.endEdgeUpdate;
+    // Detect inversion: the moving edge has crossed the origin boundary.
+    // This includes an "implicit inversion" case where the standard paragraph
+    // boundary logic sets the moving edge to a position that coincides with
+    // the origin boundary start/end, producing a collapsed selection. In this
+    // case the offset comparison catches what the standard < check misses.
+    bool isInverted = range.endOffset < range.startOffset;
+    if (!isInverted && _originStartOffset != null && _originEndOffset != null) {
+      if (isEndEdge && range.endOffset <= _originStartOffset!) {
+        isInverted = true;
+      } else if (!isEndEdge && range.startOffset >= _originEndOffset!) {
+        isInverted = true;
+      }
+    }
+    // Compute the anchor global position on demand (handles scroll).
+    final Offset originStartGlobal = MatrixUtils.transformPoint(
+      _originStartSelectable!.getTransformTo(null),
+      _originStartLocalPosition!,
+    );
+    final Offset originEndGlobal = MatrixUtils.transformPoint(
+      _originEndSelectable!.getTransformTo(null),
+      _originEndLocalPosition!,
+    );
+    // The anchor is the origin boundary edge opposite to the drag direction.
+    // When moving the END edge:
+    //   - Not inverted (forward): anchor START at originStart
+    //   - Inverted (backward):    anchor START at originEnd
+    // When moving the START edge:
+    //   - Not inverted (forward): anchor END at originEnd
+    //   - Inverted (backward):    anchor END at originStart
+    // Use character granularity for the corrective event so the anchor is
+    // placed at the exact captured position without word/paragraph boundary
+    // snapping. This avoids the off-by-one issue where the origin boundary
+    // end (e.g., offset 11) sits at a word boundary seam and would resolve
+    // to the NEXT word boundary if using word granularity.
+    if (isEndEdge) {
+      final anchorGlobal = isInverted ? originEndGlobal : originStartGlobal;
+      selectable.dispatchSelectionEvent(
+        SelectionEdgeUpdateEvent.forStart(globalPosition: anchorGlobal),
+      );
+      if (isInverted) {
+        // Re-dispatch the original event so the standard boundary logic
+        // sees the corrected anchor and computes the correct boundary
+        // direction (backward instead of forward).
+        selectable.dispatchSelectionEvent(event);
+      }
+    } else {
+      final anchorGlobal = isInverted ? originStartGlobal : originEndGlobal;
+      selectable.dispatchSelectionEvent(
+        SelectionEdgeUpdateEvent.forEnd(globalPosition: anchorGlobal),
+      );
+      if (isInverted) {
+        selectable.dispatchSelectionEvent(event);
+      }
+    }
   }
 
   /// Initializes the selection of the selectable children.
