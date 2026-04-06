@@ -25,6 +25,7 @@ void main() {
       final completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String? result;
+      // ignore: unawaited_futures
       future.then<void>((void value) {
         result = '123';
       });
@@ -44,6 +45,7 @@ void main() {
         skip: 'testing skip',
       ); // [intended] API testing
       var completed = false;
+      // ignore: unawaited_futures
       future.then<void>((_) {
         completed = true;
       });
