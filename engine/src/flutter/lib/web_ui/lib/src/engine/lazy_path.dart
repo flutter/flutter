@@ -417,12 +417,7 @@ final class ClosePathCommand implements PathCommand {
 }
 
 typedef PathCombineSource = (ui.PathOperation, LazyPath, LazyPath);
-typedef PathExtractSource = (
-  LazyPathMetric metric,
-  double start,
-  double end,
-  bool startWithMoveTo,
-);
+typedef PathExtractSource = (LazyPathMetric metric, double start, double end, bool startWithMoveTo);
 
 abstract class DisposablePathConstructors {
   DisposablePathBuilder createNew();
