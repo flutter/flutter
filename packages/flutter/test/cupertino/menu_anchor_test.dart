@@ -1533,7 +1533,7 @@ void main() {
     expect(popupSize.width, moreOrLessEquals(262, epsilon: 0.1));
   });
 
-  testWidgets('Accessible mobile menu width (< 768 px)', (WidgetTester tester) async {
+  testWidgets('Large text mode mobile menu width (< 768 px)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(size: Size(765, 900), textScaleFactor: 1 + 11 / 17),
@@ -1555,7 +1555,7 @@ void main() {
     expect(popupSize.width, moreOrLessEquals(370, epsilon: 0.1));
   });
 
-  testWidgets('Accessible tablet menu width (>= 768 px)', (WidgetTester tester) async {
+  testWidgets('Large text mode tablet menu width (>= 768 px)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(size: Size(768, 400), textScaleFactor: 1 + 11 / 17),
@@ -4452,7 +4452,7 @@ void main() {
           expect(childText.height, closeTo(lineHeight(childStyle) * 2, 1)); // 2 lines of text
         });
 
-        testWidgets('child text overflow in accessibility mode', (WidgetTester tester) async {
+        testWidgets('child text overflow in large text mode', (WidgetTester tester) async {
           final String longText = 'Very long text ' * 1000;
 
           await tester.pumpWidget(
@@ -4580,7 +4580,7 @@ void main() {
           expect(tester.getSize(find.byType(CupertinoMenuItem)).height, closeTo(87, 1));
         });
 
-        testWidgets('child text overflow with accessibility mode', (WidgetTester tester) async {
+        testWidgets('child text overflow with large text mode', (WidgetTester tester) async {
           final String longText = 'Very long text ' * 1000;
 
           await tester.pumpWidget(
@@ -5365,7 +5365,7 @@ void main() {
           expect(subtitleText.height, closeTo(lineHeight(subtitleStyle) * 2, 1)); // 2 lines of text
         });
 
-        testWidgets('subtitle text overflow in accessibility mode', (WidgetTester tester) async {
+        testWidgets('subtitle text overflow in large text mode', (WidgetTester tester) async {
           final String longText = 'Very long text ' * 100;
 
           await tester.pumpWidget(

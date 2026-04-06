@@ -82,13 +82,12 @@ double _normalizeTextScale(TextScaler textScaler) {
 /// Empirically, the jump from one policy to the other occurs at the following text
 /// scale factors:
 /// * Max "regular" scale factor ≈ 23/17 ≈ 1.352... (normalized text scale: 6)
-/// * Min "accessible" scale factor  ≈ 28/17 ≈ 1.647... (normalized text scale: 11)
+/// * Min "large" scale factor  ≈ 28/17 ≈ 1.647... (normalized text scale: 11)
 ///
 /// The following constant represents a division in text scale factor beyond which
 /// we want to change how the menu is laid out.
-///
-/// This explanation was ported from cupertino/dialog.dart.
-const double _kMinimumAccessibleNormalizedTextScale = 11;
+// This explanation was ported from cupertino/dialog.dart.
+const double _kMinimumNormalizedLargeTextScale = 11;
 
 /// The minimum normalized text scale factor supported on iOS.
 const double _kMinimumTextScaleFactor = 1 - 3 / _kCupertinoMobileBaseFontSize;
@@ -96,15 +95,15 @@ const double _kMinimumTextScaleFactor = 1 - 3 / _kCupertinoMobileBaseFontSize;
 /// The minimum normalized text scale factor supported on iOS.
 const double _kMaximumTextScaleFactor = 1 + 36 / _kCupertinoMobileBaseFontSize;
 
-// Accessibility mode on iOS is determined by the text scale factor that the
+// Large text mode on iOS is determined by the text scale factor that the
 // user has selected.
-bool _isAccessibilityModeEnabled(BuildContext context) {
+bool _largeTextModeEnabled(BuildContext context) {
   final TextScaler? textScaler = MediaQuery.maybeTextScalerOf(context);
   if (textScaler == null) {
     return false;
   }
 
-  return _normalizeTextScale(textScaler) >= _kMinimumAccessibleNormalizedTextScale;
+  return _normalizeTextScale(textScaler) >= _kMinimumNormalizedLargeTextScale;
 }
 
 /// The width of a Cupertino menu
@@ -123,16 +122,16 @@ enum _CupertinoMenuWidth {
   const _CupertinoMenuWidth({required this.points});
 
   // Determines the appropriate menu width based on screen width and
-  // accessibility mode.
+  // the large text mode setting.
   //
   // A screen width threshold of 768 points is used to differentiate between
   // mobile and tablet devices.
   factory _CupertinoMenuWidth.fromScreenWidth({
     required double screenWidth,
-    required bool isAccessibilityModeEnabled,
+    required bool isLargeTextModeEnabled,
   }) {
     final bool isMobile = screenWidth < _kTabletWidthThreshold;
-    return switch ((isMobile, isAccessibilityModeEnabled)) {
+    return switch ((isMobile, isLargeTextModeEnabled)) {
       (false, false) => _CupertinoMenuWidth.iPadOS,
       (false, true) => _CupertinoMenuWidth.iPadOSAccessible,
       (true, false) => _CupertinoMenuWidth.iOS,
@@ -523,8 +522,8 @@ class CupertinoMenuAnchor extends StatefulWidget {
 }
 
 class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerProviderStateMixin {
-  static const Duration longPressToOpenDuration = Duration(milliseconds: 400);
-  static const Tolerance springTolerance = Tolerance(velocity: 0.1);
+  static const Duration _kLongPressToOpenDuration = Duration(milliseconds: 400);
+  static const Tolerance _kSpringTolerance = Tolerance(velocity: 0.1);
 
   // Approximated from the iOS 18.5 Simulator.
   static final SpringDescription forwardSpring = SpringDescription.withDurationAndBounce(
@@ -646,7 +645,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
               _animationController.value,
               0.0,
               0.0,
-              tolerance: springTolerance,
+              tolerance: _kSpringTolerance,
             ),
             xMin: 0.0,
             xMax: 1.0,
@@ -707,7 +706,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
 
     return _SwipeSurface(
       onStart: _handleAnchorSwipeStart,
-      delay: longPressToOpenDuration,
+      delay: _kLongPressToOpenDuration,
       child: anchor,
     );
   }
@@ -771,8 +770,8 @@ class _MenuOverlay extends StatefulWidget {
 
 class _MenuOverlayState extends State<_MenuOverlay>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  static const _attachmentOffset = Offset(0, 8);
-  static final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+  static const _kAttachmentOffset = Offset(0, 8);
+  static final Map<Type, Action<Intent>> _kActions = <Type, Action<Intent>>{
     _FocusDownIntent: _FocusDownAction(),
     _FocusUpIntent: _FocusUpAction(),
     _FocusFirstIntent: _FocusFirstAction(),
@@ -964,7 +963,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
       _attachmentPoint = widget.anchorRect.topLeft + widget.anchorPosition!;
       transformOrigin = _attachmentPoint;
     } else {
-      final ui.Offset offset = _attachmentOffset * dy;
+      final ui.Offset offset = _kAttachmentOffset * dy;
       _attachmentPoint = Alignment(dx, dy).withinRect(widget.anchorRect) + offset;
       transformOrigin = Alignment(0, dy).withinRect(widget.anchorRect) + offset;
     }
@@ -1060,10 +1059,10 @@ class _MenuOverlayState extends State<_MenuOverlay>
     if (widget.constraints != null) {
       constraints = widget.constraints!;
     } else {
-      final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
+      final bool isLargeTextModeEnabled = _largeTextModeEnabled(context);
       final double screenWidth = MediaQuery.widthOf(context);
       final menuWidth = _CupertinoMenuWidth.fromScreenWidth(
-        isAccessibilityModeEnabled: isAccessibilityModeEnabled,
+        isLargeTextModeEnabled: isLargeTextModeEnabled,
         screenWidth: screenWidth,
       );
       constraints = BoxConstraints.tightFor(width: menuWidth.points);
@@ -1075,7 +1074,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
         consumeOutsideTaps: widget.consumeOutsideTaps,
         onTapOutside: _handleOutsideTap,
         child: Actions(
-          actions: _actions,
+          actions: _kActions,
           child: Shortcuts(
             shortcuts: _kMenuTraversalShortcuts,
             child: FocusScope(
@@ -1181,8 +1180,8 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
 class _ShadowPainter extends CustomPainter {
   const _ShadowPainter({required this.brightness, required this.repaint}) : super(repaint: repaint);
-  static const Radius radius = Radius.circular(13);
-  static const double shadowOpacity = 0.12;
+  static const Radius _kRadius = Radius.circular(13);
+  static const double _kShadowOpacity = 0.12;
   double get shadowAnimation => ui.clampDouble(repaint.value, 0, 1);
   final Animation<double> repaint;
   final ui.Brightness brightness;
@@ -1192,18 +1191,18 @@ class _ShadowPainter extends CustomPainter {
     assert(shadowAnimation >= 0 && shadowAnimation <= 1);
     final center = Offset(size.width / 2, size.height / 2);
     final rect = Rect.fromCenter(center: center, width: size.width, height: size.height);
-    final roundedRect = RSuperellipse.fromRectAndRadius(rect, radius);
+    final roundedRect = RSuperellipse.fromRectAndRadius(rect, _kRadius);
 
     final double blurSigma = shadowAnimation * 50;
     final shadowPaint = Paint()
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma)
-      ..color = ui.Color.fromRGBO(0, 0, 10, shadowAnimation * shadowAnimation * shadowOpacity);
+      ..color = ui.Color.fromRGBO(0, 0, 10, shadowAnimation * shadowAnimation * _kShadowOpacity);
 
     final maskPath = Path()
       ..fillType = ui.PathFillType.evenOdd
       // Extra large rect to ensure the shadow is fully visible.
       ..addRect(rect.inflate(200))
-      ..addRRect(RRect.fromRectAndRadius(rect, radius));
+      ..addRRect(RRect.fromRectAndRadius(rect, _kRadius));
 
     // Clip the shadow underneath the menu shape to make the shadow appear more
     // vibrant.
@@ -1527,7 +1526,7 @@ class _CupertinoMenuImplicitDivider extends StatelessWidget {
   /// [ui.BlendMode.overlay].
   ///
   /// On all platforms except web, this color is applied to the divider before
-  /// the [color] is applied, and is used to create a subtle translucent effect
+  /// the [kDividerColor] is applied, and is used to create a subtle translucent effect
   /// against the menu background.
   // The following colors were measured from the iOS 17.2 simulator, and opacity was
   // extrapolated:
@@ -1537,16 +1536,16 @@ class _CupertinoMenuImplicitDivider extends StatelessWidget {
   // Light mode on white      Color.fromRGBO(187, 187, 187)
   //
   // Colors were also compared atop a red, green, and blue backgrounds.
-  static const CupertinoDynamicColor overlayColor = CupertinoDynamicColor.withBrightness(
+  static const CupertinoDynamicColor kOverlayColor = CupertinoDynamicColor.withBrightness(
     color: Color.fromRGBO(140, 140, 140, 0.3),
     darkColor: Color.fromRGBO(255, 255, 255, 0.25),
   );
 
   /// The default color applied to the [_CupertinoMenuImplicitDivider], atop the
-  /// [overlayColor], with [BlendMode.srcOver].
+  /// [kOverlayColor], with [BlendMode.srcOver].
   ///
   /// This color is used to make the divider more opaque.
-  static const CupertinoDynamicColor color = CupertinoDynamicColor.withBrightness(
+  static const CupertinoDynamicColor kDividerColor = CupertinoDynamicColor.withBrightness(
     color: Color.fromRGBO(0, 0, 0, 0.25),
     darkColor: Color.fromRGBO(255, 255, 255, 0.25),
   );
@@ -1558,8 +1557,8 @@ class _CupertinoMenuImplicitDivider extends StatelessWidget {
     return CustomPaint(
       size: Size(double.infinity, displacement),
       painter: _CupertinoDividerPainter(
-        color: CupertinoDynamicColor.resolve(color, context),
-        overlayColor: CupertinoDynamicColor.resolve(overlayColor, context),
+        color: CupertinoDynamicColor.resolve(kDividerColor, context),
+        overlayColor: CupertinoDynamicColor.resolve(kOverlayColor, context),
         // Only anti-alias on devices with a low pixel density.
         antiAlias: pixelRatio < 1.0,
       ),
@@ -1581,11 +1580,11 @@ class _CupertinoMenuImplicitDivider extends StatelessWidget {
 ///   dividers are shown before or after a menu item.
 class CupertinoMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
   /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
-  const CupertinoMenuDivider({super.key, this.color = defaultColor});
+  const CupertinoMenuDivider({super.key, this.color = kDefaultColor});
 
   /// The color of the divider.
   ///
-  /// Defaults to [CupertinoMenuDivider.defaultColor].
+  /// Defaults to [CupertinoMenuDivider.kDefaultColor].
   final Color color;
 
   @override
@@ -1596,18 +1595,18 @@ class CupertinoMenuDivider extends StatelessWidget implements CupertinoMenuEntry
 
   /// Default color for a [CupertinoMenuDivider].
   // The following colors were measured from debug mode on the iOS 18.5 simulator,
-  static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
+  static const CupertinoDynamicColor kDefaultColor = CupertinoDynamicColor.withBrightness(
     color: Color.fromRGBO(0, 0, 0, 0.08),
     darkColor: Color.fromRGBO(0, 0, 0, 0.16),
   );
 
-  static const double _height = 8.0;
+  static const double _kDividerHeight = 8.0;
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: CupertinoDynamicColor.resolve(color, context),
-      child: const SizedBox(height: _height, width: double.infinity),
+      child: const SizedBox(height: _kDividerHeight, width: double.infinity),
     );
   }
 }
@@ -1690,7 +1689,7 @@ class _CupertinoDividerPainter extends CustomPainter {
 /// ## Visuals
 /// The [decoration] parameter can be used to change the background color of the
 /// menu item when hovered, focused, pressed, or swiped. If these parameters are
-/// not set, the menu item will use [CupertinoMenuItem.defaultDecoration].
+/// not set, the menu item will use [CupertinoMenuItem.kDefaultDecoration].
 ///
 /// The [isDestructiveAction] parameter should be set to true if the menu item
 /// will perform a destructive action, and will color the text of the menu item
@@ -1799,7 +1798,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
 
   /// The decoration to paint behind the menu item.
   ///
-  /// If null, defaults to [CupertinoMenuItem.defaultDecoration].
+  /// If null, defaults to [CupertinoMenuItem.kDefaultDecoration].
   final WidgetStateProperty<BoxDecoration>? decoration;
 
   /// The mouse cursor to display on hover.
@@ -1859,7 +1858,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   // Blend mode is used to mimic the visual effect of the iOS
   // menu item. As a result, the default pressed color does not match the
   // reported colors on the iOS 18.5 simulator.
-  static const WidgetStateProperty<BoxDecoration> defaultDecoration =
+  static const WidgetStateProperty<BoxDecoration> kDefaultDecoration =
       WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
         WidgetState.dragged: BoxDecoration(
           color: CupertinoDynamicColor.withBrightness(
@@ -1888,7 +1887,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
         WidgetState.any: BoxDecoration(),
       });
 
-  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+  static final WidgetStateProperty<MouseCursor> _kDefaultCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return !states.contains(WidgetState.disabled) && kIsWeb
             ? SystemMouseCursors.click
@@ -1896,7 +1895,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
       });
 
   // Measured from the iOS 18.5 simulator debug view.
-  static const Color _defaultTextColor = CupertinoDynamicColor.withBrightness(
+  static const Color _kDefaultTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
   );
@@ -1905,9 +1904,9 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// widget, if a subtitle is provided.
   ///
   /// A custom blend mode is applied to the subtitle to mimic the visual effect
-  /// of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
+  /// of the iOS menu subtitle. As a result, the kDefaultSubtitleTextColor does
   /// not match the reported color on the iOS 18.5 simulator.
-  static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
+  static const Color _kDefaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
   );
@@ -1917,27 +1916,27 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// equal to 1.25.
   ///
   /// Measured from the iOS 18.5 simulator debug view.
-  static const int _defaultMaxLines = 2;
+  static const int _kDefaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is greater than
   /// 1.25.
-  static const int _defaultAccessibilityModeMaxLines = 100;
+  static const int _kDefaultLargeTextModeMaxLines = 100;
 
-  static const TextStyle _leadingDefaultTextStyle = TextStyle(
+  static const TextStyle _kLeadingDefaultTextStyle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w600,
   );
 
-  static const IconThemeData _leadingDefaultIconTheme = IconThemeData(
+  static const IconThemeData _kLeadingDefaultIconTheme = IconThemeData(
     size: 15,
     weight: 600,
     applyTextScaling: true,
   );
 
-  static const TextStyle _trailingDefaultTextStyle = TextStyle(fontSize: 21);
+  static const TextStyle _kTrailingDefaultTextStyle = TextStyle(fontSize: 21);
 
-  static const IconThemeData _trailingDefaultIconTheme = IconThemeData(
+  static const IconThemeData _kTrailingDefaultIconTheme = IconThemeData(
     size: 21,
     applyTextScaling: true,
   );
@@ -1953,7 +1952,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
     } else if (isDestructiveAction) {
       color = CupertinoColors.systemRed;
     } else {
-      color = _defaultTextColor;
+      color = _kDefaultTextColor;
     }
 
     return _DynamicTypeStyle.body
@@ -1981,7 +1980,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
             // For light mode: plusDarker is used on iOS to achieve a darker color.
             // HardLight is used as an approximation.
             ..blendMode = isDark ? BlendMode.plus : BlendMode.hardLight
-            ..color = CupertinoDynamicColor.resolve(_defaultSubtitleTextColor, context),
+            ..color = CupertinoDynamicColor.resolve(_kDefaultSubtitleTextColor, context),
         );
   }
 
@@ -1999,20 +1998,20 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
         MediaQuery.maybeTextScalerOf(context) ??
         TextScaler.linear(MediaQuery.maybeTextScaleFactorOf(context) ?? 1);
     final TextStyle defaultTextStyle = _resolveDefaultTextStyle(context, textScaler);
-    final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
+    final bool isLargeTextModeEnabled = _largeTextModeEnabled(context);
     Widget? leadingWidget;
     Widget? trailingWidget;
     if (leading != null) {
       leadingWidget = DefaultTextStyle.merge(
-        style: _leadingDefaultTextStyle,
-        child: IconTheme.merge(data: _leadingDefaultIconTheme, child: leading!),
+        style: _kLeadingDefaultTextStyle,
+        child: IconTheme.merge(data: _kLeadingDefaultIconTheme, child: leading!),
       );
     }
 
-    if (trailing != null && !isAccessibilityModeEnabled) {
+    if (trailing != null && !isLargeTextModeEnabled) {
       trailingWidget = DefaultTextStyle.merge(
-        style: _trailingDefaultTextStyle,
-        child: IconTheme.merge(data: _trailingDefaultIconTheme, child: trailing!),
+        style: _kTrailingDefaultTextStyle,
+        child: IconTheme.merge(data: _kTrailingDefaultIconTheme, child: trailing!),
       );
     }
 
@@ -2020,19 +2019,17 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
       minScaleFactor: _kMinimumTextScaleFactor,
       maxScaleFactor: _kMaximumTextScaleFactor,
       child: _CupertinoMenuItemInteractionHandler(
-        mouseCursor: mouseCursor ?? _defaultCursor,
+        mouseCursor: mouseCursor ?? _kDefaultCursor,
         requestFocusOnHover: requestFocusOnHover,
         onPressed: onPressed != null ? () => _handleSelect(context) : null,
         onHover: onHover,
         onFocusChange: onFocusChange,
         autofocus: autofocus,
         focusNode: focusNode,
-        decoration: decoration ?? defaultDecoration,
+        decoration: decoration ?? kDefaultDecoration,
         behavior: behavior,
         child: DefaultTextStyle.merge(
-          maxLines: isAccessibilityModeEnabled
-              ? _defaultAccessibilityModeMaxLines
-              : _defaultMaxLines,
+          maxLines: isLargeTextModeEnabled ? _kDefaultLargeTextModeMaxLines : _kDefaultMaxLines,
           overflow: TextOverflow.ellipsis,
           softWrap: true,
           style: TextStyle(color: defaultTextStyle.color),
@@ -2117,7 +2114,7 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
        _trailingAlignment = trailingMidpointAlignment,
        _constraints = constraints;
 
-  static const double _defaultHorizontalWidth = 16;
+  static const double _kDefaultHorizontalWidth = 16;
 
   // The leading and trailing widths scale roughly linearly with the normalized
   // text scale once quantized to the nearest physical pixel. Each linear
@@ -2126,17 +2123,17 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   //
   // This behavior was measured on several iOS and iPadOS 18.5 simulators using
   // the debug view.
-  static const double _leadingWidthSlope = -311 / 1000;
-  static const double _leadingWidthYIntercept = 10;
+  static const double _kLeadingWidthSlope = -311 / 1000;
+  static const double _kLeadingWidthYIntercept = 10;
 
-  static const double _leadingMidpointSlope = 118 / 1000000;
-  static const double _leadingMidpointYIntercept = 73 / 125;
+  static const double _kLeadingMidpointSlope = 118 / 1000000;
+  static const double _kLeadingMidpointYIntercept = 73 / 125;
 
-  static const double _trailingWidthSlope = 1 / 10;
-  static const double _trailingWidthYIntercept = 22;
+  static const double _kTrailingWidthSlope = 1 / 10;
+  static const double _kTrailingWidthYIntercept = 22;
 
-  static const double _firstBaselineToTopSlope = 14 / 11;
-  static const double _lastBaselineToBottomSlope = 71 / 100;
+  static const double _kFirstBaselineToTopSlope = 14 / 11;
+  static const double _kLastBaselineToBottomSlope = 71 / 100;
 
   final Widget? leading;
   final double? leadingWidth;
@@ -2153,13 +2150,13 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
 
   double _resolveLeadingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
-    final double value = _leadingWidthSlope * units + _leadingWidthYIntercept;
+    final double value = _kLeadingWidthSlope * units + _kLeadingWidthYIntercept;
     return _roundToDivisible(value + lineHeight, to: 1 / pixelRatio);
   }
 
   double _resolveTrailingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
-    final double value = _trailingWidthSlope * units + _trailingWidthYIntercept;
+    final double value = _kTrailingWidthSlope * units + _kTrailingWidthYIntercept;
     return _roundToDivisible(value + lineHeight, to: 1 / pixelRatio);
   }
 
@@ -2172,17 +2169,17 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
 
   AlignmentGeometry _resolveLeadingAlignment(double leadingWidth, TextScaler textScaler) {
     final double units = _normalizeTextScale(textScaler);
-    final double horizontalRatio = _leadingMidpointSlope * units + _leadingMidpointYIntercept;
+    final double horizontalRatio = _kLeadingMidpointSlope * units + _kLeadingMidpointYIntercept;
     final double horizontalAlignment = (horizontalRatio * 2) - 1;
     return AlignmentDirectional(horizontalAlignment, 0.0);
   }
 
   double _resolveFirstBaselineToTop(double lineHeight, double pixelRatio) {
-    return _roundToDivisible(lineHeight * _firstBaselineToTopSlope, to: 1 / pixelRatio);
+    return _roundToDivisible(lineHeight * _kFirstBaselineToTopSlope, to: 1 / pixelRatio);
   }
 
   double _resolveLastBaselineToBottom(double lineHeight, double pixelRatio) {
-    return _roundToDivisible(lineHeight * _lastBaselineToBottomSlope, to: 1 / pixelRatio);
+    return _roundToDivisible(lineHeight * _kLastBaselineToBottomSlope, to: 1 / pixelRatio);
   }
 
   EdgeInsets _resolvePadding(double minimumHeight, double lineHeight) {
@@ -2224,13 +2221,13 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
         leadingWidth ??
         (showLeadingWidget
             ? _resolveLeadingWidth(textScaler, pixelRatio, lineHeight)
-            : _defaultHorizontalWidth);
+            : _kDefaultHorizontalWidth);
 
     final double resolvedTrailingWidth =
         trailingWidth ??
         (trailing != null
             ? _resolveTrailingWidth(textScaler, pixelRatio, lineHeight)
-            : _defaultHorizontalWidth);
+            : _kDefaultHorizontalWidth);
 
     return ConstrainedBox(
       constraints: constraints,
