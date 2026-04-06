@@ -294,6 +294,7 @@ void main() {
       ddsLauncherCallback =
           ({
             required Uri remoteVmServiceUri,
+            String? appName = 'Fake App',
             Uri? serviceUri,
             bool enableAuthCodes = true,
             bool serveDevTools = false,
@@ -303,6 +304,8 @@ void main() {
             String? dartExecutable,
             String? google3WorkspaceRoot,
           }) async {
+            expect(appName, contains('Kind: Flutter'));
+            expect(appName, contains('Device: flutter tester'));
             return FakeDartDevelopmentServiceLauncher(uri: Uri.parse('http://localhost:1234'));
           };
     });

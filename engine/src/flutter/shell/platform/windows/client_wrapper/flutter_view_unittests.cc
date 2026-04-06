@@ -20,6 +20,10 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
   IDXGIAdapter* ViewGetGraphicsAdapter() override {
     return reinterpret_cast<IDXGIAdapter*>(8);
   }
+
+  IDXGIAdapter* EngineGetGraphicsAdapter() override {
+    return reinterpret_cast<IDXGIAdapter*>(9);
+  }
 };
 
 }  // namespace

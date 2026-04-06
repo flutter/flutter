@@ -136,25 +136,10 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
                   },
                   [callback]() { callback(nullptr); });
             } else {
-#if FML_OS_IOS_SIMULATOR
-              callback(impeller::DlImageImpeller::Make(
-                  nullptr, DlImage::OwningContext::kRaster,
-                  /*is_fake_image=*/true));
-#else
               callback(nullptr);
-
-#endif  // FML_OS_IOS_SIMULATOR
             }
           })
           .SetIfFalse([&] {
-#if FML_OS_IOS_SIMULATOR
-            if (!GetDelegate().GetAiksContext()) {
-              callback(impeller::DlImageImpeller::Make(
-                  nullptr, DlImage::OwningContext::kRaster,
-                  /*is_fake_image=*/true));
-              return;
-            }
-#endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
                                           GetDelegate(), pixel_format));
           }));

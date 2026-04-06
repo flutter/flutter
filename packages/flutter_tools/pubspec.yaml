@@ -13,7 +13,7 @@ dependencies:
   analyzer: 10.1.0
   archive: 3.6.1
   args: 2.7.0
-  dds: 5.2.0
+  dds: 5.3.0
   dwds: 26.2.5
   code_builder: 4.11.1
   collection: 1.19.1
@@ -114,7 +114,6 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.4
-  mdns_dart: ^2.2.1
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -129,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ftmpgr
+# PUBSPEC CHECKSUM: ma8sc5

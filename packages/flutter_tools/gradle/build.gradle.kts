@@ -8,7 +8,7 @@ plugins {
     `java-gradle-plugin`
     groovy
     `kotlin-dsl`
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm") version "2.2.20"
 }
 
 group = "dev.flutter.plugin"
@@ -52,7 +52,9 @@ dependencies {
     // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
     // Version release notes https://developer.android.com/jetpack/androidx/releases/annotation
     compileOnly("androidx.annotation:annotation-jvm:1.9.1")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
+    // When bumping, also update:
+    //  * KGP error version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.0")
     // Update to 1.8.0 when min kotlin is 2.1
     // https://github.com/Kotlin/kotlinx.serialization/releases for kotlin version compatibility.
     // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.

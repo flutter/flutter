@@ -312,7 +312,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger slider', (WidgetTester tester) async {
-    var value = 0.75;
+    var value = 0.5;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -354,12 +354,12 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        expect(value, equals(0.65));
+        expect(value, equals(0.4));
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        expect(value, equals(0.70));
+        expect(value, equals(0.45));
     }
   }, variant: TargetPlatformVariant.all());
 
