@@ -1217,6 +1217,7 @@ public class FlutterLoaderTest {
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
     assertFalse(arguments.contains(disallowedArg));
   }
+
   @Test
   public void ifFlagSetViaManifestAndIntentExtraThenIntentExtraTakesPrecedence() {
     String expectedImpellerArgFromMetadata = "--enable-impeller=true";
