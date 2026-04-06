@@ -8,10 +8,7 @@ jobs:
   revert:
     name: Revert PR
     runs-on: ubuntu-latest
-    if: |
-      github.event.label.name == 'revert_wf' &&
-      github.event.pull_request.state == 'closed'
-
+    if: github.event.label.name == 'revert_wf'
     steps:
       - name: Handle Not Merged PR
         if: github.event.pull_request.merged != true
