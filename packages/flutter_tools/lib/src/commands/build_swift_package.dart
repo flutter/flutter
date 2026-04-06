@@ -266,6 +266,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     utils: utils,
   );
   late final flutterNativeIntegrationSwiftPackage = FlutterNativeIntegrationSwiftPackage(
+    targetPlatform: _targetPlatform,
     utils: utils,
     generateTests: generateTests,
   );
@@ -399,6 +400,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       xcframeworkOutput: xcframeworkOutput,
       codesignIdentity: codesignIdentity,
       codesignIdentityFile: codesignIdentityFile,
+      pluginSwiftDependencies: pluginSwiftDependencies,
     );
   }
 
@@ -591,6 +593,8 @@ class FlutterPluginRegistrantSwiftPackage {
           plugins,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
+          // The registrant needs to be public to be accessible in the app.
+          public: true,
         );
     }
   }
@@ -615,7 +619,9 @@ class FlutterFrameworkDependency {
     required Directory xcframeworkOutput,
     required String? codesignIdentity,
   }) async {
-    final Status status = _utils.logger.startProgress('   ├─Copying Flutter.xcframework...');
+    final Status status = _utils.logger.startProgress(
+      '   ├─Copying ${_targetPlatform.binaryName}.xcframework...',
+    );
     try {
       final String frameworkArtifactPath = _utils.artifacts.getArtifactPath(
         _targetPlatform.xcframeworkArtifact,
@@ -1482,10 +1488,10 @@ class CocoaPodPluginDependencies {
     required bool buildStatic,
     required String? codesignIdentity,
     required File codesignIdentityFile,
+    required FlutterPluginSwiftDependencies pluginSwiftDependencies,
   }) async {
     final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
-    final Directory podsDirectory = _xcodeProject.hostAppRoot.childDirectory('Pods');
-    if (!podsDirectory.existsSync() || !_xcodeProject.podfile.existsSync()) {
+    if (!_xcodeProject.podfile.existsSync()) {
       return;
     }
     final Directory cocoapodXCFrameworkOutput = xcframeworkOutput.childDirectory(_kCocoaPods);
@@ -1514,6 +1520,11 @@ class CocoaPodPluginDependencies {
       }
 
       await processPods(_xcodeProject, buildInfo);
+      // Pods directory may not exist until after `processPods` is called.
+      final Directory podsDirectory = _xcodeProject.hostAppRoot.childDirectory('Pods');
+      if (!podsDirectory.existsSync()) {
+        return;
+      }
 
       final frameworksPerPod = <String, List<Directory>>{};
       for (final XcodeSdk sdk in _targetPlatform.sdks) {
@@ -1527,6 +1538,7 @@ class CocoaPodPluginDependencies {
           buildStatic: buildStatic,
           outputBuildDirectory: outputBuildDirectory,
           podsDirectory: podsDirectory,
+          pluginSwiftDependencies: pluginSwiftDependencies,
         );
         sdkSpecificFrameworks.forEach((String name, List<Directory> frameworks) {
           frameworksPerPod.putIfAbsent(name, () => <Directory>[]).addAll(frameworks);
@@ -1578,6 +1590,7 @@ class CocoaPodPluginDependencies {
     required bool buildStatic,
     required Directory outputBuildDirectory,
     required Directory podsDirectory,
+    required FlutterPluginSwiftDependencies pluginSwiftDependencies,
   }) async {
     final String configuration = _configurationForSdkType(sdk, xcodeBuildConfiguration);
     final ProcessResult buildPluginsResult = await _utils.processManager.run(<String>[
@@ -1606,7 +1619,7 @@ class CocoaPodPluginDependencies {
           '$configuration-${sdk.platformName}',
         );
     }
-    return _findFrameworks(configurationBuildDir);
+    return _findFrameworks(configurationBuildDir, pluginSwiftDependencies);
   }
 
   /// Iterates through the build files and find .frameworks
@@ -1617,7 +1630,10 @@ class CocoaPodPluginDependencies {
   ///   > plugin_a
   ///     > plugin_a.framework
   /// ```
-  Future<Map<String, List<Directory>>> _findFrameworks(Directory configurationBuildDir) async {
+  Future<Map<String, List<Directory>>> _findFrameworks(
+    Directory configurationBuildDir,
+    FlutterPluginSwiftDependencies pluginSwiftDependencies,
+  ) async {
     final frameworks = <String, List<Directory>>{};
 
     final Iterable<Directory> products = configurationBuildDir
@@ -1631,6 +1647,20 @@ class CocoaPodPluginDependencies {
           continue;
         }
         final String binaryName = _utils.fileSystem.path.basenameWithoutExtension(podFrameworkName);
+        if (_utils.project.isModule &&
+            (binaryName == 'FlutterPluginRegistrant' ||
+                pluginSwiftDependencies.copiedPlugins.any((record) => record.name == binaryName))) {
+          // Flutter modules don't support SwiftPM and force all plugins to be built as CocoaPods.
+          // Since SwiftPM supported plugins are used as Swift packages in this command, they should
+          // be skipped and not included as CocoaPod framework dependencies.
+          // In addition, modules generate a FlutterPluginRegistrant framework. Since the
+          // FlutterPluginRegistrant is also being used as a Swift Package in this command, it should
+          // also be skipped.
+          // TODO(vashworth): Find a way to prevent CocoaPods from building SwiftPM plugins and
+          // FlutterPluginRegistrant when using a module in the first place.
+          // See https://github.com/flutter/flutter/issues/184590.
+          continue;
+        }
         frameworks.putIfAbsent(binaryName, () => <Directory>[]).add(podProduct);
       }
     }
@@ -1751,13 +1781,15 @@ class CocoaPodPluginDependencies {
     return fingerprinter;
   }
 
+  /// With SwiftPM integration, we can't reliably switch the build mode for CocoaPod frameworks.
+  /// This can cause errors like "missing required module 'SwiftOnoneSupport'" when building for release.
+  /// To avoid this, we always build debug for simulator and release for device.
   String _configurationForSdkType(XcodeSdk sdk, String configuration) {
     if (sdk.sdkType == EnvironmentType.simulator) {
       // Always build debug for simulator.
       return BuildMode.debug.uppercaseName;
-    } else {
-      return configuration;
     }
+    return BuildMode.release.uppercaseName;
   }
 
   /// The target dependencies and binary targets for the CocoaPod plugin xcframeworks.
@@ -1796,9 +1828,12 @@ class FlutterNativeIntegrationSwiftPackage {
   FlutterNativeIntegrationSwiftPackage({
     required BuildSwiftPackageUtils utils,
     required bool generateTests,
-  }) : _utils = utils,
+    required FlutterDarwinPlatform targetPlatform,
+  }) : _targetPlatform = targetPlatform,
+       _utils = utils,
        _generateTests = generateTests;
 
+  final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
   final bool _generateTests;
 
@@ -1829,8 +1864,11 @@ class FlutterNativeIntegrationSwiftPackage {
     final Directory nativeToolsPackage = flutterIntegrationPackage.childDirectory(
       _kFlutterNativeTools,
     );
+    final Directory scriptsDirectory = outputDirectory.childDirectory(_kScripts);
+    ErrorHandlingFileSystem.deleteIfExists(nativeToolsPackage, recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(scriptsDirectory, recursive: true);
     await _generateSourceFiles(
-      outputDirectory: outputDirectory,
+      scriptsDirectory: scriptsDirectory,
       nativeToolsPackage: nativeToolsPackage,
     );
 
@@ -1884,10 +1922,10 @@ class FlutterNativeIntegrationSwiftPackage {
 
   /// Copies files from the template to the output directory.
   Future<void> _generateSourceFiles({
-    required Directory outputDirectory,
+    required Directory scriptsDirectory,
     required Directory nativeToolsPackage,
   }) async {
-    await _generateScripts(outputDirectory.childDirectory(_kScripts));
+    await _generateScripts(scriptsDirectory);
     await _generateToolsSources(nativeToolsPackage.childDirectory(_kSources));
     await _generatePluginsSources(
       pluginsDirectory: nativeToolsPackage.childDirectory(_kSwiftPlugins),
@@ -1906,13 +1944,17 @@ class FlutterNativeIntegrationSwiftPackage {
       logger: _utils.logger,
       templateRenderer: _utils.templateRenderer,
     );
-    scriptsTemplate.render(scriptsDirectory, <String, Object>{}, printStatusWhenWriting: false);
+    scriptsTemplate.render(scriptsDirectory, <String, Object>{
+      'flutterFrameworkName': _targetPlatform.binaryName,
+      'infoPlistPath': _targetPlatform == FlutterDarwinPlatform.macos
+          ? 'Versions/A/Resources/Info.plist'
+          : 'Info.plist',
+    }, printStatusWhenWriting: false);
   }
 
   /// Generate source files for Swift package executable tools to be used for integrating SwiftPM
   /// into the [sourcesDirectory].
   Future<void> _generateToolsSources(Directory sourcesDirectory) async {
-    ErrorHandlingFileSystem.deleteIfExists(sourcesDirectory, recursive: true);
     final Template toolsTemplate = await Template.fromName(
       _utils.fileSystem.path.join('add_to_app', 'darwin', _kTools),
       fileSystem: _utils.fileSystem,
