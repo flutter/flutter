@@ -769,13 +769,13 @@ class FlutterPluginUtilsTest {
         @Nested
         inner class TestApplyingPluginsRegexTests {
             @Test
-            fun `agp app regex on single line apply`() {
+            fun `AGP app regex on single line apply`() {
                 assertSingeLinePluginDetection(FlutterPluginUtils.appPluginRegexKotlin, "com.android.application", DslType.KOTLIN)
                 assertSingeLinePluginDetection(FlutterPluginUtils.appPluginRegexGroovy, "com.android.application", DslType.GROOVY)
             }
 
             @Test
-            fun `agp lib regex on single line apply`() {
+            fun `AGP lib regex on single line apply`() {
                 assertSingeLinePluginDetection(FlutterPluginUtils.libPluginRegexKotlin, "com.android.library", DslType.KOTLIN)
                 assertSingeLinePluginDetection(FlutterPluginUtils.libPluginRegexGroovy, "com.android.library", DslType.GROOVY)
             }
