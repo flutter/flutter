@@ -218,7 +218,7 @@ const swiftPackageManager = Feature(
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
-  stable: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.

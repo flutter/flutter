@@ -26,6 +26,7 @@ import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 Matcher matchesMethodCall(String method, {dynamic args}) =>
     _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
@@ -1313,6 +1314,63 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['hintLocales'], localesLanguageTags);
   });
 
+  testWidgets('enableInlinePrediction is sent to the engine properly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              enableInlinePrediction: true,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+    expect(tester.testTextInput.setClientArgs!['enableInlinePrediction'], true);
+  });
+
+  testWidgets('enableInlinePrediction defaults to null in engine args', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+    expect(tester.testTextInput.setClientArgs!['enableInlinePrediction'], isNull);
+  });
+
   group('smartDashesType and smartQuotesType', () {
     testWidgets('sent to the engine properly', (WidgetTester tester) async {
       const SmartDashesType smartDashesType = SmartDashesType.disabled;
@@ -2529,6 +2587,63 @@ void main() {
     expect(find.text('Paste'), findsNothing);
   });
 
+  testWidgets('pasteText reports error to FlutterError when Clipboard.getData throws', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errors.add(details);
+    };
+
+    try {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+        MethodCall methodCall,
+      ) async {
+        if (methodCall.method == 'Clipboard.getData') {
+          throw PlatformException(code: 'CLIPBOARD_ERROR', message: 'Failed to read clipboard');
+        }
+        return null; // Fall through for other methods
+      });
+
+      final controller = TextEditingController(text: 'text');
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: Colors.red,
+            enableInteractiveSelection: true,
+          ),
+        ),
+      );
+
+      // Get a context inside EditableText to access its internal Actions
+      final BuildContext childContext = tester.element(
+        find
+            .descendant(of: find.byType(EditableText), matching: find.byType(RawGestureDetector))
+            .first,
+      );
+      Actions.invoke(childContext, const PasteTextIntent(SelectionChangedCause.toolbar));
+
+      await tester.idle(); // Allow async work to complete (like platform channels)
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<PlatformException>());
+      expect((errors.first.exception as PlatformException).code, 'CLIPBOARD_ERROR');
+    } finally {
+      FlutterError.onError = oldOnError;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    }
+  });
+
   testWidgets(
     'Copy selection does not collapse selection on desktop and iOS',
     (WidgetTester tester) async {
@@ -3568,7 +3683,7 @@ void main() {
 
     // Populate a fake clipboard.
     const clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
-    Clipboard.setData(const ClipboardData(text: clipboardContent));
+    await Clipboard.setData(const ClipboardData(text: clipboardContent));
 
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byType(EditableText);
@@ -18173,6 +18288,73 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
   });
+
+  testWidgets(
+    'Prevent last character visibility in obscure text when obscureText is toggled on mobile',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/184483.
+      var obscureText = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              return EditableText(
+                controller: controller,
+                backgroundCursorColor: const Color(0xFFF7F7F7),
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: obscureText,
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+
+      await tester.enterText(find.byType(EditableText), 'H');
+      await tester.pump();
+      await tester.enterText(find.byType(EditableText), 'HH');
+      await tester.pump();
+
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•H');
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect((findRenderEditable(tester).text! as TextSpan).text, '••');
+
+      await tester.enterText(find.byType(EditableText), 'HHH');
+      await tester.pump();
+
+      expect((findRenderEditable(tester).text! as TextSpan).text, '••H');
+
+      // set obscureText = false.
+      setState(() {
+        obscureText = false;
+      });
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, 'HHH');
+
+      // set obscureText = true.
+      setState(() {
+        obscureText = true;
+      });
+      await tester.pump();
+      expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
+    },
+    // Reveal the latest character in an obscured field only on mobile.
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+    }),
+  );
 }
 
 class UnsettableController extends TextEditingController {

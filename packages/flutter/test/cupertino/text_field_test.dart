@@ -25,9 +25,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
-import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
+import 'live_text_utils.dart';
 
 class MockTextSelectionControls extends TextSelectionControls {
   @override
@@ -10909,5 +10909,38 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoTextField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
+  });
+
+  testWidgets('CupertinoTextField passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(home: Center(child: CupertinoTextField(enableInlinePrediction: true))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
+
+  testWidgets('CupertinoTextField enableInlinePrediction defaults to null', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const CupertinoApp(home: Center(child: CupertinoTextField())));
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, isNull);
+  });
+
+  testWidgets('CupertinoTextField.borderless passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField.borderless(enableInlinePrediction: true)),
+      ),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
   });
 }

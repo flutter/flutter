@@ -72,7 +72,6 @@ typedef WindowRect* (*GetWindowPositionCallback)(const WindowSize& child_size,
 
 struct TooltipWindowCreationRequest {
   WindowConstraints preferred_constraints;
-  bool is_sized_to_content;
   HWND parent;
   GetWindowPositionCallback get_position_callback;
 };

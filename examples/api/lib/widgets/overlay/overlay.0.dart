@@ -76,7 +76,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                   const Text('Tap here for'),
                   Builder(builder: builder),
                   SizedBox(
-                    width: MediaQuery.of(context).size.width / 3,
+                    width: MediaQuery.widthOf(context) / 3,
                     height: 80.0,
                     child: Center(
                       child: Container(
