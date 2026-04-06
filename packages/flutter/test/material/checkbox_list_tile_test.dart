@@ -27,8 +27,7 @@ class _FeedbackTester {
   Future<void> _handler(MethodCall methodCall) async {
     if (methodCall.method == 'HapticFeedback.vibrate') {
       _hapticCount++;
-    }
-    if (methodCall.method == 'SystemSound.play' &&
+    } else if (methodCall.method == 'SystemSound.play' &&
         methodCall.arguments == SystemSoundType.click.toString()) {
       _clickSoundCount++;
     }
