@@ -17,6 +17,7 @@ dependencies:
   google_fonts: 6.3.3
   json_rpc_2: 4.1.0
   path: 1.9.1
+  path_provider_android: 2.2.23 # https://github.com/flutter/flutter/issues/184689
   stack_trace: 1.12.1
   url_launcher: 6.3.2
 
@@ -68,4 +69,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: ciq2fr
+# PUBSPEC CHECKSUM: v566a3
