@@ -166,6 +166,7 @@ void main() {
         'analyze --suggestions --machine produces expected values when using sudo',
         () async {
           final ProcessResult result = await globals.processManager.run(<String>[
+            'sudo',
             'flutter',
             'analyze',
             '--suggestions',
@@ -228,5 +229,6 @@ void main() {
       );
     },
     skip: !(const LocalPlatform().isMacOS || const LocalPlatform().isLinux),
+    // Intended: because sudo is available only on mac and linux
   );
 }
