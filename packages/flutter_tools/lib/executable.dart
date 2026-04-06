@@ -37,7 +37,6 @@ import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
-import 'src/commands/running_apps.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
@@ -251,7 +250,6 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         featureFlags: featureFlags,
       ),
       RunCommand(verboseHelp: verboseHelp),
-      RunningAppsCommand(logger: globals.logger, systemClock: globals.systemClock),
       ScreenshotCommand(fs: globals.fs),
       ShellCompletionCommand(),
       TestCommand(
@@ -270,6 +268,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         os: globals.os,
         processManager: globals.processManager,
         artifacts: globals.artifacts!,
+        terminal: globals.terminal,
       ),
       UpgradeCommand(verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),

@@ -220,6 +220,9 @@ class FlutterDriverService extends DriverService {
       try {
         await device.dds.startDartDevelopmentServiceFromDebuggingOptions(
           uri,
+          appName:
+              'Kind: Flutter - Device: ${device.displayName} - '
+              'Package: ${_applicationPackage?.name}',
           debuggingOptions: debuggingOptions,
         );
         _vmServiceUri = device.dds.uri.toString();

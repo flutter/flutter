@@ -1554,8 +1554,20 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async =>
-      projectInfo;
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(

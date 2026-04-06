@@ -614,4 +614,101 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('TitleEvaluation', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = <String>{...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility_evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
+
+    const evaluation = TitleEvaluation();
+
+    testWidgets('passes if there is at least one title widget', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Title(title: 'Title', color: const Color(0xFF000000), child: const SizedBox()),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('passes if title widget is deeply nested (recursive check)', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SizedBox(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Title(
+                  title: 'Nested Title',
+                  color: const Color(0xFF000000),
+                  child: const SizedBox(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails if there is no title widget', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const Directionality(textDirection: TextDirection.ltr, child: SizedBox()),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('Expected to find at least one Title widget, but none was found.'),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('fails if title widget is missing in deeply nested tree', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(child: Text('No title here')),
+            ),
+          ),
+        ),
+      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
+      expect(result!.violations, hasLength(1));
+      expect(
+        result.violations.first.reason,
+        contains('Expected to find at least one Title widget, but none was found.'),
+      );
+      handle.dispose();
+    });
+  });
 }

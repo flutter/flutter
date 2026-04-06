@@ -45,7 +45,7 @@ class _ToggleButtonsExampleState extends State<ToggleButtonsExample> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text('ToggleButtons'),
           const SizedBox(height: 10),

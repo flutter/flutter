@@ -10,9 +10,22 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
-  SkwasmImage(ImageHandle handle) : super(handle, _registry) {
+class SkwasmImage implements ui.Image, StackTraceDebugger {
+  SkwasmImage(ImageHandle handle) {
+    box = CountedRef<SkwasmImage, ImageHandle>(
+      handle,
+      this,
+      'SkImage',
+      onDispose: (ImageHandle h) => imageDispose(h),
+      onDisposed: (SkwasmImage image) => ui.Image.onDispose?.call(image),
+    );
+    _init();
     ui.Image.onCreate?.call(this);
+  }
+
+  SkwasmImage.cloneOf(this.box) {
+    box.ref(this);
+    _init();
   }
 
   factory SkwasmImage.fromPixels(
@@ -38,13 +51,45 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
     return SkwasmImage(imageHandle);
   }
 
-  static final SkwasmFinalizationRegistry<RawImage> _registry =
-      SkwasmFinalizationRegistry<RawImage>((ImageHandle handle) => imageDispose(handle));
+  void _init() {
+    assert(() {
+      _debugStackTrace = StackTrace.current;
+      return true;
+    }());
+  }
+
+  @override
+  StackTrace get debugStackTrace => _debugStackTrace;
+  late StackTrace _debugStackTrace;
+
+  late final CountedRef<SkwasmImage, ImageHandle> box;
+
+  bool _disposed = false;
 
   @override
   void dispose() {
-    super.dispose();
-    ui.Image.onDispose?.call(this);
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    box.unref(this);
+  }
+
+  ImageHandle get handle => box.nativeObject;
+
+  @override
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('Image.debugDisposed is only available when asserts are enabled.');
   }
 
   @override
@@ -88,16 +133,13 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
   ui.ColorSpace get colorSpace => ui.ColorSpace.sRGB;
 
   @override
-  SkwasmImage clone() {
-    imageRef(handle);
-    return SkwasmImage(handle);
-  }
+  SkwasmImage clone() => SkwasmImage.cloneOf(box);
 
   @override
   bool isCloneOf(ui.Image other) => other is SkwasmImage && handle == other.handle;
 
   @override
-  List<StackTrace>? debugGetOpenHandleStackTraces() => null;
+  List<StackTrace>? debugGetOpenHandleStackTraces() => box.debugGetStackTraces();
 
   @override
   String toString() => '[$width\u00D7$height]';

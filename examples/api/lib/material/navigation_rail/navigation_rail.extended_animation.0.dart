@@ -49,7 +49,7 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
               _selectedIndex = index;
             });
           },
-          labelType: NavigationRailLabelType.none,
+          labelType: .none,
           destinations: const <NavigationRailDestination>[
             NavigationRailDestination(
               icon: Icon(Icons.favorite_border),
@@ -73,7 +73,7 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
         Expanded(
           child: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Text('Tap on FloatingActionButton to expand'),
                 const SizedBox(height: 20),
@@ -103,19 +103,17 @@ class MyNavigationRailFab extends StatelessWidget {
         // The extended fab has a shorter height than the regular fab.
         return Container(
           height: 56,
-          padding: EdgeInsets.symmetric(
-            vertical: lerpDouble(0, 6, animation.value)!,
-          ),
+          padding: .symmetric(vertical: lerpDouble(0, 6, animation.value)!),
           child: animation.value == 0
               ? FloatingActionButton(
                   onPressed: onPressed,
                   child: const Icon(Icons.add),
                 )
               : Align(
-                  alignment: AlignmentDirectional.centerStart,
+                  alignment: .centerStart,
                   widthFactor: animation.value,
                   child: Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8),
+                    padding: const .directional(start: 8),
                     child: FloatingActionButton.extended(
                       icon: const Icon(Icons.add),
                       label: const Text('CREATE'),
