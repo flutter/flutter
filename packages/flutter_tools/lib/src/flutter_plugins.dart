@@ -1347,12 +1347,16 @@ Future<void> injectPlugins(
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
+            processUtils: globals.processUtils,
+            config: globals.config,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           logger: globals.logger,
           analytics: globals.analytics,
           platform: globals.platform,
+          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          config: globals.config,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);

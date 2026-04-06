@@ -27,6 +27,7 @@ class UberSDFContents : public ColorSourceContents {
   static std::unique_ptr<UberSDFContents> MakeRect(
       Color color,
       Scalar stroke_width,
+      Join stroke_join,
       bool stroked,
       const FillRectGeometry* geometry);
 
@@ -37,6 +38,7 @@ class UberSDFContents : public ColorSourceContents {
                   Rect rect,
                   Color color,
                   Scalar stroke_width,
+                  Join stroke_join,
                   bool stroked,
                   const Geometry* geometry,
                   Scalar aa_padding);
@@ -64,6 +66,8 @@ class UberSDFContents : public ColorSourceContents {
   Color color_;
   /// The width of the stroke.
   Scalar stroke_width_ = 0.0f;
+  /// The join of the stroke.
+  Join stroke_join_ = Join::kMiter;
   /// Whether the geometry is stroked.
   bool stroked_ = false;
   /// The geometry.
