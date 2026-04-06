@@ -27,10 +27,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 import '../widgets/feedback_tester.dart';
-import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
+import 'live_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -6241,7 +6241,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+      await Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -6286,7 +6286,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+      await Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.

@@ -88,7 +88,7 @@ void main() {
       binding.elapseBlocking(const Duration(seconds: 1));
 
       expect(timerCalled, false);
-      binding.idle();
+      await binding.idle();
     });
 
     testWidgets('can use to simulate slow build', (WidgetTester tester) async {
@@ -114,7 +114,7 @@ void main() {
       );
 
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
-      binding.idle();
+      await binding.idle();
     });
   });
 
