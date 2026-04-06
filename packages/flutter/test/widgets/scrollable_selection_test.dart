@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -851,7 +852,7 @@ void main() {
     );
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
     addTearDown(gesture.removePointer);
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
     await gesture.up();
     await tester.pumpAndSettle();
     expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
@@ -924,7 +925,7 @@ void main() {
     );
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
     addTearDown(gesture.removePointer);
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
     await gesture.up();
     await tester.pumpAndSettle();
     expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
@@ -986,7 +987,7 @@ void main() {
     );
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
     addTearDown(gesture.removePointer);
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
     await gesture.up();
     await tester.pumpAndSettle();
     expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
@@ -1375,7 +1376,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     // Simulate long press.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
 
     // Drag into the text content.
     await gesture.moveTo(textCenter);
@@ -1426,7 +1427,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     // Simulate long press.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kLongPressTimeout);
 
     // First drag update is far ALREADY OUTSIDE the scrollable.
     // Emulates a very fast drag movement (so the first EdgeUpdate frame is processed outside).
