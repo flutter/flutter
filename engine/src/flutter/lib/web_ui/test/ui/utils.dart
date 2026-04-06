@@ -7,7 +7,8 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
-    if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart'; // ignore: deprecated_web_configuration
+    // ignore: deprecated_web_configuration
+    if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart';
 
 import '../common/rendering.dart';
