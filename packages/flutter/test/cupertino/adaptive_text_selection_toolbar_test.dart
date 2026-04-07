@@ -192,10 +192,11 @@ void main() {
 
           await tapCupertinoOverflowNextButton(tester);
 
-          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
           expect(findCupertinoOverflowBackButton(), findsOneWidget);
           expect(find.text('Look Up'), findsOneWidget);
           expect(find.text('Search Web'), findsOneWidget);
+          expect(find.text('Translate'), findsOneWidget);
           expect(findLiveTextButton(), findsOneWidget);
 
         case TargetPlatform.fuchsia:
@@ -210,16 +211,17 @@ void main() {
 
           await tapCupertinoOverflowNextButton(tester);
 
-          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
           expect(findCupertinoOverflowBackButton(), findsOneWidget);
           expect(find.text('Search Web'), findsOneWidget);
           expect(find.text('Share...'), findsOneWidget);
+          expect(find.text('Translate'), findsOneWidget);
           expect(findLiveTextButton(), findsOneWidget);
 
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
+          expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(9));
           expect(find.text('Cut'), findsOneWidget);
           expect(find.text('Copy'), findsOneWidget);
           expect(find.text('Paste'), findsOneWidget);
@@ -227,6 +229,7 @@ void main() {
           expect(find.text('Share...'), findsOneWidget);
           expect(find.text('Look Up'), findsOneWidget);
           expect(find.text('Search Web'), findsOneWidget);
+          expect(find.text('Translate'), findsOneWidget);
           expect(findLiveTextButton(), findsOneWidget);
       }
     },
