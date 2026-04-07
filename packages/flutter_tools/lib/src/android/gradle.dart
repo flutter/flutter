@@ -175,7 +175,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _analytics = analytics,
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
-       _platform = platform,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -188,7 +187,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
-  final Platform _platform;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -579,7 +577,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
             gradleExecutablePath: gradleExecutablePath,
             buildInfo: buildInfo,
           )
-        : _getExistingAndroidNdkSkipValue();
+        : await _getInstalledConfiguredAndroidNdkVersion(
+            project: project,
+            gradleExecutablePath: gradleExecutablePath,
+            buildInfo: buildInfo,
+          );
     if (preprovisionedNdkVersion != null) {
       options.add('-P$_kPreprovisionedNdkVersionProperty=$preprovisionedNdkVersion');
     }
@@ -1045,21 +1047,26 @@ class AndroidGradleBuilder implements AndroidBuilder {
     return result;
   }
 
-  String? _getExistingAndroidNdkSkipValue() {
+  Future<String?> _getInstalledConfiguredAndroidNdkVersion({
+    required FlutterProject project,
+    required String gradleExecutablePath,
+    required BuildInfo buildInfo,
+  }) async {
     final AndroidSdk? androidSdk = globals.androidSdk;
     if (androidSdk == null || !androidSdk.directory.existsSync()) {
       return null;
     }
 
-    for (final Directory ndkDirectory in androidSdk.getNdkDirectoriesInResolutionOrder(
-      platform: _platform,
-    )) {
-      if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
-        return ndkDirectory.basename;
-      }
+    final String? requiredNdkVersion = await _getNdkVersion(
+      project: project,
+      gradleExecutablePath: gradleExecutablePath,
+      buildInfo: buildInfo,
+    );
+    if (requiredNdkVersion == null) {
+      return null;
     }
 
-    return null;
+    return androidSdk.hasNdkVersion(requiredNdkVersion) ? requiredNdkVersion : null;
   }
 
   @override
@@ -1523,8 +1530,4 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
 bool _shouldPreprovisionAndroidNdk(BuildInfo buildInfo) {
   final String? flavor = buildInfo.flavor;
   return flavor != null && flavor.isNotEmpty;
-}
-
-bool _isExistingAndroidNdkDirectory(Directory directory) {
-  return directory.childFile('source.properties').existsSync();
 }
