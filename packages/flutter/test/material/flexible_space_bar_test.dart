@@ -336,7 +336,10 @@ void main() {
       ],
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
+    );
 
     // We drag up to fully collapse the space bar.
     await tester.drag(find.text('Item 1'), const Offset(0, -600.0));
@@ -438,7 +441,10 @@ void main() {
       ],
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
+    );
 
     semantics.dispose();
   });
@@ -553,7 +559,10 @@ void main() {
       ],
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
+    );
 
     // We drag up to fully collapse the space bar.
     await tester.drag(find.text('Item 1'), const Offset(0, -600.0));
@@ -655,7 +664,10 @@ void main() {
       ],
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true),
+    );
 
     semantics.dispose();
   });

@@ -692,7 +692,10 @@ void main() {
                               children: <TestSemantics>[
                                 TestSemantics(
                                   tooltip: 'Add Photo',
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
+                                  ],
                                   flags: <SemanticsFlag>[
                                     SemanticsFlag.hasEnabledState,
                                     SemanticsFlag.isButton,

@@ -6229,9 +6229,7 @@ TestSemantics _expectedSemantics({bool scrollable = false}) {
                           TestSemantics(
                             label: 'body',
                             textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[
-                              TestSemantics(children: destinations),
-                            ],
+                            children: <TestSemantics>[TestSemantics(children: destinations)],
                           ),
                         ],
                       ),

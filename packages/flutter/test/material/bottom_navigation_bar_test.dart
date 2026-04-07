@@ -2554,7 +2554,10 @@ void main() {
                                     SemanticsFlag.hasSelectedState,
                                     SemanticsFlag.isSelected,
                                   ],
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
+                                  ],
                                   label: 'A\nTab 1 of 2',
                                   textDirection: TextDirection.ltr,
                                 ),
@@ -2564,7 +2567,10 @@ void main() {
                                     SemanticsFlag.isFocusable,
                                     SemanticsFlag.hasSelectedState,
                                   ],
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                                  actions: <SemanticsAction>[
+                                    SemanticsAction.tap,
+                                    SemanticsAction.focus,
+                                  ],
                                   label: 'B\nTab 2 of 2',
                                   textDirection: TextDirection.ltr,
                                 ),

@@ -2932,24 +2932,12 @@ class ScaffoldState extends State<Scaffold>
     if (child != null) {
       Widget wrappedChild = MediaQuery(data: data, child: child);
       if (traversalOrder != null) {
-        wrappedChild = FocusTraversalOrder(
-          order: traversalOrder,
-          child: wrappedChild,
-        );
+        wrappedChild = FocusTraversalOrder(order: traversalOrder, child: wrappedChild);
       }
       if (semanticsSortKey != null) {
-        wrappedChild = Semantics(
-          container: true,
-          sortKey: semanticsSortKey,
-          child: wrappedChild,
-        );
+        wrappedChild = Semantics(container: true, sortKey: semanticsSortKey, child: wrappedChild);
       }
-      children.add(
-        LayoutId(
-          id: childId,
-          child: wrappedChild,
-        ),
-      );
+      children.add(LayoutId(id: childId, child: wrappedChild));
     }
   }
 
