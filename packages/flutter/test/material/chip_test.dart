@@ -15,8 +15,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 Finder findRenderChipElement() {
   return find.byElementPredicate((Element e) => '${e.renderObject.runtimeType}' == '_RenderChip');
