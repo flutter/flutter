@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import Foundation
-import Testing
 import UIKit
 
 /// This test file verifies code compiles.
