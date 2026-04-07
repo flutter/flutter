@@ -158,29 +158,79 @@ void main() {
     });
   });
 
-  testWidgets('AlignTransition animates', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<Alignment> alignmentTween = AlignmentTween(
-      begin: Alignment.centerLeft,
-      end: Alignment.bottomRight,
-    ).animate(controller);
-    final Widget widget = AlignTransition(
-      alignment: alignmentTween,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
-    );
+  group('AlignTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<Alignment> alignmentTween = AlignmentTween(
+        begin: Alignment.centerLeft,
+        end: Alignment.bottomRight,
+      ).animate(controller);
+      final Widget widget = AlignTransition(
+        alignment: alignmentTween,
+        child: const Text('Ready', textDirection: TextDirection.ltr),
+      );
 
-    await tester.pumpWidget(widget);
+      await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+      final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
 
-    var actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, Alignment.centerLeft);
+      var actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, Alignment.centerLeft);
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, const Alignment(0.0, 0.5));
+      controller.value = 0.5;
+      await tester.pump();
+      actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, const Alignment(0.0, 0.5));
+    });
+
+    testWidgets('keeps width and height factors', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<Alignment> alignmentTween = AlignmentTween(
+        begin: Alignment.centerLeft,
+        end: Alignment.bottomRight,
+      ).animate(controller);
+      final Widget widget = AlignTransition(
+        alignment: alignmentTween,
+        widthFactor: 0.3,
+        heightFactor: 0.4,
+        child: const Text('Ready', textDirection: TextDirection.ltr),
+      );
+
+      await tester.pumpWidget(widget);
+
+      final Align actualAlign = tester.widget(find.byType(Align));
+
+      expect(actualAlign.widthFactor, 0.3);
+      expect(actualAlign.heightFactor, 0.4);
+    });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: AlignTransition(
+              alignment: Tween<AlignmentGeometry>(
+                begin: Alignment.bottomCenter,
+                end: Alignment.bottomRight,
+              ).animate(CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn)),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(AlignTransition)), Size.zero);
+    });
   });
 
   testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
@@ -228,28 +278,6 @@ void main() {
     );
     expect(actualRect, equals(const Rect.fromLTWH(0, 0, 170, 260)));
     expect(renderBox.size, equals(const Size(665, 420)));
-  });
-
-  testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<Alignment> alignmentTween = AlignmentTween(
-      begin: Alignment.centerLeft,
-      end: Alignment.bottomRight,
-    ).animate(controller);
-    final Widget widget = AlignTransition(
-      alignment: alignmentTween,
-      widthFactor: 0.3,
-      heightFactor: 0.4,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
-    );
-
-    await tester.pumpWidget(widget);
-
-    final Align actualAlign = tester.widget(find.byType(Align));
-
-    expect(actualAlign.widthFactor, 0.3);
-    expect(actualAlign.heightFactor, 0.4);
   });
 
   group('SizeTransition', () {
