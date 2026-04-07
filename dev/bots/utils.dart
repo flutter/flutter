@@ -365,12 +365,12 @@ String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirec
 /// or after the line that needs to be exemped.
 bool hasInlineIgnore(
   AstNode node,
-  ParseStringResult compilationUnit,
+  String content,
+  LineInfo lineInfo,
   Pattern ignoreDirectivePattern,
 ) {
-  final LineInfo lineInfo = compilationUnit.lineInfo;
   // In case the node has multiple lines, match from its start offset.
-  final String textAfterNode = compilationUnit.content.substring(
+  final String textAfterNode = content.substring(
     node.offset,
     // This assumes every line ends with a newline character (including the last
     // line) and the new line character is not included to match the given pattern.
@@ -384,7 +384,7 @@ bool hasInlineIgnore(
   if (lineNumber <= 0) {
     return false;
   }
-  return compilationUnit.content
+  return content
       .substring(lineInfo.getOffsetOfLine(lineNumber - 1), lineInfo.getOffsetOfLine(lineNumber))
       .trimLeft()
       .contains(ignoreDirectivePattern);

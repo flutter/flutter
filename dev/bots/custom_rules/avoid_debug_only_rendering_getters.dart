@@ -14,7 +14,7 @@ import 'analyze.dart';
 // The comment pattern representing the "flutter_ignore" inline directive that
 // indicates the line should be exempt from the debug-only getter check.
 final Pattern _ignoreDirective = RegExp(
-  r'// flutter_ignore: .*debug_only_rendering_getter .*\(see analyze\.dart\)',
+  r'// flutter_ignore: .*debug_only_rendering_getter.*\(see analyze\.dart\)',
 );
 
 /// Verify that debug-only getters on RenderObject are not used outside of
@@ -112,8 +112,8 @@ class _Visitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    // Allow usage with a trailing flutter_ignore comment.
-    if (_hasTrailingFlutterIgnore(node)) {
+    // Allow usage with a flutter_ignore comment.
+    if (hasInlineIgnore(node, compilationUnit.content, compilationUnit.lineInfo, _ignoreDirective)) {
       return;
     }
 
@@ -124,7 +124,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
   static bool _isRenderObjectSubclass(InterfaceElement enclosingElement) {
     bool isRenderObjectType(InterfaceElement element) {
       return element.name == 'RenderObject' &&
-          element.library.source.uri.toString() == 'package:flutter/src/rendering/object.dart';
+          element.library.uri.toString() == 'package:flutter/src/rendering/object.dart';
     }
 
     if (isRenderObjectType(enclosingElement)) {
@@ -159,14 +159,5 @@ class _Visitor extends RecursiveAstVisitor<void> {
       current = current.parent;
     }
     return false;
-  }
-
-  bool _hasTrailingFlutterIgnore(AstNode node) {
-    return compilationUnit.content
-        .substring(
-          node.offset + node.length,
-          compilationUnit.lineInfo.getOffsetOfLineAfter(node.offset + node.length),
-        )
-        .contains(_ignoreDirective);
   }
 }

@@ -735,8 +735,8 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     super.visitAnnotation(node);
     final bool shouldCheckAnnotation =
         node.name.name == 'Deprecated' &&
-        !hasInlineIgnore(node, parseResult, ignoreDeprecration) &&
-        !hasInlineIgnore(node, parseResult, legacyDeprecation);
+        !hasInlineIgnore(node, parseResult.content, parseResult.lineInfo, ignoreDeprecration) &&
+        !hasInlineIgnore(node, parseResult.content, parseResult.lineInfo, legacyDeprecation);
     if (!shouldCheckAnnotation) {
       return;
     }
@@ -1049,8 +1049,8 @@ class _TestSkipLinesVisitor<T> extends RecursiveAstVisitor<T> {
     r'// .*https+?://github.com/.*/issues/\d+',
   );
   bool _hasValidJustificationComment(Label skipLabel) {
-    return hasInlineIgnore(skipLabel, parseResult, _skipTestIntentionalPattern) ||
-        hasInlineIgnore(skipLabel, parseResult, _skipTestTrackingBugPattern);
+    return hasInlineIgnore(skipLabel, parseResult.content, parseResult.lineInfo, _skipTestIntentionalPattern) ||
+        hasInlineIgnore(skipLabel, parseResult.content, parseResult.lineInfo, _skipTestTrackingBugPattern);
   }
 
   @override
