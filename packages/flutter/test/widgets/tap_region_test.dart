@@ -1340,4 +1340,52 @@ void main() {
     expect(outsideCalls, isEmpty);
     handle.dispose();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167487.
+  //
+  // SemanticsAction.longPress should also trigger onTapOutside, not just
+  // SemanticsAction.tap.
+  testWidgets('TapRegionSurface calls onTapOutside for semantics longPress outside region', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final outsideCalls = <String>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TapRegionSurface(
+          child: Row(
+            children: <Widget>[
+              const SizedBox(width: 100, height: 50, child: Text('Outside LongPress')),
+              TapRegion(
+                onTapOutside: (_) => outsideCalls.add('region'),
+                child: const SizedBox(width: 100, height: 50, child: Text('Inside')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    final SemanticsNode outsideNode = tester.semantics.find(
+      find.bySemanticsLabel('Outside LongPress'),
+    );
+
+    expect(outsideCalls, isEmpty);
+
+    tester.binding.platformDispatcher.onSemanticsActionEvent!(
+      SemanticsActionEvent(
+        type: SemanticsAction.longPress,
+        nodeId: outsideNode.id,
+        viewId: tester.view.viewId,
+      ),
+    );
+    await tester.pump();
+
+    expect(outsideCalls, equals(<String>['region']));
+    handle.dispose();
+  });
 }
