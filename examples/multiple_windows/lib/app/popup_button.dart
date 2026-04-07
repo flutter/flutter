@@ -8,8 +8,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-import 'window_content.dart';
 import 'models.dart';
+import 'popup_window_content.dart';
 import 'element_position_tracker.dart';
 
 class PopupButton extends StatefulWidget {
@@ -22,7 +22,7 @@ class PopupButton extends StatefulWidget {
 }
 
 class _PopupButtonState extends State<PopupButton> {
-  PopupWindowController? _popupController;
+  WindowEntry? _popupWindowEntry;
   ElementPositionTracker? _popupTracker;
   final GlobalKey _popupButtonKey = GlobalKey();
 
@@ -33,16 +33,15 @@ class _PopupButtonState extends State<PopupButton> {
   }
 
   void _onPressed(
-    final KeyedWindowManager windowManager,
+    final WindowRegistry windowRegistry,
     final WindowSettings windowSettings,
   ) {
     // Toggle popup visibility.
-    if (_popupController != null) {
-      _popupController!.destroy();
+    if (_popupWindowEntry != null) {
+      _popupWindowEntry!.controller.destroy();
       _popupTracker?.dispose();
-      _popupWindow = null;
       setState(() {
-        _popupController = null;
+        _popupWindowEntry = null;
         _popupTracker = null;
       });
     } else {
@@ -50,55 +49,49 @@ class _PopupButtonState extends State<PopupButton> {
       final tracker = ElementPositionTracker(
         element: _popupButtonKey.currentContext!,
       );
-      final UniqueKey key = UniqueKey();
+      late final WindowEntry entry;
       final controller = PopupWindowController(
         anchorRect: tracker.getGlobalRect()!,
         positioner: windowSettings.positioner,
         delegate: _PopupWindowControllerDelegate(
           onDestroyed: () {
-            windowManager.remove(key);
+            windowRegistry.unregister(entry);
             tracker.dispose();
-            _popupController = null;
-            _popupTracker = null;
+            if (mounted) {
+              setState(() {
+                _popupWindowEntry = null;
+                _popupTracker = null;
+              });
+            }
           },
         ),
         parent: widget.parentController,
       );
+      entry = WindowEntry(
+        controller: controller,
+        builder: (BuildContext context) =>
+            PopupWindowContent(controller: controller),
+      );
+      windowRegistry.register(entry);
       tracker.onGlobalRectChange = (rect) {
         controller.updatePosition(anchorRect: rect);
       };
       setState(() {
-        _popupWindow = WindowContent(
-          windowKey: _windowKey,
-          controller: controller,
-          onDestroyed: () {},
-          onError: () {},
-        );
-        _popupController = controller;
+        _popupWindowEntry = entry;
         _popupTracker = tracker;
       });
     }
   }
 
-  final _windowKey = GlobalKey();
-  final _viewAnchorKey = GlobalKey();
-  Widget? _popupWindow;
-
   @override
   Widget build(BuildContext context) {
-    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
-      context,
-    );
+    final WindowRegistry windowManager = WindowRegistry.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return ViewAnchor(
-      key: _viewAnchorKey,
-      view: _popupWindow,
-      child: OutlinedButton(
-        key: _popupButtonKey,
-        onPressed: () => _onPressed(windowManager, windowSettings),
-        child: Text(_popupController != null ? 'Hide Popup' : 'Show Popup'),
-      ),
+    return OutlinedButton(
+      key: _popupButtonKey,
+      onPressed: () => _onPressed(windowManager, windowSettings),
+      child: Text(_popupWindowEntry != null ? 'Hide Popup' : 'Show Popup'),
     );
   }
 }
