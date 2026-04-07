@@ -1434,7 +1434,10 @@ void main() {
         expect(errors.first.context.toString(), contains('while creating a Darwin platform view'));
       } finally {
         FlutterError.onError = oldOnError;
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, null);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          null,
+        );
       }
     });
 
