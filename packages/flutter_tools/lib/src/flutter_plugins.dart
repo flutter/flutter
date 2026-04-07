@@ -550,7 +550,12 @@ import Foundation
 import {{name}}
 {{/methodChannelPlugins}}
 
+{{#public}}
+public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+{{/public}}
+{{^public}}
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+{{/public}}
   {{#methodChannelPlugins}}
   {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
 {{/methodChannelPlugins}}
@@ -927,11 +932,21 @@ Future<void> _writePluginCmakefile(
   );
 }
 
+/// Writes the macOS plugin registrant file for the given [project].
+///
+/// This method generates a Swift file that registers all provided [plugins] that
+/// have method channels.
+///
+/// The [pluginRegistrantImplementation] file can be used to override the default
+/// location where the registrant is written.
+///
+/// If [public] is true, the generated registration function will be public.
 Future<void> writeMacOSPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   File? pluginRegistrantImplementation,
   TemplateRenderer? templateRenderer,
+  bool public = false,
 }) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
@@ -945,6 +960,7 @@ Future<void> writeMacOSPluginRegistrant(
     'os': FlutterDarwinPlatform.macos.name,
     'framework': FlutterDarwinPlatform.macos.binaryName,
     'methodChannelPlugins': macosMethodChannelPlugins,
+    'public': public,
   };
   await _renderTemplateToFile(
     _macosSwiftPluginRegistryTemplate,

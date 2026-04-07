@@ -65,6 +65,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -101,6 +107,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -135,6 +147,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -192,6 +210,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -237,6 +261,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -278,6 +308,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -335,6 +371,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -391,6 +433,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -436,6 +484,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
 
@@ -898,6 +952,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
