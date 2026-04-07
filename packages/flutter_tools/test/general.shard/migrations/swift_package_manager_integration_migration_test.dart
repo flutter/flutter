@@ -318,7 +318,9 @@ void main() {
                 logger: testLogger,
               );
               _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync('');
+              project.xcodeProjectSchemeFile().writeAsStringSync(
+                '<?xml version="1.0" encoding="UTF-8"?><Scheme></Scheme>',
+              );
 
               final projectMigration = SwiftPackageManagerIntegrationMigration(
                 project,
@@ -631,6 +633,127 @@ void main() {
               );
             },
           );
+
+          testWithoutContext('successfully updates when spacing differs', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion="1510"
+   version="1.3">
+   <BuildAction
+      parallelizeBuildables="YES"
+      buildImplicitDependencies="YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting="YES"
+            buildForRunning="YES"
+            buildForProfiling="YES"
+            buildForArchiving="YES"
+            buildForAnalyzing="YES">
+            <BuildableReference
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="${_runnerNativeTargetIdentifier(platform)}"
+               BuildableName="Runner.app"
+               BlueprintName="Runner"
+               ReferencedContainer="container:Runner.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction>
+   </TestAction>
+   <LaunchAction>
+   </LaunchAction>
+   <ProfileAction>
+   </ProfileAction>
+   <AnalyzeAction>
+   </AnalyzeAction>
+   <ArchiveAction>
+   </ArchiveAction>
+</Scheme>''');
+
+            final plistParser = FakePlistParser.multiple(<String>[
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+            ]);
+            project.xcodeProjectInfoFile.writeAsStringSync(
+              _projectSettings(_allSectionsMigrated(platform)),
+            );
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              logger: testLogger,
+              fileSystem: memoryFileSystem,
+              plistParser: plistParser,
+              config: FakeConfig(),
+            );
+
+            await projectMigration.migrate();
+            expect(project.xcodeProjectSchemeFile().readAsStringSync(), '''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion="1510"
+   version="1.3">
+   <BuildAction
+      parallelizeBuildables="YES"
+      buildImplicitDependencies="YES">
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Prepare Flutter Framework Script"
+               ${_scriptText(platform)}
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
+                     BuildableName = "Runner.app"
+                     BlueprintName = "Runner"
+                     ReferencedContainer = "container:Runner.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting="YES"
+            buildForRunning="YES"
+            buildForProfiling="YES"
+            buildForArchiving="YES"
+            buildForAnalyzing="YES">
+            <BuildableReference
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="${_runnerNativeTargetIdentifier(platform)}"
+               BuildableName="Runner.app"
+               BlueprintName="Runner"
+               ReferencedContainer="container:Runner.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction>
+   </TestAction>
+   <LaunchAction>
+   </LaunchAction>
+   <ProfileAction>
+   </ProfileAction>
+   <AnalyzeAction>
+   </AnalyzeAction>
+   <ArchiveAction>
+   </ArchiveAction>
+</Scheme>''');
+          });
         });
       }
     });
@@ -3451,20 +3574,20 @@ flutter:
   }
 }
 
+String _scriptText(FlutterDarwinPlatform platform) {
+  if (platform == FlutterDarwinPlatform.ios) {
+    return r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
+  } else {
+    return r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
+  }
+}
+
 String _validBuildActions(
   FlutterDarwinPlatform platform, {
   bool hasPreActions = false,
   bool hasFrameworkScript = false,
   bool hasBuildEntries = true,
 }) {
-  final String scriptText;
-  if (platform == FlutterDarwinPlatform.ios) {
-    scriptText =
-        r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
-  } else {
-    scriptText =
-        r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
-  }
   var preActions = '';
   if (hasFrameworkScript) {
     preActions =
@@ -3474,7 +3597,7 @@ String _validBuildActions(
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Prepare Flutter Framework Script"
-               $scriptText
+               ${_scriptText(platform)}
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
