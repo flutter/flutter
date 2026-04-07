@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -39,19 +41,44 @@ class DownscaledImageCache {
   // can use the same cached downscaled image.
   final Map<Object, Map<(ui.Rect, int, int), ui.Image>> _cache = {};
 
+  /// The maximum number of downscaled variants to cache per image.
+  static const int _maxVariantsPerImage = 10;
+
   /// Gets a cached downscaled image for the given [box], source rect, and target size.
   ui.Image? get(Object box, ui.Rect src, int width, int height) {
-    return _cache[box]?[(src, width, height)];
+    final Map<(ui.Rect, int, int), ui.Image>? sizes = _cache[box];
+    if (sizes == null) {
+      return null;
+    }
+    final key = (src, width, height);
+    final ui.Image? image = sizes[key];
+    if (image != null) {
+      // Promote to most recent (insertion order).
+      sizes.remove(key);
+      sizes[key] = image;
+    }
+    return image;
   }
 
   /// Puts a downscaled image into the cache for the given [box], source rect, and target size.
   void put(Object box, ui.Rect src, int width, int height, ui.Image image) {
     final Map<(ui.Rect, int, int), ui.Image> sizes = _cache.putIfAbsent(box, () => {});
-    final ui.Image? oldImage = sizes[(src, width, height)];
+    final key = (src, width, height);
+
+    // Remove if exists to refresh insertion order.
+    final ui.Image? oldImage = sizes.remove(key);
     if (oldImage != null && oldImage != image) {
       oldImage.dispose();
     }
-    sizes[(src, width, height)] = image;
+
+    sizes[key] = image;
+
+    // Limit size.
+    if (sizes.length > _maxVariantsPerImage) {
+      final (ui.Rect, int, int) firstKey = sizes.keys.first;
+      final ui.Image? firstImage = sizes.remove(firstKey);
+      firstImage?.dispose();
+    }
   }
 
   /// Disposes all cached downscaled images for the given [box].
@@ -113,11 +140,11 @@ ui.Image createSteppedDownscaledImage({
   var currentImage = originalImage;
   var currentSrc = src;
 
-  final List<ui.Image> intermediateImages = [];
+  ui.Image? previousIntermediate;
 
-  while (currentSrc.width > targetWidth * 2) {
-    final int nextWidth = currentSrc.width ~/ 2;
-    final int nextHeight = currentSrc.height ~/ 2;
+  while (currentSrc.width > targetWidth * 2 || currentSrc.height > targetHeight * 2) {
+    final int nextWidth = math.max(1, math.max(targetWidth, currentSrc.width ~/ 2));
+    final int nextHeight = math.max(1, math.max(targetHeight, currentSrc.height ~/ 2));
 
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
@@ -133,7 +160,10 @@ ui.Image createSteppedDownscaledImage({
     final ui.Image nextImage = picture.toImageSync(nextWidth, nextHeight);
     picture.dispose();
 
-    intermediateImages.add(nextImage);
+    if (previousIntermediate != null) {
+      previousIntermediate.dispose();
+    }
+    previousIntermediate = nextImage;
 
     currentImage = nextImage;
     currentSrc = ui.Rect.fromLTWH(0, 0, nextWidth.toDouble(), nextHeight.toDouble());
@@ -142,11 +172,7 @@ ui.Image createSteppedDownscaledImage({
   // Optimization: If we reached the target size exactly in the loop, we can
   // return the last intermediate image directly.
   if (currentSrc.width.toInt() == targetWidth && currentSrc.height.toInt() == targetHeight) {
-    final ui.Image result = intermediateImages.removeLast();
-    for (final img in intermediateImages) {
-      img.dispose();
-    }
-    return result;
+    return currentImage;
   }
 
   final recorder = ui.PictureRecorder();
@@ -163,8 +189,8 @@ ui.Image createSteppedDownscaledImage({
   final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
   picture.dispose();
 
-  for (final img in intermediateImages) {
-    img.dispose();
+  if (currentImage != originalImage) {
+    currentImage.dispose();
   }
 
   return finalImage;

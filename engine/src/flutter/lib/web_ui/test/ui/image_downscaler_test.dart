@@ -66,6 +66,84 @@ void testMain() {
 
       cache.disposeForBox(box);
     });
+
+    test('limits number of variants per image', () {
+      final DownscaledImageCache cache = DownscaledImageCache.instance;
+      final box = Object();
+
+      // Add 10 variants.
+      for (var i = 0; i < 10; i++) {
+        cache.put(box, ui.Rect.fromLTWH(0, 0, i.toDouble() + 10, 10), 5, 5, MockImage(5, 5));
+      }
+
+      // All 10 should be there.
+      for (var i = 0; i < 10; i++) {
+        expect(cache.get(box, ui.Rect.fromLTWH(0, 0, i.toDouble() + 10, 10), 5, 5), isNotNull);
+      }
+
+      // Add one more.
+      final image11 = MockImage(5, 5);
+      cache.put(box, const ui.Rect.fromLTWH(0, 0, 20, 10), 5, 5, image11);
+
+      // The first one (i=0) should have been evicted.
+      expect(cache.get(box, const ui.Rect.fromLTWH(0, 0, 10, 10), 5, 5), isNull);
+
+      // The rest should still be there.
+      for (var i = 1; i < 10; i++) {
+        expect(cache.get(box, ui.Rect.fromLTWH(0, 0, i.toDouble() + 10, 10), 5, 5), isNotNull);
+      }
+
+      // The new one should be there.
+      expect(cache.get(box, const ui.Rect.fromLTWH(0, 0, 20, 10), 5, 5), equals(image11));
+
+      cache.disposeForBox(box);
+    });
+
+    test('evicted variant is disposed', () {
+      final DownscaledImageCache cache = DownscaledImageCache.instance;
+      final box = Object();
+
+      final image0 = MockImage(5, 5);
+      cache.put(box, const ui.Rect.fromLTWH(0, 0, 10, 10), 5, 5, image0);
+
+      // Add 10 more variants to evict the first one.
+      for (var i = 1; i <= 10; i++) {
+        cache.put(box, ui.Rect.fromLTWH(0, 0, i.toDouble() + 10, 10), 5, 5, MockImage(5, 5));
+      }
+
+      expect(cache.get(box, const ui.Rect.fromLTWH(0, 0, 10, 10), 5, 5), isNull);
+      expect(image0.disposed, isTrue);
+
+      cache.disposeForBox(box);
+    });
+
+    test('get promotes item to most recent', () {
+      final DownscaledImageCache cache = DownscaledImageCache.instance;
+      final box = Object();
+
+      final image0 = MockImage(5, 5);
+      cache.put(box, const ui.Rect.fromLTWH(0, 0, 10, 10), 5, 5, image0);
+
+      // Add 8 more variants.
+      for (var i = 1; i <= 8; i++) {
+        cache.put(box, ui.Rect.fromLTWH(0, 0, i.toDouble() + 10, 10), 5, 5, MockImage(5, 5));
+      }
+
+      // Access the first one to promote it.
+      expect(cache.get(box, const ui.Rect.fromLTWH(0, 0, 10, 10), 5, 5), equals(image0));
+
+      // Add 2 more variants.
+      cache.put(box, const ui.Rect.fromLTWH(0, 0, 19, 10), 5, 5, MockImage(5, 5));
+      cache.put(box, const ui.Rect.fromLTWH(0, 0, 20, 10), 5, 5, MockImage(5, 5));
+
+      // The first one should NOT be evicted because it was promoted.
+      expect(cache.get(box, const ui.Rect.fromLTWH(0, 0, 10, 10), 5, 5), equals(image0));
+
+      // The second one (i=1) should have been evicted.
+      expect(cache.get(box, const ui.Rect.fromLTWH(0, 0, 11, 10), 5, 5), isNull);
+
+      cache.disposeForBox(box);
+    });
   });
 
   group('shouldIterativelyDownscale', () {
@@ -146,6 +224,49 @@ void testMain() {
 
       expect(srcRects, equals([src, const ui.Rect.fromLTRB(0, 0, 40, 40)]));
       expect(dstSizes, equals([(40, 40), (20, 20)]));
+    });
+
+    test('handles extreme aspect ratio without skipping steps', () {
+      final originalImage = MockImage(100, 1000);
+      var drawCalls = 0;
+      final List<(int, int)> targetSizes = [];
+
+      createSteppedDownscaledImage(
+        originalImage: originalImage,
+        src: const ui.Rect.fromLTRB(0, 0, 100, 1000),
+        targetWidth: 10,
+        targetHeight: 10,
+        rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect src, ui.Rect dst) {
+          drawCalls++;
+          targetSizes.add((dst.width.toInt(), dst.height.toInt()));
+        },
+      );
+
+      expect(drawCalls, equals(7));
+      expect(
+        targetSizes,
+        equals([(50, 500), (25, 250), (12, 125), (10, 62), (10, 31), (10, 15), (10, 10)]),
+      );
+    });
+
+    test('ensures dimensions do not drop below 1', () {
+      final originalImage = MockImage(3, 100);
+      var drawCalls = 0;
+      final List<(int, int)> targetSizes = [];
+
+      createSteppedDownscaledImage(
+        originalImage: originalImage,
+        src: const ui.Rect.fromLTRB(0, 0, 3, 100),
+        targetWidth: 1,
+        targetHeight: 10,
+        rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect src, ui.Rect dst) {
+          drawCalls++;
+          targetSizes.add((dst.width.toInt(), dst.height.toInt()));
+        },
+      );
+
+      expect(drawCalls, equals(4));
+      expect(targetSizes, equals([(1, 50), (1, 25), (1, 12), (1, 10)]));
     });
   });
 }
