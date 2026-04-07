@@ -26,8 +26,6 @@ import '../foundation/_features.dart';
 import '_window.dart';
 import '_window_positioner.dart';
 import 'binding.dart';
-import 'focus_manager.dart';
-import 'view.dart';
 
 /// A Win32 window handle.
 ///
@@ -1059,14 +1057,6 @@ class PopupWindowControllerWin32 extends PopupWindowController
     if (_destroyed) {
       return;
     }
-    // Unfocus any focused node within this popup before destroying it.
-    final FocusNode? primaryFocus = WidgetsBinding.instance.focusManager.primaryFocus;
-    if (primaryFocus?.context != null) {
-      final FlutterView? focusedView = View.maybeOf(primaryFocus!.context!);
-      if (focusedView?.viewId == rootView.viewId) {
-        primaryFocus.unfocus();
-      }
-    }
     _Win32PlatformInterface.destroyWindow(getWindowHandle());
     _destroyed = true;
   }
@@ -1127,7 +1117,22 @@ class PopupWindowControllerWin32 extends PopupWindowController
     int wParam,
     int lParam,
   ) {
-    
+    // WM_DESTROY is dispatched by the engine after destroyWindow is called.
+    // It must be handled even after _destroyed is set by destroy().
+    if (message == _WM_DESTROY) {
+      _destroyed = true;
+      _onGetWindowPosition.close();
+      _owner._removeMessageHandler(this);
+      _delegate.onWindowDestroyed();
+      return 0;
+    }
+
+    // Once destruction has started, skip all other messages to avoid
+    // accessing the window handle after it has been invalidated.
+    if (_destroyed) {
+      return null;
+    }
+
     if (view.viewId == parent.rootView.viewId) {
       if (message == _WM_SIZE) {
         // Popups should close when their parent window is resized.
@@ -1139,8 +1144,8 @@ class PopupWindowControllerWin32 extends PopupWindowController
     }
 
     if (message == _WM_ACTIVATE) {
-      // If focus has changed for a window that is managed by this aplication
-      // AND the new focus is neither the parent window nor a descendent of the
+      // If focus has changed for a window that is managed by this application
+      // AND the new focus is neither the parent window nor a descendant of the
       // popup, close the popup.
       final HWND parentHwnd = _Win32PlatformInterface.getWindowHandle(
         PlatformDispatcher.instance.engineId!,
@@ -1153,13 +1158,6 @@ class PopupWindowControllerWin32 extends PopupWindowController
       return null;
     }
 
-    if (message == _WM_DESTROY) {
-      _destroyed = true;
-      _onGetWindowPosition.close();
-      _owner._removeMessageHandler(this);
-      _delegate.onWindowDestroyed();
-      return 0;
-    }
     return null;
   }
 

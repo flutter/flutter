@@ -331,6 +331,7 @@ void HostWindow::InitializeFlutterView(
           ShowWindow(hwnd, cmd_show);
         }
       });
+  archetype_ = params.archetype;
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }
@@ -857,7 +858,19 @@ void HostWindow::DisableRecursively() {
 }
 
 void HostWindow::UpdateModalStateLayer() {
-  auto children = GetOwnedWindows();
+  auto all_children = GetOwnedWindows();
+
+  // Only dialog windows participate in modal state management.
+  // Popup and tooltip windows are transient and are dismissed by
+  // Dart-side activation handlers instead.
+  std::vector<HostWindow*> children;
+  children.reserve(all_children.size());
+  for (HostWindow* const child : all_children) {
+    if (child->GetArchetype() == WindowArchetype::kDialog) {
+      children.push_back(child);
+    }
+  }
+
   if (children.empty()) {
     // Leaf window in the active path, enable it.
     EnableWindow(window_handle_, true);

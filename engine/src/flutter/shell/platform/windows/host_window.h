@@ -214,6 +214,9 @@ class HostWindow {
   // `nullptr`.
   HostWindow* FindFirstEnabledDescendant() const;
 
+  // Returns the archetype of this window.
+  WindowArchetype GetArchetype() const { return archetype_; }
+
   // Returns windows owned by this window.
   std::vector<HostWindow*> GetOwnedWindows() const;
 

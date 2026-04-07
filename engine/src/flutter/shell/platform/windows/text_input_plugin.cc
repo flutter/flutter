@@ -219,19 +219,19 @@ void TextInputPlugin::HandleMethodCall(
   } else if (method.compare(kClearClientMethod) == 0) {
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view == nullptr) {
-      std::stringstream ss;
-      ss << "Text input is not available because view with view_id=" << view_id_
-         << " cannot be found";
-      result->Error(kInternalConsistencyError, ss.str());
-      return;
+      // The view may have already been destroyed (e.g. during window
+      // teardown). Just clear the active model and return success;
+      // there is no IME state to reset on a non-existent view.
+      active_model_ = nullptr;
+    } else {
+      if (active_model_ != nullptr && active_model_->composing()) {
+        active_model_->CommitComposing();
+        active_model_->EndComposing();
+        SendStateUpdate(*active_model_);
+      }
+      view->OnResetImeComposing();
+      active_model_ = nullptr;
     }
-    if (active_model_ != nullptr && active_model_->composing()) {
-      active_model_->CommitComposing();
-      active_model_->EndComposing();
-      SendStateUpdate(*active_model_);
-    }
-    view->OnResetImeComposing();
-    active_model_ = nullptr;
   } else if (method.compare(kSetClientMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
