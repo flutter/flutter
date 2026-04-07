@@ -33,6 +33,20 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   static String get _aaptNotFound =>
       'Could not locate aapt. Please ensure you have the Android buildtools installed.';
 
+  /// This is the AndroidManifest.xml metadata key that is used to store the
+  /// engine flags that are specified on the commnad line. This key is set by the
+  /// custom Gradle task found in
+  /// packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt.
+  /// These flags are later loaded by the Flutter Android embedding in
+  /// engine/src/flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java.
+  static const String androidEngineShellArgumentsFromCommandLineManifestKey =
+      'androidEngineShellArgs';
+
+  /// This is the delimiter used between flag stored in the AndroidManifest.xml metata
+  /// with key [androidEngineShellArgumentsFromCommandLineManifestKey] that holds flags
+  /// specified by the developer on the command line.
+  static const String androidEngineShellArgumentsFromCommandLineManifestValueDelimited = ';';
+
   /// Creates a new AndroidApk from an existing APK.
   ///
   /// Returns `null` if the APK was invalid or any required tooling was missing.
@@ -85,7 +99,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? androidEngineShellArgsFromManifest = data.androidEngineShellArgs;
     if (androidEngineShellArgsFromManifest != null) {
       androidEngineShellArgs = androidEngineShellArgsFromManifest
-          .split(';')
+          .split(androidEngineShellArgumentsFromCommandLineManifestValueDelimited)
           .map((String arg) => arg.trim())
           .toSet();
     }
@@ -383,7 +397,9 @@ class ApkManifestData {
     for (final metadata in applicationMetadataElements) {
       final String? elementAttributeValue = metadata!.firstAttribute('android:name')?.value;
       if (elementAttributeValue != null &&
-          elementAttributeValue.startsWith('"androidEngineShellArgs"')) {
+          elementAttributeValue.startsWith(
+            '"${AndroidApk.androidEngineShellArgumentsFromCommandLineManifestKey}"',
+          )) {
         final _Attribute? androidEngineShellArgsList = metadata.firstAttribute('android:value');
         if (androidEngineShellArgsList != null && androidEngineShellArgsList.value != null) {
           //  A: android:value(0x01010024)="--enable-dart-profiling;--enable-checked-mode" (Raw: "--enable-dart-profiling;--enable-checked-mode")
@@ -476,7 +492,9 @@ class ApkManifestData {
       'version-code': <String, String>{'name': versionCode.toString()},
       if (activityName != null) 'launchable-activity': <String, String>{'name': activityName},
       if (androidEngineShellArgs != null)
-        'androidEngineShellArgs': <String, String>{'name': androidEngineShellArgs},
+        AndroidApk.androidEngineShellArgumentsFromCommandLineManifestKey: <String, String>{
+          'name': androidEngineShellArgs,
+        },
     };
 
     return ApkManifestData._(map);
@@ -497,7 +515,9 @@ class ApkManifestData {
   }
 
   String? get androidEngineShellArgs =>
-      _data['androidEngineShellArgs'] == null ? null : _data['androidEngineShellArgs']?['name'];
+      _data[AndroidApk.androidEngineShellArgumentsFromCommandLineManifestKey] == null
+      ? null
+      : _data[AndroidApk.androidEngineShellArgumentsFromCommandLineManifestKey]?['name'];
 
   @override
   String toString() => _data.toString();

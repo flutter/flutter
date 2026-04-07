@@ -31,6 +31,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_builder.dart';
 import 'android_studio.dart';
+import 'application_package.dart' show AndroidApk;
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'gradle_utils.dart' as gradle;
@@ -493,7 +494,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // Add engine shell arugments to be injected into the manifest.
     if (androidShellArguments != null) {
-      final String androidShellArgumentsStr = androidShellArguments.join(';');
+      final String androidShellArgumentsStr = androidShellArguments.join(
+        AndroidApk.androidEngineShellArgumentsFromCommandLineManifestValueDelimited,
+      );
       options.add('-PandroidShellArguments=$androidShellArgumentsStr');
     }
 
