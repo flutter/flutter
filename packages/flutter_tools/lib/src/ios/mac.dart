@@ -283,6 +283,13 @@ Future<XcodeBuildResult> buildXcodeProject({
       ) ??
       <String, String>{};
 
+  if (buildSettings.isEmpty) {
+    globals.printError(
+      'No XCode build settings have been found. Please check possible errors above.',
+    );
+    return XcodeBuildResult(success: false);
+  }
+
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
   final Directory? targetBuildDir = targetBuildDirPath != null
       ? globals.fs.directory(targetBuildDirPath)

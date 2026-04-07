@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -38,6 +39,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   FakeXcodeProjectInterpreterWithBuildSettings({
     this.productBundleIdentifier,
     this.developmentTeam = 'abc',
+    this.errorGettingBuildSettings = false,
   });
 
   @override
@@ -46,6 +48,10 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
+    if (errorGettingBuildSettings) {
+      return <String, String>{};
+    }
+
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
@@ -58,6 +64,8 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final String? productBundleIdentifier;
 
   final String? developmentTeam;
+
+  final bool errorGettingBuildSettings;
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -71,6 +79,7 @@ void main() {
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeProcessManager processManager;
+  late FakePlistParser testPlistUtils;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -84,6 +93,7 @@ void main() {
     );
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
+    testPlistUtils = FakePlistParser();
   });
 
   // Sets up the minimal mock project files necessary to look like a Flutter project.
@@ -329,6 +339,60 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
+
+  testUsingContext(
+    'ios build fails eagerly if the XCode get build settings fails',
+    () async {
+      createMinimalMockProjectFiles();
+
+      // Init dummy plist with basic values to detect valid folder
+      testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Runner', 'Info.plist'))
+          .createSync(recursive: true);
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        templateRenderer: FakeTemplateRenderer(),
+        terminal: FakeTerminal(),
+        plistParser: testPlistUtils,
+        xcode: FakeXcode(),
+      );
+
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(message: 'Encountered error while building for device.'),
+      );
+
+      // Eager failure message if something went wrong obtaining the xcode build settings
+      expect(
+        testLogger.errorText,
+        contains('No XCode build settings have been found. Please check possible errors above'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Pub: ThrowingPub.new,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler()]),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(errorGettingBuildSettings: true),
+      Artifacts: () => Artifacts.test(),
+      PlistParser: () => testPlistUtils,
     },
   );
 
