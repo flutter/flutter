@@ -318,23 +318,33 @@ void testMain() {
     final LazyPathMetrics metrics = path.computeMetrics();
     expect(metrics.iterator.moveNext(), isFalse);
 
-    expect(disposablePath.metricsIterators, hasLength(1));
-    final FakePathMetricsIterator disposableMetricsIterator =
-        disposablePath.metricsIterators.single;
+    final FakePath clonedPath = constructors.createdPathBuilders.last.builtPaths.single;
+    expect(identical(clonedPath, metrics.iterator.path.builtPath), isTrue);
+
+    expect(clonedPath.metricsIterators, hasLength(1));
+    final FakePathMetricsIterator disposableMetricsIterator = clonedPath.metricsIterators.single;
     expect(disposableMetricsIterator.isDisposed, isFalse);
 
     EnginePlatformDispatcher.instance.frameArena.collect();
 
-    expect(constructors.createdPathBuilders, hasLength(1));
-    expect(disposablePathBuilder.isDisposed, isTrue);
-    expect(disposablePathBuilder.builtPaths, hasLength(1));
-    expect(disposablePath.isDisposed, isTrue);
-    expect(disposablePath.metricsIterators, hasLength(1));
-    expect(disposableMetricsIterator.isDisposed, isTrue);
+    final List<FakePathBuilder> createdPathBuilders = constructors.createdPathBuilders;
+    expect(createdPathBuilders, hasLength(2));
+
+    expect(createdPathBuilders[0].isDisposed, isTrue);
+    expect(createdPathBuilders[0].builtPaths, hasLength(1));
+    expect(createdPathBuilders[0].builtPaths.single.isDisposed, isTrue);
+    // The metrics iterator was created from a cloned path, not the original path.
+    expect(createdPathBuilders[0].builtPaths.single.metricsIterators, isEmpty);
+
+    expect(createdPathBuilders[1].isDisposed, isTrue);
+    expect(createdPathBuilders[1].builtPaths, hasLength(1));
+    expect(createdPathBuilders[1].builtPaths.single.isDisposed, isTrue);
+    expect(createdPathBuilders[1].builtPaths.single.metricsIterators, hasLength(1));
+    expect(createdPathBuilders[1].builtPaths.single.metricsIterators.single.isDisposed, isTrue);
 
     path.contains(Offset.zero);
 
-    expect(constructors.createdPathBuilders.length, 2);
+    expect(constructors.createdPathBuilders.length, 3);
     final FakePathBuilder resurrectedPathBuilder = constructors.createdPathBuilders.last;
 
     expect(resurrectedPathBuilder.isDisposed, isFalse);
