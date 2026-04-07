@@ -6,7 +6,6 @@
 
 #include <memory>
 
-#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/geometry/constants.h"
 
 namespace impeller {
@@ -26,14 +25,8 @@ UberSDFParameters UberSDFParameters::MakeRect(
                 {.width = stroke->width, .join = Join::kBevel}))
           : stroke;
 
-  // Create FillRectGeometry that covers the rectangle including stroke width.
-  auto stroke_padding = stroke ? stroke->width * 0.5f : 0.0f;
-  std::unique_ptr<FillRectGeometry> geometry =
-      std::make_unique<FillRectGeometry>(rect.Expand(stroke_padding));
-  geometry->SetAntialiasPadding(kAntialiasPadding);
-
   return UberSDFParameters(Type::kRect, color, rect.GetCenter(), size,
-                           adjusted_stroke, std::move(geometry));
+                           adjusted_stroke);
 }
 
 UberSDFParameters UberSDFParameters::MakeCircle(
@@ -44,29 +37,18 @@ UberSDFParameters UberSDFParameters::MakeCircle(
   // Size x value is the radius of the circle, y value is ignored.
   Point size = Point(radius, 0.0f);
 
-  // Create FillRectGeometry that covers the circle including stroke width.
-  auto stroke_padding = stroke ? stroke->width * 0.5f : 0.0f;
-  std::unique_ptr<FillRectGeometry> geometry =
-      std::make_unique<FillRectGeometry>(
-          Rect::MakeXYWH(center.x, center.y, 0.0f, 0.0f)
-              .Expand(radius + stroke_padding));
-  geometry->SetAntialiasPadding(kAntialiasPadding);
-
-  return UberSDFParameters(Type::kCircle, color, center, size, stroke,
-                           std::move(geometry));
+  return UberSDFParameters(Type::kCircle, color, center, size, stroke);
 }
 
 UberSDFParameters::UberSDFParameters(Type type,
                                      Color color,
                                      Point center,
                                      Point size,
-                                     std::optional<StrokeParameters> stroke,
-                                     std::unique_ptr<Geometry> geometry)
+                                     std::optional<StrokeParameters> stroke)
     : type_(type),
       color_(color),
       center_(center),
       size_(size),
-      stroke_(stroke),
-      geometry_(std::move(geometry)) {}
+      stroke_(stroke) {}
 
 }  // namespace impeller

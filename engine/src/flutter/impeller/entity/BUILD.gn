@@ -243,6 +243,8 @@ impeller_component("entity") {
     "geometry/stroke_path_geometry.h",
     "geometry/superellipse_geometry.cc",
     "geometry/superellipse_geometry.h",
+    "geometry/uber_sdf_geometry.cc",
+    "geometry/uber_sdf_geometry.h",
     "geometry/vertices_geometry.cc",
     "geometry/vertices_geometry.h",
     "inline_pass_context.cc",

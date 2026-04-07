@@ -43,6 +43,7 @@
 #include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/point.h"
@@ -1235,8 +1236,9 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
 
 TEST(EntityTest, UberSDFContentsCoverage) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
-  auto contents = UberSDFContents::Make(
-      UberSDFParameters::MakeRect(Color::Red(), rect, std::nullopt));
+  auto params = UberSDFParameters::MakeRect(Color::Red(), rect, std::nullopt);
+  auto geometry = UberSDFGeometry::Make(params);
+  auto contents = UberSDFContents::Make(std::move(params), std::move(geometry));
 
   Entity entity;
   auto coverage = contents->GetCoverage(entity);

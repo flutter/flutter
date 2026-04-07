@@ -18,7 +18,9 @@ namespace impeller {
 
 class UberSDFContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<UberSDFContents> Make(UberSDFParameters params);
+  static std::unique_ptr<UberSDFContents> Make(
+      UberSDFParameters params,
+      std::unique_ptr<Geometry> geometry);
 
   ~UberSDFContents() override;
 
@@ -35,9 +37,11 @@ class UberSDFContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  explicit UberSDFContents(UberSDFParameters params);
+  explicit UberSDFContents(UberSDFParameters params,
+                           std::unique_ptr<Geometry> geometry);
 
   UberSDFParameters params_;
+  std::unique_ptr<Geometry> geometry_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 

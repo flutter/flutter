@@ -39,30 +39,21 @@ class UberSDFParameters {
   Point GetCenter() const { return center_; }
   Point GetSize() const { return size_; }
   std::optional<StrokeParameters> GetStroke() const { return stroke_; }
-  const Geometry* GetGeometry() const { return geometry_.get(); }
 
   void SetColor(Color color) { color_ = color; }
-
-  UberSDFParameters(UberSDFParameters&&) = default;
-  UberSDFParameters& operator=(UberSDFParameters&&) = default;
 
  private:
   UberSDFParameters(Type type,
                     Color color,
                     Point center,
                     Point size,
-                    std::optional<StrokeParameters> stroke,
-                    std::unique_ptr<Geometry> geometry);
+                    std::optional<StrokeParameters> stroke);
 
   Type type_;
   Color color_;
   Point center_;
   Point size_;
   std::optional<StrokeParameters> stroke_;
-  std::unique_ptr<Geometry> geometry_;
-
-  UberSDFParameters(const UberSDFParameters&) = delete;
-  UberSDFParameters& operator=(const UberSDFParameters&) = delete;
 };
 
 }  // namespace impeller

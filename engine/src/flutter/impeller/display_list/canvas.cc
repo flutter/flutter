@@ -53,6 +53,7 @@
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/shadow_path_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
@@ -828,11 +829,13 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    auto contents = UberSDFContents::Make(UberSDFParameters::MakeRect(
+    auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color, /*rect=*/rect,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
-            : std::nullopt));
+            : std::nullopt);
+    auto geometry = UberSDFGeometry::Make(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1026,11 +1029,13 @@ void Canvas::DrawCircle(const Point& center,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    auto contents = UberSDFContents::Make(UberSDFParameters::MakeCircle(
+    auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
-            : std::nullopt));
+            : std::nullopt);
+    auto geometry = UberSDFGeometry::Make(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
