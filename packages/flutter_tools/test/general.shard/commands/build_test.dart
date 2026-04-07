@@ -30,6 +30,12 @@ void main() {
       terminal: FakeTerminal(),
       plistParser: FakePlistParser(),
       processUtils: FakeProcessUtils(),
+      processManager: FakeProcessManager.any(),
+      templateRenderer: FakeTemplateRenderer(),
+      xcode: FakeXcode(),
+      artifacts: FakeArtifacts(),
+      cache: FakeCache(),
+      flutterVersion: FakeFlutterVersion(),
     );
     for (final Command<void> x in command.subcommands.values) {
       expect((x as BuildSubCommand).supported, isTrue);
