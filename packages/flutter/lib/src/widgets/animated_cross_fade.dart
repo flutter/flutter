@@ -432,6 +432,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         defaultValue: Alignment.topCenter,
       ),
     );
-    description.add(EnumProperty<Clip>('clipBehavior', widget.clipBehavior, defaultValue: Clip.hardEdge));
+    description.add(
+      EnumProperty<Clip>('clipBehavior', widget.clipBehavior, defaultValue: Clip.hardEdge),
+    );
   }
 }
