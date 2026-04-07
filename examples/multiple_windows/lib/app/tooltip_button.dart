@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'tooltip_window_content.dart';
 import 'element_position_tracker.dart';
 import 'models.dart';
 
@@ -20,7 +21,7 @@ class TooltipButton extends StatefulWidget {
 }
 
 class _TooltipButtonState extends State<TooltipButton> {
-  TooltipWindowController? _tooltipController;
+  WindowEntry? _tooltipEntry;
   ElementPositionTracker? _tooltipTracker;
   final GlobalKey _tooltipButtonKey = GlobalKey();
 
@@ -31,15 +32,15 @@ class _TooltipButtonState extends State<TooltipButton> {
   }
 
   void _onPressed(
-    final KeyedWindowManager windowManager,
+    final WindowRegistry windowRegistry,
     final WindowSettings windowSettings,
   ) {
     // Toggle tooltip visibility.
-    if (_tooltipController != null) {
-      _tooltipController!.destroy();
-      _tooltipTracker?.dispose;
+    if (_tooltipEntry != null) {
+      _tooltipEntry!.controller.destroy();
+      _tooltipTracker?.dispose();
       setState(() {
-        _tooltipController = null;
+        _tooltipEntry = null;
         _tooltipTracker = null;
       });
     } else {
@@ -47,17 +48,17 @@ class _TooltipButtonState extends State<TooltipButton> {
       final tracker = ElementPositionTracker(
         element: _tooltipButtonKey.currentContext!,
       );
-      final UniqueKey key = UniqueKey();
+      late final WindowEntry entry;
       final controller = TooltipWindowController(
         anchorRect: tracker.getGlobalRect()!,
         positioner: windowSettings.positioner,
         delegate: _TooltipWindowControllerDelegate(
           onDestroyed: () {
-            windowManager.remove(key);
+            windowRegistry.unregister(entry);
             tracker.dispose();
             if (mounted) {
               setState(() {
-                _tooltipController = null;
+                _tooltipEntry = null;
                 _tooltipTracker = null;
               });
             }
@@ -65,12 +66,17 @@ class _TooltipButtonState extends State<TooltipButton> {
         ),
         parent: widget.parentController,
       );
+      entry = WindowEntry(
+        controller: controller,
+        builder: (BuildContext context) =>
+            TooltipWindowContent(controller: controller),
+      );
+      windowRegistry.register(entry);
       tracker.onGlobalRectChange = (rect) {
         controller.updatePosition(anchorRect: rect);
       };
-      windowManager.add(KeyedWindow(key: key, controller: controller));
       setState(() {
-        _tooltipController = controller;
+        _tooltipEntry = entry;
         _tooltipTracker = tracker;
       });
     }
@@ -78,15 +84,13 @@ class _TooltipButtonState extends State<TooltipButton> {
 
   @override
   Widget build(BuildContext context) {
-    final KeyedWindowManager windowManager = KeyedWindowManagerAccessor.of(
-      context,
-    );
+    final WindowRegistry windowManager = WindowRegistry.of(context);
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
     return OutlinedButton(
       key: _tooltipButtonKey,
       onPressed: () => _onPressed(windowManager, windowSettings),
-      child: Text(_tooltipController != null ? 'Hide Tooltip' : 'Show Tooltip'),
+      child: Text(_tooltipEntry != null ? 'Hide Tooltip' : 'Show Tooltip'),
     );
   }
 }
