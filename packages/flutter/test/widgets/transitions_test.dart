@@ -130,6 +130,32 @@ void main() {
       // Scaling a shadow doesn't change the color.
       expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
     });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: DecoratedBoxTransition(
+              decoration: DecorationTween(
+                begin: const BoxDecoration(color: Color(0xFF000000)),
+                end: const BoxDecoration(color: Color(0xFFFFFFFF)),
+              ).animate(controller),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(DecoratedBoxTransition)), Size.zero);
+    });
   });
 
   testWidgets('AlignTransition animates', (WidgetTester tester) async {
