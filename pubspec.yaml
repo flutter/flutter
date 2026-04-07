@@ -24,6 +24,8 @@ workspace:
   - dev/integration_tests/android_verified_input
   - dev/integration_tests/android_views
   - dev/integration_tests/channels
+  - dev/integration_tests/data_asset_app
+  - dev/integration_tests/data_asset_package
   - dev/integration_tests/deferred_components_test
   - dev/integration_tests/display_cutout_rotation
   - dev/integration_tests/external_textures
@@ -117,6 +119,7 @@ dependencies:
   googleapis: 14.0.0
   googleapis_auth: 2.0.0
   hooks: 1.0.2
+  data_assets: 0.19.6
   html: 0.15.6
   http: 1.6.0
   http_multi_server: 3.2.2
@@ -217,4 +220,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: tbs963
+# PUBSPEC CHECKSUM: pf105d
