@@ -40,6 +40,7 @@
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/uber_sdf_contents.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -61,6 +62,8 @@
 namespace impeller {
 
 namespace {
+
+constexpr Scalar kAntialiasPadding = 1.0f;
 
 bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
   return filter->type() == flutter::DlColorFilterType::kMatrix ||
@@ -532,13 +535,17 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  std::optional<Scalar> stroke_width =
-      paint.style == Paint::Style::kStroke
-          ? std::make_optional(paint.stroke.width)
-          : std::nullopt;
+  const bool is_stroked = paint.style == Paint::Style::kStroke;
+  std::unique_ptr<CircleGeometry> geom;
+  if (is_stroked) {
+    geom = std::make_unique<CircleGeometry>(center, radius, paint.stroke.width);
+  } else {
+    geom = std::make_unique<CircleGeometry>(center, radius);
+  }
+  geom->SetAntialiasPadding(kAntialiasPadding);
 
   auto contents =
-      CircleContents::Make(paint.color, center, radius, stroke_width);
+      CircleContents::Make(std::move(geom), paint.color, is_stroked);
   entity.SetContents(std::move(contents));
   AddRenderEntityToCurrentPass(entity);
 

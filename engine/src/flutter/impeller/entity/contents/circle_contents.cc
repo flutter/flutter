@@ -5,15 +5,12 @@
 #include "impeller/entity/contents/circle_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/geometry/point.h"
 
 namespace impeller {
 
 namespace {
-
-constexpr Scalar kAntialiasPadding = 1.0f;
-
 using PipelineBuilderCallback =
     std::function<PipelineRef(ContentContextOptions)>;
 
@@ -23,31 +20,22 @@ using FS = CirclePipeline::FragmentShader;
 }  // namespace
 
 std::unique_ptr<CircleContents> CircleContents::Make(
+    std::unique_ptr<CircleGeometry> geometry,
     Color color,
-    const Point& center,
-    Scalar radius,
-    std::optional<Scalar> stroke_width) {
-  auto stroke_padding = stroke_width ? stroke_width.value() * 0.5f : 0.0f;
-  Rect geometry_rect = Rect::MakeXYWH(center.x - radius, center.y - radius,
-                                      radius * 2, radius * 2);
-  std::unique_ptr<FillRectGeometry> geometry =
-      std::make_unique<FillRectGeometry>(geometry_rect.Expand(stroke_padding));
-  return std::unique_ptr<CircleContents>(new CircleContents(
-      color, center, radius, stroke_width, std::move(geometry)));
+    bool stroked) {
+  Scalar aa_padding = geometry->GetAntialiasPadding();
+  return std::unique_ptr<CircleContents>(
+      new CircleContents(std::move(geometry), color, stroked, aa_padding));
 }
 
-CircleContents::CircleContents(Color color,
-                               const Point& center,
-                               Scalar radius,
-                               std::optional<Scalar> stroke_width,
-                               std::unique_ptr<FillRectGeometry> geometry)
-    : color_(color),
-      center_(center),
-      radius_(radius),
-      stroke_width_(stroke_width),
-      geometry_(std::move(geometry)) {
-  geometry_->SetAntialiasPadding(kAntialiasPadding);
-}
+CircleContents::CircleContents(std::unique_ptr<CircleGeometry> geometry,
+                               Color color,
+                               bool stroked,
+                               Scalar aa_padding)
+    : geometry_(std::move(geometry)),
+      color_(color),
+      stroked_(stroked),
+      aa_padding_(aa_padding) {}
 
 bool CircleContents::Render(const ContentContext& renderer,
                             const Entity& entity,
@@ -57,11 +45,11 @@ bool CircleContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.center = center_;
-  frag_info.radius = radius_;
-  frag_info.stroke_width = stroke_width_.value_or(0.0f);
-  frag_info.aa_pixels = kAntialiasPadding;
-  frag_info.stroked = stroke_width_ ? 1.0f : 0.0f;
+  frag_info.center = geometry_->GetCenter();
+  frag_info.radius = geometry_->GetRadius();
+  frag_info.stroke_width = geometry_->GetStrokeWidth();
+  frag_info.aa_pixels = aa_padding_;
+  frag_info.stroked = stroked_ ? 1.0f : 0.0f;
 
   auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
 
