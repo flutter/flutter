@@ -210,38 +210,48 @@ sealed class _DebugSemanticsRoleChecks {
     final SemanticsData data = node.getSemanticsData();
 
     // Check if value is present
-    if (data.value.isEmpty) {
-      return FlutterError('A progress bar must have a value');
+    if (data.value.isEmpty ||
+        (data.minValue?.isEmpty ?? true) ||
+        (data.maxValue?.isEmpty ?? true)) {
+      return FlutterError('A progress bar must have a value, a minValue, a maxValue.');
     }
 
-    // Check if minValue and maxValue are present
-    if (data.minValue?.isEmpty ?? true) {
-      return FlutterError('A progress bar must have a minValue');
-    }
+    final double? minVal = double.tryParse(data.minValue!);
+    final double? maxVal = double.tryParse(data.maxValue!);
+    // The value can either be a direct number fall within the min and max range
+    // or a percentage number between 0% and 100%
+    final double? currentValue = double.tryParse(data.value);
+    final double? percentValue = data.value.endsWith('%')
+        ? double.tryParse(data.value.substring(0, data.value.length - 1))
+        : null;
 
-    if (data.maxValue?.isEmpty ?? true) {
-      return FlutterError('A progress bar must have a maxValue');
-    }
-
-    // Validate that value is within min and max range
-    try {
-      final double currentValue = double.parse(data.value);
-      final double minVal = double.parse(data.minValue!);
-      final double maxVal = double.parse(data.maxValue!);
-
-      if (currentValue < minVal || currentValue > maxVal) {
-        return FlutterError(
-          'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
-        );
-      }
-
-      if (minVal >= maxVal) {
-        return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
-      }
-    } catch (e) {
+    if (minVal == null || maxVal == null || (currentValue == null && percentValue == null)) {
       return FlutterError(
         'Progress bar value, minValue, and maxValue must be valid numbers. '
         'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
+
+    // Validate min/max relation since both are guaranteed to be valid numbers.
+    if (minVal >= maxVal) {
+      return FlutterError(
+        'Progress bar minValue (${data.minValue}) must be less than maxValue (${data.maxValue})',
+      );
+    }
+    // If the value is a number, it must be between min and max.
+    if (currentValue != null) {
+      if (currentValue < minVal || currentValue > maxVal) {
+        return FlutterError(
+          'Progress bar value (${data.value}) must be between minValue (${data.minValue}) and maxValue (${data.maxValue})',
+        );
+      }
+      return null;
+    }
+
+    // If the value is a percentage string (e.g., "50%"), it must be between 0% and 100%.
+    if (percentValue != null && (percentValue < 0 || percentValue > 100)) {
+      return FlutterError(
+        'Progress bar percentage value (${data.value}) must be between 0% and 100%',
       );
     }
 
