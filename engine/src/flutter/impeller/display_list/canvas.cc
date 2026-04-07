@@ -828,11 +828,11 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    auto contents = UberSDFContents::MakeRect(
+    auto contents = UberSDFContents::Make(UberSDFParameters::MakeRect(
         /*color=*/paint.color, /*rect=*/rect,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
-            : std::nullopt);
+            : std::nullopt));
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1026,11 +1026,11 @@ void Canvas::DrawCircle(const Point& center,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    auto contents = UberSDFContents::MakeCircle(
+    auto contents = UberSDFContents::Make(UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
-            : std::nullopt);
+            : std::nullopt));
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());

@@ -203,6 +203,8 @@ impeller_component("entity") {
     "contents/tiled_texture_contents.h",
     "contents/uber_sdf_contents.cc",
     "contents/uber_sdf_contents.h",
+    "contents/uber_sdf_parameters.cc",
+    "contents/uber_sdf_parameters.h",
     "contents/vertices_contents.cc",
     "contents/vertices_contents.h",
     "draw_order_resolver.cc",

@@ -35,6 +35,7 @@
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/contents/uber_sdf_contents.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -1234,7 +1235,8 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
 
 TEST(EntityTest, UberSDFContentsCoverage) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
-  auto contents = UberSDFContents::MakeRect(Color::Red(), rect, std::nullopt);
+  auto contents = UberSDFContents::Make(
+      UberSDFParameters::MakeRect(Color::Red(), rect, std::nullopt));
 
   Entity entity;
   auto coverage = contents->GetCoverage(entity);

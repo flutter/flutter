@@ -7,14 +7,12 @@
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
-#include "impeller/entity/geometry/rect_geometry.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/geometry/stroke_parameters.h"
 
 namespace impeller {
 
 namespace {
-
-constexpr Scalar kAntialiasPadding = 1.0f;
 
 using PipelineBuilderCallback =
     std::function<PipelineRef(ContentContextOptions)>;
@@ -22,63 +20,16 @@ using PipelineBuilderCallback =
 using VS = UberSDFPipeline::VertexShader;
 using FS = UberSDFPipeline::FragmentShader;
 
-Join AdjustRectStrokeJoin(const StrokeParameters& stroke) {
-  return (stroke.join == Join::kMiter && stroke.miter_limit < kSqrt2)
-             ? Join::kBevel
-             : stroke.join;
-}
-
 }  // namespace
 
-std::unique_ptr<UberSDFContents> UberSDFContents::MakeRect(
-    Color color,
-    const Rect& rect,
-    std::optional<StrokeParameters> stroke) {
-  std::optional<StrokeParameters> adjusted_stroke =
-      stroke ? std::make_optional(StrokeParameters(
-                   {.width = stroke->width,
-                    .join = AdjustRectStrokeJoin(stroke.value())}))
-             : std::nullopt;
-  auto stroke_padding = stroke ? stroke->width * 0.5f : 0.0f;
-  std::unique_ptr<FillRectGeometry> geometry =
-      std::make_unique<FillRectGeometry>(rect.Expand(stroke_padding));
-  // Size is is the x and y extents from the center of the rect.
-  Point size = Point(rect.GetSize() * 0.5f);
-  return std::make_unique<UberSDFContents>(Type::kRect, color, rect.GetCenter(),
-                                           size, adjusted_stroke,
-                                           std::move(geometry));
+std::unique_ptr<UberSDFContents> UberSDFContents::Make(
+    UberSDFParameters params) {
+  return std::unique_ptr<UberSDFContents>(
+      new UberSDFContents(std::move(params)));
 }
 
-std::unique_ptr<UberSDFContents> UberSDFContents::MakeCircle(
-    Color color,
-    const Point& center,
-    Scalar radius,
-    std::optional<StrokeParameters> stroke) {
-  auto stroke_padding = stroke ? stroke->width * 0.5f : 0.0f;
-  Rect geometry_rect = Rect::MakeXYWH(center.x - radius, center.y - radius,
-                                      radius * 2, radius * 2);
-  // Size x value is the radius of the circle, y value is ignored.
-  Point size = Point(radius, 0.0f);
-  std::unique_ptr<FillRectGeometry> geometry =
-      std::make_unique<FillRectGeometry>(geometry_rect.Expand(stroke_padding));
-  return std::make_unique<UberSDFContents>(Type::kCircle, color, center, size,
-                                           stroke, std::move(geometry));
-}
-
-UberSDFContents::UberSDFContents(Type type,
-                                 Color color,
-                                 Point center,
-                                 Point size,
-                                 std::optional<StrokeParameters> stroke,
-                                 std::unique_ptr<FillRectGeometry> geometry)
-    : type_(type),
-      color_(color),
-      center_(center),
-      size_(size),
-      stroke_(stroke),
-      geometry_(std::move(geometry)) {
-  geometry_->SetAntialiasPadding(kAntialiasPadding);
-}
+UberSDFContents::UberSDFContents(UberSDFParameters params)
+    : params_(std::move(params)) {}
 
 UberSDFContents::~UberSDFContents() = default;
 
@@ -89,14 +40,16 @@ bool UberSDFContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info = {};
-  frag_info.type = type_ == Type::kCircle ? 0.0f : 1.0f;
-  frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-  frag_info.center = center_;
-  frag_info.size = size_;
-  frag_info.stroked = stroke_ ? 1.0f : 0.0f;
-  if (stroke_) {
-    frag_info.stroke_width = stroke_->width;
-    switch (stroke_->join) {
+  frag_info.type =
+      params_.GetType() == UberSDFParameters::Type::kCircle ? 0.0f : 1.0f;
+  frag_info.color = params_.GetColor().WithAlpha(params_.GetColor().alpha *
+                                                 GetOpacityFactor());
+  frag_info.center = params_.GetCenter();
+  frag_info.size = params_.GetSize();
+  frag_info.stroked = params_.GetStroke() ? 1.0f : 0.0f;
+  if (params_.GetStroke()) {
+    frag_info.stroke_width = params_.GetStroke()->width;
+    switch (params_.GetStroke()->join) {
       case Join::kMiter:
         frag_info.stroke_join = 0.0f;
         break;
@@ -108,7 +61,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
         break;
     }
   }
-  frag_info.aa_pixels = kAntialiasPadding;
+  frag_info.aa_pixels = UberSDFParameters::kAntialiasPadding;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
@@ -140,16 +93,16 @@ std::optional<Rect> UberSDFContents::GetCoverage(const Entity& entity) const {
 }
 
 const Geometry* UberSDFContents::GetGeometry() const {
-  return geometry_.get();
+  return params_.GetGeometry();
 }
 
 Color UberSDFContents::GetColor() const {
-  return color_;
+  return params_.GetColor();
 }
 
 bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
-  color_ = color_filter_proc(color_);
+  params_.SetColor(color_filter_proc(params_.GetColor()));
   return true;
 }
 

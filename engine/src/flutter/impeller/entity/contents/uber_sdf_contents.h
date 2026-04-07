@@ -9,9 +9,8 @@
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
-#include "impeller/entity/geometry/circle_geometry.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/geometry/geometry.h"
-#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 
@@ -19,28 +18,7 @@ namespace impeller {
 
 class UberSDFContents : public ColorSourceContents {
  public:
-  enum class Type {
-    kCircle,
-    kRect,
-  };
-
-  static std::unique_ptr<UberSDFContents> MakeRect(
-      Color color,
-      const Rect& rect,
-      std::optional<StrokeParameters> stroke);
-
-  static std::unique_ptr<UberSDFContents> MakeCircle(
-      Color color,
-      const Point& center,
-      Scalar radius,
-      std::optional<StrokeParameters> stroke);
-
-  UberSDFContents(Type type,
-                  Color color,
-                  Point center,
-                  Point size,
-                  std::optional<StrokeParameters> stroke,
-                  std::unique_ptr<FillRectGeometry> geometry);
+  static std::unique_ptr<UberSDFContents> Make(UberSDFParameters params);
 
   ~UberSDFContents() override;
 
@@ -57,15 +35,9 @@ class UberSDFContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  /// The type of geometry (e.g. circle, rect).
-  const Type type_;
-  /// The color of the geometry.
-  Color color_;
-  Point center_;
-  Point size_;
-  std::optional<StrokeParameters> stroke_;
-  /// The geometry.
-  std::unique_ptr<FillRectGeometry> geometry_;
+  explicit UberSDFContents(UberSDFParameters params);
+
+  UberSDFParameters params_;
 
   UberSDFContents(const UberSDFContents&) = delete;
 
