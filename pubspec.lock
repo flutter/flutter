@@ -186,6 +186,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.7"
+  data_assets:
+    dependency: "direct main"
+    description:
+      name: data_assets
+      sha256: d8b93648a338f471e576e0ba05f6b5d63a4e0fa447ca839a500267421d9245ba
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.6"
   device_info:
     dependency: "direct main"
     description:
