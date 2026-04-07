@@ -1120,7 +1120,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
     setState(() {
       final buffer = StringBuffer();
       final int targetLength =
-          _random.nextInt(20) + (_ellipsize ? MediaQuery.of(context).size.width.round() : 1);
+          _random.nextInt(20) + (_ellipsize ? MediaQuery.widthOf(context).round() : 1);
       for (var index = 0; index < targetLength; index += 1) {
         if (_random.nextInt(5) > 0) {
           buffer.writeCharCode(randomCharacter(_random));

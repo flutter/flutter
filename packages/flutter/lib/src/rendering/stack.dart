@@ -340,13 +340,15 @@ enum StackFit {
 /// are no non-positioned children, the stack becomes as large as possible.
 ///
 /// The final location of non-positioned children is determined by the alignment
-/// parameter. The left of each non-positioned child becomes the
-/// difference between the child's width and the stack's width scaled by
-/// alignment.x. The top of each non-positioned child is computed
-/// similarly and scaled by alignment.y. So if the alignment x and y properties
-/// are 0.0 (the default) then the non-positioned children remain in the
-/// upper-left corner. If the alignment x and y properties are 0.5 then the
-/// non-positioned children are centered within the stack.
+/// parameter. The left of each non-positioned child becomes the difference
+/// between the stack's width and the child's width multiplied by
+/// (alignment.x + 1.0) / 2.0. The top of each non-positioned child is computed
+/// similarly from the stack's height, the child's height, and `alignment.y`.
+///
+/// So if the alignment x and y properties are -1.0, then the non-positioned
+/// children remain in the upper-left corner (the top-start). If the
+/// alignment x and y properties are 0.0, then the non-positioned children
+/// are centered within the stack.
 ///
 /// Next, the positioned children are laid out. If a child has top and bottom
 /// values that are both non-null, the child is given a fixed height determined

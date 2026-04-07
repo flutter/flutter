@@ -14,7 +14,7 @@ class CupertinoLinearActivityIndicatorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoIndicatorExample(),
     );
   }
@@ -30,12 +30,12 @@ class CupertinoIndicatorExample extends StatelessWidget {
         middle: Text('CupertinoLinearActivityIndicator Sample'),
       ),
       child: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: .all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 CupertinoLinearActivityIndicator(progress: 0),
                 SizedBox(height: 10),
@@ -43,30 +43,30 @@ class CupertinoIndicatorExample extends StatelessWidget {
               ],
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 CupertinoLinearActivityIndicator(progress: 0.2),
                 SizedBox(height: 10),
-                Text('Progress: 0.2', textAlign: TextAlign.center),
+                Text('Progress: 0.2', textAlign: .center),
               ],
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 CupertinoLinearActivityIndicator(progress: 0.4, height: 10),
                 SizedBox(height: 10),
-                Text('Height: 10', textAlign: TextAlign.center),
+                Text('Height: 10', textAlign: .center),
               ],
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 CupertinoLinearActivityIndicator(
                   progress: 0.6,
                   color: CupertinoColors.activeGreen,
                 ),
                 SizedBox(height: 10),
-                Text('Color: green', textAlign: TextAlign.center),
+                Text('Color: green', textAlign: .center),
               ],
             ),
           ],

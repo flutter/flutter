@@ -34,16 +34,16 @@ class CocoaPodsValidator extends DoctorValidator {
           ),
         );
       case CocoaPodsStatus.notInstalled:
-        status = ValidationType.missing;
+        status = ValidationType.partial;
         messages.add(
-          ValidationMessage.error(
+          ValidationMessage.hint(
             _userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions),
           ),
         );
       case CocoaPodsStatus.brokenInstall:
-        status = ValidationType.missing;
+        status = ValidationType.partial;
         messages.add(
-          ValidationMessage.error(
+          ValidationMessage.hint(
             _userMessages.cocoaPodsBrokenInstall(
               brokenCocoaPodsConsequence,
               cocoaPodsInstallInstructions,
