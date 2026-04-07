@@ -5393,9 +5393,9 @@ void main() {
     controller.text = familyEmoji;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: EditableText(
-          backgroundCursorColor: Colors.grey,
+          backgroundCursorColor: const Color(0xFF000000),
           controller: controller,
           obscureText: true,
           focusNode: focusNode,
@@ -5418,9 +5418,9 @@ void main() {
     controller.text = mixedText;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: EditableText(
-          backgroundCursorColor: Colors.grey,
+          backgroundCursorColor: const Color(0xFF000000),
           controller: controller,
           obscureText: true,
           focusNode: focusNode,
