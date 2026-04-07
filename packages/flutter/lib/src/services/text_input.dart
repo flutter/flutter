@@ -531,6 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
+    this.enableInlinePrediction,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -702,6 +703,18 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final List<Locale>? hintLocales;
 
+  /// {@template flutter.services.TextInputConfiguration.enableInlinePrediction}
+  /// Whether to enable inline predictive text.
+  ///
+  /// This feature is specific to iOS 17 and later. It has no effect on other
+  /// platforms.
+  ///
+  /// By default, this property is null, which means inline prediction is
+  /// disabled on iOS. Setting this flag overrides the platform behavior:
+  /// when true, inline prediction is enabled; when false, it is disabled.
+  /// {@endtemplate}
+  final bool? enableInlinePrediction;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -723,6 +736,7 @@ class TextInputConfiguration {
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
     List<Locale>? hintLocales,
+    bool? enableInlinePrediction,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -744,6 +758,7 @@ class TextInputConfiguration {
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
       hintLocales: hintLocales ?? this.hintLocales,
+      enableInlinePrediction: enableInlinePrediction ?? this.enableInlinePrediction,
     );
   }
 
@@ -794,6 +809,7 @@ class TextInputConfiguration {
       'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
+      'enableInlinePrediction': enableInlinePrediction,
     };
   }
 
@@ -823,7 +839,8 @@ class TextInputConfiguration {
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
         other.enableDeltaModel == enableDeltaModel &&
-        other.hintLocales == hintLocales;
+        other.hintLocales == hintLocales &&
+        other.enableInlinePrediction == enableInlinePrediction;
   }
 
   @override
@@ -847,6 +864,7 @@ class TextInputConfiguration {
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
       hintLocales,
+      enableInlinePrediction,
     );
   }
 
@@ -871,6 +889,7 @@ class TextInputConfiguration {
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
       if (hintLocales != null) 'hintLocales: $hintLocales',
+      if (enableInlinePrediction != null) 'enableInlinePrediction: $enableInlinePrediction',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }
@@ -1013,6 +1032,10 @@ class TextEditingValue {
   /// iOS, the default software keyboards do not have a dedicated view to show
   /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
+  ///
+  /// On iOS 17 and later, the composing region can also be used
+  /// to display inline text predictions. The user can accept the
+  /// predicted text by tapping the Space bar.
   ///
   /// The composing region should typically only be changed by the IME, or the
   /// user via interacting with the IME.
@@ -1372,6 +1395,14 @@ mixin TextInputClient {
   /// This method will only be called on iOS.
   void showAutocorrectionPromptRect(int start, int end);
 
+  /// Notifies the client that the platform moved focus back to this input.
+  ///
+  /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
+  /// field and refocus it before autofilling.
+  ///
+  /// Returns true if the client acquired focus, false otherwise.
+  bool onFocusReceived() => false;
+
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
@@ -1521,6 +1552,114 @@ mixin DeltaTextInputClient implements TextInputClient {
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
+/// Text styling information for the current input client.
+///
+/// See also:
+///
+///  * [TextInputConnection.updateStyle], which uses this class to send style
+///    information to the platform.
+///  * [TextInputControl.updateStyle], which receives this style information
+///    in custom text input controls.
+@immutable
+final class TextInputStyle with Diagnosticable {
+  /// Creates text styling information for the current input client.
+  const TextInputStyle({
+    this.fontFamily,
+    this.fontSize,
+    this.fontWeight,
+    required this.textDirection,
+    required this.textAlign,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.lineHeight,
+  });
+
+  /// The name of the font to use when painting the text (e.g., Roboto).
+  final String? fontFamily;
+
+  /// The size of fonts (in logical pixels) to use when painting the text.
+  final double? fontSize;
+
+  /// The typeface thickness to use when painting the text (e.g., bold).
+  final FontWeight? fontWeight;
+
+  /// The directionality of the text.
+  final TextDirection textDirection;
+
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// The amount of space (in logical pixels) to add between each letter.
+  final double? letterSpacing;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word).
+  final double? wordSpacing;
+
+  /// The line height in logical pixels.
+  final double? lineHeight;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextInputStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.fontWeight == fontWeight &&
+        other.textDirection == textDirection &&
+        other.textAlign == textAlign &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.lineHeight == lineHeight;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      fontFamily,
+      fontSize,
+      fontWeight,
+      textDirection,
+      textAlign,
+      letterSpacing,
+      wordSpacing,
+      lineHeight,
+    );
+  }
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'fontFamily': fontFamily,
+      'fontSize': fontSize,
+      'fontWeightIndex': fontWeight?.index,
+      'textAlignIndex': textAlign.index,
+      'textDirectionIndex': textDirection.index,
+      'letterSpacing': letterSpacing,
+      'wordSpacing': wordSpacing,
+      'lineHeight': lineHeight,
+    };
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('fontFamily', fontFamily, defaultValue: null));
+    properties.add(DoubleProperty('fontSize', fontSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<FontWeight>('fontWeight', fontWeight, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(DoubleProperty('letterSpacing', letterSpacing, defaultValue: null));
+    properties.add(DoubleProperty('wordSpacing', wordSpacing, defaultValue: null));
+    properties.add(DoubleProperty('lineHeight', lineHeight, defaultValue: null));
+  }
+}
+
 /// An interface for interacting with a text input control.
 ///
 /// See also:
@@ -1658,6 +1797,10 @@ class TextInputConnection {
   /// This information is used by the Flutter Web Engine to change the style
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
+  @Deprecated(
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   void setStyle({
     required String? fontFamily,
     required double? fontSize,
@@ -1665,15 +1808,25 @@ class TextInputConnection {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    assert(attached);
-
-    TextInput._instance._setStyle(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
     );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void updateStyle(TextInputStyle style) {
+    assert(attached);
+    TextInput._instance._updateStyle(style);
   }
 
   /// Stop interacting with the text input control.
@@ -1931,6 +2084,7 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
+    _lastConnection = connection;
     _setClient(connection._client, configuration);
   }
 
@@ -1960,6 +2114,7 @@ class TextInput {
 
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
+  TextInputConnection? _lastConnection;
 
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
@@ -2031,6 +2186,13 @@ class TextInput {
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
         return;
+      case 'TextInputClient.onFocusReceived':
+        final args = methodCall.arguments as List<dynamic>;
+        final clientId = args[0] as int;
+        if (_lastConnection != null && _lastConnection!._id == clientId) {
+          return _lastConnection!._client.onFocusReceived();
+        }
+        return false;
     }
     if (_currentConnection == null) {
       return;
@@ -2222,21 +2384,9 @@ class TextInput {
     }
   }
 
-  void _setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-  }) {
+  void _updateStyle(TextInputStyle style) {
     for (final TextInputControl control in _inputControls) {
-      control.setStyle(
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        textDirection: textDirection,
-        textAlign: textAlign,
-      );
+      control.updateStyle(style);
     }
   }
 
@@ -2427,6 +2577,10 @@ mixin TextInputControl {
   ///
   /// This method is called on the when the attached input client's text style
   /// changes.
+  @Deprecated(
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   void setStyle({
     required String? fontFamily,
     required double? fontSize,
@@ -2434,6 +2588,12 @@ mixin TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {}
+
+  /// Informs the text input control about text style changes.
+  ///
+  /// This method is called on the when the attached input client's text style
+  /// changes.
+  void updateStyle(TextInputStyle style) {}
 
   /// Requests autofill from the text input control.
   ///
@@ -2560,13 +2720,20 @@ class _PlatformTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    _channel.invokeMethod<void>('TextInput.setStyle', <String, dynamic>{
-      'fontFamily': fontFamily,
-      'fontSize': fontSize,
-      'fontWeightIndex': fontWeight?.index,
-      'textAlignIndex': textAlign.index,
-      'textDirectionIndex': textDirection.index,
-    });
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
+    );
+  }
+
+  @override
+  void updateStyle(TextInputStyle style) {
+    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
   }
 
   @override

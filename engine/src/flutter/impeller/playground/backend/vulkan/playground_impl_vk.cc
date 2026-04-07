@@ -246,4 +246,8 @@ PlaygroundImplVK::CreateVKProcAddressResolver() const {
   };
 }
 
+RuntimeStageBackend PlaygroundImplVK::GetRuntimeStageBackend() const {
+  return RuntimeStageBackend::kVulkan;
+}
+
 }  // namespace impeller

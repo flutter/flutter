@@ -53,10 +53,11 @@ class SwiftPackageManagerUtils {
     required String platform,
     required List<String> options,
     bool usesSwiftPackageManager = false,
+    String? name,
   }) async {
     final appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
-    final appName = '${platform}_${appTemplateType}_app';
+    final String appName = name ?? '${platform}_${appTemplateType}_app';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -91,7 +92,6 @@ class SwiftPackageManagerUtils {
     allUnexpectedLines.add('-dXcodeBuildScript=embed');
     final unexpectedLinesFound = <String>[];
     final command = <String>[flutterBin, ...getLocalEngineArguments(), 'build', ...options];
-
     final ProcessResult result = await processManager.run(
       command,
       workingDirectory: workingDirectory,
@@ -225,11 +225,12 @@ class SwiftPackageManagerUtils {
     String workingDirectory, {
     required String platform,
     bool usesSwiftPackageManager = false,
+    String? name,
   }) async {
     final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
-    final pluginName = '${platform}_${dependencyManager}_plugin';
+    final String pluginName = name ?? '${platform}_${dependencyManager}_plugin';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -254,12 +255,91 @@ class SwiftPackageManagerUtils {
       fileSystem.path.join(workingDirectory, pluginName),
     );
 
+    final String pluginClassName = pluginName
+        .split('_')
+        .map((String part) => _capitalize(part))
+        .join();
     return SwiftPackageManagerPlugin(
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
-      className: '${_capitalize(platform)}${_capitalize(dependencyManager)}Plugin',
+      className: pluginClassName,
     );
+  }
+
+  static Future<Directory> createPackage(
+    String flutterBin,
+    String workingDirectory,
+    String name, {
+    String? template = 'package',
+  }) async {
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'create',
+      '--org',
+      'io.flutter.devicelab',
+      '--template=$template',
+      name,
+    ], workingDirectory: workingDirectory);
+
+    expect(
+      result.exitCode,
+      0,
+      reason:
+          'Failed to create native asset package: \n'
+          'stdout: \n${result.stdout}\n'
+          'stderr: \n${result.stderr}\n',
+    );
+
+    final Directory assetDirectory = fileSystem.directory(
+      fileSystem.path.join(workingDirectory, name),
+    );
+
+    return assetDirectory;
+  }
+
+  /// Converts a plugin from SwiftPM structure to legacy CocoaPods structure.
+  /// This is used for testing backward compatibility with plugins created
+  /// before SwiftPM was introduced.
+  static void convertToLegacyCocoaPodsPlugin(
+    SwiftPackageManagerPlugin plugin, {
+    required String platform,
+  }) {
+    final Directory pluginDir = fileSystem.directory(plugin.pluginPath);
+    final Directory platformDir = pluginDir.childDirectory(platform);
+
+    // Get the plugin name directory (contains Package.swift and Sources)
+    final Directory spmPluginDir = platformDir.childDirectory(plugin.pluginName);
+
+    // Read the Swift source file from SwiftPM structure
+    final Directory sourcesDir = spmPluginDir
+        .childDirectory('Sources')
+        .childDirectory(plugin.pluginName);
+    final File swiftFile = sourcesDir.childFile('${plugin.className}.swift');
+    final String swiftContent = swiftFile.readAsStringSync();
+
+    // Create Classes/ directory with the Swift file
+    final Directory classesDir = platformDir.childDirectory('Classes');
+    classesDir.createSync(recursive: true);
+    classesDir.childFile('${plugin.className}.swift').writeAsStringSync(swiftContent);
+
+    // Delete the SwiftPM structure (pluginName directory with Package.swift and Sources)
+    if (spmPluginDir.existsSync()) {
+      spmPluginDir.deleteSync(recursive: true);
+    }
+
+    // Update podspec to point to Classes/ instead of Sources/
+    final File podspec = platformDir.childFile('${plugin.pluginName}.podspec');
+    if (podspec.existsSync()) {
+      String podspecContent = podspec.readAsStringSync();
+      // Update source_files path from SwiftPM to CocoaPods structure
+      podspecContent = podspecContent.replaceAll(
+        '${plugin.pluginName}/Sources/${plugin.pluginName}/**/*',
+        'Classes/**/*',
+      );
+      podspec.writeAsStringSync(podspecContent);
+    }
   }
 
   static String _capitalize(String str) {
@@ -276,6 +356,21 @@ class SwiftPackageManagerUtils {
       pubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  ${plugin.pluginName}:\n    path: ${plugin.pluginPath}\n',
+      ),
+    );
+  }
+
+  static void addNativeAssetDependency({
+    required String name,
+    required String path,
+    required String appDirectoryPath,
+  }) {
+    final File pubspec = fileSystem.file(fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'));
+    final String pubspecContent = pubspec.readAsStringSync();
+    pubspec.writeAsStringSync(
+      pubspecContent.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  $name:\n    path: $path\n',
       ),
     );
   }
@@ -346,9 +441,14 @@ class SwiftPackageManagerUtils {
       // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
       if (swiftPackageMangerEnabled) {
         expectedLines.addAll(<Pattern>[
-          RegExp(
-            '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
-          ),
+          if (appDirectoryPath.contains('example'))
+            RegExp(
+              '${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.swiftPackagePlatformPath}',
+            )
+          else
+            RegExp(
+              '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
+            ),
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       } else {
@@ -405,6 +505,7 @@ class SwiftPackageManagerUtils {
         ]);
       } else {
         unexpectedLines.addAll(<String>[
+          '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.swiftPackagePlatformPath}',
           '${swiftPackagePlugin.pluginName}: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);

@@ -143,6 +143,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
     required RegularWindowControllerDelegate delegate,
   }) {
     return RegularWindowControllerWin32(
@@ -151,6 +152,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
     );
   }
 
@@ -162,6 +164,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) {
     return DialogWindowControllerWin32(
       owner: this,
@@ -169,6 +172,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
       parent: parent,
     );
   }
@@ -178,7 +182,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -187,7 +190,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
       owner: this,
       delegate: delegate,
       contentSizeConstraints: preferredConstraints,
-      isSizedToContent: isSizedToContent,
       anchorRect: anchorRect,
       positioner: positioner,
       parent: parent,
@@ -204,6 +206,20 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required BaseWindowController parent,
   }) {
     throw UnimplementedError('Popup windows are not yet implemented on Windows.');
+  }
+
+  @internal
+  @override
+  SatelliteWindowController createSatelliteWindowController({
+    required SatelliteWindowControllerDelegate delegate,
+    required BaseWindowController parent,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
   }
 
   /// Register a new [WindowsMessageHandler].
@@ -301,11 +317,17 @@ class RegularWindowControllerWin32 extends RegularWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+    if (!decorated) {
+      // TODO(team-windows): Implement undecorated windows on Windows.
+      // See https://github.com/flutter/flutter/issues/183559
+      throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
     }
 
     _handler = _RegularWindowMesageHandler(controller: this);
@@ -532,6 +554,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
     BaseWindowController? parent,
   }) : _owner = owner,
        _delegate = delegate,
@@ -539,6 +562,11 @@ class DialogWindowControllerWin32 extends DialogWindowController {
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+    if (!decorated) {
+      // TODO(team-windows): Implement undecorated windows on Windows.
+      // See https://github.com/flutter/flutter/issues/183559
+      throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
     }
 
     _handler = _DialogWindowMesageHandler(controller: this);
@@ -734,7 +762,6 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     required WindowingOwnerWin32 owner,
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints contentSizeConstraints,
-    required bool isSizedToContent,
     required BaseWindowController parent,
     required Rect anchorRect,
     required WindowPositioner positioner,
@@ -752,7 +779,6 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       _owner.allocator,
       PlatformDispatcher.instance.engineId!,
       contentSizeConstraints,
-      isSizedToContent,
       _Win32PlatformInterface.getWindowHandle(
         PlatformDispatcher.instance.engineId!,
         parent.rootView.viewId,
@@ -1024,7 +1050,6 @@ class _Win32PlatformInterface {
     ffi.Allocator allocator,
     int engineId,
     BoxConstraints preferredConstraints,
-    bool isSizedToContent,
     HWND parent,
     ffi.Pointer<
       ffi.NativeFunction<
@@ -1041,7 +1066,6 @@ class _Win32PlatformInterface {
         allocator<_TooltipWindowCreationRequest>();
     try {
       request.ref.preferredConstraints.from(preferredConstraints);
-      request.ref.isSizedToContent = isSizedToContent;
       request.ref.parent = parent;
       request.ref.onGetWindowPosition = onGetWindowPosition;
       return _createTooltipWindow(engineId, request);
@@ -1214,8 +1238,6 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
 
 final class _TooltipWindowCreationRequest extends ffi.Struct {
   external _WindowConstraintsRequest preferredConstraints;
-  @ffi.Bool()
-  external bool isSizedToContent;
   external HWND parent;
   external ffi.Pointer<
     ffi.NativeFunction<

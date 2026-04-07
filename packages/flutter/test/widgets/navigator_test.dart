@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
@@ -5085,9 +5086,9 @@ void main() {
             '/one': (BuildContext context) => Scaffold(
               body: Column(
                 children: <Widget>[
-                  const ListTile(title: Text('Title 1')),
-                  const ListTile(title: Text('Title 2')),
-                  const ListTile(title: Text('Title 3')),
+                  const TestListTile(title: Text('Title 1')),
+                  const TestListTile(title: Text('Title 2')),
+                  const TestListTile(title: Text('Title 3')),
                   ElevatedButton(
                     key: openSheetKey,
                     onPressed: () {
@@ -6260,6 +6261,85 @@ void main() {
     expect(focus, orderedEquals(<bool?>[null, false, null, null]));
     clear();
   });
+
+  testWidgets(
+    'Navigator focus restoration reports error to FlutterError',
+    (WidgetTester tester) async {
+      final errorDetails = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errorDetails.add(details);
+      };
+
+      try {
+        // Mock accessibility channel to throw error.
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (
+              dynamic message,
+            ) async {
+              final map = message as Map<dynamic, dynamic>;
+              if (map['type'] == 'focus') {
+                throw Exception('Focus restoration failed');
+              }
+              return null;
+            });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        NoAnimationPageRoute(
+                          pageBuilder: (BuildContext context) => Scaffold(
+                            appBar: AppBar(title: const Text('Second Route')),
+                            body: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Pop'),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Push'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Record the last focus in route entry.
+        ServicesBinding.instance.accessibilityFocus.value = 123;
+        await tester.pump();
+
+        // Push second route.
+        await tester.tap(find.text('Push'));
+        await tester.pumpAndSettle();
+
+        // Now we are on the second route.
+        // Pop it.
+        await tester.tap(find.text('Pop'));
+        await tester.pumpAndSettle();
+
+        expect(errorDetails.length, 1);
+        expect(errorDetails[0].exception.toString(), contains('Focus restoration failed'));
+        expect(errorDetails[0].library, 'widgets library');
+        expect(
+          errorDetails[0].context.toString(),
+          contains('while restoring focus in the navigator'),
+        );
+      } finally {
+        FlutterError.onError = oldHandler;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);

@@ -78,13 +78,14 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
   // before calling GetAiksContext because constructing the AiksContext may
   // invoke graphics APIs.
   std::unique_ptr<Surface> pbuffer_surface;
+  std::unique_ptr<GLContextResult> context_result;
   if (delegate.GetSurface()) {
-    delegate.GetSurface()->MakeRenderContextCurrent();
+    context_result = delegate.GetSurface()->MakeRenderContextCurrent();
   } else if (delegate.GetSnapshotSurfaceProducer()) {
     pbuffer_surface =
         delegate.GetSnapshotSurfaceProducer()->CreateSnapshotSurface();
     if (pbuffer_surface) {
-      pbuffer_surface->MakeRenderContextCurrent();
+      context_result = pbuffer_surface->MakeRenderContextCurrent();
     }
   }
 
@@ -135,25 +136,10 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
                   },
                   [callback]() { callback(nullptr); });
             } else {
-#if FML_OS_IOS_SIMULATOR
-              callback(impeller::DlImageImpeller::Make(
-                  nullptr, DlImage::OwningContext::kRaster,
-                  /*is_fake_image=*/true));
-#else
               callback(nullptr);
-
-#endif  // FML_OS_IOS_SIMULATOR
             }
           })
           .SetIfFalse([&] {
-#if FML_OS_IOS_SIMULATOR
-            if (!GetDelegate().GetAiksContext()) {
-              callback(impeller::DlImageImpeller::Make(
-                  nullptr, DlImage::OwningContext::kRaster,
-                  /*is_fake_image=*/true));
-              return;
-            }
-#endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
                                           GetDelegate(), pixel_format));
           }));
@@ -245,7 +231,7 @@ void SnapshotControllerImpeller::CacheRuntimeStage(
   if (!context) {
     return;
   }
-  impeller::RuntimeEffectContents runtime_effect;
+  impeller::RuntimeEffectContents runtime_effect(nullptr);
   runtime_effect.SetRuntimeStage(runtime_stage);
   runtime_effect.BootstrapShader(context->GetContentContext());
 }

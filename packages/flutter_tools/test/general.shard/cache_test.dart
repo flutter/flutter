@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
@@ -21,6 +22,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_http_client.dart';
 import '../src/fakes.dart';
 
 const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64');
@@ -365,6 +367,468 @@ void main() {
       flattenNameSubdirs(Uri.parse('https://www.flutter.dev'), MemoryFileSystem.test()),
       'www.flutter.dev',
     );
+  });
+
+  testWithoutContext('ArtifactSet.displayName defaults to name', () {
+    final cache = Cache.test(processManager: FakeProcessManager.any());
+    final artifact = FakeSimpleArtifact(cache);
+
+    expect(artifact.name, 'fake');
+    expect(artifact.displayName, 'fake');
+  });
+
+  testWithoutContext('ArtifactSet.downloadCount defaults to 1', () {
+    final cache = Cache.test(processManager: FakeProcessManager.any());
+    final artifact = FakeSimpleArtifact(cache);
+
+    expect(artifact.downloadCount, 1);
+  });
+
+  testWithoutContext(
+    'EngineCachedArtifact.downloadCount returns sum of package and binary dirs',
+    () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_artifact.',
+      );
+      final cache = FakeSecondaryCache()..artifactDirectory = artifactDir;
+
+      final artifact = FakeCachedArtifact(
+        cache: cache,
+        binaryDirs: <List<String>>[
+          <String>['dir1', 'url1'],
+          <String>['dir2', 'url2'],
+        ],
+        packageDirs: <String>['pkg1', 'pkg2', 'pkg3'],
+        requiredArtifacts: DevelopmentArtifact.universal,
+      );
+
+      expect(artifact.downloadCount, 5);
+    },
+  );
+
+  group('ArtifactUpdater progress formatting', () {
+    late FileSystem fileSystem;
+    late Directory tempStorage;
+    late ArtifactUpdater artifactUpdater;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      tempStorage = fileSystem.systemTempDirectory.createTempSync('temp.');
+      artifactUpdater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.any(),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+      );
+    });
+
+    testWithoutContext('formats single download with artifact index', () {
+      artifactUpdater.setProgressContext(artifactIndex: 2, artifactTotal: 5, downloadTotal: 1);
+
+      expect(artifactUpdater.formatProgressMessage('Test Artifact'), '[2/5] Test Artifact');
+    });
+
+    testWithoutContext('formats multiple downloads with tree prefix', () {
+      // First download gets ├─ prefix
+      artifactUpdater.setProgressContext(artifactIndex: 1, artifactTotal: 3, downloadTotal: 4);
+      expect(artifactUpdater.formatProgressMessage('first'), '  ├─ [1/4] first');
+
+      // Middle downloads also get ├─ prefix
+      artifactUpdater.setProgressContext(
+        artifactIndex: 1,
+        artifactTotal: 3,
+        downloadTotal: 4,
+        downloadIndex: 1,
+      );
+      expect(artifactUpdater.formatProgressMessage('second'), '  ├─ [2/4] second');
+
+      artifactUpdater.setProgressContext(
+        artifactIndex: 1,
+        artifactTotal: 3,
+        downloadTotal: 4,
+        downloadIndex: 2,
+      );
+      expect(artifactUpdater.formatProgressMessage('third'), '  ├─ [3/4] third');
+
+      // Last download gets └─ prefix
+      artifactUpdater.setProgressContext(
+        artifactIndex: 1,
+        artifactTotal: 3,
+        downloadTotal: 4,
+        downloadIndex: 3,
+      );
+      expect(artifactUpdater.formatProgressMessage('fourth'), '  └─ [4/4] fourth');
+    });
+
+    testWithoutContext('resetProgressContext resets download index', () {
+      artifactUpdater.setProgressContext(artifactIndex: 2, artifactTotal: 5, downloadTotal: 1);
+      expect(artifactUpdater.formatProgressMessage('first'), '[2/5] first');
+
+      artifactUpdater.resetProgressContext();
+      artifactUpdater.setProgressContext(artifactIndex: 1, artifactTotal: 3, downloadTotal: 1);
+
+      // After reset, index should start fresh
+      expect(artifactUpdater.formatProgressMessage('new'), '[1/3] new');
+    });
+  });
+
+  group('DownloadProgress', () {
+    testWithoutContext('fraction and percent with known total', () {
+      final progress = DownloadProgress()..totalBytes = 1000;
+      progress.addBytesReceived(250);
+
+      expect(progress.fractionReceived, 0.25);
+      expect(progress.percentReceived, 25);
+    });
+
+    testWithoutContext('fraction and percent with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(500);
+
+      expect(progress.fractionReceived, 0.0);
+      expect(progress.percentReceived, 0);
+      expect(progress.hasKnownSize, false);
+    });
+
+    testWithoutContext('fraction clamps to 1.0 when bytesReceived exceeds total', () {
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(150);
+
+      expect(progress.fractionReceived, 1.0);
+      expect(progress.percentReceived, 100);
+    });
+
+    testWithoutContext('speed calculation', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+      const elapsed = Duration(seconds: 2);
+
+      expect(progress.speedBytesPerSecond(elapsed), 2500000.0);
+    });
+
+    testWithoutContext('speed is zero when elapsed is zero', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.speedBytesPerSecond(Duration.zero), 0.0);
+    });
+
+    testWithoutContext('timeRemaining with known total', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+      const elapsed = Duration(seconds: 2);
+
+      // 5MB received in 2s = 2.5MB/s, 5MB timeRemaining = 2s timeRemaining
+      final Duration? rem = progress.timeRemaining(elapsed);
+      expect(rem, isNotNull);
+      expect(rem!.inSeconds, 2);
+    });
+
+    testWithoutContext('timeRemaining is null with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.timeRemaining(const Duration(seconds: 2)), isNull);
+    });
+
+    testWithoutContext('timeRemaining is null when speed is zero', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      expect(progress.timeRemaining(Duration.zero), isNull);
+    });
+
+    testWithoutContext('renderProgressBar at 50%', () {
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(50);
+
+      final String bar = progress.renderProgressBar(20);
+      expect(bar.length, 20);
+      expect(bar, '${'█' * 10}${' ' * 10}');
+    });
+
+    testWithoutContext('renderProgressBar uses sub-character partial block', () {
+      // 46% of 20 cells: totalEighths = round(0.46 * 20 * 8) = 74
+      // fullBlocks=9, remainder=2 → partial='▎', emptyBlocks=10
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(46);
+
+      final String bar = progress.renderProgressBar(20);
+      expect(bar.length, 20);
+      expect(bar, '${'█' * 9}▎${' ' * 10}');
+    });
+
+    testWithoutContext('renderProgressBar returns empty with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(50);
+
+      expect(progress.renderProgressBar(20), '');
+    });
+
+    testWithoutContext('renderProgressBar returns empty with zero width', () {
+      final progress = DownloadProgress()..totalBytes = 100;
+      progress.addBytesReceived(50);
+
+      expect(progress.renderProgressBar(0), '');
+    });
+
+    testWithoutContext('formatBytes with known total', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      expect(progress.formatBytes(), matches(r'^\d+\.\d+MB/\d+\.\d+MB$'));
+    });
+
+    testWithoutContext('formatBytes with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.formatBytes(), matches(r'^\d+\.\d+MB$'));
+    });
+
+    testWithoutContext('formatSpeed', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(2000000);
+
+      expect(progress.formatSpeed(const Duration(seconds: 1)), matches(r'^\d+\.\d+MB/s$'));
+    });
+
+    testWithoutContext('formatRemaining with known total and speed', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String eta = progress.formatRemaining(const Duration(seconds: 2));
+      expect(eta, startsWith('ETA '));
+      expect(eta, contains('s'));
+    });
+
+    testWithoutContext('formatRemaining is empty with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      expect(progress.formatRemaining(const Duration(seconds: 2)), '');
+    });
+
+    testWithoutContext('formatProgressLine includes progress bar with known total', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
+
+      expect(line, contains('50%'));
+      expect(line, matches(r'\d+\.\d+MB/\d+\.\d+MB'));
+      expect(line, contains('/s'));
+      expect(line, contains('█'));
+      expect(line, contains('▏'));
+      expect(line, contains('▕'));
+    });
+
+    testWithoutContext('formatProgressLine has fixed bar width and right-aligns info', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
+
+      // Bar is fixed at 28 inner chars + 2 brackets = 30 visual chars.
+      // Line total must equal terminalWidth.
+      expect(line.length, 80);
+      // Info is right-aligned: the line must end with the info, no trailing spaces.
+      expect(line, endsWith('ETA 2.0s'));
+    });
+
+    testWithoutContext('formatProgressLine omits bar with unknown total', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 80,
+      );
+
+      expect(line, isNot(contains('█')));
+      expect(line, matches(r'\d+\.\d+MB'));
+      expect(line, contains('/s'));
+    });
+
+    testWithoutContext('formatProgressLine omits bar when terminal too narrow', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 30,
+      );
+
+      expect(line, isNot(contains('█')));
+      expect(line, contains('50%'));
+    });
+
+    testWithoutContext('formatProgressLine never exceeds terminalWidth', () {
+      final progress = DownloadProgress()..totalBytes = 10000000;
+      progress.addBytesReceived(5000000);
+
+      final String line = progress.formatProgressLine(
+        elapsed: const Duration(seconds: 2),
+        terminalWidth: 30,
+      );
+
+      expect(line.length, lessThanOrEqualTo(30));
+    });
+
+    testWithoutContext(
+      'formatProgressLine does not have trailing whitespace with unknown total',
+      () {
+        final progress = DownloadProgress();
+        progress.addBytesReceived(5000000);
+
+        final String line = progress.formatProgressLine(
+          elapsed: const Duration(seconds: 2),
+          terminalWidth: 80,
+        );
+
+        expect(line, isNot(endsWith(' ')));
+      },
+    );
+
+    testWithoutContext('formatCompletionSummary', () {
+      final progress = DownloadProgress();
+      progress.addBytesReceived(21100000);
+
+      expect(
+        progress.formatCompletionSummary(const Duration(seconds: 5)),
+        matches(r'^\(\d+\.\d+MB in \d+\.\d+s\)$'),
+      );
+    });
+  });
+
+  group('ArtifactUpdater download progress display', () {
+    late FileSystem fileSystem;
+    late Directory tempStorage;
+    late FakeStdio stdio;
+    late BufferLogger logger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      tempStorage = fileSystem.systemTempDirectory.createTempSync('temp.');
+      stdio = FakeStdio();
+      logger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+    });
+
+    testWithoutContext(
+      'shows ANSI progress when stdio is provided and color is supported',
+      () async {
+        final body = List<int>.filled(1000, 0);
+        final updater = ArtifactUpdater(
+          operatingSystemUtils: FakeOperatingSystemUtils(),
+          logger: logger,
+          fileSystem: fileSystem,
+          tempStorage: tempStorage,
+          httpClient: FakeHttpClient.list(<FakeRequest>[
+            FakeRequest(
+              Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+              response: FakeResponse(body: body),
+            ),
+          ]),
+          platform: FakePlatform(),
+          allowedBaseUrls: <String>['https://storage.googleapis.com'],
+          stdio: stdio,
+        );
+
+        updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+
+        await updater.downloadZipArchive(
+          'Test Artifact',
+          Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+          fileSystem.directory('output')..createSync(),
+        );
+
+        final String allOutput = stdio.writtenToStdout.join();
+
+        // Should have written the status message followed by newline
+        expect(allOutput, contains('[1/1] Test Artifact'));
+
+        // Should contain completion summary with size and time
+        expect(allOutput, contains('MB in'));
+        expect(allOutput, contains('s)'));
+
+        // Should contain ANSI clear codes for cleanup
+        expect(allOutput, contains('\x1B[K')); // clear to end of line
+        expect(allOutput, contains('\x1B[1A')); // cursor up
+
+        // Completion line should be right-aligned to terminal width (80).
+        final String completionLine = stdio.writtenToStdout.last.replaceAll('\n', '');
+        expect(completionLine.length, 80);
+      },
+    );
+
+    testWithoutContext('falls back to logger progress when stdio is not provided', () async {
+      final updater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: logger,
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+            response: const FakeResponse(body: <int>[0, 0, 0]),
+          ),
+        ]),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+      );
+
+      updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+
+      await updater.downloadZipArchive(
+        'Test Artifact',
+        Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+        fileSystem.directory('output')..createSync(),
+      );
+
+      // Without stdio, nothing should be written to stdout directly
+      expect(stdio.writtenToStdout, isEmpty);
+    });
+
+    testWithoutContext('falls back to logger progress when color is not supported', () async {
+      final noColorLogger = BufferLogger.test();
+
+      final updater = ArtifactUpdater(
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        logger: noColorLogger,
+        fileSystem: fileSystem,
+        tempStorage: tempStorage,
+        httpClient: FakeHttpClient.list(<FakeRequest>[
+          FakeRequest(
+            Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+            response: const FakeResponse(body: <int>[0, 0, 0]),
+          ),
+        ]),
+        platform: FakePlatform(),
+        allowedBaseUrls: <String>['https://storage.googleapis.com'],
+        stdio: stdio,
+      );
+
+      updater.setProgressContext(artifactIndex: 1, artifactTotal: 1, downloadTotal: 1);
+
+      await updater.downloadZipArchive(
+        'Test Artifact',
+        Uri.parse('https://storage.googleapis.com/test-artifact.zip'),
+        fileSystem.directory('output')..createSync(),
+      );
+
+      // With stdio but no color support, should not write progress to stdout
+      expect(stdio.writtenToStdout, isEmpty);
+    });
   });
 
   testWithoutContext(
@@ -881,7 +1345,7 @@ void main() {
 
       await webSdk.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-      expect(messages, <String>['Downloading Web SDK...']);
+      expect(messages, <String>['Web SDK']);
 
       expect(downloads, <String>[
         'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/flutter-web-sdk.zip',
@@ -1002,7 +1466,7 @@ void main() {
 
     await engineStamp.updateInner(artifactUpdater, fileSystem, FakeOperatingSystemUtils());
 
-    expect(messages, <String>['Downloading engine information...']);
+    expect(messages, <String>['Engine Information']);
 
     expect(downloads, <String>[
       'https://storage.googleapis.com/flutter_infra_release/flutter/hijklmnop/engine_stamp.json',
@@ -1317,6 +1781,12 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
 
   @override
   DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+
+  @override
+  String get displayName => 'fake';
+
+  @override
+  int get downloadCount => 1;
 }
 
 class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
@@ -1432,22 +1902,33 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadFile;
 
   @override
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
-    onDownloadZipTarball?.call(message, url, location);
+  Future<void> downloadZippedTarball(String artifactName, Uri url, Directory location) async {
+    onDownloadZipTarball?.call(artifactName, url, location);
   }
 
   @override
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
-    onDownloadZipArchive?.call(message, url, location);
+  Future<void> downloadZipArchive(String artifactName, Uri url, Directory location) async {
+    onDownloadZipArchive?.call(artifactName, url, location);
   }
 
   @override
-  Future<void> downloadFile(String message, Uri url, Directory location) async {
-    onDownloadFile?.call(message, url, location);
+  Future<void> downloadFile(String artifactName, Uri url, Directory location) async {
+    onDownloadFile?.call(artifactName, url, location);
   }
 
   @override
   void removeDownloadedFiles() {}
+
+  @override
+  void setProgressContext({
+    required int artifactIndex,
+    required int artifactTotal,
+    required int downloadTotal,
+    int downloadIndex = 0,
+  }) {}
+
+  @override
+  void resetProgressContext() {}
 }
 
 class FakeArtifactUpdaterDownload extends ArtifactUpdater {

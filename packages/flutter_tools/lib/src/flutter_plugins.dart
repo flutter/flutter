@@ -32,7 +32,7 @@ import 'plugins.dart';
 import 'project.dart';
 
 Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     return false;
   }
   final List<int> fileBytes = await file.readAsBytes();
@@ -466,6 +466,28 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   );
 }
 
+const _iosSwiftPluginRegistryTemplate = '''
+//
+//  Generated file. Do not edit.
+//
+import {{framework}}
+import UIKit
+
+{{#methodChannelPlugins}}
+import {{name}}
+{{/methodChannelPlugins}}
+
+@objc public class GeneratedPluginRegistrant: NSObject {
+    @objc public static func register(with registry: FlutterPluginRegistry) {
+        {{#methodChannelPlugins}}
+        if let {{classVar}} = registry.registrar(forPlugin: "{{prefix}}{{class}}") {
+            {{prefix}}{{class}}.register(with: {{classVar}})
+        }
+        {{/methodChannelPlugins}}
+    }
+}
+''';
+
 const _objcPluginRegistryHeaderTemplate = '''
 //
 //  Generated file. Do not edit.
@@ -516,7 +538,7 @@ const _objcPluginRegistryImplementationTemplate = '''
 @end
 ''';
 
-const _swiftPluginRegistryTemplate = '''
+const _macosSwiftPluginRegistryTemplate = '''
 //
 //  Generated file. Do not edit.
 //
@@ -528,7 +550,12 @@ import Foundation
 import {{name}}
 {{/methodChannelPlugins}}
 
+{{#public}}
+public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+{{/public}}
+{{^public}}
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+{{/public}}
   {{#methodChannelPlugins}}
   {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
 {{/methodChannelPlugins}}
@@ -777,7 +804,12 @@ $_dartPluginRegisterWith
 }
 ''';
 
-Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> writeIOSPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  File? swiftPluginRegistrant,
+  TemplateRenderer? templateRenderer,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     IOSPlugin.kConfigKey,
@@ -798,20 +830,28 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
       _pluginRegistrantPodspecTemplate,
       context,
       registryDirectory.childFile('FlutterPluginRegistrant.podspec'),
-      globals.templateRenderer,
+      templateRenderer ?? globals.templateRenderer,
+    );
+  }
+  if (swiftPluginRegistrant != null) {
+    return _renderTemplateToFile(
+      _iosSwiftPluginRegistryTemplate,
+      context,
+      swiftPluginRegistrant,
+      templateRenderer ?? globals.templateRenderer,
     );
   }
   await _renderTemplateToFile(
     _objcPluginRegistryHeaderTemplate,
     context,
     project.ios.pluginRegistrantHeader,
-    globals.templateRenderer,
+    templateRenderer ?? globals.templateRenderer,
   );
   await _renderTemplateToFile(
     _objcPluginRegistryImplementationTemplate,
     context,
     project.ios.pluginRegistrantImplementation,
-    globals.templateRenderer,
+    templateRenderer ?? globals.templateRenderer,
   );
 }
 
@@ -892,7 +932,22 @@ Future<void> _writePluginCmakefile(
   );
 }
 
-Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+/// Writes the macOS plugin registrant file for the given [project].
+///
+/// This method generates a Swift file that registers all provided [plugins] that
+/// have method channels.
+///
+/// The [pluginRegistrantImplementation] file can be used to override the default
+/// location where the registrant is written.
+///
+/// If [public] is true, the generated registration function will be public.
+Future<void> writeMacOSPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  File? pluginRegistrantImplementation,
+  TemplateRenderer? templateRenderer,
+  bool public = false,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     MacOSPlugin.kConfigKey,
@@ -905,12 +960,13 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
     'os': FlutterDarwinPlatform.macos.name,
     'framework': FlutterDarwinPlatform.macos.binaryName,
     'methodChannelPlugins': macosMethodChannelPlugins,
+    'public': public,
   };
   await _renderTemplateToFile(
-    _swiftPluginRegistryTemplate,
+    _macosSwiftPluginRegistryTemplate,
     context,
-    project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'),
-    globals.templateRenderer,
+    pluginRegistrantImplementation ?? project.macos.pluginRegistrantImplementation,
+    templateRenderer ?? globals.templateRenderer,
   );
 }
 
@@ -1293,10 +1349,10 @@ Future<void> injectPlugins(
       pluginResolutionType: _PluginResolutionType.nativeOrDart,
     );
     if (iosPlatform) {
-      await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+      await writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
     }
     if (macOSPlatform) {
-      await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+      await writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
     }
     final DarwinDependencyManagement darwinDependencyManagerSetup =
         darwinDependencyManagement ??
@@ -1307,13 +1363,16 @@ Future<void> injectPlugins(
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
-            artifacts: globals.artifacts!,
+            processUtils: globals.processUtils,
+            config: globals.config,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           logger: globals.logger,
           analytics: globals.analytics,
           platform: globals.platform,
+          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          config: globals.config,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1769,7 +1828,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
-      if (await newMainDart.exists()) {
+      if (newMainDart.existsSync()) {
         await newMainDart.delete();
       }
     } on FileSystemException catch (error) {

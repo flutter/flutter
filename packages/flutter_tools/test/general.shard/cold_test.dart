@@ -238,6 +238,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,
     bool? ipv6,
@@ -258,6 +259,7 @@ class TestFlutterDevice extends FlutterDevice {
     required this.exception,
     required ResidentCompiler generator,
   }) : super(
+         targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,

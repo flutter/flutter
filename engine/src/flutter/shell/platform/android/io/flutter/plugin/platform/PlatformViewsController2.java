@@ -9,6 +9,7 @@ import static io.flutter.Build.API_LEVELS;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
@@ -312,11 +313,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   public void onPreEngineRestart() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   @Override
@@ -410,7 +411,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return toLogicalPixels(physicalPixels, getDisplayDensity());
   }
 
-  private void diposeAllViews() {
+  private void disposeAllViews() {
     while (platformViews.size() > 0) {
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
@@ -518,7 +519,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.bringToFront();
 
     final FrameLayout.LayoutParams layoutParams =
-        new FrameLayout.LayoutParams(viewWidth, viewHeight);
+        new FrameLayout.LayoutParams(viewWidth, viewHeight, Gravity.LEFT | Gravity.TOP);
     final View view = platformViews.get(viewId).getView();
     if (view != null) {
       view.setLayoutParams(layoutParams);
@@ -549,9 +550,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // NOT called from UI thread.
   public synchronized void swapTransactions() {
     activeTransactions.clear();
-    for (int i = 0; i < pendingTransactions.size(); i++) {
-      activeTransactions.add(pendingTransactions.get(i));
-    }
+    activeTransactions.addAll(pendingTransactions);
     pendingTransactions.clear();
   }
 
@@ -608,9 +607,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    SurfaceControl.Transaction tx = createTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
-    tx.apply();
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -618,9 +616,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    SurfaceControl.Transaction tx = createTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
-    tx.apply();
   }
 
   public boolean isHcppEnabled() {

@@ -40,7 +40,7 @@ function pub_upgrade_with_retry {
 
 # Trap function for removing any remaining lock file at exit.
 function _rmlock () {
-  [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -rf "$FLUTTER_UPGRADE_LOCK"
+  [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -rf -- "$FLUTTER_UPGRADE_LOCK"
 }
 
 # Determines which lock method to use, based on what is available on the system.
@@ -121,7 +121,7 @@ function upgrade_flutter () (
   # Ensure the engine.version is populated
   "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
 
-  local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
+  local revision="$(git -C "$FLUTTER_ROOT" rev-parse HEAD)"
   local compilekey="$revision:$FLUTTER_TOOL_ARGS"
 
   # Invalidate cache if:
@@ -132,7 +132,7 @@ function upgrade_flutter () (
   #  * pubspec.yaml last modified after pubspec.lock
   if [[ ! -f "$SNAPSHOT_PATH" || \
         ! -s "$STAMP_PATH" || \
-        "$(cat "$STAMP_PATH")" != "$compilekey" || \
+        "$(< "$STAMP_PATH")" != "$compilekey" || \
         "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
@@ -141,7 +141,7 @@ function upgrade_flutter () (
     _wait_for_lock
 
     # A different shell process might have updated the tool/SDK.
-    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(cat "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(< "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
       exit $?
     fi
 

@@ -1293,6 +1293,33 @@ void DisplayListBuilder::drawPath(const DlPath& path) {
   }
 }
 void DisplayListBuilder::DrawPath(const DlPath& path, const DlPaint& paint) {
+  DlRect rect;
+  bool closed;
+  if (path.IsRect(&rect, &closed) &&
+      (paint.getDrawStyle() == DlDrawStyle::kFill || closed)) {
+    DrawRect(rect, paint);
+    return;
+  }
+
+  DlRoundRect rrect;
+  if (path.IsRoundRect(&rrect)) {
+    DrawRoundRect(rrect, paint);
+    return;
+  }
+
+  DlRect oval_bounds;
+  if (path.IsOval(&oval_bounds)) {
+    DrawOval(oval_bounds, paint);
+    return;
+  }
+
+  DlPoint start;
+  DlPoint end;
+  if (path.IsLine(&start, &end)) {
+    DrawLine(start, end, paint);
+    return;
+  }
+
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawPathFlags);
   drawPath(path);
 }

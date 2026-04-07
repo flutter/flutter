@@ -109,9 +109,10 @@ enum FlutterTemplateType implements ParsedFlutterTemplateType {
   /// This is an FFI native plugin project.
   pluginFfi(
     helpText:
-        'Generate a shareable Flutter project containing an API '
+        '(deprecated) Generate a shareable Flutter project containing an API '
         'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
-        'Linux, macOS, Windows, or any combination of these.',
+        'Linux, macOS, Windows, or any combination of these. '
+        'Use "package_ffi" instead.',
   );
 
   const FlutterTemplateType({required this.helpText});

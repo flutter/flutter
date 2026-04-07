@@ -9,8 +9,8 @@ import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
-import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
+import com.flutter.gradle.FlutterPluginUtils.getLegacyAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
@@ -54,24 +54,6 @@ class PluginHandler(
                 )
         }
         return pluginList!!
-    }
-
-    // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
-    //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
-
-    /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private fun getPluginDependencies(): List<Map<String?, Any?>> {
-        if (pluginDependencies == null) {
-            val meta: Map<String, Any> =
-                NativePluginLoaderReflectionBridge.getDependenciesMetadata(
-                    project.extraProperties,
-                    FlutterPluginUtils.getFlutterSourceDirectory(project)
-                )
-            check(meta["dependencyGraph"] is List<*>)
-            @Suppress("UNCHECKED_CAST")
-            pluginDependencies = meta["dependencyGraph"] as List<Map<String?, Any?>>
-        }
-        return pluginDependencies!!
     }
 
     internal fun configurePlugins(engineVersionValue: String) {
@@ -129,7 +111,7 @@ class PluginHandler(
             // Add plugin dependency to the app project. We only want to add dependency
             // for dev dependencies in non-release builds.
             project.afterEvaluate {
-                getAndroidExtension(project).buildTypes.forEach { buildType ->
+                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
                     if (!(pluginObject["dev_dependency"] as Boolean) || buildType.name != "release") {
                         project.dependencies.add("${buildType.name}Api", pluginProject)
                     }
@@ -153,7 +135,7 @@ class PluginHandler(
                     )
                 }
 
-                getAndroidExtension(project).buildTypes.forEach { buildType ->
+                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
                     addEmbeddingDependencyToPlugin(project, pluginProject, buildType, engineVersion)
                 }
             }
@@ -183,13 +165,13 @@ class PluginHandler(
             // However, only copy if the plugin is also an app project, since library projects
             // cannot have applicationIdSuffix and other app-specific properties.
             if (isBuiltAsApp(pluginProject)) {
-                (getAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-                    .addAll(getAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
             } else {
                 // For library projects, create compatible build types without app-specific properties
-                getAndroidExtension(project).buildTypes.forEach { appBuildType ->
-                    if (getAndroidExtension(pluginProject).buildTypes.findByName(appBuildType.name) == null) {
-                        getAndroidExtension(pluginProject).buildTypes.create(appBuildType.name) {
+                getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->
+                    if (getLegacyAndroidExtension(pluginProject).buildTypes.findByName(appBuildType.name) == null) {
+                        getLegacyAndroidExtension(pluginProject).buildTypes.create(appBuildType.name) {
                             // Copy library-compatible properties only
                             isDebuggable = appBuildType.isDebuggable
                             isMinifyEnabled = appBuildType.isMinifyEnabled
@@ -233,7 +215,7 @@ class PluginHandler(
                 }
             val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
 
-            getAndroidExtension(project).buildTypes.forEach { buildType ->
+            getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
                 val flutterBuildMode: String = buildModeFor(buildType)
                 if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
                     // This plugin is a dev dependency will not be included in the

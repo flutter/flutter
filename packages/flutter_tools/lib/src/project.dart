@@ -697,14 +697,6 @@ class AndroidProject extends FlutterProjectPlatform {
         .childFile('GeneratedPluginRegistrant.java');
   }
 
-  File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
-
-  Directory get gradleAppOutV1Directory {
-    return globals.fs.directory(
-      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'),
-    );
-  }
-
   /// Whether the current flutter project has an Android sub-project.
   @override
   bool existsSync() {
@@ -1022,10 +1014,21 @@ See the link below for more information:
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///
-  /// If there is no manifest file, or the key is not present, returns `false`.
+  /// If there is no manifest file, or the key is not present, returns [_impellerEnabledByDefault].
   bool computeImpellerEnabled() {
+    return _computeManifestMetadataBoolValue(
+      'io.flutter.embedding.android.EnableImpeller',
+      _impellerEnabledByDefault,
+    );
+  }
+
+  bool computeHcppEnabled() {
+    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  }
+
+  bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
     if (!appManifestFile.existsSync()) {
-      return _impellerEnabledByDefault;
+      return defaultValue;
     }
     final XmlDocument document;
     try {
@@ -1043,17 +1046,20 @@ See the link below for more information:
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      if (name == 'io.flutter.embedding.android.EnableImpeller') {
+      if (name == metadataKey) {
         final String? value = metaData.getAttribute('android:value');
-        if (value == 'true') {
+        if (value == null) {
+          continue;
+        }
+        if (value.toLowerCase() == 'true') {
           return true;
         }
-        if (value == 'false') {
+        if (value.toLowerCase() == 'false') {
           return false;
         }
       }
     }
-    return _impellerEnabledByDefault;
+    return defaultValue;
   }
 }
 

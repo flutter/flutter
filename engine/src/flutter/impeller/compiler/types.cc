@@ -127,25 +127,6 @@ std::string EntryPointFunctionNameFromSourceName(
   return stream.str();
 }
 
-bool TargetPlatformNeedsReflection(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageGLES3:
-    case TargetPlatform::kRuntimeStageVulkan:
-    case TargetPlatform::kVulkan:
-      return true;
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kSkSL:
-      return false;
-  }
-  FML_UNREACHABLE();
-}
-
 std::string ShaderCErrorToString(shaderc_compilation_status status) {
   using Status = shaderc_compilation_status;
   switch (status) {
@@ -307,25 +288,6 @@ bool TargetPlatformIsVulkan(TargetPlatform platform) {
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
     case TargetPlatform::kRuntimeStageGLES3:
-      return false;
-  }
-  FML_UNREACHABLE();
-}
-
-bool TargetPlatformBundlesSkSL(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kSkSL:
-    case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageGLES3:
-    case TargetPlatform::kRuntimeStageVulkan:
-      return true;
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kVulkan:
       return false;
   }
   FML_UNREACHABLE();

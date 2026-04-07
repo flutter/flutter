@@ -74,7 +74,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
-    final builder = EngineAccessibilityFeaturesBuilder(0);
+    final builder = EngineAccessibilityFeaturesBuilder();
     if (_isHighContrastEnabled) {
       builder.highContrast = true;
     }
@@ -1784,6 +1784,7 @@ class ViewConfiguration {
     this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
+    this.displayCornerRadii,
   });
 
   ViewConfiguration copyWith({
@@ -1796,6 +1797,7 @@ class ViewConfiguration {
     ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
+    ui.DisplayCornerRadii? displayCornerRadii,
   }) {
     return ViewConfiguration(
       view: view ?? this.view,
@@ -1807,6 +1809,7 @@ class ViewConfiguration {
       padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
+      displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
     );
   }
 
@@ -1819,6 +1822,7 @@ class ViewConfiguration {
   final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
+  final ui.DisplayCornerRadii? displayCornerRadii;
 
   @override
   String toString() {
@@ -1828,7 +1832,7 @@ class ViewConfiguration {
 
 class PlatformConfiguration {
   const PlatformConfiguration({
-    this.accessibilityFeatures = const EngineAccessibilityFeatures(0),
+    this.accessibilityFeatures = EngineAccessibilityFeatures.defaultFeatures,
     this.alwaysUse24HourFormat = false,
     this.semanticsEnabled = false,
     this.platformBrightness = ui.Brightness.light,

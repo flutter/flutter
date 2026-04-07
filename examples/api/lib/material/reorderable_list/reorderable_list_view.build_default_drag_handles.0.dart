@@ -50,7 +50,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
                 Container(
                   width: 64,
                   height: 64,
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ReorderableDragStartListener(
                     index: index,
                     child: Card(color: colorScheme.primary, elevation: 2),
@@ -61,11 +61,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
             ),
           ),
       ],
-      onReorder: (int oldIndex, int newIndex) {
+      onReorderItem: (int oldIndex, int newIndex) {
         setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
           final int item = _items.removeAt(oldIndex);
           _items.insert(newIndex, item);
         });

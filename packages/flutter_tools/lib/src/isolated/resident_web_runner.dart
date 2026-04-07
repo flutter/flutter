@@ -97,11 +97,11 @@ class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
     String? target,
-    bool stayResident = true,
-    bool machine = false,
-    String? projectRootPath,
+    super.stayResident = true,
+    super.machine = false,
+    super.projectRootPath,
     required this.flutterProject,
-    required DebuggingOptions debuggingOptions,
+    required super.debuggingOptions,
     required FileSystem fileSystem,
     required Logger logger,
     required Terminal terminal,
@@ -121,9 +121,6 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
-         debuggingOptions: debuggingOptions,
-         stayResident: stayResident,
-         machine: machine,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
@@ -131,7 +128,6 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
-         projectRootPath: projectRootPath,
        );
 
   final FileSystem _fileSystem;
@@ -947,14 +943,13 @@ class ResidentWebRunner extends ResidentRunner {
           // TODO(bkonyi): consider removing this log message and using only the standard VM
           // service message instead.
           _logger.printStatus('Debug service listening on $websocketUri');
-          printDebuggerList();
-          connectionInfoCompleter?.complete(
-            DebugConnectionInfo(
-              wsUri: websocketUri,
-              devToolsUri: debugConnection.devToolsUri?.toUri(),
-              dtdUri: debugConnection.dtdUri?.toUri(),
-            ),
+          final connectionInfo = DebugConnectionInfo(
+            wsUri: websocketUri,
+            devToolsUri: debugConnection.devToolsUri?.toUri(),
+            dtdUri: debugConnection.dtdUri?.toUri(),
           );
+          printDebuggerList(connectionInfo: connectionInfo);
+          connectionInfoCompleter?.complete(connectionInfo);
         }),
       );
     } else {

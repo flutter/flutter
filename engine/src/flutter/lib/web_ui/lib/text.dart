@@ -225,7 +225,7 @@ enum TextAlign { left, right, center, justify, start, end }
 
 enum TextBaseline { alphabetic, ideographic }
 
-class TextDecoration {
+final class TextDecoration {
   const TextDecoration._(this._mask);
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     var mask = 0;

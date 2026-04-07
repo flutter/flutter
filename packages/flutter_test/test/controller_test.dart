@@ -799,7 +799,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
-        final expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 9);
+        final expectedMatchers = <Matcher>[...fullTraversalMatchers]..removeRange(0, 8);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(start: find.byType(Slider)),
@@ -890,7 +890,7 @@ void main() {
         // We're expecting the traversal to end where the slider is, inclusive.
         final Iterable<Matcher> expectedMatchers = <Matcher>[
           ...fullTraversalMatchers,
-        ].getRange(0, 10);
+        ].getRange(0, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(end: find.byType(Slider)),
@@ -961,7 +961,7 @@ void main() {
         // We're expecting the traversal to start at the text field and end at the slider.
         final Iterable<Matcher> expectedMatchers = <Matcher>[
           ...fullTraversalMatchers,
-        ].getRange(1, 10);
+        ].getRange(1, 9);
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(
@@ -1250,14 +1250,19 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(invoked, isTrue);
-        expect(tester.semantics.find(find.byType(Slider)).value, equals(expected));
+        expect(
+          find.semantics.byFlag(SemanticsFlag.isSlider).evaluate().single.value,
+          equals(expected),
+        );
       });
 
       testWidgets('showOnScreen sends showOnScreen action', (WidgetTester tester) async {
+        final controller = ScrollController(initialScrollOffset: 50);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: ListView(
-              controller: ScrollController(initialScrollOffset: 50),
+              controller: controller,
               children: <Widget>[
                 const MergeSemantics(child: SizedBox(height: 40, child: Text('Test'))),
                 SizedBox(width: 40, height: tester.binding.window.physicalSize.height * 1.5),
@@ -1280,6 +1285,7 @@ void main() {
           const text = 'This is some text.';
           int currentIndex = text.length;
           final controller = TextEditingController(text: text);
+          addTearDown(controller.dispose);
           await tester.pumpWidget(
             MaterialApp(
               home: Material(child: TextField(controller: controller)),
@@ -1330,6 +1336,7 @@ void main() {
           const text = 'This is some text.';
           int currentIndex = text.length;
           final controller = TextEditingController(text: text);
+          addTearDown(controller.dispose);
           await tester.pumpWidget(
             MaterialApp(
               home: Material(child: TextField(controller: controller)),
@@ -1377,6 +1384,7 @@ void main() {
       testWidgets('setText causes semantics to set the text', (WidgetTester tester) async {
         const expectedText = 'This is some text.';
         final controller = TextEditingController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Material(child: TextField(controller: controller)),
@@ -1399,6 +1407,7 @@ void main() {
         const int expectedStart = text.length - 8;
         const int expectedEnd = text.length - 4;
         final controller = TextEditingController(text: text);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Material(child: TextField(controller: controller)),
@@ -1495,6 +1504,7 @@ void main() {
               const SnackBar(content: SizedBox(height: 40, width: 300), duration: duration),
             )
             .closed
+            // ignore: unawaited_futures
             .then((SnackBarClosedReason result) => reason = result);
         await tester.pumpFrames(tester.widget(find.byType(MaterialApp)), halfDuration);
 

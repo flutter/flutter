@@ -47,6 +47,8 @@ public class FlutterImageView extends View implements RenderSurface {
   @Nullable private Bitmap currentBitmap;
   @Nullable private FlutterRenderer flutterRenderer;
 
+  private boolean isContentSizingEnabled = false;
+
   public ImageReader getImageReader() {
     return imageReader;
   }
@@ -92,11 +94,16 @@ public class FlutterImageView extends View implements RenderSurface {
 
   private void init() {
     setAlpha(0.0f);
+    isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
   }
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+    if (isContentSizingEnabled) {
+      FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+    } else {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
   }
 
   private static void logW(String format, Object... args) {

@@ -777,8 +777,8 @@ struct TRect {
     if (neighbor.z >= kMinimumHomogenous) {
       auto t = (kMinimumHomogenous - p.z) / (neighbor.z - p.z);
       clipped[index++] = {
-          (t * p.x + (1.0f - t) * neighbor.x) / kMinimumHomogenous,
-          (t * p.y + (1.0f - t) * neighbor.y) / kMinimumHomogenous,
+          ((1.0f - t) * p.x + t * neighbor.x) / kMinimumHomogenous,
+          ((1.0f - t) * p.y + t * neighbor.y) / kMinimumHomogenous,
       };
     }
     return index;

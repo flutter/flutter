@@ -58,7 +58,7 @@ class _FlowMenuState extends State<FlowMenu>
 
   Widget flowMenuItem(IconData icon) {
     final double buttonDiameter =
-        MediaQuery.of(context).size.width / menuItems.length;
+        MediaQuery.widthOf(context) / menuItems.length;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: RawMaterialButton(

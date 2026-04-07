@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher;
 import 'package:matcher/src/expect/async_matcher.dart';
 
@@ -24,6 +25,7 @@ void main() {
       final completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String? result;
+      // ignore: unawaited_futures
       future.then<void>((void value) {
         result = '123';
       });
@@ -43,6 +45,7 @@ void main() {
         skip: 'testing skip',
       ); // [intended] API testing
       var completed = false;
+      // ignore: unawaited_futures
       future.then<void>((_) {
         completed = true;
       });
@@ -88,6 +91,7 @@ void main() {
       int count;
 
       final test = AnimationController(duration: const Duration(milliseconds: 5100), vsync: tester);
+      addTearDown(test.dispose);
       count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 1); // it always pumps at least one frame
 
@@ -242,6 +246,7 @@ void main() {
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     expect(tester.hasRunningAnimations, isFalse);
     controller.forward();
     expect(tester.hasRunningAnimations, isTrue);
@@ -258,6 +263,7 @@ void main() {
       duration: const Duration(minutes: 525600),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     expect(await tester.pumpAndSettle(), 1);
     controller.forward();
     try {
@@ -374,7 +380,10 @@ void main() {
     });
 
     testWidgets('disallows re-entry', (WidgetTester tester) async {
+      // This test requires the first runAsync to not have finished
+      // in order to test re-entry.
       final completer = Completer<void>();
+      // ignore: unawaited_futures
       tester.runAsync<void>(() => completer.future);
       expect(() => tester.runAsync(() async {}), throwsA(isA<TestFailure>()));
       completer.complete();
@@ -522,6 +531,7 @@ void main() {
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
     late FlutterError error;
     final Ticker ticker = tester.createTicker((Duration duration) {});
+    addTearDown(ticker.dispose);
     ticker.start();
     try {
       tester.verifyTickersWereDisposed('');
@@ -792,19 +802,22 @@ void main() {
     expect(find.byType(View), findsNothing);
   });
 
-  testWidgets('passing a view to pumpWidget with wrapWithView: true throws', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(View(view: FakeView(tester.view), child: const SizedBox.shrink()));
-    expect(
-      tester.takeException(),
-      isFlutterError.having(
-        (FlutterError e) => e.message,
-        'message',
-        contains('consider setting the "wrapWithView" parameter of that method to false'),
-      ),
-    );
-  });
+  testWidgets(
+    'passing a view to pumpWidget with wrapWithView: true throws',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      await tester.pumpWidget(View(view: FakeView(tester.view), child: const SizedBox.shrink()));
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('consider setting the "wrapWithView" parameter of that method to false'),
+        ),
+      );
+    },
+  );
 
   testWidgets('can pass a View to pumpWidget when wrapWithView: false', (
     WidgetTester tester,

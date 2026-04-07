@@ -205,6 +205,10 @@ class TextFormField extends FormField<String> {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
+       assert(
+         errorBuilder == null || decoration?.errorText == null,
+         'Declaring both errorBuilder and decoration.errorText is not supported.',
+       ),
        super(
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
@@ -341,6 +345,7 @@ class TextFormField extends FormField<String> {
 
 class _TextFormFieldState extends FormFieldState<String> {
   RestorableTextEditingController? _controller;
+  late final String? _initialValue;
 
   TextEditingController get _effectiveController => _textFormField.controller ?? _controller!.value;
 
@@ -382,6 +387,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     } else {
       _textFormField.controller!.addListener(_handleControllerChanged);
     }
+    _initialValue = _textFormField.initialValue ?? _textFormField.controller?.text;
   }
 
   @override
@@ -426,7 +432,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController.value = TextEditingValue(text: widget.initialValue ?? '');
+    _effectiveController.value = TextEditingValue(text: _initialValue ?? '');
     super.reset();
     _textFormField.onChanged?.call(_effectiveController.text);
   }

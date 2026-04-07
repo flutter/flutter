@@ -249,7 +249,7 @@ abstract class TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    delegate.pasteText(SelectionChangedCause.toolbar);
+    await delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
   /// Call [TextSelectionDelegate.selectAll] to set the current selection to
@@ -2056,16 +2056,21 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
   Widget build(BuildContext context) {
     final Rect handleRect = _getHandleRect(widget.type, widget.preferredLineHeight);
 
-    // Make sure the GestureDetector is big enough to be easily interactive.
-    final Rect interactiveRect = handleRect.expandToInclude(
-      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension / 2),
-    );
-    final padding = RelativeRect.fromLTRB(
-      math.max((interactiveRect.width - handleRect.width) / 2, 0),
-      math.max((interactiveRect.height - handleRect.height) / 2, 0),
-      math.max((interactiveRect.width - handleRect.width) / 2, 0),
-      math.max((interactiveRect.height - handleRect.height) / 2, 0),
-    );
+    // Make sure the GestureDetector is big enough to be easily interactive if
+    // the handleRect is not empty.
+    final Rect interactiveRect = handleRect.isEmpty
+        ? handleRect
+        : handleRect.expandToInclude(
+            Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension / 2),
+          );
+    final RelativeRect padding = interactiveRect.isEmpty
+        ? RelativeRect.fill
+        : RelativeRect.fromLTRB(
+            math.max((interactiveRect.width - handleRect.width) / 2, 0),
+            math.max((interactiveRect.height - handleRect.height) / 2, 0),
+            math.max((interactiveRect.width - handleRect.width) / 2, 0),
+            math.max((interactiveRect.height - handleRect.height) / 2, 0),
+          );
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
