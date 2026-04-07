@@ -225,12 +225,11 @@ if (enable_ios_unittests) {
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [ ":concurrency_test_config" ]
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
-      "framework/Source/SwiftStrictConcurrencyTest.swift",
     ]
 
     frameworks = [ "XCTest.framework" ]
