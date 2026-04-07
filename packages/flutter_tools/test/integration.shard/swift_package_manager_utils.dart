@@ -53,10 +53,11 @@ class SwiftPackageManagerUtils {
     required String platform,
     required List<String> options,
     bool usesSwiftPackageManager = false,
+    String? name,
   }) async {
     final appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
-    final appName = '${platform}_${appTemplateType}_app';
+    final String appName = name ?? '${platform}_${appTemplateType}_app';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -224,11 +225,12 @@ class SwiftPackageManagerUtils {
     String workingDirectory, {
     required String platform,
     bool usesSwiftPackageManager = false,
+    String? name,
   }) async {
     final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
-    final pluginName = '${platform}_${dependencyManager}_plugin';
+    final String pluginName = name ?? '${platform}_${dependencyManager}_plugin';
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -253,12 +255,48 @@ class SwiftPackageManagerUtils {
       fileSystem.path.join(workingDirectory, pluginName),
     );
 
+    final String pluginClassName = pluginName
+        .split('_')
+        .map((String part) => _capitalize(part))
+        .join();
     return SwiftPackageManagerPlugin(
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
-      className: '${_capitalize(platform)}${_capitalize(dependencyManager)}Plugin',
+      className: pluginClassName,
     );
+  }
+
+  static Future<Directory> createPackage(
+    String flutterBin,
+    String workingDirectory,
+    String name, {
+    String? template = 'package',
+  }) async {
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'create',
+      '--org',
+      'io.flutter.devicelab',
+      '--template=$template',
+      name,
+    ], workingDirectory: workingDirectory);
+
+    expect(
+      result.exitCode,
+      0,
+      reason:
+          'Failed to create native asset package: \n'
+          'stdout: \n${result.stdout}\n'
+          'stderr: \n${result.stderr}\n',
+    );
+
+    final Directory assetDirectory = fileSystem.directory(
+      fileSystem.path.join(workingDirectory, name),
+    );
+
+    return assetDirectory;
   }
 
   /// Converts a plugin from SwiftPM structure to legacy CocoaPods structure.
@@ -318,6 +356,21 @@ class SwiftPackageManagerUtils {
       pubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  ${plugin.pluginName}:\n    path: ${plugin.pluginPath}\n',
+      ),
+    );
+  }
+
+  static void addNativeAssetDependency({
+    required String name,
+    required String path,
+    required String appDirectoryPath,
+  }) {
+    final File pubspec = fileSystem.file(fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'));
+    final String pubspecContent = pubspec.readAsStringSync();
+    pubspec.writeAsStringSync(
+      pubspecContent.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  $name:\n    path: $path\n',
       ),
     );
   }
