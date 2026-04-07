@@ -12,9 +12,30 @@
 
 namespace impeller {
 
-class UberSDFGeometry {
+class UberSDFGeometry final : public Geometry {
  public:
-  static std::unique_ptr<Geometry> Make(const UberSDFParameters& params);
+  explicit UberSDFGeometry(UberSDFParameters params);
+
+  ~UberSDFGeometry() override;
+
+  // |Geometry|
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) const override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  // |Geometry|
+  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+
+  // |Geometry|
+  bool IsAxisAlignedRect() const override;
+
+ private:
+  std::unique_ptr<Geometry> CreateUnderlyingGeometry() const;
+
+  UberSDFParameters params_;
 };
 
 }  // namespace impeller

@@ -43,15 +43,15 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info = {};
   frag_info.type =
-      params_.GetType() == UberSDFParameters::Type::kCircle ? 0.0f : 1.0f;
-  frag_info.color = params_.GetColor().WithAlpha(params_.GetColor().alpha *
-                                                 GetOpacityFactor());
-  frag_info.center = params_.GetCenter();
-  frag_info.size = params_.GetSize();
-  frag_info.stroked = params_.GetStroke() ? 1.0f : 0.0f;
-  if (params_.GetStroke()) {
-    frag_info.stroke_width = params_.GetStroke()->width;
-    switch (params_.GetStroke()->join) {
+      params_.type == UberSDFParameters::Type::kCircle ? 0.0f : 1.0f;
+  frag_info.color =
+      params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
+  frag_info.center = params_.center;
+  frag_info.size = params_.size;
+  frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
+  if (params_.stroke) {
+    frag_info.stroke_width = params_.stroke->width;
+    switch (params_.stroke->join) {
       case Join::kMiter:
         frag_info.stroke_join = 0.0f;
         break;
@@ -99,12 +99,12 @@ const Geometry* UberSDFContents::GetGeometry() const {
 }
 
 Color UberSDFContents::GetColor() const {
-  return params_.GetColor();
+  return params_.color;
 }
 
 bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
-  params_.SetColor(color_filter_proc(params_.GetColor()));
+  params_.color = color_filter_proc(params_.color);
   return true;
 }
 

@@ -16,8 +16,7 @@
 
 namespace impeller {
 
-class UberSDFParameters {
- public:
+struct UberSDFParameters {
   static constexpr Scalar kAntialiasPadding = 1.0f;
 
   enum class Type {
@@ -34,26 +33,11 @@ class UberSDFParameters {
                                       Scalar radius,
                                       std::optional<StrokeParameters> stroke);
 
-  Type GetType() const { return type_; }
-  Color GetColor() const { return color_; }
-  Point GetCenter() const { return center_; }
-  Point GetSize() const { return size_; }
-  std::optional<StrokeParameters> GetStroke() const { return stroke_; }
-
-  void SetColor(Color color) { color_ = color; }
-
- private:
-  UberSDFParameters(Type type,
-                    Color color,
-                    Point center,
-                    Point size,
-                    std::optional<StrokeParameters> stroke);
-
-  Type type_;
-  Color color_;
-  Point center_;
-  Point size_;
-  std::optional<StrokeParameters> stroke_;
+  Type type;
+  Color color;
+  Point center;
+  Point size;
+  std::optional<StrokeParameters> stroke;
 };
 
 }  // namespace impeller

@@ -25,8 +25,11 @@ UberSDFParameters UberSDFParameters::MakeRect(
                 {.width = stroke->width, .join = Join::kBevel}))
           : stroke;
 
-  return UberSDFParameters(Type::kRect, color, rect.GetCenter(), size,
-                           adjusted_stroke);
+  return UberSDFParameters{.type = Type::kRect,
+                           .color = color,
+                           .center = rect.GetCenter(),
+                           .size = size,
+                           .stroke = adjusted_stroke};
 }
 
 UberSDFParameters UberSDFParameters::MakeCircle(
@@ -37,18 +40,11 @@ UberSDFParameters UberSDFParameters::MakeCircle(
   // Size x value is the radius of the circle, y value is ignored.
   Point size = Point(radius, 0.0f);
 
-  return UberSDFParameters(Type::kCircle, color, center, size, stroke);
+  return UberSDFParameters{.type = Type::kCircle,
+                           .color = color,
+                           .center = center,
+                           .size = size,
+                           .stroke = stroke};
 }
-
-UberSDFParameters::UberSDFParameters(Type type,
-                                     Color color,
-                                     Point center,
-                                     Point size,
-                                     std::optional<StrokeParameters> stroke)
-    : type_(type),
-      color_(color),
-      center_(center),
-      size_(size),
-      stroke_(stroke) {}
 
 }  // namespace impeller

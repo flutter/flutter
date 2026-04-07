@@ -834,7 +834,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
             : std::nullopt);
-    auto geometry = UberSDFGeometry::Make(params);
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
     auto contents = UberSDFContents::Make(params, std::move(geometry));
 
     const Geometry* geom = contents->GetGeometry();
@@ -1034,7 +1034,7 @@ void Canvas::DrawCircle(const Point& center,
         /*stroke=*/paint.style == Paint::Style::kStroke
             ? std::make_optional(paint.stroke)
             : std::nullopt);
-    auto geometry = UberSDFGeometry::Make(params);
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
     auto contents = UberSDFContents::Make(params, std::move(geometry));
 
     Entity entity;
