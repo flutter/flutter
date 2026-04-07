@@ -213,6 +213,10 @@ public class FlutterAssembleToolHelper {
       env: env,
       fileManager: fileManager
     )
+
+    FlutterToolHelper.xcodeNote(
+      message: "Verification complete."
+    )
   }
 
   /// Verifies the Flutter framework's build mode.
@@ -421,23 +425,6 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
-
-      let cocoaPodsPath = "\(packagePath)/FlutterPluginRegistrant/Frameworks/CocoaPods"
-      if fileManager.fileExists(atPath: cocoaPodsPath) {
-        let messages =
-          [
-            "CocoaPod plugin framework were detected in the FlutterNativeIntegration package that were built with a different build mode.",
-            "To switch to the correct build mode, please re-run or complete one of the following actions before building:",
-          ]
-          + pluginInstructions(
-            targetBuildMode: targetBuildMode,
-            packagePath: packagePath
-          )
-        for message in messages {
-          FlutterToolHelper.xcodeWarning(message: message)
-        }
-      }
-
       updated = true
     }
     if updated {
