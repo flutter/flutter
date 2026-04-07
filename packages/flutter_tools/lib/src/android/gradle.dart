@@ -23,7 +23,6 @@ import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -1052,52 +1051,9 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return null;
     }
 
-    for (final envPath in <String?>[
-      _platform.environment[kAndroidNdkHome],
-      _platform.environment[kAndroidNdkPath],
-      _platform.environment[kAndroidNdkRoot],
-    ]) {
-      if (envPath == null || envPath.isEmpty) {
-        continue;
-      }
-      final Directory envDirectory = _fileSystem.directory(envPath);
-      if (_isExistingAndroidNdkDirectory(envDirectory)) {
-        return envDirectory.basename;
-      }
-    }
-
-    final Directory ndkRoot = androidSdk.directory.childDirectory('ndk');
-    if (!ndkRoot.existsSync()) {
-      return null;
-    }
-
-    final List<Directory> ndkDirectories = ndkRoot.listSync().whereType<Directory>().toList();
-    ndkDirectories.sort((Directory a, Directory b) {
-      Version? aVersion;
-      Version? bVersion;
-      try {
-        aVersion = Version.parse(a.basename);
-      } on FormatException {
-        // Ignore directories that are not valid version strings.
-      }
-      try {
-        bVersion = Version.parse(b.basename);
-      } on FormatException {
-        // Ignore directories that are not valid version strings.
-      }
-      if (aVersion == null && bVersion == null) {
-        return 0;
-      }
-      if (aVersion == null) {
-        return 1;
-      }
-      if (bVersion == null) {
-        return -1;
-      }
-      return bVersion.compareTo(aVersion);
-    });
-
-    for (final ndkDirectory in ndkDirectories) {
+    for (final Directory ndkDirectory in androidSdk.getNdkDirectoriesInResolutionOrder(
+      platform: _platform,
+    )) {
       if (_isExistingAndroidNdkDirectory(ndkDirectory)) {
         return ndkDirectory.basename;
       }

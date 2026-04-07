@@ -353,64 +353,67 @@ class AndroidSdk {
   /// 5. Look for the default install location inside the Android SDK:
   ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
   ///    newest.
+  Iterable<Directory> getNdkDirectoriesInResolutionOrder({Platform? platform, Config? config}) sync* {
+    platform ??= globals.platform;
+    config ??= globals.config;
+
+    String? androidNdkHomeDir;
+    if (config.containsKey('android-ndk')) {
+      androidNdkHomeDir = config.getValue('android-ndk') as String?;
+    } else if (platform.environment.containsKey(kAndroidNdkHome)) {
+      androidNdkHomeDir = platform.environment[kAndroidNdkHome];
+    } else if (platform.environment.containsKey(kAndroidNdkPath)) {
+      androidNdkHomeDir = platform.environment[kAndroidNdkPath];
+    } else if (platform.environment.containsKey(kAndroidNdkRoot)) {
+      androidNdkHomeDir = platform.environment[kAndroidNdkRoot];
+    }
+    if (androidNdkHomeDir != null) {
+      yield directory.fileSystem.directory(androidNdkHomeDir);
+    }
+
+    // Look for the default install location of the NDK inside the Android
+    // SDK when installed through `sdkmanager` or Android studio.
+    final Directory ndk = directory.childDirectory('ndk');
+    if (!ndk.existsSync()) {
+      return;
+    }
+    final List<Version> ndkVersions =
+        ndk
+            .listSync()
+            .map((FileSystemEntity entity) {
+              try {
+                return Version.parse(entity.basename);
+              } on Exception {
+                return null;
+              }
+            })
+            .whereType<Version>()
+            .toList()
+          // Use latest NDK first.
+          ..sort((Version a, Version b) => -a.compareTo(b));
+    for (final ndkVersion in ndkVersions) {
+      yield ndk.childDirectory(ndkVersion.toString());
+    }
+  }
+
   String? getNdkBinaryPath(String binaryName, {Platform? platform, Config? config}) {
     platform ??= globals.platform;
     config ??= globals.config;
-    Directory? findAndroidNdkHomeDir() {
-      String? androidNdkHomeDir;
-      if (config!.containsKey('android-ndk')) {
-        androidNdkHomeDir = config.getValue('android-ndk') as String?;
-      } else if (platform!.environment.containsKey(kAndroidNdkHome)) {
-        androidNdkHomeDir = platform.environment[kAndroidNdkHome];
-      } else if (platform.environment.containsKey(kAndroidNdkPath)) {
-        androidNdkHomeDir = platform.environment[kAndroidNdkPath];
-      } else if (platform.environment.containsKey(kAndroidNdkRoot)) {
-        androidNdkHomeDir = platform.environment[kAndroidNdkRoot];
+    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder(
+      platform: platform,
+      config: config,
+    )) {
+      final File executable = androidNdkHomeDir
+          .childDirectory('toolchains')
+          .childDirectory('llvm')
+          .childDirectory('prebuilt')
+          .childDirectory(_llvmHostDirectoryName[platform.operatingSystem]!)
+          .childDirectory('bin')
+          .childFile(binaryName);
+      if (executable.existsSync()) {
+        // LLVM missing in this NDK version.
+        return executable.path;
       }
-      if (androidNdkHomeDir != null) {
-        return directory.fileSystem.directory(androidNdkHomeDir);
-      }
-
-      // Look for the default install location of the NDK inside the Android
-      // SDK when installed through `sdkmanager` or Android studio.
-      final Directory ndk = directory.childDirectory('ndk');
-      if (!ndk.existsSync()) {
-        return null;
-      }
-      final List<Version> ndkVersions =
-          ndk
-              .listSync()
-              .map((FileSystemEntity entity) {
-                try {
-                  return Version.parse(entity.basename);
-                } on Exception {
-                  return null;
-                }
-              })
-              .whereType<Version>()
-              .toList()
-            // Use latest NDK first.
-            ..sort((Version a, Version b) => -a.compareTo(b));
-      if (ndkVersions.isEmpty) {
-        return null;
-      }
-      return ndk.childDirectory(ndkVersions.first.toString());
-    }
-
-    final Directory? androidNdkHomeDir = findAndroidNdkHomeDir();
-    if (androidNdkHomeDir == null) {
-      return null;
-    }
-    final File executable = androidNdkHomeDir
-        .childDirectory('toolchains')
-        .childDirectory('llvm')
-        .childDirectory('prebuilt')
-        .childDirectory(_llvmHostDirectoryName[platform.operatingSystem]!)
-        .childDirectory('bin')
-        .childFile(binaryName);
-    if (executable.existsSync()) {
-      // LLVM missing in this NDK version.
-      return executable.path;
     }
     return null;
   }
