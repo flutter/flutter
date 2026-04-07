@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 import 'rendering_test_utils.dart';
 
-
 class SpyFixedExtentScrollController extends FixedExtentScrollController {
   /// Override for test visibility only.
   @override
