@@ -489,6 +489,55 @@ void main() {
     );
 
     test(
+      'should correctly split multiple Set-Cookie headers when cookies contain Expires dates with commas',
+      () async {
+        HttpServer? mockServer;
+        try {
+          mockServer = await shelf_io.serve(
+            (Request request) => Response.ok(
+              'login success',
+              headers: <String, Object>{
+                'set-cookie': <String>[
+                  'sessionid=xyz; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Path=/; HttpOnly; SameSite=Lax',
+                  'csrftoken=abc; Expires=Mon, 01 Jan 2025 00:00:00 GMT; Path=/; SameSite=Lax',
+                ],
+              },
+            ),
+            'localhost',
+            0,
+          );
+          final int port = mockServer.port;
+
+          final rules = <ProxyRule>[
+            PrefixProxyRule(prefix: '/api/', target: 'http://localhost:$port/'),
+          ];
+
+          final Middleware middleware = proxyMiddleware(rules, logger);
+
+          FutureOr<Response> innerHandler(Request request) =>
+              Response.ok('Inner Handler');
+
+          final request = Request('POST', Uri.parse('http://localhost:8080/api/login'));
+          final Response response = await middleware(innerHandler)(request);
+
+          expect(response.statusCode, 200);
+          final List<String> cookies = response.headersAll['set-cookie'] ?? <String>[];
+          expect(cookies, hasLength(2));
+          expect(
+            cookies,
+            contains('sessionid=xyz; Expires=Wed, 09 Jun 2021 10:18:14 GMT; Path=/; HttpOnly; SameSite=Lax'),
+          );
+          expect(
+            cookies,
+            contains('csrftoken=abc; Expires=Mon, 01 Jan 2025 00:00:00 GMT; Path=/; SameSite=Lax'),
+          );
+        } finally {
+          await mockServer?.close();
+        }
+      },
+    );
+
+    test(
       'should preserve a single Set-Cookie header unchanged',
       () async {
         HttpServer? mockServer;
