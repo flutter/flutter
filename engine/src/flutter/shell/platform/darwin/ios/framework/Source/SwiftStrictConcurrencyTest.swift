@@ -5,6 +5,8 @@
 import Foundation
 import UIKit
 
+import InternalFlutterSwift
+
 /// This test file verifies code compiles.
 
 /// MARK: - @MainActor classes
