@@ -250,6 +250,7 @@ class SkwasmCanvas implements LayerCanvas {
       final ui.Image downscaledImage = getOrCreateDownscaledImage(
         box: (image as SkwasmImage).box,
         originalImage: image,
+        src: src,
         targetWidth: targetWidth,
         targetHeight: targetHeight,
         rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {

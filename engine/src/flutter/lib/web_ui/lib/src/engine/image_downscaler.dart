@@ -19,6 +19,8 @@ typedef RawDrawImageRect =
 /// [ui.FilterQuality.medium].
 bool shouldIterativelyDownscale(ui.Rect src, ui.Rect dst, ui.Paint paint) {
   return (dst.width < src.width / 2 && dst.height < src.height / 2) &&
+      dst.width >= 1 &&
+      dst.height >= 1 &&
       paint.filterQuality.index >= ui.FilterQuality.medium.index;
 }
 
@@ -35,26 +37,26 @@ class DownscaledImageCache {
   // The key is the ref-counting box of the image (CkCountedRef or CountedRef).
   // We use the box as the key so that cloned images (which share the same box)
   // can use the same cached downscaled image.
-  final Map<Object, Map<(int, int), ui.Image>> _cache = {};
+  final Map<Object, Map<(ui.Rect, int, int), ui.Image>> _cache = {};
 
-  /// Gets a cached downscaled image for the given [box] and target size.
-  ui.Image? get(Object box, int width, int height) {
-    return _cache[box]?[(width, height)];
+  /// Gets a cached downscaled image for the given [box], source rect, and target size.
+  ui.Image? get(Object box, ui.Rect src, int width, int height) {
+    return _cache[box]?[(src, width, height)];
   }
 
-  /// Puts a downscaled image into the cache for the given [box] and target size.
-  void put(Object box, int width, int height, ui.Image image) {
-    final Map<(int, int), ui.Image> sizes = _cache.putIfAbsent(box, () => {});
-    final ui.Image? oldImage = sizes[(width, height)];
+  /// Puts a downscaled image into the cache for the given [box], source rect, and target size.
+  void put(Object box, ui.Rect src, int width, int height, ui.Image image) {
+    final Map<(ui.Rect, int, int), ui.Image> sizes = _cache.putIfAbsent(box, () => {});
+    final ui.Image? oldImage = sizes[(src, width, height)];
     if (oldImage != null && oldImage != image) {
       oldImage.dispose();
     }
-    sizes[(width, height)] = image;
+    sizes[(src, width, height)] = image;
   }
 
   /// Disposes all cached downscaled images for the given [box].
   void disposeForBox(Object box) {
-    final Map<(int, int), ui.Image>? sizes = _cache.remove(box);
+    final Map<(ui.Rect, int, int), ui.Image>? sizes = _cache.remove(box);
     if (sizes != null) {
       for (final ui.Image image in sizes.values) {
         image.dispose();
@@ -71,24 +73,26 @@ class DownscaledImageCache {
 ui.Image getOrCreateDownscaledImage({
   required Object box,
   required ui.Image originalImage,
+  required ui.Rect src,
   required int targetWidth,
   required int targetHeight,
   required RawDrawImageRect rawDraw,
 }) {
   final DownscaledImageCache cache = DownscaledImageCache.instance;
-  final ui.Image? cached = cache.get(box, targetWidth, targetHeight);
+  final ui.Image? cached = cache.get(box, src, targetWidth, targetHeight);
   if (cached != null) {
     return cached;
   }
 
   final ui.Image downscaled = createSteppedDownscaledImage(
     originalImage: originalImage,
+    src: src,
     targetWidth: targetWidth,
     targetHeight: targetHeight,
     rawDraw: rawDraw,
   );
 
-  cache.put(box, targetWidth, targetHeight, downscaled);
+  cache.put(box, src, targetWidth, targetHeight, downscaled);
   return downscaled;
 }
 
@@ -100,22 +104,20 @@ ui.Image getOrCreateDownscaledImage({
 @visibleForTesting
 ui.Image createSteppedDownscaledImage({
   required ui.Image originalImage,
+  required ui.Rect src,
   required int targetWidth,
   required int targetHeight,
   required RawDrawImageRect rawDraw,
 }) {
-  assert(targetWidth < originalImage.width / 2 && targetHeight < originalImage.height / 2);
+  assert(targetWidth < src.width / 2 && targetHeight < src.height / 2);
   var currentImage = originalImage;
-  int currentWidth = originalImage.width;
-  int currentHeight = originalImage.height;
+  var currentSrc = src;
 
-  // We use FilterQuality.medium for the stepped downscaling.
-  // FilterQuality.medium enables mipmapping/bilinear filtering.
   final List<ui.Image> intermediateImages = [];
 
-  while (currentWidth > targetWidth * 2) {
-    final int nextWidth = currentWidth ~/ 2;
-    final int nextHeight = currentHeight ~/ 2;
+  while (currentSrc.width > targetWidth * 2) {
+    final int nextWidth = currentSrc.width ~/ 2;
+    final int nextHeight = currentSrc.height ~/ 2;
 
     final recorder = ui.PictureRecorder();
     final canvas = ui.Canvas(recorder);
@@ -123,7 +125,7 @@ ui.Image createSteppedDownscaledImage({
     rawDraw(
       canvas,
       currentImage,
-      ui.Rect.fromLTWH(0, 0, currentWidth.toDouble(), currentHeight.toDouble()),
+      currentSrc,
       ui.Rect.fromLTWH(0, 0, nextWidth.toDouble(), nextHeight.toDouble()),
     );
 
@@ -134,38 +136,36 @@ ui.Image createSteppedDownscaledImage({
     intermediateImages.add(nextImage);
 
     currentImage = nextImage;
-    currentWidth = nextWidth;
-    currentHeight = nextHeight;
+    currentSrc = ui.Rect.fromLTWH(0, 0, nextWidth.toDouble(), nextHeight.toDouble());
   }
 
-  // Final step to the exact target size if needed.
-  if (currentWidth != targetWidth || currentHeight != targetHeight) {
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-
-    rawDraw(
-      canvas,
-      currentImage,
-      ui.Rect.fromLTWH(0, 0, currentWidth.toDouble(), currentHeight.toDouble()),
-      ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
-    );
-
-    final ui.Picture picture = recorder.endRecording();
-    final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
-    picture.dispose();
-
-    for (final img in intermediateImages) {
-      img.dispose();
-    }
-
-    return finalImage;
-  } else {
-    // If we reached the target size exactly in the loop, the last image
-    // in intermediateImages is the result. All others can be disposed.
+  // Optimization: If we reached the target size exactly in the loop, we can
+  // return the last intermediate image directly.
+  if (currentSrc.width.toInt() == targetWidth && currentSrc.height.toInt() == targetHeight) {
     final ui.Image result = intermediateImages.removeLast();
     for (final img in intermediateImages) {
       img.dispose();
     }
     return result;
   }
+
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+
+  rawDraw(
+    canvas,
+    currentImage,
+    currentSrc,
+    ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
+  );
+
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
+  picture.dispose();
+
+  for (final img in intermediateImages) {
+    img.dispose();
+  }
+
+  return finalImage;
 }
