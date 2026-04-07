@@ -214,17 +214,39 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
+  config("concurrency_test_config") {
+    configs = [ "//flutter/shell/platform/darwin/common:test_config" ]
+
+    swiftflags = [
+      "-strict-concurrency=complete",
+      "-warnings-as-errors",
+    ]
+  }
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    configs += [ ":concurrency_test_config" ]
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
-      "framework/Source/SwiftStrictConcurrencyTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
+      "framework/Source/SwiftStrictConcurrencyTest.swift",
     ]
+
     frameworks = [ "XCTest.framework" ]
+    deps = [
+      ":flutter_framework_source",
+      ":ios_swift_strict_concurrency_test",
+    ]
+  }
+
+  source_set("ios_swift_strict_concurrency_test") {
+    testonly = true
+
+    visibility = [ ":*" ]
+    configs += [ ":concurrency_test_config" ]
+    sources = [ "framework/Source/SwiftStrictConcurrencyTest.swift" ]
+
     deps = [ ":flutter_framework_source" ]
   }
 
