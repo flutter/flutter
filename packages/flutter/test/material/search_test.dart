@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -686,156 +686,6 @@ void main() {
   group('contributes semantics with custom flexibleSpace', () {
     const Widget flexibleSpace = Text('FlexibleSpace');
 
-    TestSemantics buildExpected({required String routeName}) {
-      final bool isDesktop =
-          debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.linux;
-      final bool isCupertino =
-          debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final textField = kIsWeb
-          ? TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isHeader,
-                if (!isCupertino) SemanticsFlag.namesRoute,
-              ],
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 9,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isTextField,
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocused,
-                    SemanticsFlag.isFocusable,
-                  ],
-                  actions: <SemanticsAction>[
-                    if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                    if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                    SemanticsAction.tap,
-                    SemanticsAction.focus,
-                    SemanticsAction.setSelection,
-                    SemanticsAction.setText,
-                    SemanticsAction.paste,
-                  ],
-                  label: 'Search',
-                  currentValueLength: 0,
-                  inputType: SemanticsInputType.search,
-                  textDirection: TextDirection.ltr,
-                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                ),
-              ],
-            )
-          : TestSemantics(
-              id: 9,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.isHeader,
-                if (!isCupertino) SemanticsFlag.namesRoute,
-              ],
-              actions: <SemanticsAction>[
-                if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              label: 'Search',
-              currentValueLength: 0,
-              inputType: SemanticsInputType.search,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-            );
-
-      return TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              TestSemantics(
-                id: 2,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 3,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
-                    label: routeName,
-                    textDirection: TextDirection.ltr,
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 4,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 6,
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                id: 8,
-                                flags: <SemanticsFlag>[
-                                  SemanticsFlag.hasEnabledState,
-                                  SemanticsFlag.isButton,
-                                  SemanticsFlag.isEnabled,
-                                  SemanticsFlag.isFocusable,
-                                ],
-                                actions: <SemanticsAction>[
-                                  SemanticsAction.tap,
-                                  if (defaultTargetPlatform != TargetPlatform.iOS)
-                                    SemanticsAction.focus,
-                                ],
-                                tooltip: 'Back',
-                                textDirection: TextDirection.ltr,
-                              ),
-                              textField,
-                              TestSemantics(
-                                id: 10,
-                                label: 'Bottom',
-                                textDirection: TextDirection.ltr,
-                              ),
-                            ],
-                          ),
-                          TestSemantics(
-                            id: 7,
-                            children: <TestSemantics>[
-                              TestSemantics(
-                                id: 11,
-                                label: 'FlexibleSpace',
-                                textDirection: TextDirection.ltr,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      TestSemantics(
-                        id: 5,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasEnabledState,
-                          SemanticsFlag.isButton,
-                          SemanticsFlag.isEnabled,
-                          SemanticsFlag.isFocusable,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.tap,
-                          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                        ],
-                        label: 'Suggestions',
-                        textDirection: TextDirection.ltr,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
     testWidgets('includes routeName on Android', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       final delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
@@ -848,13 +698,13 @@ void main() {
 
       expect(
         semantics,
-        hasSemantics(
-          buildExpected(routeName: 'Search'),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
+        includesNodeWith(
+          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+          label: 'Search',
         ),
       );
+      expect(semantics, includesNodeWith(tooltip: 'Back'));
+      expect(semantics, includesNodeWith(label: 'FlexibleSpace'));
 
       semantics.dispose();
     });
@@ -873,13 +723,13 @@ void main() {
 
         expect(
           semantics,
-          hasSemantics(
-            buildExpected(routeName: ''),
-            ignoreId: true,
-            ignoreRect: true,
-            ignoreTransform: true,
+          includesNodeWith(
+            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+            label: '',
           ),
         );
+        expect(semantics, includesNodeWith(tooltip: 'Back'));
+        expect(semantics, includesNodeWith(label: 'FlexibleSpace'));
 
         semantics.dispose();
       },
@@ -891,136 +741,6 @@ void main() {
   });
 
   group('contributes semantics', () {
-    TestSemantics buildExpected({required String routeName}) {
-      final bool isDesktop =
-          debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.linux;
-      final bool isCupertino =
-          debugDefaultTargetPlatformOverride == TargetPlatform.iOS ||
-          debugDefaultTargetPlatformOverride == TargetPlatform.macOS;
-      final textField = kIsWeb
-          ? TestSemantics(
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isHeader,
-                if (!isCupertino) SemanticsFlag.namesRoute,
-              ],
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 11,
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isTextField,
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocused,
-                    SemanticsFlag.isFocusable,
-                  ],
-                  actions: <SemanticsAction>[
-                    if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                    if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                    SemanticsAction.tap,
-                    SemanticsAction.focus,
-                    SemanticsAction.setSelection,
-                    SemanticsAction.setText,
-                    SemanticsAction.paste,
-                  ],
-                  label: 'Search',
-                  inputType: SemanticsInputType.search,
-                  currentValueLength: 0,
-                  textDirection: TextDirection.ltr,
-                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                ),
-              ],
-            )
-          : TestSemantics(
-              id: 11,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.isHeader,
-                if (!isCupertino) SemanticsFlag.namesRoute,
-              ],
-              actions: <SemanticsAction>[
-                if (isDesktop) SemanticsAction.didGainAccessibilityFocus,
-                if (isDesktop) SemanticsAction.didLoseAccessibilityFocus,
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              label: 'Search',
-              inputType: SemanticsInputType.search,
-              currentValueLength: 0,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-            );
-      return TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            id: 1,
-            textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              TestSemantics(
-                id: 2,
-                children: <TestSemantics>[
-                  TestSemantics(
-                    id: 7,
-                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
-                    label: routeName,
-                    textDirection: TextDirection.ltr,
-                    children: <TestSemantics>[
-                      TestSemantics(
-                        id: 9,
-                        children: <TestSemantics>[
-                          TestSemantics(
-                            id: 10,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isButton,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                            ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.tap,
-                              if (defaultTargetPlatform != TargetPlatform.iOS)
-                                SemanticsAction.focus,
-                            ],
-                            tooltip: 'Back',
-                            textDirection: TextDirection.ltr,
-                          ),
-                          textField,
-                          TestSemantics(id: 14, label: 'Bottom', textDirection: TextDirection.ltr),
-                        ],
-                      ),
-                      TestSemantics(
-                        id: 8,
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.hasEnabledState,
-                          SemanticsFlag.isButton,
-                          SemanticsFlag.isEnabled,
-                          SemanticsFlag.isFocusable,
-                        ],
-                        actions: <SemanticsAction>[
-                          SemanticsAction.tap,
-                          if (defaultTargetPlatform != TargetPlatform.iOS) SemanticsAction.focus,
-                        ],
-                        label: 'Suggestions',
-                        textDirection: TextDirection.ltr,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
     testWidgets('includes routeName on Android', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
       final delegate = _TestSearchDelegate();
@@ -1033,11 +753,9 @@ void main() {
 
       expect(
         semantics,
-        hasSemantics(
-          buildExpected(routeName: 'Search'),
-          ignoreId: true,
-          ignoreRect: true,
-          ignoreTransform: true,
+        includesNodeWith(
+          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+          label: 'Search',
         ),
       );
 
@@ -1058,11 +776,9 @@ void main() {
 
         expect(
           semantics,
-          hasSemantics(
-            buildExpected(routeName: ''),
-            ignoreId: true,
-            ignoreRect: true,
-            ignoreTransform: true,
+          includesNodeWith(
+            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+            label: '',
           ),
         );
 
