@@ -13,9 +13,12 @@ class InfiniteScrollApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Infinite Scrolling Flutter',
-      home: InfiniteScrollList(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Infinite Scrolling ListView (Static Data)')),
+        body: const InfiniteScrollList(),
+      ),
     );
   }
 }
@@ -46,7 +49,7 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
 
   void _loadMoreData() {
     setState(() {
-      final List<String> newItems = List.generate(itemsPerPage, (i) {
+      final List<String> newItems = List.generate(itemsPerPage, (int i) {
         return staticData[i % staticData.length];
       });
       items.addAll(newItems);
@@ -55,27 +58,19 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Infinite Scrolling ListView (Static Data)'),
-        ),
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (scrollInfo.metrics.pixels >=
-                scrollInfo.metrics.maxScrollExtent - 50) {
-              _loadMoreData();
-              return true;
-            }
-            return false;
-          },
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return ListTile(title: Text(items[index]));
-            },
-          ),
-        ),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 50) {
+          _loadMoreData();
+          return true;
+        }
+        return false;
+      },
+      child: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          return ListTile(title: Text(items[index]));
+        },
       ),
     );
   }
