@@ -1,7 +1,7 @@
 ## Flutter Bad Builds Triage Guidelines (for Googlers)
 
-1. If you encounter a serious P0 flutter production Google3 or a GitHub issue, triage the issue and check if the issue is already part of Flutter's bad build [tracker](http://go/flutter-bad-builds).
-If the issue is not listed in Flutter bad builds [tracker](http://go/flutter-bad-builds), check that it meets the below criteria to qualify for bad builds visibility -
+1. If you encounter a serious P0 flutter production Google3 or a GitHub issue, triage the issue and check if the issue is already part of Flutter's bad build [tracker](https://goto.google.com/flutter-bad-builds).
+If the issue is not listed in Flutter bad builds [tracker](https://goto.google.com/flutter-bad-builds), check that it meets the below criteria to qualify for bad builds visibility -
    * A P0 bug
    * Can be in any component, Flutter’s component or Flutter user’s component
    * Must be a bug, not a feature request
@@ -10,7 +10,7 @@ If the issue is not listed in Flutter bad builds [tracker](http://go/flutter-bad
 
 2. If there is a buganizer for this already and no GitHub issue, create a GitHub bug in the GitHub repo. Label the GitHub bug with label _a: production_ and _customer: google_.
 
-3. Add following information to Flutter bad builds visibility [tracker](http://go/flutter-bad-builds)
+3. Add following information to Flutter bad builds visibility [tracker](https://goto.google.com/flutter-bad-builds)
    * Issue create date - this can be either buganizer or GitHub issue create date
    * Triaged by - your LDAP
    * Github issue id
