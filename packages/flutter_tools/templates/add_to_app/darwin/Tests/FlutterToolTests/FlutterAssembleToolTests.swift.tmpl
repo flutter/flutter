@@ -68,7 +68,7 @@ func runWithAssemble(
   targetPlatform: FlutterPlatform,
   flutterAppPath: String,
   resolvedAppPath: String,
-  exportEnvPath: String,
+  exportEnvPath: String
 ) async throws {
   let fileManager = MockFileManager()
   let processManager = MockFlutterProcessManager()
@@ -263,7 +263,7 @@ func runInSandboxFailsWhenBuildModeWrong() async throws {
         "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
         "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
       ],
-      fileManager: fileManager,
+      fileManager: fileManager
     )
   }
   #expect(fileManager.symlinksCreated.count == 1)
@@ -616,7 +616,7 @@ func findPlatformFramework(
   frameworkName: String,
   sdkRoot: String,
   platforms: [String],
-  expectedFramework: String,
+  expectedFramework: String
 ) async throws {
   let fileManager = MockFileManager()
   let xcframeworkURL = URL(fileURLWithPath: "/\(frameworkName).xcframework")
