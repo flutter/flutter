@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(InfiniteScrollApp());
+  runApp(const InfiniteScrollApp());
 }
 
 class InfiniteScrollApp extends StatelessWidget {
@@ -13,7 +13,7 @@ class InfiniteScrollApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Infinite Scrolling Flutter',
       home: InfiniteScrollList(),
     );
@@ -31,11 +31,11 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
   final List<String> items = [];
   final int itemsPerPage = 20;
   final List<String> staticData = [
-    "Hello Flutter",
-    "Hello Flutter",
-    "Hello Flutter",
-    "Hello Flutter",
-    "Hello Flutter",
+    'Hello Flutter',
+    'Hello Flutter',
+    'Hello Flutter',
+    'Hello Flutter',
+    'Hello Flutter',
   ];
 
   @override
@@ -46,7 +46,7 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
 
   void _loadMoreData() {
     setState(() {
-      final newItems = List.generate(itemsPerPage, (i) {
+      final List<String> newItems = List.generate(itemsPerPage, (i) {
         return staticData[i % staticData.length];
       });
       items.addAll(newItems);
@@ -58,7 +58,7 @@ class InfiniteScrollListState extends State<InfiniteScrollList> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Infinite Scrolling ListView (Static Data)"),
+          title: const Text('Infinite Scrolling ListView (Static Data)'),
         ),
         body: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
