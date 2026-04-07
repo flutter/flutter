@@ -2572,23 +2572,30 @@ final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
 
-String _getFlutterLicense() {
-  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
-      '// Use of this source code is governed by a BSD-style license that can be\n'
-      '// found in the LICENSE file.\n'
-      '\n';
-}
+const String _kFlutterLicense =
+    '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+    '// Use of this source code is governed by a BSD-style license that can be\n'
+    '// found in the LICENSE file.\n'
+    '\n';
 
-String _removeLicenseIfPresent(String fileContents, String license) {
-  if (fileContents.startsWith(license)) {
-    return fileContents.substring(license.length);
+const String _kFlutterLicenseHtml = '''
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+''';
+
+String _removeLicenseIfPresent(String fileContents) {
+  if (fileContents.startsWith(_kFlutterLicense)) {
+    return fileContents.substring(_kFlutterLicense.length);
+  }
+  if (fileContents.contains(_kFlutterLicenseHtml)) {
+    return fileContents.replaceFirst(_kFlutterLicenseHtml, '');
   }
   return fileContents;
 }
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
-  final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
   final Iterable<Directory> subDirs = Directory(
@@ -2620,7 +2627,7 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
         ); // Substitute template project name
       }
       String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
-      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      appFileContents = _removeLicenseIfPresent(appFileContents);
       if (appFileContents != templateFileContents) {
         int indexOfDifference;
         for (
