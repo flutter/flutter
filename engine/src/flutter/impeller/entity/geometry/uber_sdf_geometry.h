@@ -5,8 +5,6 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_GEOMETRY_UBER_SDF_GEOMETRY_H_
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_UBER_SDF_GEOMETRY_H_
 
-#include <memory>
-
 #include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/geometry/geometry.h"
 
@@ -33,25 +31,10 @@ class UberSDFGeometry final : public Geometry {
   bool IsAxisAlignedRect() const override;
 
  private:
-  // Compute the local bounds of the primitive based on the center and size
-  // and optionally taking into account the expansion due to the stroke width
-  // if the primitive is being stroked.
-  Rect GetExpandedBaseBounds() const;
-
-  // Compute the device bounds of the primitive based on the center and size
-  // and taking into account the expansion due to the stroke width as
-  // well as either expanding (inset == false) or reducing (inset == true)
-  // the bounds by the AA pixel fringe. Some operations need to work on
-  // the full coverage center of the operation, the part that is entirely
-  // inside the edge pixels that may have been reduced by the AA coverage
-  // calculations.
-  Rect GetExpandedDeviceBounds(const Matrix& transform,
-                               bool inset = false) const;
-
-  // Compute the local bounds of the primitive based on the center and size
-  // and taking into account the expansion due to the stroke width. This
-  // version of the bounds will always be outside by the AA pixel padding.
-  Rect GetExpandedLocalBounds(const Matrix& transform) const;
+  // Compute the local bounds of the primitive based on the center and size.
+  // Takes into account stroke width if the primitive is stroked.
+  // Does not take AA fringe into account.
+  Rect GetBaseBounds() const;
 
   UberSDFParameters params_;
 };

@@ -4,8 +4,6 @@
 
 #include "impeller/entity/contents/uber_sdf_parameters.h"
 
-#include <memory>
-
 #include "impeller/geometry/constants.h"
 
 namespace impeller {

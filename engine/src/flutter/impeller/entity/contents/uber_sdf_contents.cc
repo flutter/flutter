@@ -20,6 +20,26 @@ using PipelineBuilderCallback =
 using VS = UberSDFPipeline::VertexShader;
 using FS = UberSDFPipeline::FragmentShader;
 
+Scalar ToShaderType(UberSDFParameters::Type type) {
+  switch (type) {
+    case UberSDFParameters::Type::kCircle:
+      return 0.0f;
+    case UberSDFParameters::Type::kRect:
+      return 1.0f;
+  }
+}
+
+Scalar ToShaderStrokeJoin(Join join) {
+  switch (join) {
+    case Join::kMiter:
+      return 0.0f;
+    case Join::kBevel:
+      return 1.0f;
+    case Join::kRound:
+      return 2.0f;
+  }
+}
+
 }  // namespace
 
 std::unique_ptr<UberSDFContents> UberSDFContents::Make(
@@ -41,28 +61,16 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
-  FS::FragInfo frag_info = {};
-  frag_info.type =
-      params_.type == UberSDFParameters::Type::kCircle ? 0.0f : 1.0f;
+  FS::FragInfo frag_info;
+  frag_info.type = ToShaderType(params_.type);
   frag_info.color =
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
   frag_info.size = params_.size;
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
-  if (params_.stroke) {
-    frag_info.stroke_width = params_.stroke->width;
-    switch (params_.stroke->join) {
-      case Join::kMiter:
-        frag_info.stroke_join = 0.0f;
-        break;
-      case Join::kBevel:
-        frag_info.stroke_join = 1.0f;
-        break;
-      case Join::kRound:
-        frag_info.stroke_join = 2.0f;
-        break;
-    }
-  }
+  frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
+  frag_info.stroke_join =
+      params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPadding;
 
   auto geometry_result =
