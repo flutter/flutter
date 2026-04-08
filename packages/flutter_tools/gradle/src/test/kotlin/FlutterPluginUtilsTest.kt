@@ -10,6 +10,10 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
+import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS
+import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_APPS
+import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
+import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
 import io.mockk.called
@@ -1074,7 +1078,7 @@ class FlutterPluginUtilsTest {
                         """
                         WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
-                        Please migrate your app to Built-in Kotlin using this guide: [link here]
+                        Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
                         
                         """.trimIndent()
                     )
@@ -1170,7 +1174,9 @@ class FlutterPluginUtilsTest {
                         
                         Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
                         If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
-                        an issue against a plugin: [link here]
+                        an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                        
+                        If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                         """.trimIndent()
                     )
                 }
@@ -1263,7 +1269,7 @@ class FlutterPluginUtilsTest {
                         """
                         WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
-                        Please migrate your app to Built-in Kotlin using this guide: [link here]
+                        Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
                         
                         """.trimIndent()
                     )
@@ -1277,7 +1283,9 @@ class FlutterPluginUtilsTest {
                         
                         Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
                         If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
-                        an issue against a plugin: [link here]
+                        an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                        
+                        If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                         """.trimIndent()
                     )
                 }
@@ -1376,7 +1384,7 @@ class FlutterPluginUtilsTest {
                         """
                         WARNING: Your Android app project: app located at: ${appBuildGradleFile.absolutePath}
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
-                        Please migrate your app to Built-in Kotlin using this guide: [link here]
+                        Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
                         
                         """.trimIndent()
                     )
@@ -1390,7 +1398,9 @@ class FlutterPluginUtilsTest {
                         
                         Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
                         If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
-                        an issue against a plugin: [link here]
+                        an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                        
+                        If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                         """.trimIndent()
                     )
                 }
@@ -1564,7 +1574,7 @@ class FlutterPluginUtilsTest {
                         """
                         Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
                         If your project uses Kotlin, ensure KGP is declared in the root plugins block.
-                        For more details check: [link here]
+                        For more details check: $BUILT_IN_KOTLIN_DOCS
                         """.trimIndent()
                     )
                 }

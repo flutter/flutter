@@ -99,7 +99,7 @@ class _SaveableFormState extends State<_SaveableForm> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text(
             'If the field below is unsaved, a confirmation dialog will be shown on back.',
@@ -120,9 +120,9 @@ class _SaveableFormState extends State<_SaveableForm> {
                 await SystemNavigator.pop();
               }
             },
-            autovalidateMode: AutovalidateMode.always,
+            autovalidateMode: .always,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 TextFormField(
                   controller: _controller,
