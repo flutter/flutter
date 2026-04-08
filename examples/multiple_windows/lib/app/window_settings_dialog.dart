@@ -13,8 +13,7 @@ Future<void> showWindowSettingsDialog(
   BuildContext context,
   WindowSettings settings,
 ) async {
-  return await showDialog(
-    barrierDismissible: true,
+  return showDialog(
     context: context,
     builder: (BuildContext ctx) {
       return _WindowSettingsEditor(
@@ -132,7 +131,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           const SizedBox(height: 20),
           Row(
             children: [
-              Text('Decorations'),
+              const Text('Decorations'),
               const SizedBox(width: 10),
               Switch(
                 value: widget.settings.regularDecorated,
@@ -170,7 +169,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           const SizedBox(height: 20),
           Row(
             children: [
-              Text('Decorations'),
+              const Text('Decorations'),
               const SizedBox(width: 10),
               Switch(
                 value: widget.settings.dialogDecorated,
@@ -202,7 +201,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             isExpanded: true,
             value: _parentAnchor,
             items: [
-              for (WindowPositionerAnchor anchor
+              for (final WindowPositionerAnchor anchor
                   in WindowPositionerAnchor.values)
                 DropdownMenuItem(
                   value: anchor,

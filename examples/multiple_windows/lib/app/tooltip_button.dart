@@ -7,9 +7,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
-import 'tooltip_window_content.dart';
+
 import 'element_position_tracker.dart';
 import 'models.dart';
+import 'tooltip_window_content.dart';
 
 class TooltipButton extends StatefulWidget {
   const TooltipButton({super.key, required this.parentController});

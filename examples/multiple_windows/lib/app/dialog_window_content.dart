@@ -6,8 +6,9 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
-import 'models.dart';
 import 'package:flutter/src/widgets/_window.dart';
+
+import 'models.dart';
 
 class DialogWindowContent extends StatelessWidget {
   const DialogWindowContent({super.key, required this.dialogWindowController});
@@ -21,7 +22,7 @@ class DialogWindowContent extends StatelessWidget {
     return FocusScope(
       autofocus: true,
       child: Scaffold(
-        appBar: AppBar(title: Text('Dialog')),
+        appBar: AppBar(title: const Text('Dialog')),
         body: SingleChildScrollView(
           child: Center(
             child: Column(
@@ -58,12 +59,12 @@ class DialogWindowContent extends StatelessWidget {
                 ListenableBuilder(
                   listenable: dialogWindowController,
                   builder: (BuildContext context, Widget? _) {
-                    final dpr = MediaQuery.of(context).devicePixelRatio;
-                    final windowSize = WindowScope.contentSizeOf(context);
+                    final double dpr = MediaQuery.of(context).devicePixelRatio;
+                    final Size windowSize = WindowScope.contentSizeOf(context);
                     return Text(
                       'View ID: ${dialogWindowController.rootView.viewId}\n'
                       'Parent View ID: ${dialogWindowController.parent?.rootView.viewId ?? "None"}\n'
-                      'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
+                      'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
                       'Device Pixel Ratio: $dpr',
                       textAlign: TextAlign.center,
                     );

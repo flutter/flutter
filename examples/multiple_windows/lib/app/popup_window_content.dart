@@ -50,8 +50,8 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
           alwaysSizeToContent: true,
           child: Material(
             child: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
