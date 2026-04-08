@@ -353,10 +353,11 @@ class AndroidSdk {
   /// 5. Look for the default install location inside the Android SDK:
   ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
   ///    newest.
-  Iterable<Directory> getNdkDirectoriesInResolutionOrder({Platform? platform, Config? config}) sync* {
+  Iterable<Directory> getNdkDirectoriesInResolutionOrder({Platform? platform, Config? config}) {
     platform ??= globals.platform;
     config ??= globals.config;
 
+    final ndkDirectories = <Directory>[];
     String? androidNdkHomeDir;
     if (config.containsKey('android-ndk')) {
       androidNdkHomeDir = config.getValue('android-ndk') as String?;
@@ -368,14 +369,14 @@ class AndroidSdk {
       androidNdkHomeDir = platform.environment[kAndroidNdkRoot];
     }
     if (androidNdkHomeDir != null) {
-      yield directory.fileSystem.directory(androidNdkHomeDir);
+      ndkDirectories.add(directory.fileSystem.directory(androidNdkHomeDir));
     }
 
     // Look for the default install location of the NDK inside the Android
     // SDK when installed through `sdkmanager` or Android studio.
     final Directory ndk = directory.childDirectory('ndk');
     if (!ndk.existsSync()) {
-      return;
+      return ndkDirectories;
     }
     final List<Version> ndkVersions =
         ndk
@@ -392,8 +393,9 @@ class AndroidSdk {
           // Use latest NDK first.
           ..sort((Version a, Version b) => -a.compareTo(b));
     for (final ndkVersion in ndkVersions) {
-      yield ndk.childDirectory(ndkVersion.toString());
+      ndkDirectories.add(ndk.childDirectory(ndkVersion.toString()));
     }
+    return ndkDirectories;
   }
 
   String? getNdkBinaryPath(String binaryName, {Platform? platform, Config? config}) {
