@@ -656,7 +656,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
       return;
     }
 
-    _menuController.closeChildren();
     _animationController.reverse().whenComplete(hideOverlay);
   }
 
