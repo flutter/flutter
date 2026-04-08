@@ -181,6 +181,20 @@ void testMain() {
       final paint = ui.Paint()..filterQuality = ui.FilterQuality.low;
       expect(shouldIterativelyDownscale(src, dst, paint), isFalse);
     });
+
+    test('returns true when only width is downscaled significantly', () {
+      const src = ui.Rect.fromLTWH(0, 0, 1000, 100);
+      const dst = ui.Rect.fromLTWH(0, 0, 100, 100);
+      final paint = ui.Paint()..filterQuality = ui.FilterQuality.medium;
+      expect(shouldIterativelyDownscale(src, dst, paint), isTrue);
+    });
+
+    test('returns true when only height is downscaled significantly', () {
+      const src = ui.Rect.fromLTWH(0, 0, 100, 1000);
+      const dst = ui.Rect.fromLTWH(0, 0, 100, 100);
+      final paint = ui.Paint()..filterQuality = ui.FilterQuality.medium;
+      expect(shouldIterativelyDownscale(src, dst, paint), isTrue);
+    });
   });
 
   group('createSteppedDownscaledImage', () {

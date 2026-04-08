@@ -20,7 +20,7 @@ typedef RawDrawImageRect =
 /// to less than half of their source size, and the filter quality is at least
 /// [ui.FilterQuality.medium].
 bool shouldIterativelyDownscale(ui.Rect src, ui.Rect dst, ui.Paint paint) {
-  return (dst.width < src.width / 2 && dst.height < src.height / 2) &&
+  return (dst.width < src.width / 2 || dst.height < src.height / 2) &&
       dst.width >= 1 &&
       dst.height >= 1 &&
       paint.filterQuality.index >= ui.FilterQuality.medium.index;
@@ -36,9 +36,9 @@ class DownscaledImageCache {
   /// The singleton instance of the cache.
   static final DownscaledImageCache instance = DownscaledImageCache._();
 
-  // The key is the ref-counting box of the image (CkCountedRef or CountedRef).
-  // We use the box as the key so that cloned images (which share the same box)
-  // can use the same cached downscaled image.
+  /// The key is the ref-counting box of the image (CkCountedRef or CountedRef).
+  /// We use the box as the key so that cloned images (which share the same box)
+  /// can use the same cached downscaled image.
   final Map<Object, Map<(ui.Rect, int, int), ui.Image>> _cache = {};
 
   /// The maximum number of downscaled variants to cache per image.
@@ -136,11 +136,9 @@ ui.Image createSteppedDownscaledImage({
   required int targetHeight,
   required RawDrawImageRect rawDraw,
 }) {
-  assert(targetWidth < src.width / 2 && targetHeight < src.height / 2);
+  assert(targetWidth < src.width / 2 || targetHeight < src.height / 2);
   var currentImage = originalImage;
   var currentSrc = src;
-
-  ui.Image? previousIntermediate;
 
   while (currentSrc.width > targetWidth * 2 || currentSrc.height > targetHeight * 2) {
     final int nextWidth = math.max(1, math.max(targetWidth, currentSrc.width ~/ 2));
@@ -160,10 +158,9 @@ ui.Image createSteppedDownscaledImage({
     final ui.Image nextImage = picture.toImageSync(nextWidth, nextHeight);
     picture.dispose();
 
-    if (previousIntermediate != null) {
-      previousIntermediate.dispose();
+    if (currentImage != originalImage) {
+      currentImage.dispose();
     }
-    previousIntermediate = nextImage;
 
     currentImage = nextImage;
     currentSrc = ui.Rect.fromLTWH(0, 0, nextWidth.toDouble(), nextHeight.toDouble());
