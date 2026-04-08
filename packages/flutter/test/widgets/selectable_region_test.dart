@@ -6705,14 +6705,26 @@ void main() {
                 selectionControls: testTextSelectionHandleControls,
                 contextMenuBuilder:
                     (BuildContext context, SelectableRegionState selectableRegionState) {
-                      return Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            menuButtonPressed = true;
-                          },
-                          child: const Text('Menu Button 1'),
+                      final TextSelectionToolbarAnchors anchors =
+                          selectableRegionState.contextMenuAnchors;
+                      return SizedBox.expand(
+                        child: CustomSingleChildLayout(
+                          delegate: TextSelectionToolbarLayoutDelegate(
+                            anchorAbove: anchors.primaryAnchor,
+                            anchorBelow: anchors.secondaryAnchor == null
+                                ? anchors.primaryAnchor
+                                : anchors.secondaryAnchor!,
+                          ),
+                          child: Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                menuButtonPressed = true;
+                              },
+                              child: const Text('Menu Button 1'),
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -6745,10 +6757,7 @@ void main() {
 
       // The context menu should be rendered within the overlay's screen bounds.
       final Offset menuTopLeft = tester.getTopLeft(find.text('Menu Button 1'));
-      expect(
-        overlayRect.contains(menuTopLeft),
-        isTrue,
-      );
+      expect(overlayRect.contains(menuTopLeft), isTrue);
 
       // The context menu button should be hittable (hit test must pass through
       // the overlay's _RenderTheater to reach the toolbar).
