@@ -20,6 +20,8 @@ import 'slider_value_indicator_shape.dart';
 
 /// Base class for [RangeSlider] thumb shapes.
 ///
+/// Testing code freeze!
+///
 /// See also:
 ///
 ///  * [RoundRangeSliderThumbShape] for the default [RangeSlider]'s thumb shape
