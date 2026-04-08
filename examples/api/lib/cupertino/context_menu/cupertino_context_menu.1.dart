@@ -10,12 +10,12 @@ final DecorationTween _tween = DecorationTween(
   begin: BoxDecoration(
     color: CupertinoColors.systemYellow,
     boxShadow: const <BoxShadow>[],
-    borderRadius: BorderRadius.circular(20.0),
+    borderRadius: .circular(20.0),
   ),
   end: BoxDecoration(
     color: CupertinoColors.systemYellow,
     boxShadow: CupertinoContextMenu.kEndBoxShadow,
-    borderRadius: BorderRadius.circular(20.0),
+    borderRadius: .circular(20.0),
   ),
 );
 
@@ -27,7 +27,7 @@ class ContextMenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: ContextMenuExample(),
     );
   }
@@ -102,7 +102,7 @@ class ContextMenuExample extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemYellow,
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: .circular(20.0),
                   ),
                   child: const FlutterLogo(size: 500.0),
                 ),

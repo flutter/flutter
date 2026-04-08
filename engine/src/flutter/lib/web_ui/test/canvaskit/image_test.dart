@@ -27,7 +27,7 @@ void testMain() {
 
   test('toImage succeeds', () async {
     final ui.Image image = await _createImage();
-    expect(image.runtimeType.toString(), equals('CkImage'));
+    expect(image, isA<CkImage>());
     image.dispose();
   });
 
