@@ -490,7 +490,8 @@ NS_SWIFT_NONSENDABLE
  * The `FlutterImplicitEngineBridge` can then be used to register plugins,
  * application-level method channels, platform views, etc.
  */
-- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge NS_SWIFT_UI_ACTOR;
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge
+    NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END

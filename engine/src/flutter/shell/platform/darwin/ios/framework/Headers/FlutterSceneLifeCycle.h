@@ -70,7 +70,8 @@ NS_SWIFT_NONSENDABLE
  *
  * @return `YES` if this handled one or more of the URLs.
  */
-- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts NS_SWIFT_UI_ACTOR;
+- (BOOL)scene:(UIScene*)scene
+    openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts NS_SWIFT_UI_ACTOR;
 
 #pragma mark - Continuing user activities
 
@@ -229,7 +230,8 @@ NS_SWIFT_NONSENDABLE
  * The `FlutterPluginSceneLifeCycleDelegate` implementation is stateful. For this reason,
  * this property getter should typically always return the same object.
  */
-@property(nonatomic, readonly) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate NS_SWIFT_UI_ACTOR;
+@property(nonatomic, readonly)
+    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END

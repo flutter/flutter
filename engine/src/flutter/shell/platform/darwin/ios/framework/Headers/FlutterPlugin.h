@@ -76,7 +76,7 @@ NS_SWIFT_NONSENDABLE
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
     API_DEPRECATED(
         "See -[UIApplicationDelegate application:didRegisterUserNotificationSettings:] deprecation",
-        ios(8.0, 10.0)) NS_SWIFT_UI_ACTOR;
+        ios(8.0, 10.0))NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -97,7 +97,8 @@ NS_SWIFT_NONSENDABLE
  */
 - (BOOL)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
-          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_UI_ACTOR;
+          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler
+    NS_SWIFT_UI_ACTOR;
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
@@ -106,7 +107,7 @@ NS_SWIFT_NONSENDABLE
     didReceiveLocalNotification:(UILocalNotification*)notification
     API_DEPRECATED(
         "See -[UIApplicationDelegate application:didReceiveLocalNotification:] deprecation",
-        ios(4.0, 10.0)) NS_SWIFT_UI_ACTOR;
+        ios(4.0, 10.0))NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -142,7 +143,7 @@ NS_SWIFT_NONSENDABLE
 - (BOOL)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler
-    API_AVAILABLE(ios(9.0)) NS_SWIFT_UI_ACTOR;
+    API_AVAILABLE(ios(9.0))NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -159,7 +160,8 @@ NS_SWIFT_NONSENDABLE
  * @return `YES` if this handles the request.
  */
 - (BOOL)application:(UIApplication*)application
-    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_UI_ACTOR;
+    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler
+    NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -524,7 +526,8 @@ NS_SWIFT_NONSENDABLE
  *
  * See also: `-[FlutterAppDelegate addApplicationLifeCycleDelegate:]`
  */
-- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate NS_SWIFT_UI_ACTOR;
+- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate
+    NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END
