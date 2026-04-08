@@ -52,8 +52,12 @@ class CleanCommand extends FlutterCommand {
     final bool cleanXcode = xcode != null && xcode.isInstalledAndMeetsVersionCheck;
 
     await _cleanProject(flutterProject, cleanXcode: cleanXcode);
-    if (boolArg('include-example') && flutterProject.hasExampleApp) {
-      await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
+    if (boolArg('include-example')) {
+      if (flutterProject.hasExampleApp) {
+        await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
+      } else {
+        globals.printStatus('No example app found, skipping example cleaning.');
+      }
     }
 
     return const FlutterCommandResult(ExitStatus.success);

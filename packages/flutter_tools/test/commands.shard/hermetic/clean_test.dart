@@ -200,6 +200,27 @@ void main() {
       );
 
       testUsingContext(
+        '$CleanCommand warns when --include-example is passed but no example exists',
+        () async {
+          setupProjectUnderTest(fs.currentDirectory, true);
+          // No example directory created.
+
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(1000, 0, 0);
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          await runner.run(<String>['clean', '--include-example']);
+
+          expect(testLogger.statusText, contains('No example app found'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Xcode: () => xcode,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        },
+      );
+
+      testUsingContext(
         '$CleanCommand removes a specific xcode scheme --scheme',
         () async {
           setupProjectUnderTest(fs.currentDirectory, true);
