@@ -41,6 +41,30 @@ object FlutterPluginUtils {
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
 
     /**
+     * The URL for documentation for general information on migration to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin"
+
+    /**
+     * The URL for documentation instructing app developers how to migrate their app to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_APPS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers"
+
+    /**
+     * The URL for documentation instructing plugin authors how to migrate to their plugin to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors"
+
+    /**
+     * The URL for documentation instructing app developers on how to report incompatible KGP usage to plugin authors.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers/report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
+
+    /**
      * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
      * Targets `id("com.android.application")` or `alias(libs.plugins.android.application)`
      * within a `plugins { ... }` block.
@@ -610,12 +634,11 @@ object FlutterPluginUtils {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
-//            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
                     logger.quiet(
                         """
                         Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
                         If your project uses Kotlin, ensure KGP is declared in the root plugins block.
-                        For more details check: [link here]
+                        For more details check: $BUILT_IN_KOTLIN_DOCS
                         """.trimIndent()
                     )
                 }
@@ -634,18 +657,16 @@ object FlutterPluginUtils {
 
         project.gradle.projectsEvaluated {
             if (shouldLogForApp) {
-//            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
                 project.logger.error(
                     """
                     WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
                     applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
-                    Please migrate your app to Built-in Kotlin using this guide: [link here]
+                    Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
                     
                     """.trimIndent()
                 )
             }
             if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
-//            TODO(jesswon): Update [link here] with a guide to report Built-in Kotlin issue to plugins doc
             project.logger.error(
                 """
                 WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
@@ -653,7 +674,9 @@ object FlutterPluginUtils {
                 
                 Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
                 If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
-                an issue against a plugin: [link here]
+                an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                
+                If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                 """.trimIndent()
             )
         }

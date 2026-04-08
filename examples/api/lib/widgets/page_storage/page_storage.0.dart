@@ -61,7 +61,7 @@ class ColorBoxPage extends StatelessWidget {
     return ListView.builder(
       itemExtent: 250.0,
       itemBuilder: (BuildContext context, int index) => Container(
-        padding: const EdgeInsets.all(10.0),
+        padding: const .all(10.0),
         child: Material(
           color: index.isEven ? Colors.cyan : Colors.deepOrange,
           child: Center(child: Text(index.toString())),

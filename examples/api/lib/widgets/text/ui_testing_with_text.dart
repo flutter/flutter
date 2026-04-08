@@ -29,17 +29,17 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const .symmetric(horizontal: 16.0),
             child: Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: <Widget>[
                   const SizedBox(height: 16.0),
                   Align(
                     child: Text(
                       'Demonstration of automation tools support in Semantics for Text and RichText',
                       style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
+                      textAlign: .center,
                     ),
                   ),
                   const SizedBox(height: 16.0),
@@ -111,7 +111,7 @@ class _MyAppState extends State<MyApp> {
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                       Center(
@@ -139,7 +139,7 @@ class _MyAppState extends State<MyApp> {
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                     ],

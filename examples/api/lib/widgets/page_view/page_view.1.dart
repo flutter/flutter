@@ -60,7 +60,7 @@ class _PageViewExampleState extends State<PageViewExample> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             TextButton(
               onPressed: () => _reverse(),

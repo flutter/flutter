@@ -40,7 +40,7 @@ class FocusableText extends StatelessWidget {
           // would start looking for a Focus widget ancestor of the FocusableText
           // instead of finding the one inside of its build function.
           return Container(
-            padding: const EdgeInsets.all(8.0),
+            padding: const .all(8.0),
             // Change the color based on whether or not this Container has focus.
             color: Focus.of(context).hasPrimaryFocus
                 ? Colors.red
