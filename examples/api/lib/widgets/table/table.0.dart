@@ -34,13 +34,13 @@ class TableExample extends StatelessWidget {
         1: FlexColumnWidth(),
         2: FixedColumnWidth(64),
       },
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      defaultVerticalAlignment: .middle,
       children: <TableRow>[
         TableRow(
           children: <Widget>[
             Container(height: 32, color: Colors.green),
             TableCell(
-              verticalAlignment: TableCellVerticalAlignment.top,
+              verticalAlignment: .top,
               child: Container(height: 32, width: 32, color: Colors.red),
             ),
             Container(height: 64, color: Colors.blue),
