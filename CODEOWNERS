@@ -51,3 +51,7 @@
 /engine/src/flutter/shell/platform/windows/**/* @flutter/windows-reviewers
 /packages/flutter_tools/**/windows/* @flutter/windows-reviewers
 /packages/flutter_tools/**/*windows* @flutter/windows-reviewers
+
+# Skills owners
+.agents/skills @reidbaker # Fallback owners
+.agents/skills/find-release @reidbaker

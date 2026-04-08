@@ -101,7 +101,7 @@ class SwiftPackageManager {
 
     // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
     // any dynamic dependencies are linked to Runner and prevent undefined symbols.
-    final generatedProduct = SwiftPackageProduct(
+    final generatedProduct = SwiftPackageProduct.library(
       name: kFlutterGeneratedPluginSwiftPackageName,
       targets: <String>[kFlutterGeneratedPluginSwiftPackageName],
       libraryType: SwiftPackageLibraryType.static,
@@ -344,7 +344,7 @@ class SwiftPackageManager {
       name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
       platforms: <SwiftPackageSupportedPlatform>[],
       products: <SwiftPackageProduct>[
-        SwiftPackageProduct(
+        SwiftPackageProduct.library(
           name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
           targets: <String>[kFlutterGeneratedFrameworkSwiftPackageTargetName],
         ),
