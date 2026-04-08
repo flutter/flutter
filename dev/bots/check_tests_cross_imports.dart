@@ -167,8 +167,7 @@ class TestsCrossImportChecker {
   ///    Widgets tests importing Material or Cupertino.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
-  static final Set<String> knownCupertinoCrossImports = <String>{
-  };
+  static final Set<String> knownCupertinoCrossImports = <String>{};
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
     knownCupertinoCrossImports,
