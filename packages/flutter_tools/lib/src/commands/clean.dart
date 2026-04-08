@@ -58,7 +58,7 @@ class CleanCommand extends FlutterCommand {
       await _cleanXcode(flutterProject.macos);
     }
 
-    final Directory buildDir = globals.fs.directory(getBuildDirectory());
+    final Directory buildDir = flutterProject.directory.childDirectory(getBuildDirectory());
     deleteFile(buildDir);
     _deleteProjectFiles(flutterProject);
 
