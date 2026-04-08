@@ -389,6 +389,21 @@ void main() {
 
       expect(data, isNull);
     });
+
+    testWithoutContext('Parses manifest with engine shell arguments specified', () async {
+      const testFlags = '--test-flag=1;--test-flag-2;--testflag3=4';
+      final String testManifest =
+          _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
+            testFlags,
+          );
+      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+        testManifest,
+        BufferLogger.test(),
+      );
+
+      expect(data, isNotNull);
+      expect(data!.androidEngineShellArgs, equals(testFlags));
+    });
   });
 
   group('PrebuiltIOSApp', () {

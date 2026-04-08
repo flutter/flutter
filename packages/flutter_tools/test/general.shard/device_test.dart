@@ -1068,11 +1068,11 @@ void main() {
         final releaseDisabledOptions = DebuggingOptions.disabled(BuildInfo.debug);
         expect(
           releaseDisabledOptions.getAndroidLaunchArguments(),
-          isNot(contains('--enable-checked-mode=true')),
+          isNot(contains('--enable-checked-mode')),
         );
         expect(
           releaseDisabledOptions.getAndroidLaunchArguments(),
-          isNot(contains('--verify-entry-points=true')),
+          isNot(contains('--verify-entry-points')),
         );
       },
     );
@@ -1083,11 +1083,11 @@ void main() {
         final debugDisabledOptions = DebuggingOptions.disabled(BuildInfo.release);
         expect(
           debugDisabledOptions.getAndroidLaunchArguments(),
-          isNot(contains('--enable-checked-mode=true')),
+          isNot(contains('--enable-checked-mode')),
         );
         expect(
           debugDisabledOptions.getAndroidLaunchArguments(),
-          isNot(contains('--verify-entry-points=true')),
+          isNot(contains('--verify-entry-points')),
         );
       },
     );
@@ -1098,11 +1098,11 @@ void main() {
         final enabledOptions = DebuggingOptions.enabled(BuildInfo.release);
         expect(
           enabledOptions.getAndroidLaunchArguments(),
-          isNot(contains('--enable-checked-mode=true')),
+          isNot(contains('--enable-checked-mode')),
         );
         expect(
           enabledOptions.getAndroidLaunchArguments(),
-          isNot(contains('--verify-entry-points=true')),
+          isNot(contains('--verify-entry-points')),
         );
       },
     );

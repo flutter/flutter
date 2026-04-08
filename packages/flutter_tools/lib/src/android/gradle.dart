@@ -495,7 +495,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     // Add engine shell arugments to be injected into the manifest.
     if (androidShellArguments != null) {
       final String androidShellArgumentsStr = androidShellArguments.join(
-        AndroidApk.androidEngineShellArgumentsFromCommandLineManifestValueDelimited,
+        AndroidApk.androidEngineShellArgumentsFromCommandLineManifestValueDelimiter,
       );
       options.add('-PandroidShellArguments=$androidShellArgumentsStr');
     }

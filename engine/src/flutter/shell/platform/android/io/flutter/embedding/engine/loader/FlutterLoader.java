@@ -553,7 +553,8 @@ public class FlutterLoader {
    *
    * <p>Also throws an exception for disabled flags and logs a warning for deprecated flags.
    */
-  private boolean shouldLoadFlag(FlutterEngineFlags.Flag flag, boolean isRelease, boolean specifiedViaManifest) {
+  private boolean shouldLoadFlag(
+      FlutterEngineFlags.Flag flag, boolean isRelease, boolean specifiedViaManifest) {
     String metadataKey = flag.metadataKey;
     if (flag == FlutterEngineFlags.TEST_FLAG) {
       Log.w(

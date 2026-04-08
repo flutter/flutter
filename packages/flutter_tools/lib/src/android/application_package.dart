@@ -47,7 +47,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// The delimiter used between command line flags that are injected into the application
   /// manifest to be loaded in the Flutter Android embedding with metadata key
   /// [androidEngineShellArgumentsFromCommandLineManifestKey].
-  static const String androidEngineShellArgumentsFromCommandLineManifestValueDelimited = ';';
+  static const String androidEngineShellArgumentsFromCommandLineManifestValueDelimiter = ';';
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -101,7 +101,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? androidEngineShellArgsFromManifest = data.androidEngineShellArgs;
     if (androidEngineShellArgsFromManifest != null) {
       androidEngineShellArgs = androidEngineShellArgsFromManifest
-          .split(androidEngineShellArgumentsFromCommandLineManifestValueDelimited)
+          .split(androidEngineShellArgumentsFromCommandLineManifestValueDelimiter)
           .map((String arg) => arg.trim())
           .toSet();
     }

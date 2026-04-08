@@ -67,7 +67,6 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           // Disable them to work around flakiness issues, and in general just
           // make less things start up unnecessarily.
           '--no-dds',
-          '--no-enable-dart-profiling',
           if (useHCPPFlag) '--enable-hcpp',
           '--test-arguments=test',
           '--test-arguments=--reporter=expanded',
