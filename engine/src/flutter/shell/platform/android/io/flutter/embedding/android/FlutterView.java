@@ -882,7 +882,7 @@ public class FlutterView extends FrameLayout
             + ", Right: "
             + viewportMetrics.systemGestureInsetRight
             + ", Bottom: "
-            + viewportMetrics.viewInsetBottom);
+            + viewportMetrics.systemGestureInsetBottom);
 
     sendViewportMetricsToFlutter();
     return newInsets;
