@@ -5,7 +5,7 @@
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
     branches:
       - master
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Check for changes in frozen folders
         uses: dorny/paths-filter@v3
