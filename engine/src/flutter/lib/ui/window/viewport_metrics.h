@@ -36,6 +36,7 @@ struct ViewportMetrics {
                   double p_physical_system_gesture_inset_right,
                   double p_physical_system_gesture_inset_bottom,
                   double p_physical_system_gesture_inset_left,
+                  bool p_keyboard_visible,
                   double p_physical_touch_slop,
                   const std::vector<double>& p_physical_display_features_bounds,
                   const std::vector<int>& p_physical_display_features_type,
@@ -64,6 +65,7 @@ struct ViewportMetrics {
   double physical_system_gesture_inset_right = 0;
   double physical_system_gesture_inset_bottom = 0;
   double physical_system_gesture_inset_left = 0;
+  bool keyboard_visible = false;
   double physical_touch_slop = -1.0;
   std::vector<double> physical_display_features_bounds;
   std::vector<int> physical_display_features_type;

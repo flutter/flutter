@@ -5107,34 +5107,35 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
         shell->GetPlatformView()->SetViewportMetrics(
             kImplicitViewId,
             {
-                1.0,   // p_device_pixel_ratio
-                500,   // p_physical_width
-                800,   // p_physical_height
-                1,     // p_min_width_constraint,
-                1000,  // p_max_width_constraint,
-                1,     // p_min_height_constraint,
-                1000,  // p_max_height_constraint,
-                0,     // p_physical_padding_top
-                0,     // p_physical_padding_right
-                0,     // p_physical_padding_bottom
-                0,     // p_physical_padding_left
-                0,     // p_physical_view_inset_top,
-                0,     // p_physical_view_inset_right,
-                0,     // p_physical_view_inset_bottom,
-                0,     // p_physical_view_inset_left,
-                0,     // p_physical_system_gesture_inset_top,
-                0,     // p_physical_system_gesture_inset_right,
-                0,     // p_physical_system_gesture_inset_bottom,
-                0,     // p_physical_system_gesture_inset_left,
-                22,    // p_physical_touch_slop,
-                {},    // p_physical_display_features_bounds,
-                {},    // p_physical_display_features_type,
-                {},    // p_physical_display_features_state,
-                0,     // p_display_id
-                0,     // p_physical_display_corner_radius_top_left
-                0,     // p_physical_display_corner_radius_top_right
-                0,     // p_physical_display_corner_radius_bottom_right
-                0,     // p_physical_display_corner_radius_bottom_left
+                1.0,    // p_device_pixel_ratio
+                500,    // p_physical_width
+                800,    // p_physical_height
+                1,      // p_min_width_constraint,
+                1000,   // p_max_width_constraint,
+                1,      // p_min_height_constraint,
+                1000,   // p_max_height_constraint,
+                0,      // p_physical_padding_top
+                0,      // p_physical_padding_right
+                0,      // p_physical_padding_bottom
+                0,      // p_physical_padding_left
+                0,      // p_physical_view_inset_top,
+                0,      // p_physical_view_inset_right,
+                0,      // p_physical_view_inset_bottom,
+                0,      // p_physical_view_inset_left,
+                0,      // p_physical_system_gesture_inset_top,
+                0,      // p_physical_system_gesture_inset_right,
+                0,      // p_physical_system_gesture_inset_bottom,
+                0,      // p_physical_system_gesture_inset_left,
+                false,  // p_keyboard_visible,
+                22,     // p_physical_touch_slop,
+                {},     // p_physical_display_features_bounds,
+                {},     // p_physical_display_features_type,
+                {},     // p_physical_display_features_state,
+                0,      // p_display_id
+                0,      // p_physical_display_corner_radius_top_left
+                0,      // p_physical_display_corner_radius_top_right
+                0,      // p_physical_display_corner_radius_bottom_right
+                0,      // p_physical_display_corner_radius_bottom_left
             });
       });
   PumpOneFrame(shell.get());
