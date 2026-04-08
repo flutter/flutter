@@ -98,10 +98,10 @@ void main() {
       );
     });
 
-    tearDown(() {
+    tearDown(() async {
       // After each test reset to device perfered orientations to avoid
       // test pollution.
-      SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
+      await SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
     });
   });
 }
@@ -116,7 +116,7 @@ Future<void> setOrientationAndWaitUntilRotation(
   WidgetTester tester,
   DeviceOrientation orientation,
 ) async {
-  SystemChrome.setPreferredOrientations(<DeviceOrientation>[orientation]);
+  await SystemChrome.setPreferredOrientations(<DeviceOrientation>[orientation]);
   Orientation expectedOrientation;
   switch (orientation) {
     case DeviceOrientation.portraitUp:

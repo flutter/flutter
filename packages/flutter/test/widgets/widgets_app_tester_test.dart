@@ -510,6 +510,42 @@ void main() {
       expect(shortcutTriggered, isTrue);
     });
 
+    testWidgets('textStyle defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.textStyle, isNull);
+    });
+
+    testWidgets('custom textStyle is passed to WidgetsApp', (WidgetTester tester) async {
+      const customStyle = TextStyle(fontSize: 24.0, color: Color(0xFFFF0000));
+
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder(), textStyle: customStyle));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.textStyle, customStyle);
+    });
+
+    testWidgets('textStyle wraps tree in DefaultTextStyle', (WidgetTester tester) async {
+      const customStyle = TextStyle(fontSize: 32.0, color: Color(0xFF00FF00));
+      late TextStyle resolvedStyle;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          textStyle: customStyle,
+          home: Builder(
+            builder: (BuildContext context) {
+              resolvedStyle = DefaultTextStyle.of(context).style;
+              return const Placeholder();
+            },
+          ),
+        ),
+      );
+
+      expect(resolvedStyle.fontSize, 32.0);
+      expect(resolvedStyle.color, const Color(0xFF00FF00));
+    });
+
     testWidgets('actions defaults to null', (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
@@ -578,6 +614,91 @@ void main() {
 
       expect(find.text('Home Page'), findsOneWidget);
       expect(find.text('Details Page'), findsNothing);
+    });
+
+    testWidgets('onGenerateRoute builds routes from callback', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            if (settings.name == '/') {
+              return PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (_, _, _) => const Text('Generated Home'),
+              );
+            }
+            return null;
+          },
+        ),
+      );
+
+      expect(find.text('Generated Home'), findsOneWidget);
+    });
+
+    testWidgets('onGenerateRoute supports push navigation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+            '/' => PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (_, _, _) => Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () => Navigator.of(context).pushNamed('/second'),
+                    child: const Text('First'),
+                  );
+                },
+              ),
+            ),
+            '/second' => PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (_, _, _) => const Text('Second'),
+            ),
+            _ => null,
+          },
+        ),
+      );
+
+      expect(find.text('First'), findsOneWidget);
+      expect(find.text('Second'), findsNothing);
+
+      await tester.tap(find.text('First'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Second'), findsOneWidget);
+    });
+
+    testWidgets('onGenerateRoute works with builder', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/',
+          builder: (BuildContext context, Widget? child) {
+            return Column(
+              children: <Widget>[
+                const Text('Header'),
+                Expanded(child: child ?? const SizedBox.shrink()),
+              ],
+            );
+          },
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (_, _, _) => const Text('Route Content'),
+            );
+          },
+        ),
+      );
+
+      expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Route Content'), findsOneWidget);
+    });
+
+    testWidgets('onGenerateRoute defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.onGenerateRoute, isNull);
     });
   });
 }

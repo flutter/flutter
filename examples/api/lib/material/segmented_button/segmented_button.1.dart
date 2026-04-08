@@ -31,7 +31,7 @@ class SegmentedButtonExample extends StatefulWidget {
 enum Calendar { day, week, month, year }
 
 class _SegmentedButtonExampleState extends State<SegmentedButtonExample> {
-  Calendar calendarView = Calendar.week;
+  Calendar calendarView = .week;
 
   @override
   Widget build(BuildContext context) {

@@ -702,8 +702,8 @@ class ShapedInputBorder extends InputBorder {
 
   @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
-    if (shape is OutlinedBorder) {
-      (shape as OutlinedBorder).paintInterior(canvas, rect, paint, textDirection: textDirection);
+    if (shape.preferPaintInterior) {
+      shape.paintInterior(canvas, rect, paint, textDirection: textDirection);
     } else {
       // Fallback for shapes that don't support paintInterior.
       canvas.drawPath(shape.getOuterPath(rect, textDirection: textDirection), paint);

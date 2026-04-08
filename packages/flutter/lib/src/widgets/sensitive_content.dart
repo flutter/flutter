@@ -370,7 +370,19 @@ class _SensitiveContentState extends State<SensitiveContent> {
 
   @override
   void dispose() {
-    SensitiveContentHost.unregister(widget.sensitivity);
+    SensitiveContentHost.unregister(widget.sensitivity).catchError((
+      Object exception,
+      StackTrace stack,
+    ) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while unregistering sensitive content'),
+        ),
+      );
+    });
     super.dispose();
   }
 
@@ -378,8 +390,8 @@ class _SensitiveContentState extends State<SensitiveContent> {
     ContentSensitivity oldSensitivity,
     ContentSensitivity newSensitivity,
   ) async {
-    SensitiveContentHost.register(newSensitivity);
-    SensitiveContentHost.unregister(oldSensitivity);
+    await SensitiveContentHost.register(newSensitivity);
+    await SensitiveContentHost.unregister(oldSensitivity);
   }
 
   @override

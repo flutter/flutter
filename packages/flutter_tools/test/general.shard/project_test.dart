@@ -2545,7 +2545,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return xcodeProjectInfo;
   }
 
