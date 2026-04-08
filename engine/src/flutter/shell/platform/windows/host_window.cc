@@ -858,18 +858,7 @@ void HostWindow::DisableRecursively() {
 }
 
 void HostWindow::UpdateModalStateLayer() {
-  auto all_children = GetOwnedWindows();
-
-  // Only dialog windows participate in modal state management.
-  // Popup and tooltip windows are transient and are dismissed by
-  // Dart-side activation handlers instead.
-  std::vector<HostWindow*> children;
-  children.reserve(all_children.size());
-  for (HostWindow* const child : all_children) {
-    if (child->GetArchetype() == WindowArchetype::kDialog) {
-      children.push_back(child);
-    }
-  }
+  auto children = GetOwnedWindows();
 
   if (children.empty()) {
     // Leaf window in the active path, enable it.

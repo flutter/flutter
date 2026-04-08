@@ -70,10 +70,13 @@ class HostWindow {
   // area. |window_manager| is a pointer to the window manager that manages the
   // |HostWindow|. |engine| is a pointer to the engine that manages
   // the window manager. |preferred_constraints| are the constraints set on
-  // the window's size. |is_sized_to_content| indicates whether the tooltip
-  // should size itself to its content. |get_position_callback| is a callback
-  // that determines the position of the tooltip window. |parent| is the parent
-  // of this tooltip, which must be non-null.
+  // the window's size. |get_position_callback| is a callback
+  // that determines the position of the tooltip window. It is invoked on the
+  // platform thread whenever the rendered content size of the tooltip changes,
+  // including after the initial frame is rendered and on any subsequent content
+  // resize. It is not called in response to parent window movement or other
+  // Win32 window messages. |parent| is the parent of this tooltip, which must
+  // be non-null.
   static std::unique_ptr<HostWindow> CreateTooltipWindow(
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,
@@ -86,8 +89,11 @@ class HostWindow {
   // |HostWindow|. |engine| is a pointer to the engine that manages
   // the window manager. |preferred_constraints| are the constraints set on
   // the window's size. |get_position_callback| is a callback that determines
-  // the position of the popup window. |parent| is the parent of this popup,
-  // which must be non-null.
+  // the position of the popup window. It is invoked on the platform thread
+  // whenever the rendered content size of the popup changes, including after
+  // the initial frame is rendered and on any subsequent content resize. It is
+  // not called in response to parent window movement or other Win32 window
+  // messages. |parent| is the parent of this popup, which must be non-null.
   static std::unique_ptr<HostWindow> CreatePopupWindow(
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,

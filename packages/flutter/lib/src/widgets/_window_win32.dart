@@ -933,7 +933,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   void setConstraints(BoxConstraints constraints) {}
 }
 
-/// Implementation of [TooltipWindowController] for the Windows platform.
+/// Implementation of [PopupWindowController] for the Windows platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 ///
