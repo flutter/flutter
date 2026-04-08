@@ -929,17 +929,28 @@ abstract class _DarwinViewState<
   }
 
   Future<void> _createNewUiKitView() async {
-    final int id = platformViewsRegistry.getNextPlatformViewId();
-    final ControllerT controller = await createNewViewController(id);
-    if (!mounted) {
-      controller.dispose();
-      return;
+    try {
+      final int id = platformViewsRegistry.getNextPlatformViewId();
+      final ControllerT controller = await createNewViewController(id);
+      if (!mounted) {
+        controller.dispose();
+        return;
+      }
+      widget.onPlatformViewCreated?.call(id);
+      setState(() {
+        _controller = controller;
+        focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
+      });
+    } catch (error, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'widgets',
+          context: ErrorDescription('while creating a Darwin platform view'),
+        ),
+      );
     }
-    widget.onPlatformViewCreated?.call(id);
-    setState(() {
-      _controller = controller;
-      focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
-    });
   }
 
   Future<ControllerT> createNewViewController(int id);

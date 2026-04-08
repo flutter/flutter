@@ -1398,6 +1398,49 @@ void main() {
       );
     });
 
+    testWidgets('UiKitView reports error when creation fails', (WidgetTester tester) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+
+      try {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'create') {
+              throw PlatformException(code: 'CREATION_ERROR', message: 'Failed to create view');
+            }
+            return null;
+          },
+        );
+
+        await tester.pumpWidget(
+          const Center(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            ),
+          ),
+        );
+
+        await tester.pump(); // Allow async work to complete
+
+        expect(errors, isNotEmpty);
+        expect(errors.first.exception, isA<PlatformException>());
+        expect((errors.first.exception as PlatformException).code, 'CREATION_ERROR');
+        expect(errors.first.context.toString(), contains('while creating a Darwin platform view'));
+      } finally {
+        FlutterError.onError = oldOnError;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          null,
+        );
+      }
+    });
+
     testWidgets('Change UIView view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final viewsController = FakeIosPlatformViewsController();
