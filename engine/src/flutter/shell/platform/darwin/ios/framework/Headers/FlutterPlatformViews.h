@@ -15,16 +15,16 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Wraps a `UIView` for embedding in the Flutter hierarchy
  */
-NS_SWIFT_UI_ACTOR
+NS_SWIFT_NONSENDABLE
 @protocol FlutterPlatformView <NSObject>
 /**
  * Returns a reference to the `UIView` that is wrapped by this `FlutterPlatformView`.
  */
-- (UIView*)view;
+- (UIView*)view NS_SWIFT_UI_ACTOR;
 @end
 
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_UI_ACTOR
+NS_SWIFT_NONSENDABLE
 @protocol FlutterPlatformViewFactory <NSObject>
 /**
  * Create a `FlutterPlatformView`.
@@ -42,7 +42,7 @@ NS_SWIFT_UI_ACTOR
  */
 - (NSObject<FlutterPlatformView>*)createWithFrame:(CGRect)frame
                                    viewIdentifier:(int64_t)viewId
-                                        arguments:(id _Nullable)args;
+                                        arguments:(id _Nullable)args NS_SWIFT_UI_ACTOR;
 
 /**
  * Returns the `FlutterMessageCodec` for decoding the args parameter of `createWithFrame`.
@@ -50,7 +50,7 @@ NS_SWIFT_UI_ACTOR
  * Only needs to be implemented if `createWithFrame` needs an arguments parameter.
  */
 @optional
-- (NSObject<FlutterMessageCodec>*)createArgsCodec;
+- (NSObject<FlutterMessageCodec>*)createArgsCodec NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END

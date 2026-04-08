@@ -480,7 +480,7 @@ NS_SWIFT_UI_ACTOR
  *
  * This provides the engine bridge to the listener.
  */
-NS_SWIFT_UI_ACTOR
+NS_SWIFT_NONSENDABLE
 @protocol FlutterImplicitEngineDelegate
 @required
 
@@ -490,7 +490,7 @@ NS_SWIFT_UI_ACTOR
  * The `FlutterImplicitEngineBridge` can then be used to register plugins,
  * application-level method channels, platform views, etc.
  */
-- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge;
+- (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END

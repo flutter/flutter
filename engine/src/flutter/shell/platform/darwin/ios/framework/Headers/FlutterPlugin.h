@@ -23,7 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Protocol for listener of events from the UIApplication, typically a FlutterPlugin.
  */
-NS_SWIFT_UI_ACTOR
+
+NS_SWIFT_NONSENDABLE
 @protocol FlutterApplicationLifeCycleDelegate <UNUserNotificationCenterDelegate>
 
 @optional
@@ -33,7 +34,7 @@ NS_SWIFT_UI_ACTOR
  * @return `NO` if this vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
-    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -41,32 +42,32 @@ NS_SWIFT_UI_ACTOR
  * @return `NO` if this vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
-    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationDidBecomeActive:(UIApplication*)application;
+- (void)applicationDidBecomeActive:(UIApplication*)application NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationWillResignActive:(UIApplication*)application;
+- (void)applicationWillResignActive:(UIApplication*)application NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationDidEnterBackground:(UIApplication*)application;
+- (void)applicationDidEnterBackground:(UIApplication*)application NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationWillEnterForeground:(UIApplication*)application;
+- (void)applicationWillEnterForeground:(UIApplication*)application NS_SWIFT_UI_ACTOR;
 
 /**
  Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
-- (void)applicationWillTerminate:(UIApplication*)application;
+- (void)applicationWillTerminate:(UIApplication*)application NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -75,19 +76,19 @@ NS_SWIFT_UI_ACTOR
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
     API_DEPRECATED(
         "See -[UIApplicationDelegate application:didRegisterUserNotificationSettings:] deprecation",
-        ios(8.0, 10.0));
+        ios(8.0, 10.0)) NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
 - (void)application:(UIApplication*)application
-    didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken;
+    didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  */
 - (void)application:(UIApplication*)application
-    didFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
+    didFailToRegisterForRemoteNotificationsWithError:(NSError*)error NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -96,7 +97,7 @@ NS_SWIFT_UI_ACTOR
  */
 - (BOOL)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
-          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_UI_ACTOR;
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
@@ -105,7 +106,7 @@ NS_SWIFT_UI_ACTOR
     didReceiveLocalNotification:(UILocalNotification*)notification
     API_DEPRECATED(
         "See -[UIApplicationDelegate application:didReceiveLocalNotification:] deprecation",
-        ios(4.0, 10.0));
+        ios(4.0, 10.0)) NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -114,14 +115,14 @@ NS_SWIFT_UI_ACTOR
  */
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
  * @return `YES` if this handles the request.
  */
-- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url;
+- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -131,7 +132,7 @@ NS_SWIFT_UI_ACTOR
 - (BOOL)application:(UIApplication*)application
               openURL:(NSURL*)url
     sourceApplication:(NSString*)sourceApplication
-           annotation:(id)annotation;
+           annotation:(id)annotation NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -141,7 +142,7 @@ NS_SWIFT_UI_ACTOR
 - (BOOL)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler
-    API_AVAILABLE(ios(9.0));
+    API_AVAILABLE(ios(9.0)) NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -150,7 +151,7 @@ NS_SWIFT_UI_ACTOR
  */
 - (BOOL)application:(UIApplication*)application
     handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
-                      completionHandler:(nonnull void (^)(void))completionHandler;
+                      completionHandler:(nonnull void (^)(void))completionHandler NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -158,7 +159,7 @@ NS_SWIFT_UI_ACTOR
  * @return `YES` if this handles the request.
  */
 - (BOOL)application:(UIApplication*)application
-    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler NS_SWIFT_UI_ACTOR;
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -167,7 +168,7 @@ NS_SWIFT_UI_ACTOR
  */
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray*))restorationHandler;
+      restorationHandler:(void (^)(NSArray*))restorationHandler NS_SWIFT_UI_ACTOR;
 @end
 
 #pragma mark -
@@ -188,7 +189,7 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
  * Defines a set of optional callback methods and a method to set up the plugin
  * and register it to be called by other application components.
  */
-NS_SWIFT_UI_ACTOR
+NS_SWIFT_NONSENDABLE
 @protocol FlutterPlugin <NSObject, FlutterApplicationLifeCycleDelegate>
 @required
 /**
@@ -208,7 +209,7 @@ NS_SWIFT_UI_ACTOR
  * @param registrar A helper providing application context and methods for
  *     registering callbacks.
  */
-+ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar;
++ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar NS_SWIFT_UI_ACTOR;
 @optional
 /**
  * Set a callback for registering plugins to an additional `FlutterPluginRegistry`,
@@ -221,7 +222,7 @@ NS_SWIFT_UI_ACTOR
  * @param callback A callback for registering some set of plugins with a
  *     `FlutterPluginRegistry`.
  */
-+ (void)setPluginRegistrantCallback:(FlutterPluginRegistrantCallback)callback;
++ (void)setPluginRegistrantCallback:(FlutterPluginRegistrantCallback)callback NS_SWIFT_UI_ACTOR;
 @optional
 /**
  * Called if this plugin has been registered to receive `FlutterMethodCall`s.
@@ -229,7 +230,7 @@ NS_SWIFT_UI_ACTOR
  * @param call The method call command object.
  * @param result A callback for submitting the result of the call.
  */
-- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result NS_SWIFT_UI_ACTOR;
 @optional
 /**
  * Called when a plugin is being removed from a `FlutterEngine`, which is
@@ -242,7 +243,7 @@ NS_SWIFT_UI_ACTOR
  * @param registrar The registrar that was used to publish the plugin.
  *
  */
-- (void)detachFromEngineForRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar;
+- (void)detachFromEngineForRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar NS_SWIFT_UI_ACTOR;
 @end
 
 #pragma mark -
@@ -515,7 +516,7 @@ NS_SWIFT_UI_ACTOR
  * For plugins to receive events from `UNUserNotificationCenter`, register this as the
  * `UNUserNotificationCenterDelegate`.
  */
-NS_SWIFT_UI_ACTOR
+NS_SWIFT_NONSENDABLE
 @protocol FlutterAppLifeCycleProvider <UNUserNotificationCenterDelegate>
 
 /**
@@ -523,7 +524,7 @@ NS_SWIFT_UI_ACTOR
  *
  * See also: `-[FlutterAppDelegate addApplicationLifeCycleDelegate:]`
  */
-- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
+- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END
