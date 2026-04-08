@@ -247,6 +247,11 @@ class SkwasmCanvas implements LayerCanvas {
       final int targetWidth = dst.width.toInt();
       final int targetHeight = dst.height.toInt();
 
+      final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
+      final PaintHandle paintHandle = (tempPaint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
+
       final ui.Image downscaledImage = getOrCreateDownscaledImage(
         box: (image as SkwasmImage).box,
         originalImage: image,
@@ -258,10 +263,6 @@ class SkwasmCanvas implements LayerCanvas {
           withStackScope((StackScope scope) {
             final Pointer<Float> sourceRect = scope.convertRectToNative(s);
             final Pointer<Float> destRect = scope.convertRectToNative(d);
-            final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
-            final PaintHandle paintHandle = (tempPaint as SkwasmPaint).toRawPaint(
-              defaultBlurTileMode: ui.TileMode.clamp,
-            );
             canvasDrawImageRect(
               tempCanvasHandle,
               (img as SkwasmImage).handle,
@@ -270,10 +271,11 @@ class SkwasmCanvas implements LayerCanvas {
               paintHandle,
               ui.FilterQuality.low.index,
             );
-            paintDispose(paintHandle);
           });
         },
       );
+
+      paintDispose(paintHandle);
 
       withStackScope((StackScope scope) {
         final Pointer<Float> sourceRect = scope.convertRectToNative(
