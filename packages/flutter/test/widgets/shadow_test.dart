@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
