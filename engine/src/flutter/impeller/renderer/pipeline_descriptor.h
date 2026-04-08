@@ -49,7 +49,7 @@ class PipelineDescriptor final : public Comparable<PipelineDescriptor> {
 
   const std::shared_ptr<VertexDescriptor>& GetVertexDescriptor() const;
 
-  size_t GetMaxColorAttacmentBindIndex() const;
+  size_t GetMaxColorAttachmentBindIndex() const;
 
   PipelineDescriptor& SetColorAttachmentDescriptor(
       size_t index,

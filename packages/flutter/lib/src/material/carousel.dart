@@ -27,6 +27,9 @@ import 'theme.dart';
 /// The [CarouselView] presents a scrollable list of items, each of which can dynamically
 /// change size based on the chosen layout.
 ///
+/// When [infinite] is true, the carousel will create an infinite loop of items,
+/// allowing continuous scrolling in both directions.
+///
 /// Material Design 3 introduced 4 carousel layouts:
 ///  * Multi-browse: This layout shows at least one large, medium, and small
 ///    carousel item at a time. This layout is supported by [CarouselView.weighted].
@@ -143,6 +146,7 @@ class CarouselView extends StatefulWidget {
     this.reverse = false,
     this.onTap,
     this.enableSplash = true,
+    this.infinite = false,
     required double this.itemExtent,
     required this.children,
     this.onIndexChanged,
@@ -208,6 +212,7 @@ class CarouselView extends StatefulWidget {
     this.consumeMaxWeight = true,
     this.onTap,
     this.enableSplash = true,
+    this.infinite = false,
     required List<int> this.flexWeights,
     required this.children,
     this.onIndexChanged,
@@ -255,6 +260,7 @@ class CarouselView extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount,
     this.onIndexChanged,
+    this.infinite = false,
   }) : consumeMaxWeight = true,
        flexWeights = null,
        children = const <Widget>[];
@@ -313,6 +319,7 @@ class CarouselView extends StatefulWidget {
     required this.itemBuilder,
     this.itemCount,
     this.onIndexChanged,
+    this.infinite = false,
   }) : itemExtent = null,
        children = const <Widget>[];
 
@@ -492,7 +499,17 @@ class CarouselView extends StatefulWidget {
   /// The number of items in the carousel.
   ///
   /// If null, the carousel will continue to build items until [itemBuilder] returns null.
+  ///
+  /// When [infinite] is true, the carousel will loop infinitely.
   final int? itemCount;
+
+  /// Whether the carousel should loop infinitely.
+  ///
+  /// If true, the carousel will create an infinite loop of items,
+  /// allowing continuous scrolling in both directions.
+  ///
+  /// Defaults to false.
+  final bool infinite;
 
   @override
   State<CarouselView> createState() => _CarouselViewState();
@@ -582,6 +599,10 @@ class _CarouselViewState extends State<CarouselView> {
   }
 
   Widget _buildCarouselItem(int index) {
+    // For infinite scrolling, wrap the index to the actual children range.
+    if (widget.infinite && widget.children.isNotEmpty) {
+      index = index % widget.children.length;
+    }
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
     final ColorScheme colorScheme = ColorScheme.of(context);
     final EdgeInsets effectivePadding =
@@ -645,15 +666,31 @@ class _CarouselViewState extends State<CarouselView> {
 
   Widget _buildSliverCarousel(ThemeData theme) {
     // Determine the child count and builder based on whether we're using lazy loading
-    final int? childCount = widget.itemBuilder != null ? widget.itemCount : widget.children.length;
-    final NullableIndexedWidgetBuilder effectiveBuilder = widget.itemBuilder != null
-        ? widget.itemBuilder!
-        : (BuildContext context, int index) => _buildCarouselItem(index);
+    final int? childCount = widget.infinite
+        ? null
+        : widget.itemBuilder != null
+        ? widget.itemCount
+        : widget.children.length;
+
+    NullableIndexedWidgetBuilder effectiveBuilder;
+    if (widget.itemBuilder != null) {
+      if (widget.infinite && widget.itemCount != null && widget.itemCount! > 0) {
+        final int itemCount = widget.itemCount!;
+        effectiveBuilder = (BuildContext context, int index) {
+          return widget.itemBuilder!(context, index % itemCount);
+        };
+      } else {
+        effectiveBuilder = widget.itemBuilder!;
+      }
+    } else {
+      effectiveBuilder = (BuildContext context, int index) => _buildCarouselItem(index);
+    }
 
     if (_itemExtent != null) {
       return _SliverFixedExtentCarousel(
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
+        infinite: widget.infinite,
         delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
       );
     }
@@ -666,6 +703,7 @@ class _CarouselViewState extends State<CarouselView> {
       consumeMaxWeight: _consumeMaxWeight,
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
+      infinite: widget.infinite,
       delegate: SliverChildBuilderDelegate(effectiveBuilder, childCount: childCount),
     );
   }
@@ -719,10 +757,12 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.minExtent,
     required this.itemExtent,
+    required this.infinite,
   });
 
   final double itemExtent;
   final double minExtent;
+  final bool infinite;
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
@@ -731,6 +771,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
       childManager: element,
       minExtent: minExtent,
       maxExtent: itemExtent,
+      infinite: infinite,
     );
   }
 
@@ -738,6 +779,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
     renderObject.minExtent = minExtent;
+    renderObject.infinite = infinite;
   }
 }
 
@@ -746,8 +788,10 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     required super.childManager,
     required double maxExtent,
     required double minExtent,
+    required bool infinite,
   }) : _maxExtent = maxExtent,
-       _minExtent = minExtent;
+       _minExtent = minExtent,
+       _infinite = infinite;
 
   double get maxExtent => _maxExtent;
   double _maxExtent;
@@ -766,6 +810,16 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
       return;
     }
     _minExtent = value;
+    markNeedsLayout();
+  }
+
+  bool get infinite => _infinite;
+  bool _infinite;
+  set infinite(bool value) {
+    if (_infinite == value) {
+      return;
+    }
+    _infinite = value;
     markNeedsLayout();
   }
 
@@ -814,19 +868,6 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     return maxExtent;
   }
 
-  late SliverLayoutDimensions _currentLayoutDimensions;
-
-  @override
-  void performLayout() {
-    _currentLayoutDimensions = SliverLayoutDimensions(
-      scrollOffset: constraints.scrollOffset,
-      precedingScrollExtent: constraints.precedingScrollExtent,
-      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-      crossAxisExtent: constraints.crossAxisExtent,
-    );
-    super.performLayout();
-  }
-
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
@@ -851,7 +892,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
       minExtent,
     );
     if (index == firstVisibleIndex) {
-      final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
+      final double firstVisibleItemExtent = _buildItemExtent(index, layoutDimensions);
 
       // If the first item is collapsed to be less than `effectiveMinExtent`,
       // then it should stop changing its size and should start to scroll off screen.
@@ -877,7 +918,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
       return 0;
     }
 
-    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
+    final int firstVisibleIndex = (scrollOffset / maxExtent).floor();
     return math.max(firstVisibleIndex, 0);
   }
 
@@ -926,6 +967,7 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     required this.consumeMaxWeight,
     required this.shrinkExtent,
     required this.weights,
+    required this.infinite,
   });
 
   // Determine whether extra scroll offset should be calculate so that every
@@ -950,6 +992,9 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   // view at a time.
   final List<int> weights;
 
+  // Whether the carousel should loop infinitely.
+  final bool infinite;
+
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
     final element = context as SliverMultiBoxAdaptorElement;
@@ -958,6 +1003,7 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
       consumeMaxWeight: consumeMaxWeight,
       shrinkExtent: shrinkExtent,
       weights: weights,
+      infinite: infinite,
     );
   }
 
@@ -966,7 +1012,8 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     renderObject
       ..consumeMaxWeight = consumeMaxWeight
       ..shrinkExtent = shrinkExtent
-      ..weights = weights;
+      ..weights = weights
+      ..infinite = infinite;
   }
 }
 
@@ -978,9 +1025,11 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     required bool consumeMaxWeight,
     required double shrinkExtent,
     required List<int> weights,
+    required bool infinite,
   }) : _consumeMaxWeight = consumeMaxWeight,
        _shrinkExtent = shrinkExtent,
-       _weights = weights;
+       _weights = weights,
+       _infinite = infinite;
 
   bool get consumeMaxWeight => _consumeMaxWeight;
   bool _consumeMaxWeight;
@@ -1012,7 +1061,15 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  late SliverLayoutDimensions _currentLayoutDimensions;
+  bool get infinite => _infinite;
+  bool _infinite;
+  set infinite(bool value) {
+    if (_infinite == value) {
+      return;
+    }
+    _infinite = value;
+    markNeedsLayout();
+  }
 
   // This is to implement the itemExtentBuilder callback to return each item extent
   // while scrolling.
@@ -1153,7 +1210,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     }
     double visibleItemsTotalExtent = _distanceToLeadingEdge;
     for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-      visibleItemsTotalExtent += _buildItemExtent(i, _currentLayoutDimensions);
+      visibleItemsTotalExtent += _buildItemExtent(i, layoutDimensions);
     }
     return constraints.scrollOffset + visibleItemsTotalExtent;
   }
@@ -1180,10 +1237,31 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double itemExtent,
   ) {
     final int? childCount = childManager.estimatedChildCount;
+
+    // For infinite scrolling, calculate how many items fit in the viewport
+    if (infinite && childCount == null) {
+      double visibleItemsTotalExtent = _distanceToLeadingEdge;
+      int index = _firstVisibleItemIndex + 1;
+      // Calculate upper bound based on viewport extent and minimum possible item extent.
+      // In worst case, all items would be at minimum extent i.e. minChildExtent.
+      final double safeMinExtent = math.max(minChildExtent, 1.0);
+      final int estimatedUpperBound =
+          _firstVisibleItemIndex + (constraints.viewportMainAxisExtent / safeMinExtent).ceil();
+      while (visibleItemsTotalExtent < constraints.viewportMainAxisExtent &&
+          index < estimatedUpperBound) {
+        visibleItemsTotalExtent += _buildItemExtent(index, layoutDimensions);
+        if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
+          return index;
+        }
+        index++;
+      }
+      return index;
+    }
+
     if (childCount != null) {
       double visibleItemsTotalExtent = _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < childCount; i++) {
-        visibleItemsTotalExtent += _buildItemExtent(i, _currentLayoutDimensions);
+        visibleItemsTotalExtent += _buildItemExtent(i, layoutDimensions);
         if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
           return i;
         }
@@ -1201,11 +1279,14 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     )
     double itemExtent,
   ) {
+    if (infinite) {
+      return double.infinity;
+    }
     return childManager.childCount * maxChildExtent;
   }
 
   BoxConstraints _getChildConstraints(int index) {
-    final double extent = itemExtentBuilder!(index, _currentLayoutDimensions)!;
+    final double extent = itemExtentBuilder!(index, layoutDimensions)!;
     return constraints.asBoxConstraints(minExtent: extent, maxExtent: extent);
   }
 
@@ -1230,12 +1311,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     final double remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
-    _currentLayoutDimensions = SliverLayoutDimensions(
-      scrollOffset: constraints.scrollOffset,
-      precedingScrollExtent: constraints.precedingScrollExtent,
-      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-      crossAxisExtent: constraints.crossAxisExtent,
-    );
     // TODO(Piinks): Clean up when deprecation expires.
     const double deprecatedExtraItemExtent = -1;
 
@@ -1339,12 +1414,12 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
     double trailingScrollOffset;
 
-    if (lastIndex + 1 == childManager.childCount) {
+    if (!infinite && lastIndex + 1 == childManager.childCount) {
       trailingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex);
 
       trailingScrollOffset += math.max(
         weights.last * extentUnit,
-        _buildItemExtent(lastIndex, _currentLayoutDimensions),
+        _buildItemExtent(lastIndex, layoutDimensions),
       );
       trailingScrollOffset += extraLayoutOffset;
     } else {
@@ -1550,16 +1625,41 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     double? itemExtent,
     List<int>? flexWeights,
     bool consumeMaxWeight = true,
+    bool infinite = false,
+    int? itemCount,
     super.oldPosition,
   }) : assert(
          flexWeights != null && itemExtent == null || flexWeights == null && itemExtent != null,
        ),
        _itemToShowOnStartup = initialItem.toDouble(),
        _consumeMaxWeight = consumeMaxWeight,
+       _infinite = infinite,
+       _itemCount = itemCount,
        super(initialPixels: null);
 
   int initialItem;
   final double _itemToShowOnStartup;
+
+  /// The number of items in the carousel for infinite scrolling wrapping.
+  int? get itemCount => _itemCount;
+  int? _itemCount;
+  set itemCount(int? value) {
+    if (_itemCount == value) {
+      return;
+    }
+    _itemCount = value;
+  }
+
+  /// Whether the carousel scrolls infinitely in both directions.
+  bool get infinite => _infinite;
+  bool _infinite;
+  set infinite(bool value) {
+    if (_infinite == value) {
+      return;
+    }
+    _infinite = value;
+  }
+
   // When the viewport has a zero-size, the item can not
   // be retrieved by `getItemFromPixels`, so we need to cache the item
   // for use when resizing the viewport to non-zero next time.
@@ -1616,7 +1716,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // Use `toInt()` to truncate the fractional part, ensuring the leading item
   // only advances after fully crossing the next item's boundary.
   int get leadingItem {
-    final int leadingItem = getItemFromPixels(pixels, viewportDimension).toInt();
+    int leadingItem = getItemFromPixels(pixels, viewportDimension).toInt();
     // When `consumeMaxWeight` is true, there is some reserved space before
     // item 0 so that item 0 can be expanded to occupy the maximum
     // weight while scrolling. The way how consumeMaxWeight works is that we assume
@@ -1627,7 +1727,11 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     // The subtraction may cause negative number for leading item. In this case,
     // constrain the leading item to 0.
     if (consumeMaxWeight && flexWeights != null) {
-      return math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
+      leadingItem = math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
+    }
+    // For infinite scrolling, wrap the index to the range [0, itemCount - 1].
+    if (infinite && itemCount != null && itemCount! > 0) {
+      leadingItem = leadingItem % itemCount!;
     }
     return leadingItem;
   }
@@ -1640,6 +1744,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
           ? leadingItem
           : leadingItem + flexWeights!.indexOf(flexWeights!.max);
     } else {
+      if (!newConsumeMaxWeight) {
+        return _itemToShowOnStartup;
+      }
       maxItem = _itemToShowOnStartup;
     }
     if (newFlexWeights != null && !newConsumeMaxWeight) {
@@ -1731,6 +1838,42 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     _itemExtent = other._itemExtent;
   }
 
+  /// Returns the length of one complete cycle in pixels.
+  ///
+  /// A cycle is the scroll distance needed to return to the same visual state.
+  double _getCycleLengthInPixels() {
+    if (itemCount == null || itemCount! <= 0 || !hasViewportDimension || viewportDimension == 0) {
+      return 0.0;
+    }
+    double fraction;
+    if (itemExtent != null) {
+      fraction = itemExtent! / viewportDimension;
+    } else if (flexWeights != null) {
+      fraction = flexWeights!.first / flexWeights!.sum;
+    } else {
+      return 0.0;
+    }
+    return itemCount! * viewportDimension * fraction;
+  }
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // For infinite scrolling, dynamically add cycles when approaching the boundary.
+    // This eliminates the need for a large hardcoded starting offset.
+    if (infinite && hasPixels) {
+      final double cycleLength = _getCycleLengthInPixels();
+      if (cycleLength > 0 && pixels < cycleLength) {
+        // When scroll position drops below one cycle, add cycles to maintain buffer.
+        // This allows seamless backward scrolling without hitting the boundary.
+        final int cyclesToAdd = ((cycleLength - pixels) / cycleLength).ceil();
+        correctPixels(pixels + cyclesToAdd * cycleLength);
+        // Indicate position was corrected and layout should rerun.
+        return false;
+      }
+    }
+    return super.applyContentDimensions(infinite ? 0.0 : minScrollExtent, maxScrollExtent);
+  }
+
   @override
   _CarouselMetrics copyWith({
     double? minScrollExtent,
@@ -1815,6 +1958,10 @@ class CarouselController extends ScrollController {
   ///
   /// The [Duration] defaults to 300 milliseconds and [Curve] defaults to [Curves.ease].
   ///
+  /// When [CarouselView.infinite] is true, the animation always scrolls forward
+  /// to reach the target item, even if the item is closer in the backward
+  /// direction.
+  ///
   /// Does nothing if the carousel is not attached to this controller.
   Future<void> animateToItem(
     int index, {
@@ -1845,7 +1992,11 @@ class CarouselController extends ScrollController {
 
   double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
     if (!hasFlexWeights) {
-      return index * _carouselState!._itemExtent!;
+      final double targetInFirstCycle = index * _carouselState!._itemExtent!;
+      if (!_carouselState!.widget.infinite) {
+        return targetInFirstCycle;
+      }
+      return _adjustForInfiniteCycle(position, targetInFirstCycle);
     }
 
     final _CarouselViewState carouselState = _carouselState!;
@@ -1863,7 +2014,45 @@ class CarouselController extends ScrollController {
       leadingIndex = leadingIndex.clamp(0, itemCount - 1);
     }
 
-    return dimension * (weights.first / totalWeight) * leadingIndex;
+    final double targetInFirstCycle = dimension * (weights.first / totalWeight) * leadingIndex;
+    if (!carouselState.widget.infinite) {
+      return targetInFirstCycle;
+    }
+    return _adjustForInfiniteCycle(position, targetInFirstCycle);
+  }
+
+  /// Adjusts a target offset (computed for the first cycle) to always scroll
+  /// forward from the current position.
+  ///
+  /// In infinite mode, the scroll position can be many cycles ahead of 0.
+  /// This method finds the next forward occurrence of the target offset,
+  /// ensuring the animation always moves in the forward direction.
+  double _adjustForInfiniteCycle(_CarouselPosition position, double targetInFirstCycle) {
+    final double cycleLength = position._getCycleLengthInPixels();
+    if (cycleLength <= 0) {
+      return targetInFirstCycle;
+    }
+    final double currentPixels = position.pixels;
+    // Determine which cycle the current position is in.
+    final double currentCycleStart = (currentPixels / cycleLength).floorToDouble() * cycleLength;
+    // Candidate target in the same cycle as the current position.
+    final double sameCycleTarget = currentCycleStart + targetInFirstCycle;
+
+    // Always scroll forward: pick the first target at or ahead of current position.
+    if (sameCycleTarget >= currentPixels) {
+      return sameCycleTarget;
+    }
+    return sameCycleTarget + cycleLength;
+  }
+
+  int? _getItemCount() {
+    if (_carouselState == null) {
+      return null;
+    }
+    if (_carouselState!.widget.itemBuilder != null) {
+      return _carouselState!.widget.itemCount;
+    }
+    return _carouselState!.widget.children.length;
   }
 
   @override
@@ -1880,6 +2069,8 @@ class CarouselController extends ScrollController {
       itemExtent: _carouselState!._itemExtent,
       consumeMaxWeight: _carouselState!._consumeMaxWeight,
       flexWeights: _carouselState!._flexWeights,
+      infinite: _carouselState!.widget.infinite,
+      itemCount: _getItemCount(),
       oldPosition: oldPosition,
     );
   }
@@ -1891,5 +2082,7 @@ class CarouselController extends ScrollController {
     carouselPosition.flexWeights = _carouselState!._flexWeights;
     carouselPosition.itemExtent = _carouselState!._itemExtent;
     carouselPosition.consumeMaxWeight = _carouselState!._consumeMaxWeight;
+    carouselPosition.infinite = _carouselState!.widget.infinite;
+    carouselPosition.itemCount = _getItemCount();
   }
 }

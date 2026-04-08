@@ -17,6 +17,7 @@
 #include "impeller/compiler/types.h"
 #include "spirv_msl.hpp"
 #include "spirv_parser.hpp"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 namespace compiler {
@@ -37,6 +38,13 @@ class Compiler {
 
   std::string GetErrorMessages() const;
 
+  /// Gets verbose error messages if available.
+  ///
+  /// This is only populated when GetErrorMessages() returns a truncated error
+  /// message. If GetErrorMessages() did not have to be truncated, this will
+  /// return an empty string.
+  std::string GetVerboseErrorMessages() const;
+
   const std::vector<std::string>& GetIncludedFileNames() const;
 
   std::unique_ptr<fml::Mapping> CreateDepfileContents(
@@ -49,6 +57,7 @@ class Compiler {
   std::shared_ptr<fml::Mapping> spirv_assembly_;
   std::shared_ptr<fml::Mapping> sl_mapping_;
   std::stringstream error_stream_;
+  std::stringstream verbose_error_stream_;
   std::unique_ptr<Reflector> reflector_;
   std::vector<std::string> included_file_names_;
   bool is_valid_ = false;
@@ -56,6 +65,8 @@ class Compiler {
   std::string GetSourcePrefix() const;
 
   std::string GetDependencyNames(const std::string& separator) const;
+
+  absl::Status ValidateSkSLResult(const std::string& sksl);
 
   Compiler(const Compiler&) = delete;
 

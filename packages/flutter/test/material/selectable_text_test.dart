@@ -21,8 +21,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
+import 'editable_text_utils.dart' show textOffsetToPosition;
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -527,9 +527,8 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           body: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: Opacity(opacity: 0.5, child: SelectableText('selectable text')),
             ),
           ),

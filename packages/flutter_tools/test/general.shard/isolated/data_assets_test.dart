@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/build_info.dart' show BuildMode, TargetPlatfor
 import 'package:flutter_tools/src/build_system/build_system.dart' show Environment;
 import 'package:flutter_tools/src/features.dart' show FeatureFlags;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart'
-    show runFlutterSpecificHooks;
+    show BuildCodeAssetsOptions, runFlutterSpecificHooks;
 
 import '../../src/common.dart' show expect, returnsNormally, setUp, throwsToolExit;
 import '../../src/context.dart'
@@ -64,7 +64,7 @@ void main() {
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
-          buildCodeAssets: true,
+          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
         ),
         throwsToolExit(
@@ -101,7 +101,7 @@ void main() {
             environmentDefines: <String, String>{kBuildMode: buildMode.cliName},
             targetPlatform: TargetPlatform.linux_x64,
             projectUri: projectUri,
-            buildCodeAssets: true,
+            buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
             fileSystem: fileSystem,
             buildRunner: FakeFlutterNativeAssetsBuildRunner(

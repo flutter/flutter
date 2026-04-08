@@ -905,9 +905,8 @@ void main() {
           alignment: Alignment.topLeft,
           child: RepaintBoundary(
             key: key,
-            child: SizedBox(
-              height: 20,
-              width: 20,
+            child: SizedBox.square(
+              dimension: 20,
               child: CustomScrollView(
                 slivers: <Widget>[
                   const PinnedHeaderSliver(child: SizedBox(height: 10)),
@@ -977,9 +976,8 @@ void main() {
           alignment: Alignment.topLeft,
           child: RepaintBoundary(
             key: key,
-            child: SizedBox(
-              height: 20,
-              width: 20,
+            child: SizedBox.square(
+              dimension: 20,
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: <Widget>[

@@ -11,11 +11,14 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
+  const debugBlue = Color(0xFF0000FF);
   testWidgets('Image filter - blur', (WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
@@ -70,6 +73,36 @@ void main() {
     await expectLater(find.byType(ImageFiltered), matchesGoldenFile('image_filter_erode.png'));
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/101874
 
+  const matrixTestHome = TestWidgetsApp(
+    home: Column(
+      children: <Widget>[
+        ColoredBox(
+          color: debugBlue,
+          child: SizedBox(
+            height: 56,
+            width: double.infinity,
+            child: Center(child: Text('Matrix ImageFilter Test')),
+          ),
+        ),
+        Expanded(child: Center(child: Text('Hooray!'))),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: SizedBox(
+              width: 56,
+              height: 56,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: debugBlue, shape: BoxShape.circle),
+                child: Center(child: Text('+')),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
   testWidgets('Image filter - matrix', (WidgetTester tester) async {
     final matrix = ImageFilter.matrix(
       Float64List.fromList(<double>[
@@ -81,23 +114,7 @@ void main() {
     );
     await tester.pumpWidget(
       RepaintBoundary(
-        child: ImageFiltered(
-          imageFilter: matrix,
-          child: MaterialApp(
-            title: 'Flutter Demo',
-            theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
-            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
-            home: Scaffold(
-              appBar: AppBar(title: const Text('Matrix ImageFilter Test')),
-              body: const Center(child: Text('Hooray!')),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {},
-                tooltip: 'Increment',
-                child: const Icon(Icons.add),
-              ),
-            ),
-          ),
-        ),
+        child: ImageFiltered(imageFilter: matrix, child: matrixTestHome),
       ),
     );
     await expectLater(find.byType(ImageFiltered), matchesGoldenFile('image_filter_matrix.png'));
@@ -112,23 +129,7 @@ void main() {
         key: key,
         child: Transform.translate(
           offset: const Offset(50, 50),
-          child: ImageFiltered(
-            imageFilter: matrixFilter,
-            child: MaterialApp(
-              title: 'Flutter Demo',
-              theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
-              debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
-              home: Scaffold(
-                appBar: AppBar(title: const Text('Matrix ImageFilter Test')),
-                body: const Center(child: Text('Hooray!')),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () {},
-                  tooltip: 'Increment',
-                  child: const Icon(Icons.add),
-                ),
-              ),
-            ),
-          ),
+          child: ImageFiltered(imageFilter: matrixFilter, child: matrixTestHome),
         ),
       ),
     );

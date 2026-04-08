@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/foundation/diagnostics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -627,6 +627,59 @@ void main() {
     expect(
       tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior,
       clipBehavior,
+    );
+  });
+
+  testWidgets('AnimatedGrid.scrollCacheExtent is forwarded to its inner CustomScrollView', (
+    WidgetTester tester,
+  ) async {
+    const scrollCacheExtent = ScrollCacheExtent.viewport(2.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedGrid(
+          initialItemCount: 2,
+          scrollCacheExtent: scrollCacheExtent,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+          },
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 100.0,
+            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CustomScrollView>(find.byType(CustomScrollView)).scrollCacheExtent,
+      scrollCacheExtent,
+    );
+  });
+
+  testWidgets('AnimatedGrid.scrollCacheExtent defaults to null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedGrid(
+          initialItemCount: 2,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+          },
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 100.0,
+            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CustomScrollView>(find.byType(CustomScrollView)).scrollCacheExtent,
+      isNull,
     );
   });
 

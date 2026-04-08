@@ -1508,6 +1508,70 @@ void main() {
 
     semanticsHandle.dispose();
   });
+
+  group('positionInlineChildren', () {
+    test('asserts when boxes length exceeds childCount', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'How are you \n'),
+        textDirection: TextDirection.ltr,
+      );
+
+      // Manually add two child RenderBoxes
+      final children = List<RenderBox>.generate(
+        2,
+        (_) => RenderConstrainedBox(
+          additionalConstraints: const BoxConstraints.tightFor(width: 10, height: 10),
+        ),
+      );
+      children.forEach(paragraph.add);
+      // Now childCount == 2
+
+      // Create 3 TextBoxes (more than children)
+      final boxes = List<ui.TextBox>.generate(
+        3,
+        (i) => ui.TextBox.fromLTRBD(i * 10.0, 0.0, (i + 1) * 10.0, 10.0, TextDirection.ltr),
+      );
+
+      expect(
+        // ignore: invalid_use_of_protected_member
+        () => paragraph.positionInlineChildren(boxes),
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError e) => e.message,
+            'message',
+            contains('Invalid number of boxes provided'),
+          ),
+        ),
+      );
+    });
+
+    test('does not assert when boxes length is less than or equal to childCount', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(text: 'How are you \n'),
+        textDirection: TextDirection.ltr,
+      );
+
+      // Adding three children
+      final children = List<RenderBox>.generate(
+        3,
+        (_) => RenderConstrainedBox(
+          additionalConstraints: const BoxConstraints.tightFor(width: 10, height: 10),
+        ),
+      );
+      children.forEach(paragraph.add);
+      // childCount == 3
+
+      // Create 2 TextBoxes (less than the number of children)
+      final boxes = List<ui.TextBox>.generate(
+        2,
+        (i) => ui.TextBox.fromLTRBD(i * 10.0, 0.0, (i + 1) * 10.0, 10.0, TextDirection.ltr),
+      );
+
+      // We expect the function to not throw an exception
+      // ignore: invalid_use_of_protected_member
+      expect(() => paragraph.positionInlineChildren(boxes), returnsNormally);
+    });
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -1541,6 +1605,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 
 class TestSelectionRegistrar extends SelectionRegistrar {
   final List<Selectable> selectables = <Selectable>[];
+
   @override
   void add(Selectable selectable) {
     selectables.add(selectable);

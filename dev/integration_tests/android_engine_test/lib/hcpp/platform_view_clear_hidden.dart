@@ -35,9 +35,8 @@ class PlatformViewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 200,
-        height: 200,
+      child: SizedBox.square(
+        dimension: 200,
         child: PlatformViewLink(
           viewType: 'changing_color_button_platform_view',
           surfaceFactory: (BuildContext context, PlatformViewController controller) {

@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1722,6 +1722,21 @@ void main() {
 
     expect(find.text('**validation error**'), findsOneWidget);
   });
+
+  testWidgets(
+    'TextFormField asserts when both errorBuilder and decoration.errorText are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => TextFormField(
+          decoration: const InputDecoration(errorText: 'Decoration error'),
+          errorBuilder: (BuildContext context, String errorText) {
+            return Text(errorText);
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
 
   group('context menu', () {
     testWidgets(

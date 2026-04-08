@@ -1158,9 +1158,7 @@ void main() {
     );
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      gesture?.removePointer();
-    });
+    addTearDown(gesture.removePointer);
 
     // Both the inner and outer containers have tooltips associated with them, but only
     // the currently hovered one should appear, even though the pointer is inside both.
@@ -2779,6 +2777,23 @@ void main() {
 
     // Verify the tooltip overlay is no longer displayed.
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('RawTooltip does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: RawTooltip(
+            semanticsTooltip: tooltipText,
+            tooltipBuilder: (_, _) => const Text('Y'),
+            child: const Text('X'),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawTooltip)), Size.zero);
   });
 }
 

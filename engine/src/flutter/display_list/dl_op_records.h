@@ -68,17 +68,15 @@ struct DLOp {
 };
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
-#define DEFINE_SET_BOOL_OP(name)                                      \
-  struct Set##name##Op final : DLOp {                                 \
-    static constexpr auto kType = DisplayListOpType::kSet##name;      \
-                                                                      \
-    explicit Set##name##Op(bool value) : DLOp(kType), value(value) {} \
-                                                                      \
-    const bool value;                                                 \
-                                                                      \
-    void dispatch(DlOpReceiver& receiver) const {                     \
-      receiver.set##name(value);                                      \
-    }                                                                 \
+#define DEFINE_SET_BOOL_OP(name)                                               \
+  struct Set##name##Op final : DLOp {                                          \
+    static constexpr auto kType = DisplayListOpType::kSet##name;               \
+                                                                               \
+    explicit Set##name##Op(bool value) : DLOp(kType), value(value) {}          \
+                                                                               \
+    const bool value;                                                          \
+                                                                               \
+    void dispatch(DlOpReceiver& receiver) const { receiver.set##name(value); } \
   };
 DEFINE_SET_BOOL_OP(AntiAlias)
 DEFINE_SET_BOOL_OP(InvertColors)

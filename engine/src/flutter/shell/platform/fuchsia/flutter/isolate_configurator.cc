@@ -4,8 +4,8 @@
 
 #include "flutter/shell/platform/fuchsia/flutter/isolate_configurator.h"
 
-#include "flutter/shell/platform/fuchsia/dart-pkg/fuchsia/sdk_ext/fuchsia.h"
-#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h"
+#include "flutter/shell/platform/fuchsia/dart_pkg/fuchsia/sdk_ext/fuchsia.h"
+#include "flutter/shell/platform/fuchsia/dart_pkg/zircon/sdk_ext/handle.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_state.h"

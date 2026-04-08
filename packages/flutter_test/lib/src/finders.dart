@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -27,6 +28,26 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
+
+/// Returns true if [renderObject] is equal to [target] or is an ancestor of
+/// [target] in the render tree.
+///
+/// This is useful for hit testing because some render objects (like
+/// [RenderTransform]) don't add themselves to the hit test path but instead
+/// just transform the hit test point and pass it to their children.
+bool isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget target) {
+  if (target == renderObject) {
+    return true;
+  }
+  if (target is RenderObject) {
+    for (RenderObject? current = target.parent; current != null; current = current.parent) {
+      if (current == renderObject) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 /// The `CandidateType` of finders that search for and filter substrings,
 /// within static text rendered by [RenderParagraph]s.
@@ -1464,11 +1485,11 @@ class _HitTestableWidgetFinder extends ChainedFinder {
       final Offset absoluteOffset = object.localToGlobal(alignment.alongSize(object.size));
       final hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
-      for (final HitTestEntry entry in hitResult.path) {
-        if (entry.target == candidate.renderObject) {
-          yield candidate;
-          break;
-        }
+      final bool found = hitResult.path.any(
+        (HitTestEntry entry) => isRenderObjectAncestorOfTarget(object, entry.target),
+      );
+      if (found) {
+        yield candidate;
       }
     }
   }

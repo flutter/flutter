@@ -20,7 +20,7 @@ dependencies:
   stack_trace: 1.12.1
   url_launcher: 6.3.2
 
-  async: 2.13.0
+  async: 2.13.1
   boolean_selector: 2.1.2
   characters: 1.4.1
   clock: 1.1.2
@@ -35,7 +35,7 @@ dependencies:
   leak_tracker_flutter_testing: 3.0.10
   leak_tracker_testing: 3.0.2
   lints: 6.1.0
-  matcher: 0.12.18
+  matcher: 0.12.19
   material_color_utilities: 0.13.0
   meta: 1.18.0
   plugin_platform_interface: 2.1.8
@@ -43,10 +43,10 @@ dependencies:
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
-  test_api: 0.7.9
+  test_api: 0.7.11
   typed_data: 1.4.0
-  unified_analytics: 8.0.11
-  url_launcher_android: 6.3.28
+  unified_analytics: 8.0.14
+  url_launcher_android: 6.3.29
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
@@ -64,8 +64,8 @@ dependencies:
 dev_dependencies:
   flutter_tools:
     path: ../../../packages/flutter_tools/
-  test: 1.29.0
+  test: 1.31.0
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: 8i7fpe
+# PUBSPEC CHECKSUM: ciq2fr

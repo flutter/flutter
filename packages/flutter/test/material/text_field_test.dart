@@ -25,12 +25,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart';
 import '../widgets/feedback_tester.dart';
-import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
+import 'editable_text_utils.dart';
+import 'live_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -117,9 +117,8 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: TextField(decoration: InputDecoration(hintText: 'Placeholder')),
               ),
             ),
@@ -1061,9 +1060,8 @@ void main() {
       child: overlay(
         child: RepaintBoundary(
           key: const ValueKey<int>(1),
-          child: SizedBox(
-            height: 200,
-            width: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: Center(
               child: SizedBox(
                 // Make sure the input field is not high enough for the WidgetSpan.
@@ -1208,9 +1206,8 @@ void main() {
           theme: ThemeData(useMaterial3: false),
           home: const Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(decoration: InputDecoration(hintText: 'Placeholder')),
@@ -6244,7 +6241,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+      await Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -6289,7 +6286,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+      await Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -15786,6 +15783,24 @@ void main() {
     expect(decorator.decoration, expectedDecoration);
   });
 
+  testWidgets('TextField passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: TextField(enableInlinePrediction: true))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
+
+  testWidgets('TextField enableInlinePrediction defaults to null', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: TextField())));
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, isNull);
+  });
+
   group('MaxLengthEnforcement', () {
     const maxLength = 5;
 
@@ -17993,9 +18008,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(
@@ -18028,9 +18042,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(
@@ -18067,9 +18080,8 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: Center(
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
+                child: SizedBox.square(
+                  dimension: 100.0,
                   child: Opacity(
                     opacity: 0.5,
                     child: TextField(
@@ -18124,9 +18136,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(

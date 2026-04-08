@@ -362,10 +362,14 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool consumeOutsideTap;
 
-  /// A callback that is invoked when the menu is opened.
+  /// A callback that is invoked when the menu begins opening.
+  ///
+  /// Defaults to null.
   final VoidCallback? onOpen;
 
-  /// A callback that is invoked when the menu is closed.
+  /// A callback that is invoked when the menu finishes closing.
+  ///
+  /// Defaults to null.
   final VoidCallback? onClose;
 
   /// Determine if the menu panel can be wrapped by a [UnconstrainedBox] which allows
@@ -656,7 +660,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
       return;
     }
 
-    _menuController.closeChildren();
     _animationController.reverse().whenComplete(hideOverlay);
   }
 
@@ -3353,6 +3356,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     required this.parentOrientation,
     required this.reservedPadding,
     required this.heightFactor,
+    required this.mediaQueryData,
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -3390,6 +3394,10 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // The factor by which the height of the menu is scaled.
   final double heightFactor;
 
+  // Used to ensure the menu is positioned within the safe area and respects
+  // view insets such as the software keyboard.
+  final MediaQueryData mediaQueryData;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus the view padding
@@ -3402,11 +3410,18 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     // size: The size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
-    final Rect overlayRect = Offset.zero & size;
+    final Rect overlayRect = mediaQueryData.padding.deflateRect(
+      mediaQueryData.viewInsets.deflateRect(Offset.zero & size),
+    );
     final double unconstrainedHeight = heightFactor > 0.01 ? childSize.height / heightFactor : 0;
     final double childHeightEstimate = math.min(unconstrainedHeight, size.height);
     final childSizeEstimate = Size(childSize.width, childHeightEstimate);
     final ui.Offset finalPosition = _positionChild(childSizeEstimate, overlayRect);
+
+    if (menuPosition != null) {
+      return finalPosition;
+    }
+
     // If the menu sits above the anchor when fully open, grow upward.
     // Keep the bottom (attachment) fixed by shifting the top-left during animation.
     final bool growsUp = finalPosition.dy + childSizeEstimate.height <= anchorRect.center.dy;
@@ -3900,6 +3915,7 @@ class _Submenu extends StatelessWidget {
                 parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
                 reservedPadding: reservedPadding,
                 heightFactor: heightAnimation.value,
+                mediaQueryData: mediaQuery,
               ),
               child: menuPanel,
             );
