@@ -1645,10 +1645,8 @@ class SelectionOverlay {
     }
 
     final renderBox = context.findRenderObject()! as RenderBox;
-    final overlayRenderBox = Overlay.of(
-      context,
-      rootOverlay: true,
-    ).context.findRenderObject()! as RenderBox;
+    final overlayRenderBox =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()! as RenderBox;
     _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -1670,10 +1668,8 @@ class SelectionOverlay {
     }
 
     final renderBox = context.findRenderObject()! as RenderBox;
-    final overlayRenderBox = Overlay.of(
-      context,
-      rootOverlay: true,
-    ).context.findRenderObject()! as RenderBox;
+    final overlayRenderBox =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()! as RenderBox;
     _spellCheckToolbarController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -1833,10 +1829,8 @@ class SelectionOverlay {
     );
 
     final renderBox = this.context.findRenderObject()! as RenderBox;
-    final overlayRenderBox = Overlay.of(
-      this.context,
-      rootOverlay: true,
-    ).context.findRenderObject()! as RenderBox;
+    final overlayRenderBox =
+        Overlay.of(this.context, rootOverlay: true).context.findRenderObject()! as RenderBox;
 
     final editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero, ancestor: overlayRenderBox),

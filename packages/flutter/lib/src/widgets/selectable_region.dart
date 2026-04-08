@@ -1595,10 +1595,8 @@ class SelectableRegionState extends State<SelectableRegion>
   ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
-    final overlayRenderBox = Overlay.of(
-      context,
-      rootOverlay: true,
-    ).context.findRenderObject()! as RenderBox;
+    final overlayRenderBox =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()! as RenderBox;
     if (_lastSecondaryTapDownPosition != null) {
       // Convert the global tap position to overlay-local coordinates so it is
       // consistent with the coordinate space the toolbar is rendered in.

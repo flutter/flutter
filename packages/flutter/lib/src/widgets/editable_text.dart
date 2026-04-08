@@ -3170,17 +3170,13 @@ class EditableTextState extends State<EditableText>
   ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
-    final overlayRenderBox = Overlay.of(
-      context,
-      rootOverlay: true,
-    ).context.findRenderObject()! as RenderBox;
+    final overlayRenderBox =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()! as RenderBox;
     if (renderEditable.lastSecondaryTapDownPosition != null) {
       // Convert the global tap position to overlay-local coordinates so it is
       // consistent with the coordinate space the toolbar is rendered in.
       return TextSelectionToolbarAnchors(
-        primaryAnchor: overlayRenderBox.globalToLocal(
-          renderEditable.lastSecondaryTapDownPosition!,
-        ),
+        primaryAnchor: overlayRenderBox.globalToLocal(renderEditable.lastSecondaryTapDownPosition!),
       );
     }
 
