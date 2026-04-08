@@ -47,37 +47,32 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Clean Xcode to remove intermediate DerivedData artifacts.
-    // Do this before removing ephemeral directory, which would delete the xcworkspace.
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
-    final bool isXcodeInstalledAndMeetsVersionCheck =
-        xcode != null && xcode.isInstalledAndMeetsVersionCheck;
-    if (isXcodeInstalledAndMeetsVersionCheck) {
+    final bool cleanXcode = xcode != null && xcode.isInstalledAndMeetsVersionCheck;
+
+    await _cleanProject(flutterProject, cleanXcode: cleanXcode);
+    if (boolArg('include-example') && flutterProject.hasExampleApp) {
+      await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
+    }
+
+    return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  /// Cleans all build artifacts, Xcode workspaces, and ephemeral files for
+  /// the given [flutterProject]. When [cleanXcode] is true, also cleans
+  /// Xcode's DerivedData for iOS and macOS workspaces.
+  Future<void> _cleanProject(FlutterProject flutterProject, {required bool cleanXcode}) async {
+    // Clean Xcode's intermediate DerivedData artifacts before removing
+    // ephemeral directory, which would delete the xcworkspace.
+    if (cleanXcode) {
       await _cleanXcode(flutterProject.ios);
       await _cleanXcode(flutterProject.macos);
     }
 
     final Directory buildDir = flutterProject.directory.childDirectory(getBuildDirectory());
     deleteFile(buildDir);
-    _deleteProjectFiles(flutterProject);
 
-    if (boolArg('include-example') && flutterProject.hasExampleApp) {
-      final FlutterProject exampleProject = flutterProject.example;
-      if (isXcodeInstalledAndMeetsVersionCheck) {
-        await _cleanXcode(exampleProject.ios);
-        await _cleanXcode(exampleProject.macos);
-      }
-
-      deleteFile(exampleProject.directory.childDirectory(getBuildDirectory()));
-      _deleteProjectFiles(exampleProject);
-    }
-
-    return const FlutterCommandResult(ExitStatus.success);
-  }
-
-  /// Deletes ephemeral files and directories for the given [flutterProject].
-  void _deleteProjectFiles(FlutterProject flutterProject) {
     deleteFile(flutterProject.dartTool);
 
     deleteFile(flutterProject.android.ephemeralDirectory);
