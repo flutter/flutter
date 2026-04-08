@@ -7,9 +7,10 @@
 import 'package:flutter/material.dart';
 // ignore: implementation_imports
 import 'package:flutter/src/widgets/_window_positioner.dart';
+
 import 'models.dart';
 
-Future<void> showWindowSettingsDialog(BuildContext context, WindowSettings settings) async {
+Future<void> showWindowSettingsDialog(BuildContext context, WindowSettings settings) {
   return showDialog(
     context: context,
     builder: (BuildContext ctx) {
