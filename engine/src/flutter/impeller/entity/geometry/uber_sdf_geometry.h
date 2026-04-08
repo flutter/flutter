@@ -18,6 +18,10 @@ class UberSDFGeometry final : public Geometry {
   ~UberSDFGeometry() override;
 
   // |Geometry|
+  // Returns the mesh that the SDF is drawn onto. This is a superset of the
+  // drawn SDF shape, and is not necessarily "tight" around the drawn shape. In
+  // other words, this is a bounding container mesh onto which the smaller SDF
+  // shape is drawn.
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
@@ -32,10 +36,10 @@ class UberSDFGeometry final : public Geometry {
   bool IsAxisAlignedRect() const override;
 
  private:
-  // Compute the local bounds of the primitive based on the center and size.
+  // The local bounds of the primitive based on the center and size.
   // Takes into account stroke width if the primitive is stroked.
-  // Does not take AA fringe into account.
-  Rect GetBaseBounds() const;
+  // Does not take AA padding into account.
+  Rect base_bounds_;
 
   UberSDFParameters params_;
 };

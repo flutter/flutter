@@ -9,18 +9,18 @@
 namespace impeller {
 
 UberSDFGeometry::UberSDFGeometry(const UberSDFParameters& params)
-    : params_(params) {}
+    : params_(params) {
+  base_bounds_ = Rect::MakeLTRB(
+      /*left=*/params_.center.x - params_.size.x,
+      /*top=*/params_.center.y - params_.size.y,
+      /*right=*/params_.center.x + params_.size.x,
+      /*bottom=*/params_.center.y + params_.size.y);
+  if (params_.stroke) {
+    base_bounds_ = base_bounds_.Expand(params_.stroke->width * 0.5);
+  }
+}
 
 UberSDFGeometry::~UberSDFGeometry() = default;
-
-Rect UberSDFGeometry::GetBaseBounds() const {
-  Rect bounds = Rect::MakeOriginSize(params_.center - params_.size,
-                                     Size(params_.size.x, params_.size.y) * 2);
-  if (params_.stroke) {
-    bounds = bounds.Expand(params_.stroke->width * 0.5);
-  }
-  return bounds;
-}
 
 GeometryResult UberSDFGeometry::GetPositionBuffer(
     const ContentContext& renderer,
@@ -30,38 +30,41 @@ GeometryResult UberSDFGeometry::GetPositionBuffer(
   // space value by the maximum axis scaling of the entity transform.
   Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
   Scalar aa_padding =
-      max_basis == 0 ? 0 : UberSDFParameters::kAntialiasPadding / max_basis;
+      max_basis == 0 ? 0 : UberSDFParameters::kAntialiasPixels / max_basis;
 
   // Return a quad (FillRectGeometry) that covers the base shape expanded by the
   // AA padding.
-  FillRectGeometry frg(GetBaseBounds().Expand(aa_padding));
+  //
+  // For future performance enhancements (if the fill rate is a limiting factor)
+  // this can be optimized to use a tighter geometry for specific shapes. E.g.
+  // Using a tighter polygon, or cutting out the interior for stroked shapes.
+  FillRectGeometry frg(base_bounds_.Expand(aa_padding));
   return frg.GetPositionBuffer(renderer, entity, pass);
 }
 
 std::optional<Rect> UberSDFGeometry::GetCoverage(
     const Matrix& transform) const {
   // The coverage rect of the SDF is the bounds of the base shape, expanded by
-  // the AA fringe.
-  Rect transformed_bounds = GetBaseBounds().TransformAndClipBounds(transform);
-  return transformed_bounds.Expand(UberSDFParameters::kAntialiasPadding);
+  // the AA padding.
+  Rect transformed_bounds = base_bounds_.TransformAndClipBounds(transform);
+  return transformed_bounds.Expand(UberSDFParameters::kAntialiasPixels);
 }
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
                                  const Rect& rect) const {
-  // Conservatively return false for most cases. This can be optimized to cover
-  // more cases in the future if needed for performance reasons.
-  if (params_.type != UberSDFParameters::Type::kRect || params_.stroke) {
-    return false;
-  }
-  if (!transform.IsTranslationScaleOnly()) {
-    return false;
+  if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
+      transform.IsTranslationScaleOnly()) {
+    // The SDF is a filled axis-aligned rectangle. It covers the input rect if
+    // the SDF's rect covers the input rect, subtracting the AA padding from the
+    // SDF rect.
+    Rect transformed_bounds = base_bounds_.TransformAndClipBounds(transform);
+    return transformed_bounds.Expand(-UberSDFParameters::kAntialiasPixels)
+        .Contains(rect);
   }
 
-  // The SDF is a filled rectangle. It covers the input rect if the SDF's rect
-  // covers the input rect, subtracting the AA fringe from the SDF rect.
-  Rect transformed_bounds = GetBaseBounds().TransformAndClipBounds(transform);
-  return transformed_bounds.Expand(-UberSDFParameters::kAntialiasPadding)
-      .Contains(rect);
+  // Conservatively return false. We can optimize to handle more cases in the
+  // future if needed for performance reasons.
+  return false;
 }
 
 bool UberSDFGeometry::IsAxisAlignedRect() const {

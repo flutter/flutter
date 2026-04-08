@@ -71,7 +71,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
-  frag_info.aa_pixels = UberSDFParameters::kAntialiasPadding;
+  frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
