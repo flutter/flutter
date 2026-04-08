@@ -1616,7 +1616,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns null
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -1649,7 +1649,7 @@ class FlutterPluginUtilsTest {
         every { mockCmakeOptions.path } returns null
         every { project.findProperty(FlutterPluginUtils.PROP_PREPROVISIONED_NDK_VERSION) } returns "29.0.13846066"
         every { project.gradle.startParameter.taskNames } returns emptyList()
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk(relaxed = true)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
 
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
@@ -1671,7 +1671,7 @@ class FlutterPluginUtilsTest {
         every { mockCmakeOptions.path } returns null
         every { project.findProperty(FlutterPluginUtils.PROP_PREPROVISIONED_NDK_VERSION) } returns null
         every { project.gradle.startParameter.taskNames } returns listOf(FlutterPluginUtils.TASK_PRINT_NDK_VERSION)
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk(relaxed = true)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
 
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
@@ -1686,7 +1686,7 @@ class FlutterPluginUtilsTest {
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
-        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns null
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -1733,9 +1733,9 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForPrintNdkVersion adds task for printing ndk version`() {
         val project = mockk<Project>()
-        val androidExtension = mockk<AbstractAppExtension>()
+        val androidExtension = mockk<ApplicationExtension>()
         every { androidExtension.ndkVersion } returns "29.0.13846066"
-        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns androidExtension
+        every { project.extensions.getByType(ApplicationExtension::class.java) } returns androidExtension
         every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
         val captureSlot = slot<Action<Task>>()
 

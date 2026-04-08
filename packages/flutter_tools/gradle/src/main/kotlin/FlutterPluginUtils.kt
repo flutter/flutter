@@ -995,7 +995,7 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintNdkVersion")
     internal fun addTaskForPrintNdkVersion(project: Project) {
-        val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
+        val androidExtension = getAndroidApplicationExtension(project)
         project.tasks.register(TASK_PRINT_NDK_VERSION) {
             description = "Prints out the configured ndkVersion for this Android project"
             doLast {
