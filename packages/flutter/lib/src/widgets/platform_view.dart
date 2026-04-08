@@ -806,7 +806,7 @@ class _AndroidViewState extends State<AndroidView> {
       return;
     }
     if (!isFocused) {
-      _controller.clearFocus().catchError((dynamic e) {
+      _controller.clearFocus().catchError((Object e, StackTrace stack) {
         if (e is MissingPluginException) {
           // We land the framework part of Android platform views keyboard
           // support before the engine part. There will be a commit range where
@@ -815,6 +815,15 @@ class _AndroidViewState extends State<AndroidView> {
           // framework I'll remove this.
           // TODO(amirh): remove this once the engine's clearFocus is rolled.
           return;
+        } else {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: e,
+              stack: stack,
+              library: 'widgets library',
+              context: ErrorDescription('while clearing the platform view focus'),
+            ),
+          );
         }
       });
       return;
@@ -823,7 +832,7 @@ class _AndroidViewState extends State<AndroidView> {
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
         })
-        .catchError((dynamic e) {
+        .catchError((Object e, StackTrace stack) {
           if (e is MissingPluginException) {
             // We land the framework part of Android platform views keyboard
             // support before the engine part. There will be a commit range where
@@ -832,6 +841,15 @@ class _AndroidViewState extends State<AndroidView> {
             // rolled to the framework I'll remove this.
             // TODO(amirh): remove this once the engine's clearFocus is rolled.
             return;
+          } else {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: e,
+                stack: stack,
+                library: 'widgets library',
+                context: ErrorDescription('while setting the platform view client'),
+              ),
+            );
           }
         });
   }
@@ -962,10 +980,23 @@ abstract class _DarwinViewState<
       // cancel the focus on the previously focused platform view.
       return;
     }
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': controller.id},
-    );
+    SystemChannels.textInput
+        .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
+          'platformViewId': controller.id,
+        })
+        .then(
+          (_) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'widgets library',
+                context: ErrorDescription('while setting the platform view client'),
+              ),
+            );
+          },
+        );
   }
 }
 
@@ -1300,10 +1331,20 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!isFocused) {
       _controller?.clearFocus();
     }
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setPlatformViewClient',
-      <String, dynamic>{'platformViewId': _id},
-    );
+    SystemChannels.textInput
+        .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
+          'platformViewId': _id,
+        })
+        .catchError((Object error, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'widget library',
+              context: ErrorDescription('while handling framework focus changed on platform view'),
+            ),
+          );
+        });
   }
 
   void _handlePlatformFocusChanged(bool isFocused) {
