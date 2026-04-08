@@ -16,8 +16,7 @@ class RotatedWireCube extends StatefulWidget {
   State<StatefulWidget> createState() => _RotatedWireCubeState();
 }
 
-class _RotatedWireCubeState extends State<RotatedWireCube>
-    with SingleTickerProviderStateMixin {
+class _RotatedWireCubeState extends State<RotatedWireCube> with SingleTickerProviderStateMixin {
   late final AnimationController _animation;
 
   @override
@@ -43,10 +42,7 @@ class _RotatedWireCubeState extends State<RotatedWireCube>
       builder: (context, child) {
         return CustomPaint(
           size: const Size(200, 200),
-          painter: _RotatedWireCubePainter(
-            angle: _animation.value,
-            color: widget.cubeColor,
-          ),
+          painter: _RotatedWireCubePainter(angle: _animation.value, color: widget.cubeColor),
         );
       },
     );
@@ -54,7 +50,6 @@ class _RotatedWireCubeState extends State<RotatedWireCube>
 }
 
 class _RotatedWireCubePainter extends CustomPainter {
-
   _RotatedWireCubePainter({required this.angle, required this.color});
   static List<Vector3> vertices = [
     Vector3(-0.5, -0.5, -0.5),

@@ -14,18 +14,13 @@ void showDialogWindowEditDialog({
 }) {
   showDialog<void>(
     context: context,
-    builder: (context) => _DialogWindowEditDialog(
-      controller: controller,
-      onClose: () => Navigator.pop(context),
-    ),
+    builder: (context) =>
+        _DialogWindowEditDialog(controller: controller, onClose: () => Navigator.pop(context)),
   );
 }
 
 class _DialogWindowEditDialog extends StatefulWidget {
-  const _DialogWindowEditDialog({
-    required this.controller,
-    required this.onClose,
-  });
+  const _DialogWindowEditDialog({required this.controller, required this.onClose});
 
   final DialogWindowController controller;
   final VoidCallback onClose;
@@ -52,9 +47,7 @@ class _DialogWindowEditDialogState extends State<_DialogWindowEditDialog> {
     initialMinimized = widget.controller.isMinimized;
 
     widthController = TextEditingController(text: initialSize.width.toString());
-    heightController = TextEditingController(
-      text: initialSize.height.toString(),
-    );
+    heightController = TextEditingController(text: initialSize.height.toString());
     titleController = TextEditingController(text: initialTitle);
     nextIsMinimized = null;
   }

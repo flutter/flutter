@@ -37,9 +37,7 @@ class MainWindow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: _WindowsTable(mainWindow: controller),
-                  ),
+                  child: SingleChildScrollView(child: _WindowsTable(mainWindow: controller)),
                 ),
               ],
             ),
@@ -95,10 +93,7 @@ class _WindowsTable extends StatelessWidget {
     );
   }
 
-  List<DataRow> _buildRows(
-    WindowRegistry windowRegistry,
-    BuildContext context,
-  ) {
+  List<DataRow> _buildRows(WindowRegistry windowRegistry, BuildContext context) {
     final List<DataRow> rows = [_buildRow(mainWindow, context)];
     for (final WindowEntry entry in windowRegistry.windows) {
       final BaseWindowController controller = entry.controller;
@@ -108,10 +103,7 @@ class _WindowsTable extends StatelessWidget {
     return rows;
   }
 
-  void _showWindowEditDialog(
-    BaseWindowController controller,
-    BuildContext context,
-  ) {
+  void _showWindowEditDialog(BaseWindowController controller, BuildContext context) {
     return switch (controller) {
       final RegularWindowController regular => showRegularWindowEditDialog(
         context: context,
@@ -153,21 +145,12 @@ class _WindowsTable extends StatelessWidget {
           showBottomBorder: true,
           columns: const [
             DataColumn(
-              label: SizedBox(
-                width: 20,
-                child: Text('ID', style: TextStyle(fontSize: 16)),
-              ),
+              label: SizedBox(width: 20, child: Text('ID', style: TextStyle(fontSize: 16))),
             ),
             DataColumn(
-              label: SizedBox(
-                width: 120,
-                child: Text('Type', style: TextStyle(fontSize: 16)),
-              ),
+              label: SizedBox(width: 120, child: Text('Type', style: TextStyle(fontSize: 16))),
             ),
-            DataColumn(
-              label: SizedBox(width: 20, child: Text('')),
-              numeric: true,
-            ),
+            DataColumn(label: SizedBox(width: 20, child: Text('')), numeric: true),
           ],
           rows: _buildRows(windowRegistry, context),
         );
@@ -215,9 +198,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              RegularWindowContent(
-                                regularWindowController: controller,
-                              ),
+                              RegularWindowContent(regularWindowController: controller),
                         );
                         windowRegistry.register(entry);
                       },
@@ -241,9 +222,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              DialogWindowContent(
-                                dialogWindowController: controller,
-                              ),
+                              DialogWindowContent(dialogWindowController: controller),
                         );
                         windowRegistry.register(entry);
                       },
@@ -266,9 +245,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              DialogWindowContent(
-                                dialogWindowController: controller,
-                              ),
+                              DialogWindowContent(dialogWindowController: controller),
                         );
                         windowRegistry.register(entry);
                       },

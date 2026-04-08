@@ -21,14 +21,8 @@ class TooltipWindowContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepeatingAnimationBuilder(
       animatable: TweenSequence<double>([
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
-          weight: 50.0,
-        ),
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 1.0, end: 0.0),
-          weight: 50.0,
-        ),
+        TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 1.0), weight: 50.0),
+        TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.0), weight: 50.0),
       ]),
       duration: const Duration(seconds: 1),
       // Disable animation on Linux as it doesn't support position updates.
@@ -43,11 +37,7 @@ class TooltipWindowContent extends StatelessWidget {
               colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
             ),
             boxShadow: [
-              BoxShadow(
-                color: Color(0x4D000000),
-                blurRadius: 12.0,
-                offset: Offset(0, 4),
-              ),
+              BoxShadow(color: Color(0x4D000000), blurRadius: 12.0, offset: Offset(0, 4)),
             ],
           ),
           padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
@@ -55,16 +45,9 @@ class TooltipWindowContent extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                decoration: const BoxDecoration(
-                  color: Color(0x33FFFFFF),
-                  shape: BoxShape.circle,
-                ),
+                decoration: const BoxDecoration(color: Color(0x33FFFFFF), shape: BoxShape.circle),
                 padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.info,
-                  color: Color(0xFFFFFFFF),
-                  size: 20,
-                ),
+                child: const Icon(Icons.info, color: Color(0xFFFFFFFF), size: 20),
               ),
               const SizedBox(width: 12),
               const Text(

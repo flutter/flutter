@@ -16,18 +16,13 @@ void showTooltipWindowEditDialog({
 }) {
   showDialog<void>(
     context: context,
-    builder: (context) => _TooltipWindowEditDialog(
-      controller: controller,
-      onClose: () => Navigator.pop(context),
-    ),
+    builder: (context) =>
+        _TooltipWindowEditDialog(controller: controller, onClose: () => Navigator.pop(context)),
   );
 }
 
 class _TooltipWindowEditDialog extends StatefulWidget {
-  const _TooltipWindowEditDialog({
-    required this.controller,
-    required this.onClose,
-  });
+  const _TooltipWindowEditDialog({required this.controller, required this.onClose});
 
   final TooltipWindowController controller;
   final VoidCallback onClose;
@@ -99,10 +94,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
     }
 
     WindowPositioner? newPositioner;
-    if (parentAnchor != null ||
-        childAnchor != null ||
-        offsetX != null ||
-        offsetY != null) {
+    if (parentAnchor != null || childAnchor != null || offsetX != null || offsetY != null) {
       newPositioner = WindowPositioner(
         parentAnchor: parentAnchor ?? WindowPositionerAnchor.center,
         childAnchor: childAnchor ?? WindowPositionerAnchor.center,
@@ -111,10 +103,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
     }
 
     if (newRect != null || newPositioner != null) {
-      widget.controller.updatePosition(
-        anchorRect: newRect,
-        positioner: newPositioner,
-      );
+      widget.controller.updatePosition(anchorRect: newRect, positioner: newPositioner);
     }
 
     widget.onClose();
@@ -129,10 +118,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Anchor Rectangle',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text('Anchor Rectangle', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             TextField(
               controller: leftController,
@@ -161,10 +147,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
               initialValue: parentAnchor,
               decoration: const InputDecoration(labelText: 'Parent Anchor'),
               items: WindowPositionerAnchor.values.map((anchor) {
-                return DropdownMenuItem(
-                  value: anchor,
-                  child: Text(anchorToString(anchor)),
-                );
+                return DropdownMenuItem(value: anchor, child: Text(anchorToString(anchor)));
               }).toList(),
               onChanged: (value) {
                 setState(() {
@@ -177,10 +160,7 @@ class _TooltipWindowEditDialogState extends State<_TooltipWindowEditDialog> {
               initialValue: childAnchor,
               decoration: const InputDecoration(labelText: 'Child Anchor'),
               items: WindowPositionerAnchor.values.map((anchor) {
-                return DropdownMenuItem(
-                  value: anchor,
-                  child: Text(anchorToString(anchor)),
-                );
+                return DropdownMenuItem(value: anchor, child: Text(anchorToString(anchor)));
               }).toList(),
               onChanged: (value) {
                 setState(() {

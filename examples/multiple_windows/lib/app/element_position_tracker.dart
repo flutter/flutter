@@ -64,10 +64,7 @@ class ElementPositionTracker {
 class _ElementPositionTrackerManager {
   _ElementPositionTrackerManager._() {
     WidgetsBinding.instance.addPersistentFrameCallback((_) {
-      final trackersCopy = List<ElementPositionTracker>.from(
-        _trackers,
-        growable: false,
-      );
+      final trackersCopy = List<ElementPositionTracker>.from(_trackers, growable: false);
       for (final tracker in trackersCopy) {
         tracker._updateSelf();
       }

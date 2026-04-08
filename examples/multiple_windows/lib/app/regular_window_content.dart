@@ -66,9 +66,8 @@ class RegularWindowContent extends StatelessWidget {
 
                     entry = WindowEntry(
                       controller: controller,
-                      builder: (BuildContext context) => RegularWindowContent(
-                        regularWindowController: controller,
-                      ),
+                      builder: (BuildContext context) =>
+                          RegularWindowContent(regularWindowController: controller),
                     );
                     windowRegistry.register(entry);
                   },
@@ -90,9 +89,8 @@ class RegularWindowContent extends StatelessWidget {
 
                     entry = WindowEntry(
                       controller: controller,
-                      builder: (BuildContext context) => DialogWindowContent(
-                        dialogWindowController: controller,
-                      ),
+                      builder: (BuildContext context) =>
+                          DialogWindowContent(dialogWindowController: controller),
                     );
                     windowRegistry.register(entry);
                   },
@@ -118,8 +116,7 @@ class RegularWindowContent extends StatelessWidget {
   }
 }
 
-class CallbackRegularWindowControllerDelegate
-    with RegularWindowControllerDelegate {
+class CallbackRegularWindowControllerDelegate with RegularWindowControllerDelegate {
   CallbackRegularWindowControllerDelegate({required this.onDestroyed});
 
   @override

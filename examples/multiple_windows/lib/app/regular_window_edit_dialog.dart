@@ -14,18 +14,13 @@ void showRegularWindowEditDialog({
 }) {
   showDialog<void>(
     context: context,
-    builder: (context) => _RegularWindowEditDialog(
-      controller: controller,
-      onClose: () => Navigator.pop(context),
-    ),
+    builder: (context) =>
+        _RegularWindowEditDialog(controller: controller, onClose: () => Navigator.pop(context)),
   );
 }
 
 class _RegularWindowEditDialog extends StatefulWidget {
-  const _RegularWindowEditDialog({
-    required this.controller,
-    required this.onClose,
-  });
+  const _RegularWindowEditDialog({required this.controller, required this.onClose});
 
   final RegularWindowController controller;
   final VoidCallback onClose;
@@ -58,9 +53,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     initialMinimized = widget.controller.isMinimized;
 
     widthController = TextEditingController(text: initialSize.width.toString());
-    heightController = TextEditingController(
-      text: initialSize.height.toString(),
-    );
+    heightController = TextEditingController(text: initialSize.height.toString());
     titleController = TextEditingController(text: initialTitle);
     nextIsFullscreen = null;
     nextIsMaximized = null;
