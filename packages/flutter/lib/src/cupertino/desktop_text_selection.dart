@@ -78,6 +78,19 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   }
 
   @Deprecated(
+    'Use `calculateHandleAnchor` instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
+  @override
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
+    return calculateHandleAnchor(type, textLineHeight, targetWidth: cursorWidth);
+  }
+
+  @Deprecated(
     'Use `contextMenuBuilder` instead. '
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
