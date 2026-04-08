@@ -350,13 +350,33 @@ class FlutterPluginTest {
         every { project.file(flutterExtension.source!!) } returns mockk()
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
-        val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
+        val mockAbstractAppExtension =
+            mockk<AbstractAppExtension>(
+                moreInterfaces = arrayOf(ApplicationExtension::class),
+                relaxed = true
+            )
+        // Cast our multi-interface mock instead of creating a brand new one
+        val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
+
+        val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+
+        // Mock buildTypes on our new dual-purpose mock so AgpCommonExtensionWrapper can read them
+        every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
+        every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        val mockApplicationDefaultConfig = mockk<ApplicationDefaultConfig>(relaxed = true)
+
+        val mockApplicationDefaultConfig =
+            mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
+                moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
+                relaxed = true
+            )
+
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
-        every { project.state.failure } returns null
-        val mockAbstractAppExtension = mockk<AbstractAppExtension>(relaxed = true)
+        every { project.state.failure as Throwable? } returns null
+
         val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
@@ -375,9 +395,9 @@ class FlutterPluginTest {
             listOf()
         every { project.extraProperties } returns mockk()
         every { project.file(flutterExtension.source!!) } returns mockk()
-                val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
-        val mockDebugBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
-        val mockReleaseBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
+
+        // Keep the CommonExtension mocks just in case other parts of the plugin look for it
         every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
         every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
         every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
