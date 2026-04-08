@@ -330,8 +330,8 @@ public class FlutterLoader {
             continue;
           }
 
-          // Check if flag is valid:
-          if (!shouldLoadFlag(flag, true)) {
+          // Check if flag is allowed:
+          if (!shouldLoadFlag(flag, isRelease, true)) {
             continue;
           }
 
@@ -408,7 +408,8 @@ public class FlutterLoader {
               // https://github.com/flutter/flutter/issues/182557.
               shellArgs.add(arg);
               continue;
-            } else if (!shouldLoadFlag(flag, false)) {
+            } else if (!shouldLoadFlag(flag, isRelease, false)) {
+              // Flag is disallowed.
               continue;
             } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
                 || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
@@ -438,7 +439,8 @@ public class FlutterLoader {
             // https://github.com/flutter/flutter/issues/182557.
             shellArgs.add(arg);
             continue;
-          } else if (shouldLoadFlag(FlutterEngineFlags.TEST_FLAG, false)) {
+          } else if (!shouldLoadFlag(flag, isRelease, false)) {
+            // Flag is disallowed.
             continue;
           } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
               || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
@@ -551,7 +553,8 @@ public class FlutterLoader {
    *
    * <p>Also throws an exception for disabled flags and logs a warning for deprecated flags.
    */
-  private boolean shouldLoadFlag(FlutterEngineFlags.Flag flag, boolean specifiedViaManifest) {
+  private boolean shouldLoadFlag(FlutterEngineFlags.Flag flag, boolean isRelease, boolean specifiedViaManifest) {
+    String metadataKey = flag.metadataKey;
     if (flag == FlutterEngineFlags.TEST_FLAG) {
       Log.w(
           TAG,

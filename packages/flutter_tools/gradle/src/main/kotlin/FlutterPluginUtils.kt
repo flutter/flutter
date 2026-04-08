@@ -1026,7 +1026,7 @@ object FlutterPluginUtils {
         androidComponents.onVariants { variant ->
             val genTask =
                 project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
-                    description = "Generates manifest containing engine shell arguments"
+                    description = "Generates extra manifest containing command line flags intended to be loaded by the Flutter Android embedding"
                     shellArgs.set(androidEngineShellArgs)
                     manifestOutputFile.set(
                         project.layout.buildDirectory.file(
