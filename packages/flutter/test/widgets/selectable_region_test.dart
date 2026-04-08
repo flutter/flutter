@@ -6692,38 +6692,30 @@ void main() {
   testWidgets(
     'context menu is positioned within overlay bounds and hittable when Overlay is not fullscreen',
     (WidgetTester tester) async {
-      // Regression test: when the MaterialApp (and its Overlay) is constrained
-      // within a SizedBox and offset from the screen origin, the context menu
-      // must be positioned within the overlay's bounds and respond to hit
-      // testing. Previously, the coordinate math used global (screen) coords
-      // instead of overlay-relative coords, causing the menu to be painted
-      // outside the overlay and to fail hit testing.
-      bool copyPressed = false;
+      // Regression test for https://github.com/flutter/flutter/issues/139744.
+      var menuButtonPressed = false;
 
       await tester.pumpWidget(
         Center(
           child: SizedBox(
             width: 400,
             height: 300,
-            child: MaterialApp(
+            child: TestWidgetsApp(
               home: SelectableRegion(
-                selectionControls: materialTextSelectionHandleControls,
-                contextMenuBuilder: (
-                  BuildContext context,
-                  SelectableRegionState selectableRegionState,
-                ) {
-                  return AdaptiveTextSelectionToolbar.buttonItems(
-                    anchors: selectableRegionState.contextMenuAnchors,
-                    buttonItems: <ContextMenuButtonItem>[
-                      ContextMenuButtonItem(
-                        label: 'Copy',
-                        onPressed: () {
-                          copyPressed = true;
-                        },
-                      ),
-                    ],
-                  );
-                },
+                selectionControls: testTextSelectionHandleControls,
+                contextMenuBuilder:
+                    (BuildContext context, SelectableRegionState selectableRegionState) {
+                      return Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            menuButtonPressed = true;
+                          },
+                          child: const Text('Menu Button 1'),
+                        ),
+                      );
+                    },
                 child: const Text('Hello World'),
               ),
             ),
@@ -6740,29 +6732,29 @@ void main() {
       await tester.pumpAndSettle();
 
       // The context menu should be visible.
-      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Menu Button 1'), findsOneWidget);
 
       // Get the overlay's screen bounds.
-      final RenderBox overlayRenderBox =
+      final overlayRenderBox =
           Overlay.of(
-            tester.element(find.byType(SelectableRegion)),
-            rootOverlay: true,
-          ).context.findRenderObject()! as RenderBox;
+                tester.element(find.byType(SelectableRegion)),
+                rootOverlay: true,
+              ).context.findRenderObject()!
+              as RenderBox;
       final Rect overlayRect = overlayRenderBox.localToGlobal(Offset.zero) & overlayRenderBox.size;
 
       // The context menu should be rendered within the overlay's screen bounds.
-      final Offset menuTopLeft = tester.getTopLeft(find.text('Copy'));
+      final Offset menuTopLeft = tester.getTopLeft(find.text('Menu Button 1'));
       expect(
         overlayRect.contains(menuTopLeft),
         isTrue,
-        reason: 'Context menu at $menuTopLeft should be within overlay bounds $overlayRect',
       );
 
       // The context menu button should be hittable (hit test must pass through
       // the overlay's _RenderTheater to reach the toolbar).
-      await tester.tap(find.text('Copy'));
+      await tester.tap(find.text('Menu Button 1'));
       await tester.pump();
-      expect(copyPressed, isTrue);
+      expect(menuButtonPressed, isTrue);
     },
     skip: kIsWeb, // [intended] On web, the browser handles context menus natively.
   );
