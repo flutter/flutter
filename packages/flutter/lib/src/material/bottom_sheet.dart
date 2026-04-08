@@ -709,7 +709,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
       _curvedSheetAnimation.reverseCurve ==
           (widget.animationStyle?.reverseCurve ?? _kModalBottomSheetCurve),
     );
-    assert(_sheetAnimation.parent == _curvedSheetAnimation);
   }
 
   @override
@@ -738,8 +737,22 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 
   void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
-    // Allow the bottom sheet to animate smoothly from its current position.
-    _sheetAnimation.parent = _curvedSheetAnimation;
+    final double currentProgress = widget.route.animation!.value;
+
+    // Rebind the animation using CurvedAnimation and Split so the
+    // remaining transition continues smoothly from the exact point
+    // where the drag gesture ended.
+    _sheetAnimation.parent = CurvedAnimation(
+      parent: widget.route.animation!,
+      curve: Split(
+        currentProgress,
+        endCurve: widget.animationStyle?.curve ?? _kModalBottomSheetCurve,
+      ),
+      reverseCurve: Split(
+        currentProgress,
+        endCurve: widget.animationStyle?.reverseCurve ?? _kModalBottomSheetCurve,
+      ),
+    );
   }
 
   @override

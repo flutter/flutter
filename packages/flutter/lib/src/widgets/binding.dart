@@ -36,6 +36,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/_features.dart';
+import '_accessibility_evaluations.dart';
 import '_window.dart';
 import 'app.dart';
 import 'debug.dart';
@@ -752,6 +753,46 @@ mixin WidgetsBinding
           debugProfileBuildsEnabledUserWidgets = value;
         },
       );
+
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.accessibilityEvaluations.name,
+        callback: (Map<String, String> parameters) async {
+          final String? type = parameters['type'];
+          if (type == null) {
+            throw Exception('type parameter is required');
+          }
+
+          switch (type) {
+            case 'MinimumTextContrastEvaluation':
+              if (parameters case {
+                'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
+                'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
+              }) {
+                final EvaluationResult result = await MinimumTextContrastEvaluation(
+                  minNormalTextContrastRatio: double.parse(minNormalTextContrastRatio),
+                  minLargeTextContrastRatio: double.parse(minLargeTextContrastRatio),
+                ).evaluate(this);
+                return _formatEvaluationResult(result.violations);
+              }
+              throw Exception('Invalid arguments');
+            case 'MinimumTapTargetEvaluation':
+              if (parameters case {'targetSize': final String targetSize}) {
+                final EvaluationResult result = await MinimumTapTargetEvaluation(
+                  size: Size.square(double.parse(targetSize)),
+                ).evaluate(this);
+                return _formatEvaluationResult(result.violations);
+              }
+              throw Exception('Invalid arguments');
+            case 'LabeledTapTargetEvaluation':
+              final EvaluationResult result = await const LabeledTapTargetEvaluation().evaluate(
+                this,
+              );
+              return _formatEvaluationResult(result.violations);
+            default:
+              throw Exception('unknown type: $type');
+          }
+        },
+      );
     }
 
     assert(() {
@@ -771,6 +812,17 @@ mixin WidgetsBinding
 
       return true;
     }());
+  }
+
+  Map<String, List<Map<String, String>>> _formatEvaluationResult(List<Violation> violations) {
+    return <String, List<Map<String, String>>>{
+      'result': violations.map((Violation violation) {
+        return <String, String>{
+          'nodeId': violation.node.id.toString(),
+          'message': violation.reason,
+        };
+      }).toList(),
+    };
   }
 
   Future<void> _forceRebuild() {
@@ -1077,7 +1129,16 @@ mixin WidgetsBinding
         );
       }
     }
-    SystemNavigator.pop();
+    SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while popping route'),
+        ),
+      );
+    });
     return false;
   }
 

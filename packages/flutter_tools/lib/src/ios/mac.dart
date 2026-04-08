@@ -23,7 +23,6 @@ import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
-import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
@@ -170,6 +169,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
+      config: globals.config,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -290,8 +290,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
   final buildCommands = <String>[
-    ...globals.xcode!.xcrunCommand(),
-    'xcodebuild',
+    ...(await globals.xcode!.xcodebuildProjectCommand(
+      app.project.hostAppRoot.path,
+      globals.fs.directory(buildDirectoryPath),
+      skipPackageResolution: false,
+    )),
     '-configuration',
     configuration,
   ];
@@ -1070,6 +1073,8 @@ Future<bool> _handleIssues(
 }) async {
   var requiresProvisioningProfile = false;
   var hasProvisioningProfileIssue = false;
+  // Tracks whether we already surfaced a targeted issue message and can skip
+  // the less-accurate stdout fallback diagnostics.
   var issueDetected = false;
   var modifiedPrecompiledSource = false;
   var unableToFindArmDestination = false;
@@ -1107,6 +1112,8 @@ Future<bool> _handleIssues(
   }
 
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
+  final String? swiftPackageManagerMinPlatformMismatchMessage =
+      _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1128,6 +1135,9 @@ Future<bool> _handleIssues(
     logger.printError("Also try selecting 'Product > Build' to fix the problem.");
   } else if (missingPlatform != null) {
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
+  } else if (swiftPackageManagerMinPlatformMismatchMessage != null) {
+    logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
+    issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
@@ -1152,7 +1162,7 @@ Future<bool> _handleIssues(
       for (final module in missingModules) {
         if (await _isPluginSwiftPackageOnly(
           platform: platform,
-          project: project,
+          project: xcodeProject,
           pluginName: module,
           fileSystem: fileSystem,
         )) {
@@ -1213,11 +1223,11 @@ Future<bool> _simulatorSupportsIntel(Device device) async {
 /// Returns true if a Package.swift is found for the plugin and a podspec is not.
 Future<bool> _isPluginSwiftPackageOnly({
   required FlutterDarwinPlatform platform,
-  required FlutterProject project,
+  required XcodeBasedProject project,
   required String pluginName,
   required FileSystem fileSystem,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await project.getPlugins();
   final Plugin? matched = plugins
       .where(
         (Plugin plugin) =>
@@ -1296,6 +1306,56 @@ String? _parseMissingPlatform(String message) {
     r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform',
   );
   return pattern.firstMatch(message)?.group(1);
+}
+
+String? _swiftPackageManagerMinPlatformMismatchMessageFromStdout(String? stdout) {
+  if (stdout == null || stdout.isEmpty) {
+    return null;
+  }
+
+  final pattern = RegExp(
+    r"The package product '([^']+)' requires minimum platform version "
+    r'([0-9\.]+) for the (iOS|macOS) platform, but this target supports '
+    r"([0-9\.]+)(?: \(in target '([^']+)' from project '[^']+'\))?",
+    caseSensitive: false,
+  );
+
+  // We keep only the highest required version because bumping app minimum
+  // version to that value also satisfies lower plugin requirements.
+  // `highestSupportedVersion` is from the same mismatch to report "from X to Y".
+  String? highestRequiredByProduct;
+  Version? highestRequiredVersion;
+  Version? highestSupportedVersion;
+  for (final RegExpMatch match in pattern.allMatches(stdout)) {
+    final String? requiredByProduct = match.group(1);
+    final Version? requiredMinVersion = Version.parse(match.group(2));
+    final Version? targetSupportedVersion = Version.parse(match.group(4));
+    final String? targetName = match.group(5);
+    if (targetName != kFlutterGeneratedPluginSwiftPackageName) {
+      continue;
+    }
+    if (requiredByProduct == null || requiredMinVersion == null || targetSupportedVersion == null) {
+      continue;
+    }
+    if (highestRequiredVersion == null || requiredMinVersion > highestRequiredVersion) {
+      highestRequiredByProduct = requiredByProduct;
+      highestRequiredVersion = requiredMinVersion;
+      highestSupportedVersion = targetSupportedVersion;
+    }
+  }
+
+  if (highestRequiredByProduct == null ||
+      highestRequiredVersion == null ||
+      highestSupportedVersion == null) {
+    return null;
+  }
+
+  return '''
+To fix this error, increase your app's minimum platform version from $highestSupportedVersion to at least $highestRequiredVersion or remove the $highestRequiredByProduct dependency.
+
+To increase your app's minimum platform version, follow these instructions:
+  https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#how-to-use-a-swift-package-manager-flutter-plugin-that-requires-a-higher-os-version
+''';
 }
 
 String? _parseModuleRedefinition(String message) {

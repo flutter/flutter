@@ -34,7 +34,7 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.displayMedium!,
-      textAlign: TextAlign.center,
+      textAlign: .center,
       child: FutureBuilder<String>(
         future: _calculation, // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -47,7 +47,7 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
                 size: 60,
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const .only(top: 16),
                 child: Text('Result: ${snapshot.data}'),
               ),
             ];
@@ -55,7 +55,7 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
             children = <Widget>[
               const Icon(Icons.error_outline, color: Colors.red, size: 60),
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const .only(top: 16),
                 child: Text('Error: ${snapshot.error}'),
               ),
             ];
@@ -66,16 +66,13 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
                 child: CircularProgressIndicator(),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 16),
+                padding: .only(top: 16),
                 child: Text('Awaiting result...'),
               ),
             ];
           }
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: children,
-            ),
+            child: Column(mainAxisAlignment: .center, children: children),
           );
         },
       ),

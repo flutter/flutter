@@ -66,7 +66,7 @@ Flutter's View, not to the Android View they're actually trying to tap on.
   embedding containing the details of the touch
   event](https://github.com/flutter/flutter/blob/068fa84/packages/flutter/lib/src/rendering/platform_view.dart#L595).
 - [Within the Android
-  embedding](https://github.com/flutter/engine/blob/5b952f286fc070e99cf192775fa5c9dfe858b692/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java#L194),
+  embedding](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java#L408),
   we convert the coordinates of this event from the ones describing the touch
   inside of the larger Flutter texture to ones that would match the real Android
   View inside of its `VirtualDisplay`. We then create a new `MotionEvent`
@@ -132,21 +132,21 @@ case.
 
 - Create a mirror copy of the Android View's a11y nodes as a subtree within [the
   Flutter Android
-  embedding](https://github.com/flutter/engine/blob/5b952f286fc070e99cf192775fa5c9dfe858b692/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java).
+  embedding](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java).
   This mirror copy consists of virtual nodes and is part of the larger virtual
   a11y node tree created by [Flutter's
-  `AccessibilityNodeProvider`](https://github.com/flutter/engine/blob/5b952f286fc070e99cf192775fa5c9dfe858b692/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L64).
+  `AccessibilityNodeProvider`](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L79).
 - (P and above only): blacklisted APIs and reflection are usually used to create
   a mirror copy of the Android View's a11y nodes. The critical private
   information are the node IDs of the parent and children of the a11y hierarchy,
   which we need to construct our mirror correctly but which are private data to
   the nodes. On newer Android versions [we read the data we need from the
   serialized binary form of the
-  node](https://github.com/flutter/engine/blob/5b952f286fc070e99cf192775fa5c9dfe858b692/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java#L546)
+  node](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java#L555)
   instead.
 - [We forward all events sent to mirror a11y nodes to the "real" a11y nodes in
   the Android View's subtree as
-  well](https://github.com/flutter/engine/blob/5b952f286fc070e99cf192775fa5c9dfe858b692/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java#L268).
+  well](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java#L263).
   This forwarding involves translating any coordinates on the event, similar to
   forwarding touch events. This means users can use a11y services to still
   interact with the embedded Android UI.
@@ -177,7 +177,7 @@ normally discarded.
 ### Workaround
 
 - We override
-  [checkInputConnectionProxy](https://github.com/flutter/engine/blob/036ddbb0ee6858ae532df82a2747aa93faee4487/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java#L376)
+  [checkInputConnectionProxy](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java#L941)
   so that Android treats the Flutter View as a proxy for the Input Method Editor
   (IME) when it tries to talk to the embedded Android View. Basically, Android
   asks the Flutter View for an `InputConnection` when the embedded Android View
@@ -187,7 +187,7 @@ normally discarded.
   proxy no longer worked on Q. To work around this further we [created a
   subclass of `Context` that returned the same `IMM` as the Flutter View instead
   of the real `IMM` for the window when `getSystemService` is
-  queried](https://github.com/flutter/engine/blob/44f24bd/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java#L257).
+  queried](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/SingleViewPresentation.java#L224).
   This means whenever Android tries to use the `IMM` in our `VirtualDisplay` it
   still sees and uses the `IMM` from the real display that has been set to use
   the Flutter View as a proxy.
@@ -195,7 +195,7 @@ normally discarded.
   checks to see if an embedded Android View is "really" the target of the input.
   If so it [internally goes to the embedded Android View, gets the
   `InputConnection` from
-  there](https://github.com/flutter/engine/blob/036ddbb0ee6858ae532df82a2747aa93faee4487/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java#L206),
+  there](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/engine/src/flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java#L328),
   and returns it to Android as if the embedded Android View's `InputConnection`
   is its own.
 - Android sees that the Flutter view is focused and available, so it takes the

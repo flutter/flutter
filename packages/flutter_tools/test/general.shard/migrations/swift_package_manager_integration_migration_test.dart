@@ -5,12 +5,14 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
+import 'package:flutter_tools/src/plugins.dart';
 
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -45,6 +47,7 @@ void main() {
         logger: testLogger,
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
+        config: FakeConfig(),
       );
       await projectMigration.migrate();
       expect(
@@ -70,6 +73,7 @@ void main() {
         logger: testLogger,
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
+        config: FakeConfig(),
       );
       await projectMigration.migrate();
       expect(
@@ -99,6 +103,7 @@ void main() {
         logger: testLogger,
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
+        config: FakeConfig(),
       );
       await expectLater(
         () => projectMigration.migrate(),
@@ -128,6 +133,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          config: FakeConfig(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -156,6 +162,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          config: FakeConfig(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -184,6 +191,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          config: FakeConfig(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -218,6 +226,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
+          config: FakeConfig(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -252,6 +261,7 @@ void main() {
         logger: testLogger,
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
+        config: FakeConfig(),
       );
       await projectMigration.migrate();
       expect(testLogger.traceText, isEmpty);
@@ -289,6 +299,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+          config: FakeConfig(),
         );
         await expectLater(() => projectMigration.migrate(), throwsToolExit());
         expect(testLogger.traceText, contains('Runner.xcscheme already migrated. Skipping...'));
@@ -307,7 +318,9 @@ void main() {
                 logger: testLogger,
               );
               _createProjectFiles(project, platform, schemeMigrated: false);
-              project.xcodeProjectSchemeFile().writeAsStringSync('');
+              project.xcodeProjectSchemeFile().writeAsStringSync(
+                '<?xml version="1.0" encoding="UTF-8"?><Scheme></Scheme>',
+              );
 
               final projectMigration = SwiftPackageManagerIntegrationMigration(
                 project,
@@ -317,6 +330,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -355,6 +369,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
+                config: FakeConfig(),
               );
 
               await expectLater(
@@ -394,6 +409,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
+                config: FakeConfig(),
               );
 
               await expectLater(
@@ -433,6 +449,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
+                config: FakeConfig(),
               );
 
               await expectLater(
@@ -463,6 +480,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              config: FakeConfig(),
             );
 
             await expectLater(
@@ -493,6 +511,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
+              config: FakeConfig(),
             );
 
             await expectLater(
@@ -529,6 +548,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
+              config: FakeConfig(),
             );
 
             await projectMigration.migrate();
@@ -565,6 +585,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
+              config: FakeConfig(),
             );
 
             await projectMigration.migrate();
@@ -602,6 +623,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
 
               await projectMigration.migrate();
@@ -611,6 +633,127 @@ void main() {
               );
             },
           );
+
+          testWithoutContext('successfully updates when spacing differs', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion="1510"
+   version="1.3">
+   <BuildAction
+      parallelizeBuildables="YES"
+      buildImplicitDependencies="YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting="YES"
+            buildForRunning="YES"
+            buildForProfiling="YES"
+            buildForArchiving="YES"
+            buildForAnalyzing="YES">
+            <BuildableReference
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="${_runnerNativeTargetIdentifier(platform)}"
+               BuildableName="Runner.app"
+               BlueprintName="Runner"
+               ReferencedContainer="container:Runner.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction>
+   </TestAction>
+   <LaunchAction>
+   </LaunchAction>
+   <ProfileAction>
+   </ProfileAction>
+   <AnalyzeAction>
+   </AnalyzeAction>
+   <ArchiveAction>
+   </ArchiveAction>
+</Scheme>''');
+
+            final plistParser = FakePlistParser.multiple(<String>[
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+            ]);
+            project.xcodeProjectInfoFile.writeAsStringSync(
+              _projectSettings(_allSectionsMigrated(platform)),
+            );
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              logger: testLogger,
+              fileSystem: memoryFileSystem,
+              plistParser: plistParser,
+              config: FakeConfig(),
+            );
+
+            await projectMigration.migrate();
+            expect(project.xcodeProjectSchemeFile().readAsStringSync(), '''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion="1510"
+   version="1.3">
+   <BuildAction
+      parallelizeBuildables="YES"
+      buildImplicitDependencies="YES">
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Prepare Flutter Framework Script"
+               ${_scriptText(platform)}
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
+                     BuildableName = "Runner.app"
+                     BlueprintName = "Runner"
+                     ReferencedContainer = "container:Runner.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting="YES"
+            buildForRunning="YES"
+            buildForProfiling="YES"
+            buildForArchiving="YES"
+            buildForAnalyzing="YES">
+            <BuildableReference
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="${_runnerNativeTargetIdentifier(platform)}"
+               BuildableName="Runner.app"
+               BlueprintName="Runner"
+               ReferencedContainer="container:Runner.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction>
+   </TestAction>
+   <LaunchAction>
+   </LaunchAction>
+   <ProfileAction>
+   </ProfileAction>
+   <AnalyzeAction>
+   </AnalyzeAction>
+   <ArchiveAction>
+   </ArchiveAction>
+</Scheme>''');
+          });
         });
       }
     });
@@ -643,6 +786,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+          config: FakeConfig(),
         );
         await projectMigration.migrate();
         expect(testLogger.traceText, isEmpty);
@@ -667,6 +811,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            config: FakeConfig(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -692,6 +837,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(json: '[]'),
+            config: FakeConfig(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -717,6 +863,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(json: 'this is not json'),
+            config: FakeConfig(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -745,6 +892,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            config: FakeConfig(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -771,6 +919,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            config: FakeConfig(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -797,6 +946,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            config: FakeConfig(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -823,6 +973,7 @@ void main() {
             logger: testLogger,
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
+            config: FakeConfig(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -847,8 +998,11 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
                 projectDir: memoryFileSystem.currentDirectory
-                    .childDirectory('my_app')
-                    .childDirectory('example'),
+                    .childDirectory(pluginName)
+                    .childDirectory('example/ios'),
+                plugins: [
+                  FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
+                ],
               );
               _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
               project.xcodeProjectInfoFile.writeAsStringSync('78DABEA22ED26510000E7860');
@@ -861,6 +1015,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -882,8 +1037,11 @@ void main() {
                 fileSystem: memoryFileSystem,
                 logger: testLogger,
                 projectDir: memoryFileSystem.currentDirectory
-                    .childDirectory('my_app')
-                    .childDirectory('example'),
+                    .childDirectory(pluginName)
+                    .childDirectory('example/ios'),
+                plugins: [
+                  FakePlugin(name: pluginName, swiftPackagePath: '/$pluginName/ios/$pluginName'),
+                ],
               );
               _createProjectFiles(project, FlutterDarwinPlatform.ios, isExampleApp: true);
               project.xcodeProjectInfoFile.writeAsStringSync('784666492D4C4C64000A1A5F');
@@ -896,6 +1054,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -931,6 +1090,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -969,6 +1129,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1008,6 +1169,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1051,6 +1213,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1096,6 +1259,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1134,6 +1298,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1173,6 +1338,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1216,6 +1382,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1248,8 +1415,14 @@ void main() {
                     fileSystem: memoryFileSystem,
                     logger: testLogger,
                     projectDir: memoryFileSystem.currentDirectory
-                        .childDirectory('my_app')
-                        .childDirectory('example'),
+                        .childDirectory(pluginName)
+                        .childDirectory('example/${platform.name}'),
+                    plugins: [
+                      FakePlugin(
+                        name: pluginName,
+                        swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                      ),
+                    ],
                   );
                   _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -1280,6 +1453,7 @@ void main() {
                     logger: testLogger,
                     fileSystem: memoryFileSystem,
                     plistParser: plistParser,
+                    config: FakeConfig(),
                   );
                   await projectMigration.migrate();
                   expect(testLogger.errorText, isEmpty);
@@ -1332,6 +1506,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1374,6 +1549,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1422,6 +1598,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1461,6 +1638,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1508,6 +1686,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1555,6 +1734,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1609,6 +1789,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1655,6 +1836,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1690,6 +1872,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1729,6 +1912,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1774,6 +1958,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1826,6 +2011,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1874,6 +2060,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1903,8 +2090,14 @@ void main() {
                     fileSystem: memoryFileSystem,
                     logger: testLogger,
                     projectDir: memoryFileSystem.currentDirectory
-                        .childDirectory('my_app')
-                        .childDirectory('example'),
+                        .childDirectory(pluginName)
+                        .childDirectory('example/${platform.name}'),
+                    plugins: [
+                      FakePlugin(
+                        name: pluginName,
+                        swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                      ),
+                    ],
                   );
                   _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -1942,6 +2135,7 @@ void main() {
                     logger: testLogger,
                     fileSystem: memoryFileSystem,
                     plistParser: plistParser,
+                    config: FakeConfig(),
                   );
                   await projectMigration.migrate();
                   expect(testLogger.errorText, isEmpty);
@@ -1992,6 +2186,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2029,6 +2224,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2068,6 +2264,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2113,6 +2310,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2168,6 +2366,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2219,6 +2418,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2276,6 +2476,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2321,6 +2522,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2362,6 +2564,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2409,6 +2612,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                  config: FakeConfig(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2445,6 +2649,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2498,6 +2703,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2547,6 +2753,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2604,6 +2811,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2644,6 +2852,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2686,6 +2895,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2735,6 +2945,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2787,6 +2998,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2828,6 +3040,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
+                config: FakeConfig(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2867,6 +3080,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2916,6 +3130,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2968,6 +3183,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3011,6 +3227,7 @@ void main() {
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
+              config: FakeConfig(),
             );
             await expectLater(
               () => projectMigration.migrate(),
@@ -3086,6 +3303,7 @@ void main() {
                 logger: testLogger,
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
+                config: FakeConfig(),
               );
               await projectMigration.migrate();
               expect(
@@ -3118,8 +3336,14 @@ void main() {
                   fileSystem: memoryFileSystem,
                   logger: testLogger,
                   projectDir: memoryFileSystem.currentDirectory
-                      .childDirectory('my_app')
-                      .childDirectory('example'),
+                      .childDirectory(pluginName)
+                      .childDirectory('example/${platform.name}'),
+                  plugins: [
+                    FakePlugin(
+                      name: pluginName,
+                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                    ),
+                  ],
                 );
                 _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -3147,6 +3371,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(
@@ -3179,8 +3404,14 @@ void main() {
                   fileSystem: memoryFileSystem,
                   logger: testLogger,
                   projectDir: memoryFileSystem.currentDirectory
-                      .childDirectory('my_app')
-                      .childDirectory('example'),
+                      .childDirectory(pluginName)
+                      .childDirectory('example/${platform.name}'),
+                  plugins: [
+                    FakePlugin(
+                      name: pluginName,
+                      swiftPackagePath: '/$pluginName/${platform.name}/$pluginName',
+                    ),
+                  ],
                 );
                 _createProjectFiles(project, platform, isExampleApp: true);
 
@@ -3205,6 +3436,7 @@ void main() {
                   logger: testLogger,
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
+                  config: FakeConfig(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3258,6 +3490,7 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: plistParser,
+          config: FakeConfig(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -3293,8 +3526,8 @@ void main() {
           logger: testLogger,
           fileSystem: memoryFileSystem,
           plistParser: plistParser,
-
           validateBackup: true,
+          config: FakeConfig(),
         );
         await expectLater(() async => projectMigration.migrate(), throwsToolExit());
         expect(testLogger.traceText, contains('Restoring project settings from backup file...'));
@@ -3338,12 +3571,14 @@ flutter:
       ios:
         pluginClass: MyPlugin
 ''');
-    xcodeProject.relativeSwiftPackagesDirectory
-        .childLink(pluginName)
-        .createSync(
-          pluginProjectDir.childDirectory(platform.name).childDirectory(pluginName).path,
-          recursive: true,
-        );
+  }
+}
+
+String _scriptText(FlutterDarwinPlatform platform) {
+  if (platform == FlutterDarwinPlatform.ios) {
+    return r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
+  } else {
+    return r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
   }
 }
 
@@ -3353,14 +3588,6 @@ String _validBuildActions(
   bool hasFrameworkScript = false,
   bool hasBuildEntries = true,
 }) {
-  final String scriptText;
-  if (platform == FlutterDarwinPlatform.ios) {
-    scriptText =
-        r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
-  } else {
-    scriptText =
-        r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
-  }
   var preActions = '';
   if (hasFrameworkScript) {
     preActions =
@@ -3370,7 +3597,7 @@ String _validBuildActions(
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Prepare Flutter Framework Script"
-               $scriptText
+               ${_scriptText(platform)}
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
@@ -3592,9 +3819,10 @@ const unmigratedFileReferenceSection = '''
 String migratedFileReferenceSection(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
   var pluginFileReferences = '';
   if (includePlugin) {
+    final pluginLeadingPath = platform == FlutterDarwinPlatform.ios ? '../../' : '../../../';
     pluginFileReferences =
         '		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = ${_relativeEphemeralPath(platform)}/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };\n'
-        '		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = ../../${platform.name}/$pluginName; sourceTree = "<group>"; };\n';
+        '		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = $pluginLeadingPath${platform.name}/$pluginName; sourceTree = "<group>"; };\n';
   }
   return '/* Begin PBXFileReference section */\n'
       '		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };\n'
@@ -3662,6 +3890,7 @@ String migratedFileReferenceAsJson(FlutterDarwinPlatform platform, {bool include
       "sourceTree": "<group>"
     }''';
   if (includePlugin) {
+    final pluginLeadingPath = platform == FlutterDarwinPlatform.ios ? '../../' : '../../../';
     migratedJson =
         '''
 $migratedJson,
@@ -3673,7 +3902,7 @@ $migratedJson,
       "sourceTree": "<group>"
     },
     "78DABEA22ED26510000E7860": {
-      "path": "../../${platform.name}/$pluginName",
+      "path": "$pluginLeadingPath${platform.name}/$pluginName",
       "isa": "PBXFileReference",
       "name": "flutter",
       "lastKnownFileType": "wrapper",
@@ -4289,7 +4518,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final bool throwErrorOnGetInfo;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     if (throwErrorOnGetInfo) {
       throwToolExit('Unable to get Xcode project information');
     }
@@ -4324,11 +4557,13 @@ class FakeXcodeProject extends Fake implements IosProject {
     required this.logger,
     this.usesSwiftPackageManager = true,
     Directory? projectDir,
+    List<FakePlugin> plugins = const <FakePlugin>[],
   }) : hostAppRoot = projectDir ?? fileSystem.directory('app_name').childDirectory(platform),
        parent = FakeFlutterProject(
          fileSystem: fileSystem,
-         appName: projectDir != null ? projectDir.basename : 'app_name',
-       );
+         appName: projectDir != null ? projectDir.parent.basename : 'app_name',
+       ),
+       _plugins = plugins;
 
   final Logger logger;
   late XcodeProjectInfo? _projectInfo = XcodeProjectInfo(
@@ -4344,6 +4579,13 @@ class FakeXcodeProject extends Fake implements IosProject {
   @override
   FakeFlutterProject parent;
 
+  final List<FakePlugin> _plugins;
+
+  @override
+  Future<List<Plugin>> getPlugins() async {
+    return _plugins;
+  }
+
   @override
   Directory get xcodeProject => hostAppRoot.childDirectory('$hostAppProjectName.xcodeproj');
 
@@ -4358,6 +4600,9 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   bool usesSwiftPackageManager;
+
+  @override
+  Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
 
   @override
   Directory get ephemeralDirectory =>
@@ -4379,13 +4624,6 @@ class FakeXcodeProject extends Fake implements IosProject {
     return xcodeProjectInfoFile.existsSync() &&
         xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
   }
-
-  @override
-  Directory get relativeSwiftPackagesDirectory => hostAppRoot
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
-      .childDirectory('Packages')
-      .childDirectory('.packages');
 
   @override
   Directory get flutterFrameworkSwiftPackageDirectory => hostAppRoot
@@ -4428,6 +4666,7 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     required super.fileSystem,
     required super.plistParser,
     this.validateBackup = false,
+    required super.config,
   }) : _xcodeProject = project;
 
   final XcodeBasedProject _xcodeProject;
@@ -4453,4 +4692,23 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
       super.restoreFromBackup(schemeInfo);
     }
   }
+}
+
+class FakePlugin extends Fake implements Plugin {
+  FakePlugin({required this.name, required this.swiftPackagePath});
+
+  final String swiftPackagePath;
+
+  @override
+  final String name;
+
+  @override
+  String? pluginSwiftPackagePath(FileSystem fileSystem, String platform, {String? overridePath}) {
+    return swiftPackagePath;
+  }
+}
+
+class FakeConfig extends Fake implements Config {
+  @override
+  Object? getValue(String key) => null;
 }

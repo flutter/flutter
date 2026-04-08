@@ -151,6 +151,8 @@ abstract final class FlutterOptions {
   static const kWebWasmFlag = 'wasm';
   static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
+  static const kCodesignIdentity = 'codesign-identity';
+  static const kCodesign = 'codesign';
 }
 
 /// flutter command categories for usage.
@@ -403,6 +405,18 @@ abstract class FlutterCommand extends Command<void> {
           'and this flag can be used to override the default. To disable this for the '
           'skwasm renderer, use "--no-cross-origin-isolation".',
       hide: !verboseHelp,
+    );
+    usesBaseHrefOption();
+  }
+
+  void usesBaseHrefOption() {
+    argParser.addOption(
+      'base-href',
+      help:
+          'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is made to web/index.html file if this flag is not provided. '
+          'The value must start and end with "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
     );
   }
 
@@ -1205,6 +1219,22 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesDarwinCodeSignXCFrameworksOption() {
+    argParser.addFlag(
+      FlutterOptions.kCodesign,
+      defaultsTo: true,
+      help: 'Whether to code-sign XCFrameworks.',
+    );
+    argParser.addOption(
+      FlutterOptions.kCodesignIdentity,
+      help:
+          'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+          '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+          "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
+          'a list of valid identities run "security find-identity -p codesigning -v".',
+    );
+  }
+
   void usesTrackWidgetCreation({bool hasEffect = true, required bool verboseHelp}) {
     argParser.addFlag(
       'track-widget-creation',
@@ -1292,11 +1322,11 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableSurfaceControlFlag({required bool verboseHelp}) {
+  void addEnableHcppFlag({required bool verboseHelp}) {
     argParser.addFlag(
-      'enable-surface-control',
+      'enable-hcpp',
       hide: !verboseHelp,
-      help: 'Whether to enable surface control on the Impeller rendering backend.',
+      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
     );
   }
 

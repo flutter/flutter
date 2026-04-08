@@ -109,8 +109,9 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
   scroll_delta_x *= kScrollOffsetMultiplier * scale_factor;
   scroll_delta_y *= kScrollOffsetMultiplier * scale_factor;
 
-  if (gdk_device_get_source(gdk_event_get_source_device(event)) ==
-      GDK_SOURCE_TOUCHPAD) {
+  GdkDevice* device = gdk_event_get_source_device(event);
+  if (device != nullptr &&
+      gdk_device_get_source(device) == GDK_SOURCE_TOUCHPAD) {
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
     if (gdk_event_is_scroll_stop_event(event)) {

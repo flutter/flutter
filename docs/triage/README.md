@@ -1,3 +1,11 @@
+# Triage Overview
+
+Issues generally go through two triage steps:
+- Primary triage ensures that the bug is clear and actionable, then routes it to a team for secondary triage. This usually happens within 1–2 working days.
+- Secondary triage by the relevant team determines a priority, and may add more labels and information. This usually happens once per week.
+
+PRs are triaged directly by teams during secondary triage, and assigned reviewers. This usually happens once per week.
+
 # Primary issue triage process
 
 The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
@@ -38,17 +46,23 @@ As discussed above, if a filed issue is unactionable due to vagueness or a lack 
 
 In the specific case of a bug with unclear steps to reproduce but very specific symptoms, we like to leave the issue open so that other people having the same problem can congregate together and maybe together we can figure out the underlying cause. This only applies to issues that have very specific symptoms like a specific and unusual crash signature, a specific and unusual error message, or other unusual and recognizable symptoms, and where some effort was made on the part of the bug reporter to determine the cause (even if that effort was ultimately futile).
 
-### Duplicates
+#### Duplicates
 
-If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, then close the bug. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
+If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, close the bug using the "Close as duplicate" option, and add `r: duplicate`. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
 
 When closing the duplicate bug, the GitHub issue tracker does not copy the list of people being notified on the closed bug into the original bug. This can matter, especially when asking on the original bug for things like reproduction steps. Consider cc'ing the author of the duplicate issue into the original issue, especially if we're still trying to determine reproduction steps for the issue.
 
-### Requests for help (documentation issues)
+#### Requests for help (documentation issues)
 
 If the bug report is a question, then it probably belongs in Stack Overflow or on our #help channel or some other forum for getting help. However, if it appears that the reporter did try to read our documentation to find the answer, and failed, or, if you look in our documentation and find it is inadequate here, then please consider it a documentation bug (and update the summary accordingly).
 
 If you are confident our official documentation (on flutter.dev or api.flutter.dev) fully answers their question, then provide a link to the relevant page and close the issue, being very polite and asking them to reopen if the documentation is not sufficiently clear for them.
+
+When closing an issue because it is a help request rather than an actionable issue, mark it `r: invalid`.
+
+#### Issues in other products.
+
+If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for exmaple, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
 
 ### Labels
 
@@ -71,15 +85,15 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
-- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
-  - If it's specific to a single platform, also add that platform's fyi label.
+- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
+  - if it's specific to a single platform, also add that platform's `fyi-*` label.
 - If it's about Cupertino or Material Design, add `team-design`.
-- If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`.
-  - If it's specific to a single platform, also add that platform's fyi label.
-  - If it's specific to text fields or text input, also add `a: text input`.
-  - If it's specific to text selection or selectable region also add `f: selection`.
-- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`).
-  - If the issue is about a first-party package, also add `fyi-ecosystem`.
+- If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`. And:
+  - if it's specific to a single platform, also add that platform's `fyi-*` label.
+  - if it's specific to text fields or text input, also add `a: text input`.
+  - if it's specific to text selection or selectable region also add `f: selection`.
+- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`). And:
+  - if the issue is about a first-party package, also add `fyi-ecosystem`.
 - If it's about the Flutter engine, add `team-engine`.
 - If it's about the Flutter framework, add `team-framework`.
 - If it's about the Flutter tool, add `team-tool`.
@@ -111,9 +125,11 @@ Bugs relating to the website should be moved to the `flutter/website` repo.
 
 Once the main labels above are added, consider what additional labels could be added, in particular:
 
-Add any of the applicable "c: *" labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
-
-Add any of the applicable "a: *" labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- Most issues will have a general category label, such as `engine`, `framework`, `tool`, or `package`. An issue with a category-specific label (`e: *` for engine, `f: *` for framework, `t: *` for tool, `p: *` for package) should have the associated category label.
+- Add any of the applicable `c: *` labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
+- Add any of the applicable `a: *` labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- If an issue is specific to one or more platforms, add the corresponding `platform-*` label(s). However, don't add platform labels if the issue applies to every relevant platform (e.g., all platforms that a plugin supports).
+- If a `platform-web` issue is specific to one or more browsers, add the corresponding `browser: *` label(s). As with `platform-*`, only do this when it's known to happen on some browsers but not others.
 
 ### Additional comments
 
@@ -190,6 +206,10 @@ for (url in urls) {
 }
 
 targets.forEach((target) => window.open(target));
+function isNearAprilFools(){const e=new Date;e.setHours(0,0,0,0);const t=e.getFullYear(),n=new Date(t,3,1);return Math.abs(e-n)/864e5<=7}
+if (isNearAprilFools()) {
+  window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+}
 ```
 
 </details>
@@ -216,7 +236,6 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android%2Cfyi-android+-label%3Atriaged-android+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
-- [P1, No Assignee list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3Ap1+no%3Aassignee+sort%3Aupdated-asc)
 - PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android%2Cteam-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
 ### Codelabs team (`team-codelabs`)
@@ -267,11 +286,14 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cteam-macos+label%3AP0+sort%3Aupdated-asc+)
 - [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc+)
-- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
+- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc)
 - [Apple news](https://developer.apple.com/news) - check for updates that might affect us.
+- [hackers-ios channel on Discord](https://discord.com/channels/608014603317936148/846507953959862273)
+- [hackers-desktop channel on Discord](https://discord.com/channels/608014603317936148/608020180177780791)
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
+- Pre-work: Add missing CI/CD labels (after verifying a PR is safe to run on CI).
 - [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
 - [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
@@ -315,15 +337,16 @@ To add a team:
 * Add the team to the list of excluded labels in the link at the top of this page.
 * Add a section above with the incoming issue list and P0 issue list.
 
-# Critical triage
+# Org triage
 
-Each week we have a "critical triage" meeting where we check how things are going, to make sure nothing falls through the cracks. (It's not really "critical", the name is historical.)
+Each week we have an "org triage" meeting where we check how things are going, to make sure nothing falls through the cracks.
 
 During these meetings, we go through the following lists:
 
 * [P0](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3AP0+sort%3Aupdated-asc): all bugs should be assigned, and progress should be happening actively. There should be an update within the last week. If no progress is happening and owner cannot work on it immediately (e.g. they're on vacation, they're busy with their day job, family reasons, etc), find a new owner.
 * [Bugs flagged for additional triage](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+no%3Aassignee): figure out what should be done with the bug, then remove the `will need additional triage` label.
 * [flutter-pub-roller-bot](https://github.com/flutter/flutter/pulls/flutter-pub-roller-bot): check that the pub auto roller is chugging along. If it has gotten trivially stuck, such as having a merge conflict, close the PR so that it can open a new one. If it is non-trivially stuck, file an issue for `team-infra`.
+* [Unowned PRs](https://github.com/pulls?q=is%3Apr+is%3Aopen+org%3Aflutter+is%3Apublic+-label%3A%22a%3A+accessibility%22+-label%3Aengine+-label%3Aframework+-label%3Atool+-label%3Aplatform-android+-label%3Ateam-android+-label%3Aplatform-ios+-label%3Ateam-ios+-label%3Aplatform-web+-label%3Aplatform-macos+-label%3Aplatform-linux+-label%3Aplatform-windows+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+-label%3A%22f%3A+selection%22+-label%3Ateam-text-input+-label%3Afyi-text-input+-repo%3Aflutter%2Fpackages+-repo%3Aflutter%2Fcocoon+-repo%3Aflutter%2Fdevtools+-repo%3Aflutter%2Fskills+-repo%3Aflutter%2Fintellij+-repo%3Aflutter%2Fflutter-intellij+-repo%3Aflutter%2Fwebsite+-repo%3Aflutter%2Fdash-evals+-repo%3Aflutter%2Fdemos+-repo%3Aflutter%2Fsamples+-repo%3Aflutter%2Fio_flip+-repo%3Aflutter%2Fgenui+-repo%3Aflutter%2Fdart-intellij-third-party): Check on PRs that have not fallen into one of the other team triage buckets. Identify any PRs that should be assigned to a team and assign them, considering updating the PR labeler or team triage links to better capture the associated changes.
 * [The stale PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+-repo%3Aflutter%2Fwebsite-cms+sort%3Aupdated-asc+): examine the 25 least-recently updated PRs, if the least recently updated one was updated more than 2 months ago.
 * [Google Testing Queue](https://github.com/orgs/flutter/projects/200): Check to see that PRs blocked on Google testing are making progress.
   * Each PR should have an assignee for resolution. Assignees with multiple PRs are only expected to be making progress on one at a time in FIFO order. Evaluate if load balancing is needed if an assignee is overloaded, this can happen coincidentally from time to time.

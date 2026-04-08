@@ -697,7 +697,7 @@ class EventChannel {
       onListen: () async {
         binaryMessenger.setMessageHandler(name, (ByteData? reply) async {
           if (reply == null) {
-            controller.close();
+            await controller.close();
           } else {
             try {
               controller.add(codec.decodeEnvelope(reply));

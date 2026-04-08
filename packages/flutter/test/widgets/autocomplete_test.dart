@@ -3444,6 +3444,115 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Autocomplete reports error when SemanticsService.sendAnnouncement fails', (
+    WidgetTester tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
+      final errors = <FlutterErrorDetails>[];
+      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        final String contextStr = details.context?.toString() ?? '';
+        if (contextStr.contains('while sending semantics announcement')) {
+          errors.add(details);
+          return;
+        }
+        originalOnError?.call(details);
+      };
+      addTearDown(() {
+        FlutterError.onError = originalOnError;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          null,
+        );
+      });
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        SystemChannels.accessibility.name,
+        (ByteData? message) async {
+          const codec = StandardMessageCodec();
+          final Object? decoded = codec.decodeMessage(message);
+          if (decoded is Map && decoded['type'] == 'announce') {
+            final data = ByteData(1);
+            data.setUint8(0, 255); // Invalid type byte
+            return data;
+          }
+          return null; // Success for other events
+        },
+      );
+
+      final entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TestTextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
+          );
+        },
+      );
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(initialEntries: <OverlayEntry>[entry]),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      expect(errors, isNotEmpty);
+      final bool hasAnnouncementError = errors.any(
+        (e) =>
+            e.exception.toString().contains('FormatException') &&
+            e.context.toString().contains('while sending semantics announcement'),
+      );
+      expect(hasAnnouncementError, isTrue);
+
+      handle.dispose();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets('Autocomplete Semantics announce in multi-view', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey optionsKey = GlobalKey();
@@ -3828,5 +3937,91 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Same option in RawAutocomplete should be selectable again after text is cleared', (
+    WidgetTester tester,
+  ) async {
+    final textCtrl = TextEditingController();
+    addTearDown(textCtrl.dispose);
+    final textFocus = FocusNode();
+    addTearDown(textFocus.dispose);
+    final listItem = <String>['test', 'abc', 'dexter'];
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Row(
+          children: <Widget>[
+            Expanded(
+              child: RawAutocomplete<String>(
+                textEditingController: textCtrl,
+                focusNode: textFocus,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return listItem.where((String e) => e.contains(textEditingValue.text));
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TestTextField(controller: textEditingController, focusNode: focusNode);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return ListView.builder(
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return GestureDetector(
+                            onTap: () => onSelected(option),
+                            child: Text(option),
+                          );
+                        },
+                      );
+                    },
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                textCtrl.clear();
+              },
+              child: const Text('Clear'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Open the popup menu.
+    await tester.enterText(find.byType(TestTextField), '');
+    await tester.pumpAndSettle();
+    expect(find.text('test'), findsOneWidget);
+
+    // Select option 'test'
+    await tester.tap(find.text('test'));
+    await tester.pumpAndSettle();
+    expect(textCtrl.text, 'test');
+
+    // Clear text
+    await tester.tap(find.text('Clear'));
+    textFocus.unfocus();
+    await tester.pumpAndSettle();
+    expect(textCtrl.text, '');
+
+    // Select 'test' again
+    await tester.tap(find.byType(TestTextField));
+    await tester.pumpAndSettle();
+    expect(find.text('test'), findsWidgets);
+    await tester.tap(find.text('test').last);
+    await tester.pumpAndSettle();
+
+    // The text field should be updated to 'test'.
+    expect(textCtrl.text, 'test');
   });
 }

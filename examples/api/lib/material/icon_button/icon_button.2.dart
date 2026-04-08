@@ -29,7 +29,7 @@ class ButtonTypesExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.all(4.0),
+      padding: .all(4.0),
       child: Row(
         children: <Widget>[
           Spacer(),
@@ -52,9 +52,9 @@ class ButtonTypesGroup extends StatelessWidget {
     final VoidCallback? onPressed = enabled ? () {} : null;
 
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const .all(4.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: .spaceEvenly,
         children: <Widget>[
           IconButton(
             icon: const Icon(Icons.filter_drama),

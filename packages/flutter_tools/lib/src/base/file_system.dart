@@ -164,6 +164,7 @@ void copyDirectory(
         shouldCopyFile: shouldCopyFile,
         onFileCopied: onFileCopied,
         followLinks: followLinks,
+        shouldCopyDirectory: shouldCopyDirectory,
       );
     } else {
       throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');

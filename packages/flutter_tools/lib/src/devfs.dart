@@ -651,7 +651,22 @@ class DevFS {
         final AssetKind? kind = bundle.entries[archivePath]?.kind;
         switch (kind) {
           case AssetKind.shader:
-            final Future<DevFSContent?> pending = shaderCompiler.recompileShader(entry.content);
+            final Future<DevFSContent?> pending = (() async {
+              DevFSContent content = entry.content;
+              if (entry.transformers.isNotEmpty) {
+                final DevFSContent? transformed = await _assetTransformer.retransformAsset(
+                  inputAssetKey: archivePath,
+                  inputAssetContent: content,
+                  transformerEntries: entry.transformers,
+                  workingDirectory: rootDirectory.path,
+                );
+                if (transformed == null) {
+                  return null;
+                }
+                content = transformed;
+              }
+              return shaderCompiler.recompileShader(content);
+            })();
             pendingAssetBuilds.add(pending);
             pending.then((DevFSContent? content) {
               if (content == null) {
