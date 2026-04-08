@@ -2220,7 +2220,7 @@ void main() {
     });
   });
 
-  group('enableFilter parameter tests', () {
+  group('hasPlatformViews parameter tests', () {
     final GlobalKey scaffoldKey = GlobalKey();
 
     bool checkHasImageFilterLayer() {
@@ -2238,7 +2238,7 @@ void main() {
       return found;
     }
 
-    Widget dragGestureApp(bool enableFilter) {
+    Widget dragGestureApp(bool hasPlatformViews) {
       return CupertinoApp(
         home: CupertinoPageScaffold(
           key: scaffoldKey,
@@ -2250,7 +2250,7 @@ void main() {
                   onPressed: () {
                     showCupertinoSheet<void>(
                       context: scaffoldKey.currentContext!,
-                      enableFilter: enableFilter,
+                      hasPlatformViews: hasPlatformViews,
                       pageBuilder: (BuildContext context) {
                         return const CupertinoPageScaffold(child: Center(child: Text('Page 2')));
                       },
@@ -2265,17 +2265,17 @@ void main() {
       );
     }
 
-    Future<void> pumpSheet(WidgetTester tester, bool enableFilter) async {
-      await tester.pumpWidget(dragGestureApp(enableFilter));
+    Future<void> pumpSheet(WidgetTester tester, bool hasPlatformViews) async {
+      await tester.pumpWidget(dragGestureApp(hasPlatformViews));
       await tester.tap(find.text('Push Page 2'));
       await tester.pumpAndSettle();
       expect(find.text('Page 2'), findsOneWidget);
     }
 
-    testWidgets('enabling filter should add ImageFilterLayer during transition', (
+    testWidgets('hasPlatformViews=false should add ImageFilterLayer during transition', (
       WidgetTester tester,
     ) async {
-      await pumpSheet(tester, true);
+      await pumpSheet(tester, false);
 
       // ImageFilterLayer should not be found after the transition is completed
       // because the ScaleTransition/MatrixTransition will set the Transform.filterQuality to null
@@ -2292,10 +2292,10 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('disabling filter should not add ImageFilterLayer during transition', (
+    testWidgets('hasPlatformViews=true should not add ImageFilterLayer during transition', (
       WidgetTester tester,
     ) async {
-      await pumpSheet(tester, false);
+      await pumpSheet(tester, true);
 
       expect(checkHasImageFilterLayer(), false);
 
