@@ -763,7 +763,6 @@ void main() {
               focusNode: focusNode,
               style: const TextStyle(fontSize: 100.0),
               cursorColor: const Color.fromARGB(0, 0, 0, 0),
-
               selectionHeightStyle: ui.BoxHeightStyle.tight,
               selectionControls: cupertinoTextSelectionControls,
               readOnly: true,
@@ -858,7 +857,6 @@ void main() {
               focusNode: focusNode,
               style: const TextStyle(fontSize: 100.0),
               cursorColor: const Color.fromARGB(0, 0, 0, 0),
-
               selectionControls: cupertinoTextSelectionControls,
               readOnly: true,
               decoration: null,
@@ -956,7 +954,6 @@ void main() {
               focusNode: focusNode,
               style: const TextStyle(fontSize: 100.0),
               cursorColor: const Color.fromARGB(0, 0, 0, 0),
-
               selectionHeightStyle: ui.BoxHeightStyle.tight,
               selectionControls: cupertinoTextSelectionControls,
               readOnly: true,
@@ -1052,7 +1049,6 @@ void main() {
               focusNode: focusNode,
               style: const TextStyle(fontSize: 100.0),
               cursorColor: const Color.fromARGB(0, 0, 0, 0),
-
               selectionControls: cupertinoTextSelectionControls,
               readOnly: true,
               decoration: null,
@@ -1145,7 +1141,6 @@ void main() {
               focusNode: focusNode,
               style: const TextStyle(fontSize: 50.0),
               cursorColor: const Color.fromARGB(0, 0, 0, 0),
-
               selectionHeightStyle: ui.BoxHeightStyle.tight,
               selectionControls: cupertinoTextSelectionControls,
               readOnly: true,
