@@ -1256,6 +1256,19 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itDoesNotSetBooleanFlagWithMalformedOrMissingValue() {
+    // A key present with a non-boolean string value should NOT enable the flag.
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableVulkanValidation",
+        "Fasle",
+        "--enable-vulkan-validation");
+
+    // A key present with a null value should NOT enable the flag.
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableVulkanValidation", null, "--enable-vulkan-validation");
+  }
+
+  @Test
   public void itDoesNotSetTestFlagFromMetadata() {
     testFlagFromMetadataNotPresent("io.flutter.embedding.android.TestFlag", true, "--test-flag");
   }
