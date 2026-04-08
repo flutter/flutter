@@ -1271,7 +1271,7 @@ public class FlutterRenderer implements TextureRegistry {
             + ", R: "
             + viewportMetrics.systemGestureInsetRight
             + ", B: "
-            + viewportMetrics.systemGestureInsetRight
+            + viewportMetrics.systemGestureInsetBottom
             + "\n"
             + "Display Features: "
             + viewportMetrics.displayFeatures.size()
