@@ -13,40 +13,48 @@ UberSDFGeometry::UberSDFGeometry(const UberSDFParameters& params)
 
 UberSDFGeometry::~UberSDFGeometry() = default;
 
-Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform,
-                                        bool inset) const {
+Rect UberSDFGeometry::GetExpandedBaseBounds() const {
   Rect bounds = Rect::MakeOriginSize(params_.center,
                                      Size(params_.size.x, params_.size.y));
   if (params_.stroke) {
     bounds = bounds.Expand(params_.stroke->width);
   }
-  bounds = bounds.TransformAndClipBounds(transform);
-  bounds = bounds.Expand(params_.kAntialiasPadding * (inset ? -1.0f : 1.0f));
   return bounds;
+}
+
+Rect UberSDFGeometry::GetExpandedDeviceBounds(const Matrix& transform,
+                                              bool inset) const {
+  Rect bounds = GetExpandedBaseBounds().TransformAndClipBounds(transform);
+  return bounds.Expand(params_.kAntialiasPadding * (inset ? -1.0f : 1.0f));
+}
+
+Rect UberSDFGeometry::GetExpandedLocalBounds(const Matrix& transform) const {
+  return GetExpandedBaseBounds().Expand(params_.kAntialiasPadding /
+                                        transform.GetMaxBasisLengthXY());
 }
 
 GeometryResult UberSDFGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  FillRectGeometry frg(GetExpandedBounds(entity.GetTransform()));
+  FillRectGeometry frg(GetExpandedLocalBounds(entity.GetTransform()));
   return frg.GetPositionBuffer(renderer, entity, pass);
 }
 
 std::optional<Rect> UberSDFGeometry::GetCoverage(
     const Matrix& transform) const {
-  return GetExpandedBounds(transform, false);
+  return GetExpandedDeviceBounds(transform, false);
 }
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
                                  const Rect& rect) const {
-  if (params_.stroke || params_.type != UberSDFParameters::Type::kRect) {
+  if (params_.type != UberSDFParameters::Type::kRect || params_.stroke) {
     return false;
   }
   if (!transform.IsTranslationScaleOnly()) {
     return false;
   }
-  return GetExpandedBounds(transform, true).Contains(rect);
+  return GetExpandedDeviceBounds(transform, true).Contains(rect);
 }
 
 bool UberSDFGeometry::IsAxisAlignedRect() const {
