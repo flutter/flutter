@@ -243,6 +243,7 @@ Future<int> _handleToolErrorImpl(
       return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
+    // ignore: avoid_type_to_string
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
 
     if (!usingLocalEngine) {
