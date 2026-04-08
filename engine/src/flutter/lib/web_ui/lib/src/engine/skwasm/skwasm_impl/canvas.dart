@@ -247,10 +247,7 @@ class SkwasmCanvas implements LayerCanvas {
       final int targetWidth = dst.width.toInt();
       final int targetHeight = dst.height.toInt();
 
-      final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
-      final PaintHandle paintHandle = (tempPaint as SkwasmPaint).toRawPaint(
-        defaultBlurTileMode: ui.TileMode.clamp,
-      );
+      PaintHandle? downscalingPaintHandle;
 
       final ui.Image downscaledImage = getOrCreateDownscaledImage(
         box: (image as SkwasmImage).box,
@@ -260,6 +257,12 @@ class SkwasmCanvas implements LayerCanvas {
         targetHeight: targetHeight,
         rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
           final CanvasHandle tempCanvasHandle = (canvas as SkwasmCanvas)._handle;
+          if (downscalingPaintHandle == null) {
+            final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
+            downscalingPaintHandle = (tempPaint as SkwasmPaint).toRawPaint(
+              defaultBlurTileMode: ui.TileMode.clamp,
+            );
+          }
           withStackScope((StackScope scope) {
             final Pointer<Float> sourceRect = scope.convertRectToNative(s);
             final Pointer<Float> destRect = scope.convertRectToNative(d);
@@ -268,14 +271,16 @@ class SkwasmCanvas implements LayerCanvas {
               (img as SkwasmImage).handle,
               sourceRect,
               destRect,
-              paintHandle,
+              downscalingPaintHandle!,
               ui.FilterQuality.low.index,
             );
           });
         },
       );
 
-      paintDispose(paintHandle);
+      if (downscalingPaintHandle != null) {
+        paintDispose(downscalingPaintHandle!);
+      }
 
       withStackScope((StackScope scope) {
         final Pointer<Float> sourceRect = scope.convertRectToNative(

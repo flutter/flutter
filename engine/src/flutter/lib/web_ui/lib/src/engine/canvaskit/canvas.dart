@@ -151,7 +151,7 @@ class CkCanvas implements LayerCanvas {
       final int targetWidth = dst.width.toInt();
       final int targetHeight = dst.height.toInt();
 
-      final SkPaint downscalingPaint = CkPaint().toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
+      SkPaint? downscalingPaint;
 
       final ui.Image downscaledImage = getOrCreateDownscaledImage(
         box: (image as CkImage).box,
@@ -160,6 +160,7 @@ class CkCanvas implements LayerCanvas {
         targetWidth: targetWidth,
         targetHeight: targetHeight,
         rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
+          downscalingPaint ??= CkPaint().toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
           final SkCanvas tempSkCanvas = (canvas as CkCanvas).skCanvas;
           tempSkCanvas.drawImageRectOptions(
             (img as CkImage).skImage,
@@ -167,12 +168,12 @@ class CkCanvas implements LayerCanvas {
             toSkRect(d),
             canvasKit.FilterMode.Linear,
             canvasKit.MipmapMode.None,
-            downscalingPaint,
+            downscalingPaint!,
           );
         },
       );
 
-      downscalingPaint.delete();
+      downscalingPaint?.delete();
 
       final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
       skCanvas.drawImageRectOptions(
