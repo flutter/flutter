@@ -6707,23 +6707,21 @@ void main() {
                     (BuildContext context, SelectableRegionState selectableRegionState) {
                       final TextSelectionToolbarAnchors anchors =
                           selectableRegionState.contextMenuAnchors;
-                      return SizedBox.expand(
-                        child: CustomSingleChildLayout(
-                          delegate: TextSelectionToolbarLayoutDelegate(
-                            anchorAbove: anchors.primaryAnchor,
-                            anchorBelow: anchors.secondaryAnchor == null
-                                ? anchors.primaryAnchor
-                                : anchors.secondaryAnchor!,
-                          ),
-                          child: Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                menuButtonPressed = true;
-                              },
-                              child: const Text('Menu Button 1'),
-                            ),
+                      return CustomSingleChildLayout(
+                        delegate: TextSelectionToolbarLayoutDelegate(
+                          anchorAbove: anchors.primaryAnchor,
+                          anchorBelow: anchors.secondaryAnchor == null
+                              ? anchors.primaryAnchor
+                              : anchors.secondaryAnchor!,
+                        ),
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              menuButtonPressed = true;
+                            },
+                            child: const Text('Menu Button 1'),
                           ),
                         ),
                       );
