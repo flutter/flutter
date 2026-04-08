@@ -51,9 +51,9 @@ class SliverFillRemainingExample extends StatelessWidget {
           child: Container(
             color: Colors.teal[100],
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: .bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const .all(16.0),
                 child: ElevatedButton(
                   onPressed: () {
                     /* Place your onPressed code here! */

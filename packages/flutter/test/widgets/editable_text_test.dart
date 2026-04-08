@@ -5580,6 +5580,58 @@ void main() {
     });
   });
 
+  testWidgets('reporting error when Clipboard.setData fails in copySelection', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errors.add(details);
+    };
+    addTearDown(() {
+      FlutterError.onError = originalOnError;
+    });
+
+    final controller = TextEditingController(text: 'test data');
+    addTearDown(controller.dispose);
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ),
+    );
+
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
+    await tester.pump();
+
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.setData') {
+          throw Exception('Clipboard error');
+        }
+        return null;
+      },
+    );
+
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    state.copySelection(SelectionChangedCause.toolbar);
+
+    await tester.idle();
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception.toString(), contains('Clipboard error'));
+    expect(errors.first.context.toString(), contains('while copying selection'));
+  });
+
   testWidgets('can set text with a11y', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
