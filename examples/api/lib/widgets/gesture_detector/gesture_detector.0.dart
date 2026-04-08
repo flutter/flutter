@@ -33,10 +33,10 @@ class _GestureDetectorExampleState extends State<GestureDetectorExample> {
       body: Container(
         alignment: FractionalOffset.center,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const .all(8.0),
               child: Icon(
                 Icons.lightbulb_outline,
                 color: _lightIsOn ? Colors.yellow.shade600 : Colors.black,
@@ -52,7 +52,7 @@ class _GestureDetectorExampleState extends State<GestureDetectorExample> {
               },
               child: Container(
                 color: Colors.yellow.shade600,
-                padding: const EdgeInsets.all(8),
+                padding: const .all(8),
                 // Change button text when light changes state.
                 child: Text(_lightIsOn ? 'TURN LIGHT OFF' : 'TURN LIGHT ON'),
               ),

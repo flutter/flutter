@@ -106,11 +106,11 @@ class _RawMenuAnchorAnimationExampleState
                     ),
                     child: Material(
                       elevation: 8,
-                      clipBehavior: Clip.antiAlias,
-                      borderRadius: BorderRadius.circular(16),
+                      clipBehavior: .antiAlias,
+                      borderRadius: .circular(16),
                       color: colorScheme.primary,
                       child: SizeTransition(
-                        alignment: Alignment.topLeft,
+                        alignment: .topLeft,
                         sizeFactor: animationController.view,
                         fixedCrossAxisSizeFactor: 1.0,
                         child: SizedBox(
@@ -118,7 +118,7 @@ class _RawMenuAnchorAnimationExampleState
                           width: 150,
                           child: Text(
                             'ANIMATION STATUS:\n${_animationStatus.name}',
-                            textAlign: TextAlign.center,
+                            textAlign: .center,
                             style: TextStyle(
                               color: colorScheme.onPrimary,
                               fontSize: 12,
