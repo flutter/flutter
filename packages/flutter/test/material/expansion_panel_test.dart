@@ -2174,40 +2174,37 @@ void main() {
     expect(visibility.visible, isTrue);
   });
 
-  testWidgets(
-    'ExpansionPanel icon has semantics label when visible and canTapOnHeader is false',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SingleChildScrollView(
-            child: ExpansionPanelList(
-              children: <ExpansionPanel>[
-                ExpansionPanel(
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return const ListTile(title: Text('Panel'));
-                  },
-                  body: const ListTile(title: Text('Content')),
-                ),
-              ],
-            ),
+  testWidgets('ExpansionPanel icon has semantics label when visible and canTapOnHeader is false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content')),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
 
-      final Finder semanticsFinder = find.ancestor(
-        of: find.byType(ExpandIcon),
-        matching: find.byType(Semantics),
-      );
-      expect(semanticsFinder, findsWidgets);
+    final Finder semanticsFinder = find.ancestor(
+      of: find.byType(ExpandIcon),
+      matching: find.byType(Semantics),
+    );
+    expect(semanticsFinder, findsWidgets);
 
-      final Semantics semantics = tester
-          .widgetList<Semantics>(semanticsFinder)
-          .firstWhere(
-            (Semantics s) => s.properties.label != null && s.properties.label!.isNotEmpty,
-          );
-      expect(semantics.properties.label, isNotNull);
-    },
-  );
+    final Semantics semantics = tester
+        .widgetList<Semantics>(semanticsFinder)
+        .firstWhere((Semantics s) => s.properties.label != null && s.properties.label!.isNotEmpty);
+    expect(semantics.properties.label, isNotNull);
+  });
 
   testWidgets('ExpansionPanel icon has no semantics label when hidden', (
     WidgetTester tester,
