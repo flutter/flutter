@@ -198,6 +198,74 @@ void testMain() {
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     });
 
+    // https://github.com/flutter/flutter/issues/157831
+    test('can render emoji with text variation selector (VS15)', () async {
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+
+      final text = String.fromCharCodes(<int>[
+        0x2648, 0xFE0E, // ♈︎
+        0x264B, 0xFE0E, // ♋︎
+        0x000A, // newline
+        0x2650, 0xFE0E, // ♐︎
+      ]);
+      var pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText(text);
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
+      await FallbackFontService.instance.waitForIdle();
+
+      expect(downloadedFontFamilies, isNotEmpty);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+
+      pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.pushStyle(ui.TextStyle(fontSize: 32));
+      pb.addText(text);
+      pb.pop();
+      final ui.Paragraph paragraph = pb.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+      canvas.drawParagraph(paragraph, ui.Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile('ui_font_fallback_emoji_vs15.png', region: kDefaultRegion);
+    });
+
+    // https://github.com/flutter/flutter/issues/157831
+    test('can render emoji with color variation selector (VS16)', () async {
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+
+      final text = String.fromCharCodes(<int>[
+        0x2648, 0xFE0F, // ♈️
+        0x264B, 0xFE0F, // ♋️
+        0x000A, // newline
+        0x2650, 0xFE0F, // ♐️
+      ]);
+      var pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText(text);
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
+      await FallbackFontService.instance.waitForIdle();
+
+      expect(downloadedFontFamilies, isNotEmpty);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+
+      pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.pushStyle(ui.TextStyle(fontSize: 32));
+      pb.addText(text);
+      pb.pop();
+      final ui.Paragraph paragraph = pb.build();
+      paragraph.layout(const ui.ParagraphConstraints(width: 1000));
+
+      canvas.drawParagraph(paragraph, ui.Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
+
+      await matchGoldenFile('ui_font_fallback_emoji_vs16.png', region: kDefaultRegion);
+    });
+
     /// Attempts to render [text] and verifies that [expectedFamilies] are downloaded.
     ///
     /// Then it does the same, but asserts that the families aren't downloaded again

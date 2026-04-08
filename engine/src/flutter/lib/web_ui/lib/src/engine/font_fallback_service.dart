@@ -67,6 +67,18 @@ class FallbackFontService {
   /// single [FallbackFontComponent] before marking it as unsupported.
   static const int _maxFontsPerComponent = 5;
 
+  /// First code point in the Unicode Variation Selectors block (VS1).
+  static const int _kVariationSelectorStart = 0xFE00;
+
+  /// Last code point in the Unicode Variation Selectors block (VS16).
+  static const int _kVariationSelectorEnd = 0xFE0F;
+
+  /// Text-presentation variation selector (VS15).
+  static const int _kTextPresentationSelector = 0xFE0E;
+
+  /// Whether VS15 has been observed in the input.
+  bool _hasSeenTextPresentationSelector = false;
+
   /// Adds a list of missing code points to be processed.
   void addMissingCodePoints(List<int> codePoints) {
     var added = false;
@@ -82,6 +94,14 @@ class FallbackFontService {
     // determine which fallback font component covers them and whether that
     // component is already satisfied by a registered font.
     for (final codePoint in codePoints) {
+      // Variation selectors have no glyph in the fallback data.
+      if (codePoint >= _kVariationSelectorStart && codePoint <= _kVariationSelectorEnd) {
+        if (codePoint == _kTextPresentationSelector) {
+          _hasSeenTextPresentationSelector = true;
+        }
+        continue;
+      }
+
       // Skip if we already know this character can't be rendered or if it's
       // already scheduled for processing.
       if (!_unsupportedCodePoints.contains(codePoint) &&
@@ -220,22 +240,42 @@ class FallbackFontService {
       _unsupportedCodePoints.addAll(newlyUnsupported);
     }
 
-    if (gapComponentCounts.isEmpty) {
-      _checkIdle();
-      return;
-    }
-
     // Resolve the Gap: Run the greedy algorithm on unique components.
     // This finds the smallest set of fonts that will resolve all current "Gaps".
     final List<NotoFont> newFonts = _findFontsForComponents(gapComponentCounts);
 
-    if (newFonts.isEmpty) {
-      _checkIdle();
-      return;
-    }
-
     // Fire and Forget: Start downloads for the selected fonts.
     newFonts.forEach(_startDownloadTask);
+
+    // Also schedule the text-presentation companion when VS15 was observed.
+    if (_hasSeenTextPresentationSelector) {
+      final NotoFont? textPresentationFont = _findTextPresentationFont();
+      if (textPresentationFont != null) {
+        _startDownloadTask(textPresentationFont);
+      }
+    }
+
+    _checkIdle();
+  }
+
+  /// Returns a Noto Emoji shard covering an unprocessed code point that has
+  /// not yet been registered, downloaded, or marked unavailable.
+  NotoFont? _findTextPresentationFont() {
+    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+    for (final int cp in _unprocessedCodePoints) {
+      for (final NotoFont font in manager.codePointToComponents.lookup(cp).fonts) {
+        if (!font.name.startsWith('Noto Emoji')) {
+          continue;
+        }
+        if (_pendingFonts.contains(font) ||
+            _permanentlyUnavailableFonts.contains(font) ||
+            _registeredFonts.contains(font)) {
+          continue;
+        }
+        return font;
+      }
+    }
+    return null;
   }
 
   /// Wraps the download and registration process in a managed task.
@@ -633,6 +673,7 @@ class FallbackFontService {
     _failedFontsPerComponent.clear();
     _totalPermanentFailures = 0;
     _isBroken = false;
+    _hasSeenTextPresentationSelector = false;
     _processTimer?.cancel();
     _processTimer = null;
     _notifyTimer?.cancel();
