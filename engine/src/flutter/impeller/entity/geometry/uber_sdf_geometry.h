@@ -14,7 +14,7 @@ namespace impeller {
 
 class UberSDFGeometry final : public Geometry {
  public:
-  explicit UberSDFGeometry(UberSDFParameters params);
+  explicit UberSDFGeometry(const UberSDFParameters& params);
 
   ~UberSDFGeometry() override;
 
@@ -33,7 +33,14 @@ class UberSDFGeometry final : public Geometry {
   bool IsAxisAlignedRect() const override;
 
  private:
-  std::unique_ptr<Geometry> CreateUnderlyingGeometry() const;
+  // Compute the bounds of the primitive based on the center and size
+  // and taking into account the expansion due to the stroke width as
+  // well as either expanding (inset == false) or reducing (inset == true)
+  // the bounds by the AA pixel fringe. Some operations need to work on
+  // the full coverage center of the operation, the part that is entirely
+  // inside the edge pixels that may have been reduced by the AA coverage
+  // calculations.
+  Rect GetExpandedBounds(const Matrix& transform, bool inset = false) const;
 
   UberSDFParameters params_;
 };

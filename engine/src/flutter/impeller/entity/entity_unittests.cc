@@ -1238,7 +1238,7 @@ TEST(EntityTest, UberSDFContentsCoverage) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
   auto params = UberSDFParameters::MakeRect(Color::Red(), rect, std::nullopt);
   auto geometry = std::make_unique<UberSDFGeometry>(params);
-  auto contents = UberSDFContents::Make(std::move(params), std::move(geometry));
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
 
   Entity entity;
   auto coverage = contents->GetCoverage(entity);

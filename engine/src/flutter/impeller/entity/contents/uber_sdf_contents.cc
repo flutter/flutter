@@ -23,13 +23,13 @@ using FS = UberSDFPipeline::FragmentShader;
 }  // namespace
 
 std::unique_ptr<UberSDFContents> UberSDFContents::Make(
-    UberSDFParameters params,
+    const UberSDFParameters& params,
     std::unique_ptr<Geometry> geometry) {
   return std::unique_ptr<UberSDFContents>(
       new UberSDFContents(params, std::move(geometry)));
 }
 
-UberSDFContents::UberSDFContents(UberSDFParameters params,
+UberSDFContents::UberSDFContents(const UberSDFParameters& params,
                                  std::unique_ptr<Geometry> geometry)
     : params_(params), geometry_(std::move(geometry)) {}
 
