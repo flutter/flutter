@@ -1129,7 +1129,16 @@ mixin WidgetsBinding
         );
       }
     }
-    SystemNavigator.pop();
+    SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while popping route'),
+        ),
+      );
+    });
     return false;
   }
 

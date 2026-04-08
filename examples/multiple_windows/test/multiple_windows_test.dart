@@ -138,4 +138,16 @@ See: https://github.com/flutter/flutter/issues/30701.
 
     expect(find.text('Tooltip Window'), findsOneWidget);
   });
+
+  testWidgets('Can create a popup window', (WidgetTester tester) async {
+    multiple_windows.main();
+    await tester.pump(); // triggers a frame
+
+    final toTap = find.widgetWithText(OutlinedButton, 'Show Popup');
+    expect(toTap, findsOneWidget);
+    await tester.tap(toTap);
+    await tester.pump();
+
+    expect(find.text('Popup Window'), findsOneWidget);
+  });
 }

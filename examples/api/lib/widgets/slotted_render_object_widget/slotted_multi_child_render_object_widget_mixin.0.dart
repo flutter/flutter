@@ -105,7 +105,7 @@ class RenderDiagonal extends RenderBox
     const BoxConstraints childConstraints = BoxConstraints();
 
     // Lay out the top left child and position it at offset zero.
-    Size topLeftSize = Size.zero;
+    Size topLeftSize = .zero;
     final RenderBox? topLeft = _topLeft;
     if (topLeft != null) {
       topLeft.layout(childConstraints, parentUsesSize: true);
@@ -115,7 +115,7 @@ class RenderDiagonal extends RenderBox
 
     // Lay out the bottom right child and position it at the bottom right corner
     // of the top left child.
-    Size bottomRightSize = Size.zero;
+    Size bottomRightSize = .zero;
     final RenderBox? bottomRight = _bottomRight;
     if (bottomRight != null) {
       bottomRight.layout(childConstraints, parentUsesSize: true);
