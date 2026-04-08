@@ -229,12 +229,7 @@ class SensitiveContentHost {
   }
 
   Future<void> _unregister(ContentSensitivity widgetSensitivity) async {
-    assert(
-      _contentSensitivityIsSupported != null,
-      'SensitiveContentHost.register must be called before SensitiveContentHost.unregister',
-    );
-
-    if (!_contentSensitivityIsSupported!) {
+    if (!(_contentSensitivityIsSupported ?? false)) {
       // Setting content sensitivity is not supported on this device.
       return;
     }
