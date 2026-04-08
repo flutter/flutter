@@ -33,18 +33,20 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   static String get _aaptNotFound =>
       'Could not locate aapt. Please ensure you have the Android buildtools installed.';
 
-  /// This is the AndroidManifest.xml metadata key that is used to store the
-  /// engine flags that are specified on the commnad line. This key is set by the
-  /// custom Gradle task found in
+  /// The application manifest metadata key for engine flags specified via the command line
+  /// that are injected into the application merged manifest to be loaded in the
+  /// Flutter Android embedding.
+  ///
+  /// The key is set in the custom Gradle task found in
   /// packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt.
-  /// These flags are later loaded by the Flutter Android embedding in
+  /// The command line flags set there are later loaded by the Flutter Android embedding in
   /// engine/src/flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java.
   static const String androidEngineShellArgumentsFromCommandLineManifestKey =
       'androidEngineShellArgs';
 
-  /// This is the delimiter used between flag stored in the AndroidManifest.xml metata
-  /// with key [androidEngineShellArgumentsFromCommandLineManifestKey] that holds flags
-  /// specified by the developer on the command line.
+  /// The delimiter used between command line flags that are injected into the application
+  /// manifest to be loaded in the Flutter Android embedding with metadata key
+  /// [androidEngineShellArgumentsFromCommandLineManifestKey].
   static const String androidEngineShellArgumentsFromCommandLineManifestValueDelimited = ';';
 
   /// Creates a new AndroidApk from an existing APK.

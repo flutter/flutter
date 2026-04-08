@@ -49,9 +49,18 @@ public class FlutterLoader {
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String VMSERVICE_SNAPSHOT_LIBRARY = "libvmservice_snapshot.so";
 
-  // Manifest metadata key for engine flags specified via the command line
-  // that have been injected into the application merged manifest.
+  // The manifest metadata key for engine flags specified via the command line
+  // that are injected into the application merged manifest to be loaded here in the
+  // Flutter Android embedding.
+  //
+  // The key is set in the custom Gradle task found in
+  // packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt.
+  // The command line flags set there are later loaded by ensureInitializationComplete.
   private static final String ANDROID_ENGINE_SHELL_ARGS_KEY = "androidEngineShellArgs";
+
+  // The delimiter used between command line flags that are injected into the application
+  // manifest to be loaded in the Flutter Android embedding with metadata key
+  // ANDROID_ENGINE_SHELL_ARGS_KEY.
   private static final String ANDROID_ENGINE_SHELL_ARGS_DELIMITER = ";";
 
   private static FlutterLoader instance;
@@ -310,8 +319,10 @@ public class FlutterLoader {
       boolean oldGenHeapSizeSet = false;
       boolean isLeakVMSet = false;
 
+      // Add all flags specified in the application manifest manually or via Flutter tool injection.
       if (applicationMetaData != null) {
-        // Add engine flags provided by metadata in the application manifest. These settings will
+        // 1/2: Add engine flags provided by metadata in the application manifest. These settings
+        // will
         // be overridden if additionally set by the command line or via Intent.
         for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
           String metadataKey = flag.metadataKey;
@@ -320,31 +331,7 @@ public class FlutterLoader {
           }
 
           // Check if flag is valid:
-
-          if (flag == FlutterEngineFlags.TEST_FLAG) {
-            Log.w(
-                TAG,
-                "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
-            continue;
-          } else if (FlutterEngineFlags.isDisabled(flag)) {
-            // Do not allow disabled flags.
-            throw new IllegalArgumentException(
-                metadataKey
-                    + " is disabled and no longer allowed. Please remove this flag from your application manifest.");
-          } else if (FlutterEngineFlags.getReplacementFlagIfDeprecated(flag) != null) {
-            Log.w(
-                TAG,
-                "If you are trying to specify "
-                    + metadataKey
-                    + " in your application manifest, please make sure to use the new metadata key name: "
-                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
-          } else if (!flag.allowedInRelease && isRelease) {
-            // Manifest flag is not allowed in release builds.
-            Log.e(
-                TAG,
-                "Flag with metadata key "
-                    + metadataKey
-                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
+          if (!shouldLoadFlag(flag, true)) {
             continue;
           }
 
@@ -401,18 +388,19 @@ public class FlutterLoader {
 
           // Check if a boolean value is specified and if so, use it to determine if the
           // flags should be added. If not, assume the flag is meant to be added.
-          if (applicationMetaData.getBoolean(metadataKey, true)) {
+          if (applicationMetaData.getBoolean(metadataKey, false)) {
             shellArgs.add(arg);
           }
         }
 
-        // Add engine flags specified by the command line. These settings will take precedent
+        // 2/2: Add engine flags specified by the command line. These settings will take precedent
         // over any flag configurations specified by appplication manifest metadata.
-        if (applicationMetaData.containsKey(ANDROID_ENGINE_SHELL_ARGS_KEY)) {
-          String androidEngineShellArgsValue =
-              applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
+        String androidEngineShellArgsValue =
+            applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
+        if (androidEngineShellArgsValue != null) {
           String[] androidEngineShellArgs =
               androidEngineShellArgsValue.split(ANDROID_ENGINE_SHELL_ARGS_DELIMITER);
+
           for (String arg : androidEngineShellArgs) {
             FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
             if (flag == null) {
@@ -420,10 +408,7 @@ public class FlutterLoader {
               // https://github.com/flutter/flutter/issues/182557.
               shellArgs.add(arg);
               continue;
-            } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
-              Log.w(
-                  TAG,
-                  "For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.");
+            } else if (!shouldLoadFlag(flag, false)) {
               continue;
             } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
                 || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
@@ -432,14 +417,6 @@ public class FlutterLoader {
               String aotSharedLibraryPath =
                   arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
               maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-              continue;
-            } else if (!flag.allowedInRelease && isRelease) {
-              // Flag is not allowed in release builds.
-              Log.e(
-                  TAG,
-                  "Command line argument "
-                      + arg
-                      + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
               continue;
             }
 
@@ -461,10 +438,7 @@ public class FlutterLoader {
             // https://github.com/flutter/flutter/issues/182557.
             shellArgs.add(arg);
             continue;
-          } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
-            Log.w(
-                TAG,
-                "For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.");
+          } else if (shouldLoadFlag(FlutterEngineFlags.TEST_FLAG, false)) {
             continue;
           } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
               || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
@@ -473,14 +447,6 @@ public class FlutterLoader {
             String aotSharedLibraryPath =
                 arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
             maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-            continue;
-          } else if (!flag.allowedInRelease && isRelease) {
-            // Flag is not allowed in release builds.
-            Log.e(
-                TAG,
-                "Command line argument "
-                    + arg
-                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
             continue;
           }
 
@@ -578,6 +544,42 @@ public class FlutterLoader {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * Checks if a flag specified on the command line or via the manifest is valid.
+   *
+   * <p>Also throws an exception for disabled flags and logs a warning for deprecated flags.
+   */
+  private boolean shouldLoadFlag(FlutterEngineFlags.Flag flag, boolean specifiedViaManifest) {
+    if (flag == FlutterEngineFlags.TEST_FLAG) {
+      Log.w(
+          TAG,
+          "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
+      return false;
+    } else if (FlutterEngineFlags.isDisabled(flag)) {
+      // Do not allow disabled flags.
+      throw new IllegalArgumentException(
+          metadataKey
+              + " is disabled and no longer allowed. Please remove this flag from your application manifest.");
+    } else if (!flag.allowedInRelease && isRelease) {
+      // Manifest flag is not allowed in release builds.
+      Log.e(
+          TAG,
+          "Flag with metadata key "
+              + metadataKey
+              + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
+      return false;
+    } else if (specifiedViaManifest
+        && FlutterEngineFlags.getReplacementFlagIfDeprecated(flag) != null) {
+      Log.w(
+          TAG,
+          "If you are trying to specify "
+              + metadataKey
+              + " in your application manifest, please make sure to use the new metadata key name: "
+              + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
+    }
+    return true;
   }
 
   /**
