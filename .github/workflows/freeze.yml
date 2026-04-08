@@ -19,7 +19,7 @@ jobs:
   check_freeze:
     name: Check Code Freeze
     runs-on: ubuntu-latest
-    if: github.repository == 'flutter/flutter'
+    if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
