@@ -63,7 +63,7 @@ jobs:
         if: |
           steps.filter.outputs.frozen == 'true' &&
           contains(github.event.pull_request.labels.*.name, 'override: code freeze')
-        run: echo "Code freeze overridden by 'override: code freeze' label."
+        run: echo "Code freeze overridden by override: code freeze label."
 
       - name: Pass if no frozen changes
         if: steps.filter.outputs.frozen == 'false'
