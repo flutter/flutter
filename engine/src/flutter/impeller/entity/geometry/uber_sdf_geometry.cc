@@ -28,8 +28,9 @@ GeometryResult UberSDFGeometry::GetPositionBuffer(
     RenderPass& pass) const {
   // Calculate the AA padding's local space value by dividing the AA's device
   // space value by the maximum axis scaling of the entity transform.
-  Scalar aa_padding = UberSDFParameters::kAntialiasPadding /
-                      entity.GetTransform().GetMaxBasisLengthXY();
+  Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
+  Scalar aa_padding =
+      max_basis == 0 ? 0 : UberSDFParameters::kAntialiasPadding / max_basis;
 
   // Return a quad (FillRectGeometry) that covers the base shape expanded by the
   // AA padding.

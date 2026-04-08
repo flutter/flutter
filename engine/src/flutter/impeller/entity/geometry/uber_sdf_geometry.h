@@ -10,6 +10,7 @@
 
 namespace impeller {
 
+/// Geometry for rendering shapes using the UberSDF shader.
 class UberSDFGeometry final : public Geometry {
  public:
   explicit UberSDFGeometry(const UberSDFParameters& params);
