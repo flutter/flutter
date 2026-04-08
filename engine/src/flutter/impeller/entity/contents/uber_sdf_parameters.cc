@@ -37,8 +37,10 @@ UberSDFParameters UberSDFParameters::MakeCircle(
     const Point& center,
     Scalar radius,
     std::optional<StrokeParameters> stroke) {
-  // Size x value is the radius of the circle, y value is ignored.
-  Point size = Point(radius, 0.0f);
+  // Both size parameters are the same, but this allows us to treat this
+  // case as if it were an oval to share code down the line. We can also
+  // share bounds calculations without having to test for circle vs rect.
+  Point size = Point(radius, radius);
 
   return UberSDFParameters{.type = Type::kCircle,
                            .color = color,
