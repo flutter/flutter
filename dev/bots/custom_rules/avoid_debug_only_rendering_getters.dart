@@ -122,15 +122,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   /// Returns true if [enclosingElement] is `RenderObject` or a subclass of it.
   static bool _isRenderObjectSubclass(InterfaceElement enclosingElement) {
-    bool isRenderObjectType(InterfaceElement element) {
-      return element.name == 'RenderObject' &&
-          element.library.uri.toString() == 'package:flutter/src/rendering/object.dart';
-    }
-
-    if (isRenderObjectType(enclosingElement)) {
+    if (enclosingElement.name == 'RenderObject') {
       return true;
     }
-    return enclosingElement.allSupertypes.any((InterfaceType supertype) => isRenderObjectType(supertype.element));
+    return enclosingElement.allSupertypes.any(
+      (InterfaceType supertype) => supertype.element.name == 'RenderObject',
+    );
   }
 
   /// Returns true if [node] is inside an `assert(...)` statement or an
