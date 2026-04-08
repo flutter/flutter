@@ -150,7 +150,11 @@ class TestTextSelectionHandleControls extends TextSelectionControls
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
     return Offset.zero;
   }
 

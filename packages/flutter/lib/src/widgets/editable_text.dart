@@ -3351,12 +3351,14 @@ class EditableTextState extends State<EditableText>
       _updateRemoteEditingValueIfNeeded();
     }
 
-    if (_selectionOverlay != null &&
+    final bool shouldRecreateSelectionOverlay =
+        _selectionOverlay != null &&
         (widget.contextMenuBuilder != oldWidget.contextMenuBuilder ||
             widget.selectionControls != oldWidget.selectionControls ||
             widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
             widget.dragStartBehavior != oldWidget.dragStartBehavior ||
-            widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
+            widget.magnifierConfiguration != oldWidget.magnifierConfiguration);
+    if (shouldRecreateSelectionOverlay) {
       final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
       final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
       _selectionOverlay!.dispose();
@@ -3373,6 +3375,11 @@ class EditableTextState extends State<EditableText>
       }
     } else if (widget.controller.selection != oldWidget.controller.selection) {
       _selectionOverlay?.update(_value);
+    }
+    if (!shouldRecreateSelectionOverlay &&
+        _selectionOverlay != null &&
+        widget.cursorWidth != oldWidget.cursorWidth) {
+      _selectionOverlay!.update(_value, targetWidth: widget.cursorWidth);
     }
     _selectionOverlay?.handlesVisible = widget.showSelectionHandles;
 
@@ -4415,7 +4422,8 @@ class EditableTextState extends State<EditableText>
             .getHandleSize(lineHeight)
             .height;
         final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
-        final Offset anchor = _selectionOverlay!.selectionControls!.calculateHandleAnchor(
+        final Offset anchor = resolveTextSelectionHandleAnchor(
+          _selectionOverlay!.selectionControls!,
           TextSelectionHandleType.collapsed,
           lineHeight,
           targetWidth: widget.cursorWidth,

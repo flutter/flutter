@@ -897,5 +897,30 @@ void main() {
       );
       expect(actual, equals(expected));
     });
+
+    test('getHandleAnchor correctly delegates to calculateHandleAnchor', () {
+      final Offset anchorDefault = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+      );
+      final Offset anchorCalculated = materialTextSelectionControls.calculateHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        targetWidth: 2.0,
+      );
+      expect(anchorDefault, equals(anchorCalculated));
+
+      final Offset anchorWide = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        cursorWidth: 20.0,
+      );
+      final Offset anchorWideCalculated = materialTextSelectionControls.calculateHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        targetWidth: 20.0,
+      );
+      expect(anchorWide, equals(anchorWideCalculated));
+    });
   });
 }

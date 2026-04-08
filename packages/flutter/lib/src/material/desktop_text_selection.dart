@@ -69,7 +69,6 @@ class DesktopTextSelectionControls extends TextSelectionControls {
     return const SizedBox.shrink();
   }
 
-  /// Gets the position for the text selection handles, but desktop has none.
   @override
   Offset calculateHandleAnchor(
     TextSelectionHandleType type,

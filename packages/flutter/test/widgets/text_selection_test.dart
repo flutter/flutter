@@ -1275,6 +1275,7 @@ void main() {
       VoidCallback? onSelectionHandleTapped,
       TextSelectionControls? selectionControls,
       TextMagnifierConfiguration? magnifierConfiguration,
+      double targetWidth = 2.0,
     }) async {
       final column = UniqueKey();
       final startHandleLayerLink = LayerLink();
@@ -1319,7 +1320,7 @@ void main() {
         selectionControls: selectionControls,
         selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
-        targetWidth: 0.0,
+        targetWidth: targetWidth,
         magnifierConfiguration: magnifierConfiguration ?? TextMagnifierConfiguration.disabled,
       );
     }
@@ -1428,6 +1429,74 @@ void main() {
       rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
       expect(leftHandle.data, 'height 13');
       expect(rightHandle.data, 'height 12');
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('uses the default target width for handle anchors', (WidgetTester tester) async {
+      final spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      expect(spy.lastTargetWidth, 2.0);
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('forwards a custom target width to handle anchors', (WidgetTester tester) async {
+      final spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: spy,
+        targetWidth: 20.0,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      expect(spy.lastTargetWidth, 20.0);
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('supports legacy getHandleAnchor overrides', (WidgetTester tester) async {
+      final controls = LegacyTextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: controls,
+        targetWidth: 20.0,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      expect(controls.lastCursorWidth, 20.0);
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
@@ -1941,6 +2010,37 @@ void main() {
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
+
+  test('returns Offset.zero when no handle anchor method is overridden', () {
+    final controls = IncompleteTextSelectionControlsSpy();
+
+    expect(
+      resolveTextSelectionHandleAnchor(
+        controls,
+        TextSelectionHandleType.collapsed,
+        10.0,
+        targetWidth: 20.0,
+      ),
+      Offset.zero,
+    );
+    expect(
+      controls.calculateHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        10.0,
+        targetWidth: 20.0,
+      ),
+      Offset.zero,
+    );
+    expect(
+      controls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        10.0,
+        cursorWidth: 20.0,
+      ),
+      Offset.zero,
+    );
+  });
+
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
@@ -2110,6 +2210,7 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   UniqueKey rightHandleKey = UniqueKey();
   UniqueKey collapsedHandleKey = UniqueKey();
   UniqueKey toolBarKey = UniqueKey();
+  double? lastTargetWidth;
 
   @override
   Widget buildHandle(
@@ -2146,13 +2247,92 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
+    lastTargetWidth = targetWidth;
     return Offset.zero;
   }
 
   @override
   Size getHandleSize(double textLineHeight) {
     return Size(textLineHeight, textLineHeight);
+  }
+}
+
+class LegacyTextSelectionControlsSpy extends TextSelectionControls {
+  double? lastCursorWidth;
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
+    lastCursorWidth = cursorWidth;
+    return Offset(cursorWidth, textLineHeight);
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
+  }
+}
+
+class IncompleteTextSelectionControlsSpy extends TextSelectionControls {
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
   }
 }
 

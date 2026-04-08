@@ -105,9 +105,6 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     };
   }
 
-  /// Gets anchor for material-style text selection handles.
-  ///
-  /// See [TextSelectionControls.calculateHandleAnchor].
   @override
   Offset calculateHandleAnchor(
     TextSelectionHandleType type,

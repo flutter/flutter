@@ -230,6 +230,19 @@ void main() {
       );
       expect(anchorDefault, equals(anchorWide));
     });
+
+    test('getHandleAnchor correctly delegates to calculateHandleAnchor', () {
+      final Offset anchorDefault = cupertinoTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+      );
+      final Offset anchorCalculated = cupertinoTextSelectionControls.calculateHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+        targetWidth: 2.0,
+      );
+      expect(anchorDefault, equals(anchorCalculated));
+    });
   });
 
   group('Text selection menu overflow (iOS)', () {

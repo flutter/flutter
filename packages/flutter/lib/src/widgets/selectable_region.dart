@@ -1303,7 +1303,6 @@ class SelectableRegionState extends State<SelectableRegion>
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
       toolbarLayerLink: _toolbarLayerLink,
-      targetWidth: 0.0,
       magnifierConfiguration: widget.magnifierConfiguration,
     );
   }

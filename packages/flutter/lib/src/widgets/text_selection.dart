@@ -95,6 +95,10 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 ///  * [SelectionArea], which selects appropriate text selection controls
 ///    based on the current platform.
 abstract class TextSelectionControls {
+  static final Expando<bool> _invokingDeprecatedGetHandleAnchor = Expando<bool>(
+    'invokingDeprecatedGetHandleAnchor',
+  );
+
   /// Builds a selection handle of the given `type`.
   ///
   /// The top left corner of this widget is positioned at the bottom of the
@@ -111,15 +115,30 @@ abstract class TextSelectionControls {
     VoidCallback? onTap,
   ]);
 
-  /// Get the anchor point of the handle relative to itself. The anchor point is
-  /// the point that is aligned with a specific point in the text. A handle
-  /// often visually "points to" that location.
+  /// Get the anchor point of the handle relative to itself.
+  ///
+  /// The anchor point is the point that is aligned with a specific point in
+  /// the text. A handle often visually "points to" that location.
+  ///
+  /// See also:
+  ///
+  ///  * [calculateHandleAnchor], which is the modern version of this method
+  ///    that takes a required `targetWidth`.
   @Deprecated(
     'Use `calculateHandleAnchor` instead. '
     'This feature was deprecated after v3.32.0-0.0.pre.',
   )
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    return calculateHandleAnchor(type, textLineHeight, targetWidth: 2.0);
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
+    _invokingDeprecatedGetHandleAnchor[this] = true;
+    try {
+      return calculateHandleAnchor(type, textLineHeight, targetWidth: cursorWidth);
+    } finally {
+      _invokingDeprecatedGetHandleAnchor[this] = null;
+    }
   }
 
   /// Calculates the anchor point of the handle relative to itself.
@@ -131,15 +150,37 @@ abstract class TextSelectionControls {
   /// The [targetWidth] represents the width of the object (e.g. the cursor)
   /// that the handle is pointing to. This can be used to center the handle
   /// horizontally on that object.
-  ///
-  /// Subclasses should override either this method or [getHandleAnchor].
   /// {@endtemplate}
+  ///
+  /// Subclasses should override this method.
+  ///
+  /// Legacy subclasses that only override [getHandleAnchor] continue to work
+  /// when used by the framework.
   Offset calculateHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
     required double targetWidth,
-  }) {
-    return getHandleAnchor(type, textLineHeight);
+  });
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #calculateHandleAnchor &&
+        invocation.positionalArguments.length == 2 &&
+        invocation.namedArguments.containsKey(#targetWidth)) {
+      final type = invocation.positionalArguments[0] as TextSelectionHandleType;
+      final textLineHeight = invocation.positionalArguments[1] as double;
+      final targetWidth = invocation.namedArguments[#targetWidth] as double;
+
+      // If this abstract invocation came from the inherited deprecated
+      // implementation, then neither anchor API was overridden. Return the
+      // historical empty-controls anchor instead of recursing.
+      if (_invokingDeprecatedGetHandleAnchor[this] ?? false) {
+        return Offset.zero;
+      }
+
+      return getHandleAnchor(type, textLineHeight, cursorWidth: targetWidth);
+    }
+    return super.noSuchMethod(invocation);
   }
 
   /// Builds a toolbar near a text selection.
@@ -336,7 +377,9 @@ class EmptyTextSelectionControls extends TextSelectionControls {
     TextSelectionHandleType type,
     double textLineHeight, {
     required double targetWidth,
-  }) => Offset.zero;
+  }) {
+    return Offset.zero;
+  }
 }
 
 /// Text selection controls that do not show any toolbars or handles.
@@ -348,6 +391,28 @@ class EmptyTextSelectionControls extends TextSelectionControls {
 /// [materialTextSelectionControls] or creating a custom subclass of
 /// [TextSelectionControls].
 final TextSelectionControls emptyTextSelectionControls = EmptyTextSelectionControls();
+
+/// Resolves the handle anchor while preserving compatibility with legacy
+/// controls that only override the deprecated
+/// [TextSelectionControls.getHandleAnchor].
+///
+/// A concrete [TextSelectionControls.calculateHandleAnchor] override is used
+/// when present. Otherwise, the inherited [TextSelectionControls.noSuchMethod]
+/// bridge forwards the invocation to an overridden
+/// [TextSelectionControls.getHandleAnchor].
+@internal
+Offset resolveTextSelectionHandleAnchor(
+  TextSelectionControls selectionControls,
+  TextSelectionHandleType type,
+  double textLineHeight, {
+  required double targetWidth,
+}) {
+  return selectionControls.calculateHandleAnchor(
+    type,
+    textLineHeight,
+    targetWidth: targetWidth,
+  );
+}
 
 /// An object that manages a pair of text selection handles for a
 /// [RenderEditable].
@@ -487,7 +552,7 @@ class TextSelectionOverlay {
   // (e.g., Pixel 9 running Android 16).
   static const Duration _androidHandlesDismissalDuration = Duration(seconds: 4);
 
-  void _scheduleHandlesDismissal() {
+  void _scheduleHandleDismissalIfSupported() {
     _disposeHandlesDismissalTimer();
     // Android treats specific handle visibility differently.
     // If the selection is collapsed (cursor), handles should auto-dismiss.
@@ -508,7 +573,7 @@ class TextSelectionOverlay {
   void showHandles() {
     _updateSelectionOverlay();
     _selectionOverlay.showHandles();
-    _scheduleHandlesDismissal();
+    _scheduleHandleDismissalIfSupported();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.hideHandles}
@@ -587,20 +652,23 @@ class TextSelectionOverlay {
   /// synchronously. This means that it is safe to call during builds, but also
   /// that if you do call this during a build, the UI will not update until the
   /// next frame (i.e. many milliseconds later).
-  void update(TextEditingValue newValue) {
-    if (_value == newValue) {
+  void update(TextEditingValue newValue, {double? targetWidth}) {
+    final valueDidChange = _value != newValue;
+    if (!valueDidChange && targetWidth == null) {
       return;
     }
     _value = newValue;
-    _updateSelectionOverlay();
-    // _updateSelectionOverlay may not rebuild the selection overlay if the
-    // text metrics and selection doesn't change even if the text has changed.
-    // This rebuild is needed for the toolbar to update based on the latest text
-    // value.
-    _selectionOverlay.markNeedsBuild();
+    _updateSelectionOverlay(targetWidth: targetWidth);
+    if (valueDidChange) {
+      // _updateSelectionOverlay may not rebuild the selection overlay if the
+      // text metrics and selection doesn't change even if the text has
+      // changed. This rebuild is needed for the toolbar to update based on the
+      // latest text value.
+      _selectionOverlay.markNeedsBuild();
+    }
   }
 
-  void _updateSelectionOverlay() {
+  void _updateSelectionOverlay({double? targetWidth}) {
     _selectionOverlay
       // Update selection handle metrics.
       ..startHandleType = _chooseType(
@@ -615,7 +683,7 @@ class TextSelectionOverlay {
         TextSelectionHandleType.left,
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
-      ..targetWidth = renderObject.cursorWidth
+      ..targetWidth = targetWidth ?? renderObject.cursorWidth
       // Update selection toolbar metrics.
       ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
@@ -1065,7 +1133,7 @@ class TextSelectionOverlay {
       return;
     }
     _updateSelectionOverlay();
-    _scheduleHandlesDismissal(); // Reschedule dismissal after drag ends.
+    _scheduleHandleDismissalIfSupported(); // Reschedule dismissal after drag ends.
     _dragStartSelection = null;
     final bool draggingHandles =
         _selectionOverlay.isDraggingStartHandle || _selectionOverlay.isDraggingEndHandle;
@@ -1152,7 +1220,7 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    required double targetWidth,
+    double targetWidth = 2.0,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
@@ -1325,10 +1393,11 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
-  /// {@macro flutter.widgets.TextSelectionControls.calculateHandleAnchor.targetWidth}
+  /// {@template flutter.widgets.SelectionOverlay.targetWidth}
+  /// {@macro flutter.widgets.editableText.cursorWidth}
   ///
-  /// This value is used to calculate the position of the text selection
-  /// handles.
+  /// {@macro flutter.widgets.TextSelectionControls.calculateHandleAnchor.targetWidth}
+  /// {@endtemplate}
   ///
   /// Changing the value while the handles are visible causes them to rebuild.
   double get targetWidth => _targetWidth;
@@ -2163,7 +2232,8 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
             math.max((interactiveRect.height - handleRect.height) / 2, 0),
           );
 
-    final Offset handleAnchor = widget.selectionControls.calculateHandleAnchor(
+    final Offset handleAnchor = resolveTextSelectionHandleAnchor(
+      widget.selectionControls,
       widget.type,
       widget.preferredLineHeight,
       targetWidth: widget.targetWidth,
