@@ -5429,12 +5429,17 @@ void main() {
   );
 
   testWidgets(
-    'can hide toolbar with DismissIntent',
+    'can hide context menu with DismissIntent',
     (WidgetTester tester) async {
+      final toolbarKey = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return SizedBox.shrink(key: toolbarKey);
+                },
             child: const Text('How are you?'),
           ),
         ),
@@ -5455,15 +5460,14 @@ void main() {
 
       await gesture.up();
       await tester.pumpAndSettle();
-      // Text selection toolbar has appeared.
-      expect(find.text('Copy'), findsOneWidget);
+      // Context menu has appeared.
+      expect(find.byKey(toolbarKey), findsOneWidget);
 
-      // Hide the toolbar using the DismissIntent.
+      // Hide the context menu using the DismissIntent.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
-      expect(find.text('Copy'), findsNothing);
+      expect(find.byKey(toolbarKey), findsNothing);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}),
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
