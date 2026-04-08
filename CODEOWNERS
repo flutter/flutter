@@ -31,23 +31,27 @@
 /engine/src/flutter/shell/platform/darwin/common/ @flutter/ios-reviewers
 /engine/src/flutter/shell/platform/darwin/ios/framework/ @flutter/ios-reviewers
 /packages/flutter_tools/**/ios/* @flutter/ios-reviewers
-/packages/flutter_tools/**/macos/* @flutter/ios-reviewers
 /packages/flutter_tools/**/*xcode* @flutter/ios-reviewers
 /packages/flutter_tools/**/*ios* @flutter/ios-reviewers
-/packages/flutter_tools/**/*macos* @flutter/ios-reviewers
+
+# macOS team - keep this synced with .github/labeler.yml's team-macos section.
+/engine/src/flutter/src/flutter/shell/platform/darwin/common/**/* @flutter/macos-reviewers
+/engine/src/flutter/shell/platform/darwin/macos/**/* @flutter/macos-reviewers
+
+# Shared with iOS and macOS teams - keep this synced with both .github/labeler.yml's team-ios and team-macos sections.
+/packages/flutter_tools/**/macos/* @flutter/macos-reviewers @flutter/ios-reviewers
+/packages/flutter_tools/**/*macos* @flutter/ios-reviewers @flutter/macos-reviewers
 
 # Linux team - keep this synced with .github/labeler.yml's team-linux section.
 /engine/src/flutter/shell/platform/linux/**/* @flutter/linux-reviewers
 /packages/flutter_tools/**/linux/* @flutter/linux-reviewers
 /packages/flutter_tools/**/*linux* @flutter/linux-reviewers
 
-# macOS team - keep this synced with .github/labeler.yml's team-macos section.
-/engine/src/flutter/src/flutter/shell/platform/darwin/common/**/* @flutter/macos-reviewers
-/engine/src/flutter/shell/platform/darwin/macos/**/* @flutter/macos-reviewers
-/packages/flutter_tools/**/macos/* @flutter/macos-reviewers
-/packages/flutter_tools/**/*macos* @flutter/macos-reviewers
-
 # Windows team - keep this synced with .github/labeler.yml's team-windows section.
 /engine/src/flutter/shell/platform/windows/**/* @flutter/windows-reviewers
 /packages/flutter_tools/**/windows/* @flutter/windows-reviewers
 /packages/flutter_tools/**/*windows* @flutter/windows-reviewers
+
+# Skills owners
+.agents/skills @reidbaker # Fallback owners
+.agents/skills/find-release @reidbaker

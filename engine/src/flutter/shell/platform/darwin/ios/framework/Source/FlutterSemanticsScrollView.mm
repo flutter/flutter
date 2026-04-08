@@ -34,17 +34,20 @@ FLUTTER_ASSERT_ARC
     return NO;
   }
 
+  if ([self.semanticsObject bridge]->isVoiceOverRunning()) {
+    return self.semanticsObject.accessibilityLabel.length > 0;
+  }
+
   if (self.semanticsObject.isAccessibilityElement) {
     return YES;
   }
+
   if (self.contentSize.width > self.frame.size.width ||
       self.contentSize.height > self.frame.size.height) {
-    // In SwitchControl or VoiceControl, the isAccessibilityElement must return YES
-    // in order to use scroll actions.
-    return ![self.semanticsObject bridge]->isVoiceOverRunning();
-  } else {
-    return NO;
+    return YES;
   }
+
+  return NO;
 }
 
 - (NSString*)accessibilityLabel {

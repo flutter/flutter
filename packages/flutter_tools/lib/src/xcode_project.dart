@@ -17,6 +17,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -72,6 +73,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory get hostAppRoot;
 
+  FlutterDarwinPlatform get darwinPlatform;
+
+  /// Cached list of [Plugin]s for the [FlutterProject].
+  List<Plugin>? _plugins;
+
+  /// Returns the list of [Plugin]s for the [FlutterProject].
+  ///
+  /// On the first call, this will find plugins in the project.
+  /// On subsequent calls, this will return the cached list of plugins.
+  Future<List<Plugin>> getPlugins() async {
+    _plugins ??= await findPlugins(parent);
+    return _plugins!;
+  }
+
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist =>
       hostAppRoot.childDirectory(_defaultHostAppName).childFile('Info.plist');
@@ -113,6 +128,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// LOCAL_ENGINE, and other Flutter variables available to any flutter
   /// tooling (`flutter build`, etc) to convert into flags.
   File get generatedEnvironmentVariableExportScript;
+
+  /// This file contains the environment variables needed for Flutter tools.
+  /// It contains the same variables as [generatedEnvironmentVariableExportScript] but without the
+  /// 'export' commands. This file is used in SwiftPM Add to App.
+  File get generatedNativeIntegrationEnvironmentFile =>
+      ephemeralDirectory.childFile('flutter_native_integration.env');
 
   /// The CocoaPods 'Podfile'.
   File get podfile => hostAppRoot.childFile('Podfile');
@@ -218,7 +239,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
+      hostAppRoot.path,
+      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+    );
   }
 
   XcodeProjectInfo? _projectInfo;
@@ -374,6 +398,9 @@ class IosProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
   // build setting keys
   static const kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
@@ -551,9 +578,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
   Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
     final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
-    final List<Plugin> allPlugins = await findPlugins(parent);
     final pluginNames = <String>{
-      for (final Plugin plugin in allPlugins)
+      for (final Plugin plugin in await getPlugins())
         if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
     };
     final targetHeaderPattern = RegExp(
@@ -1127,6 +1153,9 @@ class MacOSProject extends XcodeBasedProject {
 
   @override
   String get pluginConfigKey => MacOSPlugin.kConfigKey;
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
   bool existsSync() => hostAppRoot.existsSync();

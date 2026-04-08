@@ -18,18 +18,19 @@ import 'surface.dart';
 /// Implements [ui.Picture] on top of [SkPicture].
 class CkPicture implements LayerPicture, StackTraceDebugger {
   CkPicture(SkPicture skPicture) : _isClone = false {
-    _ref = CountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
+    _ref = CkCountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
     _initStackTrace();
   }
 
-  CkPicture._clone(CountedRef<CkPicture, SkPicture> ref) : _isClone = true {
+  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) : _isClone = true {
     _ref = ref;
     ref.ref(this);
     _initStackTrace();
   }
 
-  late final CountedRef<CkPicture, SkPicture> _ref;
   final bool _isClone;
+
+  late final CkCountedRef<CkPicture, SkPicture> _ref;
 
   SkPicture get skiaObject => _ref.nativeObject;
 
