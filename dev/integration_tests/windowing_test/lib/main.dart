@@ -75,18 +75,18 @@ void main() {
           });
         } else if (jsonMap['type'] == 'set_size') {
           final size = Size(
-            (jsonMap['width']! as int).toDouble(),
-            (jsonMap['height']! as int).toDouble(),
+            (jsonMap['width']! as num).toDouble(),
+            (jsonMap['height']! as num).toDouble(),
           );
           await awaitNotification(() {
             controller.setSize(size);
           }, () => controller.contentSize == size);
         } else if (jsonMap['type'] == 'set_constraints') {
           final constraints = BoxConstraints(
-            minWidth: (jsonMap['min_width']! as int).toDouble(),
-            minHeight: (jsonMap['min_height']! as int).toDouble(),
-            maxWidth: (jsonMap['max_width']! as int).toDouble(),
-            maxHeight: (jsonMap['max_height']! as int).toDouble(),
+            minWidth: (jsonMap['min_width']! as num).toDouble(),
+            minHeight: (jsonMap['min_height']! as num).toDouble(),
+            maxWidth: (jsonMap['max_width']! as num).toDouble(),
+            maxHeight: (jsonMap['max_height']! as num).toDouble(),
           );
           // We assume that this will cause a resize, which the current tests do.
           final Size initialSize = controller.contentSize;

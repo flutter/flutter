@@ -18,7 +18,7 @@ Future<String> _requestDataWithRetry(
       if (response.isNotEmpty) {
         // Check for an error returned from the driver extension handler.
         try {
-          final data = jsonDecode(response) as Map<String, dynamic>;
+          final data = jsonDecode(response) as Map<String, Object?>;
           if (data.containsKey('error')) {
             throw Exception('Driver extension handler reported an error: ${data['error']}');
           }
