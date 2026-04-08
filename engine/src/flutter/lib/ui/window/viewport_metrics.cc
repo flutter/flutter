@@ -44,6 +44,7 @@ ViewportMetrics::ViewportMetrics(
     double p_physical_system_gesture_inset_right,
     double p_physical_system_gesture_inset_bottom,
     double p_physical_system_gesture_inset_left,
+    bool p_keyboard_visible,
     double p_physical_touch_slop,
     const std::vector<double>& p_physical_display_features_bounds,
     const std::vector<int>& p_physical_display_features_type,
@@ -74,6 +75,7 @@ ViewportMetrics::ViewportMetrics(
       physical_system_gesture_inset_bottom(
           p_physical_system_gesture_inset_bottom),
       physical_system_gesture_inset_left(p_physical_system_gesture_inset_left),
+      keyboard_visible(p_keyboard_visible),
       physical_touch_slop(p_physical_touch_slop),
       physical_display_features_bounds(p_physical_display_features_bounds),
       physical_display_features_type(p_physical_display_features_type),
@@ -112,6 +114,7 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
              b.physical_system_gesture_inset_bottom &&
          a.physical_system_gesture_inset_left ==
              b.physical_system_gesture_inset_left &&
+         a.keyboard_visible == b.keyboard_visible &&
          a.physical_touch_slop == b.physical_touch_slop &&
          a.physical_display_features_bounds ==
              b.physical_display_features_bounds &&
@@ -145,6 +148,7 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << a.physical_system_gesture_inset_right << "R "
      << a.physical_system_gesture_inset_bottom << "B "
      << a.physical_system_gesture_inset_left << "L] "
+     << "Keyboard Visible: " << (a.keyboard_visible ? "true" : "false") << " "
      << "Display Features: " << a.physical_display_features_type.size() << " "
      << "Display ID: " << a.display_id << " "
      << "Corner Radii: [" << a.physical_display_corner_radius_top_left << "TL "

@@ -349,6 +349,7 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint systemGestureInsetRight,
                                jint systemGestureInsetBottom,
                                jint systemGestureInsetLeft,
+                               jboolean keyboardVisible,
                                jint physicalTouchSlop,
                                jintArray javaDisplayFeaturesBounds,
                                jintArray javaDisplayFeaturesType,
@@ -413,6 +414,7 @@ static void SetViewportMetrics(JNIEnv* env,
           systemGestureInsetBottom),  // p_physical_system_gesture_inset_bottom
       static_cast<double>(
           systemGestureInsetLeft),  // p_physical_system_gesture_inset_left
+      static_cast<bool>(keyboardVisible),      // p_keyboard_visible
       static_cast<double>(physicalTouchSlop),  // p_physical_touch_slop
       displayFeaturesBounds,  // p_physical_display_features_bounds
       displayFeaturesType,    // p_physical_display_features_type
@@ -838,7 +840,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIIIIIII)V",
+          .signature = "(JFIIIIIIIIIIIIIIZI[I[I[IIIIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {

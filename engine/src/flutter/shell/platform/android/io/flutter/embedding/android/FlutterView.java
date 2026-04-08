@@ -791,6 +791,8 @@ public class FlutterView extends FrameLayout
                 Math.max(viewportMetrics.viewPaddingLeft, waterfallInsets.left),
                 cutout.getSafeInsetLeft());
       }
+
+      viewportMetrics.keyboardVisible = insets.isVisible(android.view.WindowInsets.Type.ime());
     } else {
       // We zero the left and/or right sides to prevent the padding the
       // navigation bar would have caused.
@@ -820,6 +822,8 @@ public class FlutterView extends FrameLayout
       viewportMetrics.viewInsetRight = 0;
       viewportMetrics.viewInsetBottom = guessBottomKeyboardInset(insets);
       viewportMetrics.viewInsetLeft = 0;
+
+      viewportMetrics.keyboardVisible = viewportMetrics.viewInsetBottom > 0;
     }
 
     // Data from the DisplayCutout bounds. Cutouts for cameras and other sensors are
@@ -882,7 +886,10 @@ public class FlutterView extends FrameLayout
             + ", Right: "
             + viewportMetrics.systemGestureInsetRight
             + ", Bottom: "
-            + viewportMetrics.systemGestureInsetBottom);
+            + viewportMetrics.systemGestureInsetBottom
+            + "\n"
+            + "Keyboard visible: "
+            + viewportMetrics.keyboardVisible);
 
     sendViewportMetricsToFlutter();
     return newInsets;
