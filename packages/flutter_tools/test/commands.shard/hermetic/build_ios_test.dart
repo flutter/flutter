@@ -343,7 +343,7 @@ void main() {
   );
 
   testUsingContext(
-    'ios build fails eagerly if the XCode get build settings fails',
+    'ios build fails eagerly if the Xcode build settings retrieval fails',
     () async {
       createMinimalMockProjectFiles();
 
@@ -381,7 +381,7 @@ void main() {
       // Eager failure message if something went wrong obtaining the xcode build settings
       expect(
         testLogger.errorText,
-        contains('No XCode build settings have been found. Please check possible errors above'),
+        contains('No Xcode build settings have been found. Please check possible errors above'),
       );
     },
     overrides: <Type, Generator>{

@@ -285,7 +285,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   if (buildSettings.isEmpty) {
     globals.printError(
-      'No XCode build settings have been found. Please check possible errors above.',
+      'No Xcode build settings have been found. Please check possible errors above.',
     );
     return XcodeBuildResult(success: false);
   }
