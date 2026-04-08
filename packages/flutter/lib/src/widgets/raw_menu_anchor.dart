@@ -310,10 +310,23 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// Called when a request is made to close the menu.
   ///
-  /// This callback is triggered every time [MenuController.close] is called,
-  /// regardless of whether the overlay is already hidden. As a result, this
-  /// callback can be used to add a delay or a closing animation before the menu
-  /// is hidden.
+  /// This callback can be used to add a delay or a closing animation before the
+  /// menu is hidden.
+  ///
+  /// This callback is triggered every time [MenuController.close] is called
+  /// while this menu is open.
+  ///
+  /// This callback is also triggered when a sibling [RawMenuAnchor] is opened
+  /// while this menu is open. In this case, the callback can be used to add a
+  /// delay or a closing animation while the sibling menu opens. When
+  /// implementing this behavior, consider disabling interactions so that the
+  /// closing menu does not interfere with the opening sibling menu. Also
+  /// consider disabling semantics, focus, and hit testing for the closing menu
+  /// for the duration of the closing animation.
+  ///
+  /// Pending timers or animations started in a previous call to
+  /// [onCloseRequested] should be canceled when this callback is triggered to
+  /// prevent them from closing the menu at an unintended time.
   ///
   /// If the menu is not closed, this callback will also be called when the root
   /// menu anchor is scrolled and when the screen is resized.
@@ -600,22 +613,40 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void handleCloseRequest();
 
-  /// Request that the submenus of this menu be closed.
+  /// Close the open submenus of this menu.
   ///
-  /// By default, this method will call [handleCloseRequest] on each child of this
-  /// menu, which will trigger the closing sequence of each child.
+  /// This method will call [close] on each child of this menu, which will
+  /// immediately close the child.
   ///
   /// If `inDispose` is true, this method was triggered by the widget being
   /// unmounted.
+  ///
+  /// See also:
+  /// * [requestChildrenClose], which triggers the closing sequence of each
+  ///   child by calling [handleCloseRequest] on each child.
   @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final child in List<_RawMenuAnchorBaseMixin>.of(_anchorChildren)) {
-      if (inDispose) {
-        child.close(inDispose: inDispose);
-      } else {
-        child.handleCloseRequest();
-      }
+    final children = List<_RawMenuAnchorBaseMixin>.of(_anchorChildren);
+    for (final child in children) {
+      child.close(inDispose: inDispose);
+    }
+  }
+
+  /// Request that the open submenus of this menu be closed.
+  ///
+  /// This method will call [handleCloseRequest] on each child of this menu,
+  /// which will trigger the closing sequence of each child.
+  ///
+  /// See also:
+  /// * [closeChildren], which immediately closes each child without triggering
+  ///   the closing sequence.
+  @protected
+  void requestChildrenClose() {
+    assert(_debugMenuInfo('Calling handleCloseRequest for children of $this'));
+    final children = List<_RawMenuAnchorBaseMixin>.of(_anchorChildren);
+    for (final child in children) {
+      child.handleCloseRequest();
     }
   }
 
@@ -626,7 +657,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   void handleOutsideTap(PointerDownEvent pointerDownEvent) {
     assert(_debugMenuInfo('Tapped Outside $menuController'));
     if (isOpen) {
-      closeChildren();
+      requestChildrenClose();
     }
   }
 
@@ -708,7 +739,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     assert(_debugMenuInfo('Opening $this at ${position ?? Offset.zero}'));
 
     // Close all siblings.
-    _parent?.closeChildren();
+    _parent?.requestChildrenClose();
     assert(!_overlayController.isShowing);
     _menuPosition = position;
     _parent?._childChangedOpenState();
@@ -731,7 +762,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       return;
     }
 
+    // Parents will close after children do.
     closeChildren(inDispose: inDispose);
+
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       _overlayController.hide();
@@ -764,6 +797,10 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
+    if (!isOpen) {
+      return;
+    }
+
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
@@ -779,6 +816,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
         }
       }, debugLabel: 'RawMenuAnchor.handleCloseRequest');
     }
+
+    // Parents will request close before children do.
+    requestChildrenClose();
   }
 
   Widget _buildOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
@@ -939,7 +979,7 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   @override
   void handleCloseRequest() {
     assert(_debugMenuInfo('Requesting close $this'));
-    close();
+    requestChildrenClose();
   }
 
   @override
@@ -1018,7 +1058,7 @@ class MenuController {
   /// without closing the menu itself.
   void closeChildren() {
     assert(_anchor != null);
-    _anchor!.closeChildren();
+    _anchor!.requestChildrenClose();
   }
 
   // ignore: use_setters_to_change_properties

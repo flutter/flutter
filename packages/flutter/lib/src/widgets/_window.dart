@@ -2278,6 +2278,43 @@ class WindowRegistry extends ChangeNotifier {
   static WindowRegistry? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_WindowRegistryScope>()?._registry;
   }
+
+  /// Retrieves the [WindowRegistry] from the given [context].
+  ///
+  /// If there is no [WindowRegistry] in scope, this method
+  /// will throw a [TypeError] exception in release builds, and throws
+  /// a descriptive [FlutterError] in debug builds.
+  ///
+  /// This method can still be called when windowing is not enabled, as it
+  /// may be a signal to the owner that windowing itself is unavailable.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  static WindowRegistry of(BuildContext context) {
+    final WindowRegistry? registry = maybeOf(context);
+    assert(() {
+      if (registry == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('No WindowRegistry found in context.'),
+          ErrorDescription(
+            '${context.widget.runtimeType} widgets require a WindowRegistry widget ancestor.',
+          ),
+          context.describeWidget(
+            'The specific widget that could not find a WindowRegistry ancestor was',
+          ),
+          context.describeOwnershipChain('The ownership chain for the affected widget is'),
+          ErrorHint(
+            'No WindowRegistry ancestor could be found starting from the context '
+            'that was passed to WindowRegistry.of(). This can happen because the '
+            'context used is not a descendant of a WindowManager widget, which introduces '
+            'a WindowRegistry.',
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return registry!;
+  }
 }
 
 class _WindowRegistryScope extends InheritedWidget {
