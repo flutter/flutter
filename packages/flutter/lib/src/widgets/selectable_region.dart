@@ -1602,7 +1602,7 @@ class SelectableRegionState extends State<SelectableRegion>
     if (_lastSecondaryTapDownPosition != null) {
       // Convert the global tap position to overlay-local coordinates so it is
       // consistent with the coordinate space the toolbar is rendered in.
-      final overlayLocalPosition = overlayRenderBox.globalToLocal(
+      final Offset overlayLocalPosition = overlayRenderBox.globalToLocal(
         _lastSecondaryTapDownPosition!,
       );
       final anchors = TextSelectionToolbarAnchors(primaryAnchor: overlayLocalPosition);
