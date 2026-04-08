@@ -140,23 +140,35 @@ ui.Image createSteppedDownscaledImage({
   var currentImage = originalImage;
   var currentSrc = src;
 
+  ui.Image drawImageScaled({
+    required RawDrawImageRect rawDraw,
+    required ui.Image image,
+    required ui.Rect src,
+    required int width,
+    required int height,
+  }) {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+
+    rawDraw(canvas, image, src, ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()));
+
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image result = picture.toImageSync(width, height);
+    picture.dispose();
+    return result;
+  }
+
   while (currentSrc.width > targetWidth * 2 || currentSrc.height > targetHeight * 2) {
     final int nextWidth = math.max(1, math.max(targetWidth, currentSrc.width ~/ 2));
     final int nextHeight = math.max(1, math.max(targetHeight, currentSrc.height ~/ 2));
 
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-
-    rawDraw(
-      canvas,
-      currentImage,
-      currentSrc,
-      ui.Rect.fromLTWH(0, 0, nextWidth.toDouble(), nextHeight.toDouble()),
+    final ui.Image nextImage = drawImageScaled(
+      rawDraw: rawDraw,
+      image: currentImage,
+      src: currentSrc,
+      width: nextWidth,
+      height: nextHeight,
     );
-
-    final ui.Picture picture = recorder.endRecording();
-    final ui.Image nextImage = picture.toImageSync(nextWidth, nextHeight);
-    picture.dispose();
 
     if (currentImage != originalImage) {
       currentImage.dispose();
@@ -172,19 +184,13 @@ ui.Image createSteppedDownscaledImage({
     return currentImage;
   }
 
-  final recorder = ui.PictureRecorder();
-  final canvas = ui.Canvas(recorder);
-
-  rawDraw(
-    canvas,
-    currentImage,
-    currentSrc,
-    ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
+  final ui.Image finalImage = drawImageScaled(
+    rawDraw: rawDraw,
+    image: currentImage,
+    src: currentSrc,
+    width: targetWidth,
+    height: targetHeight,
   );
-
-  final ui.Picture picture = recorder.endRecording();
-  final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
-  picture.dispose();
 
   if (currentImage != originalImage) {
     currentImage.dispose();
