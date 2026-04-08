@@ -3673,7 +3673,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac_x64 build_tests_1_4
+  - name: Mac_x64 build_tests_1_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3687,11 +3687,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "1_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_2_4
+  - name: Mac_x64 build_tests_2_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3705,11 +3705,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "2_4"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_3_4
+  - name: Mac_x64 build_tests_3_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3723,11 +3723,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "3_4"
+      subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_4_4
+  - name: Mac_x64 build_tests_4_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3741,11 +3741,29 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "4_4"
+      subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_1_4
+  - name: Mac_x64 build_tests_5_5
+    recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
     # Flake rate of >2.5% in presubmit
@@ -3760,11 +3778,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "1_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_2_4
+  - name: Mac_arm64 build_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3777,11 +3795,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "2_4"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_3_4
+  - name: Mac_arm64 build_tests_3_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3794,11 +3812,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "3_4"
+      subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_4_4
+  - name: Mac_arm64 build_tests_4_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3811,7 +3829,24 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "4_4"
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -6336,7 +6371,6 @@ targets:
   - name: Windows tool_integration_tests_1_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6363,7 +6397,6 @@ targets:
   - name: Windows tool_integration_tests_2_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6390,7 +6423,6 @@ targets:
   - name: Windows tool_integration_tests_3_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6417,7 +6449,6 @@ targets:
   - name: Windows tool_integration_tests_4_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6444,7 +6475,6 @@ targets:
   - name: Windows tool_integration_tests_5_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6471,7 +6501,6 @@ targets:
   - name: Windows tool_integration_tests_6_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6498,7 +6527,6 @@ targets:
   - name: Windows tool_integration_tests_7_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6525,7 +6553,6 @@ targets:
   - name: Windows tool_integration_tests_8_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6552,7 +6579,6 @@ targets:
   - name: Windows tool_integration_tests_9_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6579,7 +6605,6 @@ targets:
   - name: Windows tool_integration_tests_10_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-

@@ -60,7 +60,7 @@ class _FlowMenuState extends State<FlowMenu>
     final double buttonDiameter =
         MediaQuery.widthOf(context) / menuItems.length;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const .symmetric(vertical: 8.0),
       child: RawMaterialButton(
         fillColor: lastTapped == icon ? Colors.amber[700] : Colors.blue,
         splashColor: Colors.amber[100],

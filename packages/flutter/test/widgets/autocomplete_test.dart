@@ -3444,6 +3444,115 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Autocomplete reports error when SemanticsService.sendAnnouncement fails', (
+    WidgetTester tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final GlobalKey fieldKey = GlobalKey();
+      final GlobalKey optionsKey = GlobalKey();
+      late FocusNode focusNode;
+      late TextEditingController textEditingController;
+      final errors = <FlutterErrorDetails>[];
+      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        final String contextStr = details.context?.toString() ?? '';
+        if (contextStr.contains('while sending semantics announcement')) {
+          errors.add(details);
+          return;
+        }
+        originalOnError?.call(details);
+      };
+      addTearDown(() {
+        FlutterError.onError = originalOnError;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          null,
+        );
+      });
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        SystemChannels.accessibility.name,
+        (ByteData? message) async {
+          const codec = StandardMessageCodec();
+          final Object? decoded = codec.decodeMessage(message);
+          if (decoded is Map && decoded['type'] == 'announce') {
+            final data = ByteData(1);
+            data.setUint8(0, 255); // Invalid type byte
+            return data;
+          }
+          return null; // Success for other events
+        },
+      );
+
+      final entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TestTextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
+          );
+        },
+      );
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('en', 'US'),
+          delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(initialEntries: <OverlayEntry>[entry]),
+          ),
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      expect(errors, isNotEmpty);
+      final bool hasAnnouncementError = errors.any(
+        (e) =>
+            e.exception.toString().contains('FormatException') &&
+            e.context.toString().contains('while sending semantics announcement'),
+      );
+      expect(hasAnnouncementError, isTrue);
+
+      handle.dispose();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets('Autocomplete Semantics announce in multi-view', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey optionsKey = GlobalKey();
