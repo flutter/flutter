@@ -655,7 +655,7 @@ class StandardMethodCodec implements MethodCodec {
         message: errorMessage as String?,
         details: errorDetails,
         stacktrace: errorStacktrace,
-      );
+      ); 
     } else {
       throw const FormatException('Invalid envelope');
     }
