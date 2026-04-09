@@ -41,6 +41,8 @@ import 'theme.dart';
 
 /// A [ListTile] that shows an about box.
 ///
+/// Testing freeze
+///
 /// This widget is often added to an app's [Drawer]. When tapped it shows
 /// an about box dialog with [showAboutDialog].
 ///
