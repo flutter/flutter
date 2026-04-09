@@ -147,4 +147,56 @@ class FakeWidgetPreviewScaffoldController
          dtdServicesOverride:
              dtdServicesOverride ?? FakeWidgetPreviewScaffoldDtdServices(),
        );
+
+  @override
+  final ValueNotifier<String> searchQueryListenable = ValueNotifier<String>('');
+
+  @override
+  void updateSearchQuery(String query) {
+    searchQueryListenable.value = query;
+  }
+
+  @override
+  final ValueNotifier<bool> searchByGroupNameListenable = ValueNotifier<bool>(
+    true,
+  );
+
+  @override
+  bool toggleSearchByGroupName() {
+    searchByGroupNameListenable.value = !searchByGroupNameListenable.value;
+    return true;
+  }
+
+  @override
+  final ValueNotifier<bool> searchByPreviewNameListenable = ValueNotifier<bool>(
+    true,
+  );
+
+  @override
+  bool toggleSearchByPreviewName() {
+    searchByPreviewNameListenable.value = !searchByPreviewNameListenable.value;
+    return true;
+  }
+
+  @override
+  final ValueNotifier<bool> searchByContainingScriptListenable =
+      ValueNotifier<bool>(true);
+
+  @override
+  bool toggleSearchByContainingScript() {
+    searchByContainingScriptListenable.value =
+        !searchByContainingScriptListenable.value;
+    return true;
+  }
+
+  @override
+  final ValueNotifier<bool> searchByContainingPackageListenable =
+      ValueNotifier<bool>(true);
+
+  @override
+  bool toggleSearchByContainingPackage() {
+    searchByContainingPackageListenable.value =
+        !searchByContainingPackageListenable.value;
+    return true;
+  }
 }

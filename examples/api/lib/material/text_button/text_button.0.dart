@@ -23,12 +23,12 @@ class _TextButtonExampleAppState extends State<TextButtonExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: darkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData(brightness: Brightness.light),
-      darkTheme: ThemeData(brightness: Brightness.dark),
+      themeMode: darkMode ? .dark : .light,
+      theme: ThemeData(brightness: .light),
+      darkTheme: ThemeData(brightness: .dark),
       home: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const .all(16),
           child: TextButtonExample(
             darkMode: darkMode,
             updateDarkMode: (bool value) {
@@ -58,8 +58,8 @@ class TextButtonExample extends StatefulWidget {
 }
 
 class _TextButtonExampleState extends State<TextButtonExample> {
-  TextDirection textDirection = TextDirection.ltr;
-  ThemeMode themeMode = ThemeMode.light;
+  TextDirection textDirection = .ltr;
+  ThemeMode themeMode = .light;
   late final ScrollController scrollController;
   Future<void>? currentAction;
 
@@ -107,8 +107,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       Color color2,
       Color color3,
     ) = switch (colorScheme.brightness) {
-      Brightness.light => (Colors.blue, Colors.orange, Colors.yellow),
-      Brightness.dark => (Colors.purple, Colors.cyan, Colors.yellow),
+      .light => (Colors.blue, Colors.orange, Colors.yellow),
+      .dark => (Colors.purple, Colors.cyan, Colors.yellow),
     };
 
     // This gradient's appearance reflects the button's state.
@@ -181,7 +181,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       TextButton(
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            borderRadius: const .all(Radius.circular(8)),
             side: BorderSide(color: colorScheme.primary, width: 5),
           ),
         ),
@@ -330,10 +330,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
               (BuildContext context, Set<WidgetState> states, Widget? child) {
                 return Ink(
                   decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: grassImage,
-                      fit: BoxFit.cover,
-                    ),
+                    image: DecorationImage(image: grassImage, fit: .cover),
                   ),
                   child: child,
                 );
@@ -392,7 +389,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.fastOutSlowIn,
                   decoration: BoxDecoration(
-                    image: DecorationImage(image: image, fit: BoxFit.contain),
+                    image: DecorationImage(image: image, fit: .contain),
                   ),
                 );
               },
@@ -414,7 +411,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
           textDirection: textDirection,
           updateRTL: (bool value) {
             setState(() {
-              textDirection = value ? TextDirection.rtl : TextDirection.ltr;
+              textDirection = value ? .rtl : .ltr;
             });
           },
         ),
@@ -428,8 +425,8 @@ class _TextButtonExampleState extends State<TextButtonExample> {
               scrollDirection: Axis.horizontal,
               controller: scrollController,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: .spaceEvenly,
+                mainAxisSize: .min,
                 children: <Widget>[
                   Directionality(
                     textDirection: textDirection,
@@ -470,7 +467,7 @@ class TextButtonExampleSwitches extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: IntrinsicWidth(
           child: Column(
             children: <Widget>[
@@ -486,10 +483,7 @@ class TextButtonExampleSwitches extends StatelessWidget {
                 children: <Widget>[
                   const Expanded(child: Text('RTL Text')),
                   const SizedBox(width: 4),
-                  Switch(
-                    value: textDirection == TextDirection.rtl,
-                    onChanged: updateRTL,
-                  ),
+                  Switch(value: textDirection == .rtl, onChanged: updateRTL),
                 ],
               ),
             ],

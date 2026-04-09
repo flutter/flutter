@@ -2,12 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/material/selection_area/selection_area.2.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+
+// This was taken directly from selectable_region_test.dart
+// in the frameworks' Widget library tests.
+Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+  final Offset localOffset =
+      paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) +
+      Offset(0.0, paragraph.preferredLineHeight);
+  return paragraph.localToGlobal(localOffset) +
+      const Offset(kIsWeb ? 1.0 : 0.0, -2.0);
+}
 
 void main() {
   testWidgets('SelectionArea Color Text Red Example Smoke Test', (
@@ -80,14 +92,12 @@ void main() {
       );
       // Drag to select from paragraph 1 position 4 to paragraph 3 position 25.
       final TestGesture gesture = await tester.startGesture(
-        tester.getRect(paragraph1Finder).topLeft + const Offset(50.0, 10.0),
+        textOffsetToPosition(paragraph1, 4),
         kind: PointerDeviceKind.mouse,
       );
       addTearDown(gesture.removePointer);
       await tester.pump();
-      await gesture.moveTo(
-        tester.getRect(paragraph3Finder).centerLeft + const Offset(360.0, 0.0),
-      );
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 25));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
@@ -97,7 +107,7 @@ void main() {
       expect(paragraph1.selections.length, 1);
       expect(
         paragraph1.selections[0],
-        const TextSelection(baseOffset: 4, extentOffset: 27),
+        const TextSelection(baseOffset: 4, extentOffset: 28),
       );
       // Bulleted list.
       for (final RenderParagraph paragraphBullet in bullets) {
@@ -263,7 +273,7 @@ void main() {
         ((paragraph3ResultingSpan.children![0] as TextSpan).children![0]
                 as TextSpan)
             .text,
-        'This is some text in ano',
+        'This is some text in anot',
       );
       expect(
         (paragraph3ResultingSpan.children![0] as TextSpan).children![0].style,

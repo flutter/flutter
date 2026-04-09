@@ -34,7 +34,7 @@ class FittedBoxExample extends StatelessWidget {
       child: const FittedBox(
         // TRY THIS: Try changing the fit types to see how they change the way
         // the placeholder fits into the container.
-        fit: BoxFit.fill,
+        fit: .fill,
         child: Placeholder(),
       ),
     );

@@ -470,6 +470,92 @@ void main() {
     expect(find.text(Tag.b.a.text), findsNothing);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/182355.
+  testWidgets('Submenus call onClose before their parents', (WidgetTester tester) async {
+    final closeOrder = <NestedTag>[];
+    final controller = MenuController();
+
+    await tester.pumpWidget(
+      App(
+        Menu(
+          controller: controller,
+          onClose: () => closeOrder.add(Tag.a),
+          menuPanel: Panel(
+            children: <Widget>[
+              Menu(
+                onClose: () => closeOrder.add(Tag.a.a),
+                onCloseRequested: (hideMenu) {},
+                menuPanel: const Panel(children: <Widget>[SizedBox()]),
+                child: AnchorButton(Tag.a.a),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open parent menu.
+    controller.open();
+    await tester.pump();
+
+    // Open child menu.
+    await tester.tap(find.text(Tag.a.a.text));
+    await tester.pump();
+
+    // Close the root menu panel, which should close all submenus.
+    controller.close();
+    await tester.pump();
+
+    expect(closeOrder, equals(<NestedTag>[Tag.a.a, Tag.a]));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/182355.
+  testWidgets('[Group] Submenus call onClose before their parents', (WidgetTester tester) async {
+    final closeOrder = <NestedTag>[];
+    final controller = MenuController();
+    await tester.pumpWidget(
+      App(
+        RawMenuAnchorGroup(
+          controller: controller,
+          child: Menu(
+            onClose: () {
+              closeOrder.add(Tag.a);
+            },
+            menuPanel: Panel(
+              children: <Widget>[
+                Menu(
+                  onClose: () {
+                    closeOrder.add(Tag.a.a);
+                  },
+                  menuPanel: const Panel(children: <Widget>[SizedBox()]),
+                  child: AnchorButton(Tag.a.a),
+                ),
+              ],
+            ),
+            child: const AnchorButton(Tag.a),
+          ),
+        ),
+      ),
+    );
+
+    // Open parent menu.
+    controller.open();
+    await tester.pump();
+
+    // Open child menu.
+    await tester.tap(find.text(Tag.a.text));
+    await tester.pump();
+
+    await tester.tap(find.text(Tag.a.a.text));
+    await tester.pump();
+
+    // Close the group, which should close all submenus.
+    controller.close();
+    await tester.pump();
+
+    expect(closeOrder, equals(<NestedTag>[Tag.a.a, Tag.a]));
+  });
+
   testWidgets('[Group] Should only display one open child anchor at a time', (
     WidgetTester tester,
   ) async {
@@ -2627,59 +2713,229 @@ void main() {
       expect(onCloseCalled, equals(1));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/182355.
+    testWidgets('onCloseRequested is called on descendants before parent', (
+      WidgetTester tester,
+    ) async {
+      final closeOrder = <NestedTag>[];
+      final controller = MenuController();
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onCloseRequested: (hideOverlay) {
+              closeOrder.add(Tag.a);
+            },
+            menuPanel: Panel(
+              children: <Widget>[
+                Menu(
+                  onCloseRequested: (hideMenu) {
+                    closeOrder.add(Tag.a.a);
+                  },
+                  menuPanel: Panel(
+                    children: <Widget>[
+                      Menu(
+                        onCloseRequested: (hideMenu) {
+                          closeOrder.add(Tag.a.a.a);
+                        },
+                        menuPanel: const Panel(children: <Widget>[SizedBox()]),
+                        child: AnchorButton(Tag.a.a.a),
+                      ),
+                    ],
+                  ),
+                  child: AnchorButton(Tag.a.a),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open parent menu.
+      controller.open();
+      await tester.pump();
+
+      // Open submenu.
+      await tester.tap(find.text(Tag.a.a.text));
+      await tester.pump();
+
+      // Open sub-submenu.
+      await tester.tap(find.text(Tag.a.a.a.text));
+      await tester.pump();
+
+      // Menus call onCloseRequested on their children when opening, so clear
+      // previous close events.
+      closeOrder.clear();
+
+      controller.close();
+      await tester.pump();
+
+      expect(closeOrder, equals([Tag.a, Tag.a.a, Tag.a.a.a]));
+    });
+
+    testWidgets('Async onClose is called on descendants before parent', (
+      WidgetTester tester,
+    ) async {
+      final closeOrder = <NestedTag>[];
+
+      await tester.pumpWidget(
+        App(
+          Menu(
+            controller: controller,
+            onCloseRequested: (hideOverlay) {
+              // Called second
+              Timer(const Duration(milliseconds: 35), hideOverlay);
+            },
+            onClose: () {
+              closeOrder.add(Tag.a);
+            },
+            menuPanel: Panel(
+              children: <Widget>[
+                Menu(
+                  onCloseRequested: (hideOverlay) {
+                    Timer(const Duration(milliseconds: 50), hideOverlay);
+                  },
+                  onClose: () {
+                    closeOrder.add(Tag.a.a);
+                  },
+                  menuPanel: Panel(
+                    children: <Widget>[
+                      Menu(
+                        onCloseRequested: (hideOverlay) {
+                          // Called first
+                          Timer(const Duration(milliseconds: 10), hideOverlay);
+                        },
+                        onClose: () {
+                          closeOrder.add(Tag.a.a.a);
+                        },
+                        menuPanel: Panel(
+                          children: <Widget>[
+                            Menu(
+                              onCloseRequested: (hideOverlay) {
+                                Timer(const Duration(milliseconds: 25), hideOverlay);
+                              },
+                              onClose: () {
+                                closeOrder.add(Tag.a.a.a.a);
+                              },
+                              menuPanel: Panel(children: <Widget>[Text(Tag.a.a.a.a.a.text)]),
+                              child: AnchorButton(Tag.a.a.a.a),
+                            ),
+                          ],
+                        ),
+                        child: AnchorButton(Tag.a.a.a),
+                      ),
+                    ],
+                  ),
+                  child: AnchorButton(Tag.a.a),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open parent menu.
+      controller.open();
+      await tester.pump();
+
+      // Open submenu.
+      await tester.tap(find.text(Tag.a.a.text));
+      await tester.pump();
+
+      // Open sub-submenu.
+      await tester.tap(find.text(Tag.a.a.a.text));
+      await tester.pump();
+
+      await tester.tap(find.text(Tag.a.a.a.a.text));
+      await tester.pump();
+
+      // Menus call onCloseRequested on their children when opening, so clear
+      // previous close events.
+      closeOrder.clear();
+
+      controller.close();
+      await tester.pump();
+
+      await tester.pump(const Duration(milliseconds: 9));
+
+      expect(closeOrder, isEmpty);
+
+      // 11 milliseconds.
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(closeOrder, equals([Tag.a.a.a.a, Tag.a.a.a]));
+
+      // 34 milliseconds.
+      await tester.pump(const Duration(milliseconds: 23));
+
+      expect(closeOrder, equals([Tag.a.a.a.a, Tag.a.a.a]));
+
+      // 36 milliseconds.
+      await tester.pump(const Duration(milliseconds: 2));
+
+      expect(closeOrder, equals([Tag.a.a.a.a, Tag.a.a.a, Tag.a.a, Tag.a]));
+
+      // The test framework checks for pending timers at the end of the
+      // testWidgets function body, before the teardown callbacks run.
+      //
+      // Pump enough time for all timers to complete to ensure that any pending
+      // timers are from the test and not from the teardown.
+      await tester.pump(const Duration(milliseconds: 20));
+    });
+
     testWidgets('DismissMenuAction triggers onCloseRequested', (WidgetTester tester) async {
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      var topCloseRequests = 0;
-      var middleCloseRequests = 0;
-      var bottomCloseRequests = 0;
+      final closeRequests = <Tag>[];
 
       await tester.pumpWidget(
         App(
           Menu(
             onCloseRequested: (VoidCallback hideOverlay) {
-              topCloseRequests += 1;
-              Timer(const Duration(milliseconds: 100), hideOverlay);
+              closeRequests.add(Tag.a);
             },
             menuPanel: Panel(
               children: <Widget>[
                 Menu(
                   onCloseRequested: (VoidCallback hideOverlay) {
-                    middleCloseRequests += 1;
+                    closeRequests.add(Tag.a.a);
                   },
                   menuPanel: Panel(
                     children: <Widget>[
                       Menu(
                         controller: controller,
                         onCloseRequested: (VoidCallback hideOverlay) {
-                          bottomCloseRequests += 1;
-                          Timer(const Duration(milliseconds: 10), hideOverlay);
+                          closeRequests.add(Tag.a.a.a);
                         },
-                        menuPanel: Panel(children: <Widget>[Text(Tag.a.a.a.text)]),
-                        child: AnchorButton(Tag.a.a, focusNode: focusNode),
+                        menuPanel: Panel(children: <Widget>[Text(Tag.a.a.a.a.text)]),
+                        child: AnchorButton(Tag.a.a.a, focusNode: focusNode),
                       ),
                     ],
                   ),
-                  child: const AnchorButton(Tag.a),
+                  child: AnchorButton(Tag.a.a),
                 ),
               ],
             ),
-            child: const AnchorButton(Tag.anchor),
+            child: const AnchorButton(Tag.a),
           ),
         ),
       );
 
-      await tester.tap(find.text(Tag.anchor.text));
-      await tester.pump();
       await tester.tap(find.text(Tag.a.text));
       await tester.pump();
       await tester.tap(find.text(Tag.a.a.text));
+      await tester.pump();
+      await tester.tap(find.text(Tag.a.a.a.text));
       await tester.pump();
 
       focusNode.requestFocus();
       await tester.pump();
 
-      expect(find.text(Tag.a.a.a.text), findsOneWidget);
+      expect(find.text(Tag.a.a.a.a.text), findsOneWidget);
+      expect(closeRequests, <Tag>[]);
+
+      closeRequests.clear();
 
       const ActionDispatcher().invokeAction(
         DismissMenuAction(controller: controller),
@@ -2689,36 +2945,8 @@ void main() {
 
       await tester.pump();
 
-      expect(topCloseRequests, equals(1));
-      expect(middleCloseRequests, equals(1));
-      expect(bottomCloseRequests, equals(1));
-      expect(find.text(Tag.a.a.a.text), findsOneWidget);
-
-      await tester.pump(const Duration(milliseconds: 11));
-
-      expect(topCloseRequests, equals(1));
-      expect(middleCloseRequests, equals(1));
-      expect(bottomCloseRequests, equals(1));
-      expect(find.text(Tag.a.a.a.text), findsNothing);
-      expect(find.text(Tag.a.text), findsOneWidget);
-
-      await tester.pump(const Duration(milliseconds: 88));
-
-      expect(topCloseRequests, equals(1));
-      expect(middleCloseRequests, equals(1));
-      expect(bottomCloseRequests, equals(1));
-      expect(find.text(Tag.a.a.a.text), findsNothing);
-      expect(find.text(Tag.a.text), findsOneWidget);
-
-      await tester.pump(const Duration(milliseconds: 2));
-
-      expect(topCloseRequests, equals(1));
-      // Middle menu closes again in response to the outer menu calling
-      // "hideOverlay"
-      expect(middleCloseRequests, equals(2));
-      expect(bottomCloseRequests, equals(1));
-      expect(find.text(Tag.a.a.a.text), findsNothing);
-      expect(find.text(Tag.a.text), findsNothing);
+      expect(closeRequests, <Tag>[Tag.a, Tag.a.a, Tag.a.a.a]);
+      expect(find.text(Tag.a.a.a.a.text), findsOneWidget);
     });
 
     testWidgets('Outside tap triggers onCloseRequested', (WidgetTester tester) async {
@@ -2946,6 +3174,38 @@ void main() {
 
     expect(overlayPosition!.anchorRect, tester.getRect(find.byType(Button)));
   });
+
+  testWidgets('RawMenuAnchor does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMenuAnchor(controller: controller, overlayBuilder: (_, _) => const Text('X')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMenuAnchor)), Size.zero);
+    controller.open();
+  });
+
+  testWidgets('RawMenuAnchorGroup does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = MenuController();
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMenuAnchorGroup(controller: controller, child: const Text('X')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMenuAnchorGroup)), Size.zero);
+    controller.open();
+  });
 }
 
 // Custom MenuController that extends the base MenuController
@@ -2969,6 +3229,7 @@ class CustomMenuController extends MenuController {
 
 // ********* UTILITIES *********  //
 /// Allows the creation of arbitrarily-nested tags in tests.
+@immutable
 abstract class Tag {
   const Tag();
 
@@ -2987,8 +3248,17 @@ abstract class Tag {
   String toString() {
     return 'Tag($text, level: $level)';
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Tag && text == other.text && level == other.level;
+  }
+
+  @override
+  int get hashCode => Object.hash(text, level);
 }
 
+@immutable
 class NestedTag extends Tag {
   const NestedTag(String name, {Tag? prefix, this.level = 0})
     : assert(
