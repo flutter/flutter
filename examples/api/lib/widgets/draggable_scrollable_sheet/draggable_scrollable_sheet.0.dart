@@ -97,12 +97,8 @@ class _DraggableScrollableSheetExampleState
   bool get _isOnDesktopAndWeb =>
       kIsWeb ||
       switch (defaultTargetPlatform) {
-        TargetPlatform.macOS ||
-        TargetPlatform.linux ||
-        TargetPlatform.windows => true,
-        TargetPlatform.android ||
-        TargetPlatform.iOS ||
-        TargetPlatform.fuchsia => false,
+        .macOS || .linux || .windows => true,
+        .android || .iOS || .fuchsia => false,
       };
 }
 
@@ -124,14 +120,14 @@ class Grabber extends StatelessWidget {
         width: double.infinity,
         color: colorScheme.onSurface,
         child: Align(
-          alignment: Alignment.topCenter,
+          alignment: .topCenter,
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            margin: const .symmetric(vertical: 8.0),
             width: 32.0,
             height: 4.0,
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: .circular(8.0),
             ),
           ),
         ),

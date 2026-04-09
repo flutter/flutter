@@ -46,6 +46,12 @@ void main() {
       terminal: FakeTerminal(),
       plistParser: FakePlistParser(),
       processUtils: FakeProcessUtils(),
+      processManager: FakeProcessManager.any(),
+      templateRenderer: FakeTemplateRenderer(),
+      xcode: FakeXcode(),
+      artifacts: FakeArtifacts(),
+      cache: FakeCache(),
+      flutterVersion: FakeFlutterVersion(),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
@@ -99,6 +105,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         try {
           await createTestCommandRunner(
@@ -126,6 +138,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
         try {
@@ -152,6 +170,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
         await expectLater(
@@ -182,6 +206,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printError('Error: Danger Will Robinson!');
         await expectLater(
@@ -232,6 +262,12 @@ class FakeBuildCommand extends BuildCommand {
     required super.terminal,
     required super.plistParser,
     required super.processUtils,
+    required super.processManager,
+    required super.templateRenderer,
+    required super.xcode,
+    required super.artifacts,
+    required super.cache,
+    required super.flutterVersion,
   }) : super(logger: logger) {
     addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
   }

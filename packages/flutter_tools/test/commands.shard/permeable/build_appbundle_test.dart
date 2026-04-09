@@ -63,6 +63,7 @@ void main() {
               commandHasTerminal: false,
               buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
             ),
           ),
         );
@@ -95,6 +96,7 @@ void main() {
               commandHasTerminal: false,
               buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
             ),
           ),
         );
@@ -109,6 +111,7 @@ void main() {
               commandHasTerminal: false,
               buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildAppBundleBuildMode: 'release',
+              buildBundleEnableHcpp: false,
             ),
           ),
         );
@@ -123,6 +126,7 @@ void main() {
               commandHasTerminal: false,
               buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildAppBundleBuildMode: 'debug',
+              buildBundleEnableHcpp: false,
             ),
           ),
         );
@@ -138,6 +142,7 @@ void main() {
               commandHasTerminal: false,
               buildAppBundleTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildAppBundleBuildMode: 'profile',
+              buildBundleEnableHcpp: false,
             ),
           ),
         );
