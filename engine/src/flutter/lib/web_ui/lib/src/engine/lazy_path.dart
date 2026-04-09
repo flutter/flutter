@@ -729,6 +729,7 @@ class LazyPath implements ui.Path, Collectable {
     if (!identical(_cachedBuilder, _cachedPath)) {
       // In some implementations (*cough* skwasm *cough*), the built path and the builder might be the same
       // object. In that case, disposing the path is sufficient.
+      // TODO(mdebbar): https://github.com/flutter/flutter/issues/184840
       _cachedBuilder?.dispose();
     }
     _cachedPath = null;
