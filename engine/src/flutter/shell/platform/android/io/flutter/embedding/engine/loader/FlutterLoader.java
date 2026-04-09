@@ -423,8 +423,8 @@ public class FlutterLoader {
 
               shellArgs.add(arg);
             }
-          } catch (JSONException e) {
-            Log.e(TAG, "Exception parsing shell arguments from manifest: " + e);
+          } catch (JSONException j) {
+            Log.e(TAG, "Exception parsing shell arguments from manifest: " + j);
           }
         }
       }

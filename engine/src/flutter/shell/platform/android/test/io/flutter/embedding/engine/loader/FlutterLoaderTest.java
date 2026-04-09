@@ -296,7 +296,7 @@ public class FlutterLoaderTest {
               "io.flutter.embedding.engine.loader.FlutterLoader.aot-shared-library-name", path);
           break;
         case COMMANDLINE:
-          metadata.putString("androidEngineShellArgs", commandLineArg);
+          metadata.putString("androidEngineShellArgs", "[\"" + commandLineArg + "\"]");
           break;
         case RUNTIME:
           // Set flag via ensureInitializationComplete parameter.
@@ -369,7 +369,7 @@ public class FlutterLoaderTest {
               "io.flutter.embedding.engine.loader.FlutterLoader.aot-shared-library-name", path);
           break;
         case COMMANDLINE:
-          metadata.putString("androidEngineShellArgs", commandLineArg);
+          metadata.putString("androidEngineShellArgs", "[\"" + commandLineArg + "\"]");
           break;
         case RUNTIME:
           // Set flag via ensureInitializationComplete parameter.
@@ -514,7 +514,7 @@ public class FlutterLoaderTest {
                 "io.flutter.embedding.engine.loader.FlutterLoader.aot-shared-library-name", path);
             break;
           case COMMANDLINE:
-            metadata.putString("androidEngineShellArgs", commandLineArg);
+            metadata.putString("androidEngineShellArgs", "[" + "\"" + commandLineArg + "\"" + "]");
             break;
           case RUNTIME:
             // Set flag via ensureInitializationComplete parameter.
@@ -1438,7 +1438,8 @@ public class FlutterLoaderTest {
     metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
 
     // Mock metdata put into the manifest by the Flutter tool when command line flag specified.
-    metadata.putString("androidEngineShellArgs", expectedImpellerArgFromCommandLine);
+    metadata.putString(
+        "androidEngineShellArgs", "[\"" + expectedImpellerArgFromCommandLine + "\"]");
 
     ctx.getApplicationInfo().metaData = metadata;
 
