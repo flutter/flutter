@@ -687,8 +687,9 @@ void main() {
         ),
       );
 
+      final SemanticsNode semantics = tester.getSemantics(find.byType(MaterialButton));
       expect(
-        tester.getSemantics(find.byType(MaterialButton)),
+        semantics,
         matchesSemantics(
           label: 'Button',
           hasFocusAction: true,
@@ -698,6 +699,9 @@ void main() {
           size: expectedButtonSize,
         ),
       );
+      final SemanticsData semanticsData = semantics.getSemanticsData();
+      expect(semanticsData.hasFlag(SemanticsFlag.isEnabled), isFalse);
+      expect(semanticsData.hasAction(SemanticsAction.tap), isFalse);
 
       handle.dispose();
     },
