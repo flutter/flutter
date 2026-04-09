@@ -509,7 +509,7 @@ void main() {
       );
 
       testUsingContext(
-        'EnableImpeller="false" reports an disabled event',
+        'EnableImpeller="false" reports a disabled event',
         () async {
           final String projectPath = await createProject(
             tempDir,

@@ -60,6 +60,8 @@ Future<void> processPodsIfNeeded(
     final swiftPackageManager = SwiftPackageManager(
       fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
+      processUtils: globals.processUtils,
+      config: globals.config,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios

@@ -46,13 +46,13 @@ class DividerExample extends StatelessWidget {
           // Subheader example from Material spec.
           // https://material.io/components/dividers#types
           Container(
-            padding: const EdgeInsets.only(left: 20),
+            padding: const .only(left: 20),
             child: Align(
-              alignment: AlignmentDirectional.centerStart,
+              alignment: .centerStart,
               child: Text(
                 'Subheader',
                 style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.start,
+                textAlign: .start,
               ),
             ),
           ),

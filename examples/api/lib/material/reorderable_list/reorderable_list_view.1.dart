@@ -63,7 +63,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     }
 
     return ReorderableListView(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       proxyDecorator: proxyDecorator,
       children: <Widget>[
         for (int index = 0; index < _items.length; index += 1)

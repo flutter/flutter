@@ -445,14 +445,10 @@ class SkwasmMatrixColorFilter extends SkwasmColorFilter {
 }
 
 class SkwasmMaskFilter extends SkwasmObjectWrapper<RawMaskFilter> {
-  SkwasmMaskFilter._(MaskFilterHandle handle) : super(handle, _registry);
+  SkwasmMaskFilter._(MaskFilterHandle handle)
+    : super(handle, (MaskFilterHandle h) => maskFilterDispose(h), 'MaskFilter');
 
   factory SkwasmMaskFilter.fromUiMaskFilter(ui.MaskFilter maskFilter) => SkwasmMaskFilter._(
     maskFilterCreateBlur(maskFilter.webOnlyBlurStyle.index, maskFilter.webOnlySigma),
   );
-
-  static final SkwasmFinalizationRegistry<RawMaskFilter> _registry =
-      SkwasmFinalizationRegistry<RawMaskFilter>(
-        (MaskFilterHandle handle) => maskFilterDispose(handle),
-      );
 }

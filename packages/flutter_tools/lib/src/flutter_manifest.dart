@@ -79,7 +79,7 @@ class FlutterManifest {
     required Logger logger,
     List<AssetsEntry>? assets,
     List<Font>? fonts,
-    List<Uri>? shaders,
+    List<AssetsEntry>? shaders,
     List<DeferredComponent>? deferredComponents,
     bool removeDependencies = false,
   }) {
@@ -106,9 +106,9 @@ class FlutterManifest {
     }
 
     if (shaders != null && shaders.isNotEmpty) {
-      copy._flutterDescriptor['shaders'] = YamlList.wrap(
-        shaders.map((Uri uri) => uri.toString()).toList(),
-      );
+      copy._flutterDescriptor['shaders'] = YamlList.wrap(<Object?>[
+        for (final AssetsEntry shader in shaders) shader.descriptor,
+      ]);
     }
 
     if (deferredComponents != null && deferredComponents.isNotEmpty) {
@@ -431,31 +431,7 @@ class FlutterManifest {
     return fonts;
   }
 
-  late final List<Uri> shaders = _extractAssetUris('shaders', 'Shader');
-
-  List<Uri> _extractAssetUris(String key, String singularName) {
-    if (!_flutterDescriptor.containsKey(key)) {
-      return <Uri>[];
-    }
-
-    final items = _flutterDescriptor[key] as List<Object?>?;
-    if (items == null) {
-      return const <Uri>[];
-    }
-    final results = <Uri>[];
-    for (final Object? item in items) {
-      if (item is! String || item == '') {
-        _logger.printError('$singularName manifest contains a null or empty uri.');
-        continue;
-      }
-      try {
-        results.add(Uri.parse(item));
-      } on FormatException {
-        _logger.printError('$singularName manifest contains invalid uri: $item.');
-      }
-    }
-    return results;
-  }
+  late final List<AssetsEntry> shaders = _computeAssets(_flutterDescriptor['shaders']);
 
   /// Whether localization Dart files should be generated.
   late final generateLocalizations = _flutterDescriptor['generate'] == true;
@@ -572,17 +548,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
       case 'assets':
         errors.addAll(_validateAssets(yamlValue));
       case 'shaders':
-        if (yamlValue is! YamlList) {
-          errors.add(
-            'Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).',
-          );
-        } else if (yamlValue.isEmpty) {
-          break;
-        } else if (yamlValue[0] is! String) {
-          errors.add(
-            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
-          );
-        }
+        errors.addAll(_validateAssets(yamlValue));
       case 'fonts':
         if (yamlValue is! YamlList) {
           errors.add(

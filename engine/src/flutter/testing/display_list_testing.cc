@@ -70,7 +70,7 @@ std::ostream& operator<<(std::ostream& os,
                          const DisplayList& display_list) {
   DisplayListStreamDispatcher dispatcher(os);
   os << std::boolalpha;
-  os << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+  os << std::setprecision(std::numeric_limits<double>::digits10 + 1);
   os << "DisplayList {" << std::endl;
   display_list.Dispatch(dispatcher);
   os << "}" << std::endl;

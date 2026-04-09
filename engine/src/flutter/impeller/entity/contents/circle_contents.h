@@ -23,14 +23,18 @@ class CircleContents : public ColorSourceContents {
 
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
+  const Geometry* GetGeometry() const override;
+
  private:
   explicit CircleContents(std::unique_ptr<CircleGeometry> geometry,
                           Color color,
-                          bool stroked);
+                          bool stroked,
+                          Scalar aa_padding);
 
   std::unique_ptr<CircleGeometry> geometry_;
   Color color_;
   bool stroked_;
+  Scalar aa_padding_;
 };
 }  // namespace impeller
 
