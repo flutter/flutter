@@ -107,20 +107,10 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
-    'packages/flutter/test/widgets/text_golden_test.dart',
     'packages/flutter/test/widgets/restoration_scopes_moving_test.dart',
     'packages/flutter/test/widgets/page_transitions_test.dart',
-    'packages/flutter/test/widgets/editable_text_scribble_test.dart',
-    'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
-    'packages/flutter/test/widgets/selectable_region_test.dart',
-    'packages/flutter/test/widgets/editable_text_scribe_test.dart',
-    'packages/flutter/test/widgets/semantics_debugger_test.dart',
-    'packages/flutter/test/widgets/page_route_builder_test.dart',
-    'packages/flutter/test/widgets/two_dimensional_scroll_view_test.dart',
     'packages/flutter/test/widgets/routes_test.dart',
-    'packages/flutter/test/widgets/text_selection_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
-    'packages/flutter/test/widgets/radio_group_test.dart',
     'packages/flutter/test/widgets/navigator_replacement_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',
     'packages/flutter/test/widgets/default_text_editing_shortcuts_test.dart',
