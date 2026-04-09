@@ -244,7 +244,7 @@ return False
     // Disable asynchronous mode to workaround issues with rearming of breakpoints.
     // See https://github.com/flutter/flutter/issues/184254 and upstream issue
     // https://github.com/llvm/llvm-project/issues/190956.
-    await _lldbProcess?.stdinWriteln('script import lldb; lldb.debugger.SetAsync(False)');
+    await _lldbProcess?.stdinWriteln('script lldb.debugger.SetAsync(False)');
   }
 
   /// Resume the stopped process.

@@ -89,7 +89,7 @@ void main() {
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
-      'script import lldb; lldb.debugger.SetAsync(False)',
+      'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
       processResumedMatcher,
     ];
@@ -329,7 +329,7 @@ Target 0: (Runner) stopped.
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
-      'script import lldb; lldb.debugger.SetAsync(False)',
+      'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
       processResumedMatcher,
     ];
