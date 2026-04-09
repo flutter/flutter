@@ -39,7 +39,7 @@ import 'theme.dart';
 // Examples can assume:
 // BuildContext context;
 
-// Test freeze
+// Test Freeze
 
 /// A [ListTile] that shows an about box.
 ///
