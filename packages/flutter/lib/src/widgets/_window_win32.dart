@@ -940,8 +940,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
 /// See also:
 ///
 ///  * [PopupWindowController], the base class for popup windows.
-class PopupWindowControllerWin32 extends PopupWindowController
-    implements _WindowsMessageHandler {
+class PopupWindowControllerWin32 extends PopupWindowController implements _WindowsMessageHandler {
   /// Creates a new popup window controller for Win32.
   ///
   /// When this constructor completes, the native window has been created and
@@ -1063,7 +1062,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
 
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
-     _ensureNotDestroyed();
+    _ensureNotDestroyed();
     if (anchorRect != null) {
       _anchorRect = anchorRect;
     }
@@ -1152,7 +1151,9 @@ class PopupWindowControllerWin32 extends PopupWindowController
         parent.rootView.viewId,
       );
       final HWND hFocused = _Win32PlatformInterface.getForegroundWindow();
-      if (hFocused != parentHwnd && hFocused != getWindowHandle() && !_Win32PlatformInterface.isChild(getWindowHandle(), hFocused)) {
+      if (hFocused != parentHwnd &&
+          hFocused != getWindowHandle() &&
+          !_Win32PlatformInterface.isChild(getWindowHandle(), hFocused)) {
         scheduleMicrotask(destroy);
       }
       return null;
@@ -1601,7 +1602,6 @@ final class _PopupWindowCreationRequest extends ffi.Struct {
   >
   onGetWindowPosition;
 }
-
 
 /// Payload for the initialization request for the windowing subsystem used
 /// by the constructor for [WindowingOwnerWin32].
