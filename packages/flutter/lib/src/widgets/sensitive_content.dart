@@ -229,13 +229,9 @@ class SensitiveContentHost {
   }
 
   Future<void> _unregister(ContentSensitivity widgetSensitivity) async {
-    assert(
-      _contentSensitivityIsSupported != null,
-      'SensitiveContentHost.register must be called before SensitiveContentHost.unregister',
-    );
-
-    if (!_contentSensitivityIsSupported!) {
-      // Setting content sensitivity is not supported on this device.
+    if (_contentSensitivityIsSupported != true) {
+      // Setting content sensitivity is not supported on this device or register
+      // was not called before unregister.
       return;
     }
 
@@ -370,7 +366,19 @@ class _SensitiveContentState extends State<SensitiveContent> {
 
   @override
   void dispose() {
-    SensitiveContentHost.unregister(widget.sensitivity);
+    SensitiveContentHost.unregister(widget.sensitivity).catchError((
+      Object exception,
+      StackTrace stack,
+    ) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while unregistering sensitive content'),
+        ),
+      );
+    });
     super.dispose();
   }
 

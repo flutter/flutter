@@ -37,7 +37,7 @@ class _HomePageState extends State<_HomePage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Page One'),
             TextButton(
@@ -103,7 +103,7 @@ class _PageTwoState extends State<_PageTwo> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Page Two'),
             PopScope<Object?>(
