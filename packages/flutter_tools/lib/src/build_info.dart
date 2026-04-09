@@ -1150,6 +1150,10 @@ const kXcodeBuildScriptValueBuild = 'build';
 /// embedding.
 const kXcodeBuildScriptValueEmbed = 'embed';
 
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by a Run Script in the Xcode build process in a native app (add-to-app).
+const kXcodeBuildScriptValueAddToAppBuild = 'build-add-to-app';
+
 /// Whether the build is originating from the `flutter build swift-package` command.
 ///
 /// Expects value of "true".

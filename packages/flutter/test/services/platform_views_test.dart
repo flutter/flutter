@@ -565,7 +565,7 @@ void main() {
         layoutDirection: TextDirection.ltr,
       );
 
-      viewController.dispose();
+      await viewController.dispose();
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[const FakeUiKitView(0, 'webview')]),

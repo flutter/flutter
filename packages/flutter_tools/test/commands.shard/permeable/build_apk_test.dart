@@ -67,6 +67,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -81,6 +82,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -95,6 +97,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -109,6 +112,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -123,6 +127,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -152,6 +157,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -169,6 +175,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -186,6 +193,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -203,6 +211,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -220,6 +229,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
