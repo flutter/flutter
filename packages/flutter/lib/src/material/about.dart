@@ -39,8 +39,6 @@ import 'theme.dart';
 // Examples can assume:
 // BuildContext context;
 
-// Test Freeze
-
 /// A [ListTile] that shows an about box.
 ///
 /// This widget is often added to an app's [Drawer]. When tapped it shows

@@ -5,7 +5,7 @@
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request: # Change back to pull_request_target, testing in PR using pull_request
+  pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
     branches:
       - master
