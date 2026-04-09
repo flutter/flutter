@@ -20,7 +20,7 @@ dependencies:
   stack_trace: 1.12.1
   url_launcher: 6.3.2
 
-  async: 2.13.0
+  async: 2.13.1
   boolean_selector: 2.1.2
   characters: 1.4.1
   clock: 1.1.2
@@ -45,8 +45,8 @@ dependencies:
   term_glyph: 1.2.2
   test_api: 0.7.11
   typed_data: 1.4.0
-  unified_analytics: 8.0.12
-  url_launcher_android: 6.3.28
+  unified_analytics: 8.0.14
+  url_launcher_android: 6.3.29
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
@@ -68,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: 18ep1m
+# PUBSPEC CHECKSUM: ciq2fr

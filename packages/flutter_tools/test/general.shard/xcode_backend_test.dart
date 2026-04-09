@@ -240,6 +240,252 @@ void main() {
     });
   }
 
+  group('buildForNativeApp', () {
+    test('calls flutter assemble and embeds app framework for iOS', () {
+      const targetPlatform = 'Ios';
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      const archs = 'arm64';
+      const buildMode = 'Release';
+      const dartObfuscation = 'false';
+      const dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
+      const expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
+      const extraFrontEndOptions = '--some-option';
+      const extraGenSnapshotOptions = '--obfuscate';
+      const frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
+      const sdkRoot = '/path/to/sdk';
+      const splitDebugInfo = '/path/to/split/debug/info';
+      const trackWidgetCreation = 'true';
+      const treeShake = 'true';
+      const srcRoot = '/path/to/project';
+      const iOSVersion = '18.3.1';
+      final context = TestContext(
+        <String>['build-add-to-app', 'ios'],
+        <String, String>{
+          'ACTION': 'install',
+          'ARCHS': archs,
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'TARGET_BUILD_DIR': buildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
+          'CODE_SIGNING_REQUIRED': 'YES',
+          'CONFIGURATION': '$buildMode-strawberry',
+          'DART_DEFINES': dartDefines,
+          'DART_OBFUSCATION': dartObfuscation,
+          'EXPANDED_CODE_SIGN_IDENTITY': expandedCodeSignIdentity,
+          'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
+          'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
+          'FLUTTER_ROOT': flutterRoot.path,
+          'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
+          'INFOPLIST_PATH': 'Info.plist',
+          'SDKROOT': sdkRoot,
+          'FLAVOR': 'strawberry',
+          'SPLIT_DEBUG_INFO': splitDebugInfo,
+          'TRACK_WIDGET_CREATION': trackWidgetCreation,
+          'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '${flutterRoot.path}/bin/flutter',
+              'assemble',
+              '--no-version-check',
+              '--output=${buildDir.path}/',
+              '-dTargetPlatform=${targetPlatform.toLowerCase()}',
+              '-dTargetFile=lib/main.dart',
+              '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dFlavor=strawberry',
+              '-dConfiguration=$buildMode-strawberry',
+              '-d${targetPlatform}Archs=$archs',
+              '-dSdkRoot=$sdkRoot',
+              '-dSplitDebugInfo=$splitDebugInfo',
+              '-dTreeShakeIcons=$treeShake',
+              '-dTrackWidgetCreation=$trackWidgetCreation',
+              '-dDartObfuscation=$dartObfuscation',
+              '-dAction=install',
+              '-dFrontendServerStarterPath=$frontendServerStarterPath',
+              '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+              '--DartDefines=$dartDefines',
+              '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
+              '-dXcodeBuildScript=build-add-to-app',
+              '-dTargetDeviceOSVersion=$iOSVersion',
+              '-dCodesignIdentity=$expandedCodeSignIdentity',
+              'release_ios_bundle_flutter_assets',
+            ],
+          ),
+          const FakeCommand(
+            command: ['mkdir', '-p', '--', '/path/to/builds/Runner.app/Frameworks'],
+          ),
+          const FakeCommand(
+            command: [
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '/path/to/builds/App.framework',
+              '/path/to/builds/Runner.app/Frameworks',
+            ],
+          ),
+          const FakeCommand(
+            command: [
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '/path/to/builds/Flutter.framework',
+              '/path/to/builds/Runner.app/Frameworks/',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+      expect(context.stdout, contains('built and packaged successfully.'));
+      expect(context.stderr, isEmpty);
+    });
+
+    test('calls flutter assemble and embeds app framework for macOS', () {
+      const targetPlatform = 'Darwin';
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
+      final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+      const archs = 'arm64';
+      const buildMode = 'Release';
+      const dartObfuscation = 'false';
+      const dartDefines = 'flutter.inspector.structuredErrors%3Dtrue';
+      const expandedCodeSignIdentity = 'F1326572E0B71C3C8442805230CB4B33B708A2E2';
+      const extraFrontEndOptions = '--some-option';
+      const extraGenSnapshotOptions = '--obfuscate';
+      const frontendServerStarterPath = '/path/to/frontend_server_starter.dart';
+      const sdkRoot = '/path/to/sdk';
+      const splitDebugInfo = '/path/to/split/debug/info';
+      const trackWidgetCreation = 'true';
+      const treeShake = 'true';
+      const srcRoot = '/path/to/project';
+      const iOSVersion = '18.3.1';
+      final context = TestContext(
+        <String>['build-add-to-app', 'macos'],
+        <String, String>{
+          'ACTION': 'install',
+          'ARCHS': archs,
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'TARGET_BUILD_DIR': buildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': 'Runner.app/Frameworks',
+          'CODE_SIGNING_REQUIRED': 'YES',
+          'CONFIGURATION': '$buildMode-strawberry',
+          'DART_DEFINES': dartDefines,
+          'DART_OBFUSCATION': dartObfuscation,
+          'EXPANDED_CODE_SIGN_IDENTITY': expandedCodeSignIdentity,
+          'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions,
+          'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions,
+          'FLUTTER_ROOT': flutterRoot.path,
+          'FRONTEND_SERVER_STARTER_PATH': frontendServerStarterPath,
+          'INFOPLIST_PATH': 'Info.plist',
+          'SDKROOT': sdkRoot,
+          'FLAVOR': 'strawberry',
+          'SPLIT_DEBUG_INFO': splitDebugInfo,
+          'TRACK_WIDGET_CREATION': trackWidgetCreation,
+          'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              '${flutterRoot.path}/bin/flutter',
+              'assemble',
+              '--no-version-check',
+              '--output=${buildDir.path}/',
+              '-dTargetPlatform=${targetPlatform.toLowerCase()}',
+              '-dTargetFile=lib/main.dart',
+              '-dBuildMode=${buildMode.toLowerCase()}',
+              '-dFlavor=strawberry',
+              '-dConfiguration=$buildMode-strawberry',
+              '-d${targetPlatform}Archs=$archs',
+              '-dSdkRoot=$sdkRoot',
+              '-dSplitDebugInfo=$splitDebugInfo',
+              '-dTreeShakeIcons=$treeShake',
+              '-dTrackWidgetCreation=$trackWidgetCreation',
+              '-dDartObfuscation=$dartObfuscation',
+              '-dAction=install',
+              '-dFrontendServerStarterPath=$frontendServerStarterPath',
+              '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+              '--DartDefines=$dartDefines',
+              '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
+              '-dXcodeBuildScript=build-add-to-app',
+              'release_macos_bundle_flutter_assets',
+            ],
+          ),
+          const FakeCommand(
+            command: ['mkdir', '-p', '--', '/path/to/builds/Runner.app/Frameworks'],
+          ),
+          const FakeCommand(
+            command: [
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '/path/to/builds/App.framework',
+              '/path/to/builds/Runner.app/Frameworks',
+            ],
+          ),
+          const FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              expandedCodeSignIdentity,
+              '--',
+              '/path/to/builds/Runner.app/Frameworks/App.framework/App',
+            ],
+          ),
+          const FakeCommand(
+            command: [
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '--filter',
+              '- Headers',
+              '--filter',
+              '- Modules',
+              '/path/to/builds/FlutterMacOS.framework',
+              '/path/to/builds/Runner.app/Frameworks/',
+            ],
+          ),
+          const FakeCommand(
+            command: [
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              expandedCodeSignIdentity,
+              '--',
+              '/path/to/builds/Runner.app/Frameworks/FlutterMacOS.framework/FlutterMacOS',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+      expect(context.stdout, contains('built and packaged successfully.'));
+      expect(context.stderr, isEmpty);
+    });
+  });
+
   group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
       final Directory buildDir = fileSystem.directory('/path/to/builds')

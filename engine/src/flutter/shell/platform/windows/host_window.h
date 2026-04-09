@@ -70,7 +70,6 @@ class HostWindow {
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,
       const WindowConstraints& preferred_constraints,
-      bool is_sized_to_content,
       GetWindowPositionCallback get_position_callback,
       HWND parent);
 

@@ -45,7 +45,7 @@ class CounterBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text('Current counter value:'),
           // Thanks to the ListenableBuilder, only the widget displaying the
