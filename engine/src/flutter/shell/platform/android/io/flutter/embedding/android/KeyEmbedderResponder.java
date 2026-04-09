@@ -194,6 +194,16 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
       }
     }
 
+    boolean isVirtualUpForThisGoal = false;
+    if (event.getScanCode() == 0 && getEventType(event) == KeyData.Type.kUp) {
+      for (final KeyboardMap.KeyPair key : goal.keys) {
+        if (key.logicalKey == eventLogicalKey) {
+          isVirtualUpForThisGoal = true;
+          break;
+        }
+      }
+    }
+
     // Fill the rest of the pre-event states to match the true state.
     if (truePressed) {
       // It is required that at least one key is pressed.
@@ -201,14 +211,17 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
         if (preEventStates[keyIdx] != null) {
           continue;
         }
-        if (postEventAnyPressed) {
+        if (isVirtualUpForThisGoal) {
+          // Force release other keys in the goal for virtual UP events with persistent meta bit.
+          preEventStates[keyIdx] = false;
+        } else if (postEventAnyPressed) {
           preEventStates[keyIdx] = nowStates[keyIdx];
         } else {
           preEventStates[keyIdx] = true;
           postEventAnyPressed = true;
         }
       }
-      if (!postEventAnyPressed) {
+      if (!postEventAnyPressed && !isVirtualUpForThisGoal) {
         preEventStates[0] = true;
       }
     } else {

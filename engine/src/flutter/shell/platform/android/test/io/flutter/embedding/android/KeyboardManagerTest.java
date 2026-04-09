@@ -800,6 +800,55 @@ public class KeyboardManagerTest {
   }
 
   @Test
+  public void virtualKeyboardShiftUpClearsState() {
+    final KeyboardTester tester = new KeyboardTester();
+    final ArrayList<CallRecord> calls = new ArrayList<>();
+
+    tester.recordEmbedderCallsTo(calls);
+    tester.respondToTextInputWith(true); // Suppress redispatching
+
+    final long virtualShiftLeftPhysicalKey = KEYCODE_SHIFT_LEFT | KeyboardMap.kAndroidPlane;
+
+    // 1. Simulate ShiftLeft DOWN from virtual keyboard (scancode = 0)
+    assertTrue(
+        tester.keyboardManager.handleEvent(
+            new FakeKeyEvent(ACTION_DOWN, 0, KEYCODE_SHIFT_LEFT, 0, '\0', META_SHIFT_ON)));
+
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kDown,
+              virtualShiftLeftPhysicalKey,
+              LOGICAL_SHIFT_LEFT,
+              null,
+              false,
+              DeviceType.kKeyboard),
+        });
+    calls.clear();
+
+    // 2. Simulate ShiftLeft UP from virtual keyboard (scancode = 0) with meta bit still active
+    assertTrue(
+        tester.keyboardManager.handleEvent(
+            new FakeKeyEvent(ACTION_UP, 0, KEYCODE_SHIFT_LEFT, 0, '\0', META_SHIFT_ON)));
+
+    // Verify that it does NOT synthesize SHIFT_RIGHT DOWN.
+    // It should only send SHIFT_LEFT UP.
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kUp,
+              virtualShiftLeftPhysicalKey,
+              LOGICAL_SHIFT_LEFT,
+              null,
+              false,
+              DeviceType.kKeyboard),
+        });
+    calls.clear();
+  }
+
+  @Test
   public void tapUpperA() {
     final KeyboardTester tester = new KeyboardTester();
     final ArrayList<CallRecord> calls = new ArrayList<>();
