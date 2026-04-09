@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../widgets/semantics_tester.dart';
 
 void main() {
   setUp(() {
@@ -636,15 +635,9 @@ void main() {
   testWidgets(
     'Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics',
     (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
+      final SemanticsHandle handle = tester.ensureSemantics();
 
-      const expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
-      // Button is in center of screen
-      final expectedButtonTransform = Matrix4.identity()
-        ..translate(
-          TestSemantics.fullScreen.width / 2 - expectedButtonSize.width / 2,
-          TestSemantics.fullScreen.height / 2 - expectedButtonSize.height / 2,
-        );
+      const expectedButtonSize = Size(116.0, 48.0);
 
       // enabled button
       await tester.pumpWidget(
@@ -665,25 +658,16 @@ void main() {
       );
 
       expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: expectedButtonSize,
-                transform: expectedButtonTransform,
-                label: 'Button',
-                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isEnabled,
-                  SemanticsFlag.isFocusable,
-                ],
-              ),
-            ],
-          ),
+        tester.getSemantics(find.byType(MaterialButton)),
+        matchesSemantics(
+          label: 'Button',
+          hasTapAction: true,
+          hasFocusAction: true,
+          hasEnabledState: true,
+          isButton: true,
+          isEnabled: true,
+          isFocusable: true,
+          size: expectedButtonSize,
         ),
       );
 
@@ -704,28 +688,18 @@ void main() {
       );
 
       expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(
-            children: <TestSemantics>[
-              TestSemantics.rootChild(
-                id: 1,
-                rect: expectedButtonSize,
-                transform: expectedButtonTransform,
-                label: 'Button',
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isButton,
-                  SemanticsFlag.isFocusable,
-                ],
-                actions: <SemanticsAction>[SemanticsAction.focus],
-              ),
-            ],
-          ),
+        tester.getSemantics(find.byType(MaterialButton)),
+        matchesSemantics(
+          label: 'Button',
+          hasFocusAction: true,
+          hasEnabledState: true,
+          isButton: true,
+          isFocusable: true,
+          size: expectedButtonSize,
         ),
       );
 
-      semantics.dispose();
+      handle.dispose();
     },
   );
 
