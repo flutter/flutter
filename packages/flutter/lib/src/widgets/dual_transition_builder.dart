@@ -12,7 +12,8 @@ import 'framework.dart';
 ///
 /// The `animation` provided to the builder always runs forward from 0.0 to 1.0.
 ///
-/// An optional, pre-built widget subtree that does not depend on the animation's value.
+/// An optional `child` widget that represents a pre-built widget subtree that
+/// does not depend on the animation's value.
 ///
 /// Passing a pre-built widget here and incorporating it into the returned
 /// widget tree avoids rebuilding it for every frame of the animation and
