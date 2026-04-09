@@ -45,10 +45,8 @@ class MyApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('English: hello -> Pirate: $hello',
-                  style: const TextStyle(fontSize: 20)),
-              Text('English: friend -> Pirate: $friend',
-                  style: const TextStyle(fontSize: 20)),
+              Text('English: hello -> Pirate: $hello', style: const TextStyle(fontSize: 20)),
+              Text('English: friend -> Pirate: $friend', style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 20),
               Text('Loaded translations count: $count',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
