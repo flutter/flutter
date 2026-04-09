@@ -61,8 +61,8 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
       body: Center(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
             children: <Widget>[
               // ToggleButtons with a single selection.
               Text('Single-select', style: theme.textTheme.titleSmall),
@@ -77,7 +77,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                     }
                   });
                 },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const .all(Radius.circular(8)),
                 selectedBorderColor: Colors.red[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.red[200],
@@ -101,7 +101,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                     _selectedVegetables[index] = !_selectedVegetables[index];
                   });
                 },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const .all(Radius.circular(8)),
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
@@ -127,7 +127,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                     }
                   });
                 },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const .all(Radius.circular(8)),
                 selectedBorderColor: Colors.blue[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.blue[200],

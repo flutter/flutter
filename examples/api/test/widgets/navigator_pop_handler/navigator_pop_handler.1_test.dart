@@ -50,7 +50,7 @@ void main() {
         find.text('Bottom nav - tab Home Tab - route _TabPage.home'),
         findsOneWidget,
       );
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      if (!kIsWeb && defaultTargetPlatform == .android) {
         expect(lastFrameworkHandlesBack, isFalse);
       }
 
@@ -63,7 +63,7 @@ void main() {
         find.text('Bottom nav - tab Home Tab - route _TabPage.one'),
         findsOneWidget,
       );
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      if (!kIsWeb && defaultTargetPlatform == .android) {
         expect(lastFrameworkHandlesBack, isTrue);
       }
 
@@ -74,7 +74,7 @@ void main() {
         find.text('Bottom nav - tab Tab One - route _TabPage.home'),
         findsOneWidget,
       );
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      if (!kIsWeb && defaultTargetPlatform == .android) {
         expect(lastFrameworkHandlesBack, isFalse);
       }
 
@@ -85,7 +85,7 @@ void main() {
         find.text('Bottom nav - tab Home Tab - route _TabPage.one'),
         findsOneWidget,
       );
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      if (!kIsWeb && defaultTargetPlatform == .android) {
         expect(lastFrameworkHandlesBack, isTrue);
       }
 
@@ -97,7 +97,7 @@ void main() {
         findsOneWidget,
       );
 
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      if (!kIsWeb && defaultTargetPlatform == .android) {
         expect(lastFrameworkHandlesBack, isFalse);
       }
     },
@@ -112,7 +112,7 @@ void main() {
       find.text('Bottom nav - tab Home Tab - route _TabPage.home'),
       findsOneWidget,
     );
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -123,7 +123,7 @@ void main() {
       find.text('Bottom nav - tab Home Tab - route _TabPage.one'),
       findsOneWidget,
     );
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -134,7 +134,7 @@ void main() {
       find.text('Bottom nav - tab Tab One - route _TabPage.home'),
       findsOneWidget,
     );
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -144,7 +144,7 @@ void main() {
       find.text('Bottom nav - tab Tab One - route _TabPage.home'),
       findsOneWidget,
     );
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -155,7 +155,7 @@ void main() {
       find.text('Bottom nav - tab Home Tab - route _TabPage.one'),
       findsOneWidget,
     );
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -166,7 +166,7 @@ void main() {
       find.text('Bottom nav - tab Home Tab - route _TabPage.home'),
       findsOneWidget,
     );
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
   });

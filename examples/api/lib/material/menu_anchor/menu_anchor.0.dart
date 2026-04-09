@@ -55,7 +55,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   MenuEntry? _lastSelection;
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   ShortcutRegistryEntry? _shortcutsEntry;
-  AnimationStatus _animationStatus = AnimationStatus.dismissed;
+  AnimationStatus _animationStatus = .dismissed;
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
@@ -107,7 +107,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: <Widget>[
         MenuAnchor(
           animated: true,
@@ -174,13 +174,13 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
         ),
         Expanded(
           child: Container(
-            alignment: Alignment.center,
+            alignment: .center,
             color: backgroundColor,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const .all(12.0),
                   child: Text(
                     showingMessage ? widget.message : '',
                     style: Theme.of(context).textTheme.headlineSmall,

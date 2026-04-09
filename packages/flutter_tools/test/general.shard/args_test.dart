@@ -24,7 +24,7 @@ void main() {
     Cache.enableLocking();
   });
 
-  test(
+  testUsingContext(
     'Help for command line arguments is consistently styled and complete',
     () => TestBed().run(() {
       final runner = FlutterCommandRunner(verboseHelp: true);

@@ -1712,7 +1712,7 @@ void main() {
         await expectLater(notifier.update(), completes);
         expect(notifier.value, ClipboardStatus.notPasteable);
 
-        mockClipboard.handleMethodCall(
+        await mockClipboard.handleMethodCall(
           const MethodCall('Clipboard.setData', <String, dynamic>{'text': 'pasteablestring'}),
         );
         await expectLater(notifier.update(), completes);

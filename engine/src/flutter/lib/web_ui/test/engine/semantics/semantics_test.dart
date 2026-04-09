@@ -345,7 +345,7 @@ void _testRoleLifecycle() {
 }
 
 void _testEngineAccessibilityBuilder() {
-  final builder = EngineAccessibilityFeaturesBuilder(0);
+  final builder = EngineAccessibilityFeaturesBuilder();
   EngineAccessibilityFeatures features = builder.build();
 
   test('accessible navigation', () {
@@ -513,10 +513,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    // Announce, autoPlayAnimatedImages and autoPlayVideos are inverted
-    // checks, see EngineAccessibilityFeatures. Therefore, we need to ensure
-    // that the original copy starts with false values for them.
-    const original = EngineAccessibilityFeatures(0 | 1 << 7 | 1 << 8 | 1 << 9);
+    final EngineAccessibilityFeatures original = EngineAccessibilityFeaturesBuilder(0).build();
 
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
@@ -6372,6 +6369,33 @@ void _testProgressBar() {
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
     expect(object.element.getAttribute('role'), 'progressbar');
+  });
+
+  test('progress bar extrapolates percentages via min/max', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        value: '50%',
+        minValue: '0',
+        maxValue: '5',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('aria-valuenow'), '2.5');
+    expect(object.element.getAttribute('aria-valuetext'), '50%');
+    expect(object.element.getAttribute('aria-valuemin'), '0');
+    expect(object.element.getAttribute('aria-valuemax'), '5');
   });
 
   semantics().semanticsEnabled = false;

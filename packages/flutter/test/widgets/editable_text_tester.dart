@@ -38,6 +38,7 @@ class TestTextField extends StatefulWidget {
     this.showCursor,
     this.style,
     this.controller,
+    this.onSubmitted,
   });
 
   final Iterable<String>? autofillHints;
@@ -54,6 +55,7 @@ class TestTextField extends StatefulWidget {
   final bool? showCursor;
   final TextStyle? style;
   final TextEditingController? controller;
+  final ValueChanged<String>? onSubmitted;
 
   @override
   State<TestTextField> createState() => _TestTextFieldState();
@@ -111,6 +113,7 @@ class _TestTextFieldState extends State<TestTextField>
         groupId: widget.groupId,
         maxLines: widget.maxLines,
         onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
         readOnly: widget.readOnly,
         rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
         selectionControls: widget.selectionControls ?? testTextSelectionHandleControls,

@@ -649,6 +649,7 @@ void main() {
 
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
+        appName: 'Test App',
         disableServiceAuthCodes: true,
         ddsPort: 150,
         ipv6: false,
@@ -709,6 +710,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
           ipv6: false,
@@ -769,6 +771,7 @@ void main() {
         expect(localDds.startCalled, false);
         await dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
           ipv6: false,
@@ -811,6 +814,7 @@ void main() {
 
         final Future<void> startFuture = dds.startDartDevelopmentService(
           Uri.parse('http://127.0.0.1:100/fake'),
+          appName: 'Test App',
           disableServiceAuthCodes: true,
           ddsPort: 150,
           ipv6: false,
@@ -1231,6 +1235,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
