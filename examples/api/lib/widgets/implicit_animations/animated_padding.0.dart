@@ -41,10 +41,10 @@ class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.sizeOf(context);
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         AnimatedPadding(
-          padding: EdgeInsets.all(padValue),
+          padding: .all(padValue),
           duration: const Duration(seconds: 2),
           curve: Curves.easeInOut,
           child: Container(
