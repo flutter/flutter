@@ -110,7 +110,6 @@ class MockWindow : public FlutterWindow {
               (HWND, UINT, WPARAM, LPARAM),
               (override));
 
- protected:
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindow);
 };
