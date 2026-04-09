@@ -23,7 +23,6 @@ void main() {
     return;
   }
   setUpAll(() async {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
     processManager.runSync(<String>[flutterBin, 'config', '--enable-dart-data-assets']);
     processManager.runSync(<String>[flutterBin, 'config', '--enable-record-use']);
   });
