@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
@@ -43,11 +44,6 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// engine/src/flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java.
   static const String androidEngineShellArgumentsFromCommandLineManifestKey =
       'androidEngineShellArgs';
-
-  /// The delimiter used between command line flags that are injected into the application
-  /// manifest to be loaded in the Flutter Android embedding with metadata key
-  /// [androidEngineShellArgumentsFromCommandLineManifestKey].
-  static const String androidEngineShellArgumentsFromCommandLineManifestValueDelimiter = ';';
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -99,11 +95,13 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     Set<String>? androidEngineShellArgs;
     final String? androidEngineShellArgsFromManifest = data.androidEngineShellArgs;
-    if (androidEngineShellArgsFromManifest != null) {
-      androidEngineShellArgs = androidEngineShellArgsFromManifest
-          .split(androidEngineShellArgumentsFromCommandLineManifestValueDelimiter)
-          .map((String arg) => arg.trim())
-          .toSet();
+    if (androidEngineShellArgsFromManifest != null && androidEngineShellArgsFromManifest.isNotEmpty) {
+      try {
+        final List<dynamic> decoded = jsonDecode(androidEngineShellArgsFromManifest) as List<dynamic>;
+        androidEngineShellArgs = decoded.cast<String>().toSet();
+      } on FormatException catch (e) {
+        logger.printError('Error parsing shell arguments from manifest: $e');
+      }
     }
 
     return AndroidApk(

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1314,8 +1315,8 @@ void main() {
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
         );
-        final androidShellArguments = <String>{'--flag-1', '--flag=2', '--flag=3,4,5', '--flag6'};
-        final String androidShellArgumentsStr = androidShellArguments.join(';');
+        final Set<String> androidShellArguments = <String>{'--flag-1', '--flag=2', '--flag=3,4,5', '--flag6'};
+        final String androidShellArgumentsStr = jsonEncode(androidShellArguments.toList());
         processManager.addCommand(
           FakeCommand(
             command: <String>[

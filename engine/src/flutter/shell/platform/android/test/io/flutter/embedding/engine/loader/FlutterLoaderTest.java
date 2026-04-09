@@ -1628,7 +1628,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsSingleCommandLineFlagFromManifestMetadata() {
     testFlagFromMetadataPresent(
-        "androidEngineShellArgs", "--enable-impeller=true", "--enable-impeller=true");
+        "androidEngineShellArgs", "[\"--enable-impeller=true\"]", "--enable-impeller=true");
   }
 
   @Test
@@ -1636,12 +1636,19 @@ public class FlutterLoaderTest {
     testMultipleFlagsFromMetadata(
         Map.of(
             "androidEngineShellArgs",
-            "--enable-impeller=true;--trace-to-file=\"path/to/a file\";--enable-vulkan-validation"),
-        new String[] {
-          "--enable-impeller=true",
-          "--trace-to-file=\"path/to/a file\"",
-          "--enable-vulkan-validation"
-        },
+            "[\"--enable-impeller=true\",\"--enable-vulkan-validation\"]"),
+        new String[] {"--enable-impeller=true", "--enable-vulkan-validation"},
+        true,
+        false);
+  }
+
+  @Test
+  public void itSetsMultipleCommandLineFlagsWithSpecialCharactersFromManifestMetadata() {
+    testMultipleFlagsFromMetadata(
+        Map.of(
+            "androidEngineShellArgs",
+            "[\"--trace-to-file=\\\"path/to/a file\\\"\",\"--enable-impeller=true\"]"),
+        new String[] {"--trace-to-file=\"path/to/a file\"", "--enable-impeller=true"},
         true,
         false);
   }

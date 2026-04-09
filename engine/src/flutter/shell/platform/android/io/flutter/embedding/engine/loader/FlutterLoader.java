@@ -34,6 +34,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -57,11 +59,6 @@ public class FlutterLoader {
   // packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt.
   // The command line flags set there are later loaded by ensureInitializationComplete.
   private static final String ANDROID_ENGINE_SHELL_ARGS_KEY = "androidEngineShellArgs";
-
-  // The delimiter used between command line flags that are injected into the application
-  // manifest to be loaded in the Flutter Android embedding with metadata key
-  // ANDROID_ENGINE_SHELL_ARGS_KEY.
-  private static final String ANDROID_ENGINE_SHELL_ARGS_DELIMITER = ";";
 
   private static FlutterLoader instance;
 
@@ -397,31 +394,37 @@ public class FlutterLoader {
         // over any flag configurations specified by appplication manifest metadata.
         String androidEngineShellArgsValue =
             applicationMetaData.getString(ANDROID_ENGINE_SHELL_ARGS_KEY);
-        if (androidEngineShellArgsValue != null) {
-          String[] androidEngineShellArgs =
-              androidEngineShellArgsValue.split(ANDROID_ENGINE_SHELL_ARGS_DELIMITER);
+        if (androidEngineShellArgsValue != null && !androidEngineShellArgsValue.isEmpty()) {
+          try {
+            JSONArray shellArgsJson = new JSONArray(androidEngineShellArgsValue);
+            for (int i = 0; i < shellArgsJson.length(); i++) {
+              String arg = shellArgsJson.getString(i);
 
-          for (String arg : androidEngineShellArgs) {
-            FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
-            if (flag == null) {
-              // TODO(camsim99): Reject unknown flags specified on the command line:
-              // https://github.com/flutter/flutter/issues/182557.
+              FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
+              if (flag == null) {
+                // TODO(camsim99): Reject unknown flags specified on the command line:
+                // https://github.com/flutter/flutter/issues/182557.
+                shellArgs.add(arg);
+                continue;
+              } else if (!shouldLoadFlag(flag, isRelease, false)) {
+                // Flag is disallowed.
+                continue;
+              } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
+                  || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
+                // Perform security check for path containing application's compiled Dart
+                // code and potentially user-provided compiled native code.
+                String aotSharedLibraryPath =
+                    arg.substring(
+                        FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
+                maybeAddAotSharedLibraryNameArg(
+                    applicationContext, aotSharedLibraryPath, shellArgs);
+                continue;
+              }
+
               shellArgs.add(arg);
-              continue;
-            } else if (!shouldLoadFlag(flag, isRelease, false)) {
-              // Flag is disallowed.
-              continue;
-            } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
-                || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
-              // Perform security check for path containing application's compiled Dart
-              // code and potentially user-provided compiled native code.
-              String aotSharedLibraryPath =
-                  arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
-              maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
-              continue;
             }
-
-            shellArgs.add(arg);
+          } catch (JSONException e) {
+            Log.e(TAG, "Exception parsing shell arguments from manifest: " + e);
           }
         }
       }

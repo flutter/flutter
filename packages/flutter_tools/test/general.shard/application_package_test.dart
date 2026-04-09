@@ -826,7 +826,7 @@ void main() {
         sdk.platformToolsAvailable = true;
         sdk.licensesAvailable = false;
 
-        const androidEngineShellArgs = '--enable-impeller=true;--trace-startup;--verbose-logging';
+        const androidEngineShellArgs = '["--enable-impeller=true","--trace-startup","--verbose-logging"]';
         fakeProcessManager.addCommand(
           FakeCommand(
             command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
@@ -854,12 +854,16 @@ void main() {
 
         expect(apk, isNotNull);
         expect(apk!.engineShellArgs, isNotNull);
-        expect(apk.engineShellArgs, equals(androidEngineShellArgs.split(';').toSet()));
+        expect(apk.engineShellArgs, equals(<String>{
+          '--enable-impeller=true',
+          '--trace-startup',
+          '--verbose-logging',
+        }));
       },
     );
 
     testUsingContext(
-      'fromApk returns APK without engineShellArgs if they are found empty in the manifest',
+      'fromApk returns APK with empty engineShellArgs if they are found empty in the manifest',
       () async {
         const aaptPath = 'aaptPath';
         const apkName = 'app.apk';
@@ -875,7 +879,49 @@ void main() {
             command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
             stdout:
                 _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
-                  '',
+                  '[]',
+                ),
+          ),
+        );
+
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(
+          TargetPlatform.android_arm,
+          applicationBinary: apkFile,
+        );
+
+        final AndroidApk? apk = AndroidApk.fromApk(
+          apkFile,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          logger: testLogger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: testLogger),
+          buildMode: BuildMode.debug,
+        );
+
+        expect(apk, isNotNull);
+        expect(apk!.engineShellArgs, isEmpty);
+      },
+    );
+
+    testUsingContext(
+      'fromApk returns APK without engineShellArgs if manifest contains malformed JSON',
+      () async {
+        const aaptPath = 'aaptPath';
+        const apkName = 'app.apk';
+        final File apkFile = globals.fs.file(apkName);
+
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+            stdout:
+                _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
+                  'not-json',
                 ),
           ),
         );
@@ -897,6 +943,7 @@ void main() {
 
         expect(apk, isNotNull);
         expect(apk!.engineShellArgs, isNull);
+        expect(testLogger.errorText, contains('Error parsing shell arguments from manifest'));
       },
     );
   });
