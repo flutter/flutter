@@ -695,17 +695,21 @@ class WebTemplatedFiles extends Target {
     if (canvasKitDirectory.existsSync()) {
       for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
         if (file.path.endsWith('.wasm')) {
-          final String fileName = globals.fs.path.basename(file.path);
-          wasmHashes[fileName] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+          final String relativePath = globals.fs.path
+              .relative(file.path, from: canvasKitDirectory.path)
+              .replaceAll(r'\', '/');
+          wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
         }
       }
     }
 
     final Directory outputDirectory = environment.outputDir;
     for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
-      final String fileName = globals.fs.path.basename(file.path);
-      if (fileName.endsWith('.wasm')) {
-        wasmHashes[fileName] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+      if (file.path.endsWith('.wasm')) {
+        final String relativePath = globals.fs.path
+            .relative(file.path, from: outputDirectory.path)
+            .replaceAll(r'\', '/');
+        wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
       }
     }
 
