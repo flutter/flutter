@@ -205,6 +205,96 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  testWidgets(
+    'Tapping the Live Text button reports error when channel fails',
+    (WidgetTester tester) async {
+      final TargetPlatform? originalPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+      final errors = <FlutterErrorDetails>[];
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+
+      final liveTextInputTester = LiveTextInputTester();
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+
+      try {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 400,
+                child: EditableText(
+                  maxLines: 10,
+                  controller: controller,
+                  focusNode: focusNode,
+                  style: const TextStyle(),
+                  cursorColor: const Color(0xff0000ff),
+                  backgroundCursorColor: const Color(0xff00ffff),
+                  toolbarOptions: ToolbarOptions.empty,
+                  contextMenuBuilder: (BuildContext context, EditableTextState state) {
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        focusNode.requestFocus();
+        await tester.pump();
+
+        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+        // Mock TextInput.startLiveTextInput failure
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'TextInput.startLiveTextInput') {
+              throw Exception('Channel failed');
+            }
+            return null;
+          },
+        );
+
+        // Find the button item.
+        final List<ContextMenuButtonItem> items = state.contextMenuButtonItems;
+        final ContextMenuButtonItem liveTextItem = items.firstWhere(
+          (ContextMenuButtonItem item) => item.type == ContextMenuButtonType.liveTextInput,
+          orElse: () => throw Exception(
+            'Live Text button not found in items: ${items.map((i) => i.type).toList()}',
+          ),
+        );
+
+        liveTextItem.onPressed!();
+        await tester.pump();
+
+        expect(errors, hasLength(1));
+        expect(errors.single.exception, isA<Exception>());
+        expect(errors.single.exception.toString(), contains('Channel failed'));
+        expect(errors.single.context.toString(), contains('while starting Live Text input'));
+      } finally {
+        debugDefaultTargetPlatformOverride = originalPlatform;
+        FlutterError.onError = oldOnError;
+        liveTextInputTester.dispose();
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          null,
+        );
+        controller.dispose();
+        focusNode.dispose();
+      }
+    },
+    skip: kIsWeb, // [intended]
+  );
+
   group('Check the passed groupId value', () {
     testWidgets('The value of the passed-in groupId should match the groupId of the EditableText', (
       WidgetTester tester,

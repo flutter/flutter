@@ -5,14 +5,17 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'list_tile_tester.dart';
 import 'multi_view_testing.dart';
 import 'widgets_app_tester.dart';
+
+// Matches the Material kMinInteractiveDimension (48.0).
+const double _kMinInteractiveDimension = 48.0;
 
 class User {
   const User({required this.email, required this.name});
@@ -59,40 +62,38 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  lastOnSelected = onSelected;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                lastOnSelected = onSelected;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -158,58 +159,56 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            // The field is in the AppBar, not actually a child of RawAutocomplete.
-            title: TextFormField(
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            // The field that is not actually a child of RawAutocomplete.
+            TestTextField(
               key: fieldKey,
               controller: textEditingController,
               focusNode: focusNode,
-              decoration: const InputDecoration(hintText: 'Split RawAutocomplete App'),
-              onFieldSubmitted: (String value) {
+              onSubmitted: (String value) {
                 RawAutocomplete.onFieldSubmitted<String>(autocompleteKey);
               },
             ),
-          ),
-          body: Align(
-            alignment: Alignment.topLeft,
-            child: RawAutocomplete<String>(
-              key: autocompleteKey,
-              focusNode: focusNode,
-              textEditingController: textEditingController,
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                return kOptions.where((String option) {
-                  return option.contains(textEditingValue.text.toLowerCase());
-                }).toList();
-              },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    lastOptions = options;
-                    lastOnSelected = onSelected;
-                    return Material(
-                      key: optionsKey,
-                      elevation: 4.0,
-                      child: ListView(
-                        children: options
-                            .map(
-                              (String option) => GestureDetector(
-                                onTap: () {
-                                  onSelected(option);
-                                },
-                                child: TestListTile(title: Text(option)),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    );
+            Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: RawAutocomplete<String>(
+                  key: autocompleteKey,
+                  focusNode: focusNode,
+                  textEditingController: textEditingController,
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    return kOptions.where((String option) {
+                      return option.contains(textEditingValue.text.toLowerCase());
+                    }).toList();
                   },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        lastOptions = options;
+                        lastOnSelected = onSelected;
+                        return ListView(
+                          key: optionsKey,
+                          children: options
+                              .map(
+                                (String option) => GestureDetector(
+                                  onTap: () {
+                                    onSelected(option);
+                                  },
+                                  child: TestListTile(title: Text(option)),
+                                ),
+                              )
+                              .toList(),
+                        );
+                      },
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -272,61 +271,56 @@ void main() {
       late TextEditingController textEditingController;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                const SizedBox(height: 200),
-                RawAutocomplete<String>(
-                  optionsViewOpenDirection: openDirection,
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController fieldTextEditingController,
-                        FocusNode fieldFocusNode,
-                        VoidCallback onFieldSubmitted,
-                      ) {
-                        focusNode = fieldFocusNode;
-                        textEditingController = fieldTextEditingController;
-                        return TestTextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        lastOptions = options;
-                        return Material(
-                          elevation: 4.0,
-                          child: ListView.builder(
-                            key: optionsKey,
-                            padding: const EdgeInsets.all(8.0),
-                            itemCount: options.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final String option = options.elementAt(index);
-                              return GestureDetector(
-                                onTap: () {
-                                  onSelected(option);
-                                },
-                                child: TestListTile(title: Text(option)),
-                              );
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              const SizedBox(height: 200),
+              RawAutocomplete<String>(
+                optionsViewOpenDirection: openDirection,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      focusNode = fieldFocusNode;
+                      textEditingController = fieldTextEditingController;
+                      return TestTextField(
+                        key: fieldKey,
+                        focusNode: focusNode,
+                        controller: textEditingController,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      lastOptions = options;
+                      return ListView.builder(
+                        key: optionsKey,
+                        padding: const EdgeInsets.all(8.0),
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return GestureDetector(
+                            onTap: () {
+                              onSelected(option);
                             },
-                          ),
-                        );
-                      },
-                ),
-              ],
-            ),
+                            child: TestListTile(title: Text(option)),
+                          );
+                        },
+                      );
+                    },
+              ),
+            ],
           ),
         ),
       );
@@ -359,65 +353,63 @@ void main() {
       Alignment alignment = Alignment.bottomCenter;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
-                setState = setter;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: padding),
-                  child: Align(
-                    alignment: alignment,
-                    child: RawAutocomplete<String>(
-                      optionsViewOpenDirection: openDirection,
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        return kOptions.where((String option) {
-                          return option.contains(textEditingValue.text.toLowerCase());
-                        });
-                      },
-                      optionsViewBuilder:
-                          (
-                            BuildContext context,
-                            AutocompleteOnSelected<String> onSelected,
-                            Iterable<String> options,
-                          ) {
-                            return ListView.builder(
-                              key: optionsKey,
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final String option = options.elementAt(index);
-                                return InkWell(
-                                  onTap: () {
-                                    onSelected(option);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text(option),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                      fieldViewBuilder:
-                          (
-                            BuildContext context,
-                            TextEditingController textEditingController,
-                            FocusNode focusNode,
-                            VoidCallback onSubmitted,
-                          ) {
-                            return TestTextField(
-                              key: fieldKey,
-                              focusNode: focusNode,
-                              controller: textEditingController,
-                            );
-                          },
-                    ),
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: padding),
+                child: Align(
+                  alignment: alignment,
+                  child: RawAutocomplete<String>(
+                    optionsViewOpenDirection: openDirection,
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      return kOptions.where((String option) {
+                        return option.contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    optionsViewBuilder:
+                        (
+                          BuildContext context,
+                          AutocompleteOnSelected<String> onSelected,
+                          Iterable<String> options,
+                        ) {
+                          return ListView.builder(
+                            key: optionsKey,
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final String option = options.elementAt(index);
+                              return _OptionTile(
+                                onTap: () {
+                                  onSelected(option);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Text(option),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                    fieldViewBuilder:
+                        (
+                          BuildContext context,
+                          TextEditingController textEditingController,
+                          FocusNode focusNode,
+                          VoidCallback onSubmitted,
+                        ) {
+                          return TestTextField(
+                            key: fieldKey,
+                            focusNode: focusNode,
+                            controller: textEditingController,
+                          );
+                        },
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       );
@@ -437,18 +429,18 @@ void main() {
       switch (openDirection) {
         case OptionsViewOpenDirection.up:
           // Options are positioned and sized like normal.
-          expect(find.byType(InkWell), findsNWidgets(3));
-          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          expect(find.byType(_OptionTile), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
           final double topOfField = tester.getTopLeft(find.byKey(fieldKey)).dy;
           expect(
-            tester.getTopLeft(find.byType(InkWell).first),
+            tester.getTopLeft(find.byType(_OptionTile).first),
             Offset(padding, topOfField - 3 * optionHeight),
           );
-          expect(tester.getBottomLeft(find.byType(InkWell).at(2)), Offset(padding, topOfField));
+          expect(tester.getBottomLeft(find.byType(_OptionTile).at(2)), Offset(padding, topOfField));
         case OptionsViewOpenDirection.down:
-          expect(find.byType(InkWell), findsNWidgets(1));
+          expect(find.byType(_OptionTile), findsNWidgets(1));
           final Size optionsSize = tester.getSize(find.byKey(optionsKey));
-          expect(optionsSize.height, kMinInteractiveDimension);
+          expect(optionsSize.height, _kMinInteractiveDimension);
           // Options are positioned as low as possible while still fitting on screen.
           final double bottomOfField = tester.getBottomLeft(find.byKey(optionsKey)).dy;
           expect(
@@ -457,14 +449,14 @@ void main() {
           );
         case OptionsViewOpenDirection.mostSpace:
           // Behaves like OptionsViewOpenDirection.up.
-          expect(find.byType(InkWell), findsNWidgets(3));
-          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          expect(find.byType(_OptionTile), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
           final double topOfField = tester.getTopLeft(find.byKey(fieldKey)).dy;
           expect(
-            tester.getTopLeft(find.byType(InkWell).first),
+            tester.getTopLeft(find.byType(_OptionTile).first),
             Offset(padding, topOfField - 3 * optionHeight),
           );
-          expect(tester.getBottomLeft(find.byType(InkWell).at(2)), Offset(padding, topOfField));
+          expect(tester.getBottomLeft(find.byType(_OptionTile).at(2)), Offset(padding, topOfField));
       }
 
       setState(() {
@@ -480,29 +472,29 @@ void main() {
         case OptionsViewOpenDirection.up:
           // Options are positioned as high as possible while still fitting on
           // the screen.
-          expect(find.byType(InkWell), findsNWidgets(1));
+          expect(find.byType(_OptionTile), findsNWidgets(1));
           final Size optionsSize = tester.getSize(find.byKey(optionsKey));
-          expect(optionsSize.height, kMinInteractiveDimension);
+          expect(optionsSize.height, _kMinInteractiveDimension);
           expect(tester.getTopLeft(find.byKey(optionsKey)), const Offset(padding, 0.0));
           expect(tester.getBottomLeft(find.byKey(optionsKey)), Offset(padding, optionsSize.height));
         case OptionsViewOpenDirection.down:
           // Options are positioned and sized like normal.
-          expect(find.byType(InkWell), findsNWidgets(3));
-          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          expect(find.byType(_OptionTile), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
           final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
-          expect(tester.getTopLeft(find.byType(InkWell).first), Offset(padding, bottomOfField));
+          expect(tester.getTopLeft(find.byType(_OptionTile).first), Offset(padding, bottomOfField));
           expect(
-            tester.getBottomLeft(find.byType(InkWell).at(2)),
+            tester.getBottomLeft(find.byType(_OptionTile).at(2)),
             Offset(padding, bottomOfField + 3 * optionHeight),
           );
         case OptionsViewOpenDirection.mostSpace:
           // Behaves like OptionsViewOpenDirection.down.
-          expect(find.byType(InkWell), findsNWidgets(3));
-          final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+          expect(find.byType(_OptionTile), findsNWidgets(3));
+          final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
           final double bottomOfField = tester.getBottomLeft(find.byKey(fieldKey)).dy;
-          expect(tester.getTopLeft(find.byType(InkWell).first), Offset(padding, bottomOfField));
+          expect(tester.getTopLeft(find.byType(_OptionTile).first), Offset(padding, bottomOfField));
           expect(
-            tester.getBottomLeft(find.byType(InkWell).at(2)),
+            tester.getBottomLeft(find.byType(_OptionTile).at(2)),
             Offset(padding, bottomOfField + 3 * optionHeight),
           );
       }
@@ -515,41 +507,39 @@ void main() {
       final GlobalKey optionsKey = GlobalKey();
       const kOptionsWidth = 100.0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: RawAutocomplete<String>(
-                  optionsViewOpenDirection: openDirection,
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController textEditingController,
-                        FocusNode focusNode,
-                        VoidCallback onSubmitted,
-                      ) {
-                        return TestTextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return SizedBox(width: kOptionsWidth, key: optionsKey);
-                      },
-                ),
+        TestWidgetsApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: RawAutocomplete<String>(
+                optionsViewOpenDirection: openDirection,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onSubmitted,
+                    ) {
+                      return TestTextField(
+                        key: fieldKey,
+                        focusNode: focusNode,
+                        controller: textEditingController,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return SizedBox(width: kOptionsWidth, key: optionsKey);
+                    },
               ),
             ),
           ),
@@ -580,40 +570,38 @@ void main() {
       final GlobalKey optionsKey = GlobalKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Center(
-                child: RawAutocomplete<String>(
-                  optionsViewOpenDirection: openDirection,
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController textEditingController,
-                        FocusNode focusNode,
-                        VoidCallback onSubmitted,
-                      ) {
-                        return TestTextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return Container(key: optionsKey);
-                      },
-                ),
+        TestWidgetsApp(
+          home: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Center(
+              child: RawAutocomplete<String>(
+                optionsViewOpenDirection: openDirection,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onSubmitted,
+                    ) {
+                      return TestTextField(
+                        key: fieldKey,
+                        focusNode: focusNode,
+                        controller: textEditingController,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return Container(key: optionsKey);
+                    },
               ),
             ),
           ),
@@ -653,43 +641,41 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<User>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptionsUsers.where((User option) {
-                return option.toString().contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            onSelected: (User selected) {
-              lastUserSelected = selected;
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: fieldTextEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<User> onSelected,
-                  Iterable<User> options,
-                ) {
-                  lastOptions = options;
-                  lastOnSelected = onSelected;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<User>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptionsUsers.where((User option) {
+              return option.toString().contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          onSelected: (User selected) {
+            lastUserSelected = selected;
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<User> onSelected,
+                Iterable<User> options,
+              ) {
+                lastOptions = options;
+                lastOnSelected = onSelected;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -745,44 +731,42 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<User>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptionsUsers.where((User option) {
-                return option.toString().contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            displayStringForOption: displayStringForOption,
-            onSelected: (User selected) {
-              lastUserSelected = selected;
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  textEditingController = fieldTextEditingController;
-                  focusNode = fieldFocusNode;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: fieldTextEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<User> onSelected,
-                  Iterable<User> options,
-                ) {
-                  lastOptions = options;
-                  lastOnSelected = onSelected;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<User>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptionsUsers.where((User option) {
+              return option.toString().contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          displayStringForOption: displayStringForOption,
+          onSelected: (User selected) {
+            lastUserSelected = selected;
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                textEditingController = fieldTextEditingController;
+                focusNode = fieldFocusNode;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<User> onSelected,
+                Iterable<User> options,
+              ) {
+                lastOptions = options;
+                lastOnSelected = onSelected;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -835,40 +819,38 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  textEditingController = fieldTextEditingController;
-                  focusNode = fieldFocusNode;
-                  lastOnFieldSubmitted = onFieldSubmitted;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: fieldTextEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                textEditingController = fieldTextEditingController;
+                focusNode = fieldFocusNode;
+                lastOnFieldSubmitted = onFieldSubmitted;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -901,29 +883,27 @@ void main() {
   group('optionsViewOpenDirection', () {
     testWidgets('unset (default behavior): open downward', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawAutocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController controller,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TestTextField(controller: controller, focusNode: focusNode);
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return const Text('a');
-                    },
-              ),
+        TestWidgetsApp(
+          home: Center(
+            child: RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController controller,
+                    FocusNode focusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TestTextField(controller: controller, focusNode: focusNode);
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    return const Text('a');
+                  },
             ),
           ),
         ),
@@ -938,31 +918,29 @@ void main() {
 
     testWidgets('down: open downward', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawAutocomplete<String>(
-                // ignore: avoid_redundant_argument_values
-                optionsViewOpenDirection: OptionsViewOpenDirection.down,
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController controller,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TestTextField(controller: controller, focusNode: focusNode);
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return const Text('a');
-                    },
-              ),
+        TestWidgetsApp(
+          home: Center(
+            child: RawAutocomplete<String>(
+              // ignore: avoid_redundant_argument_values
+              optionsViewOpenDirection: OptionsViewOpenDirection.down,
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController controller,
+                    FocusNode focusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TestTextField(controller: controller, focusNode: focusNode);
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    return const Text('a');
+                  },
             ),
           ),
         ),
@@ -977,30 +955,28 @@ void main() {
 
     testWidgets('up: open upward', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawAutocomplete<String>(
-                optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController controller,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TestTextField(controller: controller, focusNode: focusNode);
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return const Text('a');
-                    },
-              ),
+        TestWidgetsApp(
+          home: Center(
+            child: RawAutocomplete<String>(
+              optionsViewOpenDirection: OptionsViewOpenDirection.up,
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController controller,
+                    FocusNode focusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TestTextField(controller: controller, focusNode: focusNode);
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    return const Text('a');
+                  },
             ),
           ),
         ),
@@ -1020,43 +996,39 @@ void main() {
       Alignment alignment = Alignment.topCenter;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
-                setState = setter;
-                return Align(
-                  alignment: alignment,
-                  child: RawAutocomplete<String>(
-                    key: fieldKey,
-                    optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
-                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
-                    fieldViewBuilder:
-                        (
-                          BuildContext context,
-                          TextEditingController controller,
-                          FocusNode focusNode,
-                          VoidCallback onFieldSubmitted,
-                        ) {
-                          return TestTextField(controller: controller, focusNode: focusNode);
-                        },
-                    optionsViewBuilder:
-                        (
-                          BuildContext context,
-                          AutocompleteOnSelected<String> onSelected,
-                          Iterable<String> options,
-                        ) {
-                          return Material(
-                            child: ListView(
-                              key: optionsKey,
-                              children: options.map((String option) => Text(option)).toList(),
-                            ),
-                          );
-                        },
-                  ),
-                );
-              },
-            ),
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return Align(
+                alignment: alignment,
+                child: RawAutocomplete<String>(
+                  key: fieldKey,
+                  optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+                  optionsBuilder: (TextEditingValue textEditingValue) => <String>['a', 'b', 'c'],
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController controller,
+                        FocusNode focusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        return TestTextField(controller: controller, focusNode: focusNode);
+                      },
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return ListView(
+                          key: optionsKey,
+                          children: options.map((String option) => Text(option)).toList(),
+                        );
+                      },
+                ),
+              );
+            },
           ),
         ),
       );
@@ -1091,30 +1063,28 @@ void main() {
         final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  TestTextField(controller: controller, focusNode: focusNode),
-                  RawAutocomplete<String>(
-                    key: autocompleteKey,
-                    textEditingController: controller,
-                    focusNode: focusNode,
-                    // ignore: avoid_redundant_argument_values
-                    optionsViewOpenDirection: OptionsViewOpenDirection.down,
-                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                    optionsViewBuilder:
-                        (
-                          BuildContext context,
-                          AutocompleteOnSelected<String> onSelected,
-                          Iterable<String> options,
-                        ) {
-                          return const Text('a');
-                        },
-                  ),
-                ],
-              ),
+          TestWidgetsApp(
+            home: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                TestTextField(controller: controller, focusNode: focusNode),
+                RawAutocomplete<String>(
+                  key: autocompleteKey,
+                  textEditingController: controller,
+                  focusNode: focusNode,
+                  // ignore: avoid_redundant_argument_values
+                  optionsViewOpenDirection: OptionsViewOpenDirection.down,
+                  optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return const Text('a');
+                      },
+                ),
+              ],
             ),
           ),
         );
@@ -1133,30 +1103,28 @@ void main() {
         final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  RawAutocomplete<String>(
-                    key: autocompleteKey,
-                    textEditingController: controller,
-                    focusNode: focusNode,
-                    optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                    optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
-                    optionsViewBuilder:
-                        (
-                          BuildContext context,
-                          AutocompleteOnSelected<String> onSelected,
-                          Iterable<String> options,
-                        ) {
-                          return const Text('a');
-                        },
-                  ),
-                  TestTextField(controller: controller, focusNode: focusNode),
-                ],
-              ),
+          TestWidgetsApp(
+            home: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                RawAutocomplete<String>(
+                  key: autocompleteKey,
+                  textEditingController: controller,
+                  focusNode: focusNode,
+                  optionsViewOpenDirection: OptionsViewOpenDirection.up,
+                  optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<String> onSelected,
+                        Iterable<String> options,
+                      ) {
+                        return const Text('a');
+                      },
+                ),
+                TestTextField(controller: controller, focusNode: focusNode),
+              ],
             ),
           ),
         );
@@ -1179,46 +1147,44 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
-              setState = setter;
-              return Align(
-                alignment: alignment,
-                child: RawAutocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController fieldTextEditingController,
-                        FocusNode fieldFocusNode,
-                        VoidCallback onFieldSubmitted,
-                      ) {
-                        focusNode = fieldFocusNode;
-                        textEditingController = fieldTextEditingController;
-                        return TextFormField(
-                          controller: fieldTextEditingController,
-                          focusNode: focusNode,
-                          key: fieldKey,
-                        );
-                      },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return Container(key: optionsKey);
-                      },
-                ),
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return Align(
+              alignment: alignment,
+              child: RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      focusNode = fieldFocusNode;
+                      textEditingController = fieldTextEditingController;
+                      return TestTextField(
+                        controller: fieldTextEditingController,
+                        focusNode: focusNode,
+                        key: fieldKey,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return Container(key: optionsKey);
+                    },
+              ),
+            );
+          },
         ),
       ),
     );
@@ -1262,41 +1228,39 @@ void main() {
     final GlobalKey optionsKey = GlobalKey();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Align(
-            alignment: Alignment.topCenter,
-            child: RawAutocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                return kOptions.where((String option) {
-                  return option.contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              fieldViewBuilder:
-                  (
-                    BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted,
-                  ) {
-                    return TextFormField(
-                      controller: fieldTextEditingController,
-                      focusNode: fieldFocusNode,
-                      key: fieldKey,
-                    );
-                  },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return ListView(
-                      key: optionsKey,
-                      children: options.map((String option) => Text(option)).toList(),
-                    );
-                  },
-            ),
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topCenter,
+          child: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TestTextField(
+                    controller: fieldTextEditingController,
+                    focusNode: fieldFocusNode,
+                    key: fieldKey,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return ListView(
+                    key: optionsKey,
+                    children: options.map((String option) => Text(option)).toList(),
+                  );
+                },
           ),
         ),
       ),
@@ -1325,42 +1289,40 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              if (textEditingValue.text == '') {
-                return const Iterable<String>.empty();
-              }
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: fieldTextEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text == '') {
+              return const Iterable<String>.empty();
+            }
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -1402,38 +1364,40 @@ void main() {
     addTearDown(textEditingController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
             // This is where the real field is being built.
-            title: TextFormField(
+            TestTextField(
               key: fieldKey,
               controller: textEditingController,
               focusNode: focusNode,
-              onFieldSubmitted: (String value) {
+              onSubmitted: (String value) {
                 RawAutocomplete.onFieldSubmitted(autocompleteKey);
               },
             ),
-          ),
-          body: RawAutocomplete<String>(
-            key: autocompleteKey,
-            focusNode: focusNode,
-            textEditingController: textEditingController,
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
+            Expanded(
+              child: RawAutocomplete<String>(
+                key: autocompleteKey,
+                focusNode: focusNode,
+                textEditingController: textEditingController,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
                 },
-          ),
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      lastOptions = options;
+                      return Container(key: optionsKey);
+                    },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1456,7 +1420,7 @@ void main() {
 
     // Submit the field. The options hide and the field updates to show the
     // selection.
-    await tester.showKeyboard(find.byType(TextFormField));
+    await tester.showKeyboard(find.byType(TestTextField));
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
@@ -1473,42 +1437,40 @@ void main() {
     late TextEditingController textEditingController;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            // Should initialize text field with 'lem'.
-            initialValue: const TextEditingValue(text: 'lem'),
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  lastOnSelected = onSelected;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          // Should initialize text field with 'lem'.
+          initialValue: const TextEditingValue(text: 'lem'),
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                lastOnSelected = onSelected;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -1585,43 +1547,41 @@ void main() {
     Duration? delay;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              final Iterable<String> options = kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-              if (delay == null) {
-                return options;
-              }
-              return Future<Iterable<String>>.delayed(delay, () => options);
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            final Iterable<String> options = kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+            if (delay == null) {
+              return options;
+            }
+            return Future<Iterable<String>>.delayed(delay, () => options);
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -1656,43 +1616,41 @@ void main() {
     late TextEditingController textEditingController;
     late int lastHighlighted;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TextFormField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                    onFieldSubmitted: (String value) {
-                      onFieldSubmitted();
-                    },
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastHighlighted = AutocompleteHighlightedOption.of(context);
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                  onSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastHighlighted = AutocompleteHighlightedOption.of(context);
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -1769,43 +1727,41 @@ void main() {
     late TextEditingController textEditingController;
     late int lastHighlighted;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TextFormField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                    onFieldSubmitted: (String value) {
-                      onFieldSubmitted();
-                    },
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastHighlighted = AutocompleteHighlightedOption.of(context);
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                  onSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastHighlighted = AutocompleteHighlightedOption.of(context);
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -1862,43 +1818,41 @@ void main() {
     late TextEditingController textEditingController;
     late int lastHighlighted;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TextFormField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                    onFieldSubmitted: (String value) {
-                      onFieldSubmitted();
-                    },
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastHighlighted = AutocompleteHighlightedOption.of(context);
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                  onSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastHighlighted = AutocompleteHighlightedOption.of(context);
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -1948,42 +1902,40 @@ void main() {
     late FocusNode focusNode;
     late TextEditingController textEditingController;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TextFormField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                    onFieldSubmitted: (String value) {
-                      onFieldSubmitted();
-                    },
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                  onSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -2048,46 +2000,44 @@ void main() {
     late FocusNode focusNode;
     var wrappingActionInvoked = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Actions(
-            actions: <Type, Action<Intent>>{
-              DismissIntent: CallbackAction<DismissIntent>(
-                onInvoke: (_) => wrappingActionInvoked = true,
-              ),
-            },
-            child: RawAutocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                return kOptions.where((String option) {
-                  return option.contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              fieldViewBuilder:
-                  (
-                    BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted,
-                  ) {
-                    focusNode = fieldFocusNode;
-                    return TextFormField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: fieldTextEditingController,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                    );
-                  },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    return Container(key: optionsKey);
-                  },
+      TestWidgetsApp(
+        home: Actions(
+          actions: <Type, Action<Intent>>{
+            DismissIntent: CallbackAction<DismissIntent>(
+              onInvoke: (_) => wrappingActionInvoked = true,
             ),
+          },
+          child: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  return TestTextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: fieldTextEditingController,
+                    onSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       ),
@@ -2122,43 +2072,41 @@ void main() {
       late FocusNode focusNode;
       late TextEditingController textEditingController;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RawAutocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                return kOptions.where((String option) {
-                  return option.contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              fieldViewBuilder:
-                  (
-                    BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted,
-                  ) {
-                    focusNode = fieldFocusNode;
-                    textEditingController = fieldTextEditingController;
-                    return TextFormField(
-                      key: fieldKey,
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                    );
-                  },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    lastOptions = options;
-                    lastHighlighted = AutocompleteHighlightedOption.of(context);
-                    return Container(key: optionsKey);
-                  },
-            ),
+        TestWidgetsApp(
+          home: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  textEditingController = fieldTextEditingController;
+                  return TestTextField(
+                    key: fieldKey,
+                    focusNode: focusNode,
+                    controller: textEditingController,
+                    onSubmitted: (String value) {
+                      onFieldSubmitted();
+                    },
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOptions = options;
+                  lastHighlighted = AutocompleteHighlightedOption.of(context);
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       );
@@ -2226,37 +2174,35 @@ void main() {
     late AutocompleteOnSelected<String> lastOnSelected;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: fieldFocusNode,
-                    controller: fieldTextEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOnSelected = onSelected;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: fieldFocusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOnSelected = onSelected;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -2283,9 +2229,10 @@ void main() {
     var width = 100.0;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Padding(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32.0),
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter localStateSetter) {
@@ -2397,9 +2344,13 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Padding(padding: const EdgeInsets.symmetric(horizontal: 32.0), child: autocomplete),
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: autocomplete,
+          ),
         ),
       ),
     );
@@ -2439,58 +2390,56 @@ void main() {
       Alignment alignment = Alignment.topLeft,
     }) {
       return tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Align(
-                alignment: alignment,
-                child: RawAutocomplete<String>(
-                  optionsViewOpenDirection: optionsViewOpenDirection,
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return ListView.builder(
-                          key: optionsKey,
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final String option = options.elementAt(index);
-                            return InkWell(
-                              onTap: () {
-                                onSelected(option);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(option),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController textEditingController,
-                        FocusNode focusNode,
-                        VoidCallback onSubmitted,
-                      ) {
-                        return TestTextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
-                ),
+        TestWidgetsApp(
+          home: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Align(
+              alignment: alignment,
+              child: RawAutocomplete<String>(
+                optionsViewOpenDirection: optionsViewOpenDirection,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return ListView.builder(
+                        key: optionsKey,
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return _OptionTile(
+                            onTap: () {
+                              onSelected(option);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(option),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onSubmitted,
+                    ) {
+                      return TestTextField(
+                        key: fieldKey,
+                        focusNode: focusNode,
+                        controller: textEditingController,
+                      );
+                    },
               ),
             ),
           ),
@@ -2519,7 +2468,7 @@ void main() {
 
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
-      expect(find.byType(InkWell), findsNWidgets(kOptions.length));
+      expect(find.byType(_OptionTile), findsNWidgets(kOptions.length));
 
       final Size fieldSize1 = tester.getSize(find.byKey(fieldKey));
       final Offset optionsTopLeft1 = tester.getTopLeft(find.byKey(optionsKey));
@@ -2531,7 +2480,7 @@ void main() {
         ),
       );
       final Offset optionsBottomRight1 = tester.getBottomRight(find.byKey(optionsKey));
-      final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+      final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
       expect(
         optionsBottomRight1,
         Offset(
@@ -2549,7 +2498,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(fieldKey), findsOneWidget);
-      expect(find.byType(InkWell), findsNWidgets(kOptions.length));
+      expect(find.byType(_OptionTile), findsNWidgets(kOptions.length));
       expect(tester.getTopLeft(find.byKey(optionsKey)), optionsTopLeft1);
       final Size fieldSize2 = tester.getSize(find.byKey(fieldKey));
       expect(fieldSize1.width, greaterThan(fieldSize2.width));
@@ -2590,7 +2539,7 @@ void main() {
 
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
-      expect(find.byType(InkWell), findsNWidgets(kOptions.length));
+      expect(find.byType(_OptionTile), findsNWidgets(kOptions.length));
 
       final Size fieldSize1 = tester.getSize(find.byKey(fieldKey));
       final Offset optionsTopLeft1 = tester.getTopLeft(find.byKey(optionsKey));
@@ -2602,7 +2551,7 @@ void main() {
         ),
       );
       final Offset optionsBottomRight1 = tester.getBottomRight(find.byKey(optionsKey));
-      final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+      final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
       expect(
         optionsBottomRight1,
         Offset(
@@ -2623,7 +2572,7 @@ void main() {
 
       final int visibleOptions = (wideWindowSize.height / optionHeight).floor();
       expect(visibleOptions, lessThan(kOptions.length));
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions));
       expect(tester.getTopLeft(find.byKey(optionsKey)), optionsTopLeft1);
       final Size fieldSize2 = tester.getSize(find.byKey(fieldKey));
       expect(fieldSize1.width, lessThan(fieldSize2.width));
@@ -2663,10 +2612,10 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
 
-      final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+      final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
       final double optionsHeight1 = tester.getSize(find.byKey(optionsKey)).height;
       final int visibleOptions1 = (optionsHeight1 / optionHeight).ceil();
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions1));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions1));
       final Size fieldSize1 = tester.getSize(find.byKey(fieldKey));
       final Offset optionsTopLeft1 = tester.getTopLeft(find.byKey(optionsKey));
       final Offset fieldTopLeft1 = tester.getTopLeft(find.byKey(fieldKey));
@@ -2691,7 +2640,7 @@ void main() {
       final double optionsHeight2 = tester.getSize(find.byKey(optionsKey)).height;
       final int visibleOptions2 = (optionsHeight2 / optionHeight).ceil();
       expect(visibleOptions2, lessThan(kOptions.length));
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions2));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions2));
       final Offset optionsTopLeft2 = tester.getTopLeft(find.byKey(optionsKey));
       expect(optionsTopLeft2, optionsTopLeft1);
       final Size fieldSize2 = tester.getSize(find.byKey(fieldKey));
@@ -2710,7 +2659,7 @@ void main() {
       );
 
       // Shrink the screen further so that the options become smaller than
-      // kMinInteractiveDimension and move to overlap the field.
+      // _kMinInteractiveDimension and move to overlap the field.
       const shortWindowSize = Size(1920.0, 48.0);
       tester.view.physicalSize = shortWindowSize;
       tester.view.devicePixelRatio = 1.0;
@@ -2718,11 +2667,11 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
 
       const visibleOptions3 = 1;
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions3));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions3));
       final Offset optionsTopLeft3 = tester.getTopLeft(find.byKey(optionsKey));
       expect(optionsTopLeft3.dx, optionsTopLeft1.dx);
       // The options have moved up, overlapping the field, to still be able to
-      // show kMinInteractiveDimension.
+      // show _kMinInteractiveDimension.
       expect(optionsTopLeft3.dy, lessThan(optionsTopLeft1.dy));
       final Size fieldSize3 = tester.getSize(find.byKey(fieldKey));
       final Offset fieldTopLeft3 = tester.getTopLeft(find.byKey(fieldKey));
@@ -2766,10 +2715,10 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
 
-      final double optionHeight = tester.getSize(find.byType(InkWell).first).height;
+      final double optionHeight = tester.getSize(find.byType(_OptionTile).first).height;
       final double optionsHeight1 = tester.getSize(find.byKey(optionsKey)).height;
       final int visibleOptions1 = (optionsHeight1 / optionHeight).ceil();
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions1));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions1));
       final Size fieldSize1 = tester.getSize(find.byKey(fieldKey));
       final Offset optionsTopLeft1 = tester.getTopLeft(find.byKey(optionsKey));
       final Offset fieldTopLeft1 = tester.getTopLeft(find.byKey(fieldKey));
@@ -2790,7 +2739,7 @@ void main() {
       expect(optionsHeight2, lessThan(optionsHeight1));
       final int visibleOptions2 = (optionsHeight2 / optionHeight).ceil();
       expect(visibleOptions2, lessThan(visibleOptions1));
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions2));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions2));
       final Offset optionsTopLeft2 = tester.getTopLeft(find.byKey(optionsKey));
       final Offset fieldTopLeft2 = tester.getTopLeft(find.byKey(fieldKey));
       expect(optionsTopLeft2, Offset(optionsTopLeft1.dx, fieldTopLeft2.dy - optionsHeight2));
@@ -2802,7 +2751,7 @@ void main() {
       expect(optionsBottomRight2, Offset(fieldTopLeft2.dx + fieldSize2.width, fieldTopLeft2.dy));
 
       // Shrink the screen further so that the options become smaller than
-      // kMinInteractiveDimension and move to overlap the field.
+      // _kMinInteractiveDimension and move to overlap the field.
       const shortWindowSize = Size(1920.0, 90.0);
       tester.view.physicalSize = shortWindowSize;
       tester.view.devicePixelRatio = 1.0;
@@ -2810,11 +2759,11 @@ void main() {
 
       expect(find.byKey(fieldKey), findsOneWidget);
       const visibleOptions3 = 1;
-      expect(find.byType(InkWell), findsNWidgets(visibleOptions3));
+      expect(find.byType(_OptionTile), findsNWidgets(visibleOptions3));
       final Offset optionsTopLeft3 = tester.getTopLeft(find.byKey(optionsKey));
       expect(optionsTopLeft3.dx, optionsTopLeft1.dx);
       // The options have moved down, overlapping the field, to still be able to
-      // show kMinInteractiveDimension.
+      // show _kMinInteractiveDimension.
       expect(optionsTopLeft3.dy, lessThan(optionsTopLeft1.dy));
       final Size fieldSize3 = tester.getSize(find.byKey(fieldKey));
       final Offset fieldTopLeft3 = tester.getTopLeft(find.byKey(fieldKey));
@@ -2837,60 +2786,58 @@ void main() {
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ListView(
-              controller: scrollController,
-              children: <Widget>[
-                const SizedBox(height: 1000.0),
-                RawAutocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return ListView.builder(
-                          key: optionsKey,
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final String option = options.elementAt(index);
-                            return InkWell(
-                              onTap: () {
-                                onSelected(option);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(option),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController textEditingController,
-                        FocusNode focusNode,
-                        VoidCallback onSubmitted,
-                      ) {
-                        return TestTextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
-                ),
-                const SizedBox(height: 1000.0),
-              ],
-            ),
+        TestWidgetsApp(
+          home: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              const SizedBox(height: 1000.0),
+              RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return ListView.builder(
+                        key: optionsKey,
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return _OptionTile(
+                            onTap: () {
+                              onSelected(option);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(option),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onSubmitted,
+                    ) {
+                      return TestTextField(
+                        key: fieldKey,
+                        focusNode: focusNode,
+                        controller: textEditingController,
+                      );
+                    },
+              ),
+              const SizedBox(height: 1000.0),
+            ],
           ),
         ),
       );
@@ -2945,60 +2892,58 @@ void main() {
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ListView(
-              controller: scrollController,
-              children: <Widget>[
-                const SizedBox(height: 1000.0),
-                RawAutocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    return kOptions.where((String option) {
-                      return option.contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  optionsViewBuilder:
-                      (
-                        BuildContext context,
-                        AutocompleteOnSelected<String> onSelected,
-                        Iterable<String> options,
-                      ) {
-                        return ListView.builder(
-                          key: optionsKey,
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final String option = options.elementAt(index);
-                            return InkWell(
-                              onTap: () {
-                                onSelected(option);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(option),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                  fieldViewBuilder:
-                      (
-                        BuildContext context,
-                        TextEditingController textEditingController,
-                        FocusNode focusNode,
-                        VoidCallback onSubmitted,
-                      ) {
-                        return TestTextField(
-                          key: fieldKey,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                        );
-                      },
-                ),
-                const SizedBox(height: 1000.0),
-              ],
-            ),
+        TestWidgetsApp(
+          home: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              const SizedBox(height: 1000.0),
+              RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return ListView.builder(
+                        key: optionsKey,
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return _OptionTile(
+                            onTap: () {
+                              onSelected(option);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(option),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onSubmitted,
+                    ) {
+                      return TestTextField(
+                        key: fieldKey,
+                        focusNode: focusNode,
+                        controller: textEditingController,
+                      );
+                    },
+              ),
+              const SizedBox(height: 1000.0),
+            ],
           ),
         ),
       );
@@ -3057,43 +3002,41 @@ void main() {
     Duration? delay;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              final Iterable<String> options = kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-              if (delay == null) {
-                return options;
-              }
-              return Future<Iterable<String>>.delayed(delay, () => options);
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            final Iterable<String> options = kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+            if (delay == null) {
+              return options;
+            }
+            return Future<Iterable<String>>.delayed(delay, () => options);
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -3137,43 +3080,41 @@ void main() {
     Duration? delay;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              final Iterable<String> options = kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-              if (delay == null) {
-                return options;
-              }
-              return Future<Iterable<String>>.delayed(delay, () => options);
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            final Iterable<String> options = kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+            if (delay == null) {
+              return options;
+            }
+            return Future<Iterable<String>>.delayed(delay, () => options);
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -3226,40 +3167,38 @@ void main() {
     const delay = Duration(milliseconds: 100);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              final Iterable<String> options = kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-              return Future<Iterable<String>>.delayed(delay, () => options);
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            final Iterable<String> options = kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+            return Future<Iterable<String>>.delayed(delay, () => options);
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -3303,46 +3242,44 @@ void main() {
     final Iterable<String> altEleOptions = <String>['something new and crazy for ele!'];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) async {
-              if (textEditingValue.text == 'ele') {
-                timesOptionsBuilderCalledWithEle += 1;
-                if (timesOptionsBuilderCalledWithEle > 1) {
-                  return Future<Iterable<String>>.delayed(delay, () => altEleOptions);
-                }
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            if (textEditingValue.text == 'ele') {
+              timesOptionsBuilderCalledWithEle += 1;
+              if (timesOptionsBuilderCalledWithEle > 1) {
+                return Future<Iterable<String>>.delayed(delay, () => altEleOptions);
               }
-              final Iterable<String> options = kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-              return Future<Iterable<String>>.delayed(delay, () => options);
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+            }
+            final Iterable<String> options = kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+            return Future<Iterable<String>>.delayed(delay, () => options);
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -3376,39 +3313,37 @@ void main() {
     const localizations = DefaultWidgetsLocalizations();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
-                return option.contains(textEditingValue.text.toLowerCase());
-              });
-            },
-            fieldViewBuilder:
-                (
-                  BuildContext context,
-                  TextEditingController fieldTextEditingController,
-                  FocusNode fieldFocusNode,
-                  VoidCallback onFieldSubmitted,
-                ) {
-                  focusNode = fieldFocusNode;
-                  textEditingController = fieldTextEditingController;
-                  return TestTextField(
-                    key: fieldKey,
-                    focusNode: focusNode,
-                    controller: textEditingController,
-                  );
-                },
-            optionsViewBuilder:
-                (
-                  BuildContext context,
-                  AutocompleteOnSelected<String> onSelected,
-                  Iterable<String> options,
-                ) {
-                  lastOptions = options;
-                  return Container(key: optionsKey);
-                },
-          ),
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            return kOptions.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                focusNode = fieldFocusNode;
+                textEditingController = fieldTextEditingController;
+                return TestTextField(
+                  key: fieldKey,
+                  focusNode: focusNode,
+                  controller: textEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                lastOptions = options;
+                return Container(key: optionsKey);
+              },
         ),
       ),
     );
@@ -3566,35 +3501,33 @@ void main() {
       ViewAnchor(
         view: View(
           view: FakeView(tester.view, viewId: viewId),
-          child: MaterialApp(
-            home: Scaffold(
-              body: RawAutocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  return kOptions.where((String option) {
-                    return option.contains(textEditingValue.text.toLowerCase());
-                  });
-                },
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      focusNode = fieldFocusNode;
-                      textEditingController = fieldTextEditingController;
-                      return TextField(focusNode: focusNode, controller: textEditingController);
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      lastOptions = options;
-                      return Container(key: optionsKey);
-                    },
-              ),
+          child: TestWidgetsApp(
+            home: RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return kOptions.where((String option) {
+                  return option.contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    focusNode = fieldFocusNode;
+                    textEditingController = fieldTextEditingController;
+                    return TestTextField(focusNode: focusNode, controller: textEditingController);
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    lastOptions = options;
+                    return Container(key: optionsKey);
+                  },
             ),
           ),
         ),
@@ -3620,27 +3553,25 @@ void main() {
 
   testWidgets('RawAutocomplete renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: SizedBox.shrink(
-            child: Scaffold(
-              body: RawAutocomplete<String>(
-                initialValue: const TextEditingValue(text: 'X'),
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback voidCallBack,
-                    ) => TestTextField(controller: textEditingController),
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) => Container(),
-              ),
+            child: RawAutocomplete<String>(
+              initialValue: const TextEditingValue(text: 'X'),
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['Y'],
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController textEditingController,
+                    FocusNode focusNode,
+                    VoidCallback voidCallBack,
+                  ) => TestTextField(controller: textEditingController),
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) => Container(),
             ),
           ),
         ),
@@ -3660,38 +3591,36 @@ void main() {
       late FocusNode focusNode;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RawAutocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                return kOptions.where((String option) {
-                  return option.contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              fieldViewBuilder:
-                  (
-                    BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted,
-                  ) {
-                    focusNode = fieldFocusNode;
-                    return TestTextField(
-                      key: fieldKey,
-                      focusNode: fieldFocusNode,
-                      controller: fieldTextEditingController,
-                    );
-                  },
-              optionsViewBuilder:
-                  (
-                    BuildContext context,
-                    AutocompleteOnSelected<String> onSelected,
-                    Iterable<String> options,
-                  ) {
-                    lastOnSelected = onSelected;
-                    return Container(key: optionsKey);
-                  },
-            ),
+        TestWidgetsApp(
+          home: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  focusNode = fieldFocusNode;
+                  return TestTextField(
+                    key: fieldKey,
+                    focusNode: fieldFocusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  lastOnSelected = onSelected;
+                  return Container(key: optionsKey);
+                },
           ),
         ),
       );
@@ -3726,47 +3655,45 @@ void main() {
     var showAutocomplete = true;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter innerSetState) {
-              setState = innerSetState;
-              if (!showAutocomplete) {
-                return const SizedBox.shrink();
-              }
-              return RawAutocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) async {
-                  return optionsCompleter.future;
-                },
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TextField(
-                        focusNode: fieldFocusNode,
-                        controller: fieldTextEditingController,
-                      );
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) {
-                      return Container();
-                    },
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter innerSetState) {
+            setState = innerSetState;
+            if (!showAutocomplete) {
+              return const SizedBox.shrink();
+            }
+            return RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) async {
+                return optionsCompleter.future;
+              },
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController fieldTextEditingController,
+                    FocusNode fieldFocusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TestTextField(
+                      focusNode: fieldFocusNode,
+                      controller: fieldTextEditingController,
+                    );
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) {
+                    return Container();
+                  },
+            );
+          },
         ),
       ),
     );
 
     // Focus the field to trigger optionsBuilder.
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
 
     // Dispose the widget while optionsBuilder is still pending.
@@ -4024,4 +3951,24 @@ void main() {
     // The text field should be updated to 'test'.
     expect(textCtrl.text, 'test');
   });
+}
+
+/// A simple tappable widget used as a replacement for [InkWell] in tests.
+///
+/// This provides the same tap handling behavior without requiring a [Material]
+/// ancestor, and a minimum height matching [_kMinInteractiveDimension] to
+/// preserve sizing behavior in layout-sensitive tests.
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ConstrainedBox(constraints: const BoxConstraints(minHeight: 48.0), child: child),
+    );
+  }
 }
