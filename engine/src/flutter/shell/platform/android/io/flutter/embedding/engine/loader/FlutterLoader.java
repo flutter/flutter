@@ -422,7 +422,7 @@ public class FlutterLoader {
             }
 
             shellArgs.add(arg);
-
+          }
         }
       }
 
