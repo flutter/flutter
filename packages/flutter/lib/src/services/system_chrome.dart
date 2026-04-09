@@ -758,10 +758,21 @@ abstract final class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        SystemChannels.platform.invokeMethod<void>(
-          'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle!._toMap(),
-        );
+        SystemChannels.platform
+            .invokeMethod<void>('SystemChrome.setSystemUIOverlayStyle', _pendingStyle!._toMap())
+            .then(
+              (void _) {},
+              onError: (Object error, StackTrace stack) {
+                FlutterError.reportError(
+                  FlutterErrorDetails(
+                    exception: error,
+                    stack: stack,
+                    library: 'services library',
+                    context: ErrorDescription('while setting the system UI overlay style'),
+                  ),
+                );
+              },
+            );
         _latestStyle = _pendingStyle;
       }
       _pendingStyle = null;
