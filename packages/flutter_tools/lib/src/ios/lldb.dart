@@ -11,18 +11,22 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
+import '../macos/xcode.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
 /// launched on a physical iOS device, you can attach to it using LLDB.
 ///
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
-  LLDB({required Logger logger, required ProcessUtils processUtils})
-    : _logger = logger,
+  LLDB({required Logger logger, required ProcessUtils processUtils, required Xcode xcode})
+    : _xcode = xcode,
+      _logger = logger,
       _processUtils = processUtils;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
+  final Xcode _xcode;
 
   _LLDBProcess? _lldbProcess;
 
@@ -74,9 +78,6 @@ frame.GetThread().GetProcess().WriteMemory(base, data, error)
 if not error.Success():
     print(f'Failed to write into {base}[+{page_len}]', error)
     return
-
-# If the returned value is False, that tells LLDB not to stop at the breakpoint
-return False
 ''';
 
   /// Starts an LLDB process and inputs commands to start debugging the [appProcessId].
@@ -147,19 +148,50 @@ return False
         logger: _logger,
       );
 
-      final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
-          .transform(utf8LineDecoder)
-          .listen((String line) {
-            if (_isAttached && !_ignoreLog(line)) {
-              // Only forwards logs after LLDB is attached. All logs before then are part of the
-              // attach process.
+      void printLine(String line) {
+        if (_isAttached && !_ignoreLog(line)) {
+          // Only forwards logs after LLDB is attached. All logs before then are part of the
+          // attach process.
 
-              lldbLogForwarder.addLog(line);
-            } else {
-              _logger.printTrace('[lldb]: $line');
-              _logCompleter?.checkForMatch(line);
-            }
-          });
+          lldbLogForwarder.addLog(line);
+        } else {
+          _logger.printTrace('[lldb]: $line');
+          _logCompleter?.checkForMatch(line);
+        }
+      }
+
+      String? processStopLine;
+      var suppressLogs = false;
+
+      final StreamSubscription<String>
+      stdoutSubscription = _lldbProcess!.stdout.transform(utf8LineDecoder).listen((String line) {
+        // Skip all logs between process stop and process resume if the stop was caused by a breakpoint
+        if (line.contains(_lldbProcessStopped)) {
+          processStopLine = line;
+          return;
+        }
+        // If the last log was a proces stop log, check if it was caused by a breakpoint.
+        if (processStopLine != null) {
+          if (line.contains('stop reason = breakpoint')) {
+            // When we stop due to a breakpoint, supress all logs until we resume.
+            _lldbProcess?.stdinWriteln('process continue');
+            suppressLogs = true;
+          } else {
+            // Otherwise, print the process stop log.
+            printLine(processStopLine!);
+          }
+          processStopLine = null;
+        }
+        if (suppressLogs) {
+          if (line.contains(_lldbProcessResuming)) {
+            // After resuming, stop supressing logs.
+            suppressLogs = false;
+          }
+          return;
+        }
+
+        printLine(line);
+      });
 
       final StreamSubscription<String> stderrSubscription = _lldbProcess!.stderr
           .transform(utf8LineDecoder)
@@ -225,9 +257,12 @@ return False
       _breakpointPattern,
     ).then((value) => value, onError: _handleAsyncError);
 
-    await _lldbProcess?.stdinWriteln(
-      r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
-    );
+    final Version? xcodeVersion = _xcode.currentVersion;
+    final bool useManualContinue = xcodeVersion != null && (xcodeVersion >= Version(26, 4, 0));
+    final breakpointSetCommand = useManualContinue
+        ? r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'"
+        : r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
+    await _lldbProcess?.stdinWriteln(breakpointSetCommand);
     final String log = await futureLog;
     final Match? match = _breakpointPattern.firstMatch(log);
     final String? breakpointId = match?.group(1);
