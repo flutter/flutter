@@ -22,9 +22,9 @@ std::filesystem::path GetExecutableDirectory() {
   std::filesystem::path executable_path(buffer);
   return executable_path.remove_filename();
 #elif defined(__linux__)
-  char buffer[PATH_MAX + 1];
+  char buffer[PATH_MAX];
   ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer));
-  if (length > PATH_MAX) {
+  if (length < 0) {
     return std::filesystem::path();
   }
   std::filesystem::path executable_path(std::string(buffer, length));

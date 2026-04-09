@@ -2368,6 +2368,60 @@ flutter:
         },
       );
     });
+
+    testUsingContext(
+      'Creates flutter_native_integration.env for macOS',
+      () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fs.directory('path/to/project'),
+        );
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          useMacOSConfig: true,
+        );
+        final File buildPhaseScript = fs.file(
+          'path/to/project/macos/Flutter/ephemeral/flutter_native_integration.env',
+        );
+        expect(buildPhaseScript.existsSync(), isTrue);
+        final List<String> buildPhaseScriptContents = buildPhaseScript.readAsLinesSync();
+        expect(
+          buildPhaseScriptContents,
+          containsAll(['FLUTTER_APPLICATION_PATH=path/to/project', 'FLUTTER_BUILD_DIR=build']),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'Creates flutter_native_integration.env for iOS',
+      () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fs.directory('path/to/project'),
+        );
+        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        final File buildPhaseScript = fs.file(
+          'path/to/project/ios/Flutter/ephemeral/flutter_native_integration.env',
+        );
+        expect(buildPhaseScript.existsSync(), isTrue);
+        final List<String> buildPhaseScriptContents = buildPhaseScript.readAsLinesSync();
+        expect(
+          buildPhaseScriptContents,
+          containsAll(['FLUTTER_APPLICATION_PATH=path/to/project', 'FLUTTER_BUILD_DIR=build']),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   testWithoutContext(
