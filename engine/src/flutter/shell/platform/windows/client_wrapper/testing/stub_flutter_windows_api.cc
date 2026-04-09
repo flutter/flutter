@@ -168,6 +168,14 @@ IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
   return nullptr;
 }
 
+IDXGIAdapter* FlutterDesktopEngineGetGraphicsAdapter(
+    FlutterDesktopEngineRef engine) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->EngineGetGraphicsAdapter();
+  }
+  return nullptr;
+}
+
 bool FlutterDesktopEngineProcessExternalWindowMessage(
     FlutterDesktopEngineRef engine,
     HWND hwnd,

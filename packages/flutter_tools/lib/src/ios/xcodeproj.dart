@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -18,10 +20,12 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../reporting/reporting.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
+const kSwiftPackageCacheDirectoryName = 'SourcePackages';
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -173,6 +177,56 @@ class XcodeProjectInterpreter {
     return xcrunCommand;
   }
 
+  /// Prefetches SwiftPM dependencies needed for `xcodebuild` command and then returns a list of
+  /// required arguments for the `xcodebuild` Xcode project command.
+  ///
+  /// This is not required when running commands that don't require a project (e.g.
+  /// `xcodebuild -version`).
+  ///
+  /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
+  /// and that the Swift package cache is properly configured.
+  ///
+  /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
+  /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
+  /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async {
+    // All `xcodebuild` project commands will download and resolve Swift packages.
+    // We should always prefetch Swift packages before running any `xcodebuild` project command
+    // to control the output.
+    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
+
+    return _xcodebuildProjectCommandArguments(
+      buildDirectory,
+      skipPackageResolution: skipPackageResolution,
+    );
+  }
+
+  List<String> _xcodebuildProjectCommandArguments(
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) {
+    final String cachePath = buildDirectory
+        .childDirectory(kSwiftPackageCacheDirectoryName)
+        .absolute
+        .path;
+    return <String>[
+      ...xcrunCommand(),
+      'xcodebuild',
+      '-clonedSourcePackagesDirPath',
+      cachePath,
+      if (skipPackageResolution) ...<String>[
+        '-disableAutomaticPackageResolution',
+        '-skipPackageUpdates',
+        '-skipPackagePluginValidation',
+        '-skipPackageSignatureValidation',
+      ],
+    ];
+  }
+
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
   ///
@@ -194,8 +248,7 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final showBuildSettingsCommand = <String>[
-      ...xcrunCommand(),
-      'xcodebuild',
+      ...(await xcodebuildProjectCommand(projectPath, _fileSystem.directory(buildDir))),
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -303,10 +356,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {
+  Future<void> cleanWorkspace(
+    String workspacePath,
+    String scheme, {
+    required Directory buildDirectory,
+    bool verbose = false,
+  }) async {
+    final String projectPath = _fileSystem.currentDirectory.path;
     await _processUtils.run(<String>[
-      ...xcrunCommand(),
-      'xcodebuild',
+      ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
       '-workspace',
       workspacePath,
       '-scheme',
@@ -314,10 +372,101 @@ class XcodeProjectInterpreter {
       if (!verbose) '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
-    ], workingDirectory: _fileSystem.currentDirectory.path);
+    ], workingDirectory: projectPath);
   }
 
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  /// The process used to fetch Swift packages.
+  Process? _swiftPackageFetchProcess;
+
+  /// The stdout subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
+
+  /// The stderr subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
+
+  /// Prefetches Swift packages for the given Xcode project.
+  ///
+  /// If a process is already running from a previous Flutter command, kill it before starting
+  /// the command. If the process is already running from the same Flutter command, wait for it to
+  /// complete if [waitForCompletion] is true.
+  ///
+  /// If [quiet] is false, it will print a spinner while the command is running and print logs of
+  /// what Swift packages are being fetched.
+  Future<void> prefetchSwiftPackages(
+    String projectPath, {
+    required Directory buildDirectory,
+    bool quiet = true,
+    bool waitForCompletion = true,
+  }) async {
+    Status? status;
+    try {
+      final command = <String>[
+        ..._xcodebuildProjectCommandArguments(buildDirectory, skipPackageResolution: false),
+        '-resolvePackageDependencies',
+      ];
+      if (_swiftPackageFetchProcess == null) {
+        // Check if process is already running from a previous Flutter command. If it is, kill it
+        // so we don't have the process running twice. When this process is run twice, it'll cause
+        // one to error. The new process will pick up where the old one left off.
+        final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
+        if (result.exitCode == 0) {
+          final int? pid = int.tryParse(result.stdout.trim());
+          if (pid != null) {
+            _logger.printTrace(
+              'Swift Package Manager dependencies are already being fetched by PID $pid',
+            );
+            await _processUtils.run(['kill', '$pid']);
+          }
+        }
+      }
+
+      final Process process =
+          _swiftPackageFetchProcess ??
+          await _processUtils.start(command, workingDirectory: projectPath);
+      _swiftPackageFetchProcess ??= process;
+      if (!waitForCompletion) {
+        return;
+      }
+      if (!quiet) {
+        var printFetchWarnings = false;
+        _swiftPackageFetchStdoutSubscription ??= process.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((String line) {
+              if (line.startsWith('Fetching')) {
+                status?.cancel();
+                if (!printFetchWarnings) {
+                  _logger.printStatus(
+                    'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
+                  );
+                  printFetchWarnings = true;
+                }
+                status = _logger.startProgress('  $line...');
+              }
+            });
+      }
+      final stderrBuffer = StringBuffer();
+      _swiftPackageFetchStderrSubscription ??= process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stderrBuffer.write);
+
+      final int exitCode = await process.exitCode.whenComplete(() async {
+        await _swiftPackageFetchStdoutSubscription?.cancel();
+        await _swiftPackageFetchStderrSubscription?.cancel();
+      });
+      if (exitCode != 0) {
+        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
+      }
+    } finally {
+      status?.cancel();
+    }
+  }
+
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -327,8 +476,7 @@ class XcodeProjectInterpreter {
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
-        ...xcrunCommand(),
-        'xcodebuild',
+        ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],

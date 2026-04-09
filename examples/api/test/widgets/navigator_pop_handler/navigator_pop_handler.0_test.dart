@@ -49,7 +49,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsOneWidget);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -59,7 +59,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsOneWidget);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -69,7 +69,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsOneWidget);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -79,7 +79,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsOneWidget);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -89,7 +89,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsOneWidget);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
   });
@@ -102,7 +102,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsOneWidget);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -112,7 +112,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsOneWidget);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -122,7 +122,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsOneWidget);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -131,7 +131,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsOneWidget);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
   });

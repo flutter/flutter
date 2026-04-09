@@ -706,12 +706,12 @@ When referencing a parameter, use backticks. However, when referencing a paramet
 ```dart
 // GOOD
 
-  /// Creates a foobar, which allows a baz to quux the bar.
+  /// Creates a foobar.
   ///
-  /// The [bar] argument must not be null.
+  /// The [bar] argument allows the baz to quux.
   ///
   /// The `baz` argument must be greater than zero.
-  Foo({ this.bar, int baz }) : assert(bar != null), assert(baz > 0);
+  Foo({required this.bar, required int baz}) : assert(baz > 0);
 ```
 
 Avoid using terms like "above" or "below" to reference one dartdoc section from another. Dartdoc sections are often shown alone on a Web page, the full context of the class is not present.
@@ -794,22 +794,23 @@ Use `switch` with no `default` case if you are examining an enum, since the anal
 Avoid using `if` chains, `? ... : ...`, or, in general, any expressions involving enums.
 
 
-### Avoid using `var` and `dynamic`
+### Prefer explicit types and avoid `dynamic`
 
-All variables and arguments are typed; avoid `dynamic` or `Object` in
-any case where you could figure out the actual type. Always specialize
-generic types where possible. Explicitly type all list and map
-literals. Give types to all parameters, even in closures and even if you
-don't use the parameter.
+Avoid `dynamic` or `Object` in any case where you could figure out the
+actual type. Always specialize generic types where possible. Explicitly
+type all list and map literals. Give types to all parameters, even in
+closures and even if you don't use the parameter.
 
-This achieves two purposes: it verifies that the type that the compiler
-would infer matches the type you expect, and it makes the code self-documenting
-in the case where the type is not obvious (e.g. when calling anything other
-than a constructor).
+For local variables, follow the `omit_obvious_local_variable_types` and
+`specify_nonobvious_local_variable_types` lints — omit the type annotation
+when the type is obvious from context (e.g. constructor calls), and
+specify it when it is not.
 
-Always avoid `var` and `dynamic`. If the type is unknown, prefer using
-`Object` (or `Object?`) and casting, as using `dynamic` disables all
-static checking.
+This makes the code self-documenting in the case where the type is not
+obvious (e.g. when calling anything other than a constructor).
+
+Avoid `dynamic`. If the type is unknown, prefer using `Object` (or
+`Object?`) and casting, as using `dynamic` disables all static checking.
 
 
 ### Avoid using `library` and `part of`.
@@ -924,7 +925,6 @@ the following pattern:
 TheType get theProperty => _theProperty;
 TheType _theProperty;
 void set theProperty(TheType value) {
-  assert(value != null);
   if (_theProperty == value) {
     return;
   }

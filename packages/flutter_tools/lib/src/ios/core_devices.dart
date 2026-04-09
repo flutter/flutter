@@ -38,12 +38,13 @@ class IOSCoreDeviceLauncher {
     required XcodeDebug xcodeDebug,
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
+    required Xcode xcode,
     @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
        _xcodeDebug = xcodeDebug,
        _fileSystem = fileSystem,
-       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils);
+       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils, xcode: xcode);
 
   final IOSCoreDeviceControl _coreDeviceControl;
   final Logger _logger;
@@ -120,12 +121,18 @@ class IOSCoreDeviceLauncher {
     }
 
     // Find the process that was launched using the installationURL.
+    // Filter out app extension processes (.appex) to avoid attaching the
+    // debugger to a widget extension or other extension instead of the
+    // main app process.
+    // See https://github.com/flutter/flutter/issues/183263.
     final List<IOSCoreDeviceRunningProcess> processes = await _coreDeviceControl
         .getRunningProcesses(deviceId: deviceId);
     final IOSCoreDeviceRunningProcess? launchedProcess = processes
         .where(
           (IOSCoreDeviceRunningProcess process) =>
-              process.executable != null && process.executable!.contains(installationURL),
+              process.executable != null &&
+              process.executable!.contains(installationURL) &&
+              !process.executable!.contains('.appex'),
         )
         .firstOrNull;
 

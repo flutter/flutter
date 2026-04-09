@@ -40,6 +40,7 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
@@ -478,16 +479,6 @@ public class PlatformPluginTest {
                   | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                   | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
-
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-      verify(fakeDecorView)
-          .setSystemUiVisibility(
-              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
   }
 
   @SuppressWarnings("deprecation")
@@ -558,13 +549,98 @@ public class PlatformPluginTest {
     when(mockActivity.getWindow()).thenReturn(fakeWindow);
     PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
 
-    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-        PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-    verify(fakeDecorView, never())
-        .setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+
+      // Should not enable edge-to-edge via any mechanism on API < 29.
+      verify(fakeDecorView, never())
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+      windowCompatMock.verifyNoInteractions();
+    }
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void setSystemUiMode_edgeToEdge_usesWindowCompat() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+
+      // For a plain Activity, should use WindowCompat instead of deprecated setSystemUiVisibility.
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+    }
+  }
+
+  @SuppressWarnings("deprecation")
+  // SYSTEM_UI_FLAG_*, setSystemUiVisibility
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void switchFromEdgeToEdgeToImmersive_restoresDecorFitsSystemWindows() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      // First, enter edge-to-edge mode.
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+
+      // Then switch to immersive.
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.IMMERSIVE);
+
+      // Should restore decor fits system windows when leaving edge-to-edge.
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, true));
+
+      // Should apply immersive flags via setSystemUiVisibility.
+      verify(fakeDecorView)
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_IMMERSIVE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void updateSystemUiOverlays_inEdgeToEdge_reappliesModernApi() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      // Enter edge-to-edge.
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      windowCompatMock.clearInvocations();
+
+      // Restore overlays (e.g., after returning from another activity).
+      platformPlugin.updateSystemUiOverlays();
+
+      // Should re-apply WindowCompat, not setSystemUiVisibility.
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+    }
   }
 
   @SuppressWarnings("deprecation")

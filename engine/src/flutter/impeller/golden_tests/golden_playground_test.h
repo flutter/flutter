@@ -11,7 +11,7 @@
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
-#include "flutter/impeller/renderer/render_target.h"
+#include "flutter/impeller/runtime_stage/runtime_stage.h"
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/typographer/typographer_context.h"
@@ -89,6 +89,8 @@ class GoldenPlaygroundTest
 
   /// Returns true if `OpenPlaygroundHere` will actually render anything.
   bool WillRenderSomething() const { return true; }
+
+  RuntimeStageBackend GetRuntimeStageBackend() const;
 
  protected:
   void SetWindowSize(ISize size);

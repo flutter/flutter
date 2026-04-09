@@ -392,6 +392,9 @@ class SearchAnchor extends StatefulWidget {
 
   /// Called to get the suggestion list for the search view.
   ///
+  /// This builder is called once when the search view is first displayed,
+  /// and subsequently every time the search text changes.
+  ///
   /// By default, the list returned by this builder is laid out in a [ListView].
   /// To get a different layout, use [viewBuilder] to override.
   final SuggestionsBuilder suggestionsBuilder;

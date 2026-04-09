@@ -14,7 +14,7 @@ class ModalPopupApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       restorationScopeId: 'app',
       home: ModalPopupExample(),
     );

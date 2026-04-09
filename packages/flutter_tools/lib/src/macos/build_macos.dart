@@ -103,6 +103,7 @@ Future<void> buildMacOS({
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
+      config: globals.config,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
@@ -111,9 +112,8 @@ Future<void> buildMacOS({
   final migration = ProjectMigration(migrators);
   await migration.run();
 
-  final Directory flutterBuildDir = flutterProject.directory.childDirectory(
-    getMacOSBuildDirectory(),
-  );
+  final String buildDirectoryPath = getMacOSBuildDirectory();
+  final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -127,6 +127,7 @@ Future<void> buildMacOS({
   final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
+    buildDirectory: flutterBuildDir,
   );
   final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
@@ -164,7 +165,7 @@ Future<void> buildMacOS({
     }
   }
 
-  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+  await processPodsIfNeeded(flutterProject.macos, buildDirectoryPath, buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
     flutterProject.macos.inputFileList.createSync(recursive: true);
@@ -217,8 +218,11 @@ Future<void> buildMacOS({
     result = await globals.processUtils.stream(
       <String>[
         '/usr/bin/env',
-        'xcrun',
-        'xcodebuild',
+        ...(await globals.xcode!.xcodebuildProjectCommand(
+          flutterProject.macos.hostAppRoot.path,
+          globals.fs.directory(buildDirectoryPath),
+          skipPackageResolution: false,
+        )),
         '-workspace',
         xcodeWorkspace.path,
         '-configuration',
