@@ -9,6 +9,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
@@ -39,6 +40,83 @@ object FlutterPluginUtils {
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
 
+    /**
+     * The URL for documentation for general information on migration to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin"
+
+    /**
+     * The URL for documentation instructing app developers how to migrate their app to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_APPS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers"
+
+    /**
+     * The URL for documentation instructing plugin authors how to migrate to their plugin to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors"
+
+    /**
+     * The URL for documentation instructing app developers on how to report incompatible KGP usage to plugin authors.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers/report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
+
+    /**
+     * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `id("com.android.application")` or `alias(libs.plugins.android.application)`
+     * within a `plugins { ... }` block.
+     */
+    internal val appPluginRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.application['"]|libs\.plugins\.android\.application)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the AGP library plugin declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `id("com.android.library")` or `alias(libs.plugins.android.library)`
+     * within a `plugins { ... }` block.
+     */
+    internal val libPluginRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.library['"]|libs\.plugins\.android\.library)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the KGP declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `kotlin-android`, `org.jetbrains.kotlin.android`, or version catalog aliases
+     * for Kotlin Android within a `plugins { ... }` block.
+     */
+    internal val kgpRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the AGP application plugin in Groovy DSL (`build.gradle`).
+     * Supports both the legacy `apply plugin: 'com.android.application'` syntax and
+     * the modern `plugins { id 'com.android.application' }` syntax (with or without parentheses).
+     */
+    internal val appPluginRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.application\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.application['"]|libs\.plugins\.android\.application)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the AGO library plugin in Groovy DSL (`build.gradle`).
+     * Supports both the legacy `apply plugin: 'com.android.library'` syntax and
+     * the modern `plugins { id 'com.android.library' }` syntax (with or without parentheses).
+     */
+    internal val libPluginRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.library\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.library['"]|libs\.plugins\.android\.library)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the KGP in Groovy DSL (`build.gradle`).
+     * Supports both legacy `apply plugin` and modern `plugins {}` blocks for
+     * `kotlin-android` or `org.jetbrains.kotlin.android`.
+     */
+    internal val kgpRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
     // ----------------- Methods for string manipulation and comparison. -----------------
 
     @JvmStatic
@@ -516,6 +594,94 @@ object FlutterPluginUtils {
         )
     }
 
+    /** Prints error message for usage of KGP. */
+    @JvmStatic
+    @JvmName("detectApplyingKotlinGradlePlugin")
+    internal fun detectApplyingKotlinGradlePlugin(project: Project) {
+        val pluginsWithKGPAppliedList = mutableListOf<String>()
+
+        var shouldLogForApp = false
+        project.rootProject.subprojects {
+            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
+            if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
+
+            val scriptText: String =
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(this.projectDir, this.logger).readText()
+                } else {
+                    buildFile.readText()
+                }
+
+            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+                if (buildFile.extension == "kts") {
+                    Triple(
+                        kgpRegexKotlin.containsMatchIn(scriptText),
+                        appPluginRegexKotlin.containsMatchIn(scriptText),
+                        libPluginRegexKotlin.containsMatchIn(scriptText)
+                    )
+                } else {
+                    Triple(
+                        kgpRegexGroovy.containsMatchIn(scriptText),
+                        appPluginRegexGroovy.containsMatchIn(scriptText),
+                        libPluginRegexGroovy.containsMatchIn(scriptText)
+                    )
+                }
+
+            // Ensures applying AGP exists in the build file configuration.
+            if (!hasAppPlugin && !hasLibPlugin) return@subprojects
+
+            if (!hasKgpPlugin) {
+                try {
+                    pluginManager.apply("kotlin-android")
+                } catch (_: Exception) {
+                    logger.quiet(
+                        """
+                        Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
+                        If your project uses Kotlin, ensure KGP is declared in the root plugins block.
+                        For more details check: $BUILT_IN_KOTLIN_DOCS
+                        """.trimIndent()
+                    )
+                }
+                return@subprojects
+            }
+
+            // Apply AGP exists and Apply KGP also exists in build.gradle
+            if (hasAppPlugin) {
+                shouldLogForApp = true
+            }
+
+            if (hasLibPlugin) {
+                pluginsWithKGPAppliedList.add(name)
+            }
+        }
+
+        project.gradle.projectsEvaluated {
+            if (shouldLogForApp) {
+                project.logger.error(
+                    """
+                    WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
+                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
+                    Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
+                    
+                    """.trimIndent()
+                )
+            }
+            if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
+            project.logger.error(
+                """
+                WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
+                Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+                
+                Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+                an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                
+                If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
+                """.trimIndent()
+            )
+        }
+    }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
@@ -798,7 +964,7 @@ object FlutterPluginUtils {
     // TODO(gmackall): Migrate to AGPs variant api.
     //    https://github.com/flutter/flutter/issues/166550
     @Suppress("DEPRECATION")
-    private fun findProcessResources(baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput): ProcessAndroidResources =
+    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
         baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
 
     /**

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 /// Flutter code sample for [SliverEnsureSemantics].
 
@@ -46,9 +45,9 @@ class _SliverEnsureSemanticsExampleState
                   index: 0,
                   child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const .all(8.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: .start,
                         children: <Widget>[
                           Semantics(
                             header: true,
@@ -112,7 +111,7 @@ class _SliverEnsureSemanticsExampleState
                 (BuildContext context, int index) {
                   return Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const .all(8.0),
                       child: Text('Item $index'),
                     ),
                   );
@@ -127,7 +126,7 @@ class _SliverEnsureSemanticsExampleState
                   index: 51,
                   child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const .all(8.0),
                       child: Semantics(
                         header: true,
                         child: const Text('Footer 1'),
@@ -143,7 +142,7 @@ class _SliverEnsureSemanticsExampleState
                   index: 52,
                   child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const .all(8.0),
                       child: Semantics(
                         header: true,
                         child: const Text('Footer 2'),
@@ -190,16 +189,16 @@ class _SliverEnsureSemanticsExampleState
             ),
             SliverEnsureSemantics(
               sliver: SliverSemantics(
-                role: SemanticsRole.list,
+                role: .list,
                 sliver: SliverFixedExtentList(
                   itemExtent: 44.0,
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                       return Semantics(
-                        role: SemanticsRole.listItem,
+                        role: .listItem,
                         child: Card(
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const .all(8.0),
                             child: Text('Second List Item $index'),
                           ),
                         ),
