@@ -8,6 +8,8 @@
         binary: "bin/app",
         forward_stdout_to: "log",
         forward_stderr_to: "log",
+        // Needed for AOT FFI callback thunks.
+        job_policy_ambient_mark_vmo_exec: "true",
     },
     capabilities: [
         {

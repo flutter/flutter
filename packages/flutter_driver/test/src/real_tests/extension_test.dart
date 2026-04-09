@@ -308,6 +308,7 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
+        // ignore: unawaited_futures
         channel.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
@@ -354,8 +355,9 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
-
+        // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
+        // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
@@ -407,6 +409,7 @@ void main() {
           );
         });
 
+        // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
 
         // Calls the waiting API before the second channel message is sent.
@@ -423,6 +426,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 5));
         expect(result, isNull);
 
+        // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
         // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
@@ -461,6 +465,7 @@ void main() {
           );
         });
 
+        // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
 
         driverExtension
@@ -476,6 +481,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 5));
         expect(result, isNull);
 
+        // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
         // Result of channel 2 is received, but channel 1 is still pending, so still waiting.
