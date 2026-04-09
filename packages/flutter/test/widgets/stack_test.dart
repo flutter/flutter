@@ -559,6 +559,24 @@ void main() {
     expect(tapped, false);
   });
 
+  testWidgets('IndexedStack supports Positioned children', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/127553.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(
+          children: <Widget>[
+            Positioned(
+              child: SizedBox(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
