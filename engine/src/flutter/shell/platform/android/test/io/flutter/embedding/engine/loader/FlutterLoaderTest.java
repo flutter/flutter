@@ -1165,11 +1165,23 @@ public class FlutterLoaderTest {
 
   @Test
   public void itSetsTraceToFileFromMetadata() {
-    String expectedTraceToFilePath = "/path/to/trace/file";
-    testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceToFile",
-        expectedTraceToFilePath,
-        "--trace-to-file=" + expectedTraceToFilePath);
+    String[] pathsToTest =
+        new String[] {
+          "path/to/trace/file",
+          "/path/to/a trace/file",
+          "\"path/to/a file\"",
+          "\"a b c\"",
+          "path/to-a/file",
+          "path_to/a/file",
+          "path/to/a/hidden/.file",
+        };
+
+    for (String expectedTraceToFilePath : pathsToTest) {
+      testFlagFromMetadataPresent(
+          "io.flutter.embedding.android.TraceToFile",
+          expectedTraceToFilePath,
+          "--trace-to-file=" + expectedTraceToFilePath);
+    }
   }
 
   @Test
@@ -1622,8 +1634,14 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsMultipleCommandLineFlagsFromManifestMetadata() {
     testMultipleFlagsFromMetadata(
-        Map.of("androidEngineShellArgs", "--enable-impeller=true;--enable-vulkan-validation"),
-        new String[] {"--enable-impeller=true", "--enable-vulkan-validation"},
+        Map.of(
+            "androidEngineShellArgs",
+            "--enable-impeller=true;--trace-to-file=\"path/to/a file\";--enable-vulkan-validation"),
+        new String[] {
+          "--enable-impeller=true",
+          "--trace-to-file=\"path/to/a file\"",
+          "--enable-vulkan-validation"
+        },
         true,
         false);
   }
