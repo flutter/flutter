@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-
 class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
@@ -757,5 +756,4 @@ void main() {
       );
     },
   );
-
 }
