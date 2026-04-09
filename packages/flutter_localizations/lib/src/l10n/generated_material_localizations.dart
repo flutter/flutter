@@ -14638,7 +14638,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get continueButtonLabel => 'ادامه';
 
   @override
-  String get copyButtonLabel => 'کپی';
+  String get copyButtonLabel => 'کپی کردن';
 
   @override
   String get currentDateLabel => 'امروز';

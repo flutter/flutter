@@ -144,7 +144,7 @@ dependencies:
   package_config: 2.2.0
   path: 1.9.1
   path_provider: 2.1.5
-  path_provider_android: 2.3.0
+  path_provider_android: 2.3.1
   path_provider_foundation: 2.6.0
   path_provider_linux: 2.2.1
   path_provider_platform_interface: 2.1.2
@@ -220,4 +220,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: iaoh3m
+# PUBSPEC CHECKSUM: 60o3ev
