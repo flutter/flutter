@@ -57,7 +57,7 @@ void main() {
   ];
 
   const kFindProcessResolvePackagesCommand = FakeCommand(
-    command: <String>['pgrep', '-n', ...kResolvePackagesCommandList],
+    command: <String>['pgrep', '-n', '-f', ...kResolvePackagesCommandList],
   );
 
   const kResolvePackagesCommand = FakeCommand(command: kResolvePackagesCommandList);
@@ -562,6 +562,7 @@ void main() {
           command: <String>[
             'pgrep',
             '-n',
+            '-f',
             'xcrun',
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
@@ -2440,6 +2441,7 @@ flutter:
           command: <String>[
             'pgrep',
             '-n',
+            '-f',
             'xcrun',
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
@@ -2519,6 +2521,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         command: <String>[
           'pgrep',
           '-n',
+          '-f',
           'xcrun',
           'xcodebuild',
           '-clonedSourcePackagesDirPath',
@@ -2576,6 +2579,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         command: <String>[
           'pgrep',
           '-n',
+          '-f',
           'xcrun',
           'xcodebuild',
           '-clonedSourcePackagesDirPath',
@@ -2648,6 +2652,7 @@ Resolved source packages:
           command: <String>[
             'pgrep',
             '-n',
+            '-f',
             'xcrun',
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
@@ -2722,6 +2727,7 @@ Resolved source packages:
         command: <String>[
           'pgrep',
           '-n',
+          '-f',
           'xcrun',
           'xcodebuild',
           '-clonedSourcePackagesDirPath',
