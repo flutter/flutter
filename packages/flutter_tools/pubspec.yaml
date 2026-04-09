@@ -104,7 +104,7 @@ dependencies:
   source_maps: 0.10.13
   source_span: 1.10.2
   sprintf: 7.0.0
-  sse: 4.1.8
+  sse: 4.2.0
   string_scanner: 1.4.1
   sync_http: 0.3.1
   term_glyph: 1.2.2
@@ -128,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: r72vdp
+# PUBSPEC CHECKSUM: 3f506k
