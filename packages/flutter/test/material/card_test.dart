@@ -90,12 +90,7 @@ void main() {
 
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    var semanticsDisposed = false;
-    addTearDown(() {
-      if (!semanticsDisposed) {
-        handle.dispose();
-      }
-    });
+    addTearDown(handle.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -137,20 +132,11 @@ void main() {
         isFocusable: true,
       ),
     );
-
-    handle.dispose();
-    semanticsDisposed = true;
-
   });
 
   testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    var semanticsDisposed = false;
-    addTearDown(() {
-      if (!semanticsDisposed) {
-        handle.dispose();
-      }
-    });
+    addTearDown(handle.dispose);
 
     await tester.pumpWidget(
       const Directionality(
@@ -169,10 +155,6 @@ void main() {
       tester.getSemantics(find.byType(Card)),
       matchesSemantics(label: 'First child\nSecond child', textDirection: TextDirection.ltr),
     );
-
-    handle.dispose();
-    semanticsDisposed = true;
-
   });
 
   testWidgets('Card margin', (WidgetTester tester) async {
