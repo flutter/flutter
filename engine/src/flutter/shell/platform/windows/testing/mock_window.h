@@ -105,9 +105,12 @@ class MockWindow : public FlutterWindow {
                             WPARAM const wparam,
                             LPARAM const lparam);
 
- protected:
-  LRESULT Win32DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+  MOCK_METHOD(LRESULT,
+              Win32DefWindowProc,
+              (HWND, UINT, WPARAM, LPARAM),
+              (override));
 
+ protected:
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindow);
 };
