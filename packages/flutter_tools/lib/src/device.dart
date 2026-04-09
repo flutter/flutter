@@ -993,7 +993,6 @@ class DebuggingOptions {
     this.ipv6 = false,
     this.google3WorkspaceRoot,
     this.printDtd = false,
-    this.enableLocalDiscovery = false,
     this.webDevServerConfig,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
@@ -1026,7 +1025,6 @@ class DebuggingOptions {
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
-    this.enableLocalDiscovery = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1114,7 +1112,6 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
-    required this.enableLocalDiscovery,
     this.webDevServerConfig,
   });
 
@@ -1161,7 +1158,6 @@ class DebuggingOptions {
   final bool ipv6;
   final String? google3WorkspaceRoot;
   final bool printDtd;
-  final bool enableLocalDiscovery;
   final WebDevServerConfig? webDevServerConfig;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
@@ -1329,7 +1325,6 @@ class DebuggingOptions {
     // with the google3 checked in binary.
     'dumpSkpOnShaderCompilation': false,
     'cacheSkSL': false,
-    'enableLocalDiscovery': enableLocalDiscovery,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1390,7 +1385,6 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
-        enableLocalDiscovery: (json['enableLocalDiscovery'] as bool?) ?? false,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',

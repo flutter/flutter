@@ -13,7 +13,7 @@ const _swiftPackageTemplate = '''
 // swift-tools-version: {{swiftToolsVersion}}
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -40,7 +40,7 @@ let package = Package(
 
 const _swiftPackageSourceTemplate = '''
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 ''';
 
@@ -114,7 +114,7 @@ class SwiftPackage {
   /// Swift packages require at least one source file per non-binary target.
   void createSwiftPackage({bool generateEmptySources = true}) {
     for (final SwiftPackageTarget target in _targets) {
-      if (target.targetType == SwiftPackageTargetType.binaryTarget) {
+      if (target.targetType != SwiftPackageTargetType.target) {
         continue;
       }
       final Directory targetDirectory = _manifest.parent
@@ -238,17 +238,41 @@ enum SwiftPackageLibraryType {
   final String name;
 }
 
+/// Types of package products.
+///
+/// Representation of Product from
+/// https://developer.apple.com/documentation/packagedescription/product.
+enum SwiftPackageProductType {
+  library(name: '.library'),
+  executable(name: '.executable'),
+  plugin(name: '.plugin');
+
+  const SwiftPackageProductType({required this.name});
+
+  final String name;
+}
+
 /// An externally visible build artifact that's available to clients of the
 /// package.
 ///
 /// Representation of Product from
 /// https://developer.apple.com/documentation/packagedescription/product.
 class SwiftPackageProduct {
-  SwiftPackageProduct({required this.name, required this.targets, this.libraryType});
+  SwiftPackageProduct.library({required this.name, required this.targets, this.libraryType})
+    : productType = SwiftPackageProductType.library;
+
+  SwiftPackageProduct.plugin({required this.name, required this.targets})
+    : productType = SwiftPackageProductType.plugin,
+      libraryType = null;
+
+  SwiftPackageProduct.executable({required this.name, required this.targets})
+    : productType = SwiftPackageProductType.executable,
+      libraryType = null;
 
   final String name;
   final SwiftPackageLibraryType? libraryType;
   final List<String> targets;
+  final SwiftPackageProductType productType;
 
   String format() {
     // products: [
@@ -264,7 +288,7 @@ class SwiftPackageProduct {
     if (libraryType != null) {
       libraryTypeString = ', type: ${libraryType!.name}';
     }
-    return '.library(name: "$name"$libraryTypeString$targetsString)';
+    return '${productType.name}(name: "$name"$libraryTypeString$targetsString)';
   }
 }
 
@@ -292,11 +316,41 @@ class SwiftPackagePackageDependency {
 /// more information.
 enum SwiftPackageTargetType {
   target(name: '.target'),
-  binaryTarget(name: '.binaryTarget');
+  binaryTarget(name: '.binaryTarget'),
+  plugin(name: '.plugin'),
+  executableTarget(name: '.executableTarget'),
+  testTarget(name: '.testTarget');
 
   const SwiftPackageTargetType({required this.name});
 
   final String name;
+}
+
+/// A command capability for a plugin target.
+///
+/// Representation of Target.PluginCapability.command from
+/// https://developer.apple.com/documentation/packagedescription/target/plugincapability-swift.enum/command(intent:permissions:)
+class SwiftPackageCommandCapability {
+  SwiftPackageCommandCapability({required this.verb, required this.description});
+
+  final String verb;
+  final String description;
+
+  String format() {
+    // capability: .command(
+    //     intent: .custom(verb: "switch-to-debug", description: "Updates package to use the debug mode"),
+    //     permissions: [
+    //         .writeToPackageDirectory(reason: "Updates package to use the debug mode"),
+    //     ]
+    // ),
+    return '''
+capability: .command(
+${_singleIndent * 4}intent: .custom(verb: "$verb", description: "$description"),
+${_singleIndent * 4}permissions: [
+${_singleIndent * 5}.writeToPackageDirectory(reason: "$description"),
+${_singleIndent * 4}]
+${_singleIndent * 3})''';
+  }
 }
 
 /// A building block of a Swift Package that contains a set of source files
@@ -305,19 +359,36 @@ enum SwiftPackageTargetType {
 /// Representation of Target from
 /// https://developer.apple.com/documentation/packagedescription/target.
 class SwiftPackageTarget {
-  SwiftPackageTarget.defaultTarget({required this.name, this.dependencies})
-    : path = null,
-      targetType = SwiftPackageTargetType.target;
+  SwiftPackageTarget.defaultTarget({required this.name, this.dependencies, this.path})
+    : targetType = SwiftPackageTargetType.target,
+      commandCapability = null;
 
   SwiftPackageTarget.binaryTarget({required this.name, required String relativePath})
     : path = relativePath,
       dependencies = null,
-      targetType = SwiftPackageTargetType.binaryTarget;
+      targetType = SwiftPackageTargetType.binaryTarget,
+      commandCapability = null;
+
+  SwiftPackageTarget.executableTarget({required this.name, this.dependencies, this.path})
+    : targetType = SwiftPackageTargetType.executableTarget,
+      commandCapability = null;
+
+  SwiftPackageTarget.pluginTarget({
+    required this.name,
+    this.path,
+    this.dependencies,
+    required this.commandCapability,
+  }) : targetType = SwiftPackageTargetType.plugin;
+
+  SwiftPackageTarget.testTarget({required this.name, this.dependencies, this.path})
+    : targetType = SwiftPackageTargetType.testTarget,
+      commandCapability = null;
 
   final String name;
   final String? path;
   final List<SwiftPackageTargetDependency>? dependencies;
   final SwiftPackageTargetType targetType;
+  final SwiftPackageCommandCapability? commandCapability;
 
   String format() {
     // targets: [
@@ -341,9 +412,8 @@ class SwiftPackageTarget {
     final nameString = 'name: "$name"';
     targetDetails.add(nameString);
 
-    if (path != null) {
-      final pathString = 'path: "$path"';
-      targetDetails.add(pathString);
+    if (commandCapability != null) {
+      targetDetails.add(commandCapability!.format());
     }
 
     if (dependencies != null && dependencies!.isNotEmpty) {
@@ -356,6 +426,11 @@ dependencies: [
 ${targetDependencies.join(",\n")}
 $targetDetailsIndent]''';
       targetDetails.add(dependenciesString);
+    }
+
+    if (path != null) {
+      final pathString = 'path: "$path"';
+      targetDetails.add(pathString);
     }
 
     return '''

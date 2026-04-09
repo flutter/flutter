@@ -13,6 +13,7 @@ import 'binding.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'text.dart';
+import 'title.dart';
 
 const String _kAccessibilityEvaluationsDisabledErrorMessage = '''
 Accessibility evaluations APIs are not enabled.
@@ -824,5 +825,43 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
     }
 
     return violations;
+  }
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which enforces that the application has at least one [Title]
+/// widget to set the web page title.
+@internal
+class TitleEvaluation extends AccessibilityEvaluation {
+  /// Create a new [TitleEvaluation].
+  const TitleEvaluation();
+
+  @override
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
+
+    if (binding.rootElement != null && !_hasTitleWidget(binding.rootElement!)) {
+      final SemanticsNode rootNode =
+          binding.renderViews.first.owner!.semanticsOwner!.rootSemanticsNode!;
+      violations.add(
+        Violation(rootNode, 'Expected to find at least one Title widget, but none was found.'),
+      );
+    }
+
+    return EvaluationResult(violations);
+  }
+
+  bool _hasTitleWidget(Element element) {
+    if (element.widget is Title) {
+      return true;
+    }
+    var found = false;
+    element.visitChildren((Element child) {
+      if (!found) {
+        found = _hasTitleWidget(child);
+      }
+    });
+    return found;
   }
 }

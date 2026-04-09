@@ -995,6 +995,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         onChangeEnd: _handleDragEnd,
         state: this,
         semanticFormatterCallback: widget.semanticFormatterCallback,
+        onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
         hasFocus: _focused,
         hovering: _hovering,
         allowedInteraction: effectiveAllowedInteraction,
@@ -1013,22 +1014,17 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       child: result,
     );
 
-    return Semantics(
-      label: widget.label,
-      container: true,
-      slider: true,
-      onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
-      child: FocusableActionDetector(
-        actions: _actionMap,
-        shortcuts: shortcutMap,
-        focusNode: focusNode,
-        autofocus: widget.autofocus,
-        enabled: _enabled,
-        onShowFocusHighlight: _handleFocusHighlightChanged,
-        onShowHoverHighlight: _handleHoverChanged,
-        mouseCursor: effectiveMouseCursor,
-        child: result,
-      ),
+    return FocusableActionDetector(
+      actions: _actionMap,
+      shortcuts: shortcutMap,
+      focusNode: focusNode,
+      autofocus: widget.autofocus,
+      enabled: _enabled,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      mouseCursor: effectiveMouseCursor,
+      includeFocusSemantics: false,
+      child: result,
     );
   }
 
@@ -1086,6 +1082,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     required this.onChangeEnd,
     required this.state,
     required this.semanticFormatterCallback,
+    required this.onDidGainAccessibilityFocus,
     required this.hasFocus,
     required this.hovering,
     required this.allowedInteraction,
@@ -1102,6 +1099,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double>? onChangeStart;
   final ValueChanged<double>? onChangeEnd;
   final SemanticFormatterCallback? semanticFormatterCallback;
+  final VoidCallback? onDidGainAccessibilityFocus;
   final _SliderState state;
   final bool hasFocus;
   final bool hovering;
@@ -1123,6 +1121,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       state: state,
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
+      onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
@@ -1148,6 +1147,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
+      ..onDidGainAccessibilityFocus = onDidGainAccessibilityFocus
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
       ..hovering = hovering
@@ -1170,6 +1170,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required TargetPlatform platform,
     required ValueChanged<double>? onChanged,
     required SemanticFormatterCallback? semanticFormatterCallback,
+    required this.onDidGainAccessibilityFocus,
     required this.onChangeStart,
     required this.onChangeEnd,
     required _SliderState state,
@@ -1259,6 +1260,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   late HorizontalDragGestureRecognizer _drag;
   late TapGestureRecognizer _tap;
   bool _active = false;
+  VoidCallback? onDidGainAccessibilityFocus;
   double _currentDragValue = 0.0;
   Rect? overlayRect;
 
@@ -1755,21 +1757,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final double padding = _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
-    final double thumbPosition = isDiscrete
-        ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
-        : trackRect.left + visualPosition * trackRect.width;
-    // Apply padding to trackRect.left and trackRect.right if the track height is
-    // greater than the thumb radius to ensure the thumb is drawn within the track.
-    final Size thumbPreferredSize = _sliderTheme.thumbShape!.getPreferredSize(
-      isInteractive,
-      isDiscrete,
+
+    final Offset thumbCenter = _calcThumbCenter(
+      trackRect: trackRect,
+      visualPosition: visualPosition,
     );
-    final double thumbPadding = (padding > thumbPreferredSize.width / 2 ? padding / 2 : 0);
-    final thumbCenter = Offset(
-      clampDouble(thumbPosition, trackRect.left + thumbPadding, trackRect.right - thumbPadding),
-      trackRect.center.dy,
-    );
+
     if (isInteractive) {
       final Size overlaySize = sliderTheme.overlayShape!.getPreferredSize(isInteractive, false);
       overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
@@ -1906,26 +1899,78 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
   }
 
+  /// Calculates the local coordinate center of the [Slider] thumb given its
+  /// physical placement on the track from 0.0 (left) to 1.0 (right).
+  ///
+  /// The [visualPosition] is provided by the caller so semantics can use the
+  /// raw logical value while paint can use the smoothly animated value.
+  Offset _calcThumbCenter({required Rect trackRect, required double visualPosition}) {
+    final double padding = _sliderTheme.trackShape!.isRounded ? trackRect.height : 0.0;
+    final double thumbPosition = isDiscrete
+        ? trackRect.left + visualPosition * (trackRect.width - padding) + padding / 2
+        : trackRect.left + visualPosition * trackRect.width;
+    // Apply padding to trackRect.left and trackRect.right if the track height is
+    // greater than the thumb radius to ensure the thumb is drawn within the track.
+    final Size thumbPreferredSize = _sliderTheme.thumbShape!.getPreferredSize(
+      isInteractive,
+      isDiscrete,
+    );
+    final double thumbPadding = padding > thumbPreferredSize.width / 2 ? padding / 2 : 0;
+    return Offset(
+      clampDouble(thumbPosition, trackRect.left + thumbPadding, trackRect.right - thumbPadding),
+      trackRect.center.dy,
+    );
+  }
+
+  Offset get _semanticThumbCenter {
+    final double visualPosition = switch (textDirection) {
+      TextDirection.rtl => 1.0 - _value,
+      TextDirection.ltr => _value,
+    };
+    return _calcThumbCenter(trackRect: _trackRect, visualPosition: visualPosition);
+  }
+
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    node.rect = Rect.fromCenter(
+      center: _semanticThumbCenter,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
+    );
+
+    node.updateWith(config: config);
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    // The Slider widget has its own Focus widget with semantics information,
+    // The Slider widget has its own Focus widget.
+    // We mark the Focus widget with "includeFocusSemantics: false"
     // and we want that semantics node to collect the semantics information here
-    // so that it's all in the same node: otherwise Talkback sees that the node
-    // has focusable children, and it won't focus the Slider's Focus widget
-    // because it thinks the Focus widget's node doesn't have anything to say
-    // (which it doesn't, but this child does). Aggregating the semantic
-    // information into one node means that Talkback will recognize that it has
-    // something to say and focus it when it receives keyboard focus.
-    // (See https://github.com/flutter/flutter/issues/57038 for context).
-    config.isSemanticBoundary = false;
+    // so that it's all in the same node.
+    config.isSemanticBoundary = true;
 
     config.isEnabled = isInteractive;
+    if (label != null) {
+      config.label = label!;
+    }
+    config.isSlider = true;
+    config.isFocusable = isInteractive;
+    config.isFocused = hasFocus;
+
+    if (onDidGainAccessibilityFocus != null) {
+      config.onDidGainAccessibilityFocus = onDidGainAccessibilityFocus;
+    }
     config.textDirection = textDirection;
     if (isInteractive) {
       config.onIncrease = increaseAction;
       config.onDecrease = decreaseAction;
+      config.onFocus = onFocusAction;
     }
 
     if (semanticFormatterCallback != null) {
@@ -1946,6 +1991,17 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double get _semanticActionUnit => divisions != null ? 1.0 / divisions! : _adjustmentUnit;
+
+  void onFocusAction() {
+    if (isInteractive) {
+      if (!_state.mounted) {
+        return;
+      }
+      if (!hasFocus) {
+        _state.focusNode.requestFocus();
+      }
+    }
+  }
 
   void increaseAction() {
     if (isInteractive) {

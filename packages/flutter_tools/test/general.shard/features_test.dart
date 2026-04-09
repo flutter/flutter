@@ -406,7 +406,7 @@ void main() {
         swiftPackageManager,
         allOf(<Matcher>[
           _onChannelIs('master', available: true, enabledByDefault: true),
-          _onChannelIs('stable', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: true, enabledByDefault: true),
           _onChannelIs('beta', available: true, enabledByDefault: true),
         ]),
       );
