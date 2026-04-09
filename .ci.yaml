@@ -1717,19 +1717,6 @@ targets:
       - engine/**
       - DEPS
 
-  - name: linux_android_emu_unstable android_engine_vulkan_tests
-    recipe: flutter/flutter_drone
-    bringup: true
-    timeout: 60
-    properties:
-      shard: android_engine_vulkan_tests
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
-        ]
-
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     timeout: 60
