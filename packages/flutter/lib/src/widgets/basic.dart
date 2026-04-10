@@ -26,6 +26,7 @@ import 'package:flutter/services.dart';
 
 import 'binding.dart';
 import 'debug.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'localizations.dart';
 <<<<<<< HEAD
@@ -4893,14 +4894,22 @@ class IndexedStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Each child is wrapped with [VisibilityScope] (so [Visibility.of] reports
+    // the child as hidden when it is not the selected index) and with
+    // [ExcludeFocus] (so non-selected children cannot receive focus). Both of
+    // these are inherited widgets that do not introduce any [RenderObject]s
+    // between the child and the enclosing [RenderIndexedStack]. This allows
+    // [ParentDataWidget]s such as [Positioned] to correctly apply their
+    // [StackParentData] to the indexed stack's render object.
+    //
+    // Painting, hit-testing, and semantics for non-selected children are
+    // already handled by [RenderIndexedStack], so no additional render-object
+    // wrappers are needed.
     final wrappedChildren = List<Widget>.generate(children.length, (int i) {
-      return Visibility(
-        visible: i == index,
-        maintainInteractivity: true,
-        maintainSize: true,
-        maintainState: true,
-        maintainAnimation: true,
-        child: children[i],
+      final isSelected = i == index;
+      return VisibilityScope(
+        isVisible: isSelected,
+        child: ExcludeFocus(excluding: !isSelected, child: children[i]),
       );
     });
     return _RawIndexedStack(

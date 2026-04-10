@@ -181,7 +181,7 @@ export 'src/widgets/unique_widget.dart';
 export 'src/widgets/value_listenable_builder.dart';
 export 'src/widgets/view.dart';
 export 'src/widgets/viewport.dart';
-export 'src/widgets/visibility.dart';
+export 'src/widgets/visibility.dart' hide VisibilityScope;
 export 'src/widgets/widget_inspector.dart';
 export 'src/widgets/widget_span.dart';
 export 'src/widgets/widget_state.dart';

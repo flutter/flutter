@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart' show internal;
 
 import 'basic.dart';
 <<<<<<< HEAD
@@ -253,15 +254,15 @@ class Visibility extends StatelessWidget {
     var isVisible = true;
     var ancestorContext = context;
     InheritedElement? ancestor = ancestorContext
-        .getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+        .getElementForInheritedWidgetOfExactType<VisibilityScope>();
     while (isVisible && ancestor != null) {
-      final scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
+      final scope = context.dependOnInheritedElement(ancestor) as VisibilityScope;
       isVisible = scope.isVisible;
       ancestor.visitAncestorElements((Element parent) {
         ancestorContext = parent;
         return false;
       });
-      ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
+      ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<VisibilityScope>();
     }
     return isVisible;
   }
@@ -290,7 +291,7 @@ class Visibility extends StatelessWidget {
         result = visible ? child : replacement;
       }
     }
-    return _VisibilityScope(isVisible: visible, child: result);
+    return VisibilityScope(isVisible: visible, child: result);
   }
 
   @override
@@ -316,13 +317,19 @@ class Visibility extends StatelessWidget {
 }
 
 /// Inherited widget that allows descendants to find their visibility status.
-class _VisibilityScope extends InheritedWidget {
-  const _VisibilityScope({required this.isVisible, required super.child});
+///
+/// Used internally by [Visibility] and [IndexedStack] to propagate visibility
+/// information to descendants.
+@internal
+class VisibilityScope extends InheritedWidget {
+  /// Creates a [VisibilityScope].
+  const VisibilityScope({super.key, required this.isVisible, required super.child});
 
+  /// Whether the subtree is visible.
   final bool isVisible;
 
   @override
-  bool updateShouldNotify(_VisibilityScope old) {
+  bool updateShouldNotify(VisibilityScope old) {
     return isVisible != old.isVisible;
   }
 }

@@ -567,7 +567,53 @@ void main() {
     expect(tapped, false);
   });
 
+<<<<<<< HEAD
 >>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
+=======
+  testWidgets('IndexedStack supports Positioned children', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/127553.
+    const positionedKey = Key('positioned-child');
+    const siblingKey = Key('sibling-child');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(
+          children: <Widget>[
+            Positioned(
+              left: 10.0,
+              top: 20.0,
+              width: 30.0,
+              height: 40.0,
+              child: SizedBox(key: positionedKey),
+            ),
+            SizedBox(key: siblingKey, width: 50.0, height: 50.0),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+
+    final RenderBox positionedBox = tester.renderObject<RenderBox>(
+      find.byKey(positionedKey, skipOffstage: false),
+    );
+    final parentData = positionedBox.parentData! as StackParentData;
+    expect(parentData.left, 10.0);
+    expect(parentData.top, 20.0);
+    expect(parentData.width, 30.0);
+    expect(parentData.height, 40.0);
+    expect(positionedBox.size, const Size(30.0, 40.0));
+
+    // The Positioned render object must be a direct child of the
+    // RenderIndexedStack, so no render object should sit between them.
+    expect(positionedBox.parent, isA<RenderIndexedStack>());
+
+    // Non-Positioned siblings still report correct visibility.
+    final Element siblingElement = tester.element(find.byKey(siblingKey, skipOffstage: false));
+    expect(Visibility.of(siblingElement), isFalse);
+  });
+
+>>>>>>> c888589719c (use @internal)
   testWidgets('Stack clip test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
