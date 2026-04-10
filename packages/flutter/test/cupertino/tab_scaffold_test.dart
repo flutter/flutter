@@ -19,7 +19,7 @@ class _TestCallbackPainter extends CustomPainter {
   final VoidCallback onPaint;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas _, Size __) {
     onPaint();
   }
 
