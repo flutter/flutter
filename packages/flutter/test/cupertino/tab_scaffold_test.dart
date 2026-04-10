@@ -16,6 +16,7 @@ late List<int> selectedTabs;
 class _TestCallbackPainter extends CustomPainter {
   const _TestCallbackPainter({required this.onPaint});
 
+  /// The callback that is invoked when the painter paints.
   final VoidCallback onPaint;
 
   @override
