@@ -2,49 +2,57 @@ import 'dart:convert';
 import 'dart:io';
 
 Future<Map<String, dynamic>?> getJson(String url) async {
+  final client = HttpClient();
   try {
-    final client = HttpClient();
     final request = await client.getUrl(Uri.parse(url));
     final response = await request.close();
     if (response.statusCode == 200) {
       final content = await response.transform(utf8.decoder).join();
-      return json.decode(content) as Map<String, dynamic>;
+      final dynamic decoded = json.decode(content);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
     }
   } catch (e) {
     stderr.writeln('Error fetching data from $url: $e');
+  } finally {
+    client.close();
   }
   return null;
 }
 
 Future<String?> fetchChromeLatest() async {
   final data = await getJson('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json');
-  if (data != null) {
-    return ((data['channels'] as Map)['Stable'] as Map)['version'] as String;
+  if (data case {'channels': {'Stable': {'version': String version}}}) {
+    return version;
   }
   return null;
 }
 
 Future<String?> fetchFirefoxLatest() async {
   final data = await getJson('https://product-details.mozilla.org/1.0/firefox_versions.json');
-  if (data != null) {
-    return data['LATEST_FIREFOX_VERSION'] as String;
+  if (data case {'LATEST_FIREFOX_VERSION': String version}) {
+    return version;
   }
   return null;
 }
 
 Future<bool> verifyChromeVersion(String version) async {
   final data = await getJson('https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json');
-  if (data != null) {
-    final versions = (data['versions'] as List).map((v) => (v as Map)['version'] as String).toList();
-    return versions.contains(version);
+  if (data case {'versions': List versions}) {
+    return versions.any((v) => v is Map && v['version'] == version);
   }
   return false;
 }
 
 Future<bool> verifyFirefoxVersion(String version) async {
-  final data = await getJson('https://product-details.mozilla.org/1.0/firefox_history_major_releases.json');
-  if (data != null) {
-    return data.values.contains(version);
+  final majorReleases = await getJson('https://product-details.mozilla.org/1.0/firefox_history_major_releases.json');
+  if (majorReleases != null && majorReleases.keys.contains(version)) {
+    return true;
+  }
+  final stabilityReleases = await getJson('https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json');
+  if (stabilityReleases != null && stabilityReleases.keys.contains(version)) {
+    return true;
   }
   return false;
 }
