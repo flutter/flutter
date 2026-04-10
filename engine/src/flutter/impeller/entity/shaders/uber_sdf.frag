@@ -61,7 +61,7 @@ float filledSDF(vec2 p) {
 float hairlineSDF(vec2 p) {
   float base_sdf = filledSDF(p);
   float pixel_size = fwidth(base_sdf);
-  // Harline SDF is a 1-pixel wide band around the edge of the base SDF.
+  // Hairline SDF is a 1-pixel wide band around the edge of the base SDF.
   return abs(base_sdf) - 0.5 * pixel_size;
 }
 

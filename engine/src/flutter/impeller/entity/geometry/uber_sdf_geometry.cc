@@ -33,7 +33,7 @@ GeometryResult UberSDFGeometry::GetPositionBuffer(
 
   Vector2 aa_padding = UberSDFParameters::kAntialiasPixels * device_pixel_size;
   Vector2 hairline_stroke_padding =
-      params_.IsHairlineStroked() ? 0.5 * device_pixel_size : Point{0, 0};
+      params_.IsHairlineStroked() ? 0.5f * device_pixel_size : Vector2{};
 
   // Return a quad (FillRectGeometry) that covers the base shape expanded by
   // padding for AA and hairline stroke.
