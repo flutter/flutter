@@ -116,4 +116,25 @@ TEST_P(TextureGLESTest, Leak) {
   EXPECT_FALSE(handle.has_value());
 }
 
+TEST_P(TextureGLESTest, CreatingAndBindingEmptyTexturesDoesNotCrash) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  const ProcTableGLES& gl = context_gles.GetReactor()->GetProcTable();
+  GLuint texture_name;
+  gl.GenTextures(1, &texture_name);
+
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = StorageMode::kDevicePrivate;
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.size = ISize(0, 0);
+  texture_descriptor.mip_count = 1u;
+
+  impeller::HandleGLES texture_handle = context_gles.GetReactor()->CreateHandle(
+      impeller::HandleType::kTexture, texture_name);
+  auto texture = TextureGLES::WrapTexture(context_gles.GetReactor(),
+                                          texture_descriptor, texture_handle);
+  // The texture descriptor is invalid because its size is empty, so WrapTexture
+  // will return null.
+  ASSERT_EQ(texture, nullptr);
+}
+
 }  // namespace impeller::testing

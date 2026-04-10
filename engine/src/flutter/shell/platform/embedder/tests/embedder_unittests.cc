@@ -3647,7 +3647,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   };
 
   // Send an event.
-  sample_event.timestamp = 1.0l;
+  sample_event.timestamp = 1.0;
   platform_task_runner->PostTask([&]() {
     FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
     message_latch->Signal();
@@ -3685,7 +3685,7 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   EXPECT_EQ(echoed_events.size(), 1u);
 
   // Send a second event.
-  sample_event.timestamp = 10.0l;
+  sample_event.timestamp = 10.0;
   platform_task_runner->PostTask([&]() {
     FlutterEngineSendKeyEvent(engine.get(), &sample_event, nullptr, nullptr);
   });

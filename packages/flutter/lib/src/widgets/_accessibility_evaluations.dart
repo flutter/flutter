@@ -13,6 +13,7 @@ import 'binding.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'text.dart';
+import 'title.dart';
 
 const String _kAccessibilityEvaluationsDisabledErrorMessage = '''
 Accessibility evaluations APIs are not enabled.
@@ -82,13 +83,10 @@ abstract class AccessibilityEvaluation {
 @internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
-  const MinimumTapTargetEvaluation({required this.size, required this.link});
+  const MinimumTapTargetEvaluation({required this.size});
 
   /// The minimum allowed size of a tappable node.
   final Size size;
-
-  /// A link describing the tap target evaluations for a platform.
-  final String link;
 
   /// The gap between targets to their parent scrollables to be considered valid
   /// tap targets.
@@ -151,8 +149,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
         Violation(
           node,
           '$node: expected tap target size of at least $size, '
-          'but found $candidateSize\n'
-          'See also: $link',
+          'but found $candidateSize\n',
         ),
       );
     }
@@ -238,6 +235,88 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   }
 }
 
+/// Base class for evaluations that verify nodes meet minimum contrast levels.
+abstract class _ContrastEvaluation extends AccessibilityEvaluation {
+  const _ContrastEvaluation();
+
+  static const double _kContrastTolerance = -0.01;
+
+  @override
+  Future<EvaluationResult> _evaluate(WidgetsBinding binding) async {
+    final violations = <Violation>[];
+    for (final RenderView renderView in binding.renderViews) {
+      final layer = renderView.debugLayer! as OffsetLayer;
+      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+
+      final double ratio = 1 / renderView.flutterView.devicePixelRatio;
+      final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
+      final ByteData byteData = (await image.toByteData())!;
+      violations.addAll(await _evaluateNode(root, image, byteData, renderView));
+      image.dispose();
+    }
+
+    return EvaluationResult(violations);
+  }
+
+  Future<List<Violation>> _evaluateNode(
+    SemanticsNode node,
+    ui.Image image,
+    ByteData byteData,
+    RenderView renderView,
+  ) async {
+    final violations = <Violation>[];
+
+    if (_shouldSkipNodeTraversal(node)) {
+      return violations;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    final children = <SemanticsNode>[];
+    node.visitChildren((SemanticsNode child) {
+      children.add(child);
+      return true;
+    });
+    for (final child in children) {
+      violations.addAll(await _evaluateNode(child, image, byteData, renderView));
+    }
+
+    if (_shouldSkipNodeEvaluation(data)) {
+      return violations;
+    }
+
+    return evaluateNodeContent(node, data, image, byteData, renderView);
+  }
+
+  bool _shouldSkipNodeTraversal(SemanticsNode node) {
+    final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
+    return node.isInvisible ||
+        node.isMergedIntoParent ||
+        node.flagsCollection.isHidden ||
+        isDisabled;
+  }
+
+  bool _shouldSkipNodeEvaluation(SemanticsData data);
+
+  Future<List<Violation>> evaluateNodeContent(
+    SemanticsNode node,
+    SemanticsData data,
+    ui.Image image,
+    ByteData byteData,
+    RenderView renderView,
+  );
+
+  /// Returns if a rectangle of node is off the screen.
+  ///
+  /// Allows node to be off screen partially before culling the node.
+  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
+    final Size windowLogicalSize = window.physicalSize / window.devicePixelRatio;
+    return paintBounds.top < -50.0 ||
+        paintBounds.left < -50.0 ||
+        paintBounds.bottom > windowLogicalSize.height + 50.0 ||
+        paintBounds.right > windowLogicalSize.width + 50.0;
+  }
+}
+
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
 /// An evaluation which verifies that all nodes that contribute semantics via text
@@ -246,9 +325,24 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
 /// The evaluations are defined by the Web Content Accessibility Guidelines,
 /// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
 @internal
-class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
+class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   /// Create a new [MinimumTextContrastEvaluation].
-  const MinimumTextContrastEvaluation();
+  const MinimumTextContrastEvaluation({
+    required this.minNormalTextContrastRatio,
+    required this.minLargeTextContrastRatio,
+  });
+
+  /// The minimum contrast ratio for normal text.
+  ///
+  /// Normal text is text that is smaller than [kLargeTextMinimumSize] (18.0) or
+  /// smaller than [kBoldTextMinimumSize] (14.0) if bold.
+  final double minNormalTextContrastRatio;
+
+  /// The minimum contrast ratio for large text.
+  ///
+  /// Large text is text that is at least [kLargeTextMinimumSize] (18.0) or at
+  /// least [kBoldTextMinimumSize] (14.0) if bold.
+  final double minLargeTextContrastRatio;
 
   /// The minimum text size considered large for contrast checking.
   ///
@@ -273,59 +367,19 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
 
   static const double _kDefaultFontSize = 12.0;
 
-  static const double _tolerance = -0.01;
+  @override
+  bool _shouldSkipNodeEvaluation(SemanticsData data) =>
+      data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
   @override
-  Future<EvaluationResult> _evaluate(WidgetsBinding binding) async {
-    final violations = <Violation>[];
-    for (final RenderView renderView in binding.renderViews) {
-      final layer = renderView.debugLayer! as OffsetLayer;
-      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
-
-      late ui.Image image;
-      // Needs to be the same pixel ratio otherwise our dimensions won't match
-      // the last transform layer.
-      final double ratio = 1 / renderView.flutterView.devicePixelRatio;
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
-      final ByteData? byteData = await image.toByteData();
-
-      violations.addAll(await _evaluateNode(root, image, byteData!, renderView));
-      image.dispose();
-    }
-
-    return EvaluationResult(violations);
-  }
-
-  Future<List<Violation>> _evaluateNode(
+  Future<List<Violation>> evaluateNodeContent(
     SemanticsNode node,
+    SemanticsData data,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
   ) async {
     final violations = <Violation>[];
-
-    // Skip disabled nodes, as they are not required to pass contrast checks.
-    final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
-
-    if (node.isInvisible ||
-        node.isMergedIntoParent ||
-        node.flagsCollection.isHidden ||
-        isDisabled) {
-      return violations;
-    }
-
-    final SemanticsData data = node.getSemanticsData();
-    final children = <SemanticsNode>[];
-    node.visitChildren((SemanticsNode child) {
-      children.add(child);
-      return true;
-    });
-    for (final child in children) {
-      violations.addAll(await _evaluateNode(child, image, byteData, renderView));
-    }
-    if (_shouldSkipNode(data)) {
-      return violations;
-    }
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = _collectElementsByText(
       WidgetsBinding.instance.rootElement!,
@@ -422,7 +476,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     final double contrastRatio = report.contrastRatio();
     final double targetContrastRatio = _targetContrastRatio(fontSize, bold: isBold);
 
-    if (contrastRatio - targetContrastRatio >= _tolerance) {
+    if (contrastRatio - targetContrastRatio >= _ContrastEvaluation._kContrastTolerance) {
       return <Violation>[];
     }
     return <Violation>[
@@ -440,23 +494,6 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     ];
   }
 
-  /// Returns whether node should be skipped.
-  ///
-  /// Skip routes which might have labels, and nodes without any text.
-  bool _shouldSkipNode(SemanticsData data) =>
-      data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
-
-  /// Returns if a rectangle of node is off the screen.
-  ///
-  /// Allows node to be off screen partially before culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
-    return paintBounds.top < -50.0 ||
-        paintBounds.left < -50.0 ||
-        paintBounds.bottom > windowPhysicalSize.height + 50.0 ||
-        paintBounds.right > windowPhysicalSize.width + 50.0;
-  }
-
   /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
@@ -464,50 +501,114 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
     if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
         fontSizeOrDefault >= kLargeTextMinimumSize) {
-      return kMinimumRatioLargeText;
+      return minLargeTextContrastRatio;
     }
-    return kMinimumRatioNormalText;
+    return minNormalTextContrastRatio;
   }
 }
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// An evaluation which verifies that all nodes that contribute semantics via text
-/// meet **WCAG AAA** contrast levels.
+/// An evaluation which verifies that all nodes that represent non-text controls
+/// meet minimum contrast levels of 3.0.
 ///
-/// The AAA level is defined by the Web Content Accessibility Guidelines:
-/// https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced
-///
-/// This evaluation enforces a stricter contrast ratio:
-///  * Normal text must have a contrast ratio of at least 7.0
-///  * Large or bold text must have a contrast ratio of at least 4.5
+/// The evaluations are defined by the Web Content Accessibility Guidelines,
+/// https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
 @internal
-class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
-  /// Create a new [MinimumTextContrastEvaluationAAA].
-  const MinimumTextContrastEvaluationAAA();
+class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
+  /// Create a new [MinimumNonTextContrastEvaluation].
+  const MinimumNonTextContrastEvaluation();
 
-  /// The minimum contrast ratio for large text (bold ≥14px or ≥18px).
+  /// The minimum contrast ratio for non-text controls.
   ///
-  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kAAAMinimumRatioLargeText = 4.5;
-
-  /// The minimum contrast ratio for normal text.
-  ///
-  /// Defined by WCAG AAA standard http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kAAAMinimumRatioNormalText = 7.0;
+  /// Defined by http://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
+  static const double _kMinimumRatioNonText = 3.0;
 
   @override
-  double _targetContrastRatio(double? fontSize, {required bool bold}) {
-    final double fontSizeOrDefault = fontSize ?? MinimumTextContrastEvaluation._kDefaultFontSize;
-    if ((bold && fontSizeOrDefault >= MinimumTextContrastEvaluation.kBoldTextMinimumSize) ||
-        fontSizeOrDefault >= MinimumTextContrastEvaluation.kLargeTextMinimumSize) {
-      return kAAAMinimumRatioLargeText;
+  bool _shouldSkipNodeEvaluation(SemanticsData data) {
+    if (data.flagsCollection.scopesRoute) {
+      return true;
     }
-    return kAAAMinimumRatioNormalText;
+
+    final bool isControl =
+        data.flagsCollection.isButton ||
+        data.flagsCollection.isSlider ||
+        data.flagsCollection.isTextField ||
+        data.flagsCollection.isChecked != ui.CheckedState.none ||
+        data.flagsCollection.isToggled != ui.Tristate.none ||
+        data.hasAction(ui.SemanticsAction.tap) ||
+        data.hasAction(ui.SemanticsAction.longPress);
+
+    return !isControl;
+  }
+
+  @override
+  Future<List<Violation>> evaluateNodeContent(
+    SemanticsNode node,
+    SemanticsData data,
+    ui.Image image,
+    ByteData byteData,
+    RenderView renderView,
+  ) async {
+    final violations = <Violation>[];
+    Rect nodeBounds = node.rect;
+    SemanticsNode? current = node;
+    while (current != null) {
+      final Matrix4? transform = current.transform;
+      if (transform != null && current.parent != null) {
+        nodeBounds = MatrixUtils.transformRect(transform, nodeBounds);
+      }
+      current = current.parent;
+    }
+
+    final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
+    final logicalBounds = Rect.fromLTRB(
+      nodeBounds.left / devicePixelRatio,
+      nodeBounds.top / devicePixelRatio,
+      nodeBounds.right / devicePixelRatio,
+      nodeBounds.bottom / devicePixelRatio,
+    );
+
+    final Rect inflatedBounds = logicalBounds.inflate(4.0);
+
+    if (_isNodeOffScreen(inflatedBounds, renderView.flutterView)) {
+      return violations;
+    }
+
+    final Map<Color, int> colorHistogram = _colorsWithinRect(
+      byteData,
+      inflatedBounds,
+      image.width,
+      image.height,
+    );
+
+    if (colorHistogram.length <= 1) {
+      return violations;
+    }
+
+    final report = _ContrastReport(colorHistogram);
+    final double contrastRatio = report.contrastRatio();
+
+    if (contrastRatio - _kMinimumRatioNonText >= _ContrastEvaluation._kContrastTolerance) {
+      return violations;
+    }
+
+    violations.add(
+      Violation(
+        node,
+        '$node:\n'
+        'Expected non-text control contrast ratio of at least ${_kMinimumRatioNonText.toStringAsFixed(1)} '
+        'but found ${contrastRatio.toStringAsFixed(2)}.\n'
+        'The computed colors were:\n'
+        'light - ${report.lightColor}, dark - ${report.darkColor}\n'
+        'See also: '
+        'https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html',
+      ),
+    );
+    return violations;
   }
 }
 
-/// A class that reports the contrast ratio of a part of the screen.
 class _ContrastReport {
   /// Generates a contrast report given a color histogram.
   ///
@@ -609,4 +710,158 @@ Iterable<Element> _collectElementsByText(Element root, String text) {
     result.addAll(_collectElementsByText(child, text));
   });
   return result;
+}
+
+final int _scrollingActions =
+    SemanticsAction.scrollUp.index |
+    SemanticsAction.scrollDown.index |
+    SemanticsAction.scrollLeft.index |
+    SemanticsAction.scrollRight.index |
+    SemanticsAction.scrollToOffset.index;
+
+/// Whether or not the node is important for accessibility. Should match most cases
+/// on the platforms, but certain edge cases will be inconsistent.
+///
+/// Based on:
+///
+/// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
+/// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+bool _isImportantForAccessibility(SemanticsNode node) {
+  if (node.isMergedIntoParent) {
+    // If this node is merged, all its information are present on an ancestor
+    // node.
+    return false;
+  }
+  final SemanticsData data = node.getSemanticsData();
+  // If the node scopes a route, it doesn't matter what other flags/actions it
+  // has, it is _not_ important for accessibility, so we short circuit.
+  if (data.flagsCollection.scopesRoute) {
+    return false;
+  }
+
+  final hasNonScrollingAction = data.actions & ~_scrollingActions != 0;
+  if (hasNonScrollingAction) {
+    return true;
+  }
+
+  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+  final bool hasImportantFlag =
+      data.flagsCollection.isChecked != ui.CheckedState.none ||
+      data.flagsCollection.isToggled != ui.Tristate.none ||
+      data.flagsCollection.isEnabled != ui.Tristate.none ||
+      data.flagsCollection.isButton ||
+      data.flagsCollection.isTextField ||
+      data.flagsCollection.isFocused != ui.Tristate.none ||
+      data.flagsCollection.isSlider ||
+      data.flagsCollection.isInMutuallyExclusiveGroup;
+
+  if (hasImportantFlag) {
+    return true;
+  }
+
+  final bool hasContent =
+      data.label.isNotEmpty ||
+      data.value.isNotEmpty ||
+      data.hint.isNotEmpty ||
+      data.tooltip.isNotEmpty;
+  if (hasContent) {
+    return true;
+  }
+
+  return false;
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which enforces that all leaf semantics nodes have a label,
+/// value, hint, or tooltip.
+@internal
+class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
+  const UnlabeledLeafNodeEvaluation();
+
+  @override
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
+    for (final RenderView view in binding.renderViews) {
+      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+    }
+    return EvaluationResult(violations);
+  }
+
+  List<Violation> _traverse(SemanticsNode node) {
+    final violations = <Violation>[];
+    var hasChildren = false;
+    node.visitChildren((SemanticsNode child) {
+      hasChildren = true;
+      violations.addAll(_traverse(child));
+      return true;
+    });
+
+    if (node.isInvisible || node.flagsCollection.isHidden) {
+      return violations;
+    }
+
+    // If not merging descendants and has children, it's not a leaf.
+    if (hasChildren && !node.mergeAllDescendantsIntoThisNode) {
+      return violations;
+    }
+
+    if (!_isImportantForAccessibility(node)) {
+      return violations;
+    }
+
+    final SemanticsData data = node.getSemanticsData();
+    if (data.label.trim().isEmpty &&
+        data.value.trim().isEmpty &&
+        data.hint.trim().isEmpty &&
+        data.tooltip.trim().isEmpty) {
+      violations.add(
+        Violation(
+          node,
+          '$node: expected leaf semantics node to have a label, value, hint, or tooltip, '
+          'but none was found.',
+        ),
+      );
+    }
+
+    return violations;
+  }
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which enforces that the application has at least one [Title]
+/// widget to set the web page title.
+@internal
+class TitleEvaluation extends AccessibilityEvaluation {
+  /// Create a new [TitleEvaluation].
+  const TitleEvaluation();
+
+  @override
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
+
+    if (binding.rootElement != null && !_hasTitleWidget(binding.rootElement!)) {
+      final SemanticsNode rootNode =
+          binding.renderViews.first.owner!.semanticsOwner!.rootSemanticsNode!;
+      violations.add(
+        Violation(rootNode, 'Expected to find at least one Title widget, but none was found.'),
+      );
+    }
+
+    return EvaluationResult(violations);
+  }
+
+  bool _hasTitleWidget(Element element) {
+    if (element.widget is Title) {
+      return true;
+    }
+    var found = false;
+    element.visitChildren((Element child) {
+      if (!found) {
+        found = _hasTitleWidget(child);
+      }
+    });
+    return found;
+  }
 }

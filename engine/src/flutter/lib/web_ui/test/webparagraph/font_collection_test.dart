@@ -67,7 +67,7 @@ void testMain() {
         });
 
         expect(fontFamilyList.length, equals(1));
-        expect(fontFamilyList.first, 'Ahem ahem ahem');
+        expect(fontFamilyList.first, '"$testFontFamily"');
       });
 
       test('Register Asset with capital case letters', () async {
@@ -127,7 +127,7 @@ void testMain() {
         });
 
         expect(fontFamilyList.length, equals(1));
-        expect(fontFamilyList.first, testFontFamily);
+        expect(fontFamilyList.first, '"$testFontFamily"');
       });
 
       test('Register Asset once with exclamation mark', () async {
@@ -145,7 +145,7 @@ void testMain() {
         });
 
         expect(fontFamilyList.length, equals(1));
-        expect(fontFamilyList.first, testFontFamily);
+        expect(fontFamilyList.first, '"$testFontFamily"');
       });
 
       test('Register Asset once with comma', () async {
@@ -163,7 +163,7 @@ void testMain() {
         });
 
         expect(fontFamilyList.length, equals(1));
-        expect(fontFamilyList.first, testFontFamily);
+        expect(fontFamilyList.first, '"$testFontFamily"');
       });
 
       test('Register Asset once with a digit at the start of a token', () async {
@@ -181,7 +181,7 @@ void testMain() {
         });
 
         expect(fontFamilyList.length, equals(1));
-        expect(fontFamilyList.first, testFontFamily);
+        expect(fontFamilyList.first, '"$testFontFamily"');
       });
     });
   });

@@ -84,11 +84,11 @@ void main() {
     const linearMinHeight = 25.0;
     const borderRadius = 8.0;
     final theme = ThemeData(
-      progressIndicatorTheme: ProgressIndicatorThemeData(
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: color,
         linearTrackColor: linearTrackColor,
         linearMinHeight: linearMinHeight,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
       ),
     );
     await tester.pumpWidget(
@@ -139,11 +139,11 @@ void main() {
     const stopIndicatorRadius = 10.0;
     const trackGap = 16.0;
     final theme = ThemeData(
-      progressIndicatorTheme: ProgressIndicatorThemeData(
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: color,
         linearTrackColor: linearTrackColor,
         linearMinHeight: linearMinHeight,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
         stopIndicatorColor: stopIndicatorColor,
         stopIndicatorRadius: stopIndicatorRadius,
         trackGap: trackGap,
@@ -217,19 +217,19 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Scaffold(
+          home: const Scaffold(
             body: Center(
               child: ProgressIndicatorTheme(
                 data: ProgressIndicatorThemeData(
                   color: color,
                   linearTrackColor: linearTrackColor,
                   linearMinHeight: linearMinHeight,
-                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
                   stopIndicatorColor: stopIndicatorColor,
                   stopIndicatorRadius: stopIndicatorRadius,
                   trackGap: trackGap,
                 ),
-                child: const SizedBox(width: 200.0, child: LinearProgressIndicator(value: 0.5)),
+                child: SizedBox(width: 200.0, child: LinearProgressIndicator(value: 0.5)),
               ),
             ),
           ),

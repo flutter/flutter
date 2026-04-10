@@ -557,7 +557,19 @@ class _ExpansionTileState extends State<ExpansionTile> {
       // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
       _timer?.cancel();
       _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+          Object exception,
+          StackTrace stack,
+        ) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'material library',
+              context: ErrorDescription('while sending semantics announcement'),
+            ),
+          );
+        });
         _timer?.cancel();
         _timer = null;
       });
@@ -565,7 +577,19 @@ class _ExpansionTileState extends State<ExpansionTile> {
     // SemanticsService.sendAnnouncement is deprecated on android.
     // We use live region to achieve the announcement effect instead.
     else if (defaultTargetPlatform != TargetPlatform.android) {
-      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+        Object exception,
+        StackTrace stack,
+      ) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'material library',
+            context: ErrorDescription('while sending semantics announcement'),
+          ),
+        );
+      });
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
@@ -693,7 +717,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
       shape: expansionTileBorder,
     );
 
-    final Widget tile = Padding(
+    Widget tile = Padding(
       padding: decoration.padding,
       child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]),
     );
@@ -711,6 +735,14 @@ class _ExpansionTileState extends State<ExpansionTile> {
         shape: expansionTileBorder,
         child: tile,
       );
+    }
+
+    // If the background color is not transparent, wrap the tile in a Material widget.
+    // This is needed to ensure that the ListTile background color or ink splashes
+    // are visible. A DecoratedBox with a non-transparent color will hide the
+    // background color or ink splashes of the ListTile.
+    if (backgroundColor.a > 0) {
+      tile = Material(type: MaterialType.transparency, child: tile);
     }
 
     return DecoratedBox(decoration: decoration, child: tile);

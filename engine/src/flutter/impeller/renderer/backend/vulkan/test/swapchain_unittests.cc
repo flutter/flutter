@@ -137,5 +137,31 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
   }
 }
 
+TEST(SwapchainTest, NoFenceWaitAfterAcquireNextImageFailure) {
+  bool wait_for_fences_called = false;
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetAcquireNextImageCallback(
+              [](VkDevice, VkSwapchainKHR, uint64_t, VkSemaphore, VkFence,
+                 uint32_t*) -> VkResult { return VK_ERROR_SURFACE_LOST_KHR; })
+          .SetWaitForFencesCallback([&](VkDevice, uint32_t, const VkFence*,
+                                        VkBool32, uint64_t) -> VkResult {
+            wait_for_fences_called = true;
+            return VK_SUCCESS;
+          })
+          .Build();
+
+  auto surface = CreateSurface(*context);
+  SetSwapchainImageSize(ISize{1, 1});
+  auto swapchain =
+      KHRSwapchainVK::Create(context, std::move(surface), ISize{1, 1},
+                             /*enable_msaa=*/false);
+  auto image = swapchain->AcquireNextDrawable();
+  EXPECT_FALSE(image);
+
+  swapchain->AcquireNextDrawable();
+  EXPECT_FALSE(wait_for_fences_called);
+}
+
 }  // namespace testing
 }  // namespace impeller

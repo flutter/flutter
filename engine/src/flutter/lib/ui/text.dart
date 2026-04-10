@@ -1345,7 +1345,7 @@ enum TextBaseline {
 }
 
 /// A linear decoration to draw near the text.
-class TextDecoration {
+final class TextDecoration {
   const TextDecoration._(this._mask);
 
   /// Creates a decoration that paints the union of all the given decorations.
@@ -1358,6 +1358,9 @@ class TextDecoration {
   }
 
   final int _mask;
+
+  /// The bit mask value that represents this decoration.
+  int get maskValue => _mask;
 
   /// Whether this decoration will paint at least as much decoration as the given decoration.
   bool contains(TextDecoration other) {
