@@ -53,9 +53,9 @@ struct UberSDFParameters {
   Point center;
 
   /// For a rectangle, this is half the width and height.
-  ///  For a circle, this is the radius in both dimensions.
-  // For an oval, this is the extent of the shape from the center along each
-  // axis.
+  /// For a circle, this is the radius in both dimensions.
+  /// For an oval, this is the extent of the shape from the center along each
+  /// axis.
   Point size;
 
   /// The stroke parameters. If std::nullopt, the shape is filled.

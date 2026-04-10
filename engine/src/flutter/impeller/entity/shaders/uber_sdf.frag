@@ -44,7 +44,7 @@ float distanceFromRect(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-float distanceFromOval(vec2 p, in vec2 xyAxis) {
+float distanceFromOval(vec2 p, vec2 xyAxis) {
   float a = xyAxis.x;
   float b = xyAxis.y;
 
@@ -110,7 +110,7 @@ float strokedSDF(vec2 p) {
       outer = distanceFromRect(p, frag_info.size) - half_stroke;
     }
     inner = distanceFromRect(p, frag_info.size - half_stroke);
-  } else if (typeIsOval()) {
+  } else {
     outer = distanceFromOval(p, frag_info.size + vec2(half_stroke));
     inner = distanceFromOval(p, frag_info.size - vec2(half_stroke));
   }
