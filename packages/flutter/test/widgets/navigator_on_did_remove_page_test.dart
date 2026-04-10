@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -26,13 +26,13 @@ void main() {
   testWidgets('Page API will not call onDidRemovePage', (WidgetTester tester) async {
     final removedPages = <Page<void>>[];
 
-    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
-    const page2 = MaterialPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
-    const page3 = MaterialPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
-    const page4 = MaterialPage<void>(key: ValueKey<String>('page4'), child: Text('page4'));
-    const page5 = MaterialPage<void>(key: ValueKey<String>('page5'), child: Text('page5'));
-    const page6 = MaterialPage<void>(key: ValueKey<String>('page6'), child: Text('page6'));
+    const page = _TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = _TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page2 = _TestPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
+    const page3 = _TestPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
+    const page4 = _TestPage<void>(key: ValueKey<String>('page4'), child: Text('page4'));
+    const page5 = _TestPage<void>(key: ValueKey<String>('page5'), child: Text('page5'));
+    const page6 = _TestPage<void>(key: ValueKey<String>('page6'), child: Text('page6'));
     await buildPages(<Page<void>>[page], tester, removedPage: removedPages);
 
     expect(find.text('page'), findsOneWidget);
@@ -58,8 +58,8 @@ void main() {
     final key = GlobalKey<NavigatorState>();
     final removedPage = <Page<void>>[];
 
-    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page = _TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = _TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
     await buildPages(<Page<void>>[page, page1], tester, removedPage: removedPage, navKey: key);
 
     expect(find.text('page1'), findsOneWidget);
@@ -81,17 +81,16 @@ void main() {
     final key = GlobalKey<NavigatorState>();
     final removedPage = <Page<void>>[];
 
-    const page = MaterialPage<void>(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = MaterialPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page = _TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = _TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
     await buildPages(<Page<void>>[page, page1], tester, removedPage: removedPage, navKey: key);
 
     expect(find.text('page1'), findsOneWidget);
 
     key.currentState!.pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) {
-          return const Text('new page');
-        },
+      PageRouteBuilder<void>(
+        pageBuilder: (_, _, _) => const Text('new page'),
+        transitionsBuilder: (_, _, _, child) => child,
       ),
     );
 
@@ -105,4 +104,20 @@ void main() {
     expect(find.text('new page'), findsOneWidget);
     expect(removedPage, <Page<void>>[page1]);
   });
+}
+
+/// A minimal [Page] widget for use in navigator tests without
+/// depending on the Material library.
+class _TestPage<T> extends Page<T> {
+  const _TestPage({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      settings: this,
+      pageBuilder: (_, _, _) => child,
+      transitionsBuilder: (_, _, _, child) => child,
+    );
+  }
 }
