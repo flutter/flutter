@@ -4,6 +4,8 @@
 
 #include "fl_compositor_opengl.h"
 
+#include <cmath>
+
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
@@ -53,6 +55,10 @@ static const char* fragment_shader_src =
     "  gl_FragColor = texture2D(texture, texcoord);\n"
     "}\n";
 
+#if FLUTTER_LINUX_GTK4
+constexpr size_t kGtk4ClientReadbackThresholdPixels = 4096;
+#endif
+
 struct _FlCompositorOpenGL {
   FlCompositor parent_instance;
 
@@ -70,6 +76,12 @@ struct _FlCompositorOpenGL {
 
   // Last rendered frame pixels (only set if shareable is TRUE).
   uint8_t* pixels;
+
+  // Size of the allocated pixel buffer.
+  size_t pixels_length;
+
+  // TRUE when self->pixels are in Cairo-compatible BGRA byte order.
+  gboolean pixels_are_bgra;
 
   // whether the renderer waits for frame render
   bool blocking_main_thread;
@@ -97,6 +109,71 @@ struct _FlCompositorOpenGL {
 G_DEFINE_TYPE(FlCompositorOpenGL,
               fl_compositor_opengl,
               fl_compositor_get_type())
+
+static bool ensure_pixel_buffer(FlCompositorOpenGL* self,
+                                size_t width,
+                                size_t height) {
+  const size_t data_length = width * height * 4;
+  if (self->pixels_length >= data_length) {
+    return true;
+  }
+
+  uint8_t* pixels = static_cast<uint8_t*>(realloc(self->pixels, data_length));
+  if (pixels == nullptr) {
+    return false;
+  }
+
+  self->pixels = pixels;
+  self->pixels_length = data_length;
+  return true;
+}
+
+#if FLUTTER_LINUX_GTK4
+static bool should_use_client_readback_fallback(FlGdkSurface* surface,
+                                                size_t width,
+                                                size_t height) {
+  const gchar* force_readback = g_getenv("FLUTTER_GTK4_FORCE_CLIENT_READBACK");
+  if (force_readback != nullptr &&
+      (g_strcmp0(force_readback, "1") == 0 ||
+       g_ascii_strcasecmp(force_readback, "true") == 0)) {
+    return true;
+  }
+
+  return fl_gtk_surface_get_scale_factor(surface) > 1 &&
+         (width > kGtk4ClientReadbackThresholdPixels ||
+          height > kGtk4ClientReadbackThresholdPixels);
+}
+
+static void paint_pixels_with_cairo(cairo_t* cr,
+                                    const uint8_t* pixels,
+                                    size_t width,
+                                    size_t height,
+                                    gint buffer_scale) {
+  cairo_save(cr);
+  cairo_translate(cr, 0.0, static_cast<double>(height) / buffer_scale);
+  cairo_scale(cr, 1.0 / buffer_scale, -1.0 / buffer_scale);
+
+  const int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+  cairo_surface_t* image_surface = cairo_image_surface_create_for_data(
+      const_cast<unsigned char*>(pixels), CAIRO_FORMAT_ARGB32, width, height,
+      stride);
+  cairo_set_source_surface(cr, image_surface, 0.0, 0.0);
+  cairo_surface_destroy(image_surface);
+
+  cairo_paint(cr);
+  cairo_restore(cr);
+}
+
+static void swizzle_rgba_to_bgra(uint8_t* pixels, size_t width, size_t height) {
+  const size_t pixel_count = width * height;
+  for (size_t i = 0; i < pixel_count; ++i) {
+    const size_t offset = i * 4;
+    const uint8_t red = pixels[offset];
+    pixels[offset] = pixels[offset + 2];
+    pixels[offset + 2] = red;
+  }
+}
+#endif
 
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
 static gchar* get_shader_log(GLuint shader) {
@@ -272,8 +349,11 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
 
     // If not shareable make buffer to copy frame pixels into.
     if (!self->shareable) {
-      size_t data_length = width * height * 4;
-      self->pixels = static_cast<uint8_t*>(realloc(self->pixels, data_length));
+      if (!ensure_pixel_buffer(self, width, height)) {
+        g_warning("Failed to allocate OpenGL compositor pixel buffer");
+        g_mutex_unlock(&self->frame_mutex);
+        return FALSE;
+      }
     }
   }
 
@@ -365,6 +445,7 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     glBindFramebuffer(GL_READ_FRAMEBUFFER,
                       fl_framebuffer_get_id(self->framebuffer));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
+    self->pixels_are_bgra = FALSE;
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
   glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
@@ -408,20 +489,25 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+  const gint buffer_scale = fl_gtk_surface_get_scale_factor(surface);
+  const double scale = fl_gtk_surface_get_scale(surface);
+  const bool has_fractional_scale =
+      std::abs(scale - static_cast<double>(buffer_scale)) > 0.001;
 #if FLUTTER_LINUX_GTK4
   double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
   cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
-  size_t width = static_cast<size_t>((x2 - x1) * scale_factor);
-  size_t height = static_cast<size_t>((y2 - y1) * scale_factor);
+  size_t width = fl_gtk_size_to_pixels(x2 - x1, scale);
+  size_t height = fl_gtk_size_to_pixels(y2 - y1, scale);
   if (width == 0 || height == 0) {
-    width = fl_gtk_surface_get_width(surface) * scale_factor;
-    height = fl_gtk_surface_get_height(surface) * scale_factor;
+    width = fl_gtk_surface_get_width(surface);
+    height = fl_gtk_surface_get_height(surface);
   }
 #else
-  size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
-  size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+  size_t width = fl_gtk_surface_get_width(surface) * buffer_scale;
+  size_t height = fl_gtk_surface_get_height(surface) * buffer_scale;
 #endif
+  const bool use_client_readback_fallback =
+      should_use_client_readback_fallback(surface, width, height);
   if (wait_for_frame) {
     gint64 expiry_time =
         g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
@@ -443,44 +529,84 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
+    if (use_client_readback_fallback) {
+      if (!ensure_pixel_buffer(self, width, height)) {
+        g_warning("Failed to allocate OpenGL compositor fallback buffer");
+        g_mutex_unlock(&self->frame_mutex);
+        return FALSE;
+      }
+
+      GLint saved_read_framebuffer_binding;
+      glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,
+                    &saved_read_framebuffer_binding);
+      glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(sibling));
+      glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                   self->pixels);
+      glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
+      swizzle_rgba_to_bgra(self->pixels, width, height);
+      self->pixels_are_bgra = TRUE;
+      paint_pixels_with_cairo(cr, self->pixels, width, height, buffer_scale);
+    } else {
 #if FLUTTER_LINUX_GTK4
-    cairo_save(cr);
-    cairo_translate(cr, 0.0, static_cast<double>(height));
-    cairo_scale(cr, 1.0, -1.0);
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+      cairo_save(cr);
+      if (has_fractional_scale) {
+        cairo_translate(cr, 0.0, static_cast<double>(height) / scale);
+        cairo_scale(cr, 1.0 / scale, -1.0 / scale);
+      } else {
+        cairo_translate(cr, 0.0, static_cast<double>(height));
+        cairo_scale(cr, 1.0, -1.0);
+      }
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
-    gdk_cairo_draw_from_gl(cr, surface, fl_framebuffer_get_texture_id(sibling),
-                           GL_TEXTURE, scale_factor, 0, 0, width, height);
+      gdk_cairo_draw_from_gl(cr, surface,
+                             fl_framebuffer_get_texture_id(sibling), GL_TEXTURE,
+                             has_fractional_scale ? 1 : buffer_scale, 0, 0,
+                             width, height);
 #if FLUTTER_LINUX_GTK4
-    G_GNUC_END_IGNORE_DEPRECATIONS
-    cairo_restore(cr);
+      G_GNUC_END_IGNORE_DEPRECATIONS
+      cairo_restore(cr);
 #endif
+    }
   } else {
-    GLint saved_texture_binding;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+    if (use_client_readback_fallback) {
+      if (!self->pixels_are_bgra) {
+        swizzle_rgba_to_bgra(self->pixels, width, height);
+        self->pixels_are_bgra = TRUE;
+      }
+      paint_pixels_with_cairo(cr, self->pixels, width, height, buffer_scale);
+    } else {
+      GLint saved_texture_binding;
+      glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
 
-    GLuint texture_id;
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, self->pixels);
+      GLuint texture_id;
+      glGenTextures(1, &texture_id);
+      glBindTexture(GL_TEXTURE_2D, texture_id);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                   GL_UNSIGNED_BYTE, self->pixels);
 
 #if FLUTTER_LINUX_GTK4
-    cairo_save(cr);
-    cairo_translate(cr, 0.0, static_cast<double>(height));
-    cairo_scale(cr, 1.0, -1.0);
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+      cairo_save(cr);
+      if (has_fractional_scale) {
+        cairo_translate(cr, 0.0, static_cast<double>(height) / scale);
+        cairo_scale(cr, 1.0 / scale, -1.0 / scale);
+      } else {
+        cairo_translate(cr, 0.0, static_cast<double>(height));
+        cairo_scale(cr, 1.0, -1.0);
+      }
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
-    gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
-                           0, width, height);
+      gdk_cairo_draw_from_gl(
+          cr, surface, texture_id, GL_TEXTURE,
+          has_fractional_scale ? 1 : buffer_scale, 0, 0, width, height);
 #if FLUTTER_LINUX_GTK4
-    G_GNUC_END_IGNORE_DEPRECATIONS
-    cairo_restore(cr);
+      G_GNUC_END_IGNORE_DEPRECATIONS
+      cairo_restore(cr);
 #endif
 
-    glDeleteTextures(1, &texture_id);
+      glDeleteTextures(1, &texture_id);
 
-    glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+      glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+    }
   }
 
   glFlush();
@@ -516,6 +642,7 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
   g_mutex_init(&self->frame_mutex);
+  self->pixels_are_bgra = FALSE;
 }
 
 FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,

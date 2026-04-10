@@ -151,24 +151,23 @@ static gboolean redraw_cb(gpointer user_data) {
   // necessary.
   GtkAllocation allocation;
   gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
-  gint scale_factor =
-      gtk_widget_get_scale_factor(GTK_WIDGET(self->render_area));
-  size_t width = allocation.width * scale_factor;
-  size_t height = allocation.height * scale_factor;
+  const double scale = fl_gtk_widget_get_scale(GTK_WIDGET(self->render_area));
+  size_t width = fl_gtk_size_to_pixels(allocation.width, scale);
+  size_t height = fl_gtk_size_to_pixels(allocation.height, scale);
   size_t frame_width, frame_height;
   fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
-                                frame_width / scale_factor,
-                                frame_height / scale_factor);
+                                MAX(static_cast<gint>(frame_width / scale), 1),
+                                MAX(static_cast<gint>(frame_height / scale), 1));
     GtkWidget* toplevel = fl_view_get_toplevel_widget(self);
     if (GTK_IS_WINDOW(toplevel)) {
 #if FLUTTER_LINUX_GTK4
       gtk_window_set_default_size(
           GTK_WINDOW(toplevel),
-          MAX(static_cast<gint>(frame_width / scale_factor), 1),
-          MAX(static_cast<gint>(frame_height / scale_factor), 1));
+          MAX(static_cast<gint>(frame_width / scale), 1),
+          MAX(static_cast<gint>(frame_height / scale), 1));
 #else
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
 #endif
@@ -304,14 +303,17 @@ static void handle_geometry_changed_with_size(FlView* self,
   if (self->sized_to_content) {
     return;
   }
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  double scale = fl_gtk_widget_get_scale(GTK_WIDGET(self));
 
+  bool size_is_in_pixels = false;
   if (width == 0 || height == 0) {
     // Try to fall back to the toplevel surface size if available.
     FlGdkSurface* surface = fl_view_get_toplevel_surface(self);
     if (surface != nullptr) {
       width = fl_gtk_surface_get_width(surface);
       height = fl_gtk_surface_get_height(surface);
+      scale = fl_gtk_surface_get_scale(surface);
+      size_is_in_pixels = true;
     }
     if (width == 0 || height == 0) {
       static bool logged_zero_allocation = false;
@@ -341,12 +343,14 @@ static void handle_geometry_changed_with_size(FlView* self,
     display_id = fl_display_monitor_get_display_id(
         fl_engine_get_display_monitor(self->engine), monitor);
   }
-  size_t min_width = width, min_height = height;
-  size_t max_width = width, max_height = height;
+  size_t min_width = size_is_in_pixels ? width : fl_gtk_size_to_pixels(width, scale);
+  size_t min_height =
+      size_is_in_pixels ? height : fl_gtk_size_to_pixels(height, scale);
+  size_t max_width = min_width;
+  size_t max_height = min_height;
   fl_engine_send_window_metrics_event(
-      self->engine, display_id, self->view_id, min_width * scale_factor,
-      min_height * scale_factor, max_width * scale_factor,
-      max_height * scale_factor, scale_factor);
+      self->engine, display_id, self->view_id, min_width, min_height,
+      max_width, max_height, scale);
 }
 
 static void handle_geometry_changed(FlView* self) {
@@ -1306,7 +1310,7 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   self->engine = FL_ENGINE(g_object_ref(engine));
 
   size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  double scale_factor = fl_gtk_widget_get_scale(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,
       scale_factor, self->cancellable, view_added_cb, self);
@@ -1324,7 +1328,7 @@ G_MODULE_EXPORT FlView* fl_view_new_sized_to_content(FlEngine* engine) {
   self->sized_to_content = TRUE;
   size_t min_width = 1, min_height = 1, max_width = G_MAXSIZE,
          max_height = G_MAXSIZE;
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  double scale_factor = fl_gtk_widget_get_scale(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,
       scale_factor, self->cancellable, view_added_cb, self);
