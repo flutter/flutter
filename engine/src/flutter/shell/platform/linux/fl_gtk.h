@@ -23,6 +23,14 @@ static inline gint fl_gtk_surface_get_scale_factor(FlGdkSurface* surface) {
   return gdk_surface_get_scale_factor(surface);
 }
 
+static inline double fl_gtk_surface_get_scale(FlGdkSurface* surface) {
+#if GTK_CHECK_VERSION(4, 12, 0)
+  return gdk_surface_get_scale(surface);
+#else
+  return static_cast<double>(gdk_surface_get_scale_factor(surface));
+#endif
+}
+
 static inline gint fl_gtk_surface_get_width(FlGdkSurface* surface) {
   return gdk_surface_get_width(surface);
 }
@@ -35,6 +43,27 @@ static inline GdkMonitor* fl_gtk_display_get_monitor_at_surface(
     GdkDisplay* display,
     FlGdkSurface* surface) {
   return gdk_display_get_monitor_at_surface(display, surface);
+}
+
+static inline double fl_gtk_monitor_get_scale(GdkMonitor* monitor) {
+#if GTK_CHECK_VERSION(4, 14, 0)
+  return gdk_monitor_get_scale(monitor);
+#else
+  return static_cast<double>(gdk_monitor_get_scale_factor(monitor));
+#endif
+}
+
+static inline double fl_gtk_widget_get_scale(GtkWidget* widget) {
+  FlGdkSurface* surface = fl_gtk_widget_get_surface(widget);
+  return surface != nullptr
+             ? fl_gtk_surface_get_scale(surface)
+             : static_cast<double>(gtk_widget_get_scale_factor(widget));
+}
+
+static inline size_t fl_gtk_size_to_pixels(double logical_size, double scale) {
+  return logical_size <= 0.0 || scale <= 0.0
+             ? 0
+             : static_cast<size_t>(logical_size * scale + 0.5);
 }
 
 static inline void fl_gtk_surface_set_cursor(FlGdkSurface* surface,
@@ -62,6 +91,10 @@ static inline gint fl_gtk_surface_get_scale_factor(FlGdkSurface* surface) {
   return gdk_window_get_scale_factor(surface);
 }
 
+static inline double fl_gtk_surface_get_scale(FlGdkSurface* surface) {
+  return static_cast<double>(gdk_window_get_scale_factor(surface));
+}
+
 static inline gint fl_gtk_surface_get_width(FlGdkSurface* surface) {
   return gdk_window_get_width(surface);
 }
@@ -74,6 +107,20 @@ static inline GdkMonitor* fl_gtk_display_get_monitor_at_surface(
     GdkDisplay* display,
     FlGdkSurface* surface) {
   return gdk_display_get_monitor_at_window(display, surface);
+}
+
+static inline double fl_gtk_monitor_get_scale(GdkMonitor* monitor) {
+  return static_cast<double>(gdk_monitor_get_scale_factor(monitor));
+}
+
+static inline double fl_gtk_widget_get_scale(GtkWidget* widget) {
+  return static_cast<double>(gtk_widget_get_scale_factor(widget));
+}
+
+static inline size_t fl_gtk_size_to_pixels(double logical_size, double scale) {
+  return logical_size <= 0.0 || scale <= 0.0
+             ? 0
+             : static_cast<size_t>(logical_size * scale + 0.5);
 }
 
 static inline void fl_gtk_surface_set_cursor(FlGdkSurface* surface,
