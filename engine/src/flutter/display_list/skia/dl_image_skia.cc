@@ -22,7 +22,9 @@ DlImageSkiaImpl::DlImageSkiaImpl(sk_sp<SkImage> image)
 // |DlImage|
 DlImageSkiaImpl::~DlImageSkiaImpl() = default;
 
-DlImage::Type DlImageSkia::GetType() const { return Type::kSkia; }
+DlImage::Type DlImageSkia::GetType() const {
+  return Type::kSkia;
+}
 
 // |DlImage|
 const DlImageSkia* DlImageSkia::asDlImageSkia() const {
