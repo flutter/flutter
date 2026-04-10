@@ -492,7 +492,15 @@ TEST_P(AiksTest, ClearBlend) {
   DlPaint clear;
   clear.setBlendMode(DlBlendMode::kClear);
 
-  builder.DrawCircle(DlPoint(300.0, 300.0), 200.0, clear);
+  builder.DrawCircle(DlPoint(150.0, 150.0), 100.0, clear);
+
+  builder.DrawRect(DlRect::MakeXYWH(350.0, 350.0, 200.0, 200.0), clear);
+
+  DlPaint clear_line = clear;
+  clear_line.setDrawStyle(DlDrawStyle::kStroke);
+  clear_line.setStrokeWidth(40.0);
+  clear_line.setStrokeCap(DlStrokeCap::kRound);
+  builder.DrawLine(DlPoint(50.0, 550.0), DlPoint(550.0, 50.0), clear_line);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

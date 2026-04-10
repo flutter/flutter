@@ -528,7 +528,8 @@ bool Canvas::AttemptDrawAntialiasedCircle(const Point& center,
                                           Scalar radius,
                                           const Paint& paint) {
   if (paint.HasColorFilter() || paint.image_filter || paint.invert_colors ||
-      paint.color_source || paint.mask_blur_descriptor.has_value()) {
+      paint.color_source || paint.mask_blur_descriptor.has_value() ||
+      paint.blend_mode == BlendMode::kClear) {
     return false;
   }
 
@@ -779,7 +780,8 @@ void Canvas::DrawLine(const Point& p0,
   if ((renderer_.GetContext()->GetFlags().antialiased_lines ||
        renderer_.GetContext()->GetFlags().use_sdfs) &&
       !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
-      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
+      !paint.mask_blur_descriptor.has_value() && !paint.color_source &&
+      paint.blend_mode != BlendMode::kClear) {
     auto contents = LineContents::Make(std::move(geometry), paint.color);
     entity.SetContents(std::move(contents));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
@@ -828,7 +830,8 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      !paint.mask_blur_descriptor.has_value() &&
+      paint.blend_mode != BlendMode::kClear) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color, /*rect=*/rect,
         /*stroke=*/paint.style == Paint::Style::kStroke
@@ -1028,7 +1031,8 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      !paint.mask_blur_descriptor.has_value() &&
+      paint.blend_mode != BlendMode::kClear) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.style == Paint::Style::kStroke
