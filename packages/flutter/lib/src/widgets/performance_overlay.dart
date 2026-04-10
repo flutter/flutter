@@ -28,11 +28,11 @@ import 'framework.dart';
 /// number of frames delivered to the screen per second.
 ///
 /// For example, if an app only updates a clock once every sixty seconds, but
-/// the UI thread takes 10ms to produce that single frame, the overlay would
-/// indicate a capacity for 60 FPS, even though the actual frame rate is one
-/// frame per minute. Conversely, if a frame takes 30ms to process, the overlay
-/// would report 33 FPS, as that is the theoretical maximum throughput the
-/// thread could sustain, regardless of the actual update frequency.
+/// the UI thread takes 16.6ms to produce that single frame, the overlay would
+/// indicate a capacity for 60 FPS (the theoretical max for a 60Hz display),
+/// even though the actual frame rate is one frame per minute. Conversely, if
+/// a frame takes 33.3ms to process, the overlay would report 30 FPS, as that
+/// is the theoretical maximum throughput the thread could sustain.
 ///
 /// **Visualizing Performance:**
 /// * **Green Vertical Line:** Indicates that the thread's work was completed
