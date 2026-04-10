@@ -649,7 +649,6 @@ class XCDevice {
             xcodeDebug: _xcodeDebug,
             fileSystem: globals.fs,
             processUtils: _processUtils,
-            xcode: _xcode,
           ),
           xcodeDebug: _xcodeDebug,
           platform: globals.platform,
