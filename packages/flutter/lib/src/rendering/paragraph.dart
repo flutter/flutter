@@ -1672,26 +1672,30 @@ class _SelectableFragment
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
-    TextPosition? targetPosition;
-    if (textBoundary != null) {
-      assert(
-        textBoundary.boundaryStart.offset >= range.start &&
-            textBoundary.boundaryEnd.offset <= range.end,
-      );
-      if (existingSelectionEnd != null) {
-        // If the end edge exists and the start edge is being moved, then the
-        // start edge is moved to encompass the entire text boundary at the new position.
-        if (position.offset < existingSelectionEnd.offset) {
-          targetPosition = textBoundary.boundaryStart;
-        } else {
-          targetPosition = textBoundary.boundaryEnd;
-        }
-      } else {
-        // Move the start edge to the closest text boundary.
-        targetPosition = _closestTextBoundary(textBoundary, position);
-      }
+    if (textBoundary == null) {
+      // The position is not contained within the current rect. The targetPosition
+      // will either be at the end or beginning of the current rect. See [SelectionUtils.adjustDragOffset]
+      // for a more in depth explanation on this adjustment.
+      return position;
     }
-    return targetPosition ?? position;
+    assert(
+      textBoundary.boundaryStart.offset >= range.start &&
+          textBoundary.boundaryEnd.offset <= range.end,
+    );
+    TextPosition? targetPosition;
+    if (existingSelectionEnd != null) {
+      // If the end edge exists and the start edge is being moved, then the
+      // start edge is moved to encompass the entire text boundary at the new position.
+      if (position.offset < existingSelectionEnd.offset) {
+        targetPosition = textBoundary.boundaryStart;
+      } else {
+        targetPosition = textBoundary.boundaryEnd;
+      }
+    } else {
+      // Move the start edge to the closest text boundary.
+      targetPosition = _closestTextBoundary(textBoundary, position);
+    }
+    return targetPosition;
   }
 
   TextPosition _updateSelectionEndEdgeByTextBoundary(
@@ -1701,26 +1705,30 @@ class _SelectableFragment
     TextPosition? existingSelectionStart,
     TextPosition? existingSelectionEnd,
   ) {
-    TextPosition? targetPosition;
-    if (textBoundary != null) {
-      assert(
-        textBoundary.boundaryStart.offset >= range.start &&
-            textBoundary.boundaryEnd.offset <= range.end,
-      );
-      if (existingSelectionStart != null) {
-        // If the start edge exists and the end edge is being moved, then the
-        // end edge is moved to encompass the entire text boundary at the new position.
-        if (position.offset < existingSelectionStart.offset) {
-          targetPosition = textBoundary.boundaryStart;
-        } else {
-          targetPosition = textBoundary.boundaryEnd;
-        }
-      } else {
-        // Move the end edge to the closest text boundary.
-        targetPosition = _closestTextBoundary(textBoundary, position);
-      }
+    if (textBoundary == null) {
+      // The position is not contained within the current rect. The targetPosition
+      // will either be at the end or beginning of the current rect. See [SelectionUtils.adjustDragOffset]
+      // for a more in depth explanation on this adjustment.
+      return position;
     }
-    return targetPosition ?? position;
+    assert(
+      textBoundary.boundaryStart.offset >= range.start &&
+          textBoundary.boundaryEnd.offset <= range.end,
+    );
+    TextPosition? targetPosition;
+    if (existingSelectionStart != null) {
+      // If the start edge exists and the end edge is being moved, then the
+      // end edge is moved to encompass the entire text boundary at the new position.
+      if (position.offset < existingSelectionStart.offset) {
+        targetPosition = textBoundary.boundaryStart;
+      } else {
+        targetPosition = textBoundary.boundaryEnd;
+      }
+    } else {
+      // Move the end edge to the closest text boundary.
+      targetPosition = _closestTextBoundary(textBoundary, position);
+    }
+    return targetPosition;
   }
 
   SelectionResult _updateSelectionEdgeByTextBoundary(
@@ -2346,7 +2354,6 @@ class _SelectableFragment
     }
     return false;
   }
-
 
   ({RenderParagraph paragraph, Offset localPosition})? _getParagraphContainingPosition(
     Offset globalPosition,
