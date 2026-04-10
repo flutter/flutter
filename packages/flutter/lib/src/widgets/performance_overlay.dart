@@ -13,15 +13,34 @@ import 'framework.dart';
 
 /// Displays performance statistics.
 ///
-/// The overlay shows two time series. The first shows how much time was
-/// required on this thread to produce each frame. The second shows how much
-/// time was required on the raster thread (formerly known as the GPU thread)
-/// to produce each frame. Ideally, both these values would be less than
-/// the total frame budget for the hardware on which the app is running.
-/// For example, if the hardware has a screen that updates at 60 Hz, each
-/// thread should ideally spend less than 16ms producing each frame.
-/// This ideal condition is indicated by a green vertical line for each thread.
-/// Otherwise, the performance overlay shows a red vertical line.
+/// The overlay shows two separate graphs representing the two main threads
+/// involved in rendering:
+///
+/// 1. **UI Thread (Bottom Graph):** Measures the time spent executing Dart code,
+///    including building widgets, performing layout, and paint command recording.
+/// 2. **Raster Thread (Top Graph):** Measures the time spent by the engine's
+///    rasterizer (formerly the GPU thread) to turn the recorded paint commands
+///    into actual pixels on the screen.
+///
+/// **Theoretical Throughput (FPS):**
+/// The values shown represent the maximum possible throughput for that thread
+/// given the current workload. It does not necessarily reflect the actual
+/// number of frames delivered to the screen per second.
+///
+/// For example, if an app only updates a clock once every sixty seconds, but
+/// the UI thread takes 10ms to produce that single frame, the overlay would
+/// indicate a capacity for 60 FPS, even though the actual frame rate is one
+/// frame per minute. Conversely, if a frame takes 30ms to process, the overlay
+/// would report 33 FPS, as that is the theoretical maximum throughput the
+/// thread could sustain, regardless of the actual update frequency.
+///
+/// **Visualizing Performance:**
+/// * **Green Vertical Line:** Indicates that the thread's work was completed
+///   within the hardware's target frame budget (e.g., < 16.6ms for 60Hz).
+/// * **Red Vertical Line:** Indicates the thread exceeded the budget, which
+///   would result in visible jank during continuous animation.
+///
+/// For more detailed analysis, including direct FPS metrics, use Flutter DevTools.
 ///
 /// The simplest way to show the performance overlay is to set
 /// [MaterialApp.showPerformanceOverlay] or [WidgetsApp.showPerformanceOverlay]
