@@ -16,11 +16,11 @@ import 'framework.dart';
 /// The overlay shows two separate graphs representing the two main threads
 /// involved in rendering:
 ///
-/// 1. **UI Thread (Bottom Graph):** Measures the time spent executing Dart code,
-///    including building widgets, performing layout, and paint command recording.
-/// 2. **Raster Thread (Top Graph):** Measures the time spent by the engine's
+/// 1. **Raster Thread (Top Graph):** Measures the time spent by the engine's
 ///    rasterizer (formerly the GPU thread) to turn the recorded paint commands
 ///    into actual pixels on the screen.
+/// 2. **UI Thread (Bottom Graph):** Measures the time spent executing Dart code,
+///    including building widgets, performing layout, and paint command recording.
 ///
 /// **Theoretical Throughput (FPS):**
 /// The values shown represent the maximum possible throughput for that thread
@@ -40,7 +40,7 @@ import 'framework.dart';
 /// * **Red Vertical Line:** Indicates the thread exceeded the budget, which
 ///   would result in visible jank during continuous animation.
 ///
-/// For more detailed analysis, including direct FPS metrics, use Flutter DevTools.
+/// For more detailed analysis, including direct FPS metrics, use [Flutter DevTools](https://docs.flutter.dev/tools/devtools)
 ///
 /// The simplest way to show the performance overlay is to set
 /// [MaterialApp.showPerformanceOverlay] or [WidgetsApp.showPerformanceOverlay]
