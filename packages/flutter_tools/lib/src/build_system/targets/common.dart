@@ -13,6 +13,7 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
+import '../../features.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
@@ -154,9 +155,9 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
-    // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
+  List<Source> get outputs => <Source>[
+    const Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
+    if (featureFlags.isRecordUseEnabled) const Source.pattern('{BUILD_DIR}/recorded_uses.json'),
   ];
 
   static const depfile = 'kernel_snapshot_program.d';
@@ -204,6 +205,17 @@ class KernelSnapshot extends Target {
       environment.defines,
       kExtraFrontEndOptions,
     );
+    final File recordedUsesFile = environment.buildDir.childFile('recorded_uses.json');
+    if (featureFlags.isRecordUseEnabled) {
+      if (buildMode.isPrecompiled) {
+        extraFrontEndOptions.add('--recorded-uses=${recordedUsesFile.path}');
+      } else {
+        // Produce an empty file to satisfy the build system in JIT mode.
+        if (!recordedUsesFile.existsSync()) {
+          recordedUsesFile.writeAsStringSync('{}');
+        }
+      }
+    }
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 

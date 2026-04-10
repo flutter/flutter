@@ -17,6 +17,7 @@ import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
+import '../../features.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../isolated/native_assets/dart_hook_result.dart';
@@ -185,6 +186,10 @@ class Dart2JSTarget extends Dart2WebTarget {
       else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
+      if (featureFlags.isRecordUseEnabled) ...<String>[
+        '--write-resources',
+        '--enable-experiment=record-use',
+      ],
     ];
 
     // NOTE: most args should be populated in [toSharedCommandOptions].
@@ -216,6 +221,12 @@ class Dart2JSTarget extends Dart2WebTarget {
       outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
+
+    final File resourcesFile = environment.buildDir.childFile('main.dart.js.resources.json');
+    final File recordedUsesFile = environment.buildDir.childFile('recorded_uses.json');
+    if (resourcesFile.existsSync()) {
+      resourcesFile.renameSync(recordedUsesFile.path);
+    }
     final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
       environment.logger.printWarning(
@@ -347,6 +358,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
+      if (featureFlags.isRecordUseEnabled) ...<String>[
+        '--recorded-uses=${environment.buildDir.childFile('recorded_uses.json').path}',
+        '--enable-experiment=record-use',
+      ],
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
@@ -539,6 +554,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
   }
 }
 
+class DartBuildForWeb extends DartBuild {
+  const DartBuildForWeb({required this.compileTargets})
+    : super(specifiedTargetPlatform: TargetPlatform.web_javascript);
+
+  final List<Dart2WebTarget> compileTargets;
+
+  @override
+  List<Target> get dependencies => <Target>[if (featureFlags.isRecordUseEnabled) ...compileTargets];
+}
+
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
@@ -569,7 +594,7 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    const DartBuild(specifiedTargetPlatform: TargetPlatform.web_javascript),
+    DartBuildForWeb(compileTargets: compileTargets),
   ];
 
   Iterable<String> get buildPatternStems =>
