@@ -23,6 +23,18 @@ out vec4 frag_color;
 
 highp in vec2 v_position;
 
+bool typeIsCircle() {
+  return abs(frag_info.type - 0.0) < 0.01;
+}
+
+bool typeIsRect() {
+  return abs(frag_info.type - 1.0) < 0.01;
+}
+
+bool typeIsOval() {
+  return abs(frag_info.type - 2.0) < 0.01;
+}
+
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
 }
@@ -30,6 +42,22 @@ float distanceFromCircle(vec2 p, float radius) {
 float distanceFromRect(vec2 p, vec2 b) {
   vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+float distanceFromOval(vec2 p, in vec2 xyAxis) {
+  float a = xyAxis.x;
+  float b = xyAxis.y;
+
+  float a2 = a * a;
+  float b2 = b * b;
+
+  // Slope of the line from the center of the oval to p.
+  float m = p.y / p.x;
+  float m2 = m * m;
+
+  // q is the point along that line that intersects the oval.
+  vec2 q = vec2(a * b / sqrt((a2 * m2) + b2), a * b * m / sqrt((a2 * m2) + b2));
+  return length(p) - length(q);
 }
 
 float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
@@ -51,10 +79,12 @@ float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
 }
 
 float filledSDF(vec2 p) {
-  if (frag_info.type < 0.5) {  // Circle
+  if (typeIsCircle()) {  // Circle
     return distanceFromCircle(p, frag_info.size.x);
-  } else {  // Rect
+  } else if (typeIsRect()) {  // Rect
     return distanceFromRect(p, frag_info.size);
+  } else {
+    return distanceFromOval(p, frag_info.size);
   }
 }
 
@@ -63,10 +93,10 @@ float strokedSDF(vec2 p) {
   float outer;
   float inner;
 
-  if (frag_info.type < 0.5) {  // Circle
+  if (typeIsCircle()) {
     outer = distanceFromCircle(p, frag_info.size.x + half_stroke);
     inner = distanceFromCircle(p, frag_info.size.x - half_stroke);
-  } else {                              // Rect
+  } else if (typeIsRect()) {
     if (frag_info.stroke_join < 0.5) {  // Miter
       // Rectangle expanded by half_stroke
       outer = distanceFromRect(p, frag_info.size + half_stroke);
@@ -80,6 +110,9 @@ float strokedSDF(vec2 p) {
       outer = distanceFromRect(p, frag_info.size) - half_stroke;
     }
     inner = distanceFromRect(p, frag_info.size - half_stroke);
+  } else if (typeIsOval()) {
+    outer = distanceFromOval(p, frag_info.size + vec2(half_stroke));
+    inner = distanceFromOval(p, frag_info.size - vec2(half_stroke));
   }
 
   return max(outer, -inner);
