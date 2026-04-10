@@ -107,8 +107,6 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
-    'packages/flutter/test/widgets/semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart',
-    'packages/flutter/test/widgets/scrollable_restoration_test.dart',
     'packages/flutter/test/widgets/text_golden_test.dart',
     'packages/flutter/test/widgets/restoration_scopes_moving_test.dart',
     'packages/flutter/test/widgets/page_transitions_test.dart',
@@ -128,7 +126,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/default_text_editing_shortcuts_test.dart',
     'packages/flutter/test/widgets/sliver_main_axis_group_test.dart',
     'packages/flutter/test/widgets/sliver_semantics_test.dart',
-    'packages/flutter/test/widgets/autocomplete_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_shortcuts_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
@@ -167,10 +164,7 @@ class TestsCrossImportChecker {
   ///    Widgets tests importing Material or Cupertino.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
-  static final Set<String> knownCupertinoCrossImports = <String>{
-    // TODO(justinmc): This one uses SelectableText. See https://github.com/flutter/flutter/issues/181682
-    'packages/flutter/test/cupertino/text_selection_test.dart',
-  };
+  static final Set<String> knownCupertinoCrossImports = <String>{};
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
     knownCupertinoCrossImports,

@@ -2989,7 +2989,19 @@ class EditableTextState extends State<EditableText>
       return;
     }
     if (_hasInputConnection) {
-      LiveText.startLiveTextInput();
+      LiveText.startLiveTextInput().then(
+        (_) {},
+        onError: (Object error, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'widgets library',
+              context: ErrorDescription('while starting Live Text input'),
+            ),
+          );
+        },
+      );
     }
     if (cause == SelectionChangedCause.toolbar) {
       hideToolbar();
