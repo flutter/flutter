@@ -1509,5 +1509,25 @@ TEST_P(AiksTest, CanRenderNestedBackdropBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, GaussianBlurFlipped) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 350, 350),
+                   DlPaint().setColor(DlColor::kWhite()));
+
+  builder.Save();
+  builder.Scale(-1, 1);
+  DlPaint paint;
+  paint.setImageFilter(DlBlurImageFilter::Make(10, 10, DlTileMode::kDecal));
+  builder.SaveLayer(DlRect::MakeLTRB(-150, 100, 150, 200), &paint);
+  builder.DrawRect(DlRect::MakeLTRB(-150, 0, 150, 300),
+                   DlPaint().setColor(DlColor::kRed()));
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

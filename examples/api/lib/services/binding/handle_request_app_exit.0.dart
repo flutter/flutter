@@ -85,7 +85,7 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
           groupValue: _shouldExit,
           onChanged: (bool? value) => _radioChanged(value),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: <Widget>[
               const RadioListTile<bool>(
                 title: Text('Do Not Allow Exit'),

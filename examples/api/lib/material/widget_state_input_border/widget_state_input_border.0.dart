@@ -46,7 +46,7 @@ class _PageContentState extends State<PageContent> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: <Widget>[
         const Spacer(flex: 8),
         Focus(child: WidgetStateInputBorderExample(enabled: enabled)),

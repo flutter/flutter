@@ -28,7 +28,7 @@ class AbsorbPointerExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      alignment: AlignmentDirectional.center,
+      alignment: .center,
       children: <Widget>[
         SizedBox(
           width: 200.0,

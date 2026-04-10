@@ -36,6 +36,14 @@ TEST_P(AiksTest, CanRenderColoredRect) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderColoredRectPrimitive) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  builder.DrawRect(DlRect::MakeXYWH(100.f, 100.f, 100.f, 100.f), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 using DrawRectProc =
     std::function<void(DisplayListBuilder&, const DlRect&, const DlPaint&)>;
@@ -712,6 +720,7 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     builder.DrawPaint(background_paint);
 
     flutter::DlPaint paint;
+
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
     paint.setStrokeWidth(stroke_width + stroke_width_fine);
