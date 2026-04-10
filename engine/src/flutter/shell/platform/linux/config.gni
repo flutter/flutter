@@ -5,4 +5,9 @@
 declare_args() {
   # Build the Linux embedder against GTK4 instead of GTK3.
   use_gtk4 = false
+
+  # Enable experimental GTK4-native compositor infrastructure.
+  # This keeps the legacy GTK4 compositor available while the native texture
+  # path is developed and tested separately.
+  use_gtk4_native_compositor = false
 }

@@ -82,8 +82,16 @@ config("disable_warnings") {
   cflags_cc = warning_flags
 }
 
-_gtk_config = use_gtk4 ? "//flutter/shell/platform/linux/config:gtk4" : "//flutter/shell/platform/linux/config:gtk"
-_gtk_defines = use_gtk4 ? [ "FLUTTER_LINUX_GTK4" ] : []
+if (use_gtk4) {
+  _gtk_config = "//flutter/shell/platform/linux/config:gtk4"
+  _gtk_defines = [ "FLUTTER_LINUX_GTK4" ]
+  if (use_gtk4_native_compositor) {
+    _gtk_defines += [ "FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR" ]
+  }
+} else {
+  _gtk_config = "//flutter/shell/platform/linux/config:gtk"
+  _gtk_defines = []
+}
 
 source_set("flutter_linux_sources") {
   public = _public_headers + [
@@ -182,6 +190,18 @@ source_set("flutter_linux_sources") {
     "key_mapping.g.cc",
   ]
 
+  if (!use_gtk4) {
+    sources += [
+      "fl_accessible_node.cc",
+      "fl_accessible_text_field.cc",
+      "fl_socket_accessible.cc",
+      "fl_view_accessible.cc",
+    ]
+  } else if (use_gtk4_native_compositor) {
+    public += [ "fl_render_texture_gtk4.h" ]
+    sources += [ "fl_render_texture_gtk4.cc" ]
+  }
+
   # Set flag to stop headers being directly included (library users should not do this)
   defines = [
               "FLUTTER_LINUX_COMPILATION",
@@ -226,7 +246,7 @@ copy("flutter_linux_gschemas") {
 
 if (!use_gtk4) {
   executable("flutter_linux_unittests") {
-  testonly = true
+    testonly = true
 
     sources = [
       "fl_accessibility_handler_test.cc",
