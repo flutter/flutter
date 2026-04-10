@@ -17,6 +17,9 @@ G_DECLARE_FINAL_TYPE(FlRenderTextureGtk4,
 
 GtkWidget* fl_render_texture_gtk4_new(void);
 
+void fl_render_texture_gtk4_set_flip_y(FlRenderTextureGtk4* self,
+                                       gboolean flip_y);
+
 void fl_render_texture_gtk4_set_texture(FlRenderTextureGtk4* self,
                                         GdkTexture* texture);
 

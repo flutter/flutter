@@ -30,6 +30,9 @@
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
+#if FLUTTER_LINUX_GTK4 && defined(FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR)
+#include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
+#endif
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
@@ -50,7 +53,7 @@ struct _FlView {
   GtkWidget* event_box;
 
   // The widget rendering the Flutter view.
-  GtkDrawingArea* render_area;
+  GtkWidget* render_area;
 
   // Rendering context when using OpenGL.
   GdkGLContext* render_context;
@@ -128,6 +131,17 @@ static void log_once(bool* flag, const char* message) {
   g_warning("%s", message);
 }
 
+#if FLUTTER_LINUX_GTK4 && defined(FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR)
+static gboolean gtk4_native_compositor_enabled() {
+  const gchar* value = g_getenv("FLUTTER_GTK4_FORCE_LEGACY_COMPOSITOR");
+  if (value == nullptr) {
+    return TRUE;
+  }
+
+  return !(g_strcmp0(value, "1") == 0 ||
+           g_ascii_strcasecmp(value, "true") == 0);
+}
+#endif
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
     fl_view,
@@ -158,15 +172,15 @@ static gboolean redraw_cb(gpointer user_data) {
   fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
-    gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
-                                MAX(static_cast<gint>(frame_width / scale), 1),
-                                MAX(static_cast<gint>(frame_height / scale), 1));
+    gtk_widget_set_size_request(
+        GTK_WIDGET(self->render_area),
+        MAX(static_cast<gint>(frame_width / scale), 1),
+        MAX(static_cast<gint>(frame_height / scale), 1));
     GtkWidget* toplevel = fl_view_get_toplevel_widget(self);
     if (GTK_IS_WINDOW(toplevel)) {
 #if FLUTTER_LINUX_GTK4
       gtk_window_set_default_size(
-          GTK_WINDOW(toplevel),
-          MAX(static_cast<gint>(frame_width / scale), 1),
+          GTK_WINDOW(toplevel), MAX(static_cast<gint>(frame_width / scale), 1),
           MAX(static_cast<gint>(frame_height / scale), 1));
 #else
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
@@ -174,6 +188,38 @@ static gboolean redraw_cb(gpointer user_data) {
     }
     return G_SOURCE_REMOVE;
   }
+
+#if FLUTTER_LINUX_GTK4 && defined(FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR)
+  if (gtk4_native_compositor_enabled()) {
+    gboolean wait_for_frame = !self->sized_to_content;
+    FlGdkSurface* surface =
+        fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
+    if (surface != nullptr) {
+      g_autoptr(GdkTexture) texture = nullptr;
+      if (self->render_context != nullptr) {
+        gdk_gl_context_make_current(self->render_context);
+      }
+
+      texture = fl_compositor_acquire_texture(
+          self->compositor, surface, self->render_context, wait_for_frame);
+
+      if (self->render_context != nullptr) {
+        gdk_gl_context_clear_current();
+      }
+
+      if (FL_IS_RENDER_TEXTURE_GTK4(self->render_area)) {
+        fl_render_texture_gtk4_set_flip_y(
+            FL_RENDER_TEXTURE_GTK4(self->render_area),
+            self->render_context != nullptr);
+        fl_render_texture_gtk4_set_texture(
+            FL_RENDER_TEXTURE_GTK4(self->render_area), texture);
+      }
+    }
+
+    gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
+    return G_SOURCE_REMOVE;
+  }
+#endif
 
   gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
 
@@ -343,14 +389,15 @@ static void handle_geometry_changed_with_size(FlView* self,
     display_id = fl_display_monitor_get_display_id(
         fl_engine_get_display_monitor(self->engine), monitor);
   }
-  size_t min_width = size_is_in_pixels ? width : fl_gtk_size_to_pixels(width, scale);
+  size_t min_width =
+      size_is_in_pixels ? width : fl_gtk_size_to_pixels(width, scale);
   size_t min_height =
       size_is_in_pixels ? height : fl_gtk_size_to_pixels(height, scale);
   size_t max_width = min_width;
   size_t max_height = min_height;
-  fl_engine_send_window_metrics_event(
-      self->engine, display_id, self->view_id, min_width, min_height,
-      max_width, max_height, scale);
+  fl_engine_send_window_metrics_event(self->engine, display_id, self->view_id,
+                                      min_width, min_height, max_width,
+                                      max_height, scale);
 }
 
 static void handle_geometry_changed(FlView* self) {
@@ -1205,7 +1252,19 @@ static void fl_view_init(FlView* self) {
                            G_CALLBACK(touch_event_cb), self);
 #endif  // !FLUTTER_LINUX_GTK4
 
-  self->render_area = GTK_DRAWING_AREA(gtk_drawing_area_new());
+#if FLUTTER_LINUX_GTK4
+  gboolean use_native_compositor = FALSE;
+#endif
+#if FLUTTER_LINUX_GTK4 && defined(FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR)
+  use_native_compositor = gtk4_native_compositor_enabled();
+  if (use_native_compositor) {
+    self->render_area = fl_render_texture_gtk4_new();
+  } else {
+    self->render_area = gtk_drawing_area_new();
+  }
+#else
+  self->render_area = GTK_WIDGET(gtk_drawing_area_new());
+#endif
   gtk_widget_show(GTK_WIDGET(self->render_area));
 #if FLUTTER_LINUX_GTK4
   gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
@@ -1225,8 +1284,10 @@ static void fl_view_init(FlView* self) {
                            G_CALLBACK(size_allocate_cb), self);
 #endif
 #if FLUTTER_LINUX_GTK4
-  gtk_drawing_area_set_draw_func(self->render_area, draw_cb_gtk4, self,
-                                 nullptr);
+  if (!use_native_compositor) {
+    gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(self->render_area),
+                                   draw_cb_gtk4, self, nullptr);
+  }
 #else
   g_signal_connect_swapped(self->render_area, "draw", G_CALLBACK(draw_cb),
                            self);

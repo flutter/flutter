@@ -10,10 +10,11 @@
 struct _FlEGLImage {
   GObject parent_instance;
 
+  EGLDisplay display;
   EGLImage image;
 };
 
-static EGLImage create_egl_image(GLuint texture_id) {
+static EGLImage create_egl_image(GLuint texture_id, EGLDisplay* display_out) {
   EGLDisplay egl_display = eglGetCurrentDisplay();
   if (egl_display == EGL_NO_DISPLAY) {
     g_warning("Failed to create EGL image: Failed to get current EGL display");
@@ -24,6 +25,10 @@ static EGLImage create_egl_image(GLuint texture_id) {
   if (egl_context == EGL_NO_CONTEXT) {
     g_warning("Failed to create EGL image: Failed to get current EGL context");
     return EGL_NO_IMAGE_KHR;
+  }
+
+  if (display_out != nullptr) {
+    *display_out = egl_display;
   }
 
   return eglCreateImageKHR(
@@ -38,12 +43,11 @@ static void fl_egl_image_dispose(GObject* object) {
   FlEGLImage* self = FL_EGL_IMAGE(object);
 
   if (self->image != EGL_NO_IMAGE_KHR) {
-    EGLDisplay egl_display = eglGetCurrentDisplay();
-    if (egl_display == EGL_NO_DISPLAY) {
+    if (self->display == EGL_NO_DISPLAY) {
       g_warning(
           "Failed to destroy EGL image: Failed to get current EGL display");
     } else {
-      eglDestroyImageKHR(egl_display, self->image);
+      eglDestroyImageKHR(self->display, self->image);
     }
   }
 
@@ -60,7 +64,8 @@ FlEGLImage* fl_egl_image_new(GLuint texture) {
   FlEGLImage* self =
       FL_EGL_IMAGE(g_object_new(fl_egl_image_get_type(), nullptr));
 
-  self->image = create_egl_image(texture);
+  self->display = EGL_NO_DISPLAY;
+  self->image = create_egl_image(texture, &self->display);
 
   return self;
 }
