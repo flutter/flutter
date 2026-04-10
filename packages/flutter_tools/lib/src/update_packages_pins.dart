@@ -26,6 +26,10 @@ const kManuallyPinnedDependencies = <String, String>{
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
   'material_color_utilities': '0.13.0', // Keep pinned to latest until 1.0.0.
   'data_assets': '0.19.6', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
+<<<<<<< HEAD
+=======
+  'record_use': '0.6.0', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 };
 
 /// These are packages that are explicitly excluded from appearing in the list

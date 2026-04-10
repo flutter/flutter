@@ -111,7 +111,10 @@ public class ProcessTextPlugin
 
     for (ResolveInfo info : infos) {
       final String id = info.activityInfo.name;
+<<<<<<< HEAD
       final String label = info.loadLabel(packageManager).toString();
+=======
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
       resolveInfosById.put(id, info);
     }
   }

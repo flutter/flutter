@@ -810,6 +810,12 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isRiscv64SupportEnabled => _enabled;
 
   @override
+<<<<<<< HEAD
+=======
+  bool get isRecordUseEnabled => _enabled;
+
+  @override
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
   final List<Feature> allFeatures;
 
   @override

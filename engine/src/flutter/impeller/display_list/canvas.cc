@@ -40,6 +40,10 @@
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/uber_sdf_contents.h"
+<<<<<<< HEAD
+=======
+#include "impeller/entity/contents/uber_sdf_parameters.h"
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -52,6 +56,10 @@
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/shadow_path_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+<<<<<<< HEAD
+=======
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
@@ -827,6 +835,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
+<<<<<<< HEAD
     Scalar expand_size = kAntialiasPadding;
     if (paint.style == Paint::Style::kStroke) {
       expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
@@ -840,6 +849,15 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
         /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
         /*stroke_join=*/paint.stroke.join,
         /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
+=======
+    auto params = UberSDFParameters::MakeRect(
+        /*color=*/paint.color, /*rect=*/rect,
+        /*stroke=*/paint.style == Paint::Style::kStroke
+            ? std::make_optional(paint.stroke)
+            : std::nullopt);
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1033,6 +1051,7 @@ void Canvas::DrawCircle(const Point& center,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
+<<<<<<< HEAD
     const bool is_stroked = paint.style == Paint::Style::kStroke;
 
     std::optional<CircleGeometry> geometry;
@@ -1045,6 +1064,15 @@ void Canvas::DrawCircle(const Point& center,
 
     auto contents = UberSDFContents::MakeCircle(
         /*color=*/paint.color, /*stroked=*/is_stroked, &geometry.value());
+=======
+    auto params = UberSDFParameters::MakeCircle(
+        /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
+        /*stroke=*/paint.style == Paint::Style::kStroke
+            ? std::make_optional(paint.stroke)
+            : std::nullopt);
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());

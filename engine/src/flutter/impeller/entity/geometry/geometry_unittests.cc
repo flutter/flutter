@@ -9,10 +9,18 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
+<<<<<<< HEAD
+=======
+#include "impeller/entity/contents/uber_sdf_parameters.h"
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+<<<<<<< HEAD
+=======
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/renderer/testing/mocks.h"
@@ -79,9 +87,15 @@ TEST(EntityGeometryTest, RectGeometryCoversArea) {
   ASSERT_TRUE(geometry->CoversArea({}, Rect()));
 }
 
+<<<<<<< HEAD
 TEST(EntityGeometryTest, FillRectGeometryPaddingIsAdjustedByInverseMaxBasis) {
   FillRectGeometry geometry(Rect::MakeLTRB(0, 0, 100, 100));
   geometry.SetAntialiasPadding(1.0);  // 1 pixel of padding
+=======
+TEST(EntityGeometryTest, UberSDFGeometryPaddingIsAdjustedByInverseMaxBasis) {
+  UberSDFGeometry geometry(UberSDFParameters::MakeRect(
+      Color::Red(), Rect::MakeLTRB(0, 0, 100, 100), /*stroke=*/std::nullopt));
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 
   // At scale 1, padding should be 1.
   {

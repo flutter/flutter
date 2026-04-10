@@ -9,9 +9,14 @@
 
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
+<<<<<<< HEAD
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
+=======
+#include "impeller/entity/contents/uber_sdf_parameters.h"
+#include "impeller/entity/geometry/geometry.h"
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 
@@ -19,6 +24,7 @@ namespace impeller {
 
 class UberSDFContents : public ColorSourceContents {
  public:
+<<<<<<< HEAD
   enum class Type {
     kCircle,
     kRect,
@@ -42,6 +48,11 @@ class UberSDFContents : public ColorSourceContents {
                   bool stroked,
                   const Geometry* geometry,
                   Scalar aa_padding);
+=======
+  static std::unique_ptr<UberSDFContents> Make(
+      const UberSDFParameters& params,
+      std::unique_ptr<Geometry> geometry);
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 
   ~UberSDFContents() override;
 
@@ -58,6 +69,7 @@ class UberSDFContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
+<<<<<<< HEAD
   /// The type of geometry (e.g. circle, rect).
   const Type type_;
   /// The bounding box of the geometry.
@@ -74,6 +86,13 @@ class UberSDFContents : public ColorSourceContents {
   const Geometry* geometry_;
   /// The antialias padding.
   Scalar aa_padding_;
+=======
+  explicit UberSDFContents(const UberSDFParameters& params,
+                           std::unique_ptr<Geometry> geometry);
+
+  UberSDFParameters params_;
+  std::unique_ptr<Geometry> geometry_;
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 
   UberSDFContents(const UberSDFContents&) = delete;
 

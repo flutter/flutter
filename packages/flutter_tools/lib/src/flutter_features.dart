@@ -53,6 +53,12 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
 
   @override
+<<<<<<< HEAD
+=======
+  bool get isRecordUseEnabled => isEnabled(recordUse);
+
+  @override
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 
   @override

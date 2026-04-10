@@ -10,6 +10,7 @@ FillRectGeometry::FillRectGeometry(Rect rect) : rect_(rect) {}
 
 FillRectGeometry::~FillRectGeometry() = default;
 
+<<<<<<< HEAD
 const Rect& FillRectGeometry::GetRect() const {
   return rect_;
 }
@@ -22,21 +23,31 @@ Scalar FillRectGeometry::GetAntialiasPadding() const {
   return padding_pixels_;
 }
 
+=======
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 GeometryResult FillRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+<<<<<<< HEAD
   Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
   Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
   Rect expanded_rect = rect_.Expand(padding);
+=======
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =
           {
+<<<<<<< HEAD
               .vertex_buffer =
                   data_host_buffer.Emplace(expanded_rect.GetPoints().data(),
                                            8 * sizeof(float), alignof(float)),
+=======
+              .vertex_buffer = data_host_buffer.Emplace(
+                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float)),
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
               .vertex_count = 4,
               .index_type = IndexType::kNone,
           },
@@ -47,9 +58,13 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
 
 std::optional<Rect> FillRectGeometry::GetCoverage(
     const Matrix& transform) const {
+<<<<<<< HEAD
   Scalar max_basis = transform.GetMaxBasisLengthXY();
   Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
   return rect_.Expand(padding).TransformAndClipBounds(transform);
+=======
+  return rect_.TransformAndClipBounds(transform);
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 }
 
 bool FillRectGeometry::CoversArea(const Matrix& transform,

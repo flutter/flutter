@@ -59,6 +59,12 @@ abstract class FeatureFlags {
   /// Whether dart data assets building and bundling is enabled.
   bool get isDartDataAssetsEnabled => false;
 
+<<<<<<< HEAD
+=======
+  /// Whether record use experiment is enabled.
+  bool get isRecordUseEnabled;
+
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -100,6 +106,10 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     dartDataAssets,
+<<<<<<< HEAD
+=======
+    recordUse,
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
@@ -211,6 +221,17 @@ const dartDataAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
+<<<<<<< HEAD
+=======
+/// Enable record use experiment.
+const recordUse = Feature(
+  name: 'record use experiment',
+  configSetting: 'enable-record-use',
+  environmentOverride: 'FLUTTER_RECORD_USE',
+  master: FeatureChannelSetting(available: true),
+);
+
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',

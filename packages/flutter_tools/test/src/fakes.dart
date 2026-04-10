@@ -545,6 +545,10 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isDartDataAssetsEnabled = false,
+<<<<<<< HEAD
+=======
+    this.isRecordUseEnabled = false,
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
@@ -588,6 +592,12 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isDartDataAssetsEnabled;
 
   @override
+<<<<<<< HEAD
+=======
+  final bool isRecordUseEnabled;
+
+  @override
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
   final bool isSwiftPackageManagerEnabled;
 
   @override
@@ -628,6 +638,10 @@ class TestFeatureFlags implements FeatureFlags {
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
+<<<<<<< HEAD
+=======
+      recordUse => isRecordUseEnabled,
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
       _ => false,
     };
   }
@@ -645,6 +659,10 @@ class TestFeatureFlags implements FeatureFlags {
     cliAnimation,
     dartDataAssets,
     nativeAssets,
+<<<<<<< HEAD
+=======
+    recordUse,
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,

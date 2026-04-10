@@ -9,6 +9,12 @@ on:
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
     branches:
       - master
+<<<<<<< HEAD
+=======
+  merge_group:
+    branches:
+      - master
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 
 permissions: read-all
 
@@ -20,6 +26,10 @@ jobs:
 
     steps:
       - name: Check for changes in frozen folders
+<<<<<<< HEAD
+=======
+        if: github.event_name != 'merge_group'
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
         uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -40,7 +50,11 @@ jobs:
               - 'packages/flutter/test_fixes/cupertino/**'
 
       - name: Fail on frozen changes
+<<<<<<< HEAD
         if: steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+=======
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
         run: |
           echo "Error: Code changes detected during the current code freeze."
           echo "If this is a critical fix that must land, please file an issue for team-design."

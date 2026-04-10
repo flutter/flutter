@@ -12,7 +12,10 @@ library;
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+<<<<<<< HEAD
 import 'debug.dart';
+=======
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'sliver.dart';
@@ -324,6 +327,7 @@ class _VisibilityScope extends InheritedWidget {
   }
 }
 
+<<<<<<< HEAD
 /// A [Stack] that shows a single child from a list of children.
 ///
 /// The displayed child is the one with the given [index]. The stack is
@@ -507,6 +511,8 @@ class _IndexedStackElement extends MultiChildRenderObjectElement {
   }
 }
 
+=======
+>>>>>>> 49233d08009 (Reverts "Disable async mode with LLDB (#184768)" (#184868))
 /// Whether to show or hide a sliver child.
 ///
 /// By default, the [visible] property controls whether the [sliver] is included
