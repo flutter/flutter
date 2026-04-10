@@ -96,9 +96,9 @@ rather than replacements for your contribution. For example, if you use an
 AI to create a reduced test case, make sure that you can actually reproduce
 the issue before posting it.
 
-Keep in mind that longer is not better in issue comments, and AI output
-is often verbose. If you use AI to write portions of a comment, consider
-editing the results to focus on the important details.
+Keep in mind that longer is not better in issues, and AI output is often
+verbose. If you use AI to write portions of an issue report or comment,
+consider editing the results to focus on the important details.
 
 ### Consider posting issues in English
 
