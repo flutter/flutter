@@ -142,6 +142,36 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   return TRUE;
 }
 
+#if FLUTTER_LINUX_GTK4
+static GdkTexture* fl_compositor_software_acquire_texture(
+    FlCompositor* compositor,
+    FlGdkSurface* surface,
+    GdkGLContext* context,
+    gboolean wait_for_frame) {
+  (void)surface;
+  (void)context;
+  (void)wait_for_frame;
+
+  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (self->surface == nullptr || self->width == 0 || self->height == 0) {
+    return nullptr;
+  }
+
+  cairo_surface_flush(self->surface);
+  const gsize stride = cairo_image_surface_get_stride(self->surface);
+  const gsize length = stride * self->height;
+  g_autoptr(GBytes) bytes =
+      g_bytes_new(cairo_image_surface_get_data(self->surface), length);
+
+  return gdk_memory_texture_new(static_cast<int>(self->width),
+                                static_cast<int>(self->height),
+                                GDK_MEMORY_DEFAULT, bytes, stride);
+}
+#endif
+
 static void fl_compositor_software_dispose(GObject* object) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
@@ -162,6 +192,10 @@ static void fl_compositor_software_class_init(
   FL_COMPOSITOR_CLASS(klass)->get_frame_size =
       fl_compositor_software_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_software_render;
+#if FLUTTER_LINUX_GTK4
+  FL_COMPOSITOR_CLASS(klass)->acquire_texture =
+      fl_compositor_software_acquire_texture;
+#endif
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
 }
