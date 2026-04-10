@@ -14,9 +14,7 @@ import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 late final RegularWindowController controller;
-final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(
-  null,
-);
+final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(null);
 
 void main() {
   final Completer<void> windowCreated = Completer();
@@ -28,18 +26,15 @@ void main() {
           return '';
         }
 
-        final jsonMap = jsonDecode(message);
+        final jsonMap = jsonDecode(message) as Map<String, Object?>;
         if (!jsonMap.containsKey('type')) {
           throw ArgumentError('Message must contain a "type" field.');
         }
 
         /// This helper method registers a listener on the controller,
         /// calls [act] to perform some action on the controller, waits for
-        /// the [predicate] to be satisified, and finally cleans up the listener.
-        Future<void> awaitNotification(
-          VoidCallback act,
-          bool Function() predicate,
-        ) async {
+        /// the [predicate] to be satisfied, and finally cleans up the listener.
+        Future<void> awaitNotification(VoidCallback act, bool Function() predicate) async {
           final StreamController<bool> streamController = StreamController();
           void notificationHandler() {
             streamController.add(true);
@@ -54,12 +49,12 @@ void main() {
             // the animation is in progress and next request for state change
             // will be ignored. Easiest way to handle this is to just wait.
             if (defaultTargetPlatform == TargetPlatform.macOS) {
-              await Future.delayed(Duration(seconds: 1));
+              await Future<void>.delayed(const Duration(seconds: 1));
             }
 
             // Add a timeout to avoid hanging indefinitely
-            await for (final _ in streamController.stream.timeout(
-              Duration(seconds: 10),
+            await for (final bool _ in streamController.stream.timeout(
+              const Duration(seconds: 10),
             )) {
               if (predicate()) {
                 break;
@@ -79,22 +74,22 @@ void main() {
             'height': controller.contentSize.height,
           });
         } else if (jsonMap['type'] == 'set_size') {
-          final Size size = Size(
-            jsonMap['width'].toDouble(),
-            jsonMap['height'].toDouble(),
+          final size = Size(
+            (jsonMap['width']! as num).toDouble(),
+            (jsonMap['height']! as num).toDouble(),
           );
           await awaitNotification(() {
             controller.setSize(size);
           }, () => controller.contentSize == size);
         } else if (jsonMap['type'] == 'set_constraints') {
-          final BoxConstraints constraints = BoxConstraints(
-            minWidth: jsonMap['min_width'].toDouble(),
-            minHeight: jsonMap['min_height'].toDouble(),
-            maxWidth: jsonMap['max_width'].toDouble(),
-            maxHeight: jsonMap['max_height'].toDouble(),
+          final constraints = BoxConstraints(
+            minWidth: (jsonMap['min_width']! as num).toDouble(),
+            minHeight: (jsonMap['min_height']! as num).toDouble(),
+            maxWidth: (jsonMap['max_width']! as num).toDouble(),
+            maxHeight: (jsonMap['max_height']! as num).toDouble(),
           );
           // We assume that this will cause a resize, which the current tests do.
-          final initialSize = controller.contentSize;
+          final Size initialSize = controller.contentSize;
           await awaitNotification(() {
             controller.setConstraints(constraints);
           }, () => controller.contentSize != initialSize);
@@ -129,7 +124,7 @@ void main() {
         } else if (jsonMap['type'] == 'get_minimized') {
           return jsonEncode({'isMinimized': controller.isMinimized});
         } else if (jsonMap['type'] == 'set_title') {
-          final String title = jsonMap['title'];
+          final title = jsonMap['title']! as String;
           await awaitNotification(() {
             controller.setTitle(title);
           }, () => controller.title == title);
@@ -168,12 +163,12 @@ void main() {
     },
   );
   controller = RegularWindowController(
-    preferredSize: Size(640, 480),
+    preferredSize: const Size(640, 480),
     title: 'Integration Test',
     delegate: RegularWindowControllerDelegate(),
   );
 
-  runWidget(RegularWindow(controller: controller, child: MyApp()));
+  runWidget(RegularWindow(controller: controller, child: const MyApp()));
   windowCreated.complete();
 }
 
@@ -184,9 +179,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -218,33 +211,28 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: dialogController,
-      builder:
-          (
-            BuildContext context,
-            DialogWindowController? dialogController,
-            Widget? child,
-          ) {
-            return ViewAnchor(
-              view: dialogController != null
-                  ? DialogWindow(
-                      controller: dialogController,
-                      child: MyDialogPage(controller: dialogController),
-                    )
-                  : null,
-              child: Scaffold(
-                appBar: AppBar(
-                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                  title: Text(widget.title),
-                ),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[const Text('This is the main window.')],
-                  ),
-                ),
+      builder: (BuildContext context, DialogWindowController? dialogController, Widget? child) {
+        return ViewAnchor(
+          view: dialogController != null
+              ? DialogWindow(
+                  controller: dialogController,
+                  child: MyDialogPage(controller: dialogController),
+                )
+              : null,
+          child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              title: Text(widget.title),
+            ),
+            body: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[Text('This is the main window.')],
               ),
-            );
-          },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -260,7 +248,7 @@ class MyDialogPage extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text('Dialog'),
+          title: const Text('Dialog'),
         ),
         body: Center(
           child: Column(
@@ -272,7 +260,7 @@ class MyDialogPage extends StatelessWidget {
                 onPressed: () {
                   controller.destroy();
                 },
-                child: Text('Close Dialog'),
+                child: const Text('Close Dialog'),
               ),
             ],
           ),

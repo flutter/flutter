@@ -852,6 +852,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName,
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
@@ -872,6 +873,7 @@ class ProxiedDartDevelopmentService
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
+        appName: appName,
         ddsPort: ddsPort,
         ipv6: ipv6,
         disableServiceAuthCodes: disableServiceAuthCodes,
