@@ -1095,7 +1095,7 @@ void main() {
     expect(mockCodec.disposed, true);
   });
 
-  testWidgets('errors are not reported after removal when preventErrorReporting is set', (
+  testWidgets('errors are not reported after removal when reportErrors is false', (
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/81931.
@@ -1108,7 +1108,7 @@ void main() {
     final listener = ImageStreamListener(
       (ImageInfo info, bool syncCall) {},
       onError: (Object error, StackTrace? stack) {},
-      preventErrorReporting: true,
+      reportErrors: false,
     );
     completer.addListener(listener);
     completer.removeListener(listener);

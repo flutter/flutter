@@ -3045,7 +3045,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Originally verified that errors were reported when errorBuilder was removed
-    // before the widget is disposed. With the preventErrorReporting fix for
+    // before the widget is disposed. With the reportErrors fix for
     // https://github.com/flutter/flutter/issues/81931, the completer remembers
     // that an error handler was once present, so errors are no longer reported.
 
@@ -3099,7 +3099,7 @@ void main() {
       reportedErrors,
       isEmpty,
       reason:
-          'preventErrorReporting was set when errorBuilder was present, so errors are not reported.',
+          'reportErrors was set to false when errorBuilder was present, so errors are not reported.',
     );
     // Also check takeException as a standard backup.
     expect(tester.takeException(), isNull);
