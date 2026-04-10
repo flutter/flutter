@@ -185,6 +185,47 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
+bool IsCompatibleWithUberSDF(const Paint& paint) {
+  if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  switch (paint.blend_mode) {
+    // Incompatible blend modes:
+    case BlendMode::kClear:
+    case BlendMode::kSrc:
+    case BlendMode::kSrcIn:
+    case BlendMode::kDstIn:
+    case BlendMode::kSrcOut:
+    case BlendMode::kDstATop:
+    case BlendMode::kModulate:
+      return false;
+    // Compatible blend modes:
+    case BlendMode::kDst:
+    case BlendMode::kSrcOver:
+    case BlendMode::kDstOver:
+    case BlendMode::kDstOut:
+    case BlendMode::kSrcATop:
+    case BlendMode::kXor:
+    case BlendMode::kPlus:
+    case BlendMode::kScreen:
+    case BlendMode::kOverlay:
+    case BlendMode::kDarken:
+    case BlendMode::kLighten:
+    case BlendMode::kColorDodge:
+    case BlendMode::kColorBurn:
+    case BlendMode::kHardLight:
+    case BlendMode::kSoftLight:
+    case BlendMode::kDifference:
+    case BlendMode::kExclusion:
+    case BlendMode::kMultiply:
+    case BlendMode::kHue:
+    case BlendMode::kSaturation:
+    case BlendMode::kColor:
+    case BlendMode::kLuminosity:
+      return true;
+  }
+}
+
 }  // namespace
 
 class Canvas::RRectBlurShape : public BlurShape {
@@ -828,7 +869,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithUberSDF(paint)) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color, /*rect=*/rect,
         /*stroke=*/paint.style == Paint::Style::kStroke
@@ -1028,7 +1069,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithUberSDF(paint)) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.style == Paint::Style::kStroke

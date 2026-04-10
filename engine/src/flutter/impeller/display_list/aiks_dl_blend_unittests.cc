@@ -564,7 +564,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   builder.RestoreToCount(0);
 
   //----------------------------------------------------------------------------
-  /// 2. CPU blend modes (bottom squares).
+  /// 2. CPU blend modes (middle squares).
   ///
 
   builder.Save();
@@ -585,13 +585,39 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   builder.Restore();
 
   //----------------------------------------------------------------------------
-  /// 3. Image blending (bottom images).
+  /// 3. Draw a circle with blend mode (bottom squares).
+  ///
+
+  builder.Save();
+  builder.Translate(0, 200);
+  builder.SaveLayer(std::nullopt);
+  for (const auto& color : source_colors) {
+    // Draw background rectangle.
+    DlPaint background_paint;
+    background_paint.setColor(
+        DlColor::RGBA(destination_color.red, destination_color.green,
+                      destination_color.blue, destination_color.alpha));
+    builder.DrawRect(DlRect::MakeXYWH(25, 25, 100, 100), background_paint);
+
+    // Draw circle on top.
+    DlPaint circle_paint;
+    circle_paint.setColor(
+        DlColor::RGBA(color.red, color.green, color.blue, color.alpha));
+    circle_paint.setBlendMode(blend_mode);
+    builder.DrawCircle(DlPoint(75, 75), 40, circle_paint);
+    builder.Translate(100, 0);
+  }
+  builder.Restore();
+  builder.Restore();
+
+  //----------------------------------------------------------------------------
+  /// 4. Image blending (bottom images).
   ///
   /// Compare these results with the images in the Flutter blend mode
   /// documentation: https://api.flutter.dev/flutter/dart-ui/BlendMode.html
   ///
 
-  builder.Translate(0, 250);
+  builder.Translate(0, 350);
 
   // Draw grid behind the images.
   {
