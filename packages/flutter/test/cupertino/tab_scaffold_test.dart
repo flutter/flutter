@@ -15,6 +15,7 @@ import 'navigator_utils.dart';
 /// Used in tests to track paint events without importing cross-file test utilities.
 class _TestCallbackPainter extends CustomPainter {
   const _TestCallbackPainter({required this.onPaint});
+  /// Called whenever the [paint] method is invoked.
   final VoidCallback onPaint;
 
   @override
