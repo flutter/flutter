@@ -31,6 +31,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
+import 'common.dart';
 import 'localizations.dart';
 import 'native_assets.dart';
 
@@ -223,9 +224,13 @@ class Dart2JSTarget extends Dart2WebTarget {
     ]);
 
     final File resourcesFile = environment.buildDir.childFile('main.dart.js.resources.json');
-    final File recordedUsesFile = environment.buildDir.childFile('recorded_uses.json');
+    final File recordedUsesFile = environment.buildDir.childFile(
+      DartBuildForWeb.recordedUsesJsFileName,
+    );
     if (resourcesFile.existsSync()) {
       resourcesFile.renameSync(recordedUsesFile.path);
+    } else if (featureFlags.isRecordUseEnabled) {
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
     final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
@@ -284,6 +289,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     'main.dart.js',
     'main.dart.js_*.part.js',
     if (compilerConfig.sourceMaps) ...<String>['main.dart.js.map', 'main.dart.js_*.part.js.map'],
+    if (featureFlags.isRecordUseEnabled) DartBuildForWeb.recordedUsesJsFileName,
   ];
 }
 
@@ -359,7 +365,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
       if (featureFlags.isRecordUseEnabled) ...<String>[
-        '--recorded-uses=${environment.buildDir.childFile('recorded_uses.json').path}',
+        '--recorded-uses=${environment.buildDir.childFile(DartBuildForWeb.recordedUsesWasmFileName).path}',
         '--enable-experiment=record-use',
       ],
       ...compilerConfig.toCommandOptions(buildMode),
@@ -379,6 +385,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
     if (compilerConfig.dryRun) {
       await _handleDryRunResult(environment, runResult);
+    }
+    final File recordedUsesFile = environment.buildDir.childFile(
+      DartBuildForWeb.recordedUsesWasmFileName,
+    );
+    if (!recordedUsesFile.existsSync() && featureFlags.isRecordUseEnabled) {
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
   }
 
@@ -419,6 +431,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'main.dart.wasm',
           'main.dart.mjs',
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+          if (featureFlags.isRecordUseEnabled) DartBuildForWeb.recordedUsesWasmFileName,
         ];
 
   @visibleForTesting
@@ -560,8 +573,49 @@ class DartBuildForWeb extends DartBuild {
 
   final List<Dart2WebTarget> compileTargets;
 
+  /// Target-specific filenames for recorded uses.
+  /// Both JS and Wasm targets are built in the same invocation when --wasm is used.
+  static const recordedUsesWasmFileName = 'recorded_uses_wasm.json';
+  static const recordedUsesJsFileName = 'recorded_uses_js.json';
+
   @override
   List<Target> get dependencies => <Target>[if (featureFlags.isRecordUseEnabled) ...compileTargets];
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    if (featureFlags.isRecordUseEnabled) ...<Source>[
+      const Source.pattern('{BUILD_DIR}/${DartBuildForWeb.recordedUsesJsFileName}'),
+      const Source.pattern('{BUILD_DIR}/${DartBuildForWeb.recordedUsesWasmFileName}'),
+    ],
+  ];
+
+  /// Returns the recorded uses file to pass to the link hooks.
+  ///
+  /// The contents of both files should be nearly identical (except for some
+  /// unreachable code not being found and loading units).
+  ///
+  /// Since WASM is the future, we prioritize that one if it exists and has data.
+  // TODO(dcharkes): We might want to invoke the link hooks twice if we actually
+  // have deferred loading enabled and deploy both WASM and JS with different
+  // deferred loading.
+  @override
+  File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
+    if (!featureFlags.isRecordUseEnabled) {
+      return null;
+    }
+    final File wasmFile = environment.buildDir.childFile(DartBuildForWeb.recordedUsesWasmFileName);
+    if (wasmFile.existsSync() &&
+        wasmFile.readAsStringSync() != KernelSnapshot.recordedUsesEmptyContent) {
+      return wasmFile;
+    }
+    final File jsFile = environment.buildDir.childFile(DartBuildForWeb.recordedUsesJsFileName);
+    if (jsFile.existsSync() &&
+        jsFile.readAsStringSync() != KernelSnapshot.recordedUsesEmptyContent) {
+      return jsFile;
+    }
+    return wasmFile.existsSync() ? wasmFile : null;
+  }
 }
 
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given

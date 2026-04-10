@@ -157,7 +157,8 @@ class KernelSnapshot extends Target {
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
-    if (featureFlags.isRecordUseEnabled) const Source.pattern('{BUILD_DIR}/recorded_uses.json'),
+    if (featureFlags.isRecordUseEnabled)
+      const Source.pattern('{BUILD_DIR}/${KernelSnapshot.recordedUsesFileName}'),
   ];
 
   static const depfile = 'kernel_snapshot_program.d';
@@ -172,6 +173,13 @@ class KernelSnapshot extends Target {
   ];
 
   static const dillName = 'app.dill';
+  static const recordedUsesFileName = 'recorded_uses.json';
+
+  /// The content of an empty recorded uses file.
+  ///
+  /// We always write this file even if no resources are recorded to prevent
+  /// tripping up the Flutter build system (which expects declared outputs to exist).
+  static const recordedUsesEmptyContent = '{}';
 
   @override
   Future<void> build(Environment environment) async {
@@ -205,15 +213,16 @@ class KernelSnapshot extends Target {
       environment.defines,
       kExtraFrontEndOptions,
     );
-    final File recordedUsesFile = environment.buildDir.childFile('recorded_uses.json');
+    final File recordedUsesFile = environment.buildDir.childFile(
+      KernelSnapshot.recordedUsesFileName,
+    );
     if (featureFlags.isRecordUseEnabled) {
       if (buildMode.isPrecompiled) {
         extraFrontEndOptions.add('--recorded-uses=${recordedUsesFile.path}');
       } else {
         // Produce an empty file to satisfy the build system in JIT mode.
-        if (!recordedUsesFile.existsSync()) {
-          recordedUsesFile.writeAsStringSync('{}');
-        }
+        // Always overwrite to avoid stale data.
+        recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
       }
     }
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
