@@ -24,7 +24,7 @@ class _TestCallbackPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TestCallbackPainter oldPainter) => true;
+  bool shouldRepaint(_TestCallbackPainter _) => true;
 }
 
 late List<int> selectedTabs;
