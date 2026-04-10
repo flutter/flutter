@@ -365,6 +365,7 @@ Future<void> _runBuildTests() async {
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
+        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'record_use_test_app')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
