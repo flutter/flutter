@@ -15,7 +15,10 @@ void main() {
     expect(frameworkUri('foo-foo', <String>{}), equals(Uri.file('foo-foo.framework/foo-foo')));
     expect(frameworkUri(r'foo$foo', <String>{}), equals(Uri.file('foofoo.framework/foofoo')));
     expect(frameworkUri('foo.foo', <String>{}), equals(Uri.file('foo.foo.framework/foo.foo')));
-    expect(frameworkUri('foo.1.2.3', <String>{}), equals(Uri.file('foo.1.2.3.framework/foo.1.2.3')));
+    expect(
+      frameworkUri('foo.1.2.3', <String>{}),
+      equals(Uri.file('foo.1.2.3.framework/foo.1.2.3')),
+    );
     expect(
       frameworkUri('libatoolongfilenameforaframework.dylib', <String>{}),
       equals(Uri.file('atoolongfilenameforaframework.framework/atoolongfilenameforaframework')),
