@@ -9,6 +9,7 @@
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/skia/dl_image_skia.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/effects/SkGradient.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
@@ -101,10 +102,10 @@ sk_sp<SkShader> ToSk(const DlColorSource* source) {
       const DlImageColorSource* image_source = source->asImage();
       FML_DCHECK(image_source != nullptr);
       auto image = image_source->image();
-      if (!image || !image->skia_image()) {
+      if (!image || !image->asDlImageSkia()->skia_image()) {
         return nullptr;
       }
-      return image->skia_image()->makeShader(
+      return image->asDlImageSkia()->skia_image()->makeShader(
           ToSk(image_source->horizontal_tile_mode()),
           ToSk(image_source->vertical_tile_mode()),
           ToSk(image_source->sampling()),

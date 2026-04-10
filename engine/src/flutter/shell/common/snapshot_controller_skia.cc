@@ -7,6 +7,7 @@
 #include "flutter/shell/common/snapshot_controller_skia.h"
 
 #include "display_list/image/dl_image.h"
+#include "flutter/display_list/skia/dl_image_skia.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/snapshot_controller.h"
@@ -136,7 +137,7 @@ sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
 
   // It is up to the caller to create a DlImageGPU version of this image
   // if the result will interact with the UI thread.
-  return DlImage::Make(result);
+  return DlImageSkia::Make(result);
 }
 
 sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshotSync(
@@ -151,7 +152,7 @@ sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshotSync(
 sk_sp<DlImage> SnapshotControllerSkia::MakeTextureImage(
     sk_sp<SkImage> image,
     SnapshotPixelFormat pixel_format) {
-  return DlImage::Make(image);
+  return DlImageSkia::Make(image);
 }
 
 sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
@@ -174,7 +175,7 @@ sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
       image_size, [image = std::move(image)](SkCanvas* canvas) {
         canvas->drawImage(image, 0, 0);
       });
-  return result->skia_image();
+  return result->asDlImageSkia()->skia_image();
 }
 
 void SnapshotControllerSkia::CacheRuntimeStage(

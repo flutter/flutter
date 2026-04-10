@@ -63,12 +63,6 @@ sk_sp<SkImage> DlDeferredImageGPUSkia::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlDeferredImageGPUSkia::impeller_texture()
-    const {
-  return nullptr;
-}
-
-// |DlImage|
 bool DlDeferredImageGPUSkia::isOpaque() const {
   return image_wrapper_ ? image_wrapper_->image_info().isOpaque() : false;
 }

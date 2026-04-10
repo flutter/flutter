@@ -25,10 +25,6 @@ PixelDeferredImageGPUImpeller::PixelDeferredImageGPUImpeller(
 
 PixelDeferredImageGPUImpeller::~PixelDeferredImageGPUImpeller() = default;
 
-sk_sp<SkImage> PixelDeferredImageGPUImpeller::skia_image() const {
-  return nullptr;
-}
-
 std::shared_ptr<impeller::Texture>
 PixelDeferredImageGPUImpeller::impeller_texture() const {
   if (!wrapper_) {
@@ -121,7 +117,8 @@ void PixelDeferredImageGPUImpeller::ImageWrapper::SnapshotImage(
               wrapper->error_ = "Failed to create snapshot.";
               return;
             }
-            wrapper->texture_ = snapshot_dl_image->impeller_texture();
+            wrapper->texture_ =
+                snapshot_dl_image->asDlImageImpeller()->impeller_texture();
           }));
 }
 

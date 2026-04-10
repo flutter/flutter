@@ -12,6 +12,8 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/skia/dl_image_skia.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/typographer/text_frame.h"
 
 namespace flutter::testing {
@@ -328,14 +330,21 @@ std::ostream& operator<<(std::ostream& os, const DlImage* image) {
   if (image == nullptr) {
     return os << "null image";
   }
-  os << "&DlImage(" << image->width() << " x " << image->height() << ", ";
-  if (image->skia_image()) {
-    os << "skia(" << image->skia_image().get() << "), ";
+  std::string type;
+  void* raw_pointer;
+  switch (image->GetType()) {
+    case flutter::DlImage::Type::kImpeller:
+      type = "Impeller";
+      raw_pointer = image->asDlImageImpeller()->impeller_texture().get();
+      break;
+    case flutter::DlImage::Type::kSkia:
+      type = "Skia";
+      raw_pointer = image->asDlImageSkia()->skia_image().get();
+      break;
   }
-  if (image->impeller_texture()) {
-    os << "impeller(" << image->impeller_texture().get() << "), ";
-  }
-  return os << "isTextureBacked: " << image->isTextureBacked() << ")";
+  os << "&DlImage" << type << "("  //
+     << image->width() << " x " << image->height() << ", " << raw_pointer;
+  return os << ", isTextureBacked: " << image->isTextureBacked() << ")";
 }
 
 std::ostream& operator<<(std::ostream& os,

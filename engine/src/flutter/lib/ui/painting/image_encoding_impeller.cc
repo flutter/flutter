@@ -9,6 +9,7 @@
 #include "fml/status.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -139,7 +140,7 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     std::function<void(fml::StatusOr<sk_sp<SkImage>>)> encode_task,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<impeller::Context>& impeller_context) {
-  auto texture = dl_image->impeller_texture();
+  auto texture = dl_image->asDlImageImpeller()->impeller_texture();
 
   if (impeller_context == nullptr) {
     encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,

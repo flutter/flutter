@@ -12,6 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/snapshot_pixel_format.h"
 #include "impeller/core/texture.h"
@@ -22,7 +23,7 @@ namespace testing {
 FML_TEST_CLASS(DlDeferredImageGPUImpeller, TrashesDisplayList);
 }  // namespace testing
 
-class DlDeferredImageGPUImpeller final : public DlImage {
+class DlDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
  public:
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       std::unique_ptr<LayerTree> layer_tree,
@@ -40,19 +41,10 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   ~DlDeferredImageGPUImpeller() override;
 
   // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
-
-  // |DlImage|
   std::shared_ptr<impeller::Texture> impeller_texture() const override;
 
   // |DlImage|
-  bool isOpaque() const override;
-
-  // |DlImage|
   bool isTextureBacked() const override;
-
-  // |DlImage|
-  bool isUIThreadSafe() const override;
 
   // |DlImage|
   DlISize GetSize() const override;

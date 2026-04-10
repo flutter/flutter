@@ -8,6 +8,7 @@
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/skia/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/fml/trace_event.h"
@@ -282,7 +283,7 @@ void DlSkCanvasAdapter::DrawImage(const sk_sp<DlImage>& image,
                                   DlImageSampling sampling,
                                   const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = image->skia_image();
+  sk_sp<SkImage> sk_image = image->asDlImageSkia()->skia_image();
   delegate_->drawImage(sk_image.get(), point.x, point.y, ToSk(sampling),
                        sk_paint());
 }
@@ -294,7 +295,7 @@ void DlSkCanvasAdapter::DrawImageRect(const sk_sp<DlImage>& image,
                                       const DlPaint* paint,
                                       DlSrcRectConstraint constraint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = image->skia_image();
+  sk_sp<SkImage> sk_image = image->asDlImageSkia()->skia_image();
   delegate_->drawImageRect(sk_image.get(), ToSkRect(src), ToSkRect(dst),
                            ToSk(sampling), sk_paint(), ToSk(constraint));
 }
@@ -305,7 +306,7 @@ void DlSkCanvasAdapter::DrawImageNine(const sk_sp<DlImage>& image,
                                       DlFilterMode filter,
                                       const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = image->skia_image();
+  sk_sp<SkImage> sk_image = image->asDlImageSkia()->skia_image();
   delegate_->drawImageNine(sk_image.get(), ToSkIRect(center), ToSkRect(dst),
                            ToSk(filter), sk_paint());
 }
@@ -320,7 +321,7 @@ void DlSkCanvasAdapter::DrawAtlas(const sk_sp<DlImage>& atlas,
                                   const DlRect* cullRect,
                                   const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = atlas->skia_image();
+  sk_sp<SkImage> sk_image = atlas->asDlImageSkia()->skia_image();
   std::vector<SkColor> sk_colors;
   sk_colors.reserve(count);
   for (int i = 0; i < count; ++i) {

@@ -18,6 +18,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
@@ -693,7 +694,7 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
     return;
   }
 
-  auto texture = image->impeller_texture();
+  auto texture = image->asDlImageImpeller()->impeller_texture();
   if (!texture) {
     return;
   }
@@ -722,7 +723,7 @@ void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
-      image->impeller_texture(),                       // image
+      image->asDlImageImpeller()->impeller_texture(),  // image
       src,                                             // source rect
       dst,                                             // destination rect
       render_with_attributes ? paint_ : Paint(),       // paint
@@ -739,7 +740,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(9u);
 
   NinePatchConverter converter = {};
-  converter.DrawNinePatch(image->impeller_texture(),
+  converter.DrawNinePatch(image->asDlImageImpeller()->impeller_texture(),
                           Rect::MakeLTRB(center.GetLeft(), center.GetTop(),
                                          center.GetRight(), center.GetBottom()),
                           dst, ToSamplerDescriptor(filter), &GetCanvas(),
@@ -759,7 +760,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
   AUTO_DEPTH_WATCHER(1u);
 
   auto geometry =
-      DlAtlasGeometry(atlas->impeller_texture(),                        //
+      DlAtlasGeometry(atlas->asDlImageImpeller()->impeller_texture(),   //
                       xform,                                            //
                       tex,                                              //
                       colors,                                           //

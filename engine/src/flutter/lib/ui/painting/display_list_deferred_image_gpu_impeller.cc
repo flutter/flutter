@@ -46,11 +46,6 @@ DlDeferredImageGPUImpeller::DlDeferredImageGPUImpeller(
 DlDeferredImageGPUImpeller::~DlDeferredImageGPUImpeller() = default;
 
 // |DlImage|
-sk_sp<SkImage> DlDeferredImageGPUImpeller::skia_image() const {
-  return nullptr;
-};
-
-// |DlImage|
 std::shared_ptr<impeller::Texture>
 DlDeferredImageGPUImpeller::impeller_texture() const {
   if (!wrapper_) {
@@ -60,19 +55,8 @@ DlDeferredImageGPUImpeller::impeller_texture() const {
 }
 
 // |DlImage|
-bool DlDeferredImageGPUImpeller::isOpaque() const {
-  // Impeller doesn't currently implement opaque alpha types.
-  return false;
-}
-
-// |DlImage|
 bool DlDeferredImageGPUImpeller::isTextureBacked() const {
   return wrapper_ && wrapper_->isTextureBacked();
-}
-
-// |DlImage|
-bool DlDeferredImageGPUImpeller::isUIThreadSafe() const {
-  return true;
 }
 
 // |DlImage|
@@ -183,7 +167,8 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           wrapper->error_ = "Failed to create snapshot.";
           return;
         }
-        std::atomic_store(&wrapper->texture_, snapshot->impeller_texture());
+        std::atomic_store(&wrapper->texture_,
+                          snapshot->asDlImageImpeller()->impeller_texture());
       }));
 }
 

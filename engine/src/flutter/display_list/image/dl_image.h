@@ -12,14 +12,15 @@
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
-#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace impeller {
-class Texture;
+class DlImageImpeller;
 }  // namespace impeller
 
 namespace flutter {
+
+class DlImageSkia;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents an image whose allocation is (usually) resident on
@@ -31,14 +32,21 @@ namespace flutter {
 ///
 class DlImage : public SkRefCnt {
  public:
+  /// The subclass type of this DlImage (Skia or Impeller).
+  enum class Type { kSkia, kImpeller };
+
   // Describes which GPU context owns this image.
   enum class OwningContext { kRaster, kIO };
 
-  static sk_sp<DlImage> Make(const SkImage* image);
-
-  static sk_sp<DlImage> Make(sk_sp<SkImage> image);
-
   virtual ~DlImage();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns the type of rendering backend that this image is
+  ///             meant to be used by.
+  ///
+  /// @return     A DlImage::Type enum value.
+  ///
+  virtual Type GetType() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      If this display list image is meant to be used by the Skia
@@ -46,7 +54,7 @@ class DlImage : public SkRefCnt {
   ///
   /// @return     A Skia image instance or null.
   ///
-  virtual sk_sp<SkImage> skia_image() const = 0;
+  virtual const DlImageSkia* asDlImageSkia() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      If this display list image is meant to be used by the Impeller
@@ -54,7 +62,7 @@ class DlImage : public SkRefCnt {
   ///
   /// @return     An Impeller texture instance or null.
   ///
-  virtual std::shared_ptr<impeller::Texture> impeller_texture() const = 0;
+  virtual const impeller::DlImageImpeller* asDlImageImpeller() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      If the pixel format of this image ignores alpha, this returns
@@ -120,16 +128,7 @@ class DlImage : public SkRefCnt {
   ///             image.
   virtual std::optional<std::string> get_error() const;
 
-  bool Equals(const DlImage* other) const {
-    if (!other) {
-      return false;
-    }
-    if (this == other) {
-      return true;
-    }
-    return skia_image() == other->skia_image() &&
-           impeller_texture() == other->impeller_texture();
-  }
+  virtual bool Equals(const DlImage* other) const;
 
   bool Equals(const DlImage& other) const { return Equals(&other); }
 

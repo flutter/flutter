@@ -6,6 +6,8 @@
 
 namespace flutter {
 
+static constexpr DlScalar kMinSigma = (1.0f / (1 << 12));
+
 std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(
     DlScalar sigma_x,
     DlScalar sigma_y,
@@ -14,11 +16,11 @@ std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(
   if (!std::isfinite(sigma_x) || !std::isfinite(sigma_y)) {
     return nullptr;
   }
-  if (sigma_x < SK_ScalarNearlyZero && sigma_y < SK_ScalarNearlyZero) {
+  if (sigma_x < kMinSigma && sigma_y < kMinSigma) {
     return nullptr;
   }
-  sigma_x = (sigma_x < SK_ScalarNearlyZero) ? 0 : sigma_x;
-  sigma_y = (sigma_y < SK_ScalarNearlyZero) ? 0 : sigma_y;
+  sigma_x = (sigma_x < kMinSigma) ? 0 : sigma_x;
+  sigma_y = (sigma_y < kMinSigma) ? 0 : sigma_y;
   return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode,
                                              bounds);
 }

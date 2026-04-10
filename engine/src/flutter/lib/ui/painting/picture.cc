@@ -204,9 +204,9 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
 
         if (!image->isUIThreadSafe()) {
           // All images with impeller textures should already be safe.
-          FML_DCHECK(image->impeller_texture() == nullptr);
-          image =
-              DlImageGPU::Make({image->skia_image(), std::move(unref_queue)});
+          FML_DCHECK(image->asDlImageImpeller()->impeller_texture() == nullptr);
+          image = DlImageGPU::Make(
+              {image->asDlImageSkia()->skia_image(), std::move(unref_queue)});
         }
 
         auto dart_image = CanvasImage::Create();

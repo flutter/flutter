@@ -2,39 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/image/dl_image_skia.h"
+#include "flutter/display_list/skia/dl_image_skia.h"
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 
 namespace flutter {
 
-DlImageSkia::DlImageSkia(sk_sp<SkImage> image) : image_(std::move(image)) {}
+sk_sp<DlImage> DlImageSkia::Make(const SkImage* image) {
+  return Make(sk_ref_sp(image));
+}
+
+sk_sp<DlImage> DlImageSkia::Make(sk_sp<SkImage> image) {
+  return sk_make_sp<DlImageSkiaImpl>(std::move(image));
+}
+
+DlImageSkiaImpl::DlImageSkiaImpl(sk_sp<SkImage> image)
+    : image_(std::move(image)) {}
 
 // |DlImage|
-DlImageSkia::~DlImageSkia() = default;
+DlImageSkiaImpl::~DlImageSkiaImpl() = default;
+
+DlImage::Type DlImageSkia::GetType() const { return Type::kSkia; }
 
 // |DlImage|
-sk_sp<SkImage> DlImageSkia::skia_image() const {
-  return image_;
+const DlImageSkia* DlImageSkia::asDlImageSkia() const {
+  return this;
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageSkia::impeller_texture() const {
+const impeller::DlImageImpeller* DlImageSkia::asDlImageImpeller() const {
   return nullptr;
 }
 
 // |DlImage|
-bool DlImageSkia::isOpaque() const {
+bool DlImageSkiaImpl::isOpaque() const {
   return image_ ? image_->isOpaque() : false;
 }
 
 // |DlImage|
-bool DlImageSkia::isTextureBacked() const {
+bool DlImageSkiaImpl::isTextureBacked() const {
   return image_ ? image_->isTextureBacked() : false;
 }
 
 // |DlImage|
-bool DlImageSkia::isUIThreadSafe() const {
+bool DlImageSkiaImpl::isUIThreadSafe() const {
   // Technically if the image is null then we are thread-safe, and possibly
   // if the image is constructed from a heap raster as well, but there
   // should never be a leak of an instance of this class into any data that
@@ -45,12 +56,12 @@ bool DlImageSkia::isUIThreadSafe() const {
 }
 
 // |DlImage|
-DlISize DlImageSkia::GetSize() const {
+DlISize DlImageSkiaImpl::GetSize() const {
   return image_ ? ToDlISize(image_->dimensions()) : DlISize();
 }
 
 // |DlImage|
-size_t DlImageSkia::GetApproximateByteSize() const {
+size_t DlImageSkiaImpl::GetApproximateByteSize() const {
   auto size = sizeof(*this);
   if (image_) {
     const auto& info = image_->imageInfo();
@@ -59,6 +70,10 @@ size_t DlImageSkia::GetApproximateByteSize() const {
     size += image_byte_size;
   }
   return size;
+}
+
+sk_sp<SkImage> DlImageSkiaImpl::skia_image() const {
+  return image_;
 }
 
 }  // namespace flutter

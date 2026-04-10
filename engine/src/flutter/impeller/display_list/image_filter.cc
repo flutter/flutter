@@ -8,6 +8,7 @@
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "fml/logging.h"
 #include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -131,12 +132,12 @@ std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
         if (!image) {
           return nullptr;
         }
-        FML_DCHECK(image->image()->impeller_texture());
+        FML_DCHECK(image->image()->asDlImageImpeller()->impeller_texture());
         index++;
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),
-            .texture = image->image()->impeller_texture(),
+            .texture = image->image()->asDlImageImpeller()->impeller_texture(),
         });
       }
       return FilterContents::MakeRuntimeEffect(input, std::move(runtime_stage),

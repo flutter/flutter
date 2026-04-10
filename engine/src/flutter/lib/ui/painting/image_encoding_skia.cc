@@ -7,6 +7,7 @@
 #include "flutter/lib/ui/painting/image_encoding.h"
 #include "flutter/lib/ui/painting/image_encoding_impl.h"
 
+#include "flutter/display_list/skia/dl_image_skia.h"
 #include "flutter/lib/ui/painting/image.h"
 
 namespace flutter {
@@ -21,7 +22,7 @@ void ConvertImageToRasterSkia(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
   // If the owning_context is kRaster, we can't access it on this task runner.
   if (dl_image->owning_context() != DlImage::OwningContext::kRaster) {
-    auto image = dl_image->skia_image();
+    auto image = dl_image->asDlImageSkia()->skia_image();
 
     // Check validity of the image.
     if (image == nullptr) {
@@ -72,7 +73,7 @@ void ConvertImageToRasterSkia(
                                 resource_context, snapshot_delegate,
                                 io_task_runner, is_gpu_disabled_sync_switch,
                                 raster_task_runner]() {
-    auto image = dl_image->skia_image();
+    auto image = dl_image->asDlImageSkia()->skia_image();
     if (!image || !snapshot_delegate) {
       io_task_runner->PostTask(
           [encode_task = encode_task]() mutable { encode_task(nullptr); });

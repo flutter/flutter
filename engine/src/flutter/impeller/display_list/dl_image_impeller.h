@@ -12,7 +12,7 @@ namespace impeller {
 
 class AiksContext;
 
-class DlImageImpeller final : public flutter::DlImage {
+class DlImageImpeller : public flutter::DlImage {
  public:
   static sk_sp<DlImageImpeller> Make(
       std::shared_ptr<Texture> texture,
@@ -28,10 +28,13 @@ class DlImageImpeller final : public flutter::DlImage {
   ~DlImageImpeller() override;
 
   // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
+  Type GetType() const override;
 
   // |DlImage|
-  std::shared_ptr<impeller::Texture> impeller_texture() const override;
+  const flutter::DlImageSkia* asDlImageSkia() const override;
+
+  // |DlImage|
+  const DlImageImpeller* asDlImageImpeller() const override;
 
   // |DlImage|
   bool isOpaque() const override;
@@ -42,6 +45,13 @@ class DlImageImpeller final : public flutter::DlImage {
   // |DlImage|
   bool isUIThreadSafe() const override;
 
+  virtual std::shared_ptr<Texture> impeller_texture() const = 0;
+};
+
+class DlImageImpellerImpl final : public DlImageImpeller {
+  // |DlImage|
+  ~DlImageImpellerImpl() override;
+
   // |DlImage|
   flutter::DlISize GetSize() const override;
 
@@ -51,16 +61,22 @@ class DlImageImpeller final : public flutter::DlImage {
   // |DlImage|
   OwningContext owning_context() const override { return owning_context_; }
 
+  // |DlImageImpeller|
+  std::shared_ptr<Texture> impeller_texture() const override;
+
  private:
+  friend class DlImageImpeller;
+
   std::shared_ptr<Texture> texture_;
   OwningContext owning_context_;
 
-  explicit DlImageImpeller(std::shared_ptr<Texture> texture,
-                           OwningContext owning_context = OwningContext::kIO);
+  explicit DlImageImpellerImpl(
+      std::shared_ptr<Texture> texture,
+      OwningContext owning_context = OwningContext::kIO);
 
-  DlImageImpeller(const DlImageImpeller&) = delete;
+  DlImageImpellerImpl(const DlImageImpeller&) = delete;
 
-  DlImageImpeller& operator=(const DlImageImpeller&) = delete;
+  DlImageImpellerImpl& operator=(const DlImageImpellerImpl&) = delete;
 };
 
 }  // namespace impeller

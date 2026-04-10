@@ -27,11 +27,6 @@ sk_sp<SkImage> DlImageGPU::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageGPU::impeller_texture() const {
-  return nullptr;
-}
-
-// |DlImage|
 bool DlImageGPU::isOpaque() const {
   if (auto image = skia_image()) {
     return image->isOpaque();

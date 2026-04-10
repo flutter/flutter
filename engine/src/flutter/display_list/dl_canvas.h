@@ -14,6 +14,7 @@
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/third_party/skia/include/core/SkImageInfo.h"
 
 namespace flutter {
 

@@ -21,6 +21,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -1280,9 +1281,10 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
       paint.color_source->type() == flutter::DlColorSourceType::kImage) {
     const flutter::DlImageColorSource* image_color_source =
         paint.color_source->asImage();
-    FML_DCHECK(image_color_source &&
-               image_color_source->image()->impeller_texture());
-    auto texture = image_color_source->image()->impeller_texture();
+    FML_DCHECK(image_color_source);
+    auto texture =
+        image_color_source->image()->asDlImageImpeller()->impeller_texture();
+    FML_DCHECK(texture);
     auto x_tile_mode = static_cast<Entity::TileMode>(
         image_color_source->horizontal_tile_mode());
     auto y_tile_mode =

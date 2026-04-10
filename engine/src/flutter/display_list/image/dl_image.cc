@@ -4,17 +4,7 @@
 
 #include "flutter/display_list/image/dl_image.h"
 
-#include "flutter/display_list/image/dl_image_skia.h"
-
 namespace flutter {
-
-sk_sp<DlImage> DlImage::Make(const SkImage* image) {
-  return Make(sk_ref_sp(image));
-}
-
-sk_sp<DlImage> DlImage::Make(sk_sp<SkImage> image) {
-  return sk_make_sp<DlImageSkia>(std::move(image));
-}
 
 DlImage::DlImage() = default;
 

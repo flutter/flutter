@@ -15,7 +15,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
     return nullptr;
   }
   return sk_sp<DlImageImpeller>(
-      new DlImageImpeller(std::move(texture), owning_context));
+      new DlImageImpellerImpl(std::move(texture), owning_context));
 }
 
 sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
@@ -52,21 +52,29 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
   return impeller::DlImageImpeller::Make(snapshot->texture);
 }
 
-DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture,
-                                 OwningContext owning_context)
+DlImageImpellerImpl::DlImageImpellerImpl(std::shared_ptr<Texture> texture,
+                                         OwningContext owning_context)
     : texture_(std::move(texture)), owning_context_(owning_context) {}
 
 // |DlImage|
 DlImageImpeller::~DlImageImpeller() = default;
 
 // |DlImage|
-sk_sp<SkImage> DlImageImpeller::skia_image() const {
+DlImageImpellerImpl::~DlImageImpellerImpl() = default;
+
+// |DlImage|
+flutter::DlImage::Type DlImageImpeller::GetType() const {
+  return flutter::DlImage::Type::kImpeller;
+}
+
+// |DlImage|
+const flutter::DlImageSkia* DlImageImpeller::asDlImageSkia() const {
   return nullptr;
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageImpeller::impeller_texture() const {
-  return texture_;
+const DlImageImpeller* DlImageImpeller::asDlImageImpeller() const {
+  return this;
 }
 
 // |DlImage|
@@ -88,19 +96,23 @@ bool DlImageImpeller::isUIThreadSafe() const {
 }
 
 // |DlImage|
-flutter::DlISize DlImageImpeller::GetSize() const {
+flutter::DlISize DlImageImpellerImpl::GetSize() const {
   // texture |GetSize()| returns a 64-bit size, but we need a 32-bit size,
   // so we need to convert to DlISize (the 32-bit variant) either way.
   return texture_ ? flutter::DlISize(texture_->GetSize()) : flutter::DlISize();
 }
 
 // |DlImage|
-size_t DlImageImpeller::GetApproximateByteSize() const {
+size_t DlImageImpellerImpl::GetApproximateByteSize() const {
   auto size = sizeof(*this);
   if (texture_) {
     size += texture_->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
   }
   return size;
+}
+
+std::shared_ptr<Texture> DlImageImpellerImpl::impeller_texture() const {
+  return texture_;
 }
 
 }  // namespace impeller

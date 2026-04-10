@@ -13,6 +13,7 @@
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "impeller/core/texture.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -23,7 +24,7 @@ namespace flutter {
 /// @see DisplayListDeferredImageGPUImpeller for another example of a deferred
 /// image.
 /// @see dart:ui `decodeImageFromPixelsSync` for the user of this class.
-class PixelDeferredImageGPUImpeller final : public DlImage {
+class PixelDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
  public:
   static sk_sp<PixelDeferredImageGPUImpeller> Make(
       sk_sp<SkImage> image,
@@ -33,10 +34,7 @@ class PixelDeferredImageGPUImpeller final : public DlImage {
   // |DlImage|
   ~PixelDeferredImageGPUImpeller() override;
 
-  // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
-
-  // |DlImage|
+  // |DlImageImpeller|
   std::shared_ptr<impeller::Texture> impeller_texture() const override;
 
   // |DlImage|

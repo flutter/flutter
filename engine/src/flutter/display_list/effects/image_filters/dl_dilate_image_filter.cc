@@ -6,10 +6,12 @@
 
 namespace flutter {
 
+static constexpr DlScalar kMinRadius = (1.0f / (1 << 12));
+
 std::shared_ptr<DlImageFilter> DlDilateImageFilter::Make(DlScalar radius_x,
                                                          DlScalar radius_y) {
-  if (std::isfinite(radius_x) && radius_x > SK_ScalarNearlyZero &&
-      std::isfinite(radius_y) && radius_y > SK_ScalarNearlyZero) {
+  if (std::isfinite(radius_x) && radius_x > kMinRadius &&
+      std::isfinite(radius_y) && radius_y > kMinRadius) {
     return std::make_shared<DlDilateImageFilter>(radius_x, radius_y);
   }
   return nullptr;

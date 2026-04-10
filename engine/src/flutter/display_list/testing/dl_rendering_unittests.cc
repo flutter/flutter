@@ -562,7 +562,7 @@ struct DlJobRenderer : public MatrixClipJobRenderer {
   }
 
   bool targets_impeller() const override {
-    return dl_image_->impeller_texture() != nullptr;
+    return dl_image_->GetType() == DlImage::Type::kImpeller;
   }
 
  private:
@@ -757,7 +757,7 @@ class RenderEnvironment {
 
 const sk_sp<SkImage> RenderEnvironment::kTestSkImage = makeTestSkImage();
 const sk_sp<DlImage> RenderEnvironment::kTestDlImage =
-    DlImage::Make(kTestSkImage);
+    DlImageSkia::Make(kTestSkImage);
 
 class CaseParameters {
  public:
@@ -4814,7 +4814,7 @@ class DisplayListNopTest : public DisplayListRendering {
                         .setBlendMode(mode)            //
                         .setColorFilter(color_filter)  //
                         .setImageFilter(image_filter);
-    builder.DrawImage(DlImage::Make(test_image_src_data->image()),
+    builder.DrawImage(DlImageSkia::Make(test_image_src_data->image()),
                       DlPoint(0, 0), DlImageSampling::kNearestNeighbor, &paint);
     auto dl = builder.Build();
 

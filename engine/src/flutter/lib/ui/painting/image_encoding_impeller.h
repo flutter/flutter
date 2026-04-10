@@ -10,6 +10,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/status_or.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#include "flutter/impeller/core/texture.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 
 namespace impeller {

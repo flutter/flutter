@@ -11,6 +11,7 @@
 #include "flutter/display_list/geometry/dl_path.h"
 #include "fml/logging.h"
 #include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
@@ -188,9 +189,10 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
     case flutter::DlColorSourceType::kImage: {
       const flutter::DlImageColorSource* image_color_source =
           color_source->asImage();
-      FML_DCHECK(image_color_source &&
-                 image_color_source->image()->impeller_texture());
-      auto texture = image_color_source->image()->impeller_texture();
+      FML_DCHECK(image_color_source);
+      auto texture =
+          image_color_source->image()->asDlImageImpeller()->impeller_texture();
+      FML_DCHECK(texture);
       auto x_tile_mode = static_cast<Entity::TileMode>(
           image_color_source->horizontal_tile_mode());
       auto y_tile_mode = static_cast<Entity::TileMode>(
@@ -256,11 +258,11 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
           contents->SetColor(Color::BlackTransparent());
           return contents;
         }
-        FML_DCHECK(image->image()->impeller_texture());
+        FML_DCHECK(image->image()->asDlImageImpeller()->impeller_texture());
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),
-            .texture = image->image()->impeller_texture(),
+            .texture = image->image()->asDlImageImpeller()->impeller_texture(),
         });
       }
 
