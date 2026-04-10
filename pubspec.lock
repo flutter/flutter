@@ -722,6 +722,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  record_use:
+    dependency: "direct main"
+    description:
+      name: record_use
+      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   retry:
     dependency: "direct main"
     description:
