@@ -58,6 +58,13 @@ float filledSDF(vec2 p) {
   }
 }
 
+float hairlineSDF(vec2 p) {
+  float base_sdf = filledSDF(p);
+  float pixel_size = fwidth(base_sdf);
+  // Harline SDF is a 1-pixel wide band around the edge of the base SDF.
+  return abs(base_sdf) - 0.5 * pixel_size;
+}
+
 float strokedSDF(vec2 p) {
   float half_stroke = max(frag_info.stroke_width, 0.0) * 0.5;
   float outer;
@@ -88,7 +95,14 @@ float strokedSDF(vec2 p) {
 void main() {
   vec2 p = v_position - frag_info.center;
 
-  float dist = (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
+  float dist;
+  if (frag_info.stroked < 0.5) {
+    dist = filledSDF(p);
+  } else if (frag_info.stroke_width == 0.0) {
+    dist = hairlineSDF(p);
+  } else {
+    dist = strokedSDF(p);
+  }
 
   // Anti-aliasing
   // fwidth(dist) gives the change in SDF per pixel.

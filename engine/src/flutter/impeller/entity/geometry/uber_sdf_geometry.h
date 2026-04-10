@@ -37,7 +37,8 @@ class UberSDFGeometry final : public Geometry {
 
  private:
   // The local bounds of the primitive based on the center and size.
-  // Takes into account stroke width if the primitive is stroked.
+  // Takes into account stroke width if the primitive is stroked, unless the
+  // stroke width is 0 (hairline stroke).
   // Does not take AA padding into account.
   Rect base_bounds_;
 

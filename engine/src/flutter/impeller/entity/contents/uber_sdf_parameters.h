@@ -37,6 +37,8 @@ struct UberSDFParameters {
                                       Scalar radius,
                                       std::optional<StrokeParameters> stroke);
 
+  bool IsHairlineStroked() const { return stroke && stroke->width == 0.0f; }
+
   /// The type of shape to render.
   Type type;
 

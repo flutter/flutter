@@ -26,28 +26,34 @@ GeometryResult UberSDFGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  // Calculate the AA padding's local space value by dividing the AA's device
-  // space value by the maximum axis scaling of the entity transform.
-  Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
-  Scalar aa_padding =
-      max_basis == 0 ? 0 : UberSDFParameters::kAntialiasPixels / max_basis;
+  Vector2 transform_basis_scaling = entity.GetTransform().GetBasisScaleXY();
+  Vector2 device_pixel_size = {
+      transform_basis_scaling.x != 0 ? 1.0f / transform_basis_scaling.x : 0,
+      transform_basis_scaling.y != 0 ? 1.0f / transform_basis_scaling.y : 0};
 
-  // Return a quad (FillRectGeometry) that covers the base shape expanded by the
-  // AA padding.
+  Vector2 aa_padding = UberSDFParameters::kAntialiasPixels * device_pixel_size;
+  Vector2 hairline_stroke_padding =
+      params_.IsHairlineStroked() ? 0.5 * device_pixel_size : Point{0, 0};
+
+  // Return a quad (FillRectGeometry) that covers the base shape expanded by
+  // padding for AA and hairline stroke.
   //
   // For future performance enhancements (if the fill rate is a limiting factor)
   // this can be optimized to use a tighter geometry for specific shapes. E.g.
   // Using a tighter polygon, or cutting out the interior for stroked shapes.
-  FillRectGeometry frg(base_bounds_.Expand(aa_padding));
+  FillRectGeometry frg(
+      base_bounds_.Expand(aa_padding + hairline_stroke_padding));
   return frg.GetPositionBuffer(renderer, entity, pass);
 }
 
 std::optional<Rect> UberSDFGeometry::GetCoverage(
     const Matrix& transform) const {
   // The coverage rect of the SDF is the bounds of the base shape, expanded by
-  // the AA padding.
+  // padding for AA and hairline stroke.
   Rect transformed_bounds = base_bounds_.TransformAndClipBounds(transform);
-  return transformed_bounds.Expand(UberSDFParameters::kAntialiasPixels);
+  Scalar hairline_stroke_padding = params_.IsHairlineStroked() ? 0.5f : 0.0f;
+  return transformed_bounds.Expand(UberSDFParameters::kAntialiasPixels +
+                                   hairline_stroke_padding);
 }
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
