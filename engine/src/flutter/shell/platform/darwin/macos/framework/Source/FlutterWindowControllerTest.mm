@@ -57,6 +57,20 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
 
 class FlutterWindowControllerRetainTest : public ::testing::Test {};
 
+TEST_F(FlutterWindowControllerTest, FixMoveRunLoopMode) {
+  FlutterEngine* engine = GetFlutterEngine();
+  [engine.windowController fixMoveRunLoopModeIfNeeded];
+
+  // Make sure that after fixMoveRunLoopMode _NSMoveTimerRunLoopMode becomes
+  // common run loop mode.
+  __block BOOL signalled = NO;
+  CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopCommonModes, ^{
+    signalled = YES;
+  });
+  CFRunLoopRunInMode(CFSTR("_NSMoveTimerRunLoopMode"), 1.0, YES);
+  EXPECT_TRUE(signalled);
+}
+
 TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
