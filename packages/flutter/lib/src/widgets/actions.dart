@@ -921,13 +921,21 @@ class Actions extends StatefulWidget {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
     if (mappedAction is Action<T>?) {
       return mappedAction;
-    } else {
-      assert(
-        false,
-        '$T cannot be handled by an Action of runtime type ${mappedAction.runtimeType}.',
-      );
-      return null;
     }
+    // An Action<Intent> (e.g. DoNothingAction) can handle any Intent subtype
+    // but Dart's invariant reified generics cause `Action<Intent>` to fail the
+    // `is Action<T>` check when T is a concrete Intent subclass.  Since the
+    // action was explicitly mapped to this intent type, it is safe to return.
+    if (mappedAction.intentType == Intent) {
+      // The unchecked cast is safe: Action<Intent>.invoke accepts any Intent,
+      // so passing a T (which extends Intent) is valid.
+      return _UnsafeCastAction<T>(mappedAction);
+    }
+    assert(
+      false,
+      '$T cannot be handled by an Action of runtime type ${mappedAction.runtimeType}.',
+    );
+    return null;
   }
 
   /// Returns the [ActionDispatcher] associated with the [Actions] widget that
@@ -1484,6 +1492,49 @@ class DoNothingAction extends Action<Intent> {
 
   @override
   void invoke(Intent intent) {}
+}
+
+/// Wraps an [Action<Intent>] so it can be used where an [Action<T>] is
+/// expected.  This is needed because Dart's reified generics make
+/// `Action<Intent>` fail the `is Action<T>` check even though `T extends
+/// Intent`.
+class _UnsafeCastAction<T extends Intent> extends Action<T> {
+  _UnsafeCastAction(this._delegate);
+  final Action<Intent> _delegate;
+
+  @override
+  void addActionListener(ActionListenerCallback listener) {
+    super.addActionListener(listener);
+    _delegate.addActionListener(listener);
+  }
+
+  @override
+  void removeActionListener(ActionListenerCallback listener) {
+    super.removeActionListener(listener);
+    _delegate.removeActionListener(listener);
+  }
+
+  @override
+  bool get isActionEnabled => _delegate.isActionEnabled;
+
+  @override
+  bool isEnabled(T intent) => _delegate.isEnabled(intent);
+
+  @override
+  bool consumesKey(T intent) => _delegate.consumesKey(intent);
+
+  @override
+  KeyEventResult toKeyEventResult(T intent, Object? invokeResult) =>
+      _delegate.toKeyEventResult(intent, invokeResult);
+
+  @override
+  Object? invoke(T intent) => _delegate.invoke(intent);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Action<Intent>>('delegate', _delegate));
+  }
 }
 
 /// An [Intent] that activates the currently focused control.

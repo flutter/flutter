@@ -1881,6 +1881,40 @@ void main() {
       expect(LogInvocationContextAction.invokeContext, invokingContext);
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180435
+  testWidgets('DoNothingAction can override Action.overridable intents', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget? child) {
+          return Actions(
+            actions: <Type, Action<Intent>>{SelectAllTextIntent: DoNothingAction()},
+            child: EditableText(
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: TextStyle(),
+              cursorColor: Color(0xFF000000),
+              backgroundCursorColor: Color(0xFF000000),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+
+    // Press Ctrl+A — should not throw an assertion error.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 typedef PostInvokeCallback =
