@@ -30,6 +30,9 @@
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_accessibility_bridge_gtk4.h"
+#endif
 #if FLUTTER_LINUX_GTK4 && defined(FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR)
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #endif
@@ -94,6 +97,10 @@ struct _FlView {
 #if !FLUTTER_LINUX_GTK4
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
+#else
+  // GTK4 bridge retaining semantics state until a full native accessibility
+  // implementation lands.
+  FlAccessibilityBridgeGtk4* accessibility_bridge;
 #endif
 
   // Signal subscripton for cursor changes.
@@ -442,8 +449,8 @@ static void update_semantics_cb(FlView* self,
 #if !FLUTTER_LINUX_GTK4
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 #else
-  (void)self;
-  (void)update;
+  fl_accessibility_bridge_gtk4_handle_update_semantics(
+      self->accessibility_bridge, update);
 #endif
 }
 
@@ -1069,8 +1076,8 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->key_controller);
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
-#endif
-#if !FLUTTER_LINUX_GTK4
+  g_clear_object(&self->accessibility_bridge);
+#else
   g_clear_object(&self->view_accessible);
 #endif
   g_clear_object(&self->cancellable);
@@ -1183,6 +1190,8 @@ static void setup_engine(FlView* self) {
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+#else
+  self->accessibility_bridge = fl_accessibility_bridge_gtk4_new(self->view_id);
 #endif
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
@@ -1417,7 +1426,12 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
   self->background_color = gdk_rgba_copy(color);
 }
 
-#if !FLUTTER_LINUX_GTK4
+#if FLUTTER_LINUX_GTK4
+FlAccessibilityBridgeGtk4* fl_view_get_accessibility_bridge(FlView* self) {
+  g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
+  return self->accessibility_bridge;
+}
+#else
 FlViewAccessible* fl_view_get_accessible(FlView* self) {
   g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
   return self->view_accessible;
