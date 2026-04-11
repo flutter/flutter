@@ -194,7 +194,8 @@ abstract interface class WindowControllerLinux {
   @internal
   ffi.Pointer<ffi.Void> getWindowHandle();
 
-  /// Returns pointer to the [FlView](https://github.com/flutter/flutter/blob/master/engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_view.h) that renders the Flutter content in this window.
+  /// Returns pointer to the [FlView](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_view.h)
+  /// that renders the Flutter content in this window.
   /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
