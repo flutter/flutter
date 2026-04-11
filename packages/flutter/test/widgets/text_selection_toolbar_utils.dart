@@ -76,10 +76,13 @@ void expectCupertinoToolbarForPartialSelection() {
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
-      expect(cupertinoToolbarHasText('Share...'), isTrue);
-      expect(cupertinoToolbarHasText('Translate'), isTrue);
       expect(find.text('Look Up'), findsOneWidget);
       expect(find.text('Search Web'), findsOneWidget);
+
+      // Adding Translate pushes both Share and Translate to the next page
+      // So just check that they exist on the tool bar.
+      expect(cupertinoToolbarHasText('Share...'), isTrue);
+      expect(cupertinoToolbarHasText('Translate'), isTrue);
     case TargetPlatform.macOS:
       expect(find.byType(CupertinoButton), findsNWidgets(3));
       expect(find.text('Cut'), findsOneWidget);
@@ -116,10 +119,13 @@ void expectCupertinoToolbarForFullSelection() {
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
-      expect(cupertinoToolbarHasText('Share...'), isTrue);
-      expect(cupertinoToolbarHasText('Translate'), isTrue);
       expect(find.text('Look Up'), findsOneWidget);
       expect(find.text('Search Web'), findsOneWidget);
+
+      // Adding Translate pushes both Share and Translate to the next page
+      // So just check that they exist on the tool bar.
+      expect(cupertinoToolbarHasText('Share...'), isTrue);
+      expect(cupertinoToolbarHasText('Translate'), isTrue);
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.macOS:
