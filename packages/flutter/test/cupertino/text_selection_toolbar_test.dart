@@ -11,7 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
+import 'editable_text_utils.dart' show textOffsetToPosition;
 
 // These constants are copied from cupertino/text_selection_toolbar.dart.
 const double _kArrowScreenPadding = 26.0;

@@ -72,7 +72,7 @@ jobs:
             if (channel === 'beta' && hotfix !== 'true') {
               body += '#### Branch Alignment\n';
               body += '  - [ ] Stop the [Dart Auto Roller](https://autoroll.skia.org/r/dart-sdk-flutter)\n';
-              body += '  - [ ] Roll forward to aligned Dart hash\n';
+              body += '  - [ ] Update Dart version if necessary ([GH Workflow](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/roll-dart-dependencies.yml))\n';
               body += '    - Dart Hash: [Paste the Dart hash here]\n';
               body += '  - [ ] Wait for Google3 Roll to complete.\n';
               body += '  - [ ] Restart the [Dart Auto Roller](https://autoroll.skia.org/r/dart-sdk-flutter)\n';

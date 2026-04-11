@@ -1624,6 +1624,533 @@ void main() {
       expect(json['textDirectionIndex'], TextDirection.ltr.index);
     });
   });
+
+  _testErrorHandling();
+}
+
+void _testErrorHandling() {
+  group('TextInput error reporting', () {
+    late TestDefaultBinaryMessengerBinding binding;
+    late List<FlutterErrorDetails> errors;
+
+    setUp(() {
+      binding = TestDefaultBinaryMessengerBinding.instance;
+      errors = <FlutterErrorDetails>[];
+      TextInput.restorePlatformInputControl();
+    });
+
+    tearDown(() {
+      TextInputConnection.debugResetId();
+    });
+
+    testWidgets('attach reports error when setClient fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            throw 'Failed to set client';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        TextInput.attach(client, const TextInputConfiguration());
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set client'),
+        );
+        expect(errors.first.context.toString(), contains('while attaching the text input client'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('detach reports error when clearClient fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.clearClient') {
+            throw 'Failed to clear client';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        await tester.idle();
+
+        connection.close();
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to clear client'),
+        );
+        expect(errors.first.context.toString(), contains('while detaching the text input client'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('updateConfig reports error when updateConfig fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.updateConfig') {
+            throw 'Failed to update config';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.updateConfig(const TextInputConfiguration());
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to update config'),
+        );
+        expect(
+          errors.first.context.toString(),
+          contains('while updating text input configuration'),
+        );
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('setEditingState reports error when setEditingState fails', (
+      WidgetTester tester,
+    ) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.setEditingState') {
+            throw 'Failed to set editing state';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.setEditingState(const TextEditingValue(text: 'new test'));
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set editing state'),
+        );
+        expect(errors.first.context.toString(), contains('while setting text input editing state'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('show reports error when show fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.show') {
+            throw 'Failed to show';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.show();
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect((errors.first.exception as PlatformException).message, equals('Failed to show'));
+        expect(errors.first.context.toString(), contains('while showing the text input client'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('hide reports error when hide fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.hide') {
+            throw 'Failed to hide';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        await tester.idle();
+
+        connection.close();
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect((errors.first.exception as PlatformException).message, equals('Failed to hide'));
+        expect(errors.first.context.toString(), contains('while hiding the text input client'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('setEditableSizeAndTransform reports error when fails', (
+      WidgetTester tester,
+    ) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.setEditableSizeAndTransform') {
+            throw 'Failed to set size and transform';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.setEditableSizeAndTransform(Size.zero, Matrix4.identity());
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set size and transform'),
+        );
+        expect(
+          errors.first.context.toString(),
+          contains('while setting text input size and transform'),
+        );
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('setComposingRect reports error when setMarkedTextRect fails', (
+      WidgetTester tester,
+    ) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.setMarkedTextRect') {
+            throw 'Failed to set composing rect';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.setComposingRect(Rect.zero);
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set composing rect'),
+        );
+        expect(
+          errors.first.context.toString(),
+          contains('while setting text input composing rect'),
+        );
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('setCaretRect reports error when setCaretRect fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.setCaretRect') {
+            throw 'Failed to set caret rect';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.setCaretRect(Rect.zero);
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set caret rect'),
+        );
+        expect(errors.first.context.toString(), contains('while setting text input caret rect'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('setSelectionRects reports error when fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.setSelectionRects') {
+            throw 'Failed to set selection rects';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.setSelectionRects(<SelectionRect>[
+          const SelectionRect(position: 0, bounds: Rect.zero),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set selection rects'),
+        );
+        expect(
+          errors.first.context.toString(),
+          contains('while setting text input selection rects'),
+        );
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('updateStyle reports error when setStyle fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.setStyle') {
+            throw 'Failed to set style';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.setStyle(
+          fontFamily: 'Roboto',
+          fontSize: 12.0,
+          fontWeight: FontWeight.normal,
+          textDirection: TextDirection.ltr,
+          textAlign: TextAlign.left,
+        );
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to set style'),
+        );
+        expect(errors.first.context.toString(), contains('while updating text input style'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('requestAutofill reports error when fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.requestAutofill') {
+            throw 'Failed to request autofill';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        final TextInputConnection connection = TextInput.attach(
+          client,
+          const TextInputConfiguration(),
+        );
+        connection.requestAutofill();
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to request autofill'),
+        );
+        expect(errors.first.context.toString(), contains('while requesting autofill'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+
+    testWidgets('finishAutofillContext reports error when fails', (WidgetTester tester) async {
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      try {
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'TextInput.setClient') {
+            return null;
+          }
+          if (methodCall.method == 'TextInput.finishAutofillContext') {
+            throw 'Failed to finish autofill context';
+          }
+          return null;
+        });
+
+        final client = FakeTextInputClient(const TextEditingValue(text: 'test'));
+        TextInput.attach(client, const TextInputConfiguration());
+        TextInput.finishAutofillContext();
+        await tester.pumpAndSettle();
+
+        expect(errors, hasLength(1));
+        expect(errors.first.exception, isA<PlatformException>());
+        expect(
+          (errors.first.exception as PlatformException).message,
+          equals('Failed to finish autofill context'),
+        );
+        expect(errors.first.context.toString(), contains('while finishing autofill context'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
+    });
+  });
 }
 
 class FakeTextInputClient with TextInputClient {

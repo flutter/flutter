@@ -129,6 +129,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// tooling (`flutter build`, etc) to convert into flags.
   File get generatedEnvironmentVariableExportScript;
 
+  /// This file contains the environment variables needed for Flutter tools.
+  /// It contains the same variables as [generatedEnvironmentVariableExportScript] but without the
+  /// 'export' commands. This file is used in SwiftPM Add to App.
+  File get generatedNativeIntegrationEnvironmentFile =>
+      ephemeralDirectory.childFile('flutter_native_integration.env');
+
   /// The CocoaPods 'Podfile'.
   File get podfile => hostAppRoot.childFile('Podfile');
 
@@ -566,7 +572,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       }
     }
 
-    return !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+    return !buildSettings.contains(RegExp(r'EXCLUDED_ARCHS.*\barm64\b'));
   }
 
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
