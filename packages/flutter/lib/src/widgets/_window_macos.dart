@@ -184,7 +184,6 @@ class WindowingOwnerMacOS extends WindowingOwner {
   }
 }
 
-
 /// Platform specific functionality for all window controllers on macOS.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
