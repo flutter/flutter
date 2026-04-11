@@ -23,6 +23,26 @@ out vec4 frag_color;
 
 highp in vec2 v_position;
 
+bool typeIsCircle() {
+  return abs(frag_info.type - 0.0) < 0.01;
+}
+
+bool typeIsRect() {
+  return abs(frag_info.type - 1.0) < 0.01;
+}
+
+bool joinIsMiter() {
+  return abs(frag_info.stroke_join - 0.0) < 0.01;
+}
+
+bool joinIsBevel() {
+  return abs(frag_info.stroke_join - 1.0) < 0.01;
+}
+
+bool joinIsRound() {
+  return abs(frag_info.stroke_join - 2.0) < 0.01;
+}
+
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
 }
@@ -58,57 +78,55 @@ float filledSDF(vec2 p) {
   }
 }
 
-float hairlineSDF(vec2 p) {
-  float base_sdf = filledSDF(p);
-  float pixel_size = fwidth(base_sdf);
-  // Hairline SDF is a 1-pixel wide band around the edge of the base SDF.
-  return abs(base_sdf) - 0.5 * pixel_size;
-}
+float strokedSDF(vec2 p, float base_sdf, float pixel_size) {
+  float half_stroke = max(frag_info.stroke_width, pixel_size) * 0.5;
 
-float strokedSDF(vec2 p) {
-  float half_stroke = max(frag_info.stroke_width, 0.0) * 0.5;
-  float outer;
-  float inner;
-
-  if (frag_info.type < 0.5) {  // Circle
-    outer = distanceFromCircle(p, frag_info.size.x + half_stroke);
-    inner = distanceFromCircle(p, frag_info.size.x - half_stroke);
-  } else {                              // Rect
-    if (frag_info.stroke_join < 0.5) {  // Miter
-      // Rectangle expanded by half_stroke
-      outer = distanceFromRect(p, frag_info.size + half_stroke);
-    } else if (frag_info.stroke_join < 1.5) {  // Bevel
-      // Rectangle expanded by half_stroke, with half_stroke chamfer
-      outer =
+  // Special case handling for certain shapes.
+  if (typeIsRect()) {
+    if (joinIsMiter()) {
+      // Outer edge is the SDF for a rect with size expanded by half_stroke.
+      float outer = distanceFromRect(p, frag_info.size + half_stroke);
+      // Inner edge is base_sdf's -half_stroke isoline.
+      float inner = base_sdf + half_stroke;
+      return max(outer, -inner);
+    } else if (joinIsBevel()) {
+      // Outer edge is the SDF for a rect with size expanded by half_stroke,
+      // with a half_stroke chamfer.
+      float outer =
           distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
-    } else {  // Round
-      // Rectangle sdf expanded by half_stroke, to give a half_stroke radius
-      // https://www.shadertoy.com/view/NfXSDr
-      outer = distanceFromRect(p, frag_info.size) - half_stroke;
+      // Inner edge is base_sdf's -half_stroke isoline.
+      float inner = base_sdf + half_stroke;
+      return max(outer, -inner);
     }
-    inner = distanceFromRect(p, frag_info.size - half_stroke);
   }
 
-  return max(outer, -inner);
+  // Most stroked SDFs are the shape within the half-stroke offset isolines of
+  // the filled SDF.
+  return abs(base_sdf) - half_stroke;
 }
 
 void main() {
   vec2 p = v_position - frag_info.center;
 
-  float dist;
-  if (frag_info.stroked < 0.5) {
-    dist = filledSDF(p);
-  } else if (frag_info.stroke_width == 0.0) {
-    dist = hairlineSDF(p);
-  } else {
-    dist = strokedSDF(p);
-  }
+  float base_sdf = filledSDF(p);
+
+  // Gradient vector of the SDF. Points in the direction of steepest increase
+  // away from shape. At the edges of the shape, this is perpendicular to the
+  // edge.
+  vec2 gradient = vec2(dFdx(base_sdf), dFdy(base_sdf));
+
+  // The length of the gradient vector is how fast the SDF changes per unit
+  // distance. This is equal to the width of a pixel in the direction of the
+  // gradient.
+  float pixel_size = length(gradient);
+
+  float sdf = (frag_info.stroked < 0.5) ? base_sdf
+                                        : strokedSDF(p, base_sdf, pixel_size);
 
   // Anti-aliasing
-  // fwidth(dist) gives the change in SDF per pixel.
-  float fade_size = fwidth(dist) * frag_info.aa_pixels * 0.5;
+  float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
 
-  float alpha = 1.0 - smoothstep(-fade_size, fade_size, dist);
+  float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
