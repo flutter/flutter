@@ -5379,11 +5379,11 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
             requestFocusOnTap: true,
-            dropdownMenuEntries: const <DropdownMenuEntry<TestMenu>>[
+            dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
               DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
               DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Item 1'),
             ],
@@ -5406,10 +5406,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: DropdownMenu<TestMenu>(
-            dropdownMenuEntries: const <DropdownMenuEntry<TestMenu>>[
+            dropdownMenuEntries: <DropdownMenuEntry<TestMenu>>[
               DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
             ],
           ),
@@ -5429,7 +5429,7 @@ void main() {
   testWidgets('DropdownMenu uses provided focusNode instead of creating an internal one', (
     WidgetTester tester,
   ) async {
-    final FocusNode providedFocusNode = FocusNode();
+    final providedFocusNode = FocusNode();
     addTearDown(providedFocusNode.dispose);
 
     await tester.pumpWidget(
