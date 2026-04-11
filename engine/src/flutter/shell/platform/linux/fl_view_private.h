@@ -9,7 +9,11 @@
 
 G_BEGIN_DECLS
 
-#if !FLUTTER_LINUX_GTK4
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_accessibility_bridge_gtk4.h"
+
+FlAccessibilityBridgeGtk4* fl_view_get_accessibility_bridge(FlView* view);
+#else
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 
 /**
