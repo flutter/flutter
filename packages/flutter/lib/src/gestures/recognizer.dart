@@ -861,9 +861,10 @@ class OffsetPair {
 /// Data associated with a pointer event.
 ///
 /// This is stored by [GestureRecognizer]s on a per-pointer basis.
-class _RecognizerEventData {
+@immutable
+final class _RecognizerEventData {
   /// Creates a new [_RecognizerEventData].
-  _RecognizerEventData({required this.kind, required this.buttons});
+  const _RecognizerEventData({required this.kind, required this.buttons});
 
   /// The kind of device that generated the event.
   final PointerDeviceKind kind;
