@@ -360,6 +360,8 @@ class Layer {
     auto dl_builder = DisplayListBuilder();
     bool clear_surface = true;
     for (auto c : flutter_contents_) {
+      FML_DCHECK(render_target_->GetRenderTargetSize() ==
+                 c->GetRenderSurfaceSize());
       c->Render(dl_builder, clear_surface);
       clear_surface = false;
     }
