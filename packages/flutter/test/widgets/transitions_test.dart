@@ -1115,70 +1115,91 @@ void main() {
       expect(redrawKeyChild.currentState!.redraws, equals(1));
     });
 
-    testWidgets('ListenableBuilder rebuilds when changed', (WidgetTester tester) async {
-      final redrawKey = GlobalKey<RedrawCounterState>();
-      final notifier = ChangeNotifier();
-      addTearDown(notifier.dispose);
+    group('ListenableBuilder', () {
+      testWidgets(' rebuilds when changed', (WidgetTester tester) async {
+        final redrawKey = GlobalKey<RedrawCounterState>();
+        final notifier = ChangeNotifier();
+        addTearDown(notifier.dispose);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ListenableBuilder(
-            listenable: notifier,
-            builder: (BuildContext context, Widget? child) {
-              return RedrawCounter(key: redrawKey, child: child);
-            },
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListenableBuilder(
+              listenable: notifier,
+              builder: (BuildContext context, Widget? child) {
+                return RedrawCounter(key: redrawKey, child: child);
+              },
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(redrawKey.currentState!.redraws, equals(1));
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(1));
-      notifier.notifyListeners();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKey.currentState!.redraws, equals(1));
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(1));
+        notifier.notifyListeners();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
 
-      // Pump a few more times to make sure that we don't rebuild unnecessarily.
-      await tester.pump();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-    });
+        // Pump a few more times to make sure that we don't rebuild unnecessarily.
+        await tester.pump();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+      });
 
-    testWidgets("ListenableBuilder doesn't rebuild the child", (WidgetTester tester) async {
-      final redrawKey = GlobalKey<RedrawCounterState>();
-      final redrawKeyChild = GlobalKey<RedrawCounterState>();
-      final notifier = ChangeNotifier();
-      addTearDown(notifier.dispose);
+      testWidgets("doesn't rebuild the child", (WidgetTester tester) async {
+        final redrawKey = GlobalKey<RedrawCounterState>();
+        final redrawKeyChild = GlobalKey<RedrawCounterState>();
+        final notifier = ChangeNotifier();
+        addTearDown(notifier.dispose);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ListenableBuilder(
-            listenable: notifier,
-            builder: (BuildContext context, Widget? child) {
-              return RedrawCounter(key: redrawKey, child: child);
-            },
-            child: RedrawCounter(key: redrawKeyChild),
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListenableBuilder(
+              listenable: notifier,
+              builder: (BuildContext context, Widget? child) {
+                return RedrawCounter(key: redrawKey, child: child);
+              },
+              child: RedrawCounter(key: redrawKeyChild),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(redrawKey.currentState!.redraws, equals(1));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(1));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-      notifier.notifyListeners();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
+        expect(redrawKey.currentState!.redraws, equals(1));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(1));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+        notifier.notifyListeners();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
 
-      // Pump a few more times to make sure that we don't rebuild unnecessarily.
-      await tester.pump();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
+        // Pump a few more times to make sure that we don't rebuild unnecessarily.
+        await tester.pump();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+      });
+
+      testWidgets('does not crash at zero area', (WidgetTester tester) async {
+        tester.view.physicalSize = Size.zero;
+        final focusNode = FocusNode();
+        addTearDown(tester.view.reset);
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: ListenableBuilder(
+                listenable: focusNode,
+                builder: (_, _) => const Placeholder(),
+              ),
+            ),
+          ),
+        );
+        expect(tester.getSize(find.byType(ListenableBuilder)), Size.zero);
+      });
     });
   });
 }
