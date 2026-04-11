@@ -43,8 +43,8 @@ static void send_announcement(int64_t view_id,
   FlView* view = FL_VIEW(renderable);
 #if FLUTTER_LINUX_GTK4
   FlAccessibilityBridgeGtk4* bridge = fl_view_get_accessibility_bridge(view);
-  fl_accessibility_bridge_gtk4_send_announcement(
-      bridge, message, text_direction, assertiveness);
+  fl_accessibility_bridge_gtk4_send_announcement(bridge, message,
+                                                 text_direction, assertiveness);
 #else
   FlViewAccessible* accessible = fl_view_get_accessible(view);
   fl_view_accessible_send_announcement(
