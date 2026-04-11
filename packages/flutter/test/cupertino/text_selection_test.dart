@@ -250,6 +250,8 @@ void main() {
     testWidgets(
       'All menu items show when they fit.',
       (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(4000.0, 800.0);
+        addTearDown(tester.view.reset);
         final controller = TextEditingController(text: 'abc def ghi');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
@@ -257,7 +259,7 @@ void main() {
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: const MediaQueryData(size: Size(800.0, 600.0)),
+                data: const MediaQueryData(size: Size(1400.0, 600.0)),
                 child: Center(child: CupertinoTextField(autofocus: true, controller: controller)),
               ),
             ),
@@ -525,7 +527,7 @@ void main() {
         expect(findOverflowBackButton(), findsOneWidget);
         expect(findOverflowNextButton(), findsOneWidget);
 
-        // Tapping the next button again shows the last page and the Share button
+        // Tapping the next button again shows the Share button
         await tapNextButton();
         expect(find.text('Cut'), findsNothing);
         expect(find.text('Copy'), findsNothing);
@@ -534,10 +536,25 @@ void main() {
         expect(find.text('Look Up'), findsNothing);
         expect(find.text('Search Web'), findsNothing);
         expect(find.text('Share...'), findsOneWidget);
+        expect(find.text('Translate'), findsNothing);
+        expect(findOverflowBackButton(), findsOneWidget);
+        expect(findOverflowNextButton(), findsOneWidget);
+
+        // Tapping the next button again shows the Translate button on the last page
+        await tapNextButton();
+        expect(find.text('Cut'), findsNothing);
+        expect(find.text('Copy'), findsNothing);
+        expect(find.text('Paste'), findsNothing);
+        expect(find.text('Select All'), findsNothing);
+        expect(find.text('Look Up'), findsNothing);
+        expect(find.text('Search Web'), findsNothing);
+        expect(find.text('Share...'), findsNothing);
+        expect(find.text('Translate'), findsOneWidget);
         expect(findOverflowBackButton(), findsOneWidget);
         expect(findOverflowNextButton(), findsNothing);
 
-        // Tapping the back button 5 times shows the first page again.
+        // Tapping the back button 6 times shows the first page again.
+        await tapBackButton();
         await tapBackButton();
         await tapBackButton();
         await tapBackButton();
@@ -671,6 +688,8 @@ void main() {
     testWidgets(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(4000.0, 800.0);
+        addTearDown(tester.view.reset);
         final controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         addTearDown(controller.dispose);
         await tester.pumpWidget(
@@ -678,7 +697,7 @@ void main() {
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: const MediaQueryData(size: Size(800.0, 600.0)),
+                data: const MediaQueryData(size: Size(1400.0, 600.0)),
                 child: Center(
                   child: CupertinoTextField(
                     autofocus: true,
