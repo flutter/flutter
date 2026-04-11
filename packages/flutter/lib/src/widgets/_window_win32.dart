@@ -222,7 +222,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
   }
 
-  /// Register a new [WindowsMessageHandler].
+  /// Register a new [_WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level
   /// windows.
@@ -241,7 +241,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     _messageHandlers.add(handler);
   }
 
-  /// Unregister a [WindowsMessageHandler].
+  /// Unregister a [_WindowsMessageHandler].
   ///
   /// If the handler has not been registered, this method has no effect.
   void _removeMessageHandler(_WindowsMessageHandler handler) {
@@ -292,6 +292,65 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
   }
 }
 
+/// A message handler that can respond to windows message sent to window
+/// of a specific window controller.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract interface class WindowsMessageHandler {
+  /// Handles a window message.
+  ///
+  /// Returned value, if not null will be returned to the system as LRESULT
+  /// and will stop all registered other handlers from being called. See
+  /// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
+  /// for more information.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  int? handleWindowsMessage(HWND windowHandle, int message, int wParam, int lParam);
+}
+
+/// Platform specific functionality for all window controllers on Windows.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract mixin class WindowControllerWin32 {
+  /// Returns the underlying HWND for this window.
+  /// Using this handle implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  HWND getWindowHandle();
+
+  /// Registers a [WindowsMessageHandler] to receive Windows messages for this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void addWindowsMessageHandler(WindowsMessageHandler handler) {
+    _messageHandlers.add(handler);
+  }
+
+  /// Unregisters a [WindowsMessageHandler] from receiving Windows messages for this window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void removeWindowsMessageHandler(WindowsMessageHandler handler) {
+    _messageHandlers.remove(handler);
+  }
+
+  final _messageHandlers = <WindowsMessageHandler>{};
+
+  int? _dispatchWindowsMessage(HWND windowHandle, int message, int wParam, int lParam) {
+    for (final WindowsMessageHandler handler in _messageHandlers) {
+      final int? result = handler.handleWindowsMessage(windowHandle, message, wParam, lParam);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+}
+
 /// Implementation of [RegularWindowController] for the Windows platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -299,7 +358,7 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
 /// See also:
 ///
 ///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerWin32 extends RegularWindowController {
+class RegularWindowControllerWin32 extends RegularWindowController with WindowControllerWin32 {
   /// Creates a new regular window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -462,7 +521,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   }
 
   /// Returns HWND pointer to the top level window.
-  @internal
+  @override
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
@@ -497,6 +556,9 @@ class RegularWindowControllerWin32 extends RegularWindowController {
       return null;
     }
 
+    final int? result = _dispatchWindowsMessage(windowHandle, message, wParam, lParam);
+
+    // User handler can not prevent controller from processing windows message.
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
       return 0;
@@ -508,7 +570,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
     } else if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     }
-    return null;
+    return result;
   }
 }
 
@@ -536,7 +598,7 @@ class _DialogWindowMesageHandler implements _WindowsMessageHandler {
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerWin32 extends DialogWindowController {
+class DialogWindowControllerWin32 extends DialogWindowController with WindowControllerWin32 {
   /// Creates a new dialog window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -683,7 +745,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   BaseWindowController? get parent => _parent;
 
   /// Returns HWND pointer to the top level window.
-  @internal
+  @override
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
@@ -717,6 +779,9 @@ class DialogWindowControllerWin32 extends DialogWindowController {
       return null;
     }
 
+    final int? result = _dispatchWindowsMessage(windowHandle, message, wParam, lParam);
+
+    // User handler can not prevent controller from processing windows message.
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
       return 0;
@@ -728,7 +793,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
     } else if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     }
-    return null;
+    return result;
   }
 }
 
@@ -747,6 +812,7 @@ typedef _GetWindowPositionNative =
 ///
 ///  * [TooltipWindowController], the base class for tooltip windows.
 class TooltipWindowControllerWin32 extends TooltipWindowController
+    with WindowControllerWin32
     implements _WindowsMessageHandler {
   /// Creates a new tooltip window controller for Win32.
   ///
@@ -836,7 +902,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   }
 
   /// Returns HWND pointer to the top level window.
-  @internal
+  @override
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
@@ -907,6 +973,8 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       return null;
     }
 
+    final int? result = _dispatchWindowsMessage(windowHandle, message, wParam, lParam);
+
     if (message == _WM_DESTROY) {
       _destroyed = true;
       _onGetWindowPosition.close();
@@ -914,7 +982,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       _delegate.onWindowDestroyed();
       return 0;
     }
-    return null;
+    return result;
   }
 
   @override

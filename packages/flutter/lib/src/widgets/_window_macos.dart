@@ -184,7 +184,21 @@ class WindowingOwnerMacOS extends WindowingOwner {
   }
 }
 
-mixin _WindowControllerMixin {
+
+/// Platform specific functionality for all window controllers on macOS.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract interface class WindowControllerMacOS {
+  /// Returns pointer to the underlying NSWindow.
+  /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  Pointer<Void> getWindowHandle();
+}
+
+mixin _WindowControllerMixin implements WindowControllerMacOS {
   void _initController(WindowingOwnerMacOS owner) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -238,6 +252,7 @@ mixin _WindowControllerMixin {
 
   /// Returns window handle for the current window.
   /// The handle is a pointer to NSWindow instance.
+  @override
   Pointer<Void> getWindowHandle() {
     _ensureNotDestroyed();
     return WindowingOwnerMacOS.getWindowHandle(rootView);
