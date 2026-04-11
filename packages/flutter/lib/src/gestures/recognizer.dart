@@ -185,6 +185,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
   /// Holds a mapping between pointer IDs and the data associated with them.
+  /// This holds the initial data according to the first event received for each pointer,
+  /// which is expected to stay constant throughout the pointer's lifecycle.
   final Map<int, _RecognizerEventData> _pointerToEventData = <int, _RecognizerEventData>{};
 
   /// Registers a new pointer pan/zoom that might be relevant to this gesture
