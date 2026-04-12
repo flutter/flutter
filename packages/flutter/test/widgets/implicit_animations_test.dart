@@ -803,6 +803,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedFractionallySizedBox)), Size.zero);
   });
+
+  testWidgets('SlideTransition does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset.zero,
+              end: const Offset(1.5, 0.0),
+            ).animate(CurvedAnimation(parent: controller, curve: Curves.linear)),
+            child: const Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SlideTransition)), Size.zero);
+  });
 }
 
 Future<void> tapTest2and3(
