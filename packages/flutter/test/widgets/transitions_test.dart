@@ -907,6 +907,30 @@ void main() {
       // Validate that expensive layer is not left in tree after animation has finished.
       expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
     });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MatrixTransition(
+              animation: CurvedAnimation(parent: controller, curve: Curves.linear),
+              onTransform: (_) => Matrix4.identity(),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(MatrixTransition)), Size.zero);
+    });
   });
 
   group('ScaleTransition', () {
