@@ -292,23 +292,6 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
   }
 }
 
-/// A message handler that can respond to windows message sent to window
-/// of a specific window controller.
-///
-/// Returned value, if not null will be returned to the system as LRESULT
-/// and will stop all registered other handlers from being called. See
-/// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
-/// for more information.
-///
-/// {@macro flutter.widgets.windowing.experimental}
-@internal
-typedef WindowsMessageHandler = int? Function(
-  HWND windowHandle,
-  int message,
-  int wParam,
-  int lParam,
-);
-
 /// Platform specific functionality for all window controllers on Windows.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -324,34 +307,6 @@ abstract mixin class WindowControllerWin32 {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   HWND get windowHandle;
-
-  /// Registers a [WindowsMessageHandler] to receive Windows messages for this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void addWindowsMessageHandler(WindowsMessageHandler handler) {
-    _messageHandlers.add(handler);
-  }
-
-  /// Unregisters a [WindowsMessageHandler] from receiving Windows messages for this window.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  void removeWindowsMessageHandler(WindowsMessageHandler handler) {
-    _messageHandlers.remove(handler);
-  }
-
-  final _messageHandlers = <WindowsMessageHandler>{};
-
-  int? _dispatchWindowsMessage(HWND windowHandle, int message, int wParam, int lParam) {
-    for (final WindowsMessageHandler handler in _messageHandlers) {
-      final int? result = handler(windowHandle, message, wParam, lParam);
-      if (result != null) {
-        return result;
-      }
-    }
-    return null;
-  }
 }
 
 /// Implementation of [RegularWindowController] for the Windows platform.
@@ -559,8 +514,6 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
       return null;
     }
 
-    final int? result = _dispatchWindowsMessage(windowHandle, message, wParam, lParam);
-
     // User handler can not prevent controller from processing windows message.
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
@@ -573,7 +526,7 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
     } else if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     }
-    return result;
+    return null;
   }
 }
 
@@ -782,8 +735,6 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
       return null;
     }
 
-    final int? result = _dispatchWindowsMessage(windowHandle, message, wParam, lParam);
-
     // User handler can not prevent controller from processing windows message.
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
@@ -796,7 +747,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     } else if (message == _WM_SIZE || message == _WM_ACTIVATE) {
       notifyListeners();
     }
-    return result;
+    return null;
   }
 }
 
@@ -976,8 +927,6 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       return null;
     }
 
-    final int? result = _dispatchWindowsMessage(windowHandle, message, wParam, lParam);
-
     if (message == _WM_DESTROY) {
       _destroyed = true;
       _onGetWindowPosition.close();
@@ -985,7 +934,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       _delegate.onWindowDestroyed();
       return 0;
     }
-    return result;
+    return null;
   }
 
   @override
