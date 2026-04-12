@@ -188,6 +188,7 @@ class WindowingOwnerLinux extends WindowingOwner {
 @internal
 abstract interface class WindowControllerLinux {
   /// Returns pointer to the underlying [GtkWindow](https://docs.gtk.org/gtk3/class.Window.html).
+  ///
   /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
