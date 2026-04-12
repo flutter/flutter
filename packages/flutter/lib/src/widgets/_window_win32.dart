@@ -295,20 +295,19 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
 /// A message handler that can respond to windows message sent to window
 /// of a specific window controller.
 ///
+/// Returned value, if not null will be returned to the system as LRESULT
+/// and will stop all registered other handlers from being called. See
+/// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
+/// for more information.
+///
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
-abstract interface class WindowsMessageHandler {
-  /// Handles a window message.
-  ///
-  /// Returned value, if not null will be returned to the system as LRESULT
-  /// and will stop all registered other handlers from being called. See
-  /// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
-  /// for more information.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  int? handleWindowsMessage(HWND windowHandle, int message, int wParam, int lParam);
-}
+typedef WindowsMessageHandler = int? Function(
+  HWND windowHandle,
+  int message,
+  int wParam,
+  int lParam,
+);
 
 /// Platform specific functionality for all window controllers on Windows.
 ///
@@ -346,7 +345,7 @@ abstract mixin class WindowControllerWin32 {
 
   int? _dispatchWindowsMessage(HWND windowHandle, int message, int wParam, int lParam) {
     for (final WindowsMessageHandler handler in _messageHandlers) {
-      final int? result = handler.handleWindowsMessage(windowHandle, message, wParam, lParam);
+      final int? result = handler(windowHandle, message, wParam, lParam);
       if (result != null) {
         return result;
       }
