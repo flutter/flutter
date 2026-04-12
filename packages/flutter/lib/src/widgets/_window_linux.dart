@@ -196,7 +196,7 @@ abstract interface class WindowControllerLinux {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  ffi.Pointer<ffi.Void> getWindowHandle();
+  ffi.Pointer<ffi.Void> get windowHandle;
 
   /// Returns pointer to the [FlView](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_view.h)
   /// that renders the Flutter content in this window.
@@ -208,7 +208,7 @@ abstract interface class WindowControllerLinux {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
-  ffi.Pointer<ffi.Void> getFlutterViewHandle();
+  ffi.Pointer<ffi.Void> get flutterViewHandle;
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
@@ -396,7 +396,7 @@ class RegularWindowControllerLinux extends RegularWindowController
   }
 
   @override
-  ffi.Pointer<ffi.Void> getWindowHandle() {
+  ffi.Pointer<ffi.Void> get windowHandle {
     if (_destroyed) {
       throw StateError('Window has been destroyed.');
     }
@@ -404,7 +404,7 @@ class RegularWindowControllerLinux extends RegularWindowController
   }
 
   @override
-  ffi.Pointer<ffi.Void> getFlutterViewHandle() {
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
     if (_destroyed) {
       throw StateError('Window has been destroyed.');
     }
@@ -580,7 +580,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   }
 
   @override
-  ffi.Pointer<ffi.Void> getWindowHandle() {
+  ffi.Pointer<ffi.Void> get windowHandle {
     if (_destroyed) {
       throw StateError('Window has been destroyed.');
     }
@@ -588,7 +588,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   }
 
   @override
-  ffi.Pointer<ffi.Void> getFlutterViewHandle() {
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
     if (_destroyed) {
       throw StateError('Window has been destroyed.');
     }
@@ -771,7 +771,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   }
 
   @override
-  ffi.Pointer<ffi.Void> getWindowHandle() {
+  ffi.Pointer<ffi.Void> get windowHandle {
     if (_destroyed) {
       throw StateError('Window has been destroyed.');
     }
@@ -779,7 +779,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   }
 
   @override
-  ffi.Pointer<ffi.Void> getFlutterViewHandle() {
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
     if (_destroyed) {
       throw StateError('Window has been destroyed.');
     }
