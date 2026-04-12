@@ -397,11 +397,17 @@ class RegularWindowControllerLinux extends RegularWindowController
 
   @override
   ffi.Pointer<ffi.Void> getWindowHandle() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
     return _window.instance.cast();
   }
 
   @override
   ffi.Pointer<ffi.Void> getFlutterViewHandle() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
     return _view.instance.cast();
   }
 }
@@ -575,11 +581,17 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
 
   @override
   ffi.Pointer<ffi.Void> getWindowHandle() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
     return _window.instance.cast();
   }
 
   @override
   ffi.Pointer<ffi.Void> getFlutterViewHandle() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
     return _view.instance.cast();
   }
 }
@@ -760,11 +772,17 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 
   @override
   ffi.Pointer<ffi.Void> getWindowHandle() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
     return _window.instance.cast();
   }
 
   @override
   ffi.Pointer<ffi.Void> getFlutterViewHandle() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
     return _view.instance.cast();
   }
 }
