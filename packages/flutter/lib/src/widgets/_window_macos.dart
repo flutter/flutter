@@ -190,7 +190,11 @@ class WindowingOwnerMacOS extends WindowingOwner {
 @internal
 abstract interface class WindowControllerMacOS {
   /// Returns pointer to the underlying NSWindow.
+  ///
   /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

@@ -316,7 +316,11 @@ abstract interface class WindowsMessageHandler {
 @internal
 abstract mixin class WindowControllerWin32 {
   /// Returns the underlying HWND for this window.
+  ///
   /// Using this handle implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
