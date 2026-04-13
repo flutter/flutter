@@ -14,7 +14,7 @@ and who adds them.
 | `autosubmit` | Merge a pull request when the tree becomes green. | X | | Merge on a validated pull request. |
 | `revert` | Label used to initiate a revert request on a closed and merged PR. | X | | Revert a particular change that has been merged. |
 | `revert of` | Tracking label for the revert request generated from the closed and merged original pull request. | | X | To track the new pull request that reverts a previous change. |
-| `emergency` | Override the tree-status check and land even when tree is closed. | X | | To submit a potential fix for the current tree-status |
+| `emergency` | Override the tree-status check and land even when the tree is closed. | X | | To submit a potential fix for the current tree-status. |
 
 Note that `emergency` cannot be used on its own and should be used in
 conjunction with the `autosubmit` label.
