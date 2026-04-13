@@ -299,6 +299,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addTaskForKGPVersion(projectToAddTasksTo)
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
+            FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
 
             // Add task that Flutter apps need to allow command line flags to be loaded by the Flutter Android embedding.

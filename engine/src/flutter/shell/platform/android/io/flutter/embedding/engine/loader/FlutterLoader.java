@@ -535,6 +535,7 @@ public class FlutterLoader {
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
+      Log.e("CAMILLE shell args", shellArgs.toString());
       flutterJNI.init(
           applicationContext,
           shellArgs.toArray(new String[0]),
