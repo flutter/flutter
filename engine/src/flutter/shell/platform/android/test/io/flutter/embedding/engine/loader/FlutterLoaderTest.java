@@ -1399,7 +1399,9 @@ public class FlutterLoaderTest {
     Bundle metadata = new Bundle();
 
     // Place metadata key and value into the metadata bundle used to mock the manifest.
-    if (metadataValue instanceof Boolean) {
+    if (metadataValue == null) {
+      metadata.putString(metadataKey, null);
+    } else if (metadataValue instanceof Boolean) {
       metadata.putBoolean(metadataKey, (Boolean) metadataValue);
     } else if (metadataValue instanceof Integer) {
       metadata.putInt(metadataKey, (Integer) metadataValue);
