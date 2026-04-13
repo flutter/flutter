@@ -118,12 +118,12 @@ class WebAssetServer implements AssetReader {
 
   static const _reloadedSourcesFileName = 'reloaded_sources.json';
 
-  /// Given a list of [modules] that need to be reloaded during a hot restart or
-  /// hot reload, writes a file that contains a list of objects each with three
-  /// fields:
+  /// Given a list of [modulePaths] that need to be reloaded during a hot
+  /// restart or hot reload, writes a file that contains a list of objects each
+  /// with three fields:
   ///
-  /// `src`: A string that corresponds to the relative file path containing a
-  /// DDC library bundle.
+  /// `src`: A string that corresponds to the file path relative to the app base
+  /// URL that contains the DDC library bundle.
   /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
@@ -141,18 +141,20 @@ class WebAssetServer implements AssetReader {
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
-  void writeReloadedSources(List<String> modules) {
+  void writeReloadedSources(List<String> modulePaths) {
     final moduleToLibrary = <Map<String, Object>>[];
-    for (final module in modules) {
+    for (final relativeModulePath in modulePaths) {
       final metadata = ModuleMetadata.fromJson(
-        json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
+        json.decode(
+              utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
+            )
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{
         // Use relative path for module so the app can still find it even if
         // it's in a different domain than the server.
-        'src': module,
+        'src': relativeModulePath,
         'module': metadata.name,
         'libraries': libraries,
       });
