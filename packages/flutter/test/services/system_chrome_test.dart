@@ -384,4 +384,42 @@ void main() {
     await tester.idle();
     expect(log.length, equals(2));
   });
+
+  testWidgets('SystemChrome reports error when setSystemUIOverlayStyle fails', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errors.add(details);
+    };
+
+    try {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemChrome.setSystemUIOverlayStyle') {
+            throw 'Failed to set system UI overlay style';
+          }
+          return null;
+        },
+      );
+
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+      await tester.idle();
+
+      expect(errors, hasLength(1));
+      expect(errors.first.exception, isA<PlatformException>());
+      expect(
+        (errors.first.exception as PlatformException).message,
+        equals('Failed to set system UI overlay style'),
+      );
+      expect(
+        errors.first.context.toString(),
+        contains('while setting the system UI overlay style'),
+      );
+    } finally {
+      FlutterError.onError = originalOnError;
+    }
+  });
 }
