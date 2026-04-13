@@ -1468,6 +1468,46 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void ifFlagSetViaCommandLineAndIntentExtraThenIntentExtraTakesPrecedence() {
+    String expectedImpellerArgFromCommandLine = "--enable-impeller=true";
+    String expectedImpellerArgFromIntentExtra = "--enable-impeller=false";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Mock metdata put into the manifest by the Flutter tool when command line flag specified.
+    metadata.putString(
+        "androidEngineShellArgs", "[\"" + expectedImpellerArgFromCommandLine + "\"]");
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(
+        ctx, new String[] {expectedImpellerArgFromIntentExtra});
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the Intent extras argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedImpellerArgFromCommandLine)
+            < arguments.indexOf(expectedImpellerArgFromIntentExtra));
+  }
+
+  @Test
   public void ifAOTSharedLibraryNameSetViaManifestAndIntentExtraThenIntentExtraTakesPrecedence()
       throws IOException {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
