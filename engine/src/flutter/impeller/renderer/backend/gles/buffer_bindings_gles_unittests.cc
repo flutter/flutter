@@ -134,10 +134,10 @@ TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
       }};
 
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{1024}));  // Plenty of space
   DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 1024}, reactor,
-                                 backing_store);
+                                 std::move(backing_store));
   BufferView buffer_view(&device_buffer, Range(0, 1024));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
