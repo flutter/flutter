@@ -72,11 +72,11 @@ TEST(UberSDFParametersTest, MakeStrokeCircle) {
 }
 
 TEST(UberSDFParametersTest, MakeFillOval) {
-  Point center = {50, 50};
-  Size size = Size(40, 20);
+  Point center = {25, 25};
+  Size size = Size(50, 50);
+  Rect bounds = Rect::MakeOriginSize(Point(), size);
 
-  auto params = UberSDFParameters::MakeOval(
-      Color::Red(), Rect::MakeOriginSize(center, size), std::nullopt);
+  auto params = UberSDFParameters::MakeOval(Color::Red(), bounds, std::nullopt);
 
   EXPECT_EQ(params.type, UberSDFParameters::Type::kOval);
   EXPECT_EQ(params.color, Color::Red());
@@ -86,12 +86,12 @@ TEST(UberSDFParametersTest, MakeFillOval) {
 }
 
 TEST(UberSDFParametersTest, MakeStrokeOval) {
-  Point center = {50, 50};
-  Size size = Size(40, 20);
+  Point center = {25, 25};
+  Size size = Size(50, 50);
+  Rect bounds = Rect::MakeOriginSize(Point(), size);
   StrokeParameters stroke = {.width = 4.0f};
 
-  auto params = UberSDFParameters::MakeOval(
-      Color::Red(), Rect::MakeOriginSize(center, size), stroke);
+  auto params = UberSDFParameters::MakeOval(Color::Red(), bounds, stroke);
 
   EXPECT_EQ(params.type, UberSDFParameters::Type::kOval);
   EXPECT_EQ(params.color, Color::Red());

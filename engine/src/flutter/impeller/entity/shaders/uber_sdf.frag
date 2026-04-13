@@ -56,6 +56,8 @@ float distanceFromOval(vec2 p, vec2 xyAxis) {
   float m2 = m * m;
 
   // q is the point along that line that intersects the oval.
+  // The line is defined as y = mx, the oval as (x/a)^2 + (y/a)^2 = 1,
+  // We solve this system of equations for (x,y) that intersect both.
   vec2 q = vec2(a * b / sqrt((a2 * m2) + b2), a * b * m / sqrt((a2 * m2) + b2));
   return length(p) - length(q);
 }
