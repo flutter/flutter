@@ -393,6 +393,7 @@ class SelectableRegionState extends State<SelectableRegion>
         granularity: TextGranularity.document,
       ),
     ),
+    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
   };
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers =
@@ -1829,6 +1830,14 @@ class SelectableRegionState extends State<SelectableRegion>
     if (hideHandles) {
       _selectionOverlay?.hideHandles();
     }
+  }
+
+  Object? _hideToolbarIfVisible(DismissIntent intent) {
+    if (_selectionOverlay?.toolbarIsVisible ?? false) {
+      hideToolbar(false);
+      return null;
+    }
+    return Actions.invoke(context, intent);
   }
 
   @override

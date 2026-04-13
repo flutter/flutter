@@ -25,7 +25,19 @@ void main() {
     expect(
       find.byType(RawScrollbar),
       paints
-        ..path(color: Colors.blue)
+        // Scrollbar thumb background fill.
+        ..rrect(
+          rrect: .fromLTRBR(
+            785.0,
+            0.0,
+            800.0,
+            180.0,
+            const Radius.circular(7.5),
+          ),
+          style: PaintingStyle.fill,
+          color: Colors.blue,
+        )
+        // Scrollbar thumb border.
         ..rrect(
           rrect: RRect.fromLTRBR(
             786.5,
@@ -34,6 +46,8 @@ void main() {
             178.5,
             const Radius.circular(6),
           ),
+          style: PaintingStyle.stroke,
+          strokeWidth: 3.0,
           color: Colors.brown,
         ),
     );

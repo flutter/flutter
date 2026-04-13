@@ -9,9 +9,12 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/renderer/testing/mocks.h"
@@ -76,6 +79,44 @@ TEST(EntityGeometryTest, RectGeometryCoversArea) {
   ASSERT_FALSE(geometry->CoversArea({}, Rect::MakeLTRB(-1, 0, 100, 100)));
   ASSERT_TRUE(geometry->CoversArea({}, Rect::MakeLTRB(1, 1, 100, 100)));
   ASSERT_TRUE(geometry->CoversArea({}, Rect()));
+}
+
+TEST(EntityGeometryTest, UberSDFGeometryPaddingIsAdjustedByInverseMaxBasis) {
+  UberSDFGeometry geometry(UberSDFParameters::MakeRect(
+      Color::Red(), Rect::MakeLTRB(0, 0, 100, 100), /*stroke=*/std::nullopt));
+
+  // At scale 1, padding should be 1.
+  {
+    auto coverage = geometry.GetCoverage(Matrix());
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-1, -1, 101, 101));
+    }
+  }
+
+  // At scale 2, padding should be 0.5 in local coordinates, which becomes 1.0
+  // in screen coordinates.
+  {
+    auto matrix = Matrix::MakeScale({2.0, 2.0, 1.0});
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-0.5, -0.5, 100.5, 100.5)
+                                      .TransformAndClipBounds(matrix));
+    }
+  }
+
+  // At scale 0.5, padding should be 2.0 in local coordinates, which becomes 1.0
+  // in screen coordinates.
+  {
+    auto matrix = Matrix::MakeScale({0.5, 0.5, 1.0});
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-2.0, -2.0, 102.0, 102.0)
+                                      .TransformAndClipBounds(matrix));
+    }
+  }
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {

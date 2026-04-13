@@ -228,6 +228,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createCoreMockProjectFiles();
 
@@ -259,6 +265,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createCoreMockProjectFiles();
 
@@ -292,6 +304,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       fileSystem.file('pubspec.yaml').createSync();
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
@@ -329,6 +347,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -375,6 +399,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -420,6 +450,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -466,6 +502,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
 
@@ -511,6 +553,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       processManager.addCommands(<FakeCommand>[
@@ -567,6 +615,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand1,
@@ -614,6 +668,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand1,
@@ -660,6 +720,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       createMinimalMockProjectFiles();
       processManager.addCommands(<FakeCommand>[
@@ -704,6 +770,12 @@ void main() {
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
         processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[
         xattrCommand1,
@@ -791,6 +863,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         createMinimalMockProjectFiles();
 
@@ -845,6 +923,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         createMinimalMockProjectFiles();
 
@@ -920,6 +1004,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -970,6 +1060,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1027,6 +1123,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1089,6 +1191,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1136,6 +1244,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1201,6 +1315,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1257,6 +1377,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1307,6 +1433,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1374,6 +1506,12 @@ void main() {
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1427,6 +1565,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1478,6 +1622,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
 
         createMinimalMockProjectFiles();
@@ -1530,6 +1680,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1580,6 +1736,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1632,6 +1794,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1693,6 +1861,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1746,6 +1920,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,
@@ -1803,6 +1983,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
 
         processManager.addCommands(<FakeCommand>[
@@ -1869,6 +2055,12 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
           processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
           xattrCommand1,

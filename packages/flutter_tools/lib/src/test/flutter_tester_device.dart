@@ -179,6 +179,9 @@ class FlutterTesterTestDevice extends TestDevice {
           logger.printTrace('test $id: Starting Dart Development Service');
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
+            appName:
+                'Kind: Flutter - Device: flutter tester - '
+                'Package: ${flutterProject?.manifest.appName ?? 'unknown'}',
             debuggingOptions: debuggingOptions,
           );
           forwardingUri = _ddsLauncher.uri;
