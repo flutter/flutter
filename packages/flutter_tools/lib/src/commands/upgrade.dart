@@ -224,7 +224,7 @@ class UpgradeCommandRunner {
     }
     // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
-    if (!force && await hasUncommittedChanges()) {
+    if (!force && await hasUncommittedChanges(flutterVersion)) {
       throwToolExit(
         'Your flutter checkout has local changes that would be erased by '
         'upgrading. If you want to keep these changes, it is recommended that '
@@ -306,14 +306,35 @@ class UpgradeCommandRunner {
   }
 
   @protected
-  Future<bool> hasUncommittedChanges() async {
+  Future<bool> hasUncommittedChanges(FlutterVersion flutterVersion) async {
     try {
       final RunResult result = await globals.git.run(
         ['status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-      return result.stdout.trim().isNotEmpty;
+      final String output = result.stdout.trim();
+      if (output.isEmpty) {
+        return false;
+      }
+      if (flutterVersion.channel == 'stable') {
+        return true;
+      }
+      final List<String> lines = output.split('\n');
+      for (final line in lines) {
+        final String trimmed = line.trim();
+        if (trimmed.isEmpty) {
+          continue;
+        }
+        // Ignore modifications to pubspec.lock files on non-stable branches.
+        // These files are automatically updated with the active Dart SDK dev
+        // constraints during internal tool operations, and should not block
+        // the automatic upgrade workflow.
+        if (!trimmed.endsWith('pubspec.lock')) {
+          return true;
+        }
+      }
+      return false;
     } on ProcessException catch (error) {
       throwToolExit(
         'The tool could not verify the status of the current flutter checkout. '
