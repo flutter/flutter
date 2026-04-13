@@ -374,11 +374,11 @@ void _dispatchPointerDataPacket(ByteData packet) {
   PlatformDispatcher.instance._dispatchPointerDataPacket(packet);
 }
 
-@pragma("vm:entry-point")
+@pragma('vm:entry-point')
 class _HitTestResponse {
   _HitTestResponse({required this.isPlatformView});
 
-  @pragma("vm:entry-point")
+  @pragma('vm:entry-point')
   final bool isPlatformView;
 }
 

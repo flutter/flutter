@@ -2957,11 +2957,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
   UIGestureRecognizer* forwardGectureRecognizer =
-      FindForwardingGestureRecognizer(touchInteceptorView);
+      FindForwardingGestureRecognizer(touchInterceptorView);
 
   // Before setting flutter view controller, events are not dispatched.
   NSSet* touches1 = [[NSSet alloc] init];
@@ -3016,11 +3016,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
   UIGestureRecognizer* forwardGectureRecognizer =
-      FindForwardingGestureRecognizer(touchInteceptorView);
+      FindForwardingGestureRecognizer(touchInterceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   {
     // ***** Sequence 1, finishing touch event with touchEnded ***** //
@@ -3132,11 +3132,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
   UIGestureRecognizer* forwardGectureRecognizer =
-      FindForwardingGestureRecognizer(touchInteceptorView);
+      FindForwardingGestureRecognizer(touchInterceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = flutterViewController;
 
@@ -3237,11 +3237,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
   UIGestureRecognizer* forwardGectureRecognizer =
-      FindForwardingGestureRecognizer(touchInteceptorView);
+      FindForwardingGestureRecognizer(touchInterceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = flutterViewController;
 
@@ -3301,11 +3301,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
   __block UIGestureRecognizer* forwardGestureRecognizer =
-      FindForwardingGestureRecognizer(touchInteceptorView);
+      FindForwardingGestureRecognizer(touchInterceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = flutterViewController;
 
@@ -3322,7 +3322,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       [self expectationWithDescription:@"Wait for gesture recognizer's state change."];
   dispatch_async(dispatch_get_main_queue(), ^{
     // Re-query forward gesture recognizer since it's recreated.
-    forwardGestureRecognizer = FindForwardingGestureRecognizer(touchInteceptorView);
+    forwardGestureRecognizer = FindForwardingGestureRecognizer(touchInterceptorView);
     XCTAssert(forwardGestureRecognizer.state == UIGestureRecognizerStatePossible,
               @"Forwarding gesture recognizer must be reset to possible state.");
     [touchEndedExpectation fulfill];
@@ -3339,7 +3339,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       [self expectationWithDescription:@"Wait for gesture recognizer's state change."];
   dispatch_async(dispatch_get_main_queue(), ^{
     // Re-query forward gesture recognizer since it's recreated.
-    forwardGestureRecognizer = FindForwardingGestureRecognizer(touchInteceptorView);
+    forwardGestureRecognizer = FindForwardingGestureRecognizer(touchInterceptorView);
     XCTAssert(forwardGestureRecognizer.state == UIGestureRecognizerStatePossible,
               @"Forwarding gesture recognizer must be reset to possible state.");
     [touchCancelledExpectation fulfill];
@@ -3388,17 +3388,17 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
-  XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
-  UIGestureRecognizer* delayingRecognizer = touchInteceptorView.gestureRecognizers[0];
-  UIGestureRecognizer* forwardingRecognizer = touchInteceptorView.gestureRecognizers[1];
+  XCTAssert(touchInterceptorView.gestureRecognizers.count == 2);
+  UIGestureRecognizer* delayingRecognizer = touchInterceptorView.gestureRecognizers[0];
+  UIGestureRecognizer* forwardingRecognizer = touchInterceptorView.gestureRecognizers[1];
 
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [touchInteceptorView blockGesture];
+  [touchInterceptorView blockGesture];
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
@@ -3409,11 +3409,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
   if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], forwardingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], delayingRecognizer);
   } else {
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], delayingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], forwardingRecognizer);
   }
 }
 
@@ -3457,17 +3457,17 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
-  XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
-  UIGestureRecognizer* delayingRecognizer = touchInteceptorView.gestureRecognizers[0];
-  UIGestureRecognizer* forwardingRecognizer = touchInteceptorView.gestureRecognizers[1];
+  XCTAssert(touchInterceptorView.gestureRecognizers.count == 2);
+  UIGestureRecognizer* delayingRecognizer = touchInterceptorView.gestureRecognizers[0];
+  UIGestureRecognizer* forwardingRecognizer = touchInterceptorView.gestureRecognizers[1];
 
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [touchInteceptorView blockGesture];
+  [touchInterceptorView blockGesture];
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
@@ -3479,11 +3479,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
   if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], forwardingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], delayingRecognizer);
   } else {
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], delayingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], forwardingRecognizer);
   }
 }
 
@@ -3526,17 +3526,17 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
-  XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
-  UIGestureRecognizer* delayingRecognizer = touchInteceptorView.gestureRecognizers[0];
-  UIGestureRecognizer* forwardingRecognizer = touchInteceptorView.gestureRecognizers[1];
+  XCTAssert(touchInterceptorView.gestureRecognizers.count == 2);
+  UIGestureRecognizer* delayingRecognizer = touchInterceptorView.gestureRecognizers[0];
+  UIGestureRecognizer* forwardingRecognizer = touchInterceptorView.gestureRecognizers[1];
 
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [touchInteceptorView blockGesture];
+  [touchInterceptorView blockGesture];
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
@@ -3548,11 +3548,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
   if (shouldReAddDelayingRecognizer) {
     // Since we remove and add back delayingRecognizer, it would be reordered to the last.
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], forwardingRecognizer);
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], delayingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], forwardingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], delayingRecognizer);
   } else {
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
-    XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], delayingRecognizer);
+    XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], forwardingRecognizer);
   }
 }
 
@@ -3595,20 +3595,20 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
-  XCTAssertNotNil(touchInteceptorView);
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptorView);
 
-  XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
-  UIGestureRecognizer* delayingRecognizer = touchInteceptorView.gestureRecognizers[0];
-  UIGestureRecognizer* forwardingRecognizer = touchInteceptorView.gestureRecognizers[1];
+  XCTAssert(touchInterceptorView.gestureRecognizers.count == 2);
+  UIGestureRecognizer* delayingRecognizer = touchInterceptorView.gestureRecognizers[0];
+  UIGestureRecognizer* forwardingRecognizer = touchInterceptorView.gestureRecognizers[1];
 
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [touchInteceptorView blockGesture];
+  [touchInterceptorView blockGesture];
 
-  XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
-  XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
+  XCTAssertEqual(touchInterceptorView.gestureRecognizers[0], delayingRecognizer);
+  XCTAssertEqual(touchInterceptorView.gestureRecognizers[1], forwardingRecognizer);
 }
 
 - (void)
@@ -3652,9 +3652,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
     XCTAssertNotNil(gMockPlatformView);
 
-    FlutterTouchInterceptingView* touchInteceptorView =
+    FlutterTouchInterceptingView* touchInterceptorView =
         FindTouchInterceptingView(gMockPlatformView);
-    XCTAssertNotNil(touchInteceptorView);
+    XCTAssertNotNil(touchInterceptorView);
 
     /*
       Simple Web View at root, with [*] indicating views containing
@@ -3705,7 +3705,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         [[MockTouchEventsGestureRecognizer alloc] init];
     [child2_2 addGestureRecognizer:targetRecognizer2_2];
 
-    [touchInteceptorView blockGesture];
+    [touchInterceptorView blockGesture];
 
     NSArray* normalRecognizers = @[
       normalRecognizer0, normalRecognizer1, normalRecognizer2, normalRecognizer2_1,
@@ -3767,9 +3767,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
     XCTAssertNotNil(gMockPlatformView);
 
-    FlutterTouchInterceptingView* touchInteceptorView =
+    FlutterTouchInterceptingView* touchInterceptorView =
         FindTouchInterceptingView(gMockPlatformView);
-    XCTAssertNotNil(touchInteceptorView);
+    XCTAssertNotNil(touchInterceptorView);
 
     /*
       Platform View with Multiple Web Views in different branches, with [*] indicating views
@@ -3852,7 +3852,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         [[MockTouchEventsGestureRecognizer alloc] init];
     [child3_1_2 addGestureRecognizer:targetRecognizer3_1_2];
 
-    [touchInteceptorView blockGesture];
+    [touchInterceptorView blockGesture];
 
     NSArray* normalRecognizers = @[
       normalRecognizer0, normalRecognizer1, normalRecognizer2, normalRecognizer2_1,
@@ -3915,9 +3915,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
     XCTAssertNotNil(gMockPlatformView);
 
-    FlutterTouchInterceptingView* touchInteceptorView =
+    FlutterTouchInterceptingView* touchInterceptorView =
         FindTouchInterceptingView(gMockPlatformView);
-    XCTAssertNotNil(touchInteceptorView);
+    XCTAssertNotNil(touchInterceptorView);
 
     /*
       Platform View with nested web views, with [*] indicating views containing
@@ -4009,7 +4009,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
         [[MockTouchEventsGestureRecognizer alloc] init];
     [child3_1_2_2 addGestureRecognizer:targetRecognizer3_1_2_2];
 
-    [touchInteceptorView blockGesture];
+    [touchInterceptorView blockGesture];
 
     NSArray* normalRecognizers = @[
       normalRecognizer0, normalRecognizer1, normalRecognizer2, normalRecognizer2_1,
@@ -4072,12 +4072,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInterceptorView);
 
   XCTAssert(touchInterceptorView.gestureRecognizers.count == 1);
@@ -4123,12 +4118,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInterceptorView);
 
   XCTAssert(touchInterceptorView.gestureRecognizers.count == 2);
@@ -4181,12 +4171,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInterceptorView);
 
   touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
@@ -4247,12 +4232,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInterceptorView);
 
   touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
@@ -4315,12 +4295,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                        @"gestureBlockingPolicy" : @"eager"
                                                      }]
             result:result];
-  UIView* touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
-  XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
+
+  FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertEqual(touchInterceptorView.blockingPolicy,
                  FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
 
   // waitUntilTouchesEnded
@@ -4333,12 +4310,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                         @"gestureBlockingPolicy" : @"waitUntilTouchesEnded"
                                       }]
             result:result];
-  touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
-  XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
+  touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertEqual(touchInterceptorView.blockingPolicy,
                  FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded);
 
   [flutterPlatformViewsController
@@ -4350,12 +4323,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                         @"gestureBlockingPolicy" : @"doNotBlockGesture"
                                       }]
             result:result];
-  touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
-  XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
+  touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertEqual(touchInterceptorView.blockingPolicy,
                  FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture);
   XCTAssertNil(methodResult);
 
@@ -4369,12 +4338,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                         @"gestureBlockingPolicy" : @"fallbackToPluginDefault"
                                       }]
             result:result];
-  touchInterceptorView = gMockPlatformView;
-  while (touchInterceptorView != nil &&
-         ![touchInterceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInterceptorView = touchInterceptorView.superview;
-  }
-  XCTAssertEqual(((FlutterTouchInterceptingView*)touchInterceptorView).blockingPolicy,
+  touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertEqual(touchInterceptorView.blockingPolicy,
                  FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded);
   XCTAssertNil(methodResult);
 
@@ -5532,10 +5497,10 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterTouchInterceptingViewLinksToAccessibilityContainer {
-  FlutterTouchInterceptingView* touchInteceptorView = [[FlutterTouchInterceptingView alloc] init];
+  FlutterTouchInterceptingView* touchInterceptorView = [[FlutterTouchInterceptingView alloc] init];
   NSObject* container = [[NSObject alloc] init];
-  [touchInteceptorView setFlutterAccessibilityContainer:container];
-  XCTAssertEqualObjects([touchInteceptorView accessibilityContainer], container);
+  [touchInterceptorView setFlutterAccessibilityContainer:container];
+  XCTAssertEqualObjects([touchInterceptorView accessibilityContainer], container);
 }
 
 - (void)testLayerPool {

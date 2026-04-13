@@ -652,6 +652,6 @@ void hitTestInsidePlatformViewMain() {
 @pragma('vm:entry-point')
 void hitTestOutsidePlatformViewMain() {
   PlatformDispatcher.instance.onHitTest = (HitTestRequest request) {
-    return const HitTestResponse(isPlatformView: false);
+    return HitTestResponse.empty;
   };
 }
