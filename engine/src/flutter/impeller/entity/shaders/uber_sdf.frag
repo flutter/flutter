@@ -90,10 +90,20 @@ void main() {
 
   float dist = (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
 
-  // Anti-aliasing
-  // fwidth(dist) gives the change in SDF per pixel.
-  float fade_size = fwidth(dist) * frag_info.aa_pixels * 0.5;
+  // Gradient vector of the SDF at point p. Points in the direction of steepest
+  // increase away from SDF's shape. At the edges of the shape, this is
+  // perpendicular to the edge.
+  vec2 gradient = vec2(dFdx(dist), dFdy(dist));
 
+  // The length of the gradient vector is how fast the SDF changes per unit
+  // distance. This is equal to the width of a pixel when measuring in the
+  // direction of the gradient vector.
+  float pixel_size = length(gradient);
+
+  // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
+  // goes from negative to positive). Fade through distance of half
+  // (pixel_size * aa_pixels) in each direction.
+  float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, dist);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
