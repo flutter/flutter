@@ -1442,7 +1442,7 @@ void main() {
           body: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return DropdownMenu<TestMenu>(
-                width: MediaQuery.of(context).size.width,
+                width: MediaQuery.widthOf(context),
                 dropdownMenuEntries: menuChildren,
               );
             },

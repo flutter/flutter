@@ -488,3 +488,73 @@ Future<void> sendSemanticsTreeInfo() async {
   view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
   signal();
 }
+
+@pragma('vm:entry-point')
+Future<void> sendSemanticsTree() async {
+  // Wait until semantics are enabled.
+  if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
+    await semanticsChanged;
+  }
+
+  final Iterable<ui.FlutterView> views = ui.PlatformDispatcher.instance.views;
+  final ui.FlutterView view1 = views.first;
+
+  ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {
+    final builder = ui.SemanticsUpdateBuilder();
+    final transform = Float64List(16);
+    final hitTestTransform = Float64List(16);
+    final childrenInTraversalOrder = Int32List(0);
+    final childrenInHitTestOrder = Int32List(0);
+    final additionalActions = Int32List(0);
+    // Identity matrix 4x4.
+    transform[0] = 1;
+    transform[5] = 1;
+    transform[10] = 1;
+    builder.updateNode(
+      id: nodeId,
+      flags: ui.SemanticsFlags.none,
+      actions: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: -1,
+      textSelectionExtent: -1,
+      platformViewId: -1,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      traversalParent: -1,
+      scrollPosition: 0,
+      scrollExtentMax: 0,
+      scrollExtentMin: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
+      identifier: 'identifier',
+      label: 'label',
+      labelAttributes: const <ui.StringAttribute>[],
+      value: 'value',
+      valueAttributes: const <ui.StringAttribute>[],
+      increasedValue: 'increasedValue',
+      increasedValueAttributes: const <ui.StringAttribute>[],
+      decreasedValue: 'decreasedValue',
+      decreasedValueAttributes: const <ui.StringAttribute>[],
+      hint: 'hint',
+      hintAttributes: const <ui.StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: ui.TextDirection.ltr,
+      transform: transform,
+      hitTestTransform: hitTestTransform,
+      childrenInTraversalOrder: childrenInTraversalOrder,
+      childrenInHitTestOrder: childrenInHitTestOrder,
+      additionalActions: additionalActions,
+      role: ui.SemanticsRole.tab,
+      controlsNodes: null,
+      inputType: ui.SemanticsInputType.none,
+      locale: null,
+      minValue: '0',
+      maxValue: '0',
+    );
+    return builder.build();
+  }
+
+  ui.PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
+  view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
+  signal();
+}

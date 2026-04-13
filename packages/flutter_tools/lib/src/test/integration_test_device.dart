@@ -79,6 +79,9 @@ class IntegrationTestTestDevice implements TestDevice {
       globals.printTrace('test $id: Starting Dart Development Service');
       await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
         vmServiceUri,
+        appName:
+            'Kind: Flutter - Device: ${device.displayName} - '
+            'Package: ${package.name}',
         debuggingOptions: debuggingOptions,
       );
       globals.printTrace(

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/memory.dart';
@@ -46,6 +47,20 @@ void main() {
     command: <String>['sysctl', 'hw.optional.arm64'],
     stdout: 'hw.optional.arm64: 1',
   );
+
+  const kResolvePackagesCommandList = <String>[
+    'xcrun',
+    'xcodebuild',
+    '-clonedSourcePackagesDirPath',
+    '/build/ios/SourcePackages',
+    '-resolvePackageDependencies',
+  ];
+
+  const kFindProcessResolvePackagesCommand = FakeCommand(
+    command: <String>['pgrep', '-n', ...kResolvePackagesCommandList],
+  );
+
+  const kResolvePackagesCommand = FakeCommand(command: kResolvePackagesCommandList);
 
   late FakeProcessManager fakeProcessManager;
   late XcodeProjectInterpreter xcodeProjectInterpreter;
@@ -259,10 +274,18 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             '/',
             '-scheme',
@@ -299,10 +322,18 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             '/',
             '-sdk',
@@ -339,10 +370,18 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             '/',
             '-destination',
@@ -379,10 +418,18 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             fileSystem.path.separator,
             '-scheme',
@@ -419,10 +466,18 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             '/',
             '-destination',
@@ -457,10 +512,18 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             '/',
             '-destination',
@@ -495,10 +558,36 @@ void main() {
       fakeProcessManager.addCommands(<FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        const FakeCommand(
+          command: <String>[
+            'pgrep',
+            '-n',
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/macos/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/macos/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+        ),
         FakeCommand(
           command: <String>[
             'xcrun',
             'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/macos/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
             '-project',
             '/',
             '-destination',
@@ -526,6 +615,7 @@ void main() {
   );
 
   testWithoutContext('xcodebuild clean contains Flutter Xcode environment variables', () async {
+    final Directory buildDirectory = fileSystem.directory('build/ios');
     platform.environment = const <String, String>{
       'FLUTTER_XCODE_CODE_SIGN_STYLE': 'Manual',
       'FLUTTER_XCODE_ARCHS': 'arm64',
@@ -534,10 +624,18 @@ void main() {
     fakeProcessManager.addCommands(const <FakeCommand>[
       kWhichSysctlCommand,
       kx64CheckCommand,
+      kFindProcessResolvePackagesCommand,
+      kResolvePackagesCommand,
       FakeCommand(
         command: <String>[
           'xcrun',
           'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/build/ios/SourcePackages',
+          '-disableAutomaticPackageResolution',
+          '-skipPackageUpdates',
+          '-skipPackagePluginValidation',
+          '-skipPackageSignatureValidation',
           '-workspace',
           'workspace_path',
           '-scheme',
@@ -550,7 +648,11 @@ void main() {
       ),
     ]);
 
-    await xcodeProjectInterpreter.cleanWorkspace('workspace_path', 'Free');
+    await xcodeProjectInterpreter.cleanWorkspace(
+      'workspace_path',
+      'Free',
+      buildDirectory: buildDirectory,
+    );
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -558,10 +660,25 @@ void main() {
     'xcodebuild -list getInfo returns something when xcodebuild -list succeeds',
     () async {
       const workingDirectory = '/';
+      final Directory buildDirectory = fileSystem.directory('build/ios');
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
-        FakeCommand(command: <String>['xcrun', 'xcodebuild', '-list']),
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-list',
+          ],
+        ),
       ]);
 
       final xcodeProjectInterpreter = XcodeProjectInterpreter(
@@ -572,7 +689,10 @@ void main() {
         analytics: const NoOpAnalytics(),
       );
 
-      expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
+      expect(
+        await xcodeProjectInterpreter.getInfo(workingDirectory, buildDirectory: buildDirectory),
+        isNotNull,
+      );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
   );
@@ -581,13 +701,26 @@ void main() {
     'xcodebuild -list getInfo throws a tool exit when it is unable to find a project',
     () async {
       const workingDirectory = '/';
+      final Directory buildDirectory = fileSystem.directory('build/ios');
       const stderr = 'Useful Xcode failure message about missing project.';
 
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
-          command: <String>['xcrun', 'xcodebuild', '-list'],
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-list',
+          ],
           exitCode: 66,
           stderr: stderr,
         ),
@@ -601,8 +734,8 @@ void main() {
         analytics: const NoOpAnalytics(),
       );
 
-      expect(
-        () => xcodeProjectInterpreter.getInfo(workingDirectory),
+      await expectLater(
+        () => xcodeProjectInterpreter.getInfo(workingDirectory, buildDirectory: buildDirectory),
         throwsToolExit(message: stderr),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -614,12 +747,25 @@ void main() {
     () async {
       const workingDirectory = '/';
       const stderr = 'Useful Xcode failure message about corrupted project.';
+      final Directory buildDirectory = fileSystem.directory('build/ios');
 
       fakeProcessManager.addCommands(const <FakeCommand>[
         kWhichSysctlCommand,
         kx64CheckCommand,
+        kFindProcessResolvePackagesCommand,
+        kResolvePackagesCommand,
         FakeCommand(
-          command: <String>['xcrun', 'xcodebuild', '-list'],
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/build/ios/SourcePackages',
+            '-disableAutomaticPackageResolution',
+            '-skipPackageUpdates',
+            '-skipPackagePluginValidation',
+            '-skipPackageSignatureValidation',
+            '-list',
+          ],
           exitCode: 74,
           stderr: stderr,
         ),
@@ -633,8 +779,8 @@ void main() {
         analytics: const NoOpAnalytics(),
       );
 
-      expect(
-        () => xcodeProjectInterpreter.getInfo(workingDirectory),
+      await expectLater(
+        () => xcodeProjectInterpreter.getInfo(workingDirectory, buildDirectory: buildDirectory),
         throwsToolExit(message: stderr),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -1419,9 +1565,14 @@ Build settings for action build and target good_plugin:
           );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          final String configContents = config.readAsStringSync();
           expect(logger.warningText, isEmpty);
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
+          expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(
+            configContents,
+            isNot(contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64')),
+          );
+          expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -2222,5 +2373,394 @@ flutter:
         },
       );
     });
+
+    testUsingContext(
+      'Creates flutter_native_integration.env for macOS',
+      () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fs.directory('path/to/project'),
+        );
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          useMacOSConfig: true,
+        );
+        final File buildPhaseScript = fs.file(
+          'path/to/project/macos/Flutter/ephemeral/flutter_native_integration.env',
+        );
+        expect(buildPhaseScript.existsSync(), isTrue);
+        final List<String> buildPhaseScriptContents = buildPhaseScript.readAsLinesSync();
+        expect(
+          buildPhaseScriptContents,
+          containsAll(['FLUTTER_APPLICATION_PATH=path/to/project', 'FLUTTER_BUILD_DIR=build']),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'Creates flutter_native_integration.env for iOS',
+      () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fs.directory('path/to/project'),
+        );
+        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        final File buildPhaseScript = fs.file(
+          'path/to/project/ios/Flutter/ephemeral/flutter_native_integration.env',
+        );
+        expect(buildPhaseScript.existsSync(), isTrue);
+        final List<String> buildPhaseScriptContents = buildPhaseScript.readAsLinesSync();
+        expect(
+          buildPhaseScriptContents,
+          containsAll(['FLUTTER_APPLICATION_PATH=path/to/project', 'FLUTTER_BUILD_DIR=build']),
+        );
+      },
+      overrides: <Type, Generator>{
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+  });
+
+  testWithoutContext(
+    'prefetchSwiftPackages kills previously running process before starting new one',
+    () async {
+      final fs = MemoryFileSystem.test();
+      final testLogger = BufferLogger.test();
+      final platform = FakePlatform(operatingSystem: 'macos');
+      const projectPath = 'path/to/project';
+      final Directory buildDirectory = fileSystem.directory('$projectPath/build/ios');
+      final fakeProcessManager = FakeProcessManager.empty();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        FakeCommand(
+          command: <String>[
+            'pgrep',
+            '-n',
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+          stdout: '12345',
+        ),
+        const FakeCommand(command: <String>['kill', '12345']),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+          stdout: '''
+Resolve Package Graph
+
+Fetching from https://github.com/apple/swift-algorithms.git (cached)
+
+Fetching from https://github.com/apple/swift-numerics.git (cached)
+
+Creating working copy of package ‘swift-numerics’
+
+Creating working copy of package ‘swift-algorithms’
+
+Checking out 1.2.2 of package ‘swift-algorithms’
+
+Checking out 1.1.1 of package ‘swift-numerics’
+
+
+Resolved source packages:
+  swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1
+  swift-algorithms: https://github.com/apple/swift-algorithms.git @ 1.2.2
+''',
+        ),
+      ]);
+
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
+        logger: testLogger,
+        fileSystem: fs,
+        platform: platform,
+        processManager: fakeProcessManager,
+        analytics: const NoOpAnalytics(),
+      );
+      await xcodeProjectInterpreter.prefetchSwiftPackages(
+        projectPath,
+        buildDirectory: buildDirectory,
+        quiet: false,
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        testLogger.statusText,
+        contains('''
+Xcode is fetching Swift Package Manager dependencies. This may take several minutes...
+  Fetching from https://github.com/apple/swift-algorithms.git (cached)...
+  Fetching from https://github.com/apple/swift-numerics.git (cached)...
+'''),
+      );
+    },
+  );
+
+  testWithoutContext('prefetchSwiftPackages skips running if already completed', () async {
+    final fs = MemoryFileSystem.test();
+    final testLogger = BufferLogger.test();
+    final platform = FakePlatform(operatingSystem: 'macos');
+    const projectPath = 'path/to/project';
+    final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+    final fakeProcessManager = FakeProcessManager.empty();
+
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'pgrep',
+          '-n',
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+        exitCode: 1,
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+      ),
+    ]);
+
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: testLogger,
+      fileSystem: fs,
+      platform: platform,
+      processManager: fakeProcessManager,
+      analytics: const NoOpAnalytics(),
+    );
+
+    await xcodeProjectInterpreter.prefetchSwiftPackages(
+      projectPath,
+      buildDirectory: buildDirectory,
+      quiet: false,
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+
+    await xcodeProjectInterpreter.prefetchSwiftPackages(
+      projectPath,
+      buildDirectory: buildDirectory,
+      quiet: false,
+    );
+
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('prefetchSwiftPackages does not print when quiet is true', () async {
+    final fs = MemoryFileSystem.test();
+    final testLogger = BufferLogger.test();
+    final platform = FakePlatform(operatingSystem: 'macos');
+    const projectPath = 'path/to/project';
+    final Directory buildDirectory = fileSystem.directory('$projectPath/build/ios');
+    final fakeProcessManager = FakeProcessManager.empty();
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'pgrep',
+          '-n',
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+        stdout: '12345',
+      ),
+      const FakeCommand(command: <String>['kill', '12345']),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+        stdout: '''
+Resolve Package Graph
+
+Fetching from https://github.com/apple/swift-algorithms.git (cached)
+
+Fetching from https://github.com/apple/swift-numerics.git (cached)
+
+Creating working copy of package ‘swift-numerics’
+
+Creating working copy of package ‘swift-algorithms’
+
+Checking out 1.2.2 of package ‘swift-algorithms’
+
+Checking out 1.1.1 of package ‘swift-numerics’
+
+
+Resolved source packages:
+  swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1
+  swift-algorithms: https://github.com/apple/swift-algorithms.git @ 1.2.2
+''',
+      ),
+    ]);
+
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: testLogger,
+      fileSystem: fs,
+      platform: platform,
+      processManager: fakeProcessManager,
+      analytics: const NoOpAnalytics(),
+    );
+    await xcodeProjectInterpreter.prefetchSwiftPackages(
+      projectPath,
+      buildDirectory: buildDirectory,
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+    expect(testLogger.statusText, isEmpty);
+  });
+
+  testWithoutContext(
+    'prefetchSwiftPackages does not wait for command to complete when waitForCompletion is false',
+    () async {
+      final fs = MemoryFileSystem.test();
+      final testLogger = BufferLogger.test();
+      final platform = FakePlatform(operatingSystem: 'macos');
+      const projectPath = 'path/to/project';
+      final Directory buildDirectory = fileSystem.directory('$projectPath/build/ios');
+      final fakeProcessManager = FakeProcessManager.empty();
+      final commandCompleter = Completer<void>();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        FakeCommand(
+          command: <String>[
+            'pgrep',
+            '-n',
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+          stdout: '12345',
+        ),
+        const FakeCommand(command: <String>['kill', '12345']),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+            '-resolvePackageDependencies',
+          ],
+          stdout: '''
+Resolve Package Graph
+
+Fetching from https://github.com/apple/swift-algorithms.git (cached)
+
+Fetching from https://github.com/apple/swift-numerics.git (cached)
+
+Creating working copy of package ‘swift-numerics’
+
+Creating working copy of package ‘swift-algorithms’
+
+Checking out 1.2.2 of package ‘swift-algorithms’
+
+Checking out 1.1.1 of package ‘swift-numerics’
+
+
+Resolved source packages:
+  swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1
+  swift-algorithms: https://github.com/apple/swift-algorithms.git @ 1.2.2
+''',
+          completer: commandCompleter,
+        ),
+      ]);
+
+      final xcodeProjectInterpreter = XcodeProjectInterpreter(
+        logger: testLogger,
+        fileSystem: fs,
+        platform: platform,
+        processManager: fakeProcessManager,
+        analytics: const NoOpAnalytics(),
+      );
+      await xcodeProjectInterpreter.prefetchSwiftPackages(
+        projectPath,
+        buildDirectory: buildDirectory,
+        waitForCompletion: false,
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(testLogger.statusText, isEmpty);
+      expect(commandCompleter.isCompleted, isFalse);
+      commandCompleter.complete();
+    },
+  );
+
+  testWithoutContext('prefetchSwiftPackages throws exception when resolving fails', () async {
+    final fs = MemoryFileSystem.test();
+    final testLogger = BufferLogger.test();
+    final platform = FakePlatform(operatingSystem: 'macos');
+    const projectPath = 'path/to/project';
+    final Directory buildDirectory = fileSystem.directory('$projectPath/build/ios');
+    final fakeProcessManager = FakeProcessManager.empty();
+    fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
+      FakeCommand(
+        command: <String>[
+          'pgrep',
+          '-n',
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+      ),
+      FakeCommand(
+        command: <String>[
+          'xcrun',
+          'xcodebuild',
+          '-clonedSourcePackagesDirPath',
+          '/${buildDirectory.path}/SourcePackages',
+          '-resolvePackageDependencies',
+        ],
+        exitCode: 1,
+        stderr: 'error: some error',
+      ),
+    ]);
+
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: testLogger,
+      fileSystem: fs,
+      platform: platform,
+      processManager: fakeProcessManager,
+      analytics: const NoOpAnalytics(),
+    );
+    await expectLater(
+      xcodeProjectInterpreter.prefetchSwiftPackages(
+        projectPath,
+        buildDirectory: buildDirectory,
+        quiet: false,
+      ),
+      throwsToolExit(),
+    );
   });
 }

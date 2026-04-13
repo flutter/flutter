@@ -1,0 +1,647 @@
+import Foundation
+import Testing
+
+@testable import FlutterToolHelper
+
+@Test
+func runInSandboxSuccessWhenBuildModeCorrect() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let targetBuildMode = "Debug"
+  let targetPlatform = FlutterPlatform.ios
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+
+  let plistContent = plistContentFor(buildMode: "Debug")
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(
+      plistContent.utf8
+    )
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] =
+    [
+      Data(plistContent.utf8)
+    ]
+
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": "iphoneos26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test(
+  "Calling flutter assemble",
+  arguments: [
+    (
+      FlutterPlatform.ios, "/path/to/flutter_app", "/path/to/flutter_app",
+      "ios/Flutter/ephemeral/flutter_native_integration.env"
+    ),
+    (
+      FlutterPlatform.ios, "../flutter_app",
+      "/path/to/native_app/../flutter_app",
+      "ios/Flutter/ephemeral/flutter_native_integration.env"
+    ),
+    (
+      FlutterPlatform.ios, "/path/to/flutter_app", "/path/to/flutter_app",
+      ".ios/Flutter/ephemeral/flutter_native_integration.env"
+    ),
+    (
+      FlutterPlatform.macos, "/path/to/flutter_app", "/path/to/flutter_app",
+      "macos/Flutter/ephemeral/flutter_native_integration.env"
+    ),
+  ]
+)
+func runWithAssemble(
+  targetPlatform: FlutterPlatform,
+  flutterAppPath: String,
+  resolvedAppPath: String,
+  exportEnvPath: String
+) async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let targetBuildMode = "Debug"
+  let currentBuildMode = "Release"
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let xcodeAppPath = "/path/to/native_app"
+  let flutterRoot = "/path/to/flutter"
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[resolvedAppPath] = true
+  fileManager.filesExist[flutterRoot] = true
+  let plistContent = plistContentFor(buildMode: currentBuildMode)
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(
+      plistContent.utf8
+    )
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] =
+    [
+      Data(plistContent.utf8)
+    ]
+
+  let exportedEnv = """
+    FLUTTER_ROOT=\(flutterRoot)
+    FLUTTER_APPLICATION_PATH=\(flutterAppPath)
+    FLUTTER_TARGET=lib/main.dart
+    """
+  let appExportedEnvPath =
+    "\(resolvedAppPath)/\(exportEnvPath)"
+  fileManager.filesExist[appExportedEnvPath] = true
+  fileManager.fileContents[appExportedEnvPath] = [Data(exportedEnv.utf8)]
+  processManager.expectedProcesses.append(
+    MockProcess(
+      expectedURL: "\(flutterRoot)/bin/dart",
+      expectedArguments: [
+        "\(flutterRoot)/packages/flutter_tools/bin/xcode_backend.dart",
+        "build-add-to-app", targetPlatform.rawValue,
+      ]
+    )
+  )
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": "iphoneos26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      "FLUTTER_APPLICATION_PATH": flutterAppPath, "SRCROOT": xcodeAppPath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(fileManager.symlinksCreated.count == 1)
+  #expect(
+    fileManager.symlinksCreated["\(flutterPackagePath)/FlutterPluginRegistrant"]
+      == "./\(targetBuildMode)"
+  )
+}
+
+@Test func runVerifyBuildModeAndUpdateIfNeeded() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let targetBuildMode = "Debug"
+  let currentBuildMode = "Release"
+  let targetPlatform = FlutterPlatform.ios
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let flutterXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/Flutter.xcframework"
+
+  let appXCFrameworkPath =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  fileManager.filesExist[appXCFrameworkPath] = true
+  fileManager.filesInDirectory[appXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/ios-arm64"),
+    URL(fileURLWithPath: "\(appXCFrameworkPath)/ios-arm64_x86_64-simulator"),
+  ]
+
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  fileManager.filesExist[flutterXCFrameworkPath] = true
+  fileManager.filesInDirectory[flutterXCFrameworkPath] = [
+    URL(fileURLWithPath: "\(flutterXCFrameworkPath)/ios-arm64"),
+    URL(
+      fileURLWithPath: "\(flutterXCFrameworkPath)/ios-arm64_x86_64-simulator"
+    ),
+  ]
+  fileManager.filesExist[
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/App.xcframework"
+  ] = true
+
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(
+      plistContentFor(buildMode: currentBuildMode).utf8
+    ),
+    Data(
+      plistContentFor(buildMode: targetBuildMode).utf8
+    ),
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] =
+    [
+      Data(
+        plistContentFor(buildMode: targetBuildMode).utf8
+      )
+    ]
+  processManager.expectedProcesses.append(
+    MockProcess(
+      expectedURL: "/usr/bin/rsync",
+      expectedArguments: [
+        "-av", "--delete", "--filter", "- .DS_Store/",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+        "\(flutterXCFrameworkPath)/ios-arm64/Flutter.framework",
+        "\(buildDir)/\(frameworksDir)",
+      ]
+    )
+  )
+  processManager.expectedProcesses.append(
+    MockProcess(
+      expectedURL: "/usr/bin/rsync",
+      expectedArguments: [
+        "-av", "--delete", "--filter", "- .DS_Store/",
+        "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+        "\(appXCFrameworkPath)/ios-arm64/App.framework",
+        "\(buildDir)/\(frameworksDir)",
+      ]
+    )
+  )
+  try FlutterAssembleToolHelper.run(
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": "iphoneos26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+  #expect(fileManager.symlinksCreated.count == 1)
+  #expect(
+    fileManager.symlinksCreated["\(flutterPackagePath)/FlutterPluginRegistrant"]
+      == "./\(targetBuildMode)"
+  )
+}
+
+@Test
+func runInSandboxFailsWhenBuildModeWrong() async throws {
+  let fileManager = MockFileManager()
+  let targetBuildMode = "Debug"
+  let currentBuildMode = "Release"
+  let targetPlatform = FlutterPlatform.ios
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+
+  let plistContent = plistContentFor(buildMode: currentBuildMode)
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(
+      plistContent.utf8
+    )
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] =
+    [
+      Data(plistContent.utf8)
+    ]
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.runInSandbox(
+      appPath: nil,
+      packagePath: flutterPackagePath,
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: [
+        "SDKROOT": "iphoneos26.2",
+        "BUILT_PRODUCTS_DIR": buildDir,
+        "TARGET_BUILD_DIR": buildDir,
+        "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+        "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
+        "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      ],
+      fileManager: fileManager
+    )
+  }
+  #expect(fileManager.symlinksCreated.count == 1)
+  #expect(
+    fileManager.symlinksCreated["\(flutterPackagePath)/FlutterPluginRegistrant"]
+      == "./\(targetBuildMode)"
+  )
+}
+
+@Test(
+  "Verify build mode in framework Info.plist",
+  arguments: [
+    (
+      FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphonesimulator",
+      "Debug", "debug"
+    ),
+    (
+      FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphonesimulator",
+      "Release", "debug"
+    ),
+    (
+      FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphoneos", "Debug",
+      "debug"
+    ),
+    (
+      FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphoneos",
+      "Release", "release"
+    ),
+    (
+      FlutterPlatform.macos, "FlutterMacOS.framework/Resources/Info.plist",
+      "macosx", "Debug", "debug"
+    ),
+    (
+      FlutterPlatform.macos, "FlutterMacOS.framework/Resources/Info.plist",
+      "macosx", "Release", "release"
+    ),
+  ]
+)
+func verifyFlutterFrameworkBuildModeSuccess(
+  targetPlatform: FlutterPlatform,
+  infoPlistPath: String,
+  sdk: String,
+  targetBuildMode: String,
+  expectedBuildMode: String
+) async throws {
+  let buildDir = "/Build/Products/\(targetBuildMode)-\(sdk)"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+
+  let fileManager = MockFileManager()
+  let plistContent = plistContentFor(buildMode: expectedBuildMode)
+  fileManager.fileContents["\(buildDir)/\(infoPlistPath)"] = [
+    Data(
+      plistContent.utf8
+    )
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistPath)"] =
+    [
+      Data(plistContent.utf8)
+    ]
+
+  try FlutterAssembleToolHelper.verifyFlutterFrameworkBuildMode(
+    packagePath: flutterPackagePath,
+    targetBuildMode: targetBuildMode,
+    targetPlatform: targetPlatform,
+    env: [
+      "SDKROOT": "\(sdk)26.2",
+      "BUILT_PRODUCTS_DIR": buildDir,
+      "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+    ],
+    fileManager: fileManager
+  )
+}
+
+@Test(
+  "Verify build mode in framework Info.plist",
+  arguments: [
+    (
+      FlutterPlatform.ios, "Flutter.framework/Info.plist", "iphoneos", "Debug",
+      "release"
+    ),
+    (
+      FlutterPlatform.macos, "FlutterMacOS.framework/Resources/Info.plist",
+      "macosx", "Debug", "release"
+    ),
+  ]
+)
+func verifyFlutterFrameworkBuildModeThrows(
+  targetPlatform: FlutterPlatform,
+  infoPlistPath: String,
+  sdk: String,
+  targetBuildMode: String,
+  expectedBuildMode: String
+) async throws {
+  let buildDir = "/Build/Products/\(targetBuildMode)-\(sdk)"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+
+  let fileManager = MockFileManager()
+  let plistContent = plistContentFor(buildMode: expectedBuildMode)
+  fileManager.fileContents["\(buildDir)/\(infoPlistPath)"] = [
+    Data(
+      plistContent.utf8
+    )
+  ]
+  fileManager.fileContents["\(buildDir)/\(frameworksDir)/\(infoPlistPath)"] =
+    [
+      Data(plistContent.utf8)
+    ]
+
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.verifyFlutterFrameworkBuildMode(
+      packagePath: flutterPackagePath,
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: [
+        "SDKROOT": "\(sdk)26.2",
+        "BUILT_PRODUCTS_DIR": buildDir,
+        "TARGET_BUILD_DIR": buildDir,
+        "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      ],
+      fileManager: fileManager
+    )
+  }
+}
+
+@Test
+func assembleFlutterAppNotExists() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+
+  let flutterAppPath = "/path/to/flutter_app"
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.assemble(
+      appPath: flutterAppPath,
+      targetPlatform: .ios,
+      env: ["FLUTTER_APPLICATION_PATH": flutterAppPath],
+      fileManager: fileManager,
+      processManager: processManager
+    )
+  }
+}
+
+@Test
+func assembleUsesMergedEnv() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let xcodeAppPath = "/path/to/native_app"
+  let flutterRootFromFlutterEnv = "/path/to/flutter"
+  let flutterRootFromXcodeEnv = "/path/to/some/other/flutter"
+  let flutterAppPath = "/path/to/flutter_app"
+  let targetPlatform = FlutterPlatform.ios
+  fileManager.filesExist[flutterAppPath] = true
+  fileManager.filesExist[flutterRootFromXcodeEnv] = true
+  let exportedEnvPath =
+    "\(flutterAppPath)/\(targetPlatform)/Flutter/ephemeral/flutter_native_integration.env"
+  let exportedEnv = """
+    FLUTTER_ROOT=\(flutterRootFromFlutterEnv)
+    FLUTTER_APPLICATION_PATH=\(flutterAppPath)
+    FLUTTER_TARGET=lib/main.dart
+    FLUTTER_BUILD_DIR=build
+    FLUTTER_BUILD_NAME=1.0.0
+    FLUTTER_BUILD_NUMBER=1
+    DART_OBFUSCATION=false
+    TRACK_WIDGET_CREATION=true
+    TREE_SHAKE_ICONS=false
+    PACKAGE_CONFIG=.dart_tool/package_config.json
+    """
+  fileManager.fileContents[exportedEnvPath] = [Data(exportedEnv.utf8)]
+  fileManager.filesExist[exportedEnvPath] = true
+  processManager.expectedProcesses.append(
+    MockProcess(
+      expectedURL: "\(flutterRootFromXcodeEnv)/bin/dart",
+      expectedArguments: [
+        "\(flutterRootFromXcodeEnv)/packages/flutter_tools/bin/xcode_backend.dart",
+        "build-add-to-app", targetPlatform.rawValue,
+      ],
+      expectedEnv: [
+        "FLUTTER_APPLICATION_PATH": flutterAppPath,
+        "SRCROOT": xcodeAppPath,
+        "FLUTTER_ROOT": flutterRootFromXcodeEnv,
+        "FLUTTER_TARGET": "lib/main.dart",
+        "FLUTTER_BUILD_DIR": "build",
+        "FLUTTER_BUILD_NAME": "1.0.0",
+        "FLUTTER_BUILD_NUMBER": "1",
+        "DART_OBFUSCATION": "false",
+        "TRACK_WIDGET_CREATION": "true",
+        "TREE_SHAKE_ICONS": "false",
+        "PACKAGE_CONFIG": ".dart_tool/package_config.json",
+      ]
+    )
+  )
+  processManager.validateEnvironment = true
+  try FlutterAssembleToolHelper.assemble(
+    appPath: flutterAppPath,
+    targetPlatform: targetPlatform,
+    env: [
+      "FLUTTER_APPLICATION_PATH": flutterAppPath, "SRCROOT": xcodeAppPath,
+      "FLUTTER_ROOT": flutterRootFromXcodeEnv,
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test(
+  "Copy Flutter.framework for iOS",
+  arguments: [
+    ("iphonesimulator", "ios-arm64_x86_64-simulator"),
+    ("iphoneos", "ios-arm64"),
+  ]
+)
+func copyAndCodesignFrameworkForIOS(
+  platformName: String,
+  expectedArch: String
+) async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+
+  let targetBuildMode = "Debug"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let xcframework =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/Flutter.xcframework"
+  let buildDir = "/Build/Products/Debug-\(platformName)"
+  let frameworksDir = "MyApp.app/Frameworks"
+
+  fileManager.filesExist[xcframework] = true
+  fileManager.filesInDirectory[xcframework] = [
+    URL(fileURLWithPath: "\(xcframework)/ios-arm64"),
+    URL(fileURLWithPath: "\(xcframework)/ios-arm64_x86_64-simulator"),
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(xcframework)/\(expectedArch)/Flutter.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/codesign",
+        expectedArguments: [
+          "--force", "--verbose", "--sign", "-", "--",
+          "\(buildDir)/\(frameworksDir)/Flutter.framework/Flutter",
+        ]
+      ),
+    ]
+  )
+  try FlutterAssembleToolHelper.copyAndCodesignFramework(
+    frameworkName: "Flutter",
+    packagePath: flutterPackagePath,
+    targetBuildMode: targetBuildMode,
+    targetPlatform: FlutterPlatform.ios,
+    env: [
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      "PLATFORM_NAME": platformName, "SDKROOT": "\(platformName)26.2",
+      "BUILT_PRODUCTS_DIR": buildDir, "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "EXPANDED_CODE_SIGN_IDENTITY": "-",
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test
+func copyAndCodesignFrameworkForMacOS() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+
+  let targetBuildMode = "Debug"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let xcframework =
+    "\(flutterPackagePath)/\(targetBuildMode)/Frameworks/FlutterMacOS.xcframework"
+  let buildDir = "/Build/Products/Debug"
+  let frameworksDir = "MyApp.app/Frameworks"
+
+  fileManager.filesExist[xcframework] = true
+  fileManager.filesInDirectory[xcframework] = [
+    URL(fileURLWithPath: "\(xcframework)/macos-arm64_x86_64")
+  ]
+  processManager.expectedProcesses.append(
+    contentsOf: [
+      MockProcess(
+        expectedURL: "/usr/bin/rsync",
+        expectedArguments: [
+          "-av", "--delete", "--filter", "- .DS_Store/",
+          "--filter", "- Headers", "--filter", "- Modules",
+          "--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r",
+          "\(xcframework)/macos-arm64_x86_64/FlutterMacOS.framework",
+          "\(buildDir)/\(frameworksDir)",
+        ]
+      ),
+      MockProcess(
+        expectedURL: "/usr/bin/codesign",
+        expectedArguments: [
+          "--force", "--verbose", "--sign", "-", "--",
+          "\(buildDir)/\(frameworksDir)/FlutterMacOS.framework/FlutterMacOS",
+        ]
+      ),
+    ]
+  )
+  try FlutterAssembleToolHelper.copyAndCodesignFramework(
+    frameworkName: "FlutterMacOS",
+    packagePath: flutterPackagePath,
+    targetBuildMode: targetBuildMode,
+    targetPlatform: FlutterPlatform.macos,
+    env: [
+      "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      "PLATFORM_NAME": "macosx", "SDKROOT": "macosx",
+      "BUILT_PRODUCTS_DIR": buildDir, "TARGET_BUILD_DIR": buildDir,
+      "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+      "EXPANDED_CODE_SIGN_IDENTITY": "-",
+    ],
+    fileManager: fileManager,
+    processManager: processManager
+  )
+}
+
+@Test(
+  "Find platform framework inside XCFramework",
+  arguments: [
+    (
+      FlutterPlatform.ios, "Flutter", "iphoneos26.2",
+      [
+        "/Flutter.xcframework/ios-arm64",
+        "/Flutter.xcframework/ios-arm64_x86_64-simulator",
+      ], "/Flutter.xcframework/ios-arm64/Flutter.framework"
+    ),
+    (
+      FlutterPlatform.ios, "Flutter", "iphonesimulator26.2",
+      [
+        "/Flutter.xcframework/ios-arm64",
+        "/Flutter.xcframework/ios-arm64_x86_64-simulator",
+      ], "/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework"
+    ),
+    (
+      FlutterPlatform.macos, "FlutterMacOS", "macosx",
+      ["/FlutterMacOS.xcframework/macos-arm64_x86_64"],
+      "/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework"
+    ),
+  ]
+)
+func findPlatformFramework(
+  targetPlatform: FlutterPlatform,
+  frameworkName: String,
+  sdkRoot: String,
+  platforms: [String],
+  expectedFramework: String
+) async throws {
+  let fileManager = MockFileManager()
+  let xcframeworkURL = URL(fileURLWithPath: "/\(frameworkName).xcframework")
+  fileManager.filesInDirectory[xcframeworkURL.path] = platforms.compactMap {
+    URL(string: $0)
+  }
+  let frameworkURL = try FlutterAssembleToolHelper.findPlatformFramework(
+    frameworkName: frameworkName,
+    xcframeworkURL: xcframeworkURL,
+    targetPlatform: targetPlatform,
+    env: ["SDKROOT": sdkRoot],
+    fileManager: fileManager
+  )
+  #expect(frameworkURL.path == expectedFramework)
+}
+
+func plistContentFor(buildMode: String) -> String {
+  return """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>BuildMode</key>
+      <string>\(buildMode)</string>
+    </dict>
+    </plist>
+    """
+}

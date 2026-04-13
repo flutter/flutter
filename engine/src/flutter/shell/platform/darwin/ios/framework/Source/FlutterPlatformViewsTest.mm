@@ -326,6 +326,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 }
 }  // namespace
 
+// Walks up the superview chain from the given view and returns the first
+// FlutterTouchInterceptingView found, or nil if none exists.
+static FlutterTouchInterceptingView* FindTouchInterceptingView(UIView* view) {
+  while (view != nil && ![view isKindOfClass:[FlutterTouchInterceptingView class]]) {
+    view = view.superview;
+  }
+  return (FlutterTouchInterceptingView*)view;
+}
+
+// Returns the first ForwardingGestureRecognizer attached to the given view,
+// or nil if none exists.
+static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
+  for (UIGestureRecognizer* gestureRecognizer in view.gestureRecognizers) {
+    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
+      return gestureRecognizer;
+    }
+  }
+  return nil;
+}
+
 - (void)testFlutterViewOnlyCreateOnceInOneFrame {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
@@ -2909,22 +2929,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
-  // Find ForwardGestureRecognizer
-  UIGestureRecognizer* forwardGectureRecognizer = nil;
-  for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-      forwardGectureRecognizer = gestureRecognizer;
-      break;
-    }
-  }
+  UIGestureRecognizer* forwardGectureRecognizer =
+      FindForwardingGestureRecognizer(touchInteceptorView);
 
   // Before setting flutter view controller, events are not dispatched.
   NSSet* touches1 = [[NSSet alloc] init];
@@ -2978,22 +2987,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
-  // Find ForwardGestureRecognizer
-  UIGestureRecognizer* forwardGectureRecognizer = nil;
-  for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-      forwardGectureRecognizer = gestureRecognizer;
-      break;
-    }
-  }
+  UIGestureRecognizer* forwardGectureRecognizer =
+      FindForwardingGestureRecognizer(touchInteceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   {
     // ***** Sequence 1, finishing touch event with touchEnded ***** //
@@ -3104,22 +3102,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
-  // Find ForwardGestureRecognizer
-  UIGestureRecognizer* forwardGectureRecognizer = nil;
-  for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-      forwardGectureRecognizer = gestureRecognizer;
-      break;
-    }
-  }
+  UIGestureRecognizer* forwardGectureRecognizer =
+      FindForwardingGestureRecognizer(touchInteceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = flutterViewController;
 
@@ -3219,22 +3206,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
-  // Find ForwardGestureRecognizer
-  UIGestureRecognizer* forwardGectureRecognizer = nil;
-  for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-      forwardGectureRecognizer = gestureRecognizer;
-      break;
-    }
-  }
+  UIGestureRecognizer* forwardGectureRecognizer =
+      FindForwardingGestureRecognizer(touchInteceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = flutterViewController;
 
@@ -3293,22 +3269,11 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
-  // Find ForwardGestureRecognizer
-  __block UIGestureRecognizer* forwardGestureRecognizer = nil;
-  for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-    if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-      forwardGestureRecognizer = gestureRecognizer;
-      break;
-    }
-  }
+  __block UIGestureRecognizer* forwardGestureRecognizer =
+      FindForwardingGestureRecognizer(touchInteceptorView);
   id flutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = flutterViewController;
 
@@ -3325,12 +3290,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [self expectationWithDescription:@"Wait for gesture recognizer's state change."];
   dispatch_async(dispatch_get_main_queue(), ^{
     // Re-query forward gesture recognizer since it's recreated.
-    for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-      if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-        forwardGestureRecognizer = gestureRecognizer;
-        break;
-      }
-    }
+    forwardGestureRecognizer = FindForwardingGestureRecognizer(touchInteceptorView);
     XCTAssert(forwardGestureRecognizer.state == UIGestureRecognizerStatePossible,
               @"Forwarding gesture recognizer must be reset to possible state.");
     [touchEndedExpectation fulfill];
@@ -3347,12 +3307,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [self expectationWithDescription:@"Wait for gesture recognizer's state change."];
   dispatch_async(dispatch_get_main_queue(), ^{
     // Re-query forward gesture recognizer since it's recreated.
-    for (UIGestureRecognizer* gestureRecognizer in touchInteceptorView.gestureRecognizers) {
-      if ([gestureRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]) {
-        forwardGestureRecognizer = gestureRecognizer;
-        break;
-      }
-    }
+    forwardGestureRecognizer = FindForwardingGestureRecognizer(touchInteceptorView);
     XCTAssert(forwardGestureRecognizer.state == UIGestureRecognizerStatePossible,
               @"Forwarding gesture recognizer must be reset to possible state.");
     [touchCancelledExpectation fulfill];
@@ -3398,12 +3353,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
   XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
@@ -3413,7 +3363,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+  [touchInteceptorView blockGesture];
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
@@ -3468,12 +3418,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
   XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
@@ -3483,7 +3428,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+  [touchInteceptorView blockGesture];
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
@@ -3541,12 +3486,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
   XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
@@ -3556,7 +3496,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+  [touchInteceptorView blockGesture];
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
@@ -3614,12 +3554,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   XCTAssertNotNil(gMockPlatformView);
 
-  // Find touch inteceptor view
-  UIView* touchInteceptorView = gMockPlatformView;
-  while (touchInteceptorView != nil &&
-         ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-    touchInteceptorView = touchInteceptorView.superview;
-  }
+  FlutterTouchInterceptingView* touchInteceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInteceptorView);
 
   XCTAssert(touchInteceptorView.gestureRecognizers.count == 2);
@@ -3629,7 +3564,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssert([delayingRecognizer isKindOfClass:[FlutterDelayingGestureRecognizer class]]);
   XCTAssert([forwardingRecognizer isKindOfClass:[ForwardingGestureRecognizer class]]);
 
-  [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+  [touchInteceptorView blockGesture];
 
   XCTAssertEqual(touchInteceptorView.gestureRecognizers[0], delayingRecognizer);
   XCTAssertEqual(touchInteceptorView.gestureRecognizers[1], forwardingRecognizer);
@@ -3672,12 +3607,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
     XCTAssertNotNil(gMockPlatformView);
 
-    // Find touch inteceptor view
-    UIView* touchInteceptorView = gMockPlatformView;
-    while (touchInteceptorView != nil &&
-           ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-      touchInteceptorView = touchInteceptorView.superview;
-    }
+    FlutterTouchInterceptingView* touchInteceptorView =
+        FindTouchInterceptingView(gMockPlatformView);
     XCTAssertNotNil(touchInteceptorView);
 
     /*
@@ -3729,7 +3660,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[MockTouchEventsGestureRecognizer alloc] init];
     [child2_2 addGestureRecognizer:targetRecognizer2_2];
 
-    [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+    [touchInteceptorView blockGesture];
 
     NSArray* normalRecognizers = @[
       normalRecognizer0, normalRecognizer1, normalRecognizer2, normalRecognizer2_1,
@@ -3789,12 +3720,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
     XCTAssertNotNil(gMockPlatformView);
 
-    // Find touch inteceptor view
-    UIView* touchInteceptorView = gMockPlatformView;
-    while (touchInteceptorView != nil &&
-           ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-      touchInteceptorView = touchInteceptorView.superview;
-    }
+    FlutterTouchInterceptingView* touchInteceptorView =
+        FindTouchInterceptingView(gMockPlatformView);
     XCTAssertNotNil(touchInteceptorView);
 
     /*
@@ -3878,7 +3805,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[MockTouchEventsGestureRecognizer alloc] init];
     [child3_1_2 addGestureRecognizer:targetRecognizer3_1_2];
 
-    [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+    [touchInteceptorView blockGesture];
 
     NSArray* normalRecognizers = @[
       normalRecognizer0, normalRecognizer1, normalRecognizer2, normalRecognizer2_1,
@@ -3937,12 +3864,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
     XCTAssertNotNil(gMockPlatformView);
 
-    // Find touch inteceptor view
-    UIView* touchInteceptorView = gMockPlatformView;
-    while (touchInteceptorView != nil &&
-           ![touchInteceptorView isKindOfClass:[FlutterTouchInterceptingView class]]) {
-      touchInteceptorView = touchInteceptorView.superview;
-    }
+    FlutterTouchInterceptingView* touchInteceptorView =
+        FindTouchInterceptingView(gMockPlatformView);
     XCTAssertNotNil(touchInteceptorView);
 
     /*
@@ -4035,7 +3958,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         [[MockTouchEventsGestureRecognizer alloc] init];
     [child3_1_2_2 addGestureRecognizer:targetRecognizer3_1_2_2];
 
-    [(FlutterTouchInterceptingView*)touchInteceptorView blockGesture];
+    [touchInteceptorView blockGesture];
 
     NSArray* normalRecognizers = @[
       normalRecognizer0, normalRecognizer1, normalRecognizer2, normalRecognizer2_1,
