@@ -54,10 +54,10 @@ if [[ "$CURRENT_BRANCH" != "main" && \
     REMOTE="upstream"
   fi
 
-  # Try to find the merge-base with master, then main.
-  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
+  # Try to find the merge-base with main, then master.
+  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
   if [[ -z "$MERGEBASE" ]]; then
-    MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
+    MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
   fi
 
   if [[ -n "$MERGEBASE" ]]; then

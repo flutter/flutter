@@ -216,6 +216,15 @@ void main() {
     expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
+  test('prefers upstream/main over upstream/master when both exist', () {
+    initGitRepoWithBlankInitialCommit(branch: 'main');
+    run('git', <String>['branch', 'master']);
+    writeFileAndCommit(testRoot.deps, 'deps changed');
+    run('git', <String>['fetch', 'upstream']);
+    gitSwitchBranch('feature');
+    expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
+  });
+
   test('generates a hash for CI/CD from HEAD', () {
     // This test validates the workflow with LUCI recipes in which the git sha
     // is checked out, not the branch.
