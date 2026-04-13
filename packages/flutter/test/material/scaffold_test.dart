@@ -1164,13 +1164,11 @@ void main() {
     }
 
     PageRoute<void> customPageRouteBuilder() {
-      return _TestRoute<void>(
-        fullscreenDialog: true,
-        maintainState: true,
-        transitionDuration: const Duration(milliseconds: 300),
+      return _CustomPageRoute<void>(
         builder: (BuildContext context) {
           return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
         },
+        fullscreenDialog: true,
       );
     }
 
@@ -3883,6 +3881,48 @@ class _GeometryCachePainter extends CustomPainter {
   }
 }
 
+class _CustomPageRoute<T> extends PageRoute<T> {
+  _CustomPageRoute({
+    required this.builder,
+    RouteSettings super.settings = const RouteSettings(),
+    this.maintainState = true,
+    super.fullscreenDialog,
+  });
+
+  final WidgetBuilder builder;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  final bool maintainState;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
+}
+
 class _ScaffoldWithPrimaryScrollView extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _ScaffoldWithPrimaryScrollViewState();
@@ -3900,69 +3940,6 @@ class _ScaffoldWithPrimaryScrollViewState extends State<_ScaffoldWithPrimaryScro
           body: SingleChildScrollView(primary: true, child: SizedBox(height: 2000)),
         ),
       ),
-    );
-  }
-}
-
-class _TestRoute<T> extends PageRoute<T> {
-  _TestRoute({
-    this.child,
-    this.builder,
-    RouteSettings super.settings = const RouteSettings(),
-    this.barrierColor,
-    this.maintainState = false,
-    this.transitionDuration = Duration.zero,
-    this.reverseTransitionDuration = Duration.zero,
-    this.transitionsBuilder,
-    super.fullscreenDialog,
-    super.allowSnapshotting,
-  }) : assert(child != null || builder != null, 'Either child or builder must be provided.');
-
-  final Widget? child;
-  final WidgetBuilder? builder;
-  final PageTransitionsBuilder? transitionsBuilder;
-
-  @override
-  final Duration transitionDuration;
-
-  @override
-  final Duration reverseTransitionDuration;
-
-  @override
-  final Color? barrierColor;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  final bool maintainState;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return child ?? builder?.call(context) ?? const SizedBox.shrink();
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    if (transitionsBuilder == null) {
-      return child;
-    }
-
-    return transitionsBuilder!.buildTransitions<T>(
-      this,
-      context,
-      animation,
-      secondaryAnimation,
-      child,
     );
   }
 }
