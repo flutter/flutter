@@ -59,6 +59,10 @@ Future<Stream<String>> startWidgetPreview({
     if (legacyPreviewDetection) '--legacy-preview-detection',
   ], workingDirectory: tempDir.path);
 
+  addTearDown(() async {
+    process.kill();
+  });
+
   final controller = StreamController<String>.broadcast();
   process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
     controller.add(msg);
