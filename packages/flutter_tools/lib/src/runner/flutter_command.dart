@@ -1931,6 +1931,30 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
+    final FlutterProject project;
+    try {
+      project = await _updateCacheAndRunPubGet();
+    } finally {
+      globals.cache.releaseLock();
+    }
+
+    if (regeneratePlatformSpecificToolingDuringVerify) {
+      await regeneratePlatformSpecificToolingIfApplicable(
+        project,
+        releaseMode: getBuildMode().isRelease,
+      );
+    }
+
+    setupApplicationPackages();
+
+    if (commandPath != null) {
+      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
+    }
+
+    return runCommand();
+  }
+
+  Future<FlutterProject> _updateCacheAndRunPubGet() async {
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -1959,22 +1983,7 @@ abstract class FlutterCommand extends Command<void> {
         checkUpToDate: cachePubGet,
       );
     }
-    globals.cache.releaseLock();
-
-    if (regeneratePlatformSpecificToolingDuringVerify) {
-      await regeneratePlatformSpecificToolingIfApplicable(
-        project,
-        releaseMode: getBuildMode().isRelease,
-      );
-    }
-
-    setupApplicationPackages();
-
-    if (commandPath != null) {
-      analytics.send(await unifiedAnalyticsUsageValues(commandPath));
-    }
-
-    return runCommand();
+    return project;
   }
 
   /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
