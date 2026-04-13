@@ -14,6 +14,8 @@ export 'package:meta/meta.dart'
         factory,
         immutable,
         internal,
+        // ignore: experimental_member_use
+        mustBeConst,
         mustCallSuper,
         nonVirtual,
         optionalTypeArgs,
@@ -34,6 +36,7 @@ export 'src/foundation/consolidate_response.dart';
 export 'src/foundation/constants.dart';
 export 'src/foundation/debug.dart';
 export 'src/foundation/diagnostics.dart';
+export 'src/foundation/error_dumper.dart';
 export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';

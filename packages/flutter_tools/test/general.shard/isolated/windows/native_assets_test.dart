@@ -101,7 +101,7 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
-            buildCodeAssets: true,
+            buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
           );
           final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';

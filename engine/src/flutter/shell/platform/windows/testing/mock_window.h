@@ -40,11 +40,23 @@ class MockWindow : public FlutterWindow {
   MOCK_METHOD(void, OnPaint, (), (override));
   MOCK_METHOD(void,
               OnPointerMove,
-              (double, double, FlutterPointerDeviceKind, int32_t, int),
+              (double,
+               double,
+               FlutterPointerDeviceKind,
+               int32_t,
+               uint32_t,
+               uint32_t,
+               int),
               (override));
   MOCK_METHOD(void,
               OnPointerDown,
-              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
+              (double,
+               double,
+               FlutterPointerDeviceKind,
+               int32_t,
+               UINT,
+               uint32_t,
+               uint32_t),
               (override));
   MOCK_METHOD(void,
               OnPointerUp,
@@ -93,8 +105,10 @@ class MockWindow : public FlutterWindow {
                             WPARAM const wparam,
                             LPARAM const lparam);
 
- protected:
-  LRESULT Win32DefWindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+  MOCK_METHOD(LRESULT,
+              Win32DefWindowProc,
+              (HWND, UINT, WPARAM, LPARAM),
+              (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindow);

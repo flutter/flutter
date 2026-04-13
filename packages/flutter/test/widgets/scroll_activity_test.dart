@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import 'utils.dart';
+import 'button_tester.dart';
 import 'widgets_app_tester.dart';
 
 List<Widget> children(int n) {

@@ -1552,8 +1552,9 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   final List<File> files = await _gitFiles(workingDirectory);
   for (final file in files) {
     if (path.basename(file.path).endsWith('_test.dart') ||
-        path.basename(file.path) == 'analyze.dart') {
-      continue; // Skip tests, they're not public-facing.
+        path.basename(file.path) == 'analyze.dart' ||
+        FileSystemEntity.isLinkSync(file.path)) {
+      continue; // Skip tests, they're not public-facing. Skip symlinks.
     }
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
@@ -2116,6 +2117,9 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
     final List<File> files = await _gitFiles(workingDirectory);
     final problems = <String>[];
     for (final file in files) {
+      if (FileSystemEntity.isLinkSync(file.path)) {
+        continue; // Skip symlinks.
+      }
       final Uint8List bytes = file.readAsBytesSync();
       try {
         utf8.decode(bytes);
@@ -2237,6 +2241,8 @@ Stream<File> _allFiles(
 class EvalResult {
   EvalResult({required this.stdout, required this.stderr, this.exitCode = 0});
 
+  static const kNotFoundExitCode = 127;
+
   final String stdout;
   final String stderr;
   final int exitCode;
@@ -2260,12 +2266,18 @@ Future<EvalResult> _evalCommand(
   }
 
   final time = Stopwatch()..start();
-  final Process process = await Process.start(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
+  final Process process;
+
+  try {
+    process = await Process.start(
+      executable,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
+  } on ProcessException catch (e) {
+    return EvalResult(stdout: '', stderr: e.toString(), exitCode: EvalResult.kNotFoundExitCode);
+  }
 
   final Future<List<List<int>>> savedStdout = process.stdout.toList();
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
@@ -2532,7 +2544,9 @@ Future<void> lintKotlinFiles(String workingDirectory) async {
     '--baseline=$flutterRoot/$baselineRelativePath',
     '--editorconfig=$flutterRoot/$editorConfigRelativePath',
   ], workingDirectory: workingDirectory);
-  if (lintResult.exitCode != 0) {
+  if (lintResult.exitCode == EvalResult.kNotFoundExitCode) {
+    foundError(<String>['Failed to find ktlint on PATH. Kotlin code analysis failed.']);
+  } else if (lintResult.exitCode != 0) {
     final errorMessage =
         'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
         'To reproduce this lint locally:\n'
@@ -2558,23 +2572,30 @@ final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
 
-String _getFlutterLicense() {
-  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
-      '// Use of this source code is governed by a BSD-style license that can be\n'
-      '// found in the LICENSE file.\n'
-      '\n';
-}
+const String _kFlutterLicense =
+    '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+    '// Use of this source code is governed by a BSD-style license that can be\n'
+    '// found in the LICENSE file.\n'
+    '\n';
 
-String _removeLicenseIfPresent(String fileContents, String license) {
-  if (fileContents.startsWith(license)) {
-    return fileContents.substring(license.length);
+const String _kFlutterLicenseHtml = '''
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+''';
+
+String _removeLicenseIfPresent(String fileContents) {
+  if (fileContents.startsWith(_kFlutterLicense)) {
+    return fileContents.substring(_kFlutterLicense.length);
+  }
+  if (fileContents.contains(_kFlutterLicenseHtml)) {
+    return fileContents.replaceFirst(_kFlutterLicenseHtml, '');
   }
   return fileContents;
 }
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
-  final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
   final Iterable<Directory> subDirs = Directory(
@@ -2606,7 +2627,7 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
         ); // Substitute template project name
       }
       String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
-      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      appFileContents = _removeLicenseIfPresent(appFileContents);
       if (appFileContents != templateFileContents) {
         int indexOfDifference;
         for (
@@ -2656,6 +2677,7 @@ Future<CommandResult> _runFlutterAnalyze(
 // These files legitimately require executable permissions
 const Set<String> kExecutableAllowlist = <String>{
   '.autoroller-preupload.sh',
+  '.claude/skills',
   'bin/dart',
   'bin/flutter',
   'bin/flutter-dev',

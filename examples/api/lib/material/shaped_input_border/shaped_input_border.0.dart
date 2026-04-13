@@ -29,9 +29,9 @@ class ShapedInputBorderExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const .all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             // Superellipse border (iOS-style)
             TextField(
@@ -40,7 +40,7 @@ class ShapedInputBorderExample extends StatelessWidget {
                 hintText: 'iOS-style smooth border',
                 border: ShapedInputBorder(
                   shape: const RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    borderRadius: .all(Radius.circular(16.0)),
                   ),
                   borderSide: BorderSide(
                     color: Theme.of(context).colorScheme.primary,
@@ -49,7 +49,7 @@ class ShapedInputBorderExample extends StatelessWidget {
                 ),
                 enabledBorder: ShapedInputBorder(
                   shape: const RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    borderRadius: .all(Radius.circular(16.0)),
                   ),
                   borderSide: BorderSide(
                     color: Theme.of(context).colorScheme.outline,
@@ -57,7 +57,7 @@ class ShapedInputBorderExample extends StatelessWidget {
                 ),
                 focusedBorder: ShapedInputBorder(
                   shape: const RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                    borderRadius: .all(Radius.circular(16.0)),
                   ),
                   borderSide: BorderSide(
                     color: Theme.of(context).colorScheme.primary,
@@ -89,7 +89,7 @@ class ShapedInputBorderExample extends StatelessWidget {
                 hintText: 'Angular beveled corners',
                 border: ShapedInputBorder(
                   shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                    borderRadius: .all(Radius.circular(12.0)),
                   ),
                 ),
               ),
@@ -106,7 +106,7 @@ class ShapedInputBorderExample extends StatelessWidget {
                 ).colorScheme.surfaceContainerHighest,
                 border: const ShapedInputBorder(
                   shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                    borderRadius: .all(Radius.circular(12.0)),
                   ),
                 ),
               ),

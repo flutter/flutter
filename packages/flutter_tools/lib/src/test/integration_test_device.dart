@@ -79,6 +79,9 @@ class IntegrationTestTestDevice implements TestDevice {
       globals.printTrace('test $id: Starting Dart Development Service');
       await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
         vmServiceUri,
+        appName:
+            'Kind: Flutter - Device: ${device.displayName} - '
+            'Package: ${package.name}',
         debuggingOptions: debuggingOptions,
       );
       globals.printTrace(
@@ -141,8 +144,10 @@ class IntegrationTestTestDevice implements TestDevice {
       if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {
         globals.printTrace('Could not stop the Integration Test app.');
       }
-      if (!await device.uninstallApp(applicationPackage, userIdentifier: userIdentifier)) {
-        globals.printTrace('Could not uninstall the Integration Test app.');
+      if (debuggingOptions.uninstallApp) {
+        if (!await device.uninstallApp(applicationPackage, userIdentifier: userIdentifier)) {
+          globals.printTrace('Could not uninstall the Integration Test app.');
+        }
       }
     }
 

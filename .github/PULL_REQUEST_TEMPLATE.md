@@ -13,6 +13,7 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 ## Pre-launch Checklist
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
+- [ ] I read the [AI contribution guidelines] and understand my responsibilities, or I am not using AI tools.
 - [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
@@ -24,10 +25,13 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
 
+If this change needs to override an active code freeze, provide a comment explaining why. The code freeze workflow can be overridden by code reviewers. See pinned issues for any active code freezes with guidance.
+
 **Note**: The Flutter team is currently trialing the use of [Gemini Code Assist for GitHub](https://developers.google.com/gemini-code-assist/docs/review-github-code). Comments from the `gemini-code-assist` bot should not be taken as authoritative feedback from the Flutter team. If you find its comments useful you can update your code accordingly, but if you are unsure or disagree with the feedback, please feel free to wait for a Flutter team member's review for guidance on which automated comments should be addressed.
 
 <!-- Links -->
 [Contributor Guide]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#overview
+[AI contribution guidelines]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#ai-contribution-guidelines
 [Tree Hygiene]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md
 [test-exempt]: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#tests
 [Flutter Style Guide]: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md

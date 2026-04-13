@@ -295,6 +295,24 @@ void main() {
     );
 
     testUsingContext(
+      'pluginsPath returns null when version is unknown on macOS',
+      () {
+        const installPath = '/Applications/Android Studio.app/Contents';
+        fileSystem.directory(installPath).createSync(recursive: true);
+        final studio = AndroidStudio(installPath);
+        expect(studio.version, isNull);
+        expect(studio.pluginsPath, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        FileSystemUtils: () => fsUtils,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        PlistParser: () => plistUtils,
+      },
+    );
+
+    testUsingContext(
       'discovers Android Studio EAP location',
       () {
         final String studioInApplicationPlistFolder = fileSystem.path.join(
@@ -1301,6 +1319,42 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         // Custom home paths are not supported on macOS nor Windows yet,
         // so we force the platform to fake Linux here.
+        Platform: () => platform,
+        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: platform),
+      },
+    );
+
+    testUsingContext(
+      'pluginsPath returns null when version is unknown and no toolbox path (no 0.0 fallback)',
+      () {
+        const installPath = '/opt/android-studio-unknown';
+        fileSystem.directory(installPath).createSync(recursive: true);
+        final studio = AndroidStudio(installPath);
+        expect(studio.version, isNull);
+        expect(studio.pluginsPath, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+        FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: platform),
+      },
+    );
+
+    testUsingContext(
+      'pluginsPath returns toolbox path when version is unknown on Linux',
+      () {
+        const installPath = '/opt/android-studio-unknown';
+        const toolboxPluginsPath = '$installPath.plugins';
+        fileSystem.directory(installPath).createSync(recursive: true);
+        fileSystem.directory(toolboxPluginsPath).createSync(recursive: true);
+        final studio = AndroidStudio(installPath);
+        expect(studio.version, isNull);
+        expect(studio.pluginsPath, equals(toolboxPluginsPath));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
         FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: platform),
       },

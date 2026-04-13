@@ -74,7 +74,7 @@ Future<PubspecCache> buildPubspecCache(
 }
 
 Future<bool> _fileContentsUnchanged(File file, String renderedTemplate) async {
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     return false;
   }
   final List<int> fileBytes = await file.readAsBytes();
@@ -618,7 +618,12 @@ import Foundation
 import {{name}}
 {{/methodChannelPlugins}}
 
+{{#public}}
+public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+{{/public}}
+{{^public}}
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+{{/public}}
   {{#methodChannelPlugins}}
   {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
 {{/methodChannelPlugins}}
@@ -995,11 +1000,21 @@ Future<void> _writePluginCmakefile(
   );
 }
 
+/// Writes the macOS plugin registrant file for the given [project].
+///
+/// This method generates a Swift file that registers all provided [plugins] that
+/// have method channels.
+///
+/// The [pluginRegistrantImplementation] file can be used to override the default
+/// location where the registrant is written.
+///
+/// If [public] is true, the generated registration function will be public.
 Future<void> writeMacOSPluginRegistrant(
   FlutterProject project,
   List<Plugin> plugins, {
   File? pluginRegistrantImplementation,
   TemplateRenderer? templateRenderer,
+  bool public = false,
 }) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
@@ -1013,6 +1028,7 @@ Future<void> writeMacOSPluginRegistrant(
     'os': FlutterDarwinPlatform.macos.name,
     'framework': FlutterDarwinPlatform.macos.binaryName,
     'methodChannelPlugins': macosMethodChannelPlugins,
+    'public': public,
   };
   await _renderTemplateToFile(
     _macosSwiftPluginRegistryTemplate,
@@ -1431,13 +1447,16 @@ Future<void> injectPlugins(
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
-            artifacts: globals.artifacts!,
+            processUtils: globals.processUtils,
+            config: globals.config,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           logger: globals.logger,
           analytics: globals.analytics,
           platform: globals.platform,
+          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          config: globals.config,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1893,7 +1912,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
-      if (await newMainDart.exists()) {
+      if (newMainDart.existsSync()) {
         await newMainDart.delete();
       }
     } on FileSystemException catch (error) {

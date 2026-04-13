@@ -54,7 +54,7 @@ if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
 #
 # If set, it takes precedence over the git hash.
 elif [ -n "$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)" ]; then
-  ENGINE_VERSION="$(cat "$FLUTTER_ROOT/bin/internal/engine.version")"
+  ENGINE_VERSION="$(< "$FLUTTER_ROOT/bin/internal/engine.version")"
 
 # Fallback to using git to triangulate which upstream/master (or origin/master)
 # the current branch is forked from, which would be the last version of the
@@ -64,11 +64,16 @@ else
 fi
 
 # Write the engine version out so downstream tools know what to look for.
-echo $ENGINE_VERSION >"$FLUTTER_ROOT/bin/cache/engine.stamp"
+# Use a temporary file and atomic mv to prevent race conditions during parallel flutter executions.
+pid=$$
+es_tmp="$FLUTTER_ROOT/bin/cache/engine.stamp.tmp.$pid"
+trap 'rm -f "$es_tmp"' EXIT
+echo "$ENGINE_VERSION" >"$es_tmp" && mv "$es_tmp" "$FLUTTER_ROOT/bin/cache/engine.stamp"
+trap - EXIT
 
 # The realm on CI is passed in.
 if [ -n "${FLUTTER_REALM}" ]; then
-  echo $FLUTTER_REALM >"$FLUTTER_ROOT/bin/cache/engine.realm"
+  echo "$FLUTTER_REALM" >"$FLUTTER_ROOT/bin/cache/engine.realm"
 else
   echo "" >"$FLUTTER_ROOT/bin/cache/engine.realm"
 fi

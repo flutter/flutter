@@ -583,16 +583,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
         // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;
+        BOOL isRoundedSuperellipse = NO;
+        // If there's multiple clips, this uses the innermost to decide if its
+        // rse or not. The assumption being the innermost will be the tightest
         if ([pendingClipRRects count] > 0) {
-          cornerRadius = pendingClipRRects[0].topLeftRadius;
+          cornerRadius = pendingClipRRects.lastObject.topLeftRadius;
+          isRoundedSuperellipse = pendingClipRRects.lastObject.isRoundedSuperellipse;
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
+        if (@available(iOS 13.0, *)) {
+          visualEffectView.layer.cornerCurve =
+              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
+        }
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
                                                                   cornerRadius:cornerRadius
+                                                         isRoundedSuperellipse:isRoundedSuperellipse
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
@@ -620,7 +629,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         break;
       }
       case flutter::MutatorType::kBackdropClipRSuperellipse: {
-        // TODO(https://github.com/flutter/flutter/issues/179125)
+        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
+        flutter::DlRoundSuperellipse rse = (*iter)->GetBackdropClipRSuperellipse().rse;
+
+        clip.rect = boundingRect;
+        impeller::RoundingRadii radii = rse.GetRadii();
+        clip.topLeftRadius = radii.top_left.width;
+        clip.topRightRadius = radii.top_right.width;
+        clip.bottomLeftRadius = radii.bottom_left.width;
+        clip.bottomRightRadius = radii.bottom_right.width;
+        clip.isRoundedSuperellipse = YES;
+        [pendingClipRRects addObject:clip];
         break;
       }
       case flutter::MutatorType::kBackdropClipPath: {

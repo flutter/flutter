@@ -25,12 +25,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart';
 import '../widgets/feedback_tester.dart';
-import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
+import 'editable_text_utils.dart';
+import 'live_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -117,9 +117,8 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: TextField(decoration: InputDecoration(hintText: 'Placeholder')),
               ),
             ),
@@ -1061,9 +1060,8 @@ void main() {
       child: overlay(
         child: RepaintBoundary(
           key: const ValueKey<int>(1),
-          child: SizedBox(
-            height: 200,
-            width: 200,
+          child: SizedBox.square(
+            dimension: 200,
             child: Center(
               child: SizedBox(
                 // Make sure the input field is not high enough for the WidgetSpan.
@@ -1208,9 +1206,8 @@ void main() {
           theme: ThemeData(useMaterial3: false),
           home: const Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(decoration: InputDecoration(hintText: 'Placeholder')),
@@ -6244,7 +6241,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+      await Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -6289,7 +6286,7 @@ void main() {
         const Duration(milliseconds: 200),
       ); // skip past the frame where the opacity is zero
 
-      Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
+      await Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('Paste'));
       await tester.pump();
       // Puts 456 before the 2 in 123.
@@ -9535,6 +9532,7 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics.rootChild(
                     label: 'label',
+                    hint: 'oh no!',
                     textDirection: TextDirection.ltr,
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     flags: <SemanticsFlag>[
@@ -9567,6 +9565,99 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   }
+
+  testWidgets('TextField hintText is not duplicated in semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(labelText: 'Search', hintText: 'Search Google Pay'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible
+    // and merges into the semantics tree.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    expect(node.label, contains('Search Google Pay'));
+    expect(node.hint, isEmpty);
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField passes errorText to semantics hint', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Email', errorText: 'Email is required'),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
+
+  // When both errorText and hintText are present, they should end up in
+  // separate semantics properties: hintText in label (via Text widget merge),
+  // errorText in hint (via explicit Semantics wrapper).
+  testWidgets('TextField errorText and hintText do not concatenate in semantics', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextField(
+              key: key,
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                hintText: 'Enter your email',
+                errorText: 'Email is required',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus the text field so the hint Text widget becomes visible.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final SemanticsNode node = tester.getSemantics(find.byType(EditableText));
+    // hintText merges into label via the Text widget's markAsMergeUp.
+    expect(node.label, contains('Enter your email'));
+    // errorText is in the hint property via the explicit Semantics wrapper.
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
@@ -15692,6 +15783,24 @@ void main() {
     expect(decorator.decoration, expectedDecoration);
   });
 
+  testWidgets('TextField passes enableInlinePrediction to EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: TextField(enableInlinePrediction: true))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, true);
+  });
+
+  testWidgets('TextField enableInlinePrediction defaults to null', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: TextField())));
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.enableInlinePrediction, isNull);
+  });
+
   group('MaxLengthEnforcement', () {
     const maxLength = 5;
 
@@ -17899,9 +18008,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(
@@ -17934,9 +18042,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(
@@ -17973,9 +18080,8 @@ void main() {
           MaterialApp(
             home: Scaffold(
               body: Center(
-                child: SizedBox(
-                  width: 100,
-                  height: 100,
+                child: SizedBox.square(
+                  dimension: 100.0,
                   child: Opacity(
                     opacity: 0.5,
                     child: TextField(
@@ -18030,9 +18136,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Opacity(
                   opacity: 0.5,
                   child: TextField(

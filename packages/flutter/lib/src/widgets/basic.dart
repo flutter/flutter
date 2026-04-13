@@ -4224,6 +4224,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
+  /// Setting [SemanticsProperties.identifier] also implicitly introduces a new
+  /// node, even if [container] is false.
+  ///
   /// Whether descendants of this widget can add their semantic information to the
   /// [SemanticsNode] introduced by this configuration is controlled by
   /// [explicitChildNodes].

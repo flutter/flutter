@@ -9,74 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
 
-class KeyedWindow {
-  KeyedWindow({
-    this.isMainWindow = false,
-    required this.key,
-    required this.controller,
-  });
-
-  BaseWindowController? get parent {
-    switch (controller) {
-      case RegularWindowController():
-        return null;
-      case DialogWindowController dialogController:
-        return dialogController.parent;
-      case TooltipWindowController tooltipController:
-        return tooltipController.parent;
-      default:
-        throw Exception('Unknown controller type');
-    }
-  }
-
-  final bool isMainWindow;
-  final UniqueKey key;
-  final BaseWindowController controller;
-}
-
-/// Provides access to the windows created by the application.
-///
-/// The window manager manages a flat list of all of the [BaseWindowController]s
-/// that have been created by the application as well as which controller is
-/// currently selected by the UI.
-class WindowManager extends ChangeNotifier {
-  WindowManager({required List<KeyedWindow> initialWindows})
-    : _windows = initialWindows;
-
-  final List<KeyedWindow> _windows;
-  List<KeyedWindow> get windows => _windows;
-
-  void add(KeyedWindow window) {
-    _windows.add(window);
-    notifyListeners();
-  }
-
-  void remove(UniqueKey key) {
-    _windows.removeWhere((KeyedWindow window) => window.key == key);
-    notifyListeners();
-  }
-
-  Iterable<KeyedWindow> getWindows({required BaseWindowController? parent}) {
-    return _windows.where((KeyedWindow window) => window.parent == parent);
-  }
-}
-
-/// Provides access to the [WindowManager] from the widget tree.
-class WindowManagerAccessor extends InheritedNotifier<WindowManager> {
-  const WindowManagerAccessor({
-    super.key,
-    required super.child,
-    required WindowManager windowManager,
-  }) : super(notifier: windowManager);
-
-  static WindowManager of(BuildContext context) {
-    final WindowManagerAccessor? result = context
-        .dependOnInheritedWidgetOfExactType<WindowManagerAccessor>();
-    assert(result != null, 'No WindowManager found in context');
-    return result!.notifier!;
-  }
-}
-
 class TooltipSettings {}
 
 /// Settings that control the behavior of newly created windows.
@@ -88,6 +20,8 @@ class WindowSettings {
       parentAnchor: WindowPositionerAnchor.right,
       childAnchor: WindowPositionerAnchor.left,
     ),
+    this.regularDecorated = true,
+    this.dialogDecorated = true,
   });
 
   /// The initial size for newly created regular windows.
@@ -98,6 +32,12 @@ class WindowSettings {
 
   /// The positioner used to determine where new tooltips and popups are placed.
   WindowPositioner positioner;
+
+  /// True if regular windows are decorated.
+  bool regularDecorated;
+
+  /// True if dialog windows are decorated.
+  bool dialogDecorated;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.

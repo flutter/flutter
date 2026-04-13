@@ -35,14 +35,14 @@ namespace {
   };
 // clang-format on
 
-rapidjson::Value ParsePlatformMessage(std::string json) {
+rapidjson::Document ParsePlatformMessage(std::string json) {
   rapidjson::Document document;
   document.Parse(json);
   if (document.HasParseError() || !document.IsObject()) {
     FML_LOG(ERROR) << "Could not parse document";
-    return rapidjson::Value();
+    return rapidjson::Document();
   }
-  return document.GetObject();
+  return document;
 }
 
 zx_koid_t ExtractKoid(const zx::object_base& object) {
@@ -106,7 +106,7 @@ class PlatformMessageBuilder {
     return *this;
   }
 
-  rapidjson::Value Build() {
+  rapidjson::Document Build() {
     std::ostringstream message;
     message << "{" << "    \"method\":\""
             << PointerInjectorDelegate::kPointerInjectorMethodPrefix << "\","

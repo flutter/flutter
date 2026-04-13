@@ -89,6 +89,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
         '--output=$outputDirectoryName',
         '--obfuscate',
         '--split-debug-info=symbols',
+        '--codesign-identity',
+        '-',
       ],
     );
   });
@@ -374,6 +376,18 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     checkFileExists(simulatorHeaderPath);
   }
 
+  section('Check all XCFrameworks are codesigned');
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
+    final String modePath = path.join(outputPath, mode);
+    await _checkCodeSignature(path.join(modePath, 'Flutter.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'connectivity.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
+    if (isModule) {
+      await _checkCodeSignature(path.join(modePath, 'FlutterPluginRegistrant.xcframework'));
+    }
+  }
+
   // This builds all build modes' frameworks by default
   section('Build podspec and static plugins');
 
@@ -388,6 +402,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
         '--force', // Allow podspec creation on master.
         '--output=$cocoapodsOutputDirectoryName',
         '--static',
+        '--no-codesign',
       ],
     );
   });
@@ -473,6 +488,8 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
         '--output=$outputDirectoryName',
         '--obfuscate',
         '--split-debug-info=symbols',
+        '--codesign-identity',
+        '-',
       ],
     );
   });
@@ -701,6 +718,15 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     );
   }
 
+  section('Check all XCFrameworks are codesigned');
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
+    final String modePath = path.join(outputPath, mode);
+    await _checkCodeSignature(path.join(modePath, 'FlutterMacOS.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'connectivity_macos.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
+  }
+
   // This builds all build modes' frameworks by default
   section('Build podspec and static plugins');
 
@@ -715,6 +741,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
         '--force', // Allow podspec creation on master.
         '--output=$cocoapodsOutputDirectoryName',
         '--static',
+        '--no-codesign',
       ],
     );
   });
@@ -821,6 +848,7 @@ Future<void> _testBuildFrameworksWithoutPlugins(
         '--force', // Allow podspec creation on master.
         '--output=$noPluginsOutputDir',
         '--no-plugins',
+        '--no-codesign',
       ],
     );
   });
@@ -852,6 +880,7 @@ Future<void> _testStaticAndNoPlugins(Directory projectDir) async {
         '--output=$noPluginsOutputDir',
         '--no-plugins',
         '--static',
+        '--no-codesign',
       ],
       canFail: true,
     );
@@ -883,6 +912,14 @@ Future<void> _checkStatic(String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('current ar archive random library')) {
     throw TaskResult.failure('$pathToLibrary is not a static library, found: $binaryFileType');
+  }
+}
+
+Future<void> _checkCodeSignature(String pathToArtifact) async {
+  final stderrBuffer = StringBuffer();
+  await eval('codesign', <String>['-dv', pathToArtifact], canFail: true, stderr: stderrBuffer);
+  if (stderrBuffer.toString().contains('not signed at all')) {
+    throw TaskResult.failure('$pathToArtifact is not signed');
   }
 }
 

@@ -72,6 +72,7 @@ Future<void> testMain() async {
     cleanTestFlags();
     clearBackUpDomElementIfExists();
     await waitForTextStrategyStopPropagation();
+    dormantForms.clear();
   });
 
   group('EditableTextStyle', () {
@@ -719,6 +720,209 @@ Future<void> testMain() async {
     );
   });
 
+  group('IOSTextEditingStrategy scrollIntoView for embedded scenarios', () {
+    late HybridTextEditing testTextEditing;
+    late IOSTextEditingStrategySpy editingStrategySpy;
+    late bool originalMultiViewEnabled;
+
+    setUp(() {
+      testTextEditing = HybridTextEditing();
+      editingStrategySpy = IOSTextEditingStrategySpy(testTextEditing);
+      testTextEditing.debugTextEditingStrategyOverride = editingStrategySpy;
+      testTextEditing.configuration = multilineConfig;
+      originalMultiViewEnabled = configuration.multiViewEnabled;
+    });
+
+    tearDown(() {
+      editingStrategySpy.disable();
+      debugResetIframeDetectionCache();
+      debugOverrideJsConfiguration(
+        JsFlutterConfiguration(multiViewEnabled: originalMultiViewEnabled),
+      );
+    });
+
+    test('scrollIntoView is called in placeElement when in iframe', () async {
+      // Simulate being in an iframe
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      // IOSTextEditingStrategy overrides initializeElementPlacement() and does
+      // not place the element immediately on enable. Call placeElement()
+      // directly to verify the scrollIntoView behavior.
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when in iframe',
+      );
+    });
+
+    test('scrollIntoView is called in placeElement when in multi-view mode', () async {
+      editingStrategySpy.debugIsInIframeOverride = false;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: true));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when in multi-view mode',
+      );
+    });
+
+    test('scrollIntoView is called when both iframe and multi-view are true', () async {
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: true));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when both iframe and multi-view are true',
+      );
+    });
+
+    test('scrollIntoView is NOT called when not embedded', () async {
+      editingStrategySpy.debugIsInIframeOverride = false;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      // See comment in the previous test.
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        equals(0),
+        reason: 'scrollIntoView should NOT be called when not embedded',
+      );
+    });
+
+    test('placeElement applies geometry before scrollIntoView', () async {
+      editingStrategySpy.debugIsInIframeOverride = true;
+      debugOverrideJsConfiguration(JsFlutterConfiguration(multiViewEnabled: false));
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      // Set geometry
+      testTextEditing.acceptCommand(
+        TextInputSetEditableSizeAndTransform(
+          geometry: EditableTextGeometry(
+            width: 200,
+            height: 100,
+            globalTransform: Matrix4.translationValues(50, 60, 0).storage,
+          ),
+        ),
+        () {},
+      );
+
+      // IOSTextEditingStrategy does not apply geometry until placeElement is
+      // called (it delays placement on iOS).
+      editingStrategySpy.placeElement();
+
+      // Verify geometry was applied.
+      expect(editingStrategySpy.domElement!.style.width, '200px');
+      expect(editingStrategySpy.domElement!.style.height, '100px');
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called after geometry is applied',
+      );
+    });
+  });
+
+  group('Iframe detection utilities', () {
+    tearDown(() {
+      debugResetIframeDetectionCache();
+    });
+
+    test('DomWindow.parent property is accessible', () {
+      // Test harness may run in an iframe; just verify the API is accessible.
+      final DomWindow? parent = domWindow.parent;
+      // parent is always a valid window (itself for top-level, parent for iframes)
+      expect(parent, isNotNull);
+    });
+
+    test('isEmbeddedInIframe() returns consistent results', () {
+      // Just verify the function works without throwing
+      final bool result1 = isEmbeddedInIframe();
+      final bool result2 = isEmbeddedInIframe();
+      expect(result1, equals(result2), reason: 'Results should be cached');
+    });
+
+    test('debugSetIframeEmbeddingForTests overrides detection', () {
+      debugSetIframeEmbeddingForTests(true);
+      expect(isEmbeddedInIframe(), isTrue);
+
+      debugSetIframeEmbeddingForTests(false);
+      expect(isEmbeddedInIframe(), isFalse);
+
+      debugResetIframeDetectionCache();
+    });
+  });
+
+  group('DomElement.scrollIntoView', () {
+    test('scrollIntoView can be called without options', () {
+      final DomElement element = createDomElement('div');
+      domDocument.body!.append(element);
+
+      // Should not throw
+      expect(() => element.scrollIntoView(), returnsNormally);
+
+      element.remove();
+    });
+
+    test('scrollIntoView can be called with options', () {
+      final DomElement element = createDomElement('div');
+      domDocument.body!.append(element);
+
+      // Should not throw
+      expect(
+        () => element.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'}),
+        returnsNormally,
+      );
+
+      element.remove();
+    });
+  });
+
   group('$HybridTextEditing', () {
     HybridTextEditing? textEditing;
     final spy = PlatformMessagesSpy();
@@ -1007,7 +1211,7 @@ Future<void> testMain() async {
       // Form elements
       {
         final DomHTMLFormElement formElement =
-            textEditing!.configuration!.autofillGroup!.formElement;
+            textEditing!.configuration!.autofillGroup!.formElement!;
         expect(formElement.style.alignContent, isEmpty);
 
         // Should contain one <input type="text"> and one <input type="submit">
@@ -1220,14 +1424,14 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
 
       const finishAutofillContext = MethodCall('TextInput.finishAutofillContext', false);
       sendFrameworkMessage(codec.encodeMethodCall(finishAutofillContext));
 
       // Form element is removed from DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isEmpty);
-      expect(formsOnTheDom, hasLength(0));
+      expect(dormantForms, hasLength(0));
     });
 
     test('finishAutofillContext with save submits forms', () async {
@@ -1339,7 +1543,7 @@ Future<void> testMain() async {
       await expectLater(await submittedForm.future, isTrue);
       // Form element is removed from DOM.
       expect(defaultTextEditingRoot.querySelectorAll('form'), hasLength(0));
-      expect(formsOnTheDom, hasLength(0));
+      expect(dormantForms, hasLength(0));
     });
 
     test('Moves the focus across input elements', () async {
@@ -1540,7 +1744,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
     });
 
     test('singleTextField Autofill setEditableSizeAndTransform preserves'
@@ -1613,7 +1817,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
     });
 
     test('multiTextField Autofill: setClient, setEditingState, show, '
@@ -1667,7 +1871,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
       // Form stays on the DOM until autofill context is finalized.
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
+      expect(dormantForms, hasLength(1));
     });
 
     test('No capitalization: setClient, setEditingState, show', () {
@@ -2339,9 +2543,6 @@ Future<void> testMain() async {
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
-      const show = MethodCall('TextInput.show');
-      sendFrameworkMessage(codec.encodeMethodCall(show));
-
       // The "setSizeAndTransform" message has to be here before we call
       // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
       // we don't put the input element into the DOM until we get its correct
@@ -2352,6 +2553,9 @@ Future<void> testMain() async {
         Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
       );
       sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
 
       // The second [setEditingState] should override the first one.
       checkInputEditingState(textEditing!.strategy.domElement, 'abcd', 2, 3);
@@ -2846,7 +3050,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
 
       final DomElement input = textEditing!.strategy.domElement!;
-      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement;
+      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement!;
 
       // Input and form are appended to the right view.
       expect(view.dom.textEditingHost.contains(input), isTrue);
@@ -2886,7 +3090,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
       final DomElement input = textEditing!.strategy.domElement!;
-      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement;
+      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement!;
 
       // Input and form are appended to view1.
       expect(view1.dom.textEditingHost.contains(input), isTrue);
@@ -2997,59 +3201,75 @@ Future<void> testMain() async {
 
   group('EngineAutofillForm', () {
     test('validate multi element form', () {
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'field2', 'field3'],
       );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('username', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
 
-      // Number of elements if number of fields sent to the constructor minus
-      // one (for the focused text element).
-      expect(autofillForm.elements, hasLength(2));
-      expect(autofillForm.items, hasLength(2));
-      expect(autofillForm.formElement, isNotNull);
-
       expect(autofillForm.formIdentifier, 'field1*field2*field3');
 
-      final DomHTMLFormElement form = autofillForm.formElement;
-      // Note that we also add a submit button. Therefore the form element has
-      // 3 child nodes.
-      expect(form.childNodes, hasLength(3));
+      // Elements are not created yet, until the form is woken up.
+      expect(autofillForm.elements, isEmpty);
+      expect(autofillForm.items, hasLength(3));
+      expect(autofillForm.formElement, isNull);
 
-      final firstElement = form.childNodes.toList()[0] as DomHTMLInputElement;
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      final focusedElement = createDomElement('input') as DomHTMLInputElement;
+
+      autofillForm.wakeUp(focusedElement, focusedAutofill);
+
+      // Number of elements if number of fields sent to the constructor minus
+      // one (for the focused text element).
+      expect(autofillForm.elements, hasLength(3));
+      expect(autofillForm.items, hasLength(3));
+      expect(autofillForm.formElement, isNotNull);
+
+      final DomHTMLFormElement form = autofillForm.formElement!;
+      // Note that we also add a submit button. Therefore the form element has
+      // 4 child nodes.
+      expect(form.childNodes, hasLength(4));
+
+      final usernameElement = form.childNodes.toList()[0] as DomHTMLInputElement;
+      expect(usernameElement, focusedElement);
+
+      final passwordElement = form.childNodes.toList()[1] as DomHTMLInputElement;
       // Autofill value is applied to the element.
-      expect(firstElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
-      expect(firstElement.id, BrowserAutofillHints.instance.flutterToEngine('password'));
-      expect(firstElement.type, 'password');
+      expect(passwordElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
+      expect(passwordElement.id, BrowserAutofillHints.instance.flutterToEngine('password'));
+      expect(passwordElement.type, 'password');
       if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
-        expect(firstElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
+        expect(passwordElement.name, BrowserAutofillHints.instance.flutterToEngine('password'));
       } else {
         expect(
-          firstElement.autocomplete,
+          passwordElement.autocomplete,
           BrowserAutofillHints.instance.flutterToEngine('password'),
         );
       }
 
       // Editing state is applied to the element.
-      expect(firstElement.value, 'Test');
-      expect(firstElement.selectionStart, 0);
-      expect(firstElement.selectionEnd, 0);
+      expect(passwordElement.value, 'Test');
+      // When we only set the `value` without changing selection, the browser
+      // automatically sets the selection to the end of the value.
+      expect(passwordElement.selectionStart, 4);
+      expect(passwordElement.selectionEnd, 4);
 
       // Element is hidden.
-      final DomCSSStyleDeclaration css = firstElement.style;
+      final DomCSSStyleDeclaration css = passwordElement.style;
       expect(css.color, 'transparent');
       expect(css.backgroundColor, 'transparent');
 
       // For `blink` and `webkit` browser engines the overlay would be hidden.
       if (ui_web.browser.browserEngine == ui_web.BrowserEngine.blink ||
           ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
-        expect(firstElement.classList.contains('transparentTextEditing'), isTrue);
+        expect(passwordElement.classList.contains('transparentTextEditing'), isTrue);
       } else {
-        expect(firstElement.classList.contains('transparentTextEditing'), isFalse);
+        expect(passwordElement.classList.contains('transparentTextEditing'), isFalse);
       }
     });
 
@@ -3067,54 +3287,92 @@ Future<void> testMain() async {
       expect(autofillForm.formIdentifier, 'aabbcc*jjkkll*zzyyxx');
     });
 
-    test('place and store form', () {
+    test('form wakeUp and goDormant', () {
       expect(defaultTextEditingRoot.querySelectorAll('form'), isEmpty);
 
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],
         <String>['field1', 'fields2', 'field3'],
       );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('username', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
-      autofillForm.placeForm(testInputElement);
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
 
-      // The focused element is appended to the form, form also has the button
-      // so in total it shoould have 4 elements.
-      final DomHTMLFormElement form = autofillForm.formElement;
+      // The focused element is appended to the form. The form also has the submit button
+      // so in total it should have 4 elements.
+      final DomHTMLFormElement form = autofillForm.formElement!;
       expect(form.childNodes, hasLength(4));
 
       final formOnDom = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       // Form is attached to the DOM.
-      expect(form, equals(formOnDom));
+      expect(form, formOnDom);
 
-      autofillForm.storeForm();
+      autofillForm.goDormant();
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
-      expect(formsOnTheDom, hasLength(1));
-    });
+      expect(dormantForms, hasLength(1));
+      expect(dormantForms, {autofillForm.formIdentifier: autofillForm});
 
-    test('Validate single element form', () {
-      final List<dynamic> fields = createFieldValues(<String>['username'], <String>['field1']);
-      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+      final EngineAutofillForm autofillForm2 = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('username', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
 
-      // The focused element is the only field. Form should be empty after
-      // the initialization (focus element is appended later).
+      expect(autofillForm2.formElement, isNull);
+      expect(autofillForm2.elements, isEmpty);
+
+      // The form identifier should be the same.
+      expect(autofillForm2.formIdentifier, autofillForm.formIdentifier);
+
+      // Waking up should reuse elements from the dormant form.
+      autofillForm2.wakeUp(testInputElement, focusedAutofill);
+      expect(autofillForm2.formElement, autofillForm.formElement);
+      expect(autofillForm2.elements, autofillForm.elements);
+    });
+
+    test('Validate single element form', () {
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['username'],
+        <String>['field1'],
+      );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedAutofillMap,
+        fields,
+      )!;
+
       expect(autofillForm.elements, isEmpty);
-      expect(autofillForm.items, isEmpty);
+      expect(autofillForm.items, hasLength(1));
+      expect(autofillForm.items, contains('field1'));
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, 'username');
+      expect(autofillForm.formElement, isNull);
+
+      final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
+
+      // The focused element is the only field. Form should have a single element after
+      // the initialization.
+      expect(autofillForm.elements, hasLength(1));
+      expect(autofillForm.elements, contains('field1'));
+      expect(autofillForm.items, hasLength(1));
+      expect(autofillForm.items, contains('field1'));
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, 'username');
       expect(autofillForm.formElement, isNotNull);
 
-      final DomHTMLFormElement form = autofillForm.formElement;
+      final DomHTMLFormElement form = autofillForm.formElement!;
       // Submit button is added to the form.
-      expect(form.childNodes, isNotEmpty);
-      final inputElement = form.childNodes.toList()[0] as DomHTMLInputElement;
+      expect(form.childNodes, hasLength(2));
+      final inputElement = form.childNodes.toList().last as DomHTMLInputElement;
       expect(inputElement.type, 'submit');
       expect(inputElement.tabIndex, -1, reason: 'The input should not be reachable by keyboard');
 
@@ -3133,59 +3391,118 @@ Future<void> testMain() async {
       expect(autofillForm, isNull);
     });
 
-    test('placeForm() should place element in correct position', () {
-      final List<dynamic> fields = createFieldValues(
+    test('wakeUp() should place element in correct position', () {
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('email', 'field1'),
+        focusedAutofillMap,
         fields,
       )!;
 
-      expect(autofillForm.elements, hasLength(2));
-
-      var formChildNodes =
-          autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
-
-      // Only username, password, submit nodes are created
-      expect(formChildNodes, hasLength(3));
-      expect(formChildNodes[0].name, 'username');
-      expect(formChildNodes[1].name, 'current-password');
-      expect(formChildNodes[2].type, 'submit');
-      // insertion point for email should be before username
-      expect(autofillForm.insertionReferenceNode, formChildNodes[0]);
+      expect(autofillForm.formElement, isNull);
+      expect(autofillForm.elements, isEmpty);
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       testInputElement.name = 'email';
-      autofillForm.placeForm(testInputElement);
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
 
-      formChildNodes = autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+      expect(autofillForm.elements['field1'], testInputElement);
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, focusedAutofill.autofillHint);
+      expect(
+        autofillForm.items['field1']!.autofillInfo.uniqueIdentifier,
+        focusedAutofill.uniqueIdentifier,
+      );
+
+      final formChildNodes =
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+
       // email node should be placed before username
       expect(formChildNodes, hasLength(4));
       expect(formChildNodes[0].name, 'email');
+      expect(formChildNodes[0], testInputElement);
       expect(formChildNodes[1].name, 'username');
       expect(formChildNodes[2].name, 'current-password');
       expect(formChildNodes[3].type, 'submit');
     });
 
+    test('multiple wakeUp() calls', () {
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['email', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final passwordAutofillMap = fields.last['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        emailAutofillMap,
+        fields,
+      )!;
+
+      expect(autofillForm.formElement, isNull);
+      expect(autofillForm.elements, isEmpty);
+
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
+      expect(autofillForm.formElement, isNotNull);
+      expect(autofillForm.elements, hasLength(2));
+
+      expect(autofillForm.elements['field1'], emailFocusedElement);
+      expect(autofillForm.items['field1']!.autofillInfo.autofillHint, emailAutofill.autofillHint);
+      expect(
+        autofillForm.items['field1']!.autofillInfo.uniqueIdentifier,
+        emailAutofill.uniqueIdentifier,
+      );
+
+      final DomHTMLFormElement formElement = autofillForm.formElement!;
+
+      final passwordFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final passwordAutofill = AutofillInfo.fromFrameworkMessage(passwordAutofillMap);
+      autofillForm.wakeUp(passwordFocusedElement, passwordAutofill);
+
+      // The form element should be the same as before.
+      expect(autofillForm.formElement, formElement);
+
+      expect(autofillForm.elements, hasLength(2));
+      expect(autofillForm.elements['field2'], passwordFocusedElement);
+      expect(
+        autofillForm.items['field2']!.autofillInfo.autofillHint,
+        passwordAutofill.autofillHint,
+      );
+      expect(
+        autofillForm.items['field2']!.autofillInfo.uniqueIdentifier,
+        passwordAutofill.uniqueIdentifier,
+      );
+    });
+
     test(
       'hidden autofill elements should have a width and height of 0 on non-Safari browsers',
       () {
-        final List<dynamic> fields = createFieldValues(
+        final List<Map<String, Object?>> fields = createFieldValues(
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
+        final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
         final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
           kImplicitViewId,
-          createAutofillInfo('email', 'field1'),
+          emailAutofillMap,
           fields,
         )!;
+
+        final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+        final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+        autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
         final formChildNodes =
-            autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
-        final DomHTMLInputElement username = formChildNodes[0];
-        final DomHTMLInputElement password = formChildNodes[1];
+            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+        final DomHTMLInputElement username = formChildNodes[1];
+        final DomHTMLInputElement password = formChildNodes[2];
 
         expect(username.name, 'username');
         expect(password.name, 'current-password');
@@ -3195,25 +3512,32 @@ Future<void> testMain() async {
         expect(password.style.width, '0px');
         expect(password.style.height, '0px');
         expect(password.style.pointerEvents, isNot('none'));
-        expect(autofillForm.formElement.style.pointerEvents, isNot('none'));
+        expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
       },
       skip: isSafari,
     );
 
     test('hidden autofill elements should not have a width and height of 0 on Safari', () {
-      final List<dynamic> fields = createFieldValues(
+      final List<Map<String, Object?>> fields = createFieldValues(
         <String>['email', 'username', 'password'],
         <String>['field1', 'field2', 'field3'],
       );
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
       final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
         kImplicitViewId,
-        createAutofillInfo('email', 'field1'),
+        emailAutofillMap,
         fields,
       )!;
+
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+
       final formChildNodes =
-          autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
-      final DomHTMLInputElement username = formChildNodes[0];
-      final DomHTMLInputElement password = formChildNodes[1];
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      final DomHTMLInputElement username = formChildNodes[1];
+      final DomHTMLInputElement password = formChildNodes[2];
+
       expect(username.name, 'username');
       expect(password.name, 'current-password');
       expect(username.style.width, isNot('0px'));
@@ -3222,28 +3546,30 @@ Future<void> testMain() async {
       expect(password.style.width, isNot('0px'));
       expect(password.style.height, isNot('0px'));
       expect(password.style.pointerEvents, 'none');
-      expect(autofillForm.formElement.style.pointerEvents, 'none');
+      expect(autofillForm.formElement!.style.pointerEvents, 'none');
     }, skip: !isSafari);
 
     test(
       'the focused element within a form should explicitly set pointer events on Safari',
       () {
-        final List<dynamic> fields = createFieldValues(
+        final List<Map<String, Object?>> fields = createFieldValues(
           <String>['email', 'username', 'password'],
           <String>['field1', 'field2', 'field3'],
         );
+        final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
         final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
           kImplicitViewId,
-          createAutofillInfo('email', 'field1'),
+          focusedAutofillMap,
           fields,
         )!;
 
         final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
         testInputElement.name = 'email';
-        autofillForm.placeForm(testInputElement);
+        final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+        autofillForm.wakeUp(testInputElement, focusedAutofill);
 
         final formChildNodes =
-            autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
         final DomHTMLInputElement email = formChildNodes[0];
         final DomHTMLInputElement username = formChildNodes[1];
         final DomHTMLInputElement password = formChildNodes[2];
@@ -3253,7 +3579,7 @@ Future<void> testMain() async {
         expect(password.name, 'current-password');
 
         // pointer events are none on the form and all non-focused elements
-        expect(autofillForm.formElement.style.pointerEvents, 'none');
+        expect(autofillForm.formElement!.style.pointerEvents, 'none');
         expect(username.style.pointerEvents, 'none');
         expect(password.style.pointerEvents, 'none');
 
@@ -4003,8 +4329,8 @@ Map<String, dynamic> createAutofillInfo(String? hint, String uniqueId, {String? 
       },
     };
 
-List<dynamic> createFieldValues(List<String> hints, List<String> uniqueIds) {
-  final testFields = <dynamic>[];
+List<Map<String, Object?>> createFieldValues(List<String> hints, List<String> uniqueIds) {
+  final testFields = <Map<String, Object?>>[];
 
   expect(hints.length, equals(uniqueIds.length));
 
@@ -4015,8 +4341,8 @@ List<dynamic> createFieldValues(List<String> hints, List<String> uniqueIds) {
   return testFields;
 }
 
-Map<String, dynamic> createOneFieldValue(String hint, String uniqueId) => <String, dynamic>{
-  'inputType': <String, dynamic>{'name': 'TextInputType.text', 'signed': null, 'decimal': null},
+Map<String, Object?> createOneFieldValue(String hint, String uniqueId) => <String, Object?>{
+  'inputType': <String, Object?>{'name': 'TextInputType.text', 'signed': null, 'decimal': null},
   'textCapitalization': 'TextCapitalization.none',
   'autofill': createAutofillInfo(hint, uniqueId),
 };
@@ -4026,7 +4352,7 @@ void clearForms() {
   while (defaultTextEditingRoot.querySelectorAll('form').isNotEmpty) {
     defaultTextEditingRoot.querySelectorAll('form').last.remove();
   }
-  formsOnTheDom.clear();
+  dormantForms.clear();
 }
 
 /// Waits until the text strategy closes and moves the focus accordingly.
@@ -4043,5 +4369,27 @@ class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy
   void placeElement() {
     placeElementCount++;
     super.placeElement();
+  }
+}
+
+/// Spy class for testing IOSTextEditingStrategy iframe scrollIntoView behavior.
+class IOSTextEditingStrategySpy extends IOSTextEditingStrategy {
+  IOSTextEditingStrategySpy(super.owner);
+
+  /// Set this to simulate iframe context for testing.
+  /// Uses the shared debugSetIframeEmbeddingForTests() from dom.dart.
+  set debugIsInIframeOverride(bool? value) {
+    debugSetIframeEmbeddingForTests(value);
+  }
+
+  /// Count of how many times scrollIntoView was called.
+  int scrollIntoViewCallCount = 0;
+
+  @override
+  void scrollIntoViewIfEmbedded() {
+    if (isEmbeddedInIframe() || configuration.multiViewEnabled) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+      scrollIntoViewCallCount++;
+    }
   }
 }

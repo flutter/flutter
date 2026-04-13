@@ -48,6 +48,23 @@ import 'package:flutter/widgets.dart';
 ///   await tester.pumpAndSettle();
 /// });
 /// ```
+///
+/// For tests that need full control over route generation:
+/// ```dart
+/// testWidgets('custom route test', (WidgetTester tester) async {
+///   await tester.pumpWidget(
+///     TestWidgetsApp(
+///       initialRoute: '/',
+///       onGenerateRoute: (RouteSettings settings) {
+///         return PageRouteBuilder<void>(
+///           settings: settings,
+///           pageBuilder: (_, __, ___) => const Text('Generated'),
+///         );
+///       },
+///     ),
+///   );
+/// });
+/// ```
 // TODO(rkishan516): Move this to flutter_test package.
 // Tracking issue: https://github.com/flutter/flutter/issues/181283
 class TestWidgetsApp extends StatelessWidget {
@@ -56,9 +73,16 @@ class TestWidgetsApp extends StatelessWidget {
     super.key,
     this.navigatorKey,
     this.home,
+    this.initialRoute,
+    this.onGenerateRoute,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
+    this.textStyle,
     this.pageRouteBuilder = _defaultPageRouteBuilder,
+    this.builder,
+    this.shortcuts,
+    this.actions,
+    this.restorationScopeId,
   });
 
   /// A key to use when building the [Navigator].
@@ -91,6 +115,28 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.home], the equivalent property in [WidgetsApp].
   final Widget? home;
 
+  /// The name of the first route to show when the app launches.
+  ///
+  /// Defaults to [Navigator.defaultRouteName] (typically `/`).
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.initialRoute], the equivalent property in [WidgetsApp].
+  final String? initialRoute;
+
+  /// The route generator callback used when the app is navigated to a named
+  /// route.
+  ///
+  /// This callback is used if [routes] and [home] do not contain the requested
+  /// route.
+  ///
+  /// The [pageRouteBuilder] is not used for routes created by this callback.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
+  final RouteFactory? onGenerateRoute;
+
   /// The application's top-level routing table.
   ///
   /// Maps route names to widget builders. When navigating to a named route,
@@ -120,6 +166,12 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.color], the equivalent property in [WidgetsApp].
   final Color color;
 
+  /// The default text style for [Text] widgets in the app.
+  ///
+  /// Passed directly to [WidgetsApp.textStyle], which wraps the widget tree
+  /// in a [DefaultTextStyle].
+  final TextStyle? textStyle;
+
   /// A function that creates page routes for named navigation.
   ///
   /// Defaults to a [PageRouteBuilder] with no transition animation, allowing
@@ -148,6 +200,44 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.pageRouteBuilder], the equivalent property in [WidgetsApp].
   final PageRouteFactory pageRouteBuilder;
 
+  /// A builder for inserting widgets above the [Navigator].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.builder], the equivalent property in [WidgetsApp].
+  final TransitionBuilder? builder;
+
+  /// The application's keyboard shortcut map.
+  ///
+  /// In tests, this allows registering custom keyboard shortcuts to verify
+  /// that key combinations trigger the expected [Intent]s.
+  ///
+  /// When null, [WidgetsApp.defaultShortcuts] are used.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.shortcuts], the equivalent property in [WidgetsApp].
+  final Map<ShortcutActivator, Intent>? shortcuts;
+
+  /// The application's action map.
+  ///
+  /// In tests, this allows registering custom [Action]s that respond to
+  /// [Intent]s dispatched by [Shortcuts] or programmatic invocation.
+  ///
+  /// When null, [WidgetsApp.defaultActions] are used.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.actions], the equivalent property in [WidgetsApp].
+  final Map<Type, Action<Intent>>? actions;
+
+  /// The identifier to use for state restoration of the app's [Navigator].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.restorationScopeId], the equivalent property in [WidgetsApp].
+  final String? restorationScopeId;
+
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
     return PageRouteBuilder<T>(
       settings: settings,
@@ -171,10 +261,17 @@ class TestWidgetsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: color,
+      textStyle: textStyle,
       navigatorKey: navigatorKey,
       home: home,
+      initialRoute: initialRoute,
+      onGenerateRoute: onGenerateRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,
+      builder: builder,
+      shortcuts: shortcuts,
+      actions: actions,
+      restorationScopeId: restorationScopeId,
     );
   }
 }

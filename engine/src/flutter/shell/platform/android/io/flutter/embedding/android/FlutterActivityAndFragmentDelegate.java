@@ -29,6 +29,7 @@ import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
+import io.flutter.embedding.engine.FlutterEngineFlags;
 import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.FlutterEngineGroupCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
@@ -333,11 +334,9 @@ import java.util.Set;
             + " this FlutterFragment.");
 
     warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
-    String[] flutterShellArgs =
-        host.getFlutterShellArgs() == null ? new String[0] : host.getFlutterShellArgs();
     FlutterEngineGroup group =
         engineGroup == null
-            ? new FlutterEngineGroup(host.getContext(), flutterShellArgs)
+            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
             : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
@@ -349,7 +348,7 @@ import java.util.Set;
   }
 
   // As part of https://github.com/flutter/flutter/issues/180686, the ability
-  // to set engine flags via Intent extras is planned to be removed, so warn
+  // to set engine flags via Intent extras will be removed, so warn
   // developers that engine shell arguments set that way will be ignored.
   private void warnIfEngineFlagsSetViaIntent(@NonNull Intent intent) {
     if (intent.getExtras() == null) {
@@ -360,13 +359,15 @@ import java.util.Set;
     Set<String> extrasKeys = extras.keySet();
 
     for (String extrasKey : extrasKeys) {
-      FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey(extrasKey);
+      FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagFromIntentKey(extrasKey);
       if (flag != null) {
-        Log.w(
+        Log.i(
             TAG,
-            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
-                + flag.commandLineArgument
-                + " on the command line or see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
+            "If you are attempting to set "
+                + flag.engineArgument
+                + " via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
+                + flag.engineArgument
+                + " or any other flags specified via Intent extras on the command line instead or see https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for alternative methods.");
         break;
       }
     }
@@ -1118,8 +1119,9 @@ import java.util.Set;
     @NonNull
     Lifecycle getLifecycle();
 
+    /** Returns the {@link FlutterShellArgs} that should be used when initializing Flutter. */
     @NonNull
-    String[] getFlutterShellArgs();
+    FlutterShellArgs getFlutterShellArgs();
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to

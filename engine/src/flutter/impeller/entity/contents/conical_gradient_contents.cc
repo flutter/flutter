@@ -36,9 +36,14 @@ ConicalKind GetConicalKind(Point center,
 
 }  // namespace
 
-ConicalGradientContents::ConicalGradientContents() = default;
+ConicalGradientContents::ConicalGradientContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 ConicalGradientContents::~ConicalGradientContents() = default;
+
+const Geometry* ConicalGradientContents::GetGeometry() const {
+  return geometry_;
+}
 
 void ConicalGradientContents::SetCenterAndRadius(Point center, Scalar radius) {
   center_ = center;
