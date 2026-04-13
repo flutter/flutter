@@ -6656,7 +6656,9 @@ void main() {
     'context menu overlay entry is built after selection handles',
     (WidgetTester tester) async {
       final List<String> buildOrder = <String>[];
-      final selectionControls = _OrderTrackingSelectionControls(buildOrder);
+      final selectionControls = _TextSelectionControlsSpy(
+        onBuildHandle: () => buildOrder.add('handle'),
+      );
 
       await tester.pumpWidget(
         TestWidgetsApp(
@@ -6882,13 +6884,13 @@ class RenderSelectAll extends RenderProxyBox with Selectable, SelectionRegistran
   }
 }
 
-/// A [TextSelectionControls] with [TextSelectionHandleControls] mixin that
-/// tracks when handles are built, used to verify overlay insertion order.
-class _OrderTrackingSelectionControls extends TextSelectionControls
+/// A [TextSelectionControls] spy with [TextSelectionHandleControls] mixin that
+/// exposes an [onBuildHandle] callback, used to verify overlay insertion order.
+class _TextSelectionControlsSpy extends TextSelectionControls
     with TextSelectionHandleControls {
-  _OrderTrackingSelectionControls(this.buildOrder);
+  _TextSelectionControlsSpy({this.onBuildHandle});
 
-  final List<String> buildOrder;
+  final VoidCallback? onBuildHandle;
 
   @override
   Size getHandleSize(double textLineHeight) => const Size(20.0, 30.0);
@@ -6900,7 +6902,7 @@ class _OrderTrackingSelectionControls extends TextSelectionControls
     double textLineHeight, [
     VoidCallback? onTap,
   ]) {
-    buildOrder.add('handle');
+    onBuildHandle?.call();
     return const SizedBox(width: 20.0, height: 30.0);
   }
 
