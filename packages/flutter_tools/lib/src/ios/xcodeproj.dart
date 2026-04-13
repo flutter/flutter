@@ -410,7 +410,7 @@ class XcodeProjectInterpreter {
         // one to error. The new process will pick up where the old one left off.
         final RunResult result = await _processUtils.run([
           'pgrep',
-          '-n', //Select only the newest
+          '-n', // Select only the newest
           '-f', // Match against full argument lists
           ...command,
         ]);
