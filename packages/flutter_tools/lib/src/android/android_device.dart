@@ -593,16 +593,10 @@ class AndroidDevice extends Device {
           !androidShellArguments.containsAll(previousEngineShellArguments) ||
           previousEngineShellArguments.length != androidShellArguments.length;
     }
-    print(
-      'CAMILLE shouldRegenerateEngineShellArgsManifest: $shouldRegenerateEngineShellArgsManifest',
-    );
-    print('CAMILLE previousEngineShellArguments: $previousEngineShellArguments');
-    print('CAMILLE androidShellArguments: $androidShellArguments');
 
     if (!prebuiltApplication ||
         shouldRegenerateEngineShellArgsManifest ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
-      print('CAMILLE rebuilding APK if you are seeing this!');
       final bool apkBuildNotExpected =
           shouldRegenerateEngineShellArgsManifest && !prebuiltApplication;
       final buildApkLoggerMessage = apkBuildNotExpected
