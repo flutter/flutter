@@ -1,5 +1,5 @@
 ---
-name: rebuild-flutter-tool
+name: rebuilding-flutter-tool
 description: Rebuilds the Flutter tool and CLI. Use when a user asks to compile, update, regenerate, or rebuild the Flutter tool or CLI.
 ---
 
