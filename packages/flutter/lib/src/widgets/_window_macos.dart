@@ -79,6 +79,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
     bool decorated = true,
   }) {
@@ -98,6 +99,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,

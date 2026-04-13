@@ -196,8 +196,10 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@template flutter.widgets.windowing.constraints}
   /// The [preferredSize] is the preferred content size of the window.
   /// This might not be honored by the platform. This is the size that
-  /// the platform will try to apply to the window when it is created. In contrast,
-  /// the [preferredConstraints] field enforces the minimum and maximum size of
+  /// the platform will try to apply to the window when it is created.
+  /// When `null`, the window will be sized to its content.
+  ///
+  /// In contrast, the [preferredConstraints] field enforces the minimum and maximum size of
   /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
   /// or the [preferredSize] is null, then the platform will attempt to use an
   /// initial size that does satisfy the [preferredConstraints] instead.
@@ -212,7 +214,15 @@ abstract class RegularWindowController extends BaseWindowController {
   /// be unconstrained.
   ///
   /// If both [preferredSize] and [preferredConstraints] are null,
-  /// then the platform will use its own default size for the window.
+  /// then the platform will size the window to its content exactly.
+  ///
+  /// The [resizable] argument configures whether or not the window may be
+  /// resized by the platform. If `false`, the window will be fixed to its
+  /// initial size as decided by [preferredSize] and [preferredConstraints].
+  /// If `true`, the user will be able to resize the window within its
+  /// [preferredConstraints]. If [resizable] is `true` and no explicit size
+  /// is provided, the window is initially sized to its content but may be
+  /// freely resized afterwards within its [preferredConstraints].
   /// {@endtemplate}
   ///
   /// The [title] argument configures the window's title.
@@ -231,6 +241,7 @@ abstract class RegularWindowController extends BaseWindowController {
   factory RegularWindowController({
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
     bool decorated = true,
     RegularWindowControllerDelegate? delegate,
@@ -248,6 +259,7 @@ abstract class RegularWindowController extends BaseWindowController {
       delegate: delegate ?? RegularWindowControllerDelegate(),
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
+      resizable: resizable,
       title: title,
       decorated: decorated,
     );
@@ -1216,6 +1228,7 @@ abstract class WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
     bool decorated = true,
   });
@@ -1232,6 +1245,7 @@ abstract class WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
@@ -1316,6 +1330,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
     bool decorated = true,
   }) {
@@ -1327,6 +1342,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,

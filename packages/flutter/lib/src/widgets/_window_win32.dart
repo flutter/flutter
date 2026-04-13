@@ -142,6 +142,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
   RegularWindowController createRegularWindowController({
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
     bool decorated = true,
     required RegularWindowControllerDelegate delegate,
@@ -162,6 +163,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     BaseWindowController? parent,
     String? title,
     bool decorated = true,
