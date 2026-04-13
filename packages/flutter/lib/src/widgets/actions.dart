@@ -873,13 +873,15 @@ class Actions extends StatefulWidget {
   /// return null.
   ///
   /// {@template flutter.widgets.actions.findLimitations}
-  /// ### Limitations
+  /// ## Limitations:
   ///
-  /// The type parameter `T` in `Action<T>` is contravariant. However, dart doesn't
-  /// support custom contravariance. For example, an `Action<Intent>` can handle
-  /// any `Intent` subtype, thus should always be a valid candidate.
-  /// But an `Action<Intent>` can not be cast to `Action<T>` for arbitrary `T`
-  /// thus can not be returned from this method, unless `T == Intent`.
+  /// The return type `Action<T>?` may prevent this method from returning
+  /// perfectly capable `Action`s bound to the given [Intent]. For instance, an
+  /// `Action<Intent>` can be bound to any `Intent` because its type signature
+  /// claims it can take any [Intent] object. However this method will not be
+  /// able to return an `Action<Intent>` unless `T` is exactly `Intent`, because
+  /// `Action<Intent>` is not a subtype of `Action<T>?`. The method will return
+  /// null in this case, and assert in debug mode.
   ///
   /// To work around this, it is strongly recommended that callers explicitly
   /// set the type parameter to `Intent` when the `intent` parameter is not null:
