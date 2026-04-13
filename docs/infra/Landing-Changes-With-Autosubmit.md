@@ -16,7 +16,7 @@ and who adds them.
 | `revert of` | Tracking label for the revert request generated from the closed and merged original pull request. | | X | To track the new pull request that reverts a previous change. |
 | `emergency` | Override the tree-status check and land even when tree is closed. | X | | To submit a potential fix for the current tree-status |
 
-Note: that `emergency` cannot be used on its own and should be used in
+Note that `emergency` cannot be used on its own and should be used in
 conjunction with the `autosubmit` label.
 
 ### Usage Examples
