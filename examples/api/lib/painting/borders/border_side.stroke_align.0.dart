@@ -31,10 +31,10 @@ class StrokeAlignExample extends StatelessWidget {
         child: RepeatingAnimationBuilder<double>(
           animatable: Tween<double>(begin: -1.0, end: 1.0),
           duration: const Duration(seconds: 1),
-          repeatMode: RepeatMode.reverse,
+          repeatMode: .reverse,
           builder: (BuildContext context, double strokeAlign, Widget? child) {
             return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: .spaceAround,
               children: <Widget>[
                 BorderedBox(
                   shape: StadiumBorder(
@@ -46,7 +46,7 @@ class StrokeAlignExample extends StatelessWidget {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: .spaceAround,
                   children: <Widget>[
                     BorderedBox(
                       shape: CircleBorder(
@@ -69,7 +69,7 @@ class StrokeAlignExample extends StatelessWidget {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: .spaceAround,
                   children: <Widget>[
                     BorderedBox(
                       shape: BeveledRectangleBorder(
@@ -82,7 +82,7 @@ class StrokeAlignExample extends StatelessWidget {
                     ),
                     BorderedBox(
                       shape: BeveledRectangleBorder(
-                        borderRadius: BorderRadius.circular(cornerRadius),
+                        borderRadius: .circular(cornerRadius),
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
@@ -93,7 +93,7 @@ class StrokeAlignExample extends StatelessWidget {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: .spaceAround,
                   children: <Widget>[
                     BorderedBox(
                       shape: RoundedRectangleBorder(
@@ -106,7 +106,7 @@ class StrokeAlignExample extends StatelessWidget {
                     ),
                     BorderedBox(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(cornerRadius),
+                        borderRadius: .circular(cornerRadius),
                         side: BorderSide(
                           color: borderColor,
                           width: borderWidth,
@@ -117,7 +117,7 @@ class StrokeAlignExample extends StatelessWidget {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: .spaceAround,
                   children: <Widget>[
                     BorderedBox(
                       shape: StarBorder(

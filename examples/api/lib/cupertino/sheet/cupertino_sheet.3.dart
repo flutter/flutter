@@ -34,7 +34,7 @@ class HomePage extends StatelessWidget {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             CupertinoButton.filled(
               onPressed: () {
@@ -68,7 +68,7 @@ class _ScrollableSheetBody extends StatelessWidget {
         middle: const Text('Scrollable Sheet'),
         automaticBackgroundVisibility: false,
         leading: CupertinoButton(
-          padding: EdgeInsets.zero,
+          padding: .zero,
           child: const Text('Close'),
           onPressed: () {
             CupertinoSheetRoute.popSheet(context);
@@ -85,7 +85,7 @@ class _ScrollableSheetBody extends StatelessWidget {
               int index,
             ) {
               return Container(
-                alignment: Alignment.center,
+                alignment: .center,
                 height: 100,
                 child: const Text('Scroll Me'),
               );

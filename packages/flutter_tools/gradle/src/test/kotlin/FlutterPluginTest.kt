@@ -1,5 +1,6 @@
 package com.flutter.gradle
 
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
@@ -49,7 +50,11 @@ class FlutterPluginTest {
         val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
-        val mockAbstractAppExtension = mockk<AbstractAppExtension>(relaxed = true)
+        val mockAbstractAppExtension =
+            mockk<AbstractAppExtension>(
+                moreInterfaces = arrayOf(ApplicationExtension::class),
+                relaxed = true
+            )
         val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
@@ -69,19 +74,35 @@ class FlutterPluginTest {
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
         val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
-        val mockDebugBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
-        val mockReleaseBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+
+        // Cast our multi-interface mock instead of creating a brand new one
+        val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
+
+        // Mock buildTypes on our new dual-purpose mock so AgpCommonExtensionWrapper can read them
+        every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
+        every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+
+        // Keep the CommonExtension mocks just in case other parts of the plugin look for it
         every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
         every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
-        val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
+
+        // Pass the dual-purpose mock for any ApplicationExtension lookups
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        val mockApplicationDefaultConfig = mockk<ApplicationDefaultConfig>(relaxed = true)
+
+        val mockApplicationDefaultConfig =
+            mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
+                moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
+                relaxed = true
+            )
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
         every { project.rootProject } returns project
-        every { project.state.failure } returns null
+        every { project.state.failure as Throwable? } returns null
         val mockDirectory = mockk<Directory>(relaxed = true)
         every { project.layout.buildDirectory.get() } returns mockDirectory
         val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
@@ -120,7 +141,11 @@ class FlutterPluginTest {
         val fakeEngineRealmFile = fakeCacheDir.resolve("engine.realm")
         fakeEngineRealmFile.writeText(FAKE_ENGINE_REALM)
         val project = mockk<Project>(relaxed = true)
-        val mockAbstractAppExtension = mockk<AbstractAppExtension>(relaxed = true)
+        val mockAbstractAppExtension =
+            mockk<AbstractAppExtension>(
+                moreInterfaces = arrayOf(ApplicationExtension::class),
+                relaxed = true
+            )
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.findByName("android") } returns mockAbstractAppExtension
@@ -138,19 +163,35 @@ class FlutterPluginTest {
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
         val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
-        val mockDebugBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
-        val mockReleaseBuildType = mockk<com.android.build.api.dsl.BuildType>(relaxed = true)
+        val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+        val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
+
+        // Cast our multi-interface mock instead of creating a brand new one
+        val mockApplicationExtension = mockAbstractAppExtension as ApplicationExtension
+
+        // Mock buildTypes on our new dual-purpose mock so AgpCommonExtensionWrapper can read them
+        every { mockApplicationExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
+        every { mockApplicationExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+
+        // Keep the CommonExtension mocks just in case other parts of the plugin look for it
         every { mockCommonExtension.buildTypes.getByName("debug") } returns mockDebugBuildType
         every { mockCommonExtension.buildTypes.getByName("release") } returns mockReleaseBuildType
+
         every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
         every { project.extensions.findByType(CommonExtension::class.java) } returns mockCommonExtension
-        val mockApplicationExtension = mockk<ApplicationExtension>(relaxed = true)
+
+        // Pass the dual-purpose mock for any ApplicationExtension lookups
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
         every { project.extensions.getByType(ApplicationExtension::class.java) } returns mockApplicationExtension
-        val mockApplicationDefaultConfig = mockk<ApplicationDefaultConfig>(relaxed = true)
+
+        val mockApplicationDefaultConfig =
+            mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
+                moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
+                relaxed = true
+            )
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
         every { project.rootProject } returns project
-        every { project.state.failure } returns null
+        every { project.state.failure as Throwable? } returns null
         val mockDirectory = mockk<Directory>(relaxed = true)
         every { project.layout.buildDirectory.get() } returns mockDirectory
         val mockAndroidSourceSet = mockk<com.android.build.gradle.api.AndroidSourceSet>(relaxed = true)
