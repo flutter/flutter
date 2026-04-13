@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <fuchsia/inspect/cpp/fidl.h>
+#include <fuchsia/kernel/cpp/fidl.h>
 #include <fuchsia/logger/cpp/fidl.h>
 #include <fuchsia/sysmem/cpp/fidl.h>
 #include <fuchsia/sysmem2/cpp/fidl.h>
@@ -234,10 +235,11 @@ void FlutterEmbedderTest::SetUpRealmBase() {
   realm_builder_.AddRoute(
       Route{.capabilities =
                 {
-                    Protocol{fuchsia::logger::LogSink::Name_},
                     Protocol{fuchsia::inspect::InspectSink::Name_},
-                    Protocol{fuchsia::sysmem::Allocator::Name_},
+                    Protocol{fuchsia::kernel::VmexResource::Name_},
+                    Protocol{fuchsia::logger::LogSink::Name_},
                     Protocol{fuchsia::sysmem2::Allocator::Name_},
+                    Protocol{fuchsia::sysmem::Allocator::Name_},
                     Protocol{fuchsia::tracing::provider::Registry::Name_},
                     Protocol{kVulkanLoaderServiceName},
                 },
@@ -247,10 +249,11 @@ void FlutterEmbedderTest::SetUpRealmBase() {
 
   // Route base system services to the test UI stack.
   realm_builder_.AddRoute(Route{
-      .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
-                       Protocol{fuchsia::inspect::InspectSink::Name_},
-                       Protocol{fuchsia::sysmem::Allocator::Name_},
+      .capabilities = {Protocol{fuchsia::inspect::InspectSink::Name_},
+                       Protocol{fuchsia::kernel::VmexResource::Name_},
+                       Protocol{fuchsia::logger::LogSink::Name_},
                        Protocol{fuchsia::sysmem2::Allocator::Name_},
+                       Protocol{fuchsia::sysmem::Allocator::Name_},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},
                        Protocol{kVulkanLoaderServiceName}},
       .source = ParentRef{},

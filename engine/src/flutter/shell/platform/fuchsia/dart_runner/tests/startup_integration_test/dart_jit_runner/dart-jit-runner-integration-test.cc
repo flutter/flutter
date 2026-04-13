@@ -78,7 +78,8 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
 
   // Route base capabilities to the Dart JIT runner
   realm_builder.AddRoute(
-      Route{.capabilities = {Protocol{"fuchsia.logger.LogSink"},
+      Route{.capabilities = {Protocol{"fuchsia.kernel.VmexResource"},
+                             Protocol{"fuchsia.logger.LogSink"},
                              Protocol{"fuchsia.tracing.provider.Registry"},
                              Protocol{"fuchsia.posix.socket.Provider"},
                              Protocol{"fuchsia.intl.PropertyProvider"},
