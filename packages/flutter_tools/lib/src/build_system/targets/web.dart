@@ -709,6 +709,12 @@ class WebTemplatedFiles extends Target {
         final String relativePath = globals.fs.path
             .relative(file.path, from: outputDirectory.path)
             .replaceAll(r'\', '/');
+        // Skip files under the canvaskit/ subdirectory — they are already
+        // covered by the canvasKit SDK directory scan above with keys that
+        // match what the JS lookup code actually uses.
+        if (relativePath.startsWith('canvaskit/')) {
+          continue;
+        }
         wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
       }
     }
