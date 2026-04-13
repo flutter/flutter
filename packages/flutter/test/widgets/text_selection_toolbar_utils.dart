@@ -33,7 +33,7 @@ bool cupertinoToolbarHasText(String text) {
   if (elements.isEmpty) {
     return false;
   }
-  final CupertinoTextSelectionToolbar toolbar = elements.first.widget as CupertinoTextSelectionToolbar;
+  final toolbar = elements.first.widget as CupertinoTextSelectionToolbar;
   for (final Widget child in toolbar.children) {
     if (child is CupertinoTextSelectionToolbarButton) {
       if (child.text == text || child.buttonItem?.label == text) {
