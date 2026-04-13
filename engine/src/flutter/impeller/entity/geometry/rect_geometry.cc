@@ -10,33 +10,17 @@ FillRectGeometry::FillRectGeometry(Rect rect) : rect_(rect) {}
 
 FillRectGeometry::~FillRectGeometry() = default;
 
-const Rect& FillRectGeometry::GetRect() const {
-  return rect_;
-}
-
-void FillRectGeometry::SetAntialiasPadding(Scalar padding) {
-  padding_pixels_ = padding;
-}
-
-Scalar FillRectGeometry::GetAntialiasPadding() const {
-  return padding_pixels_;
-}
-
 GeometryResult FillRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
-  Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
-  Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
-  Rect expanded_rect = rect_.Expand(padding);
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =
           {
-              .vertex_buffer =
-                  data_host_buffer.Emplace(expanded_rect.GetPoints().data(),
-                                           8 * sizeof(float), alignof(float)),
+              .vertex_buffer = data_host_buffer.Emplace(
+                  rect_.GetPoints().data(), 8 * sizeof(float), alignof(float)),
               .vertex_count = 4,
               .index_type = IndexType::kNone,
           },
@@ -47,9 +31,7 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
 
 std::optional<Rect> FillRectGeometry::GetCoverage(
     const Matrix& transform) const {
-  Scalar max_basis = transform.GetMaxBasisLengthXY();
-  Scalar padding = max_basis == 0 ? 0 : padding_pixels_ / max_basis;
-  return rect_.Expand(padding).TransformAndClipBounds(transform);
+  return rect_.TransformAndClipBounds(transform);
 }
 
 bool FillRectGeometry::CoversArea(const Matrix& transform,

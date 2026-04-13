@@ -40,6 +40,7 @@
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/uber_sdf_contents.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/arc_geometry.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -52,6 +53,7 @@
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/shadow_path_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
@@ -827,19 +829,13 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    Scalar expand_size = kAntialiasPadding;
-    if (paint.style == Paint::Style::kStroke) {
-      expand_size += LineGeometry::ComputePixelHalfWidth(GetCurrentTransform(),
-                                                         paint.stroke.width);
-    }
-
-    FillRectGeometry geometry(rect);
-    geometry.SetAntialiasPadding(expand_size);
-
-    auto contents = UberSDFContents::MakeRect(
-        /*color=*/paint.color, /*stroke_width=*/paint.stroke.width,
-        /*stroke_join=*/paint.stroke.join,
-        /*stroked=*/paint.style == Paint::Style::kStroke, &geometry);
+    auto params = UberSDFParameters::MakeRect(
+        /*color=*/paint.color, /*rect=*/rect,
+        /*stroke=*/paint.style == Paint::Style::kStroke
+            ? std::make_optional(paint.stroke)
+            : std::nullopt);
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
 
     const Geometry* geom = contents->GetGeometry();
 
@@ -1033,18 +1029,13 @@ void Canvas::DrawCircle(const Point& center,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    const bool is_stroked = paint.style == Paint::Style::kStroke;
-
-    std::optional<CircleGeometry> geometry;
-    if (is_stroked) {
-      geometry.emplace(center, radius, paint.stroke.width);
-    } else {
-      geometry.emplace(center, radius);
-    }
-    geometry->SetAntialiasPadding(1.0f);
-
-    auto contents = UberSDFContents::MakeCircle(
-        /*color=*/paint.color, /*stroked=*/is_stroked, &geometry.value());
+    auto params = UberSDFParameters::MakeCircle(
+        /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
+        /*stroke=*/paint.style == Paint::Style::kStroke
+            ? std::make_optional(paint.stroke)
+            : std::nullopt);
+    auto geometry = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geometry));
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
