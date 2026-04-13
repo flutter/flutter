@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+set -e
+
 # See documentation at: packages/flutter_tools/README.md#forcing-flutter-tools-snapshot-regeneration
 
 # To be run from its own directory
