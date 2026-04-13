@@ -2841,12 +2841,12 @@ flutter:
 
       final PubspecCache cache = await buildPubspecCache(config, fileSystem: fs);
 
-      // Package in resolution with pubspec 
+      // Package in resolution with pubspec
       // this means that the key is present and the value is non-null.
       expect(cache.containsKey('file:///pkgs/in_resolution/'), isTrue);
       expect(cache['file:///pkgs/in_resolution/'], isNotNull);
 
-      // Package NOT in resolution (e.g. example-only dep) 
+      // Package NOT in resolution (e.g. example-only dep)
       // this means that the key is absent entirely.
       // containsKey must return false so callers can fall back to disk reads.
       expect(cache.containsKey('file:///pkgs/example_only_plugin/'), isFalse);
