@@ -1565,9 +1565,14 @@ Build settings for action build and target good_plugin:
           );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          final String configContents = config.readAsStringSync();
           expect(logger.warningText, isEmpty);
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
+          expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(
+            configContents,
+            isNot(contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64')),
+          );
+          expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{

@@ -104,7 +104,7 @@ class _ScrollNotificationObserverExampleState
                 },
                 child: const Card(
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: .all(8.0),
                     child: Column(
                       children: <Widget>[
                         Icon(Icons.arrow_upward_rounded),

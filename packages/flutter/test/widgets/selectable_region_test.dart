@@ -5428,6 +5428,49 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
+  testWidgets(
+    'can hide context menu with DismissIntent',
+    (WidgetTester tester) async {
+      final toolbarKey = UniqueKey();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: testTextSelectionHandleControls,
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return SizedBox.shrink(key: toolbarKey);
+                },
+            child: const Text('How are you?'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 6),
+      ); // at the 'r'
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      // `are` is selected.
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+      await tester.pumpAndSettle();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Context menu has appeared.
+      expect(find.byKey(toolbarKey), findsOneWidget);
+
+      // Hide the context menu using the DismissIntent.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(find.byKey(toolbarKey), findsNothing);
+    },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/121053.
   testWidgets(
     'Ensure SelectableRegion does not affect the layout of its children',

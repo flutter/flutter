@@ -37,7 +37,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         SizedBox(
           width: 300,
@@ -57,7 +57,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
         ),
         const SizedBox(height: 50),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             GestureDetector(
               onTap: () {
@@ -68,7 +68,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
               child: const Icon(Icons.chevron_left, key: Key('gesture1')),
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 IndexedStack(
                   index: index,
@@ -107,11 +107,11 @@ class _PersonTrackerState extends State<PersonTracker> {
     return Container(
       key: Key(widget.name),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 239, 248, 255),
-        border: Border.all(color: const Color.fromARGB(255, 54, 60, 244)),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        color: const .fromARGB(255, 239, 248, 255),
+        border: .all(color: const .fromARGB(255, 54, 60, 244)),
+        borderRadius: const .all(Radius.circular(10)),
       ),
-      padding: const EdgeInsets.all(16.0),
+      padding: const .all(16.0),
       child: Column(
         children: <Widget>[
           Text('Name: ${widget.name}'),
