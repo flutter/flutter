@@ -704,11 +704,11 @@ class WebReleaseBundle extends Target {
     final File fontManifestFile = environment.outputDir
         .childDirectory('assets')
         .childFile(_kFontManifestJsonFile);
-    final List<dynamic> manifestJson = fontManifestFile.existsSync()
-        ? (jsonDecode(fontManifestFile.readAsStringSync()) as List<dynamic>)
-        : <dynamic>[];
+    final List<Object?> manifestJson = fontManifestFile.existsSync()
+        ? (jsonDecode(fontManifestFile.readAsStringSync()) as List<Object?>)
+        : <Object?>[];
 
-    final bool hasRobotoFamily = manifestJson.any((dynamic entry) {
+    final bool hasRobotoFamily = manifestJson.any((Object? entry) {
       return entry is Map<String, dynamic> && entry['family'] == _kBundledFallbackRobotoFamily;
     });
     if (hasRobotoFamily) {
