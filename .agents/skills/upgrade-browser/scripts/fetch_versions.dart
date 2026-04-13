@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -22,7 +26,9 @@ Future<Map<String, dynamic>?> getJson(String url) async {
 }
 
 Future<String?> fetchChromeLatest() async {
-  final data = await getJson('https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json');
+  final data = await getJson(
+    'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json',
+  );
   if (data case {'channels': {'Stable': {'version': String version}}}) {
     return version;
   }
@@ -38,7 +44,9 @@ Future<String?> fetchFirefoxLatest() async {
 }
 
 Future<bool> verifyChromeVersion(String version) async {
-  final data = await getJson('https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json');
+  final data = await getJson(
+    'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions.json',
+  );
   if (data case {'versions': List versions}) {
     return versions.any((v) => v is Map && v['version'] == version);
   }
@@ -46,11 +54,15 @@ Future<bool> verifyChromeVersion(String version) async {
 }
 
 Future<bool> verifyFirefoxVersion(String version) async {
-  final majorReleases = await getJson('https://product-details.mozilla.org/1.0/firefox_history_major_releases.json');
+  final majorReleases = await getJson(
+    'https://product-details.mozilla.org/1.0/firefox_history_major_releases.json',
+  );
   if (majorReleases != null && majorReleases.keys.contains(version)) {
     return true;
   }
-  final stabilityReleases = await getJson('https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json');
+  final stabilityReleases = await getJson(
+    'https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json',
+  );
   if (stabilityReleases != null && stabilityReleases.keys.contains(version)) {
     return true;
   }
@@ -74,10 +86,7 @@ void main(List<String> args) async {
     } else if (target == 'firefox') {
       print(await fetchFirefoxLatest());
     } else {
-      final versions = {
-        'chrome': await fetchChromeLatest(),
-        'firefox': await fetchFirefoxLatest(),
-      };
+      final versions = {'chrome': await fetchChromeLatest(), 'firefox': await fetchFirefoxLatest()};
       print(json.encode(versions));
     }
   } else if (cmd == 'verify') {
