@@ -40,6 +40,8 @@ workspace:
   - dev/integration_tests/link_hook
   - dev/integration_tests/new_gallery
   - dev/integration_tests/platform_interaction
+  - dev/integration_tests/record_use_test_app
+  - dev/integration_tests/record_use_test_package
   - dev/integration_tests/release_smoke_test
   - dev/integration_tests/spell_check
   - dev/integration_tests/ui
@@ -120,6 +122,7 @@ dependencies:
   googleapis_auth: 2.0.0
   hooks: 1.0.2
   data_assets: 0.19.6
+  record_use: 0.6.0
   html: 0.15.6
   http: 1.6.0
   http_multi_server: 3.2.2
@@ -220,4 +223,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 60o3ev
+# PUBSPEC CHECKSUM: vd5srp
