@@ -1616,6 +1616,7 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -1635,12 +1636,57 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `forceNdkDownload skips when project has a preprovisioned ndk property`() {
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.cmake
+        } returns mockCmakeOptions
+        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_PREPROVISIONED_NDK_VERSION) } returns "29.0.13846066"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload skips when invoking the ndk metadata task`() {
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .externalNativeBuild.cmake
+        } returns mockCmakeOptions
+        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_PREPROVISIONED_NDK_VERSION) } returns null
+        every { project.gradle.startParameter.taskNames } returns listOf(FlutterPluginUtils.TASK_PRINT_NDK_VERSION)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockk(relaxed = true)
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
     fun `forceNdkDownload sets externalNativeBuild properties`() {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
         val mockDirectory = mockk<Directory>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -1681,6 +1727,29 @@ class FlutterPluginUtilsTest {
                 "--no-warn-unused-cli",
                 "-DCMAKE_BUILD_TYPE=Debug"
             )
+        }
+    }
+
+    @Test
+    fun `addTaskForPrintNdkVersion adds task for printing ndk version`() {
+        val project = mockk<Project>()
+        val androidExtension = mockk<ApplicationExtension>()
+        every { androidExtension.ndkVersion } returns "29.0.13846066"
+        every { project.extensions.getByType(ApplicationExtension::class.java) } returns androidExtension
+        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
+        val captureSlot = slot<Action<Task>>()
+
+        FlutterPluginUtils.addTaskForPrintNdkVersion(project)
+
+        verify { project.tasks.register("printNdkVersion", capture(captureSlot)) }
+        val mockTask = mockk<Task>()
+        every { mockTask.description = any() } returns Unit
+        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
+
+        captureSlot.captured.execute(mockTask)
+
+        verify {
+            mockTask.description = "Prints out the configured ndkVersion for this Android project"
         }
     }
 
