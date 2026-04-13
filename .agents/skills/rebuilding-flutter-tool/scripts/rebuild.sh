@@ -10,4 +10,4 @@ set -e
 # To be run from its own directory
 rm -f ../../../../bin/cache/flutter_tools.snapshot
 rm -f ../../../../bin/cache/flutter_tools.stamp
-flutter help # Triggers the rebuild by executing a flutter command
+../../../../bin/flutter help # Triggers the rebuild by executing a flutter command
