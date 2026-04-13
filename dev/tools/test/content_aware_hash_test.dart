@@ -211,6 +211,56 @@ void main() {
     expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
 
+  test('prefers newer merge-base when main is newer than master', () {
+    initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'master');
+    writeFileAndCommit(testRoot.deps, 'deps on master');
+    // Branch main from master (so it includes master's history).
+    run('git', <String>['checkout', '-b', 'main']);
+    writeFileAndCommit(testRoot.deps, 'deps on main');
+    run('git', <String>['fetch', 'upstream']);
+
+    // Checkout feature branch from main.
+    run('git', <String>['checkout', '-b', 'feature']);
+    writeFileAndCommit(testRoot.deps, 'deps on feature');
+
+    run('git', <String>['checkout', 'main']);
+    final String hashMain = (runContentAwareHash().stdout as String).trim();
+    run('git', <String>['checkout', 'master']);
+    final String hashMaster = (runContentAwareHash().stdout as String).trim();
+    expect(hashMain, isNot(equals(hashMaster)));
+
+    run('git', <String>['checkout', 'feature']);
+    final String hashFeature = (runContentAwareHash().stdout as String).trim();
+
+    // It should pick main.
+    expect(hashFeature, equals(hashMain));
+  });
+
+  test('prefers newer merge-base when master is newer than main', () {
+    initGitRepoWithBlankInitialCommit(remote: 'upstream', branch: 'main');
+    writeFileAndCommit(testRoot.deps, 'deps on main');
+    // Branch master from main (so it includes main's history).
+    run('git', <String>['checkout', '-b', 'master']);
+    writeFileAndCommit(testRoot.deps, 'deps on master');
+    run('git', <String>['fetch', 'upstream']);
+
+    // Checkout feature branch from master.
+    run('git', <String>['checkout', '-b', 'feature']);
+    writeFileAndCommit(testRoot.deps, 'deps on feature');
+
+    run('git', <String>['checkout', 'main']);
+    final String hashMain = (runContentAwareHash().stdout as String).trim();
+    run('git', <String>['checkout', 'master']);
+    final String hashMaster = (runContentAwareHash().stdout as String).trim();
+    expect(hashMain, isNot(equals(hashMaster)));
+
+    run('git', <String>['checkout', 'feature']);
+    final String hashFeature = (runContentAwareHash().stdout as String).trim();
+
+    // It should pick master.
+    expect(hashFeature, equals(hashMaster));
+  });
+
   test('generates a hash for upstream/main', () {
     initGitRepoWithBlankInitialCommit(branch: 'main');
     expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));

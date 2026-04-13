@@ -54,10 +54,22 @@ if [[ "$CURRENT_BRANCH" != "main" && \
     REMOTE="upstream"
   fi
 
-  # Try to find the merge-base with master, then main.
-  MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
-  if [[ -z "$MERGEBASE" ]]; then
-    MERGEBASE=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
+  # Find the most recent merge base.
+  MB_MASTER=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/master" 2>/dev/null || true)
+  MB_MAIN=$(git -C "$FLUTTER_ROOT" merge-base HEAD "$REMOTE/main" 2>/dev/null || true)
+
+  if [[ -n "$MB_MASTER" && -n "$MB_MAIN" ]]; then
+    if git -C "$FLUTTER_ROOT" merge-base --is-ancestor "$MB_MASTER" "$MB_MAIN" 2>/dev/null; then
+      # MB_MAIN is newer than MB_MASTER
+      MERGEBASE="$MB_MAIN"
+    else
+      # MB_MASTER is newer or they are the same
+      MERGEBASE="$MB_MASTER"
+    fi
+  elif [[ -n "$MB_MASTER" ]]; then
+    MERGEBASE="$MB_MASTER"
+  else
+    MERGEBASE="$MB_MAIN"
   fi
 
   if [[ -n "$MERGEBASE" ]]; then
