@@ -203,6 +203,9 @@ TEST(MockWindow, SysKeyDown) {
 TEST(MockWindow, SysKeyUp) {
   MockWindow window;
   EXPECT_CALL(window, OnKey(_, _, _, _, _, _, _)).Times(1);
+  // Prevent default proc for WM_SYSKEYUP which unfocuses the window and sends
+  // WM_MOUSELEAVE.
+  EXPECT_CALL(window, Win32DefWindowProc(_, _, _, _)).Times(0);
   LPARAM lparam = CreateKeyEventLparam(42, false, true);
   // send a "Shift" key up event.
   window.InjectWindowMessage(WM_SYSKEYUP, 16, lparam);

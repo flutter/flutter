@@ -38,13 +38,12 @@ class IOSCoreDeviceLauncher {
     required XcodeDebug xcodeDebug,
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
-    required Xcode xcode,
     @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
        _xcodeDebug = xcodeDebug,
        _fileSystem = fileSystem,
-       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils, xcode: xcode);
+       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils);
 
   final IOSCoreDeviceControl _coreDeviceControl;
   final Logger _logger;

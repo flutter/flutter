@@ -545,6 +545,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isDartDataAssetsEnabled = false,
+    this.isRecordUseEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
@@ -588,6 +589,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isDartDataAssetsEnabled;
 
   @override
+  final bool isRecordUseEnabled;
+
+  @override
   final bool isSwiftPackageManagerEnabled;
 
   @override
@@ -628,6 +632,7 @@ class TestFeatureFlags implements FeatureFlags {
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
+      recordUse => isRecordUseEnabled,
       _ => false,
     };
   }
@@ -645,6 +650,7 @@ class TestFeatureFlags implements FeatureFlags {
     cliAnimation,
     dartDataAssets,
     nativeAssets,
+    recordUse,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,

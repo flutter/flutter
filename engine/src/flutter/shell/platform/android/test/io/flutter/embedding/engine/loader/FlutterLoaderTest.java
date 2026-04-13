@@ -757,7 +757,7 @@ public class FlutterLoaderTest {
   public void itSetsEnableSoftwareRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableSoftwareRendering",
-        null,
+        true,
         "--enable-software-rendering");
   }
 
@@ -784,7 +784,7 @@ public class FlutterLoaderTest {
   public void itSetsSkiaDeterministicRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.SkiaDeterministicRendering",
-        null,
+        true,
         "--skia-deterministic-rendering");
   }
 
@@ -914,7 +914,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsUseTestFontsFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.UseTestFonts", null, "--use-test-fonts");
+        "io.flutter.embedding.android.UseTestFonts", true, "--use-test-fonts");
   }
 
   @Test
@@ -929,7 +929,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsEnableVulkanValidationFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanValidation", null, "--enable-vulkan-validation");
+        "io.flutter.embedding.android.EnableVulkanValidation", true, "--enable-vulkan-validation");
   }
 
   @Test
@@ -944,64 +944,64 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsTraceStartupFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceStartup", null, "--trace-startup");
+        "io.flutter.embedding.android.TraceStartup", true, "--trace-startup");
   }
 
   @Test
   public void itSetsStartPausedFromMetadata() {
-    testFlagFromMetadataPresent("io.flutter.embedding.android.StartPaused", null, "--start-paused");
+    testFlagFromMetadataPresent("io.flutter.embedding.android.StartPaused", true, "--start-paused");
   }
 
   @Test
   public void itSetsDisableServiceAuthCodesFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.DisableServiceAuthCodes",
-        null,
+        true,
         "--disable-service-auth-codes");
   }
 
   @Test
   public void itSetsEndlessTraceBufferFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EndlessTraceBuffer", null, "--endless-trace-buffer");
+        "io.flutter.embedding.android.EndlessTraceBuffer", true, "--endless-trace-buffer");
   }
 
   @Test
   public void itSetsEnableDartProfilingFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableDartProfiling", null, "--enable-dart-profiling");
+        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableDartProfiling", null, "--enable-dart-profiling");
+        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
   }
 
   @Test
   public void itSetsProfileStartupFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
+        "io.flutter.embedding.android.ProfileStartup", true, "--profile-startup");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ProfileStartup", null, "--profile-startup");
+        "io.flutter.embedding.android.ProfileStartup", true, "--profile-startup");
   }
 
   @Test
   public void itSetsMergedPlatformUiThread() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread", null, "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread", true, "--merged-platform-ui-thread");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.MergedPlatformUIThread", null, "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread", true, "--merged-platform-ui-thread");
   }
 
   @Test
   public void itSetsTraceSkiaFromMetadata() {
-    testFlagFromMetadataPresent("io.flutter.embedding.android.TraceSkia", null, "--trace-skia");
+    testFlagFromMetadataPresent("io.flutter.embedding.android.TraceSkia", true, "--trace-skia");
   }
 
   @Test
@@ -1016,7 +1016,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsTraceSystraceFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceSystrace", null, "--trace-systrace");
+        "io.flutter.embedding.android.TraceSystrace", true, "--trace-systrace");
   }
 
   @Test
@@ -1031,27 +1031,27 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsProfileMicrotasksFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ProfileMicrotasks", null, "--profile-microtasks");
+        "io.flutter.embedding.android.ProfileMicrotasks", true, "--profile-microtasks");
   }
 
   @Test
   public void itSetsDumpSkpOnShaderCompilationFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.DumpSkpOnShaderCompilation",
-        null,
+        true,
         "--dump-skp-on-shader-compilation");
   }
 
   @Test
   public void itSetsPurgePersistentCacheFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.PurgePersistentCache", null, "--purge-persistent-cache");
+        "io.flutter.embedding.android.PurgePersistentCache", true, "--purge-persistent-cache");
   }
 
   @Test
   public void itSetsVerboseLoggingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.VerboseLogging", null, "--verbose-logging");
+        "io.flutter.embedding.android.VerboseLogging", true, "--verbose-logging");
   }
 
   @Test
@@ -1110,6 +1110,19 @@ public class FlutterLoaderTest {
   public void itSetsEnableVulkanGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableVulkanGPUTracing", true, "--enable-vulkan-gpu-tracing");
+  }
+
+  @Test
+  public void itDoesNotSetBooleanFlagWithMalformedOrMissingValue() {
+    // A key present with a non-boolean string value should NOT enable the flag.
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableVulkanValidation",
+        "Fasle",
+        "--enable-vulkan-validation");
+
+    // A key present with a null value should NOT enable the flag.
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.EnableVulkanValidation", null, "--enable-vulkan-validation");
   }
 
   @Test
