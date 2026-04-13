@@ -107,8 +107,11 @@ LRESULT HostWindowDialog::HandleMessage(HWND hwnd,
       // Forward the message to Dart before handling it on the C++ side.
       // This ensures that Dart-side handlers (e.g. popup dismiss logic)
       // can observe activation changes caused by dialog windows.
-      engine_->window_proc_delegate_manager()->OnTopLevelWindowProc(
-          window_handle_, message, wparam, lparam);
+      if (auto const result =
+              engine_->window_proc_delegate_manager()->OnTopLevelWindowProc(
+                  window_handle_, message, wparam, lparam)) {
+        return *result;
+      }
 
       if (LOWORD(wparam) != WA_INACTIVE) {
         // Prevent disabled window from being activated using the task

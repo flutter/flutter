@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/host_window_popup.h"
 #include <cstdio>
+#include <memory>
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "shell/platform/windows/window_manager.h"
 
@@ -95,15 +96,20 @@ void HostWindowPopup::UpdatePosition() {
   WindowRect work_area = GetWorkArea();
 
   IsolateScope scope(isolate_);
-  auto rect = get_position_callback_(
-      WindowSize{width_, height_},
-      WindowRect{parent_top_left.x, parent_top_left.y,
-                 parent_bottom_right.x - parent_top_left.x,
-                 parent_bottom_right.y - parent_top_left.y},
-      work_area);
+
+  // Frees the memory allocated by the positioner callback.
+  // Even if the callback throws an exception, the memory will be freed when
+  // rect goes out of scope.
+  std::unique_ptr<WindowRect, decltype(&free)> rect(
+      get_position_callback_(
+          WindowSize{width_, height_},
+          WindowRect{parent_top_left.x, parent_top_left.y,
+                     parent_bottom_right.x - parent_top_left.x,
+                     parent_bottom_right.y - parent_top_left.y},
+          work_area),
+      free);
   SetWindowPos(window_handle_, HWND_TOP, rect->left, rect->top, rect->width,
                rect->height, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
-  free(rect);
 
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.

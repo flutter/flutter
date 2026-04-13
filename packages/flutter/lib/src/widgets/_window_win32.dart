@@ -1000,7 +1000,6 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
     ffi.Pointer<_Rect> parentRect,
     ffi.Pointer<_Rect> outputRect,
   ) {
-    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
         .devicePixelRatio;
@@ -1021,6 +1020,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       parentRect: parentRect.ref.toRect(),
       displayRect: outputRect.ref.toRect(),
     );
+    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
     result.ref.left = targetRect.left.toInt();
     result.ref.top = targetRect.top.toInt();
     result.ref.width = targetRect.width.toInt();
@@ -1081,29 +1081,18 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       parent.rootView.viewId,
     );
 
-    // Get popup window position in screen coordinates.
-    final ffi.Pointer<_Win32Rect> popupRect = _owner.allocator<_Win32Rect>();
-    _Win32PlatformInterface.getWindowRect(popupHandle, popupRect);
-
-    // Get parent client area origin in screen coordinates.
-    final ffi.Pointer<_Win32Point> parentOrigin = _owner.allocator<_Win32Point>();
-    parentOrigin.ref.x = 0;
-    parentOrigin.ref.y = 0;
-    _Win32PlatformInterface.clientToScreen(parentHandle, parentOrigin);
-
-    // Calculate offset in physical pixels.
-    final double dx = (popupRect.ref.left - parentOrigin.ref.x).toDouble();
-    final double dy = (popupRect.ref.top - parentOrigin.ref.y).toDouble();
-
-    _owner.allocator.free(popupRect);
-    _owner.allocator.free(parentOrigin);
+    final Offset physicalOffset = _Win32PlatformInterface.getWindowOffsetFromParent(
+      _owner.allocator,
+      popupHandle,
+      parentHandle,
+    );
 
     // Convert from physical pixels to logical pixels.
     final double scale = PlatformDispatcher.instance.views
         .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
         .devicePixelRatio;
 
-    return Offset(dx / scale, dy / scale);
+    return physicalOffset / scale;
   }
 
   late final ffi.NativeCallable<_GetWindowPositionNative> _onGetWindowPosition;
@@ -1556,6 +1545,32 @@ class _Win32PlatformInterface {
 
   @ffi.Native<ffi.Bool Function(HWND, ffi.Pointer<_Win32Point>)>(symbol: 'ClientToScreen')
   external static bool clientToScreen(HWND windowHandle, ffi.Pointer<_Win32Point> point);
+
+  /// Returns the offset of [windowHandle] from the client area of
+  /// [parentHandle], in physical pixels.
+  static Offset getWindowOffsetFromParent(
+    ffi.Allocator allocator,
+    HWND windowHandle,
+    HWND parentHandle,
+  ) {
+    final ffi.Pointer<_Win32Rect> windowRect = allocator<_Win32Rect>();
+    final ffi.Pointer<_Win32Point> parentOrigin = allocator<_Win32Point>();
+    try {
+      getWindowRect(windowHandle, windowRect);
+
+      parentOrigin.ref.x = 0;
+      parentOrigin.ref.y = 0;
+      clientToScreen(parentHandle, parentOrigin);
+
+      return Offset(
+        (windowRect.ref.left - parentOrigin.ref.x).toDouble(),
+        (windowRect.ref.top - parentOrigin.ref.y).toDouble(),
+      );
+    } finally {
+      allocator.free(windowRect);
+      allocator.free(parentOrigin);
+    }
+  }
 }
 
 /// Payload for the creation method used by [_Win32PlatformInterface.createRegularWindow].
