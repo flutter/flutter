@@ -30,15 +30,20 @@ this branch. Keep it short and focused on actionable items.
 
 ## Accessibility (ATK removal)
 - [ ] Follow the dedicated plan in `docs/gtk4-accessibility-plan.md`.
-- [ ] Near-term priority 1: remove GTK4 dependency on the GTK3 accessibility
+- [ ] Align the work with `flutter/flutter#159460` as the long-term target and
+      treat `flutter/engine#52355` as prior art / an intermediate design point.
+- [ ] Near-term priority 1: keep GTK4 independent from the GTK3 accessibility
       stack in:
       - `engine/src/flutter/shell/platform/linux/fl_engine.cc`
       - `engine/src/flutter/shell/platform/linux/fl_view.cc`
       - `engine/src/flutter/shell/platform/linux/fl_accessibility_handler.*`
       - `engine/src/flutter/shell/platform/linux/fl_view_accessible.*`
       - `engine/src/flutter/shell/platform/linux/fl_accessible_*`
-- [ ] Near-term priority 2: add a minimal GTK4 accessibility bridge that
-      preserves semantics updates, even before full GTK4 accessibility parity.
+- [ ] Near-term priority 2: use GTK3 as the first validation target for the new
+      Linux accessibility architecture and keep the existing behavior/tests as
+      the baseline.
+- [ ] Near-term priority 3: keep the minimal GTK4 bridge limited to preserving
+      semantics updates until the GTK3-first migration path is proven.
 - [ ] Keep ATK-backed sources and mocks out of the GTK4 compile graph; the GTK4
       sysroot does not provide `atk/atk.h`.
 - [ ] Update ATK-based tests to GTK4-safe coverage only after the GTK4 bridge

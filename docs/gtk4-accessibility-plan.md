@@ -1,17 +1,27 @@
-# GTK4 Accessibility Plan
+# Linux Accessibility Migration Plan
 
-This document defines the GTK4 accessibility strategy for the Linux engine.
+This document defines the Linux accessibility migration strategy for the
+Flutter engine.
+
 The current Linux accessibility implementation is GTK3/ATK-based. GTK4 build
 validation has shown that this stack cannot simply be compiled forward under
 GTK4: it depends on `atk/atk.h`, `AtkPlug`/`GtkSocket`, and GTK3-era GDK APIs
 that are not present in the GTK4 sysroot or runtime model.
 
-The goal here is to make the GTK4 port technically honest:
-- GTK4 builds should not depend on GTK3 accessibility code.
-- GTK4 should eventually expose Flutter semantics through a GTK4-native
-  accessibility path.
-- Until that exists, the branch should fail gracefully rather than pretend that
-  ATK-based accessibility still works.
+The long-term target is the work described in
+`flutter/flutter#159460`: replace ATK usage with direct AT-SPI access on
+Linux. The engine already has prior art in `flutter/engine#52355`, which added
+an AT-SPI socket/plug export path. That change is relevant, but it should be
+treated as an implementation reference or intermediate step, not necessarily as
+the final architecture.
+
+The migration goals are:
+- GTK3 should be the first validation target for the new architecture.
+- GTK4 should stop depending on the GTK3 accessibility stack.
+- GTK4 should follow after the new Linux accessibility model is proven under
+  GTK3.
+- The branch should stay technically honest about what is implemented versus
+  what is still a placeholder.
 
 ## Current state
 
@@ -31,47 +41,73 @@ GTK4 currently has no equivalent implementation in this branch.
 
 ## Problem statement
 
-We need to answer two separate questions:
+We need to answer three separate questions:
 
-1. What should GTK4 do right now?
-2. What is the long-term GTK4 accessibility architecture?
+1. What is the long-term Linux accessibility architecture?
+2. How do we prove that architecture without losing current behavior?
+3. What should GTK4 do in the meantime?
 
-These cannot be solved with one build-flag change. The first is a stabilization
-task. The second is a product and engine design task.
+These cannot be solved with one build-flag change. The first is an
+architecture task. The second is a migration and testing task. The third is a
+GTK4 stabilization task.
+
+## Migration order
+
+Recommended order:
+
+1. Use GTK3 as the first implementation and validation target for the new Linux
+   accessibility architecture.
+2. Preserve existing GTK3 semantics behavior and as much of the current test
+   coverage as possible while moving away from ATK-shaped internals.
+3. Only after the model is proven under GTK3, add the GTK4 adapter.
+
+This order is preferable because GTK3 already has working behavior and an
+existing test corpus. GTK4 currently has no complete accessibility
+implementation in this branch, so designing the architecture there first gives
+less feedback and more ambiguity.
 
 ## Immediate policy
 
-Until a GTK4-native implementation exists:
-- Do not compile GTK3 accessibility sources into the GTK4 engine build.
+Until the new Linux accessibility implementation exists:
+- Keep GTK3 accessibility behavior as the baseline to compare against.
+- Do not compile GTK3 accessibility sources into the GTK4 engine build unless
+  they are explicitly part of a transitional adapter.
 - Do not instantiate GTK3 accessibility handlers from GTK4 engine startup.
 - Do not require existing ATK-based Linux unit tests to compile under GTK4.
-- Be explicit that GTK4 accessibility is currently unimplemented or partial.
+- Be explicit that GTK4 accessibility is currently partial or transitional.
 
 This keeps the branch buildable and prevents hidden GTK3 dependencies from
-leaking back into GTK4.
+leaking back into GTK4 while the larger migration is being designed.
 
 ## Target architecture
 
-The GTK4 implementation should be semantics-driven, not ATK-object-port-driven.
+The Linux accessibility implementation should be semantics-driven, not
+ATK-object-port-driven.
 
 Recommended shape:
 - Keep `flutter/accessibility` channel handling as the engine-facing entry
   point.
-- Replace the ATK view/object tree with a GTK4 accessibility bridge owned by
-  the view.
-- Map Flutter semantics updates onto GTK4 accessibility roles, states,
-  properties, relations, and announcements.
+- Introduce a platform-neutral internal semantics model owned by the Linux
+  embedder.
+- Add platform adapters on top of that model rather than embedding ATK object
+  design into the semantics core.
+- Map Flutter semantics updates onto Linux accessibility roles, states,
+  properties, relations, actions, and announcements through those adapters.
 - Keep the Linux embedder’s public API stable where possible; avoid exporting
-  GTK4 accessibility internals as part of the public `flutter_linux` surface.
+  Linux accessibility internals as part of the public `flutter_linux` surface.
 
-That implies a new GTK4 path rather than a direct port of:
+That implies a new Linux accessibility path rather than a direct port of:
 - `FlViewAccessible`
 - `FlAccessibleNode`
 - `FlAccessibleTextField`
 
+For GTK3, the new adapter may temporarily reuse concepts from the existing
+socket/plug integration or from `engine#52355`, but the semantics core should
+not be shaped around ATK-only concepts.
+
 ## Proposed phases
 
-### Phase 0: Stabilize the build
+### Phase 0: Stabilize GTK4 and isolate the old stack
 
 Goal: GTK4 compiles without pulling GTK3 accessibility code into the graph.
 
@@ -89,7 +125,51 @@ Exit criteria:
 - `ninja -C engine/src/out/host_debug_unopt build.ninja.stamp` succeeds.
 - Focused GTK4 Linux engine build gets past accessibility source/link errors.
 
-### Phase 1: Define a GTK4 accessibility bridge
+### Phase 1: Define the Linux accessibility abstraction
+
+Goal: establish the replacement ownership model before doing the platform port.
+
+Deliverables:
+- A semantics-owned Linux accessibility layer under
+  `engine/src/flutter/shell/platform/linux/`.
+- A clear split between:
+  - accessibility channel handling
+  - semantics state retention
+  - platform adapter responsibilities
+  - announcements / live-region behavior
+- A documented relationship between:
+  - current ATK-based GTK3 implementation
+  - `engine#52355` AT-SPI socket/plug work
+  - `flutter#159460` direct AT-SPI target
+
+Open design question:
+- Is the first non-ATK validation target:
+  - a socket/plug-based AT-SPI export path, or
+  - direct AT-SPI/D-Bus exposure?
+
+Recommendation:
+- Decide this explicitly before expanding GTK4 work. Do not let the branch
+  drift into a hybrid model accidentally.
+
+### Phase 2: Implement and validate GTK3 first
+
+Goal: prove the new Linux accessibility model against the platform that already
+has working behavior and tests.
+
+Required capabilities:
+- Preserve current semantics update flow.
+- Preserve current announcement behavior.
+- Preserve current text and selection behavior where feasible.
+- Keep existing GTK3 accessibility tests passing, updating them only where they
+  are coupled to ATK internals rather than observable behavior.
+
+Files likely affected:
+- `engine/src/flutter/shell/platform/linux/fl_accessibility_handler.*`
+- `engine/src/flutter/shell/platform/linux/fl_view.cc`
+- `engine/src/flutter/shell/platform/linux/fl_engine.cc`
+- current GTK3 accessibility implementation files
+
+### Phase 3: Add the GTK4 adapter
 
 Goal: establish the replacement ownership model.
 
@@ -114,9 +194,10 @@ Recommendation:
   incremental and view-scoped; retaining state will make announcements, child
   updates, and text selection behavior more tractable.
 
-### Phase 2: Semantics mapping
+### Phase 4: Semantics mapping
 
-Goal: implement a minimum viable semantics-to-GTK4 translation.
+Goal: implement a minimum viable semantics-to-platform translation, then finish
+the GTK4 adapter.
 
 Required capabilities:
 - Root object creation for each `FlView`.
@@ -132,12 +213,13 @@ Required capabilities:
 - Geometry updates sufficient for screen-reader hit testing.
 
 Files likely affected:
-- new GTK4 accessibility bridge files
+- Linux accessibility abstraction files
+- GTK4 accessibility bridge files
 - `engine/src/flutter/shell/platform/linux/fl_view.cc`
 - `engine/src/flutter/shell/platform/linux/fl_engine.cc`
 - `engine/src/flutter/shell/platform/linux/fl_accessibility_handler.*`
 
-### Phase 3: Text and announcements
+### Phase 5: Text and announcements
 
 Goal: cover the semantics that were previously handled by
 `FlAccessibleTextField` and `FlAccessibilityHandler`.
@@ -151,28 +233,33 @@ Required capabilities:
 This phase should explicitly document any behavior that cannot be represented
 1:1 from the ATK implementation.
 
-### Phase 4: Tests and CI
+### Phase 6: Tests and CI
 
-Goal: add GTK4-specific validation instead of trying to reuse all GTK3 tests.
+Goal: validate the migration in the right order instead of treating GTK4 as the
+first proof point.
 
 Required changes:
-- Add GTK4-safe mocks to
-  `engine/src/flutter/shell/platform/linux/testing/mock_gtk.*`.
+- Preserve and adapt GTK3 accessibility tests first.
+- Add GTK4-safe mocks to `engine/src/flutter/shell/platform/linux/testing/mock_gtk.*`.
 - Split tests into:
-  - GTK3-only accessibility tests
+  - GTK3 baseline accessibility tests
   - GTK4-safe engine tests
   - GTK4 accessibility bridge tests
 - Add CI validation that at minimum:
+  - exercises the GTK3 migration path
   - regenerates GN with `use_gtk4=true`
   - builds `libflutter_linux_gtk.so`
   - runs GTK4-safe Linux tests
 
 Do not block GTK4 on porting every ATK test verbatim. Some current tests are
-proving GTK3 implementation details, not the GTK4 contract we actually need.
+proving GTK3 implementation details, not the cross-platform Linux
+accessibility contract we actually need.
 
 ## Interim implementation rules
 
-Until the GTK4 bridge exists:
+Until the new Linux accessibility model exists:
+- No new migration code should deepen ATK coupling unless it is explicitly part
+  of the GTK3 transitional adapter.
 - No new GTK4 code should include `atk/atk.h`.
 - No new GTK4 code should depend on `FlViewAccessible`, `FlAccessibleNode`, or
   `FlAccessibleTextField`.
@@ -183,21 +270,23 @@ Until the GTK4 bridge exists:
 
 ## Concrete next steps
 
-1. Finish removing unconditional GTK3 accessibility wiring from GTK4 engine
-   startup and view setup.
-2. Decide the temporary GTK4 behavior:
-   document accessibility as unimplemented, or add a no-op bridge with clear
-   TODOs.
-3. Introduce a GTK4 accessibility bridge skeleton with owned files and type
-   names, even before feature-complete behavior lands.
-4. Add one focused GTK4 build validation command to CI for the Linux engine.
-5. Add one focused GTK4 accessibility design test once the skeleton exists.
+1. Decide whether the first migration target is the `engine#52355`
+   socket/plug model or direct AT-SPI/D-Bus.
+2. Convert this plan into a Linux-wide accessibility plan of record, with GTK3
+   first and GTK4 second.
+3. Use GTK3 to validate the new accessibility abstraction while preserving
+   current semantics behavior and tests.
+4. Keep GTK4 isolated from GTK3 accessibility code during that work.
+5. Once GTK3 behavior is proven, port GTK4 onto the same abstraction.
 
-## Non-goals for the first GTK4 accessibility pass
+## Non-goals for the first migration pass
 
 - Perfect parity with every ATK role and state.
-- Porting all GTK3 accessibility tests unchanged.
-- Preserving the exact `AtkPlug`/`GtkSocket` model under GTK4.
+- Designing the final Linux accessibility architecture around GTK4-only needs.
+- Porting all GTK3 accessibility tests unchanged if they are ATK-internal
+  rather than behavior-based.
+- Assuming `engine#52355` and `flutter#159460` are identical tasks.
 
-The first pass should optimize for correctness of architecture and clear
-forward progress, not for superficial parity with the GTK3 implementation.
+The first pass should optimize for correctness of architecture, preservation of
+GTK3 behavior, and a clean path to GTK4, not for superficial parity with the
+existing ATK object model.
