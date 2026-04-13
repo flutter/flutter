@@ -450,7 +450,20 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final String optionsHint = resultsAvailable
         ? localizations.searchResultsFound
         : localizations.noResultsFound;
-    SemanticsService.sendAnnouncement(View.of(context), optionsHint, localizations.textDirection);
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      optionsHint,
+      localizations.textDirection,
+    ).catchError((Object exception, StackTrace stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while sending semantics announcement'),
+        ),
+      );
+    });
   }
 
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
@@ -516,6 +529,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
+    _lastFieldText = selectionString;
     widget.onSelected?.call(nextSelection);
     if (_optionsViewController.isShowing) {
       _optionsViewController.hide(); // Close the options view after a selection is made.

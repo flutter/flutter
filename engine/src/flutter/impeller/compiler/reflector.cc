@@ -32,7 +32,7 @@
 namespace impeller {
 namespace compiler {
 
-static std::string ExecutionModelToString(spv::ExecutionModel model) {
+static std::string ExecutionModelToStringName(spv::ExecutionModel model) {
   switch (model) {
     case spv::ExecutionModel::ExecutionModelVertex:
       return "vertex";
@@ -151,7 +151,7 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   {
     root["entrypoint"] = options_.entry_point_name;
     root["shader_name"] = options_.shader_name;
-    root["shader_stage"] = ExecutionModelToString(execution_model);
+    root["shader_stage"] = ExecutionModelToStringName(execution_model);
     root["header_file_name"] = options_.header_file_name;
   }
 

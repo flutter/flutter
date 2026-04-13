@@ -3480,6 +3480,23 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('NestedScrollView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: NestedScrollView(
+              headerSliverBuilder: (_, _) => [const SliverToBoxAdapter(child: Text('Y'))],
+              body: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(NestedScrollView)), Size.zero);
+  });
 }
 
 double appBarHeight(WidgetTester tester) =>

@@ -37,7 +37,7 @@ class TooltipSample extends StatelessWidget {
         children: <InlineSpan>[
           TextSpan(
             text: 'I am another span of this rich tooltip',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: .bold),
           ),
         ],
       ),

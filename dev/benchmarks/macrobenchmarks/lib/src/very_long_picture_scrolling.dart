@@ -24,6 +24,7 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -52,9 +53,8 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
         ],
       ),
       backgroundColor: Colors.transparent,
-      body: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
+      body: SizedBox.fromSize(
+        size: size,
         child: useList
             ? ListView.builder(
                 key: const ValueKey<String>('vlp_list_view_scrollable'),
@@ -74,8 +74,8 @@ class VeryLongPictureScrollingPerfState extends State<VeryLongPictureScrollingPe
                 key: const ValueKey<String>('vlp_single_child_scrollable'),
                 scrollDirection: Axis.horizontal,
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 20,
-                  height: MediaQuery.of(context).size.height,
+                  width: size.width * 20,
+                  height: size.height,
                   child: RepaintBoundary(
                     child: CustomPaint(
                       isComplex: true,

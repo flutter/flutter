@@ -48,9 +48,11 @@ class Context {
     final TargetPlatform platform = parsePlatform(platformName);
     switch (subCommand) {
       case 'build':
-        buildApp(platform);
+        buildApp(platform, 'build');
       case 'prepare':
         unpackFor(platform, 'prepare');
+      case 'build-add-to-app':
+        buildForNativeApp(platform);
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
@@ -73,6 +75,7 @@ class Context {
       case 'thin':
       case 'embed':
       case 'embed_and_thin':
+      case 'build-add-to-app':
       case 'test_vm_service_bonjour_service':
         return command;
       default:
@@ -222,6 +225,10 @@ class Context {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+
+    // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+    // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
+
     final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])
         ?.toLowerCase();
 
@@ -269,6 +276,14 @@ class Context {
     ]);
   }
 
+  /// Call `flutter assemble` from a build script in a native app (add-to-app).
+  /// After building the App.framework, embed it and the Flutter framework into the app.
+  /// This does a combination of the `build` and `embed_and_thin` commands in a single build script.
+  void buildForNativeApp(TargetPlatform platform) {
+    buildApp(platform, 'build-add-to-app');
+    embedFlutterFrameworks(platform);
+  }
+
   /// Embeds the App.framework, Flutter/FlutterMacOS.framework, and any native
   /// asset frameworks into the app.
   ///
@@ -296,6 +311,8 @@ class Context {
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type-specific build.
     switch (platform) {
+      // NOTE: If you modify the rsync logic here, you should likely also update the equivalent implementation in
+      // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
       case TargetPlatform.ios:
         runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
       case TargetPlatform.macos:
@@ -385,6 +402,8 @@ class Context {
   }
 
   void _codesignFramework(String expandedCodeSignIdentity, String frameworkPath) {
+    // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+    // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
     runSync('codesign', <String>[
       '--force',
       '--verbose',
@@ -517,7 +536,7 @@ class Context {
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
   /// (e.g. `debug_ios_bundle_flutter_assets`, `debug_macos_bundle_flutter_assets`)
-  void buildApp(TargetPlatform platform) {
+  void buildApp(TargetPlatform platform, String command) {
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
@@ -525,7 +544,7 @@ class Context {
     final String buildMode = parseFlutterBuildMode();
 
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
-      command: 'build',
+      command: command,
       buildMode: buildMode,
       sourceRoot: sourceRoot,
       platform: platform,

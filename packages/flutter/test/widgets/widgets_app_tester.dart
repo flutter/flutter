@@ -48,6 +48,23 @@ import 'package:flutter/widgets.dart';
 ///   await tester.pumpAndSettle();
 /// });
 /// ```
+///
+/// For tests that need full control over route generation:
+/// ```dart
+/// testWidgets('custom route test', (WidgetTester tester) async {
+///   await tester.pumpWidget(
+///     TestWidgetsApp(
+///       initialRoute: '/',
+///       onGenerateRoute: (RouteSettings settings) {
+///         return PageRouteBuilder<void>(
+///           settings: settings,
+///           pageBuilder: (_, __, ___) => const Text('Generated'),
+///         );
+///       },
+///     ),
+///   );
+/// });
+/// ```
 // TODO(rkishan516): Move this to flutter_test package.
 // Tracking issue: https://github.com/flutter/flutter/issues/181283
 class TestWidgetsApp extends StatelessWidget {
@@ -57,8 +74,10 @@ class TestWidgetsApp extends StatelessWidget {
     this.navigatorKey,
     this.home,
     this.initialRoute,
+    this.onGenerateRoute,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
+    this.textStyle,
     this.pageRouteBuilder = _defaultPageRouteBuilder,
     this.builder,
     this.shortcuts,
@@ -105,6 +124,19 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.initialRoute], the equivalent property in [WidgetsApp].
   final String? initialRoute;
 
+  /// The route generator callback used when the app is navigated to a named
+  /// route.
+  ///
+  /// This callback is used if [routes] and [home] do not contain the requested
+  /// route.
+  ///
+  /// The [pageRouteBuilder] is not used for routes created by this callback.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
+  final RouteFactory? onGenerateRoute;
+
   /// The application's top-level routing table.
   ///
   /// Maps route names to widget builders. When navigating to a named route,
@@ -133,6 +165,12 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.color], the equivalent property in [WidgetsApp].
   final Color color;
+
+  /// The default text style for [Text] widgets in the app.
+  ///
+  /// Passed directly to [WidgetsApp.textStyle], which wraps the widget tree
+  /// in a [DefaultTextStyle].
+  final TextStyle? textStyle;
 
   /// A function that creates page routes for named navigation.
   ///
@@ -223,9 +261,11 @@ class TestWidgetsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: color,
+      textStyle: textStyle,
       navigatorKey: navigatorKey,
       home: home,
       initialRoute: initialRoute,
+      onGenerateRoute: onGenerateRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,
       builder: builder,

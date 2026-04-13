@@ -9,15 +9,24 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
+import 'test_page_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kBlue = Color(0xFF0000FF);
+  const kGreen = Color(0xFF00FF00);
+  const kRed = Color(0xFFFF0000);
+  const kOrange = Color(0xFFFF8C00);
+  const kPurple = Color(0xFF800080);
+  const kYellow = Color(0xFFFFFF00);
+
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     var finderCalled = false;
@@ -102,6 +111,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
+    // and https://github.com/flutter/flutter/issues/6537
     final controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
 
@@ -123,13 +133,14 @@ void main() {
 
     // The pageView have a zero viewport, so nothing display.
     await tester.pumpWidget(build(Size.zero));
+    expect(tester.getSize(find.byType(PageView)), Size.zero);
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
 
     // Change the page through the page controller when zero viewport
     controller.animateToPage(
       kStates.indexOf('Iowa'),
-      duration: kTabScrollDuration,
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
     expect(controller.page, kStates.indexOf('Iowa'));
@@ -201,7 +212,7 @@ void main() {
               onTap: () {
                 log.add(state);
               },
-              child: Container(height: 200.0, color: const Color(0xFF0000FF), child: Text(state)),
+              child: Container(height: 200.0, color: kBlue, child: Text(state)),
             );
           }).toList(),
         ),
@@ -256,10 +267,10 @@ void main() {
     'PageView does not squish when overscrolled',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: PageView(
             children: List<Widget>.generate(10, (int i) {
-              return Container(key: ValueKey<int>(i), color: const Color(0xFF0000FF));
+              return Container(key: ValueKey<int>(i), color: kBlue);
             }),
           ),
         ),
@@ -585,7 +596,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -690,7 +701,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -733,7 +744,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -762,7 +773,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -802,7 +813,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(index.toString()),
             );
           },
@@ -1243,19 +1254,33 @@ void main() {
 
     const pixel6EmulatorWidth = 411.42857142857144;
 
+    const errorTextStyle = TextStyle(
+      color: Color(0xD0FF0000),
+      fontFamily: 'monospace',
+      fontSize: 48.0,
+      fontWeight: FontWeight.w900,
+      decoration: TextDecoration.underline,
+      decorationColor: Color(0xFFFFFF00),
+      decorationStyle: TextDecorationStyle.double,
+    );
+
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: SizedBox(
-            width: pixel6EmulatorWidth,
-            child: PageView(
-              controller: controller,
-              physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
-              children: const <Widget>[
-                Center(child: Text('First Page')),
-                Center(child: Text('Second Page')),
-                Center(child: Text('Third Page')),
-              ],
+      TestWidgetsApp(
+        textStyle: errorTextStyle,
+        home: ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+          child: Center(
+            child: SizedBox(
+              width: pixel6EmulatorWidth,
+              child: PageView(
+                controller: controller,
+                physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+                children: const <Widget>[
+                  Center(child: Text('First Page')),
+                  Center(child: Text('Second Page')),
+                  Center(child: Text('Third Page')),
+                ],
+              ),
             ),
           ),
         ),
@@ -1285,7 +1310,7 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: PageView(
             controller: controller,
@@ -1315,17 +1340,15 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     Widget createPageView(PageController? controller) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            key: key,
-            controller: controller,
-            children: const <Widget>[
-              Center(child: Text('0')),
-              Center(child: Text('1')),
-              Center(child: Text('2')),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: PageView(
+          key: key,
+          controller: controller,
+          children: const <Widget>[
+            Center(child: Text('0')),
+            Center(child: Text('1')),
+            Center(child: Text('2')),
+          ],
         ),
       );
     }
@@ -1390,48 +1413,44 @@ void main() {
 
   group('Asserts in jumpToPage and animateToPage methods works properly', () {
     Widget createPageView([PageController? controller]) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            controller: controller,
-            children: <Widget>[
-              Container(color: Colors.red),
-              Container(color: Colors.green),
-              Container(color: Colors.blue),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: PageView(
+          controller: controller,
+          children: <Widget>[
+            Container(color: kRed),
+            Container(color: kGreen),
+            Container(color: kBlue),
+          ],
         ),
       );
     }
 
     group('One pageController is attached to multiple PageViews', () {
       Widget createMultiplePageViews(PageController controller) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Container(color: Colors.red),
-                      Container(color: Colors.green),
-                      Container(color: Colors.blue),
-                    ],
-                  ),
+        return TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(color: kRed),
+                    Container(color: kGreen),
+                    Container(color: kBlue),
+                  ],
                 ),
-                Expanded(
-                  child: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Container(color: Colors.orange),
-                      Container(color: Colors.purple),
-                      Container(color: Colors.yellow),
-                    ],
-                  ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(color: kOrange),
+                    Container(color: kPurple),
+                    Container(color: kYellow),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       }
@@ -1553,30 +1572,34 @@ void main() {
       late String currentPage;
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Builder(
-                        builder: (BuildContext context) {
-                          currentPage = controller.page == null ? 'null' : 'not empty';
-                          return Center(child: Text(currentPage));
-                        },
-                      ),
-                    ],
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: PageView(
+                      controller: controller,
+                      children: <Widget>[
+                        Builder(
+                          builder: (BuildContext context) {
+                            currentPage = controller.page == null ? 'null' : 'not empty';
+                            return Center(child: Text(currentPage));
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: () {
+                  GestureDetector(
+                    key: const Key('rebuild-trigger'),
+                    onTap: () {
                       setState(() {});
                     },
+                    child: const Text('Tap'),
                   ),
-                );
-              },
-            ),
+                ],
+              );
+            },
           ),
         ),
       );
@@ -1584,7 +1607,7 @@ void main() {
       expect(find.text('not empty'), findsNothing);
       expect(currentPage, 'null');
 
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.byKey(const Key('rebuild-trigger')));
       await tester.pump();
       currentPage = controller.page == null ? 'null' : 'not empty';
       expect(find.text('not empty'), findsOneWidget);
@@ -1599,25 +1622,18 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Navigator(
-            onDidRemovePage: (Page<Object?> page) {},
-            pages: <Page<void>>[
-              MaterialPage<void>(
-                child: Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: const <Widget>[
-                      Scaffold(body: Text('One')),
-                      Scaffold(body: Text('Two')),
-                    ],
-                  ),
-                ),
+      TestWidgetsApp(
+        home: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            TestPage<void>(
+              child: PageView(
+                controller: controller,
+                children: const <Widget>[Text('One'), Text('Two')],
               ),
-              const MaterialPage<void>(child: Scaffold()),
-            ],
-          ),
+            ),
+            const TestPage<void>(child: SizedBox.shrink()),
+          ],
         ),
       ),
     );
@@ -1634,25 +1650,18 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Navigator(
-            onDidRemovePage: (Page<Object?> page) {},
-            pages: <Page<void>>[
-              MaterialPage<void>(
-                child: Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: const <Widget>[
-                      Scaffold(body: Text('One')),
-                      Scaffold(body: Text('Two')),
-                    ],
-                  ),
-                ),
+      TestWidgetsApp(
+        home: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            TestPage<void>(
+              child: PageView(
+                controller: controller,
+                children: const <Widget>[Text('One'), Text('Two')],
               ),
-              const MaterialPage<void>(child: Scaffold()),
-            ],
-          ),
+            ),
+            const TestPage<void>(child: SizedBox.shrink()),
+          ],
         ),
       ),
     );
@@ -1660,4 +1669,210 @@ void main() {
     controller.animateToPage(1, duration: const Duration(milliseconds: 50), curve: Curves.bounceIn);
     expect(tester.takeException(), null);
   });
+
+  testWidgets('PageView respects scrollCacheExtent', (WidgetTester tester) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: true,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 0'), findsOneWidget);
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('PageView scrollCacheExtent defaults to allowImplicitScrolling behavior', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    Widget build({required bool allowImplicitScrolling, ScrollCacheExtent? scrollCacheExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: allowImplicitScrolling,
+          scrollCacheExtent: scrollCacheExtent,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      );
+    }
+
+    // Default (allowImplicitScrolling: false) -> scrollCacheExtent: viewport(0.0)
+    await tester.pumpWidget(build(allowImplicitScrolling: false));
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+
+    // allowImplicitScrolling: true -> scrollCacheExtent: viewport(1.0)
+    await tester.pumpWidget(build(allowImplicitScrolling: true));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('PageView updates scrollCacheExtent dynamically', (WidgetTester tester) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    Widget build({required ScrollCacheExtent scrollCacheExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: true,
+          scrollCacheExtent: scrollCacheExtent,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      );
+    }
+
+    // Start with viewport(1.0)
+    await tester.pumpWidget(build(scrollCacheExtent: const ScrollCacheExtent.viewport(1.0)));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+
+    // Update to viewport(2.0)
+    await tester.pumpWidget(build(scrollCacheExtent: const ScrollCacheExtent.viewport(2.0)));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsOneWidget);
+
+    // Update back to viewport(1.0)
+    await tester.pumpWidget(build(scrollCacheExtent: const ScrollCacheExtent.viewport(1.0)));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('PageView semantics respects allowImplicitScrolling', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    // Off-screen pages should be excluded from semantics.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(children: const <Widget>[Text('Page 1'), Text('Page 2')]),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page 2')));
+
+    // Off-screen pages should be included in semantics.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
+  });
+
+  testWidgets(
+    'PageView asserts when scrollCacheExtent and allowImplicitScrolling are inconsistent',
+    (WidgetTester tester) async {
+      // allowImplicitScrolling: true && scrollCacheExtent: 0.0
+      expect(
+        () => PageView(
+          allowImplicitScrolling: true,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+        throwsAssertionError,
+      );
+
+      // allowImplicitScrolling: false && scrollCacheExtent > 0
+      expect(
+        () => PageView(
+          scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
+  testWidgets('PageView showOnScreen scrolls when allowImplicitScrolling is true', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+    expect(targetFinder, findsOneWidget);
+
+    final RenderObject target = tester.renderObject(targetFinder);
+    target.showOnScreen();
+    await tester.pumpAndSettle();
+
+    // Should scroll.
+    expect(controller.page, 1.0);
+  });
+
+  testWidgets(
+    'PageView showOnScreen scrolling behavior is consistent with default scrollCacheExtent',
+    (WidgetTester tester) async {
+      // This test verifies that providing an explicit scrollCacheExtent behaves consistently
+      // with PageView's default behavior when allowImplicitScrolling is true.
+      final controller = PageController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView(
+            controller: controller,
+            allowImplicitScrolling: true,
+            children: const <Widget>[
+              Text('Page 1'),
+              Text('Page 2'),
+              Text('Page 3'),
+              Text('Page 4'),
+            ],
+          ),
+        ),
+      );
+
+      // Page 2 (index 1) is within the implicit cache extent.
+      final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+      expect(targetFinder, findsOneWidget);
+
+      final RenderObject target = tester.renderObject(targetFinder);
+      target.showOnScreen();
+      await tester.pumpAndSettle();
+
+      // Should scroll (existing behavior).
+      expect(controller.page, 1.0);
+    },
+  );
 }

@@ -16,12 +16,7 @@ class DlImageImpeller final : public flutter::DlImage {
  public:
   static sk_sp<DlImageImpeller> Make(
       std::shared_ptr<Texture> texture,
-      OwningContext owning_context = OwningContext::kIO
-#if FML_OS_IOS_SIMULATOR
-      ,
-      bool is_fake_image = false
-#endif  // FML_OS_IOS_SIMULATOR
-  );
+      OwningContext owning_context = OwningContext::kIO);
 
   static sk_sp<DlImageImpeller> MakeFromYUVTextures(
       AiksContext* aiks_context,
@@ -56,25 +51,12 @@ class DlImageImpeller final : public flutter::DlImage {
   // |DlImage|
   OwningContext owning_context() const override { return owning_context_; }
 
-#if FML_OS_IOS_SIMULATOR
-  // |DlImage|
-  bool IsFakeImage() const override { return is_fake_image_; }
-#endif  // FML_OS_IOS_SIMULATOR
-
  private:
   std::shared_ptr<Texture> texture_;
   OwningContext owning_context_;
-#if FML_OS_IOS_SIMULATOR
-  bool is_fake_image_ = false;
-#endif  // FML_OS_IOS_SIMULATOR
 
   explicit DlImageImpeller(std::shared_ptr<Texture> texture,
-                           OwningContext owning_context = OwningContext::kIO
-#if FML_OS_IOS_SIMULATOR
-                           ,
-                           bool is_fake_image = false
-#endif  // FML_OS_IOS_SIMULATOR
-  );
+                           OwningContext owning_context = OwningContext::kIO);
 
   DlImageImpeller(const DlImageImpeller&) = delete;
 
