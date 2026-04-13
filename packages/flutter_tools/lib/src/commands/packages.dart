@@ -350,15 +350,12 @@ class PackagesGetCommand extends FlutterCommand {
       final PubspecCache pubspecCache = await buildPubspecCache(packageConfig);
       // Process workspace root packages concurrently, capped to 64 to
       // saturate I/O without exhausting file descriptors or system resources.
-      await Pool(64)
-          .forEach<String, void>(graph.roots, (String workspaceRootName) async {
+      await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {
         final Package? rootPackage = packageConfig[workspaceRootName];
         assert(rootPackage != null);
         final Uri rootUri = rootPackage!.root;
 
-        final FlutterProject project = FlutterProject.fromDirectory(
-          globals.fs.directory(rootUri),
-        );
+        final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(rootUri));
 
         if (project.manifest.generateLocalizations) {
           final environment = Environment(

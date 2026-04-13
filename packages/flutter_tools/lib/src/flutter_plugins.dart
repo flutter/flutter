@@ -55,27 +55,24 @@ Future<PubspecCache> buildPubspecCache(
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final cache = <String, YamlMap?>{};
-  await Pool(64).forEach<Package, void>(
-    packageConfig.packages,
-    (Package package) async {
-      final key = package.root.toString();
-      final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
-      if (!pubspecFile.existsSync()) {
-        cache[key] = null;
-        return;
-      }
-      try {
-        final Object? parsed = loadYaml(await pubspecFile.readAsString());
-        cache[key] = parsed is YamlMap ? parsed : null;
-      } on YamlException catch (err) {
-        globals.printTrace('Failed to parse pubspec.yaml for ${package.name}: $err');
-        cache[key] = null;
-      } on FileSystemException catch (err) {
-        globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
-        cache[key] = null;
-      }
-    },
-  ).drain<void>();
+  await Pool(64).forEach<Package, void>(packageConfig.packages, (Package package) async {
+    final key = package.root.toString();
+    final File pubspecFile = fs.file(package.root.resolve('pubspec.yaml'));
+    if (!pubspecFile.existsSync()) {
+      cache[key] = null;
+      return;
+    }
+    try {
+      final Object? parsed = loadYaml(await pubspecFile.readAsString());
+      cache[key] = parsed is YamlMap ? parsed : null;
+    } on YamlException catch (err) {
+      globals.printTrace('Failed to parse pubspec.yaml for ${package.name}: $err');
+      cache[key] = null;
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to read pubspec.yaml for ${package.name}: $err');
+      cache[key] = null;
+    }
+  }).drain<void>();
   return cache;
 }
 
