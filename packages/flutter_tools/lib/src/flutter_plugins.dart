@@ -37,6 +37,12 @@ import 'project.dart';
 /// Pre-built once per workspace via [buildPubspecCache] and passed to
 /// [findPlugins] to avoid re-reading the same pubspec files for every
 /// workspace project during `flutter pub get`.
+///
+/// A `null` value stored under a key means the package's `pubspec.yaml` was
+/// missing or could not be parsed — i.e. "looked up, no valid pubspec". An
+/// absent key means the package was not included in the cache at all (e.g.
+/// [buildPubspecCache] was not called for it), and a file-system fallback
+/// should be used instead.
 typedef PubspecCache = Map<String, YamlMap?>;
 
 /// Builds a [PubspecCache] for all packages in [packageConfig].
@@ -106,6 +112,9 @@ Future<Plugin?> _pluginFromPackage(
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   YamlMap? pubspec;
+  // Use containsKey rather than a null check so that a cached null (meaning
+  // "pubspec.yaml is missing or unparseable") is distinguished from a cache
+  // miss (key absent), which falls back to reading the file from disk
   if (pubspecCache != null && pubspecCache.containsKey(packageRoot.toString())) {
     pubspec = pubspecCache[packageRoot.toString()];
   } else {
