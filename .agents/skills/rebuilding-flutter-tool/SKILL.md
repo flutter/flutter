@@ -14,5 +14,5 @@ You must execute the rebuild script strictly from within its own directory.
 
 ## Step 2: Verification & Error Handling
 After execution, verify the build output.
-* If the script succeeds, briefly confirm completion to the user.
+* If the script succeeds, print only "**Flutter tool rebuilt successfully!**" and then **STOP**.
 * If the script fails, provide the user with the exact error output and **STOP**.
