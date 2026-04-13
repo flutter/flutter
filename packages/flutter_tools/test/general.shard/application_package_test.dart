@@ -404,6 +404,21 @@ void main() {
       expect(data, isNotNull);
       expect(data!.androidEngineShellArgs, equals(testFlags));
     });
+
+    testWithoutContext('Parses manifest with JSON engine shell arguments specified', () async {
+      const testFlags = r'[\"--foo\",\"--bar\"]';
+      final String testManifest =
+          _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
+            testFlags,
+          );
+      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(
+        testManifest,
+        BufferLogger.test(),
+      );
+
+      expect(data, isNotNull);
+      expect(data!.androidEngineShellArgs, equals(testFlags));
+    });
   });
 
   group('PrebuiltIOSApp', () {
@@ -826,7 +841,7 @@ void main() {
         sdk.platformToolsAvailable = true;
         sdk.licensesAvailable = false;
 
-        const androidEngineShellArgs = '["--enable-impeller=true","--trace-startup","--verbose-logging"]';
+        const androidEngineShellArgs = r'[\"--enable-impeller=true\",\"--trace-startup\",\"--verbose-logging\"]';
         fakeProcessManager.addCommand(
           FakeCommand(
             command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],

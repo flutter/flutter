@@ -28,7 +28,7 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
                 <application>
                     <meta-data
                         android:name="androidEngineShellArgs"
-                        android:value="${shellArgs.get()}" />
+                        android:value="${shellArgs.get().replace("\"", "&quot;")}" />
                 </application>
             </manifest>
             """.trimIndent()

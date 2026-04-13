@@ -97,7 +97,8 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? androidEngineShellArgsFromManifest = data.androidEngineShellArgs;
     if (androidEngineShellArgsFromManifest != null && androidEngineShellArgsFromManifest.isNotEmpty) {
       try {
-        final List<dynamic> decoded = jsonDecode(androidEngineShellArgsFromManifest) as List<dynamic>;
+        final decoded =
+            jsonDecode(androidEngineShellArgsFromManifest.replaceAll(r'\"', '"')) as List<dynamic>;
         androidEngineShellArgs = decoded.cast<String>().toSet();
       } on FormatException catch (e) {
         logger.printError('Error parsing shell arguments from manifest: $e');

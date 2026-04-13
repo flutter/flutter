@@ -64,7 +64,7 @@ class GenerateEngineFlagsManifestTaskTest {
                 <application>
                     <meta-data
                         android:name="androidEngineShellArgs"
-                        android:value="$shellArg" />
+                        android:value="${shellArg.replace("\"", "&quot;")}" />
                 </application>
             </manifest>
             """.trimIndent()
@@ -89,7 +89,7 @@ class GenerateEngineFlagsManifestTaskTest {
                 <application>
                     <meta-data
                         android:name="androidEngineShellArgs"
-                        android:value="$shellArgs" />
+                        android:value="${shellArgs.replace("\"", "&quot;")}" />
                 </application>
             </manifest>
             """.trimIndent()
@@ -114,7 +114,7 @@ class GenerateEngineFlagsManifestTaskTest {
                 <application>
                     <meta-data
                         android:name="androidEngineShellArgs"
-                        android:value="$shellArgs" />
+                        android:value="${shellArgs.replace("\"", "&quot;")}" />
                 </application>
             </manifest>
             """.trimIndent()
