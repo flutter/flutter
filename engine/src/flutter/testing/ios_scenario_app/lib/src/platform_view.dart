@@ -2205,7 +2205,7 @@ void addPlatformView(
     valueString,
     ..._encodeString('create'),
     valueMap,
-    if (Platform.isIOS) 3, // 3 entries in map for iOS.
+    if (Platform.isIOS) 4, // 4 entries in map for iOS.
     if (Platform.isAndroid && !usesAndroidHybridComposition)
       7, // 7 entries in map for texture on Android.
     if (Platform.isAndroid && usesAndroidHybridComposition)
@@ -2218,10 +2218,12 @@ void addPlatformView(
     ..._encodeString('viewType'),
     valueString,
     ..._encodeString(viewType),
-    valueString,
-    ..._encodeString('gestureBlockingPolicy'),
-    valueString,
-    ..._encodeString(gestureBlockingPolicy),
+    if (Platform.isIOS) ...<int>[
+      valueString,
+      ..._encodeString('gestureBlockingPolicy'),
+      valueString,
+      ..._encodeString(gestureBlockingPolicy),
+    ],
     if (Platform.isAndroid && !usesAndroidHybridComposition) ...<int>[
       valueString,
       ..._encodeString('width'),

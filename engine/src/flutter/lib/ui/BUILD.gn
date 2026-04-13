@@ -135,6 +135,7 @@ source_set("ui") {
     "text/paragraph_builder.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
+    "window/hit_test_response.h",
     "window/key_data.cc",
     "window/key_data.h",
     "window/key_data_packet.cc",
