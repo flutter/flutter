@@ -61,6 +61,7 @@ Future<Stream<String>> startWidgetPreview({
 
   addTearDown(() async {
     process.kill();
+    await process.exitCode;
   });
 
   final controller = StreamController<String>.broadcast();

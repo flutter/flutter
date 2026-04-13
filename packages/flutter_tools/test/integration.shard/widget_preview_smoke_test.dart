@@ -183,7 +183,13 @@ void main() {
           firstConnection = false;
           runFlutterClean(tempDir);
           // Restore dependencies so the Analysis Server and Dwds can resolve packages during Hot Restart.
-          processManager.runSync(<String>[flutterBin, 'pub', 'get'], workingDirectory: tempDir.path);
+          // Add --offline flag to prevent attempts to reach the network during CI.
+          processManager.runSync(<String>[
+            flutterBin,
+            'pub',
+            'get',
+            '--offline',
+          ], workingDirectory: tempDir.path);
           dtdConnection.call(
             WidgetPreviewDtdServices.kWidgetPreviewServiceRoot,
             WidgetPreviewDtdServices.kHotRestartPreviewer,
@@ -202,14 +208,19 @@ void main() {
         dtdUri: dtdUri,
       );
 
-      var processExited = false;
+      final processExitCompleter = Completer<void>();
       final StreamSubscription<String> subscription = stdoutStream.listen(
         null,
-        onDone: () => processExited = true,
+        onDone: () => processExitCompleter.complete(),
       );
 
-      await completer.future;
-      expect(processExited, isFalse, reason: 'Widget preview process exited unexpectedly after flutter clean.');
+      // Race the connection completer against process exit for clearer failure messages.
+      await Future.any(<Future<void>>[completer.future, processExitCompleter.future]);
+      expect(
+        processExitCompleter.isCompleted,
+        isFalse,
+        reason: 'Widget preview process exited unexpectedly after flutter clean.',
+      );
       await subscription.cancel();
     });
   });
