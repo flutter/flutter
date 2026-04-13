@@ -21,11 +21,11 @@ Before updating any files, find and verify the existence of the version you want
   ```bash
   dart scripts/fetch_versions.dart verify <chrome|firefox> <version>
   ```
-  This command will return `true` or `false`. 
+  This command will return `true` or `false`.
 
 **Verification Rules:**
 - **Enforced by default:** If the command returns `false`, do not proceed.
-- **Optional if requested:** If the user explicitly asks to skip verification (e.g., "Upgrade to version X without verification"), you may skip this step. 
+- **Optional if requested:** If the user explicitly asks to skip verification (e.g., "Upgrade to version X without verification"), you may skip this step.
 - **Failed verification:** If verification fails but the user confirms they want to proceed anyway, you may continue.
 
 ### 2. Update Local Files
@@ -91,7 +91,7 @@ This is the final step as it uploads binaries to CIPD and requires special, temp
 ## Examples
 
 - **User:** "Upgrade Chrome and Firefox to the latest stable versions everywhere."
-- **Agent:** 
+- **Agent:**
   1. Runs `dart scripts/fetch_versions.dart latest` to get the latest versions.
   2. Updates `engine/src/flutter/lib/web_ui/dev/package_lock.yaml` and `.ci.yaml`.
   3. Runs `dev/felt generate-builder-json` to sync CI configs.
