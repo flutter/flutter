@@ -34,11 +34,12 @@ enum class RenderType {
 
 struct RenderParams {
   flutter::DlPoint center;
-  flutter::DlScalar scale_x;
-  flutter::DlScalar scale_y;
-  flutter::DlScalar skew_x;
-  flutter::DlScalar skew_y;
-  flutter::DlScalar rotation;
+  flutter::DlScalar stroke_width = 0.0f;
+  flutter::DlScalar scale_x = 1.0f;
+  flutter::DlScalar scale_y = 1.0f;
+  flutter::DlScalar skew_x = 0.0f;
+  flutter::DlScalar skew_y = 0.0f;
+  flutter::DlScalar degrees = 0.0f;
   RenderType render_type;
 };
 
@@ -47,34 +48,40 @@ void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
   builder.Save();
 
   builder.Translate(params.center.x, params.center.y);
-  builder.Rotate(params.rotation * 360);
+  builder.Rotate(params.degrees);
   builder.Scale(params.scale_x, params.scale_y);
   builder.Skew(params.skew_x, params.skew_y);
   builder.Translate(-params.center.x, -params.center.y);
 
-  // Paint for filling the outline (or wide stroke in the case of DrawLine)
-  // into which the hairline will be inscribed, inset by about 10 pixels
-  // for comparison.
-  flutter::DlPaint fill_paint =
+  // Paint for filling a large outline around the shape outside of the
+  // stroke for reference to see how the stroke tracks the shape.
+  flutter::DlPaint fill_paint =  //
       flutter::DlPaint()
           .setColor(flutter::DlColor::kBlue())
-          .setDrawStyle(flutter::DlDrawStyle::kFill)
-          // This stroke width is only for the DrawLine case which still uses
-          // the stroke width even if the style is kFill.
-          .setStrokeWidth(20.0f);
+          .setDrawStyle(flutter::DlDrawStyle::kFill);
 
-  // Paint for stroking a hairline outline of the shape inside the filled
-  // version for comparison.
-  flutter::DlPaint hairline_paint =
+  // Paint for filling the interior inside the stroke to track the exact
+  // position of the stroke. The contrast between these fills will provide
+  // a reference for where the stroke should appear and whether it
+  // precisely follows the shape boundary.
+  flutter::DlPaint interior_paint =
+      flutter::DlPaint()
+          // A very very dark blue
+          .setColor(flutter::DlColor::ARGB(1.0f, 0.0f, 0.0f, 0.5f))
+          .setDrawStyle(flutter::DlDrawStyle::kFill);
+
+  // Paint for stroking the stroke outline of the shape itself.
+  flutter::DlPaint stroke_paint =
       flutter::DlPaint()
           .setColor(flutter::DlColor::kWhite())
           .setDrawStyle(flutter::DlDrawStyle::kStroke)
-          .setStrokeWidth(0.0f);
+          .setStrokeWidth(params.stroke_width);
 
   constexpr int fill_radius = 100;
-  constexpr int hairline_inset = 10;
+  constexpr int stroke_inset = 10;
+  // The "expansion (contraction)" of the squared bounds to make rect bounds.
   constexpr flutter::DlVector2 rect_expansion(0, -20);
-  constexpr int hairline_radius = fill_radius - hairline_inset;
+  constexpr int stroke_radius = fill_radius - stroke_inset;
 
   // Common rectangle used as bounds by many of the render operations.
   flutter::DlRect fill_bounds = flutter::DlRect::MakeLTRB(
@@ -82,36 +89,48 @@ void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
       params.center.x + fill_radius, params.center.y + fill_radius);
 
   // Common rectangle used as bounds by many of the render operations.
-  flutter::DlRect hairline_bounds = flutter::DlRect::MakeLTRB(
-      params.center.x - hairline_radius, params.center.y - hairline_radius,
-      params.center.x + hairline_radius, params.center.y + hairline_radius);
+  flutter::DlRect stroke_bounds = flutter::DlRect::MakeLTRB(
+      params.center.x - stroke_radius, params.center.y - stroke_radius,
+      params.center.x + stroke_radius, params.center.y + stroke_radius);
 
   switch (params.render_type) {
     case RenderType::kSquare:
       builder.DrawRect(fill_bounds, fill_paint);
-      builder.DrawRect(hairline_bounds, hairline_paint);
+      builder.DrawRect(stroke_bounds, interior_paint);
+      builder.DrawRect(stroke_bounds, stroke_paint);
       break;
     case RenderType::kRectangle:
       builder.DrawRect(fill_bounds.Expand(rect_expansion), fill_paint);
-      builder.DrawRect(hairline_bounds.Expand(rect_expansion), hairline_paint);
+      builder.DrawRect(stroke_bounds.Expand(rect_expansion), interior_paint);
+      builder.DrawRect(stroke_bounds.Expand(rect_expansion), stroke_paint);
       break;
     case RenderType::kCircle:
       builder.DrawCircle(params.center, fill_radius, fill_paint);
-      builder.DrawCircle(params.center, hairline_radius, hairline_paint);
+      builder.DrawCircle(params.center, stroke_radius, interior_paint);
+      builder.DrawCircle(params.center, stroke_radius, stroke_paint);
       break;
     case RenderType::kOval:
       builder.DrawOval(fill_bounds.Expand(rect_expansion), fill_paint);
-      builder.DrawOval(hairline_bounds.Expand(rect_expansion), hairline_paint);
+      builder.DrawOval(stroke_bounds.Expand(rect_expansion), interior_paint);
+      builder.DrawOval(stroke_bounds.Expand(rect_expansion), stroke_paint);
       break;
     case RenderType::kLine: {
+      flutter::DlPaint outer_stroke_paint = fill_paint;
+      // Drawline can't "fill" the outer shape since it is just a line and
+      // has no fillable interior. So, instead we just draw it stroked with
+      // a larger line width.
+      outer_stroke_paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+      outer_stroke_paint.setStrokeWidth(20.0);
       flutter::DlVector2 fill_offset(fill_radius, 0);
       builder.DrawLine(params.center - fill_offset,  //
                        params.center + fill_offset,  //
-                       fill_paint);
-      flutter::DlVector2 hairline_offset(hairline_radius, 0);
-      builder.DrawLine(params.center - hairline_offset,  //
-                       params.center + hairline_offset,  //
-                       hairline_paint);
+                       outer_stroke_paint);
+      // Nothing to render for "interior" of the stroke since lines have
+      // no fillable interior.
+      flutter::DlVector2 stroke_offset(stroke_radius, 0);
+      builder.DrawLine(params.center - stroke_offset,  //
+                       params.center + stroke_offset,  //
+                       stroke_paint);
       break;
     }
     case RenderType::kCount:
@@ -127,9 +146,9 @@ namespace impeller {
 namespace testing {
 
 // This playground tests the effects of scaling, rotation and skew transforms
-// on the consistency of a hairline stroke. The math used to estimate the
-// pixel size can get complicated in a shader that is performing some of
-// its operations on local space values and some on device space values.
+// on the consistency of a stroke (particularly hairlines). The math used to
+// estimate the pixel size can get complicated in a shader that is performing
+// some of its operations on local space values and some in device space.
 TEST_P(AiksTest, SdfPrimitivePlayground) {
   if (IsGoldenTest()) {
     GTEST_SKIP() << "SdfPrimitivePlayground does not produce a golden image";
@@ -138,11 +157,6 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
   RenderParams params{
       .center = flutter::DlPoint(GetWindowSize().width * 0.5f,
                                  GetWindowSize().height * 0.5f),
-      .scale_x = 1.0f,
-      .scale_y = 1.0f,
-      .skew_x = 0.0f,
-      .skew_y = 0.0f,
-      .rotation = 0.0f,
       .render_type = RenderType::kRectangle,
   };
   // The ImGui controls need a pointer to an int and casting a pointer to
@@ -153,11 +167,12 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
   auto callback = [&]() -> sk_sp<flutter::DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Stroke", &params.stroke_width, 0, 3);
       ImGui::SliderFloat("X Scale", &params.scale_x, 1, 3);
       ImGui::SliderFloat("Y Scale", &params.scale_y, 1, 3);
       ImGui::SliderFloat("X Skew", &params.skew_x, 0, 1);
       ImGui::SliderFloat("Y Skew", &params.skew_y, 0, 1);
-      ImGui::SliderFloat("Rotation", &params.rotation, 0, 1);
+      ImGui::SliderFloat("Rotation", &params.degrees, 0, 360);
       ImGui::ListBox(
           "Shape Type", &render_type_index,
           [](void* data, int index) {
@@ -185,6 +200,7 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
 
     flutter::DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
+    builder.DrawColor(flutter::DlColor::kBlack(), flutter::DlBlendMode::kSrc);
     RenderPrimitiveWithHairline(builder, params);
     return builder.Build();
   };
@@ -193,19 +209,17 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
 }
 
 TEST_P(AiksTest, CanRenderSkewedHairlineSdfCircle) {
-  RenderParams params{
-      .center = flutter::DlPoint(GetWindowSize().width * 0.5f,
-                                 GetWindowSize().height * 0.5f),
-      .scale_x = 1.0f,
-      .scale_y = 1.0f,
-      .skew_x = 0.75f,
-      .skew_y = 0.75f,
-      .rotation = 0.0f,
-      .render_type = RenderType::kCircle,
-  };
-
   flutter::DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(flutter::DlColor::kBlack(), flutter::DlBlendMode::kSrc);
+
+  RenderParams params = {
+      .center = flutter::DlPoint(GetWindowSize().width * 0.5f,
+                                 GetWindowSize().height * 0.5f),
+      .skew_x = 0.75f,
+      .skew_y = 0.75f,
+      .render_type = RenderType::kCircle,
+  };
   RenderPrimitiveWithHairline(builder, params);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
