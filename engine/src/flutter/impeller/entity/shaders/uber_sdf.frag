@@ -44,22 +44,58 @@ float distanceFromRect(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-float distanceFromOval(vec2 p, vec2 xyAxis) {
-  float a = xyAxis.x;
-  float b = xyAxis.y;
+// Newton-Raphson method minimizing the dot product
+// between the tangent of the ellipse and p minus the closest point.
+//
+// `p` is the coordinate of the point relative to the center of the oval
+// `ab` is the extent of the oval from the center to the x and y axis
+//
+// https://iquilezles.org/articles/ellipsedist/
+//
+// The MIT License
+// Copyright © 2015 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions: The above copyright
+// notice and this permission notice shall be included in all copies or
+// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
+// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// https://www.youtube.com/c/InigoQuilez
+// https://iquilezles.org
 
-  float a2 = a * a;
-  float b2 = b * b;
+float distanceFromOval(vec2 p, vec2 ab) {
+  // symmetry
+  p = abs(p);
 
-  // Slope of the line from the center of the oval to p.
-  float m = p.y / p.x;
-  float m2 = m * m;
+  // initial value
+  vec2 q = ab * (p - ab);
+  vec2 cs = normalize((q.x < q.y) ? vec2(0.01, 1) : vec2(1, 0.01));
 
-  // q is the point along that line that intersects the oval.
-  // The line is defined as y = mx, the oval as (x/a)^2 + (y/a)^2 = 1,
-  // We solve this system of equations for (x,y) that intersect both.
-  vec2 q = vec2(a * b / sqrt((a2 * m2) + b2), a * b * m / sqrt((a2 * m2) + b2));
-  return length(p) - length(q);
+  // find root with Newton solver (see https://www.shadertoy.com/view/4lsXDN)
+  for (int i = 0; i < 5; i++) {
+    vec2 u = ab * vec2(cs.x, cs.y);
+    vec2 v = ab * vec2(-cs.y, cs.x);
+
+    float a = dot(p - u, v);
+    float c = dot(p - u, u) + dot(v, v);
+    float b = sqrt(c * c - a * a);
+
+    cs = vec2(cs.x * b - cs.y * a, cs.y * b + cs.x * a) / c;
+  }
+
+  // compute final point and distance
+  float d = length(p - ab * cs);
+
+  // return signed distance
+  return (dot(p / ab, p / ab) > 1.0) ? d : -d;
 }
 
 float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
@@ -113,8 +149,8 @@ float strokedSDF(vec2 p) {
     }
     inner = distanceFromRect(p, frag_info.size - half_stroke);
   } else {
-    outer = distanceFromOval(p, frag_info.size + vec2(half_stroke));
-    inner = distanceFromOval(p, frag_info.size - vec2(half_stroke));
+    outer = distanceFromOval(p, frag_info.size) - half_stroke;
+    inner = distanceFromOval(p, frag_info.size) + half_stroke;
   }
 
   return max(outer, -inner);
