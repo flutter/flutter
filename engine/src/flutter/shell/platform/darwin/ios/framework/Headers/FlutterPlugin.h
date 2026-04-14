@@ -29,9 +29,6 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
- * This method is only called once per application. Plugins registered later than
- * that call will not receive this event.
- *
  * @return `NO` if this vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
@@ -39,9 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
- *
- * This method is only called once per application. Plugins registered later than
- * that call will not receive this event.
  *
  * @return `NO` if this vetos application launch.
  */

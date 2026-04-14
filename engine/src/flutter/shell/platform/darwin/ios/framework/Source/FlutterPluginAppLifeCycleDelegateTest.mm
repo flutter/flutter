@@ -243,7 +243,7 @@ FLUTTER_ASSERT_ARC
   // Calling sceneWillConnectFallback a second time, didFinishLaunching
   // should not be called again.
   [delegate sceneWillConnectFallback:mockOptions];
-  OCMVerify(times(1), [mockPlugin application:UIApplication.sharedApplication
+  OCMVerify(times(2), [mockPlugin application:UIApplication.sharedApplication
                           didFinishLaunchingWithOptions:expectedApplicationOptions]);
   OCMVerify(times(2), [mockPlugin application:UIApplication.sharedApplication
                           performActionForShortcutItem:mockShortcutItem
@@ -299,7 +299,7 @@ FLUTTER_ASSERT_ARC
   // Calling sceneWillConnectFallback for a second time, didFinishLaunching
   // should not be called again.
   [delegate sceneWillConnectFallback:mockOptions];
-  OCMVerify(times(1), [mockPlugin application:[UIApplication sharedApplication]
+  OCMVerify(times(2), [mockPlugin application:[UIApplication sharedApplication]
                           didFinishLaunchingWithOptions:expectedApplicationOptions]);
   // But since this is not cold start, the previous return value of
   // didFinishLaunching should be ignored and the user activity & shortcuts
