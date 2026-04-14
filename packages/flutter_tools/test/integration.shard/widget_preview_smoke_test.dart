@@ -210,8 +210,7 @@ void main() {
 
       final processExitCompleter = Completer<void>();
       final StreamSubscription<String> subscription = stdoutStream.listen(
-        // ignore: avoid_print
-        (String msg) => print('[stdout] $msg'),
+        null,
         onDone: () => processExitCompleter.complete(),
       );
 

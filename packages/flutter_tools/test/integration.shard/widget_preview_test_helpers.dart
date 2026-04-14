@@ -66,6 +66,8 @@ Future<Stream<String>> startWidgetPreview({
 
   final controller = StreamController<String>.broadcast();
   process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
+    // ignore: avoid_print
+    print('[stdout] $msg');
     if (!controller.isClosed) {
       controller.add(msg);
     }
