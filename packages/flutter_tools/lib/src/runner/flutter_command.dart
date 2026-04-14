@@ -1931,35 +1931,11 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    // Populate the cache. We call this before pub get below so that the
-    // sky_engine package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache) {
-      // First always update universal artifacts, as some of these (e.g.
-      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      final bool offline;
-      if (argParser.options.containsKey('offline')) {
-        offline = boolArg('offline');
-      } else {
-        offline = false;
-      }
-      await globals.cache.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, offline: offline);
-      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
-    }
-    globals.cache.releaseLock();
-
-    await validateCommand();
-
-    final FlutterProject project = FlutterProject.current();
-    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
-
-    if (shouldRunPub) {
-      await pub.get(
-        context: PubContext.getVerifyContext(name),
-        project: project,
-        checkUpToDate: cachePubGet,
-      );
+    final FlutterProject project;
+    try {
+      project = await _updateCacheAndRunPubGet();
+    } finally {
+      globals.cache.releaseLock();
     }
 
     if (regeneratePlatformSpecificToolingDuringVerify) {
@@ -1976,6 +1952,38 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return runCommand();
+  }
+
+  Future<FlutterProject> _updateCacheAndRunPubGet() async {
+    // Populate the cache. We call this before pub get below so that the
+    // sky_engine package is available in the flutter cache for pub to find.
+    if (shouldUpdateCache) {
+      // First always update universal artifacts, as some of these (e.g.
+      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
+      final bool offline;
+      if (argParser.options.containsKey('offline')) {
+        offline = boolArg('offline');
+      } else {
+        offline = false;
+      }
+      await globals.cache.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      }, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
+    }
+    await validateCommand();
+
+    final FlutterProject project = FlutterProject.current();
+    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+
+    if (shouldRunPub) {
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        project: project,
+        checkUpToDate: cachePubGet,
+      );
+    }
+    return project;
   }
 
   /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
