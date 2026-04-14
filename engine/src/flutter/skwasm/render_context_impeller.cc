@@ -5,6 +5,7 @@
 #include "flutter/skwasm/render_context.h"
 
 #include "flutter/impeller/display_list/dl_dispatcher.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/entity/gles3/entity_shaders_gles.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/surface_gles.h"
@@ -75,7 +76,9 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
   virtual bool RasterizeImage(flutter::DlImage* image,
                               Skwasm::ImageByteFormat format,
                               void* out_pixels) override {
-    auto texture = image->GetImpellerTexture(context_);
+    auto impeller_image = image ? image->asImpellerImage() : nullptr;
+    auto texture =
+        impeller_image ? impeller_image->GetImpellerTexture(context_) : nullptr;
     if (!texture) {
       return false;
     }

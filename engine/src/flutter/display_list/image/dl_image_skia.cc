@@ -8,6 +8,20 @@
 
 namespace flutter {
 
+sk_sp<DlImage> DlImageSkia::Make(const SkImage* image) {
+  if (!image) {
+    return nullptr;
+  }
+  return sk_make_sp<DlImageSkia>(sk_ref_sp(image));
+}
+
+sk_sp<DlImage> DlImageSkia::Make(sk_sp<SkImage> image) {
+  if (!image) {
+    return nullptr;
+  }
+  return sk_make_sp<DlImageSkia>(std::move(image));
+}
+
 DlImageSkia::DlImageSkia(sk_sp<SkImage> image) : image_(std::move(image)) {}
 
 // |DlImage|
@@ -19,19 +33,13 @@ sk_sp<SkImage> DlImageSkia::skia_image() const {
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageSkia::GetImpellerTexture(
-    const std::shared_ptr<impeller::Context>& context) const {
-  return nullptr;
+bool DlImageSkia::isTextureBacked() const {
+  return image_ ? image_->isTextureBacked() : false;
 }
 
 // |DlImage|
 bool DlImageSkia::isOpaque() const {
   return image_ ? image_->isOpaque() : false;
-}
-
-// |DlImage|
-bool DlImageSkia::isTextureBacked() const {
-  return image_ ? image_->isTextureBacked() : false;
 }
 
 // |DlImage|

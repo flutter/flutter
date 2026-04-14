@@ -18,6 +18,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
@@ -680,7 +681,18 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
 
 std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
     const sk_sp<flutter::DlImage>& image) {
-  return GetContentContext().GetCachedTexture(image.get());
+  if (!image) {
+    return nullptr;
+  }
+  auto texture = GetContentContext().GetCachedTexture(image.get());
+  if (texture) {
+    return texture;
+  }
+  auto impeller_image = static_cast<const DlImageImpeller*>(image.get());
+  texture =
+      impeller_image->GetImpellerTexture(GetContentContext().GetContext());
+  GetContentContext().SetCachedTexture(image.get(), texture);
+  return texture;
 }
 
 void DlDispatcherBase::drawVertices(

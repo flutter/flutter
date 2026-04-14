@@ -1577,11 +1577,17 @@ std::shared_ptr<Texture> ContentContext::GetCachedTexture(
       return it->second;
     }
   }
-  auto texture = image->GetImpellerTexture(GetContext());
-  if (is_texture_caching_enabled_ && texture) {
+  return nullptr;
+}
+
+void ContentContext::SetCachedTexture(const flutter::DlImage* image,
+                                      std::shared_ptr<Texture> texture) const {
+  if (!image || !texture) {
+    return;
+  }
+  if (is_texture_caching_enabled_) {
     texture_cache_[image] = texture;
   }
-  return texture;
 }
 
 void ContentContext::RemoveCachedTexture(const flutter::DlImage* image) const {

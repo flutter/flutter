@@ -221,9 +221,11 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
 
         if (!image->isUIThreadSafe()) {
           // All images with impeller textures should already be safe.
-          FML_DCHECK(!image->isTextureBacked());
+          FML_DCHECK(image->GetImageType() == DlImage::Type::kSkia);
+          auto skia_image = image->asSkiaImage();
           image =
-              DlImageGPU::Make({image->skia_image(), std::move(unref_queue)});
+              DlImageGPU::Make({skia_image ? skia_image->skia_image() : nullptr,
+                                std::move(unref_queue)});
         }
 
         auto dart_image = CanvasImage::Create();
@@ -275,7 +277,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                     ui_task_runner, [ui_task, sk_image]() {
                       sk_sp<DlImage> image;
                       if (sk_image) {
-                        image = DlImage::Make(sk_image);
+                        image = DlImageSkia::Make(sk_image);
                       }
                       ui_task(std::move(image));
                     });

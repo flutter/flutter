@@ -9,6 +9,7 @@
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "third_party/skia/include/core/SkData.h"
 
 #include "impeller/core/texture_descriptor.h"
@@ -26,19 +27,17 @@ void skwasm_disposeDlImageOnWorker(void* dl_image_ptr);
 
 namespace Skwasm {
 
-class DlWimpImageBase : public flutter::DlImage {
+class DlWimpImageBase : public impeller::DlImageImpeller {
  public:
   DlWimpImageBase(int width, int height) : width_(width), height_(height) {}
 
-  sk_sp<SkImage> skia_image() const override { return nullptr; }
-
+  // |DlImageImpeller|
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
       const std::shared_ptr<impeller::Context>& context) const override {
     return nullptr;
   }
 
   bool isOpaque() const override { return false; }
-  bool isTextureBacked() const override { return false; }
   bool isUIThreadSafe() const override { return true; }
 
   virtual ~DlWimpImageBase();

@@ -6,9 +6,11 @@
 #define FLUTTER_LIB_UI_PAINTING_TESTING_MOCKS_H_
 
 #include "flutter/common/graphics/texture.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "gmock/gmock.h"
 #include "impeller/core/texture.h"
+#include "impeller/display_list/dl_image_impeller.h"
 
 namespace flutter {
 namespace testing {
@@ -88,18 +90,18 @@ class MockSnapshotDelegate : public SnapshotDelegate {
   std::shared_ptr<MockTextureRegistry> texture_registry_;
 };
 
-class MockDlImage : public DlImage {
+class MockDlImage : public impeller::DlImageImpeller {
  public:
   MOCK_METHOD(DlISize, GetSize, (), (const, override));
-  MOCK_METHOD(sk_sp<SkImage>, skia_image, (), (const, override));
   MOCK_METHOD(bool, isOpaque, (), (const, override));
-  MOCK_METHOD(bool, isTextureBacked, (), (const, override));
+  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
+  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
+  MOCK_METHOD(DlImage::Type, GetImageType, (), (const, override));
+  MOCK_METHOD(const DlImageSkia*, asSkiaImage, (), (const, override));
   MOCK_METHOD(std::shared_ptr<impeller::Texture>,
               GetImpellerTexture,
               (const std::shared_ptr<impeller::Context>&),
               (const, override));
-  MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
-  MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
 };
 
 }  // namespace testing

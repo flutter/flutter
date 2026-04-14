@@ -15,6 +15,7 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "impeller/core/texture.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
@@ -23,7 +24,7 @@ namespace flutter {
 /// @see DisplayListDeferredImageGPUImpeller for another example of a deferred
 /// image.
 /// @see dart:ui `decodeImageFromPixelsSync` for the user of this class.
-class PixelDeferredImageGPUImpeller final : public DlImage {
+class PixelDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
  public:
   static sk_sp<PixelDeferredImageGPUImpeller> Make(
       sk_sp<SkImage> image,
@@ -33,18 +34,12 @@ class PixelDeferredImageGPUImpeller final : public DlImage {
   // |DlImage|
   ~PixelDeferredImageGPUImpeller() override;
 
-  // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
-
-  // |DlImage|
+  // |DlImageImpeller|
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
       const std::shared_ptr<impeller::Context>& context) const override;
 
   // |DlImage|
   bool isOpaque() const override;
-
-  // |DlImage|
-  bool isTextureBacked() const override;
 
   // |DlImage|
   bool isUIThreadSafe() const override;
@@ -76,8 +71,6 @@ class PixelDeferredImageGPUImpeller final : public DlImage {
     std::shared_ptr<impeller::Texture> texture() const { return texture_; }
 
     const DlISize& size() const { return size_; }
-
-    bool isTextureBacked() const;
 
     std::optional<std::string> get_error() const;
 

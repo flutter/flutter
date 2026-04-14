@@ -336,10 +336,12 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image,
                                              const std::string& decode_error) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image && image->skia_image());
+      auto skia_image = image ? image->asSkiaImage() : nullptr;
+      ASSERT_TRUE(skia_image && skia_image->skia_image());
       EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
+
     EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
     image_decoder->Decode(
         descriptor,
@@ -653,8 +655,11 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
     ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image,
                                              const std::string& decode_error) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image && image->skia_image());
-      decoded_size = image->skia_image()->dimensions();
+
+      auto skia_image = image ? image->asSkiaImage() : nullptr;
+      ASSERT_TRUE(skia_image && skia_image->skia_image());
+      decoded_size = skia_image->skia_image()->dimensions();
+
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(
@@ -717,7 +722,10 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
     ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image,
                                              const std::string& decode_error) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image && image->skia_image());
+
+      auto skia_image = image ? image->asSkiaImage() : nullptr;
+      ASSERT_TRUE(skia_image && skia_image->skia_image());
+
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(
@@ -792,13 +800,14 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
           std::move(data), std::move(generator));
 
-      ImageDecoder::ImageResult callback =
-          [&](const sk_sp<DlImage>& image, const std::string& decode_error) {
-            ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-            ASSERT_TRUE(image && image->skia_image());
-            final_size = image->skia_image()->dimensions();
-            latch.Signal();
-          };
+      [&](const sk_sp<DlImage>& image, const std::string& decode_error) {
+        ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
+        auto skia_image = image ? image->asSkiaImage() : nullptr;
+        ASSERT_TRUE(skia_image && skia_image->skia_image());
+        final_size = skia_image->skia_image()->dimensions();
+
+        latch.Signal();
+      };
       image_decoder->Decode(
           descriptor,
           {.target_width = target_width, .target_height = target_height},

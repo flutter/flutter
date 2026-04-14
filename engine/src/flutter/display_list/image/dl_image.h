@@ -17,11 +17,11 @@
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace impeller {
-class Context;
-class Texture;
+class DlImageImpeller;
 }  // namespace impeller
 
 namespace flutter {
+class DlImageSkia;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents an image whose allocation is (usually) resident on
@@ -36,31 +36,40 @@ class DlImage : public SkRefCnt {
   // Describes which GPU context owns this image.
   enum class OwningContext { kRaster, kIO };
 
-  static sk_sp<DlImage> Make(const SkImage* image);
-
-  static sk_sp<DlImage> Make(sk_sp<SkImage> image);
-
   virtual ~DlImage();
 
   //----------------------------------------------------------------------------
-  /// @brief      If this display list image is meant to be used by the Skia
-  ///             backend, an SkImage instance. Null otherwise.
+  /// @brief      The backend type of this image.
   ///
-  /// @return     A Skia image instance or null.
-  ///
-  virtual sk_sp<SkImage> skia_image() const = 0;
+  enum class Type { kSkia, kImpeller };
 
   //----------------------------------------------------------------------------
-  /// @brief      Gets the Impeller texture instance, providing the current
-  ///             context.
-  ///             This allows the image to lazily generate the texture if it
-  ///             needs to know the context (e.g. for deferred WebGL rendering).
+  /// @brief      Returns the backend type of this image.
   ///
-  /// @param      context  The active Impeller context.
-  /// @return     An Impeller texture instance or null.
+  /// @return     The image type.
   ///
-  virtual std::shared_ptr<impeller::Texture> GetImpellerTexture(
-      const std::shared_ptr<impeller::Context>& context) const = 0;
+  virtual Type GetImageType() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Safe downcast to DlImageSkia.
+  ///
+  /// @return     A pointer to DlImageSkia or null if not a Skia image.
+  ///
+  virtual const DlImageSkia* asSkiaImage() const { return nullptr; }
+
+  //----------------------------------------------------------------------------
+  /// @brief      Safe downcast to DlImageImpeller.
+  ///
+  /// @return     A pointer to DlImageImpeller or null if not an Impeller image.
+  ///
+  virtual const impeller::DlImageImpeller* asImpellerImage() const {
+    return nullptr;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns true if the image is backed by a GPU texture.
+  ///
+  virtual bool isTextureBacked() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Gets the color space of the image.
@@ -79,8 +88,6 @@ class DlImage : public SkRefCnt {
   /// @return     True if the pixel format of this image ignores alpha.
   ///
   virtual bool isOpaque() const = 0;
-
-  virtual bool isTextureBacked() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      If the underlying platform image held by this object has no
@@ -133,20 +140,7 @@ class DlImage : public SkRefCnt {
   ///             image.
   virtual std::optional<std::string> get_error() const;
 
-  bool Equals(const DlImage* other) const {
-    if (!other) {
-      return false;
-    }
-    if (this == other) {
-      return true;
-    }
-
-    if (!skia_image()) {
-      // Impeller images have pointer equality
-      return false;
-    }
-    return skia_image() == other->skia_image();
-  }
+  bool Equals(const DlImage* other) const;
 
   bool Equals(const DlImage& other) const { return Equals(&other); }
 

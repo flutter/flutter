@@ -46,11 +46,6 @@ DlDeferredImageGPUImpeller::DlDeferredImageGPUImpeller(
 DlDeferredImageGPUImpeller::~DlDeferredImageGPUImpeller() = default;
 
 // |DlImage|
-sk_sp<SkImage> DlDeferredImageGPUImpeller::skia_image() const {
-  return nullptr;
-};
-
-// |DlImage|
 std::shared_ptr<impeller::Texture>
 DlDeferredImageGPUImpeller::GetImpellerTexture(
     const std::shared_ptr<impeller::Context>& context) const {
@@ -82,11 +77,6 @@ flutter::DlColorSpace DlDeferredImageGPUImpeller::GetColorSpace() const {
 bool DlDeferredImageGPUImpeller::isOpaque() const {
   // Impeller doesn't currently implement opaque alpha types.
   return false;
-}
-
-// |DlImage|
-bool DlDeferredImageGPUImpeller::isTextureBacked() const {
-  return wrapper_ && wrapper_->isTextureBacked();
 }
 
 // |DlImage|
@@ -159,11 +149,6 @@ void DlDeferredImageGPUImpeller::ImageWrapper::OnGrContextDestroyed() {}
 std::shared_ptr<impeller::Texture>
 DlDeferredImageGPUImpeller::ImageWrapper::texture() const {
   return std::atomic_load(&texture_);
-}
-
-bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
-  std::shared_ptr<impeller::Texture> tex = texture();
-  return tex && tex->IsValid();
 }
 
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(

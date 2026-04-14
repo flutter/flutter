@@ -25,10 +25,6 @@ PixelDeferredImageGPUImpeller::PixelDeferredImageGPUImpeller(
 
 PixelDeferredImageGPUImpeller::~PixelDeferredImageGPUImpeller() = default;
 
-sk_sp<SkImage> PixelDeferredImageGPUImpeller::skia_image() const {
-  return nullptr;
-}
-
 std::shared_ptr<impeller::Texture>
 PixelDeferredImageGPUImpeller::GetImpellerTexture(
     const std::shared_ptr<impeller::Context>& context) const {
@@ -40,10 +36,6 @@ PixelDeferredImageGPUImpeller::GetImpellerTexture(
 
 bool PixelDeferredImageGPUImpeller::isOpaque() const {
   return false;
-}
-
-bool PixelDeferredImageGPUImpeller::isTextureBacked() const {
-  return wrapper_ && wrapper_->isTextureBacked();
 }
 
 bool PixelDeferredImageGPUImpeller::isUIThreadSafe() const {
@@ -92,10 +84,6 @@ PixelDeferredImageGPUImpeller::ImageWrapper::ImageWrapper(
       raster_task_runner_(std::move(raster_task_runner)) {}
 
 PixelDeferredImageGPUImpeller::ImageWrapper::~ImageWrapper() = default;
-
-bool PixelDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
-  return texture_ && texture_->IsValid();
-}
 
 void PixelDeferredImageGPUImpeller::ImageWrapper::SnapshotImage(
     sk_sp<SkImage> image) {
