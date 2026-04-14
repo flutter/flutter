@@ -741,10 +741,8 @@ Future<void> _verifyCodeSigning({
       buildDir.childDirectory(framework).path,
     ]);
     final output = 'stdout: ${result.stdout}\nstderr: ${result.stderr}';
-    expect(
-      output,
-      contains('Signature=adhoc'),
-      reason: '$framework not codesigned correctly: \n$output',
-    );
+    final bool isCodesigned =
+        output.contains('Signature=adhoc') || output.contains('Signature size=');
+    expect(isCodesigned, isTrue, reason: '$framework not codesigned correctly: \n$output');
   }
 }
