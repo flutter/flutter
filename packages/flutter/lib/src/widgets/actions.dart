@@ -875,17 +875,19 @@ class Actions extends StatefulWidget {
   /// {@template flutter.widgets.actions.findLimitations}
   /// ## Limitations:
   ///
-  /// The return type `Action<T>?` may prevent this method from returning
-  /// perfectly capable `Action`s bound to the given [Intent]. For instance, an
-  /// `Action<Intent>` can be bound to any `Intent` because its type signature
-  /// claims it can take any [Intent] object. However this method will not be
-  /// able to return an `Action<Intent>` unless `T` is exactly `Intent`, because
-  /// `Action<Intent>` is not a subtype of `Action<T>?`. The method will return
-  /// null in this case, and assert in debug mode.
+  /// It is strongly recommended that callers explicitly set the type parameter
+  /// to `Intent` when the `intent` parameter is not null:
   ///
-  /// To work around this, it is strongly recommended that callers explicitly
-  /// set the type parameter to `Intent` when the `intent` parameter is not null:
-  /// `Actions.maybeFind<Intent>(context, intent)`.
+  /// ```dart
+  /// Actions.find<Intent>(context, intent); // GOOD
+  /// Actions.find(context, intent); // BAD
+  /// ```
+  ///
+  /// If the type parameter is not set to `Intent` when the `intent` parameter is
+  /// not null, this method might be unable to return a perfectly capable `Action`.
+  /// For instance, this method cannot return an `Action<Intent>` - an action
+  /// that can be bound to any intent - unless `T` is exactly `Intent`.
+  /// This will trigger assertions in debug mode.
   /// {@endtemplate}
   ///
   /// See also:
