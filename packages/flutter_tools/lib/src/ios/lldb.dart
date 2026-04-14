@@ -42,10 +42,10 @@ class LLDB {
   /// Example: (lldb) Process 6152 stopped
   static final _lldbProcessStopped = RegExp(r'Process \d* stopped');
 
-  /// Pattern of lldb log when the process is resuming.
+  /// Pattern of lldb log when the process is resuming and the breakpoint is added.
   ///
-  /// Example: (lldb) Process 6152 resuming
-  static final _lldbProcessResuming = RegExp(r'Process \d+ resuming');
+  /// Example: (lldb) 1 location added to breakpoint 1
+  static final _lldbProcessResuming = RegExp(r'location added to breakpoint');
 
   /// Pattern of lldb log when the breakpoint is added.
   ///
@@ -240,6 +240,11 @@ return False
     await _lldbProcess?.stdinWriteln('breakpoint command add --script-type python $breakpointId');
     await _lldbProcess?.stdinWriteln(_pythonScript);
     await _lldbProcess?.stdinWriteln('DONE');
+
+    // Disable asynchronous mode to workaround issues with rearming of breakpoints.
+    // See https://github.com/flutter/flutter/issues/184254 and upstream issue
+    // https://github.com/llvm/llvm-project/issues/190956.
+    await _lldbProcess?.stdinWriteln('script lldb.debugger.SetAsync(False)');
   }
 
   /// Resume the stopped process.

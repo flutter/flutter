@@ -41,7 +41,7 @@ class SliverFillRemainingExample extends StatelessWidget {
         const SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
-            padding: EdgeInsets.all(50.0),
+            padding: .all(50.0),
             child: Icon(Icons.pan_tool, size: 60, color: Colors.blueGrey),
           ),
         ),

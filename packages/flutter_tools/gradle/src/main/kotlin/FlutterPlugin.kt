@@ -299,6 +299,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addTaskForKGPVersion(projectToAddTasksTo)
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
+            FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
         }
 
@@ -396,6 +397,9 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo,
                 getPluginHandler(projectToAddTasksTo).getPluginList()
             )
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
+                projectToAddTasksTo
+            )
             return
         }
         // Flutter host module project (Add-to-app).
@@ -474,6 +478,9 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
+        )
+        FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
+            projectToAddTasksTo
         )
     }
 

@@ -263,6 +263,7 @@ void main() {
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         );
         await installCodeAssets(
           dartHookResult: dartHookResult,
