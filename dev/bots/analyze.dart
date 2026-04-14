@@ -2189,49 +2189,49 @@ Stream<File> _allFiles(
   String? extension, {
   required int minimumMatches,
 }) async* {
-  final gitFileNamesSet = <String>{};
-  gitFileNamesSet.addAll(
-    (await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)),
-  );
-
   assert(
     extension == null || !extension.startsWith('.'),
     'Extension argument should not start with a period.',
   );
-  final pending = <FileSystemEntity>{Directory(workingDirectory)};
+
+  final List<File> gitFiles = await _gitFiles(workingDirectory);
+
+  final Set<String> dartIgnoreDirectories = gitFiles
+      .where((File f) => path.basename(f.path) == '.dartignore')
+      .map((File f) => path.dirname(f.path))
+      .toSet();
+
+  const skipDirectories = {'.git', '.idea', '.gradle', '.dart_tool', 'build'};
+
   var matches = 0;
-  while (pending.isNotEmpty) {
-    final FileSystemEntity entity = pending.first;
-    pending.remove(entity);
-    if (path.extension(entity.path) == '.tmpl') {
+  for (final file in gitFiles) {
+    final FileStat stat = file.statSync();
+    if (stat.type != FileSystemEntityType.file) {
       continue;
     }
-    if (entity is File) {
-      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path))) {
+    if (dartIgnoreDirectories.any((String d) => path.isWithin(d, file.path))) {
+      continue;
+    }
+    final List<String> components = path.split(path.relative(file.path, from: workingDirectory));
+    if (components.any((String c) => skipDirectories.contains(c))) {
+      continue;
+    }
+    if (components.any((String c) => c.endsWith('.tmpl'))) {
+      continue;
+    }
+    if (_isGeneratedPluginRegistrant(file)) {
+      continue;
+    }
+    switch (path.basename(file.path)) {
+      case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
         continue;
-      }
-      if (_isGeneratedPluginRegistrant(entity)) {
-        continue;
-      }
-      switch (path.basename(entity.path)) {
-        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
-          continue;
-      }
-      if (extension == null || path.extension(entity.path) == '.$extension') {
-        matches += 1;
-        yield entity;
-      }
-    } else if (entity is Directory) {
-      if (File(path.join(entity.path, '.dartignore')).existsSync()) {
-        continue;
-      }
-      switch (path.basename(entity.path)) {
-        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
-          continue;
-      }
-      pending.addAll(entity.listSync());
+    }
+    if (extension == null || path.extension(file.path) == '.$extension') {
+      matches += 1;
+      yield file;
     }
   }
+
   assert(
     matches >= minimumMatches,
     'Expected to find at least $minimumMatches files with extension ".$extension" in "$workingDirectory", but only found $matches.',
