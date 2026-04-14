@@ -67,8 +67,7 @@ void main() {
     tryToDelete(tempDirectory);
   });
 
-  // TODO(dcharkes): Implement record-use in Flutter, this number should be two.
-  const expectedTranslationCount = 4;
+  const expectedTranslationCount = 2;
 
   group('record use', () {
     // This test relies on running the flutter app and capturing `print()`s
@@ -114,10 +113,6 @@ void main() {
       ['web'],
       ['web', '--wasm'],
     ]) {
-      if (target.first == 'web') {
-        // TODO(dcharkes): Fix compiler crash in dart2js, https://github.com/dart-lang/sdk/issues/63131.
-        continue;
-      }
       testWithoutContext('flutter build ${target.join(' ')} --release', () async {
         final ProcessTestResult result = await runFlutter(
           <String>['build', '-v', ...target, '--release'],
