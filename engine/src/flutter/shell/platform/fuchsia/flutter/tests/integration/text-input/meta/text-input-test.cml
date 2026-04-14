@@ -30,6 +30,7 @@
             protocol: [
                 "fuchsia.kernel.RootJobForInspect",
                 "fuchsia.kernel.Stats",
+                "fuchsia.kernel.VmexResource",
                 "fuchsia.scheduler.ProfileProvider",
                 "fuchsia.sysmem.Allocator",
                 "fuchsia.sysmem2.Allocator",

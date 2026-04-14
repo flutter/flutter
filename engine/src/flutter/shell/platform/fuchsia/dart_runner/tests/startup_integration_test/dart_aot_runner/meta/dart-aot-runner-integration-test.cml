@@ -27,6 +27,7 @@
                 "fuchsia.vulkan.loader.Loader",
                 "fuchsia.posix.socket.Provider",
                 "fuchsia.intl.PropertyProvider",
+                "fuchsia.kernel.VmexResource",
             ],
             from: "parent",
             to: "#realm_builder",
