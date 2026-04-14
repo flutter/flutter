@@ -55,6 +55,6 @@ abstract class Scenario {
   ///
   /// See [PlatformDispatcher.onHitTest].
   HitTestResponse onHitTest(HitTestRequest request) {
-    return const HitTestResponse(isPlatformView: false);
+    return HitTestResponse.empty;
   }
 }
