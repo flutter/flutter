@@ -23,6 +23,10 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'shortcuts.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// late Intent intent;
+
 /// Returns the parent [BuildContext] of a given `context`.
 ///
 /// [BuildContext] (or rather, [Element]) doesn't have a `parent` accessor, but
@@ -879,8 +883,8 @@ class Actions extends StatefulWidget {
   /// to `Intent` when the `intent` parameter is not null:
   ///
   /// ```dart
-  /// Actions.find<Intent>(context, intent); // GOOD
-  /// Actions.find(context, intent); // BAD
+  /// Actions.find<Intent>(context, intent: intent); // GOOD
+  /// Actions.find(context, intent: intent); // BAD
   /// ```
   ///
   /// If the type parameter is not set to `Intent` when the `intent` parameter is
