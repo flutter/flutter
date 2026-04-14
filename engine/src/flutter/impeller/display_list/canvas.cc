@@ -885,14 +885,12 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      !paint.mask_blur_descriptor.has_value() &&
+      paint.style != Paint::Style::kStroke) {
     UberSDFParameters params;
 
-    if (paint.style == Paint::Style::kStroke) {
-      params = UberSDFParameters::MakeOval(paint.color, rect, paint.stroke);
-    } else {
-      params = UberSDFParameters::MakeOval(paint.color, rect, std::nullopt);
-    }
+    params = UberSDFParameters::MakeOval(paint.color, rect, std::nullopt);
+
     auto geom = std::make_unique<UberSDFGeometry>(params);
     auto contents = UberSDFContents::Make(params, std::move(geom));
 
