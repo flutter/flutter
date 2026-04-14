@@ -1583,6 +1583,14 @@ class PlatformViewForTouchIOSScenario extends Scenario with _BasePlatformViewSce
     }
     finishBuilder(builder);
   }
+
+  @override
+  HitTestResponse onHitTest(HitTestRequest request) {
+    final Rect rect1 = const Rect.fromLTWH(0, 0, 500, 500);
+    final Rect rect2 = const Rect.fromLTWH(5, 5, 500, 500);
+    bool hit = rect1.contains(request.offset) || rect2.contains(request.offset);
+    return HitTestResponse(isPlatformView: hit);
+  }
 }
 
 /// Scenario for verifying overlapping platform views can accept touch gesture.
@@ -1706,6 +1714,15 @@ class PlatformViewForOverlappingPlatformViewsScenario extends Scenario
         (ByteData? response) {},
       );
     }
+  }
+
+  @override
+  HitTestResponse onHitTest(HitTestRequest request) {
+    // rect1 and rect2 will overlap, but explicitly check them in case we introduce more platform views.
+    final Rect rect1 = const Rect.fromLTWH(100, 100, 100, 100);
+    final Rect rect2 = const Rect.fromLTWH(0, 0, 300, 300);
+    bool isPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
+    return HitTestResponse(isPlatformView: isPlatformView);
   }
 }
 
