@@ -29,7 +29,11 @@ enum class RenderType {
   kCircle,
   kOval,
   kLine,
-  kCount,
+
+  // kValidCount casts to the number of valid enum values.
+  kValidCount,
+  // kInvalid is used as a default initializer to force construction override.
+  kInvalid,
 };
 
 struct RenderParameters {
@@ -40,7 +44,8 @@ struct RenderParameters {
   flutter::DlScalar skew_x = 0.0f;
   flutter::DlScalar skew_y = 0.0f;
   flutter::DlScalar degrees = 0.0f;
-  RenderType render_type;
+  RenderType render_type =
+      RenderType::kInvalid;  // Will cause errors unless explicitly replaced.
 };
 
 void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
@@ -77,11 +82,11 @@ void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
           .setDrawStyle(flutter::DlDrawStyle::kStroke)
           .setStrokeWidth(params.stroke_width);
 
-  constexpr int fill_radius = 100;
-  constexpr int stroke_inset = 10;
+  constexpr flutter::DlScalar fill_radius = 100.0f;
+  constexpr flutter::DlScalar stroke_inset = 10.0f;
   // The "expansion (contraction)" of the squared bounds to make rect bounds.
-  constexpr flutter::DlVector2 rect_expansion(0, -20);
-  constexpr int stroke_radius = fill_radius - stroke_inset;
+  constexpr flutter::DlVector2 rect_expansion(0.0f, -20.0f);
+  constexpr flutter::DlScalar stroke_radius = fill_radius - stroke_inset;
 
   // Common rectangle used as bounds by many of the render operations.
   flutter::DlRect fill_bounds = flutter::DlRect::MakeLTRB(
@@ -120,20 +125,21 @@ void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
       // has no fillable interior. So, instead we just draw it stroked with
       // a larger line width.
       outer_stroke_paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
-      outer_stroke_paint.setStrokeWidth(20.0);
-      flutter::DlVector2 fill_offset(fill_radius, 0);
+      outer_stroke_paint.setStrokeWidth(20.0f);
+      flutter::DlVector2 fill_offset(fill_radius, 0.0f);
       builder.DrawLine(params.center - fill_offset,  //
                        params.center + fill_offset,  //
                        outer_stroke_paint);
       // Nothing to render for "interior" of the stroke since lines have
       // no fillable interior.
-      flutter::DlVector2 stroke_offset(stroke_radius, 0);
+      flutter::DlVector2 stroke_offset(stroke_radius, 0.0f);
       builder.DrawLine(params.center - stroke_offset,  //
                        params.center + stroke_offset,  //
                        stroke_paint);
       break;
     }
-    case RenderType::kCount:
+    case RenderType::kValidCount:
+    case RenderType::kInvalid:
       FML_UNREACHABLE();
   }
 
@@ -167,12 +173,12 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
   auto callback = [&]() -> sk_sp<flutter::DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::SliderFloat("Stroke", &params.stroke_width, 0, 3);
-      ImGui::SliderFloat("X Scale", &params.scale_x, 1, 3);
-      ImGui::SliderFloat("Y Scale", &params.scale_y, 1, 3);
-      ImGui::SliderFloat("X Skew", &params.skew_x, 0, 1);
-      ImGui::SliderFloat("Y Skew", &params.skew_y, 0, 1);
-      ImGui::SliderFloat("Rotation", &params.degrees, 0, 360);
+      ImGui::SliderFloat("Stroke", &params.stroke_width, 0.0f, 3.0f);
+      ImGui::SliderFloat("X Scale", &params.scale_x, 1.0f, 3.0f);
+      ImGui::SliderFloat("Y Scale", &params.scale_y, 1.0f, 3.0f);
+      ImGui::SliderFloat("X Skew", &params.skew_x, 0.0f, 1.0f);
+      ImGui::SliderFloat("Y Skew", &params.skew_y, 0.0f, 1.0f);
+      ImGui::SliderFloat("Rotation", &params.degrees, 0.0f, 360.0f);
       ImGui::ListBox(
           "Shape Type", &render_type_index,
           [](void* data, int index) {
@@ -187,11 +193,12 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
                 return "Oval";
               case RenderType::kLine:
                 return "Line";
-              case RenderType::kCount:
+              case RenderType::kValidCount:
+              case RenderType::kInvalid:
                 FML_UNREACHABLE();
             }
           },
-          nullptr, static_cast<int>(RenderType::kCount), -1);
+          nullptr, static_cast<int>(RenderType::kValidCount), -1);
       ImGui::End();
     }
 

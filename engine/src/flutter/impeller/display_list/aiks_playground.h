@@ -34,7 +34,7 @@ class AiksPlayground : public PlaygroundTest {
                          bool* p_open,
                          ImGuiWindowFlags flags);
 
-  static bool IsGoldenTest() { return false; }
+  bool IsGoldenTest() { return false; }
 
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
