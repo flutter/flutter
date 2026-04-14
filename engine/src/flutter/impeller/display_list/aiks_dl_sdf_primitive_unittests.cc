@@ -15,55 +15,13 @@
 #include "imgui.h"
 #include "impeller/playground/widgets.h"
 
+// File for tests that check conditions that complicate the SDF shaders,
+// such as making sure our hairline (and other) strokes are consistent
+// under various transforms. These same issues can also affect non-SDF
+// shaders, though the math on tessellated primitives is likely to be
+// less complicated.
+
 namespace {
-
-using RenderFunction = std::function<void(flutter::DisplayListBuilder& builder,
-                                          flutter::DlPoint center,
-                                          flutter::DlScalar radius,
-                                          const flutter::DlPaint& paint)>;
-
-flutter::DlRect MakeRect(flutter::DlPoint center,
-                         flutter::DlScalar width,
-                         flutter::DlScalar height) {
-  return flutter::DlRect::MakeLTRB(center.x - width, center.y - height,  //
-                                   center.x + width, center.y + height);
-}
-
-const RenderFunction kRenderSquare = [](flutter::DisplayListBuilder& builder,
-                                        flutter::DlPoint center,
-                                        flutter::DlScalar radius,
-                                        const flutter::DlPaint& paint) {
-  builder.DrawRect(MakeRect(center, radius, radius), paint);
-};
-
-const RenderFunction kRenderRectangle = [](flutter::DisplayListBuilder& builder,
-                                           flutter::DlPoint center,
-                                           flutter::DlScalar radius,
-                                           const flutter::DlPaint& paint) {
-  builder.DrawRect(MakeRect(center, radius, radius * 0.9f), paint);
-};
-
-const RenderFunction kRenderCircle = [](flutter::DisplayListBuilder& builder,
-                                        flutter::DlPoint center,
-                                        flutter::DlScalar radius,
-                                        const flutter::DlPaint& paint) {
-  builder.DrawCircle(center, radius, paint);
-};
-
-const RenderFunction kRenderOval = [](flutter::DisplayListBuilder& builder,
-                                      flutter::DlPoint center,
-                                      flutter::DlScalar radius,
-                                      const flutter::DlPaint& paint) {
-  builder.DrawOval(MakeRect(center, radius, radius * 0.9f), paint);
-};
-
-const RenderFunction kRenderLine = [](flutter::DisplayListBuilder& builder,
-                                      flutter::DlPoint center,
-                                      flutter::DlScalar radius,
-                                      const flutter::DlPaint& paint) {
-  flutter::DlVector2 offset(radius, 0);
-  builder.DrawLine(center - offset, center + offset, paint);
-};
 
 enum class RenderType {
   kSquare,
@@ -74,40 +32,6 @@ enum class RenderType {
   kCount,
 };
 
-const char* ToName(RenderType type) {
-  switch (type) {
-    case RenderType::kSquare:
-      return "Square";
-    case RenderType::kRectangle:
-      return "Rectangle";
-    case RenderType::kCircle:
-      return "Circle";
-    case RenderType::kOval:
-      return "Oval";
-    case RenderType::kLine:
-      return "Line";
-    case RenderType::kCount:
-      FML_UNREACHABLE();
-  }
-}
-
-const RenderFunction& ToFunction(RenderType type) {
-  switch (type) {
-    case RenderType::kSquare:
-      return kRenderSquare;
-    case RenderType::kRectangle:
-      return kRenderRectangle;
-    case RenderType::kCircle:
-      return kRenderCircle;
-    case RenderType::kOval:
-      return kRenderOval;
-    case RenderType::kLine:
-      return kRenderLine;
-    case RenderType::kCount:
-      FML_UNREACHABLE();
-  }
-}
-
 struct RenderParams {
   flutter::DlPoint center;
   flutter::DlScalar scale_x;
@@ -116,32 +40,85 @@ struct RenderParams {
   flutter::DlScalar skew_y;
   flutter::DlScalar rotation;
   RenderType render_type;
-
-  flutter::DlRadians Radians() const {
-    return flutter::DlRadians(rotation * impeller::kPi * 2.0f);
-  }
 };
 
-void RenderPrimitive(flutter::DisplayListBuilder& builder,
-                     const RenderParams& params) {
-  using Matrix = impeller::Matrix;
+void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
+                                 const RenderParams& params) {
+  builder.Save();
 
-  Matrix transform =  //
-      Matrix::MakeTranslation(params.center) *
-      Matrix::MakeRotationZ(params.Radians()) *
-      Matrix::MakeScale({params.scale_x, params.scale_y, 1.0f}) *
-      Matrix::MakeSkew(params.skew_x, params.skew_y);
-  builder.Transform(transform);
+  builder.Translate(params.center.x, params.center.y);
+  builder.Rotate(params.rotation * 360);
+  builder.Scale(params.scale_x, params.scale_y);
+  builder.Skew(params.skew_x, params.skew_y);
+  builder.Translate(-params.center.x, -params.center.y);
 
-  flutter::DlPaint paint;
-  paint.setColor(flutter::DlColor::kBlue());
-  paint.setStrokeWidth(20.0f);
-  const RenderFunction& renderer = ToFunction(params.render_type);
-  renderer(builder, flutter::DlPoint(), 100, paint);
-  paint.setColor(flutter::DlColor::kWhite());
-  paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
-  paint.setStrokeWidth(0.0f);
-  renderer(builder, flutter::DlPoint(), 90, paint);
+  // Paint for filling the outline (or wide stroke in the case of DrawLine)
+  // into which the hairline will be inscribed, inset by about 10 pixels
+  // for comparison.
+  flutter::DlPaint fill_paint =
+      flutter::DlPaint()
+          .setColor(flutter::DlColor::kBlue())
+          .setDrawStyle(flutter::DlDrawStyle::kFill)
+          // This stroke width is only for the DrawLine case which still uses
+          // the stroke width even if the style is kFill.
+          .setStrokeWidth(20.0f);
+
+  // Paint for stroking a hairline outline of the shape inside the filled
+  // version for comparison.
+  flutter::DlPaint hairline_paint =
+      flutter::DlPaint()
+          .setColor(flutter::DlColor::kWhite())
+          .setDrawStyle(flutter::DlDrawStyle::kStroke)
+          .setStrokeWidth(0.0f);
+
+  constexpr int fill_radius = 100;
+  constexpr int hairline_inset = 10;
+  constexpr flutter::DlVector2 rect_expansion(0, -20);
+  constexpr int hairline_radius = fill_radius - hairline_inset;
+
+  // Common rectangle used as bounds by many of the render operations.
+  flutter::DlRect fill_bounds = flutter::DlRect::MakeLTRB(
+      params.center.x - fill_radius, params.center.y - fill_radius,
+      params.center.x + fill_radius, params.center.y + fill_radius);
+
+  // Common rectangle used as bounds by many of the render operations.
+  flutter::DlRect hairline_bounds = flutter::DlRect::MakeLTRB(
+      params.center.x - hairline_radius, params.center.y - hairline_radius,
+      params.center.x + hairline_radius, params.center.y + hairline_radius);
+
+  switch (params.render_type) {
+    case RenderType::kSquare:
+      builder.DrawRect(fill_bounds, fill_paint);
+      builder.DrawRect(hairline_bounds, hairline_paint);
+      break;
+    case RenderType::kRectangle:
+      builder.DrawRect(fill_bounds.Expand(rect_expansion), fill_paint);
+      builder.DrawRect(hairline_bounds.Expand(rect_expansion), hairline_paint);
+      break;
+    case RenderType::kCircle:
+      builder.DrawCircle(params.center, fill_radius, fill_paint);
+      builder.DrawCircle(params.center, hairline_radius, hairline_paint);
+      break;
+    case RenderType::kOval:
+      builder.DrawOval(fill_bounds.Expand(rect_expansion), fill_paint);
+      builder.DrawOval(hairline_bounds.Expand(rect_expansion), hairline_paint);
+      break;
+    case RenderType::kLine: {
+      flutter::DlVector2 fill_offset(fill_radius, 0);
+      builder.DrawLine(params.center - fill_offset,  //
+                       params.center + fill_offset,  //
+                       fill_paint);
+      flutter::DlVector2 hairline_offset(hairline_radius, 0);
+      builder.DrawLine(params.center - hairline_offset,  //
+                       params.center + hairline_offset,  //
+                       hairline_paint);
+      break;
+    }
+    case RenderType::kCount:
+      FML_UNREACHABLE();
+  }
+
+  builder.Restore();
 }
 
 }  // namespace
@@ -149,6 +126,10 @@ void RenderPrimitive(flutter::DisplayListBuilder& builder,
 namespace impeller {
 namespace testing {
 
+// This playground tests the effects of scaling, rotation and skew transforms
+// on the consistency of a hairline stroke. The math used to estimate the
+// pixel size can get complicated in a shader that is performing some of
+// its operations on local space values and some on device space values.
 TEST_P(AiksTest, SdfPrimitivePlayground) {
   if (IsGoldenTest()) {
     GTEST_SKIP() << "SdfPrimitivePlayground does not produce a golden image";
@@ -164,6 +145,10 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
       .rotation = 0.0f,
       .render_type = RenderType::kRectangle,
   };
+  // The ImGui controls need a pointer to an int and casting a pointer to
+  // an enum field to an int pointer is frowned upon, so we instead create
+  // an int variable and then fill in the params enum from it later.
+  int render_type_index = static_cast<int>(RenderType::kRectangle);
 
   auto callback = [&]() -> sk_sp<flutter::DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
@@ -174,38 +159,54 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
       ImGui::SliderFloat("Y Skew", &params.skew_y, 0, 1);
       ImGui::SliderFloat("Rotation", &params.rotation, 0, 1);
       ImGui::ListBox(
-          "Shape Type", reinterpret_cast<int*>(&params.render_type),
+          "Shape Type", &render_type_index,
           [](void* data, int index) {
-            return ToName(static_cast<RenderType>(index));
+            switch (static_cast<RenderType>(index)) {
+              case RenderType::kSquare:
+                return "Square";
+              case RenderType::kRectangle:
+                return "Rectangle";
+              case RenderType::kCircle:
+                return "Circle";
+              case RenderType::kOval:
+                return "Oval";
+              case RenderType::kLine:
+                return "Line";
+              case RenderType::kCount:
+                FML_UNREACHABLE();
+            }
           },
           nullptr, static_cast<int>(RenderType::kCount), -1);
       ImGui::End();
     }
 
+    // Translate our "Gui int variable" to the appropriate enum field value.
+    params.render_type = static_cast<RenderType>(render_type_index);
+
     flutter::DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
-    RenderPrimitive(builder, params);
+    RenderPrimitiveWithHairline(builder, params);
     return builder.Build();
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_P(AiksTest, CanRenderSkewedSdfRectangle) {
+TEST_P(AiksTest, CanRenderSkewedHairlineSdfCircle) {
   RenderParams params{
       .center = flutter::DlPoint(GetWindowSize().width * 0.5f,
                                  GetWindowSize().height * 0.5f),
       .scale_x = 1.0f,
       .scale_y = 1.0f,
-      .skew_x = 0.5f,
-      .skew_y = 0.5f,
-      .rotation = 0.1f,
-      .render_type = RenderType::kRectangle,
+      .skew_x = 0.75f,
+      .skew_y = 0.75f,
+      .rotation = 0.0f,
+      .render_type = RenderType::kCircle,
   };
 
   flutter::DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
-  RenderPrimitive(builder, params);
+  RenderPrimitiveWithHairline(builder, params);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
