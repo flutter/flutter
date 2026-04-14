@@ -73,5 +73,5 @@ void _onPointerDataPacket(PointerDataPacket packet) {
 }
 
 HitTestResponse _onHitTest(HitTestRequest request) {
-  return currentScenario?.onHitTest(request) ?? HitTestResponse(isPlatformView: false);
+  return currentScenario?.onHitTest(request) ?? HitTestResponse.empty;
 }
