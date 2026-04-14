@@ -71,7 +71,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       color: Colors.white,
-      alignment: Alignment.center,
+      alignment: .center,
       child: DefaultTextStyle(
         style: textTheme.headlineMedium!,
         child: Focus(
