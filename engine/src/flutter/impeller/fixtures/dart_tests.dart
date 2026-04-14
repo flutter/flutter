@@ -74,9 +74,7 @@ void canCreateRenderPassAndSubmit(int width, int height) {
 
   final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
-  final gpu.RenderTarget renderTarget = gpu.RenderTarget.singleColor(
-    gpu.ColorAttachment(texture: renderTexture),
-  );
+  final renderTarget = gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: renderTexture));
   final gpu.RenderPass encoder = commandBuffer.createRenderPass(renderTarget);
 
   final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();

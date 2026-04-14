@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -49,10 +49,13 @@ class InvalidDidUpdateWidgetLifecycleWidgetState
 }
 
 void main() {
+  const red = Color(0xffff0000);
+  const green = Color(0xff00ff00);
+
   testWidgets(
     'async onInit throws FlutterError',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
 
@@ -62,11 +65,11 @@ void main() {
 
   testWidgets(
     'async didUpdateWidget throws FlutterError',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
-      await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.green));
-      await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.red));
+      await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: green));
+      await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: red));
 
       expect(tester.takeException(), isFlutterError);
     },

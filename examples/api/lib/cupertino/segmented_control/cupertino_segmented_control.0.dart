@@ -22,7 +22,7 @@ class SegmentedControlApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: SegmentedControlExample(),
     );
   }
@@ -32,11 +32,12 @@ class SegmentedControlExample extends StatefulWidget {
   const SegmentedControlExample({super.key});
 
   @override
-  State<SegmentedControlExample> createState() => _SegmentedControlExampleState();
+  State<SegmentedControlExample> createState() =>
+      _SegmentedControlExampleState();
 }
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {
-  Sky _selectedSegment = Sky.midnight;
+  Sky _selectedSegment = .midnight;
   bool _toggleOne = false;
   bool _toggleAll = true;
   Set<Sky> _disabledChildren = <Sky>{};
@@ -51,7 +52,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           disabledChildren: _disabledChildren,
           selectedColor: skyColors[_selectedSegment],
           // Provide horizontal padding around the children.
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const .symmetric(horizontal: 12),
           // This represents a currently selected segmented control.
           groupValue: _selectedSegment,
           // Callback that sets the selected segmented control.
@@ -62,15 +63,15 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           },
           children: const <Sky, Widget>{
             Sky.midnight: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: .symmetric(horizontal: 20),
               child: Text('Midnight'),
             ),
             Sky.viridian: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: .symmetric(horizontal: 20),
               child: Text('Viridian'),
             ),
             Sky.cerulean: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: .symmetric(horizontal: 20),
               child: Text('Cerulean'),
             ),
           },
@@ -78,7 +79,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Text(
               'Selected Segment: ${_selectedSegment.name}',
@@ -86,9 +87,12 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
-                const Text('Disable one segment', style: TextStyle(color: CupertinoColors.white)),
+                const Text(
+                  'Disable one segment',
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
                 CupertinoSwitch(
                   value: _toggleOne,
                   onChanged: (bool value) {
@@ -107,9 +111,12 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
               ],
             ),
             Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
-                const Text('Toggle all segments', style: TextStyle(color: CupertinoColors.white)),
+                const Text(
+                  'Toggle all segments',
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
                 CupertinoSwitch(
                   value: _toggleAll,
                   onChanged: (bool value) {
@@ -119,7 +126,11 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
                         _toggleOne = false;
                         _disabledChildren = <Sky>{};
                       } else {
-                        _disabledChildren = <Sky>{Sky.midnight, Sky.viridian, Sky.cerulean};
+                        _disabledChildren = <Sky>{
+                          Sky.midnight,
+                          Sky.viridian,
+                          Sky.cerulean,
+                        };
                       }
                     });
                   },

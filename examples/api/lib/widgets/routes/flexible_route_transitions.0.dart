@@ -51,7 +51,7 @@ class _MyHomePage extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             TextButton(
               onPressed: () {
@@ -200,7 +200,10 @@ class _VerticalPageTransition extends StatelessWidget {
       end: const Offset(0.0, -1.0),
     ).chain(CurveTween(curve: _curve));
 
-    return SlideTransition(position: secondaryAnimation.drive(tween), child: child);
+    return SlideTransition(
+      position: secondaryAnimation.drive(tween),
+      child: child,
+    );
   }
 
   @override
@@ -215,7 +218,7 @@ class _VerticalPageTransition extends StatelessWidget {
         position: _primaryPositionAnimation,
         textDirection: textDirection,
         child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: const .vertical(top: Radius.circular(12)),
           child: child,
         ),
       ),

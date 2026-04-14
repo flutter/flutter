@@ -73,7 +73,7 @@ class VerticesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.translate(0, tick);
-    final ui.Vertices vertices = ui.Vertices(
+    final vertices = ui.Vertices(
       VertexMode.triangles,
       const <Offset>[
         Offset.zero,

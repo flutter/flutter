@@ -29,16 +29,22 @@ void main() {
 
     // Verify that the first CupertinoSwitch is off.
     final Finder firstSwitchFinder = find.byType(CupertinoSwitch).first;
-    final CupertinoSwitch firstSwitch = tester.widget<CupertinoSwitch>(firstSwitchFinder);
+    final CupertinoSwitch firstSwitch = tester.widget<CupertinoSwitch>(
+      firstSwitchFinder,
+    );
     expect(firstSwitch.value, false);
 
     // Verify that the second CupertinoSwitch is on.
     final Finder secondSwitchFinder = find.byType(CupertinoSwitch).last;
-    final CupertinoSwitch secondSwitch = tester.widget<CupertinoSwitch>(secondSwitchFinder);
+    final CupertinoSwitch secondSwitch = tester.widget<CupertinoSwitch>(
+      secondSwitchFinder,
+    );
     expect(secondSwitch.value, true);
   });
 
-  testWidgets('Can change a selected segmented control', (WidgetTester tester) async {
+  testWidgets('Can change a selected segmented control', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SegmentedControlApp());
 
     expect(find.text('Selected Segment: midnight'), findsOneWidget);
@@ -49,14 +55,18 @@ void main() {
     expect(find.text('Selected Segment: cerulean'), findsOneWidget);
   });
 
-  testWidgets('Can not select on a disabled segment', (WidgetTester tester) async {
+  testWidgets('Can not select on a disabled segment', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SegmentedControlApp());
 
     // Toggle on the first CupertinoSwitch to disable the first segment.
     final Finder firstSwitchFinder = find.byType(CupertinoSwitch).first;
     await tester.tap(firstSwitchFinder);
     await tester.pumpAndSettle();
-    final CupertinoSwitch firstSwitch = tester.widget<CupertinoSwitch>(firstSwitchFinder);
+    final CupertinoSwitch firstSwitch = tester.widget<CupertinoSwitch>(
+      firstSwitchFinder,
+    );
     expect(firstSwitch.value, true);
 
     // Tap on the second segment then tap back on the first segment.
@@ -70,14 +80,18 @@ void main() {
     expect(find.text('Selected Segment: viridian'), findsOneWidget);
   });
 
-  testWidgets('Can not select on all disabled segments', (WidgetTester tester) async {
+  testWidgets('Can not select on all disabled segments', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SegmentedControlApp());
 
     // Toggle off the second CupertinoSwitch to disable all segments.
     final Finder secondSwitchFinder = find.byType(CupertinoSwitch).last;
     await tester.tap(secondSwitchFinder);
     await tester.pumpAndSettle();
-    final CupertinoSwitch secondSwitch = tester.widget<CupertinoSwitch>(secondSwitchFinder);
+    final CupertinoSwitch secondSwitch = tester.widget<CupertinoSwitch>(
+      secondSwitchFinder,
+    );
     expect(secondSwitch.value, false);
 
     // Tap on the second segment and verify that the selected segment is still the first segment.

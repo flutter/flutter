@@ -14,7 +14,7 @@ import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
-  final BasicProject project = BasicProject();
+  final project = BasicProject();
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('run_test.');
@@ -27,8 +27,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/126691
   testWithoutContext('flutter run --start-paused prints DevTools URI', () async {
-    final Completer<void> completer = Completer<void>();
-    const String matcher = 'The Flutter DevTools debugger and profiler on';
+    final completer = Completer<void>();
+    const matcher = 'The Flutter DevTools debugger and profiler on';
 
     final Process process = await processManager.start(<String>[
       flutterBin,

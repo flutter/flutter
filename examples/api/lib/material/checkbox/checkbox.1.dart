@@ -37,7 +37,7 @@ class _CheckboxExampleState extends State<CheckboxExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         Checkbox(
           tristate: true,
@@ -58,7 +58,12 @@ class _CheckboxExampleState extends State<CheckboxExample> {
             });
           },
         ),
-        Checkbox(isError: true, tristate: true, value: isChecked, onChanged: null),
+        Checkbox(
+          isError: true,
+          tristate: true,
+          value: isChecked,
+          onChanged: null,
+        ),
       ],
     );
   }

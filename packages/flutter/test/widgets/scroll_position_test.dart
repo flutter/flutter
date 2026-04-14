@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 ScrollController _controller = ScrollController(initialScrollOffset: 110.0);
@@ -24,7 +24,7 @@ class ThePositiveNumbers extends StatelessWidget {
 }
 
 Future<void> performTest(WidgetTester tester, bool maintainState) async {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final navigatorKey = GlobalKey<NavigatorState>();
   await tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
@@ -34,16 +34,20 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
           key: navigatorKey,
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == '/') {
-              return MaterialPageRoute<void>(
+              return PageRouteBuilder<void>(
                 settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 0),
                 maintainState: maintainState,
+                pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) {
+                  return const ThePositiveNumbers(from: 0);
+                },
               );
             } else if (settings.name == '/second') {
-              return MaterialPageRoute<void>(
+              return PageRouteBuilder<void>(
                 settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 10000),
                 maintainState: maintainState,
+                pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) {
+                  return const ThePositiveNumbers(from: 10000);
+                },
               );
             }
             return null;
@@ -138,13 +142,16 @@ void main() {
   testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (
     WidgetTester tester,
   ) async {
-    int count = 0;
+    var count = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            return Text('$index', textDirection: TextDirection.ltr);
-          },
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Text('$index', textDirection: TextDirection.ltr);
+            },
+          ),
         ),
       ),
     );
@@ -165,31 +172,33 @@ void main() {
 
   testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(11, (int index) => index).toList();
-    final List<FocusNode> nodes =
-        List<FocusNode>.generate(
-          11,
-          (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
-        ).toList();
+    final List<FocusNode> nodes = List<FocusNode>.generate(
+      11,
+      (int index) => FocusNode(debugLabel: 'Item ${index + 1}'),
+    ).toList();
     addTearDown(() {
-      for (final FocusNode node in nodes) {
+      for (final node in nodes) {
         node.dispose();
       }
     });
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          controller: controller,
-          children:
-              items.map<Widget>((int item) {
-                return Focus(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: ListView(
+            controller: controller,
+            children: [
+              for (final int item in items)
+                Focus(
                   key: ValueKey<int>(item),
                   focusNode: nodes[item],
                   child: Container(height: 110),
-                );
-              }).toList(),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -238,19 +247,22 @@ void main() {
   });
 
   testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
-    int loadedWithDeferral = 0;
-    int buildCount = 0;
+    var loadedWithDeferral = 0;
+    var buildCount = 0;
     const double height = 500;
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            buildCount += 1;
-            if (Scrollable.recommendDeferredLoadingForContext(context)) {
-              loadedWithDeferral += 1;
-            }
-            return const SizedBox(height: height);
-          },
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              buildCount += 1;
+              if (Scrollable.recommendDeferredLoadingForContext(context)) {
+                loadedWithDeferral += 1;
+              }
+              return const SizedBox(height: height);
+            },
+          ),
         ),
       ),
     );

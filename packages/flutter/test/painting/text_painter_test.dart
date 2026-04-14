@@ -13,11 +13,11 @@ void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   expect(boundaries.first, 0);
   expect(boundaries.last, text.length);
 
-  final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+  final painter = TextPainter()..textDirection = TextDirection.ltr;
 
   // Lay out the string up to each boundary, and record the width.
-  final List<double> prefixWidths = <double>[];
-  for (final int boundary in boundaries) {
+  final prefixWidths = <double>[];
+  for (final boundary in boundaries) {
     painter.text = TextSpan(text: text.substring(0, boundary));
     painter.layout();
     prefixWidths.add(painter.width);
@@ -25,13 +25,13 @@ void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
 
   // The painter has the full text laid out.  Check the caret offsets.
   double caretOffset(int offset) {
-    final TextPosition position = ui.TextPosition(offset: offset);
+    final position = ui.TextPosition(offset: offset);
     return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
   }
 
   expect(boundaries.map(caretOffset).toList(), prefixWidths);
   double lastOffset = caretOffset(0);
-  for (int i = 1; i <= text.length; i++) {
+  for (var i = 1; i <= text.length; i++) {
     final double offset = caretOffset(i);
     expect(offset, greaterThanOrEqualTo(lastOffset));
     lastOffset = offset;
@@ -52,8 +52,8 @@ void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
 /// If you have a [TextSpan] instead of a plain [String],
 /// see [caretOffsetsForTextSpan].
 void checkCaretOffsetsLtr(String text) {
-  final List<int> characterBoundaries = <int>[];
-  final CharacterRange range = CharacterRange.at(text, 0);
+  final characterBoundaries = <int>[];
+  final range = CharacterRange.at(text, 0);
   while (true) {
     characterBoundaries.add(range.current.length);
     if (range.stringAfterLength <= 0) {
@@ -78,10 +78,10 @@ void checkCaretOffsetsLtr(String text) {
 /// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
 /// doesn't pass, you may have an instance of <https://github.com/flutter/flutter/issues/122478>.
 void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
-  final StringBuffer buffer = StringBuffer();
-  final List<int> boundaries = <int>[];
+  final buffer = StringBuffer();
+  final boundaries = <int>[];
   boundaries.add(buffer.length);
-  for (final String cluster in clusters) {
+  for (final cluster in clusters) {
     buffer.write(cluster);
     boundaries.add(buffer.length);
   }
@@ -99,14 +99,13 @@ void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
 /// If you have a [String] instead of a nontrivial [TextSpan],
 /// consider using [checkCaretOffsetsLtr] instead.
 List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text) {
-  final TextPainter painter =
-      TextPainter()
-        ..textDirection = textDirection
-        ..text = text
-        ..layout();
+  final painter = TextPainter()
+    ..textDirection = textDirection
+    ..text = text
+    ..layout();
   final int length = text.toPlainText().length;
-  final List<double> result = List<double>.generate(length + 1, (int offset) {
-    final TextPosition position = ui.TextPosition(offset: offset);
+  final result = List<double>.generate(length + 1, (int offset) {
+    final position = ui.TextPosition(offset: offset);
     return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
   });
   switch (textDirection) {
@@ -122,9 +121,9 @@ List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text)
 void main() {
   group('caret', () {
     test('TextPainter caret test', () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+      final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-      String text = 'A';
+      var text = 'A';
       checkCaretOffsetsLtr(text);
 
       painter.text = TextSpan(text: text);
@@ -155,7 +154,7 @@ void main() {
       ///   * '\u{2007}' (figure space)
       ///   * '\u{202F}' (narrow no-break space)
       void verifyCharacterIsConsideredTrailingSpace(String character) {
-        final String reason = 'character: ${character.codeUnitAt(0).toRadixString(16)}';
+        final reason = 'character: ${character.codeUnitAt(0).toRadixString(16)}';
 
         text = 'A$character';
         checkCaretOffsetsLtr(text);
@@ -221,7 +220,7 @@ void main() {
 
     test('TextPainter caret test with WidgetSpan', () {
       // Regression test for https://github.com/flutter/flutter/issues/98458.
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+      final painter = TextPainter()..textDirection = TextDirection.ltr;
 
       painter.text = const TextSpan(
         children: <InlineSpan>[
@@ -247,9 +246,9 @@ void main() {
     });
 
     test('TextPainter null text test', () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+      final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-      List<TextSpan> children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
+      var children = <TextSpan>[const TextSpan(text: 'B'), const TextSpan(text: 'C')];
       painter.text = TextSpan(children: children);
       painter.layout();
 
@@ -275,11 +274,11 @@ void main() {
     });
 
     test('TextPainter caret emoji test', () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+      final painter = TextPainter()..textDirection = TextDirection.ltr;
 
       // Format: '👩‍<zwj>👩‍<zwj>👦👩‍<zwj>👩‍<zwj>👧‍<zwj>👧👏<modifier>'
       // One three-person family, one four-person family, one clapping hands (medium skin tone).
-      const String text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
+      const text = '👩‍👩‍👦👩‍👩‍👧‍👧👏🏽';
       checkCaretOffsetsLtr(text);
 
       painter.text = const TextSpan(text: text);
@@ -414,7 +413,10 @@ void main() {
           const TextSpan(
             children: <TextSpan>[
               TextSpan(text: '👩‍🚀', style: TextStyle()),
-              TextSpan(text: ' words', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' words',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
         ),
@@ -425,7 +427,10 @@ void main() {
           TextDirection.ltr,
           const TextSpan(
             children: <TextSpan>[
-              TextSpan(text: 'words ', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: 'words ',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               TextSpan(text: '👩‍🚀', style: TextStyle()),
             ],
           ),
@@ -442,7 +447,10 @@ void main() {
           const TextSpan(
             children: <TextSpan>[
               TextSpan(text: '👩‍🚀', style: TextStyle()),
-              TextSpan(text: ' מילים', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' מילים',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
         ),
@@ -453,7 +461,10 @@ void main() {
           TextDirection.rtl,
           const TextSpan(
             children: <TextSpan>[
-              TextSpan(text: 'מילים ', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: 'מילים ',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               TextSpan(text: '👩‍🚀', style: TextStyle()),
             ],
           ),
@@ -463,9 +474,9 @@ void main() {
     });
 
     test('TextPainter caret center space test', () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+      final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-      const String text = 'test text with space at end   ';
+      const text = 'test text with space at end   ';
       painter.text = const TextSpan(text: text);
       painter.textAlign = TextAlign.center;
       painter.layout();
@@ -491,12 +502,11 @@ void main() {
     });
 
     test('TextPainter caret height and line height', () {
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..strutStyle = const StrutStyle(fontSize: 50.0);
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..strutStyle = const StrutStyle(fontSize: 50.0);
 
-      const String text = 'A';
+      const text = 'A';
       painter.text = const TextSpan(text: text, style: TextStyle(height: 1.0));
       painter.layout();
 
@@ -509,10 +519,9 @@ void main() {
     });
 
     test('upstream downstream makes no difference in the same line within the same bidi run', () {
-      final TextPainter painter =
-          TextPainter(textDirection: TextDirection.ltr)
-            ..text = const TextSpan(text: 'aa')
-            ..layout();
+      final painter = TextPainter(textDirection: TextDirection.ltr)
+        ..text = const TextSpan(text: 'aa')
+        ..layout();
 
       final Rect largeRect = Offset.zero & const Size.square(5);
       expect(
@@ -525,10 +534,10 @@ void main() {
     });
 
     test('trailing newlines', () {
-      const double fontSize = 14.0;
-      final TextPainter painter = TextPainter();
+      const fontSize = 14.0;
+      final painter = TextPainter();
       final Rect largeRect = Offset.zero & const Size.square(5);
-      String text = 'a    ';
+      var text = 'a    ';
       painter
         ..text = TextSpan(text: text)
         ..textDirection = TextDirection.ltr
@@ -550,10 +559,10 @@ void main() {
     });
 
     test('End of text caret when the text ends with +1 bidi level', () {
-      const double fontSize = 14.0;
-      final TextPainter painter = TextPainter();
+      const fontSize = 14.0;
+      final painter = TextPainter();
       final Rect largeRect = Offset.zero & const Size.square(5);
-      const String text = 'aل';
+      const text = 'aل';
       painter
         ..text = const TextSpan(text: text)
         ..textDirection = TextDirection.ltr
@@ -568,15 +577,15 @@ void main() {
     });
 
     test('handles newlines properly', () {
-      final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+      final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-      const double SIZE_OF_A = 14.0; // square size of "a" character
-      String text = 'aaa';
+      const SIZE_OF_A = 14.0; // square size of "a" character
+      var text = 'aaa';
       painter.text = TextSpan(text: text);
       painter.layout();
 
       // getOffsetForCaret in a plain one-line string is the same for either affinity.
-      int offset = 0;
+      var offset = 0;
       painter.text = TextSpan(text: text);
       painter.layout();
       Offset caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: offset), ui.Rect.zero);
@@ -849,7 +858,7 @@ void main() {
     });
 
     test('caret height reflects run height if strut is disabled', () {
-      const TextSpan span = TextSpan(
+      const span = TextSpan(
         text: 'M',
         style: TextStyle(fontSize: 128),
         children: <InlineSpan>[
@@ -857,11 +866,10 @@ void main() {
           TextSpan(text: 'M', style: TextStyle(fontSize: 64)),
         ],
       );
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..text = span
-            ..layout();
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = span
+        ..layout();
 
       expect(
         painter.getFullHeightForCaret(
@@ -901,7 +909,7 @@ void main() {
   });
 
   test('TextPainter error test', () {
-    final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+    final painter = TextPainter(textDirection: TextDirection.ltr);
 
     expect(
       () => painter.paint(MockCanvas(), Offset.zero),
@@ -917,9 +925,9 @@ void main() {
   });
 
   test('TextPainter requires textDirection', () {
-    final TextPainter painter1 = TextPainter(text: const TextSpan(text: ''));
+    final painter1 = TextPainter(text: const TextSpan(text: ''));
     expect(painter1.layout, throwsStateError);
-    final TextPainter painter2 = TextPainter(
+    final painter2 = TextPainter(
       text: const TextSpan(text: ''),
       textDirection: TextDirection.rtl,
     );
@@ -927,7 +935,7 @@ void main() {
   });
 
   test('TextPainter size test', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: const TextSpan(text: 'X', style: TextStyle(inherit: false, fontSize: 123.0)),
       textDirection: TextDirection.ltr,
     );
@@ -937,7 +945,7 @@ void main() {
   });
 
   test('TextPainter textScaler test', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: const TextSpan(text: 'X', style: TextStyle(inherit: false, fontSize: 10.0)),
       textDirection: TextDirection.ltr,
       textScaler: const TextScaler.linear(2.0),
@@ -948,7 +956,7 @@ void main() {
   });
 
   test('TextPainter textScaler null style test', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: const TextSpan(text: 'X'),
       textDirection: TextDirection.ltr,
       textScaler: const TextScaler.linear(2.0),
@@ -959,7 +967,7 @@ void main() {
   });
 
   test('TextPainter default text height is 14 pixels', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: const TextSpan(text: 'x'),
       textDirection: TextDirection.ltr,
     );
@@ -970,7 +978,7 @@ void main() {
   });
 
   test('TextPainter sets paragraph size from root', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       text: const TextSpan(text: 'x', style: TextStyle(fontSize: 100.0)),
       textDirection: TextDirection.ltr,
     );
@@ -981,7 +989,7 @@ void main() {
   });
 
   test('TextPainter intrinsic dimensions', () {
-    const TextStyle style = TextStyle(inherit: false, fontSize: 10.0);
+    const style = TextStyle(inherit: false, fontSize: 10.0);
     TextPainter painter;
 
     painter = TextPainter(
@@ -1051,9 +1059,9 @@ void main() {
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
   test('TextPainter widget span', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-    const String text = 'test';
+    const text = 'test';
     painter.text = const TextSpan(
       text: text,
       children: <InlineSpan>[
@@ -1235,7 +1243,7 @@ void main() {
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.textHeightBehavior = const TextHeightBehavior();
     painter.textHeightBehavior = null;
@@ -1243,9 +1251,9 @@ void main() {
   });
 
   test('TextPainter line metrics', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-    const String text = 'test1\nhello line two really long for soft break\nfinal line 4';
+    const text = 'test1\nhello line two really long for soft break\nfinal line 4';
     painter.text = const TextSpan(text: text);
 
     painter.layout(maxWidth: 300);
@@ -1306,25 +1314,23 @@ void main() {
 
   group('TextPainter line-height', () {
     test('half-leading', () {
-      const TextStyle style = TextStyle(
+      const style = TextStyle(
         height: 20,
         fontSize: 1,
         leadingDistribution: TextLeadingDistribution.even,
       );
 
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..text = const TextSpan(text: 'A', style: style)
-            ..layout();
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = const TextSpan(text: 'A', style: style)
+        ..layout();
 
-      final Rect glyphBox =
-          painter
-              .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-              .first
-              .toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+          .first
+          .toRect();
 
-      final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
+      final insets = RelativeRect.fromSize(glyphBox, painter.size);
       // The glyph box is centered.
       expect(insets.top, insets.bottom);
       // The glyph box is exactly 1 logical pixel high.
@@ -1333,25 +1339,23 @@ void main() {
     });
 
     test('half-leading with small height', () {
-      const TextStyle style = TextStyle(
+      const style = TextStyle(
         height: 0.1,
         fontSize: 10,
         leadingDistribution: TextLeadingDistribution.even,
       );
 
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..text = const TextSpan(text: 'A', style: style)
-            ..layout();
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = const TextSpan(text: 'A', style: style)
+        ..layout();
 
-      final Rect glyphBox =
-          painter
-              .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-              .first
-              .toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+          .first
+          .toRect();
 
-      final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
+      final insets = RelativeRect.fromSize(glyphBox, painter.size);
       // The glyph box is still centered.
       expect(insets.top, insets.bottom);
       // The glyph box is exactly 10 logical pixel high (the height multiplier
@@ -1361,27 +1365,25 @@ void main() {
     });
 
     test('half-leading with leading trim', () {
-      const TextStyle style = TextStyle(
+      const style = TextStyle(
         height: 0.1,
         fontSize: 10,
         leadingDistribution: TextLeadingDistribution.even,
       );
 
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..text = const TextSpan(text: 'A', style: style)
-            ..textHeightBehavior = const TextHeightBehavior(
-              applyHeightToFirstAscent: false,
-              applyHeightToLastDescent: false,
-            )
-            ..layout();
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = const TextSpan(text: 'A', style: style)
+        ..textHeightBehavior = const TextHeightBehavior(
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        )
+        ..layout();
 
-      final Rect glyphBox =
-          painter
-              .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-              .first
-              .toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+          .first
+          .toRect();
 
       expect(painter.size, glyphBox.size);
       // The glyph box is still centered.
@@ -1390,54 +1392,49 @@ void main() {
     });
 
     test('TextLeadingDistribution falls back to paragraph style', () {
-      const TextStyle style = TextStyle(height: 20, fontSize: 1);
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..text = const TextSpan(text: 'A', style: style)
-            ..textHeightBehavior = const TextHeightBehavior(
-              leadingDistribution: TextLeadingDistribution.even,
-            )
-            ..layout();
+      const style = TextStyle(height: 20, fontSize: 1);
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = const TextSpan(text: 'A', style: style)
+        ..textHeightBehavior = const TextHeightBehavior(
+          leadingDistribution: TextLeadingDistribution.even,
+        )
+        ..layout();
 
-      final Rect glyphBox =
-          painter
-              .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-              .first
-              .toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+          .first
+          .toRect();
 
       // Still uses half-leading.
-      final RelativeRect insets = RelativeRect.fromSize(glyphBox, painter.size);
+      final insets = RelativeRect.fromSize(glyphBox, painter.size);
       expect(insets.top, insets.bottom);
       expect(insets.top, (20 - 1) / 2);
       painter.dispose();
     });
 
     test('TextLeadingDistribution does nothing if height multiplier is null', () {
-      const TextStyle style = TextStyle(fontSize: 1);
-      final TextPainter painter =
-          TextPainter()
-            ..textDirection = TextDirection.ltr
-            ..text = const TextSpan(text: 'A', style: style)
-            ..textHeightBehavior = const TextHeightBehavior(
-              leadingDistribution: TextLeadingDistribution.even,
-            )
-            ..layout();
+      const style = TextStyle(fontSize: 1);
+      final painter = TextPainter()
+        ..textDirection = TextDirection.ltr
+        ..text = const TextSpan(text: 'A', style: style)
+        ..textHeightBehavior = const TextHeightBehavior(
+          leadingDistribution: TextLeadingDistribution.even,
+        )
+        ..layout();
 
-      final Rect glyphBox =
-          painter
-              .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-              .first
-              .toRect();
+      final Rect glyphBox = painter
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+          .first
+          .toRect();
 
       painter.textHeightBehavior = const TextHeightBehavior();
       painter.layout();
 
-      final Rect newGlyphBox =
-          painter
-              .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
-              .first
-              .toRect();
+      final Rect newGlyphBox = painter
+          .getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1))
+          .first
+          .toRect();
       expect(glyphBox, newGlyphBox);
       painter.dispose();
     });
@@ -1449,11 +1446,14 @@ void main() {
       error = details;
     };
 
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-    const String text = 'Hello\uD83DWorld';
-    const double fontSize = 20.0;
-    painter.text = const TextSpan(text: text, style: TextStyle(fontSize: fontSize));
+    const text = 'Hello\uD83DWorld';
+    const fontSize = 20.0;
+    painter.text = const TextSpan(
+      text: text,
+      style: TextStyle(fontSize: fontSize),
+    );
     painter.layout();
     // The layout should include one replacement character.
     expect(painter.width, equals(fontSize));
@@ -1463,10 +1463,10 @@ void main() {
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87544
 
   test('Diacritic', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     // Two letters followed by a diacritic
-    const String text = 'ฟห้';
+    const text = 'ฟห้';
     painter.text = const TextSpan(text: text);
     painter.layout();
 
@@ -1479,9 +1479,9 @@ void main() {
   });
 
   test('TextPainter line metrics update after layout', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
-    const String text = 'word1 word2 word3';
+    const text = 'word1 word2 word3';
     painter.text = const TextSpan(text: text);
 
     painter.layout(maxWidth: 80);
@@ -1497,10 +1497,9 @@ void main() {
   });
 
   test('TextPainter throws with stack trace when accessing text layout', () {
-    final TextPainter painter =
-        TextPainter()
-          ..text = const TextSpan(text: 'TEXT')
-          ..textDirection = TextDirection.ltr;
+    final painter = TextPainter()
+      ..text = const TextSpan(text: 'TEXT')
+      ..textDirection = TextDirection.ltr;
 
     expect(
       () => painter.getPositionForOffset(Offset.zero),
@@ -1535,7 +1534,7 @@ void main() {
   });
 
   test('TextPainter requires layout after providing different placeholder dimensions', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       children: <InlineSpan>[
@@ -1574,7 +1573,7 @@ void main() {
   });
 
   test('TextPainter does not require layout after providing identical placeholder dimensions', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
       children: <InlineSpan>[
@@ -1616,21 +1615,21 @@ void main() {
   });
 
   test('TextPainter - debugDisposed', () {
-    final TextPainter painter = TextPainter();
+    final painter = TextPainter();
     expect(painter.debugDisposed, false);
     painter.dispose();
     expect(painter.debugDisposed, true);
   });
 
   test('TextPainter - asserts if disposed more than once', () {
-    final TextPainter painter = TextPainter()..dispose();
+    final painter = TextPainter()..dispose();
     expect(painter.debugDisposed, isTrue);
     expect(painter.dispose, throwsAssertionError);
   });
 
   test('TextPainter computeWidth', () {
     const InlineSpan text = TextSpan(text: 'foobar');
-    final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
+    final painter = TextPainter(text: text, textDirection: TextDirection.ltr);
     painter.layout();
     expect(painter.width, TextPainter.computeWidth(text: text, textDirection: TextDirection.ltr));
 
@@ -1645,7 +1644,7 @@ void main() {
 
   test('TextPainter computeMaxIntrinsicWidth', () {
     const InlineSpan text = TextSpan(text: 'foobar');
-    final TextPainter painter = TextPainter(text: text, textDirection: TextDirection.ltr);
+    final painter = TextPainter(text: text, textDirection: TextDirection.ltr);
     painter.layout();
     expect(
       painter.maxIntrinsicWidth,
@@ -1667,8 +1666,8 @@ void main() {
 
   test('TextPainter.getWordBoundary works', () {
     // Regression test for https://github.com/flutter/flutter/issues/93493 .
-    const String testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
-    final TextPainter textPainter = TextPainter(
+    const testCluster = '👨‍👩‍👦👨‍👩‍👦👨‍👩‍👦'; // 8 * 3
+    final textPainter = TextPainter(
       text: const TextSpan(text: testCluster),
       textDirection: TextDirection.ltr,
     );
@@ -1682,12 +1681,12 @@ void main() {
 
   test('TextHeightBehavior with strut on empty paragraph', () {
     // Regression test for https://github.com/flutter/flutter/issues/112123
-    const TextStyle style = TextStyle(height: 11, fontSize: 7);
-    const TextSpan simple = TextSpan(text: 'x', style: style);
-    const TextSpan emptyString = TextSpan(text: '', style: style);
-    const TextSpan emptyParagraph = TextSpan(style: style);
+    const style = TextStyle(height: 11, fontSize: 7);
+    const simple = TextSpan(text: 'x', style: style);
+    const emptyString = TextSpan(text: '', style: style);
+    const emptyParagraph = TextSpan(style: style);
 
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       textDirection: TextDirection.ltr,
       strutStyle: StrutStyle.fromTextStyle(style, forceStrutHeight: true),
       textHeightBehavior: const TextHeightBehavior(
@@ -1699,7 +1698,7 @@ void main() {
     painter.text = simple;
     painter.layout();
     final double height = painter.height;
-    for (final TextSpan span in <TextSpan>[simple, emptyString, emptyParagraph]) {
+    for (final span in <TextSpan>[simple, emptyString, emptyParagraph]) {
       painter.text = span;
       painter.layout();
       expect(painter.height, height, reason: '$span is expected to have a height of $height');
@@ -1712,7 +1711,7 @@ void main() {
   });
 
   test('TextPainter plainText getter', () {
-    final TextPainter painter = TextPainter()..textDirection = TextDirection.ltr;
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
 
     expect(painter.plainText, '');
 
@@ -1746,12 +1745,11 @@ void main() {
   });
 
   test('TextPainter infinite width - centered', () {
-    final TextPainter painter =
-        TextPainter()
-          ..textAlign = TextAlign.center
-          ..textDirection = TextDirection.ltr;
+    final painter = TextPainter()
+      ..textAlign = TextAlign.center
+      ..textDirection = TextDirection.ltr;
     painter.text = const TextSpan(text: 'A', style: TextStyle(fontSize: 10));
-    MockCanvasWithDrawParagraph mockCanvas = MockCanvasWithDrawParagraph();
+    var mockCanvas = MockCanvasWithDrawParagraph();
 
     painter.layout(minWidth: double.infinity);
     expect(painter.width, double.infinity);
@@ -1781,12 +1779,11 @@ void main() {
   });
 
   test('TextPainter infinite width - LTR justified', () {
-    final TextPainter painter =
-        TextPainter()
-          ..textAlign = TextAlign.justify
-          ..textDirection = TextDirection.ltr;
+    final painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textDirection = TextDirection.ltr;
     painter.text = const TextSpan(text: 'A', style: TextStyle(fontSize: 10));
-    MockCanvasWithDrawParagraph mockCanvas = MockCanvasWithDrawParagraph();
+    var mockCanvas = MockCanvasWithDrawParagraph();
 
     painter.layout(minWidth: double.infinity);
     expect(painter.width, double.infinity);
@@ -1817,12 +1814,11 @@ void main() {
 
   test('LongestLine TextPainter properly relayout when maxWidth changes.', () {
     // Regression test for https://github.com/flutter/flutter/issues/142309.
-    final TextPainter painter =
-        TextPainter()
-          ..textAlign = TextAlign.justify
-          ..textWidthBasis = TextWidthBasis.longestLine
-          ..textDirection = TextDirection.ltr
-          ..text = TextSpan(text: 'A' * 100, style: const TextStyle(fontSize: 10));
+    final painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textWidthBasis = TextWidthBasis.longestLine
+      ..textDirection = TextDirection.ltr
+      ..text = TextSpan(text: 'A' * 100, style: const TextStyle(fontSize: 10));
 
     painter.layout(maxWidth: 1000);
     expect(painter.width, 1000);
@@ -1835,12 +1831,15 @@ void main() {
   });
 
   test('TextPainter line breaking does not round to integers', () {
-    const double fontSize = 1.25;
-    const String text = '12345';
+    const fontSize = 1.25;
+    const text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       textDirection: TextDirection.ltr,
-      text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(fontSize: fontSize),
+      ),
     )..layout(maxWidth: text.length * fontSize);
 
     expect(painter.maxIntrinsicWidth, text.length * fontSize);
@@ -1854,8 +1853,8 @@ void main() {
 
   group('strut style', () {
     test('strut style applies when the span has no style', () {
-      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10);
-      final TextPainter painter = TextPainter(
+      const strut = StrutStyle(height: 10, fontSize: 10);
+      final painter = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(),
         strutStyle: strut,
@@ -1864,8 +1863,8 @@ void main() {
     });
 
     test('strut style leading is a fontSize multiplier', () {
-      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, leading: 2);
-      final TextPainter painter = TextPainter(
+      const strut = StrutStyle(height: 10, fontSize: 10, leading: 2);
+      final painter = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(),
         strutStyle: strut,
@@ -1876,8 +1875,8 @@ void main() {
     });
 
     test('strut no half leading + force strut height', () {
-      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
-      final TextPainter painter = TextPainter(
+      const strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final painter = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
         strutStyle: strut,
@@ -1893,13 +1892,13 @@ void main() {
     });
 
     test('strut half leading + force strut height', () {
-      const StrutStyle strut = StrutStyle(
+      const strut = StrutStyle(
         height: 10,
         fontSize: 10,
         forceStrutHeight: true,
         leadingDistribution: TextLeadingDistribution.even,
       );
-      final TextPainter painter = TextPainter(
+      final painter = TextPainter(
         textDirection: TextDirection.ltr,
         text: const TextSpan(text: 'A', style: TextStyle(fontSize: 20)),
         strutStyle: strut,
@@ -1915,9 +1914,9 @@ void main() {
     });
 
     test('force strut height applies to widget spans', () {
-      const Size placeholderSize = Size(1000, 1000);
-      const StrutStyle strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
-      final TextPainter painter =
+      const placeholderSize = Size(1000, 1000);
+      const strut = StrutStyle(height: 10, fontSize: 10, forceStrutHeight: true);
+      final painter =
           TextPainter(
               textDirection: TextDirection.ltr,
               text: const WidgetSpan(child: SizedBox()),
@@ -1932,7 +1931,7 @@ void main() {
   });
 
   test('getOffsetForCaret does not crash on decomposed characters', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       textDirection: TextDirection.ltr,
       text: const TextSpan(text: '각', style: TextStyle(fontSize: 10)),
     )..layout(maxWidth: 1); // Force the jamo characters to soft wrap.
@@ -1943,14 +1942,43 @@ void main() {
   });
 
   test('kTextHeightNone unsets the text height multiplier', () {
-    final TextPainter painter = TextPainter(
+    final painter = TextPainter(
       textDirection: TextDirection.ltr,
       text: const TextSpan(
         style: TextStyle(fontSize: 10, height: 1000),
-        children: <TextSpan>[TextSpan(text: 'A', style: TextStyle(height: kTextHeightNone))],
+        children: <TextSpan>[
+          TextSpan(
+            text: 'A',
+            style: TextStyle(height: kTextHeightNone),
+          ),
+        ],
       ),
     )..layout();
     expect(painter.height, 10);
+  });
+
+  test('debugPaintTextLayoutBoxes', () {
+    const span = TextSpan(
+      text: 'M',
+      // ascent = 96, descent = 32
+      style: TextStyle(fontSize: 128),
+      children: <InlineSpan>[TextSpan(text: 'M', style: TextStyle(fontSize: 64))],
+    );
+
+    final painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..text = span
+      ..layout();
+    expect(
+      (Canvas canvas) {
+        painter.debugPaintTextLayoutBoxes = true;
+        painter.paint(canvas, Offset.zero);
+        painter.debugPaintTextLayoutBoxes = false;
+      },
+      paints
+        ..rect(rect: Offset.zero & const Size.square(128))
+        ..rect(rect: const Offset(128, 96 - 48) & const Size.square(64)),
+    );
   });
 
   test('TextPainter dispatches memory events', () async {

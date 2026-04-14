@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/restoration_properties/restorable_va
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Increments answer on OutlinedButton tap', (WidgetTester tester) async {
+  testWidgets('Increments answer on OutlinedButton tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RestorableValueExampleApp());
 
     // Verify that the initial answer value in the example equals 42.
@@ -22,7 +24,9 @@ void main() {
     expect(find.text('43'), findsOneWidget);
   });
 
-  testWidgets('Restores answer value after restart', (WidgetTester tester) async {
+  testWidgets('Restores answer value after restart', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: RootRestorationScope(

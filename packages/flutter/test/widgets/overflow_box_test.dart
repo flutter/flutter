@@ -25,7 +25,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
+    final box = inner.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(Offset.zero), equals(const Offset(745.0, 565.0)));
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
@@ -33,11 +33,11 @@ void main() {
   // Adapted from https://github.com/flutter/flutter/issues/129094
   group('when fit is OverflowBoxFit.deferToChild', () {
     group('OverflowBox behavior with long and short content', () {
-      for (final bool contentSuperLong in <bool>[false, true]) {
+      for (final contentSuperLong in <bool>[false, true]) {
         testWidgets('contentSuperLong=$contentSuperLong', (WidgetTester tester) async {
           final GlobalKey<State<StatefulWidget>> key = GlobalKey();
 
-          final Column child = Column(
+          final child = Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[SizedBox(width: 100, height: contentSuperLong ? 10000 : 100)],
           );
@@ -91,18 +91,17 @@ void main() {
   });
 
   testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
       maxWidth: 2.0,
       minHeight: 3.0,
       maxHeight: 4.0,
     ).debugFillProperties(builder);
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode n) => n.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString())
+        .toList();
     expect(description, <String>[
       'alignment: Alignment.center',
       'minWidth: 1.0',
@@ -127,7 +126,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
+    final box = inner.currentContext!.findRenderObject()! as RenderBox;
     expect(box.size, equals(const Size(50.0, 50.0)));
     expect(
       box.localToGlobal(box.size.center(Offset.zero)),
@@ -154,7 +153,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = inner.currentContext!.findRenderObject()! as RenderBox;
+    final box = inner.currentContext!.findRenderObject()! as RenderBox;
     expect(box.size, equals(const Size(50.0, 50.0)));
     expect(
       box.localToGlobal(box.size.center(Offset.zero)),

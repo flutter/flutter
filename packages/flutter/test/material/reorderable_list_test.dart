@@ -14,14 +14,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('$ReorderableListView', () {
-    const double itemHeight = 48.0;
-    const List<String> originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+    const itemHeight = 48.0;
+    const originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
     late List<String> listItems;
 
-    void onReorder(int oldIndex, int newIndex) {
-      if (oldIndex < newIndex) {
-        newIndex -= 1;
-      }
+    void onReorderItem(int oldIndex, int newIndex) {
       final String element = listItems.removeAt(oldIndex);
       listItems.insert(newIndex, element);
     }
@@ -48,14 +45,13 @@ void main() {
         theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: textDirection,
-          child: SizedBox(
-            height: itemHeight * 10,
-            width: itemHeight * 10,
+          child: SizedBox.square(
+            dimension: itemHeight * 10,
             child: ReorderableListView(
               header: header,
               footer: footer,
               scrollDirection: scrollDirection,
-              onReorder: onReorder,
+              onReorderItem: onReorderItem,
               reverse: reverse,
               padding: padding,
               children: listItems.map<Widget>(listItemToWidget).toList(),
@@ -74,16 +70,18 @@ void main() {
       testWidgets('reorder is not triggered when children length is less or equals to 1', (
         WidgetTester tester,
       ) async {
-        bool onReorderWasCalled = false;
+        var onReorderWasCalled = false;
         final List<String> currentListItems = listItems.take(1).toList();
-        final ReorderableListView reorderableListView = ReorderableListView(
+        final reorderableListView = ReorderableListView(
           header: const Text('Header'),
-          onReorder: (_, _) => onReorderWasCalled = true,
+          onReorderItem: (_, _) => onReorderWasCalled = true,
           children: currentListItems.map<Widget>(listItemToWidget).toList(),
         );
         final List<String> currentOriginalListItems = originalListItems.take(1).toList();
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+          ),
         );
         expect(currentListItems, orderedEquals(currentOriginalListItems));
         final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
@@ -181,7 +179,7 @@ void main() {
         WidgetTester tester,
       ) async {
         final Widget reorderableListView = ReorderableListView(
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorderItem: (_, _) {},
           children: const <Widget>[
             SizedBox(key: Key('Normal item'), height: itemHeight, child: Text('Normal item')),
             SizedBox(key: Key('Tall item'), height: itemHeight * 2, child: Text('Tall item')),
@@ -189,7 +187,9 @@ void main() {
           ],
         );
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+          ),
         );
 
         double getListHeight() {
@@ -254,15 +254,14 @@ void main() {
               color: Colors.green,
             ),
           ],
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorderItem: (_, _) {},
         );
 
         late final OverlayEntry entry;
         addTearDown(
-          () =>
-              entry
-                ..remove()
-                ..dispose(),
+          () => entry
+            ..remove()
+            ..dispose(),
         );
 
         await tester.pumpWidget(
@@ -328,7 +327,7 @@ void main() {
                 _Stateful(key: const Key('B')),
                 _Stateful(key: const Key('C')),
               ],
-              onReorder: (int oldIndex, int newIndex) {},
+              onReorderItem: (_, _) {},
             ),
           ),
         );
@@ -347,7 +346,7 @@ void main() {
                 _Stateful(key: const Key('C')),
                 _Stateful(key: const Key('A')),
               ],
-              onReorder: (int oldIndex, int newIndex) {},
+              onReorderItem: (_, _) {},
             ),
           ),
         );
@@ -358,17 +357,16 @@ void main() {
       });
 
       testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
-        const Key firstBox = Key('key');
+        const firstBox = Key('key');
         Widget build() {
           return MaterialApp(
             home: Directionality(
               textDirection: TextDirection.ltr,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: ReorderableListView(
                   children: const <Widget>[SizedBox(key: firstBox, width: 10, height: 10)],
-                  onReorder: (_, _) {},
+                  onReorderItem: (_, _) {},
                 ),
               ),
             ),
@@ -384,7 +382,7 @@ void main() {
       });
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
-        final ScrollController primary = ScrollController();
+        final primary = ScrollController();
         addTearDown(primary.dispose);
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
@@ -392,7 +390,7 @@ void main() {
             SizedBox(width: 100.0, height: 100.0, key: Key('B'), child: Text('B')),
             SizedBox(width: 100.0, height: 100.0, key: Key('A'), child: Text('A')),
           ],
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorderItem: (_, _) {},
         );
 
         Widget buildWithScrollController(ScrollController controller) {
@@ -409,7 +407,7 @@ void main() {
         expect(scrollView.controller, primary);
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
-        final ScrollController primary2 = ScrollController();
+        final primary2 = ScrollController();
         addTearDown(primary2.dispose);
 
         await tester.pumpWidget(buildWithScrollController(primary2));
@@ -418,10 +416,10 @@ void main() {
       });
 
       testWidgets('Test custom ScrollController behavior when set', (WidgetTester tester) async {
-        const Key firstBox = Key('C');
-        const Key secondBox = Key('B');
-        const Key thirdBox = Key('A');
-        final ScrollController customController = ScrollController();
+        const firstBox = Key('C');
+        const secondBox = Key('B');
+        const thirdBox = Key('A');
+        final customController = ScrollController();
         addTearDown(customController.dispose);
 
         await tester.pumpWidget(
@@ -431,7 +429,7 @@ void main() {
                 height: 150,
                 child: ReorderableListView(
                   scrollController: customController,
-                  onReorder: (int oldIndex, int newIndex) {},
+                  onReorderItem: (_, _) {},
                   children: const <Widget>[
                     SizedBox(width: 100.0, height: 100.0, key: firstBox, child: Text('C')),
                     SizedBox(width: 100.0, height: 100.0, key: secondBox, child: Text('B')),
@@ -472,7 +470,7 @@ void main() {
 
       testWidgets('ReorderableList auto scrolling is fast enough', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/121603.
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
@@ -484,7 +482,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return Text('data', key: ValueKey<int>(index));
                 },
-                onReorder: (int oldIndex, int newIndex) {},
+                onReorderItem: (_, _) {},
               ),
             ),
           ),
@@ -501,7 +499,7 @@ void main() {
         await tester.pump();
         // Use a fixed value to make sure the default velocity scalar is bigger
         // than a certain amount.
-        const double kMinimumAllowedAutoScrollDistancePer5ms = 1.7;
+        const kMinimumAllowedAutoScrollDistancePer5ms = 1.7;
 
         await tester.pump(const Duration(milliseconds: 5));
         expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms));
@@ -522,15 +520,14 @@ void main() {
             SizedBox(width: 100.0, height: 100.0, key: Key('B'), child: Text('B')),
             SizedBox(width: 100.0, height: 100.0, key: Key('A'), child: Text('A')),
           ],
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorderItem: (_, _) {},
         );
 
         late final OverlayEntry entry;
         addTearDown(
-          () =>
-              entry
-                ..remove()
-                ..dispose(),
+          () => entry
+            ..remove()
+            ..dispose(),
         );
 
         final Widget overlay = Overlay(
@@ -544,9 +541,8 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: SizedBox(
-            width: 100.0,
-            height: 100.0,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: Directionality(textDirection: TextDirection.ltr, child: overlay),
           ),
         );
@@ -555,7 +551,7 @@ void main() {
 
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
-          final Semantics semantics =
+          final semantics =
               find
                       .ancestor(
                         of: find.byKey(Key(listItems[index])),
@@ -568,10 +564,10 @@ void main() {
           return semantics.properties.customSemanticsActions!;
         }
 
-        const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
-        const CustomSemanticsAction moveToEnd = CustomSemanticsAction(label: 'Move to the end');
-        const CustomSemanticsAction moveUp = CustomSemanticsAction(label: 'Move up');
-        const CustomSemanticsAction moveDown = CustomSemanticsAction(label: 'Move down');
+        const moveToStart = CustomSemanticsAction(label: 'Move to the start');
+        const moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+        const moveUp = CustomSemanticsAction(label: 'Move up');
+        const moveDown = CustomSemanticsAction(label: 'Move down');
 
         testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (
           WidgetTester tester,
@@ -611,7 +607,7 @@ void main() {
             );
 
             // Items in the middle can be moved to the start, end, up or down.
-            for (int i = 1; i < listItems.length - 1; i += 1) {
+            for (var i = 1; i < listItems.length - 1; i += 1) {
               final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions =
                   getSemanticsActions(i);
               expect(
@@ -757,7 +753,7 @@ void main() {
         ) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           final Widget reorderableListView = ReorderableListView(
-            onReorder: (int oldIndex, int newIndex) {},
+            onReorderItem: (_, _) {},
             children: <Widget>[
               const SizedBox(
                 key: Key('List tile 1'),
@@ -784,7 +780,9 @@ void main() {
             ],
           );
           await tester.pumpWidget(
-            MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+            MaterialApp(
+              home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+            ),
           );
 
           // Get the switch tile's semantics:
@@ -835,17 +833,19 @@ void main() {
       testWidgets('reorder is not triggered when children length is less or equals to 1', (
         WidgetTester tester,
       ) async {
-        bool onReorderWasCalled = false;
+        var onReorderWasCalled = false;
         final List<String> currentListItems = listItems.take(1).toList();
-        final ReorderableListView reorderableListView = ReorderableListView(
+        final reorderableListView = ReorderableListView(
           header: const Text('Header'),
           scrollDirection: Axis.horizontal,
-          onReorder: (_, _) => onReorderWasCalled = true,
+          onReorderItem: (_, _) => onReorderWasCalled = true,
           children: currentListItems.map<Widget>(listItemToWidget).toList(),
         );
         final List<String> currentOriginalListItems = originalListItems.take(1).toList();
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+          ),
         );
         expect(currentListItems, orderedEquals(currentOriginalListItems));
         final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 1')));
@@ -957,7 +957,7 @@ void main() {
       ) async {
         final Widget reorderableListView = ReorderableListView(
           scrollDirection: Axis.horizontal,
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorderItem: (_, _) {},
           children: const <Widget>[
             SizedBox(key: Key('Normal item'), width: itemHeight, child: Text('Normal item')),
             SizedBox(key: Key('Tall item'), width: itemHeight * 2, child: Text('Tall item')),
@@ -965,7 +965,9 @@ void main() {
           ],
         );
         await tester.pumpWidget(
-          MaterialApp(home: SizedBox(width: itemHeight * 10, child: reorderableListView)),
+          MaterialApp(
+            home: SizedBox(width: itemHeight * 10, child: reorderableListView),
+          ),
         );
 
         double getListWidth() {
@@ -1011,7 +1013,7 @@ void main() {
         debugDisableShadows = false;
         final Widget reorderableListView = ReorderableListView(
           scrollDirection: Axis.horizontal,
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorderItem: (_, _) {},
           children: <Widget>[
             Container(
               key: const Key('pink'),
@@ -1036,10 +1038,9 @@ void main() {
 
         late final OverlayEntry entry;
         addTearDown(
-          () =>
-              entry
-                ..remove()
-                ..dispose(),
+          () => entry
+            ..remove()
+            ..dispose(),
         );
 
         await tester.pumpWidget(
@@ -1100,7 +1101,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ReorderableListView(
-              onReorder: (int oldIndex, int newIndex) {},
+              onReorderItem: (_, _) {},
               scrollDirection: Axis.horizontal,
               children: <Widget>[
                 _Stateful(key: const Key('A')),
@@ -1120,7 +1121,7 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ReorderableListView(
-              onReorder: (int oldIndex, int newIndex) {},
+              onReorderItem: (_, _) {},
               scrollDirection: Axis.horizontal,
               children: <Widget>[
                 _Stateful(key: const Key('B')),
@@ -1137,18 +1138,17 @@ void main() {
       });
 
       testWidgets('Preserves children states when rebuilt', (WidgetTester tester) async {
-        const Key firstBox = Key('key');
+        const firstBox = Key('key');
         Widget build() {
           return MaterialApp(
             home: Directionality(
               textDirection: TextDirection.ltr,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: ReorderableListView(
                   scrollDirection: Axis.horizontal,
                   children: const <Widget>[SizedBox(key: firstBox, width: 10, height: 10)],
-                  onReorder: (_, _) {},
+                  onReorderItem: (_, _) {},
                 ),
               ),
             ),
@@ -1165,7 +1165,7 @@ void main() {
 
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
-          final Semantics semantics =
+          final semantics =
               find
                       .ancestor(
                         of: find.byKey(Key(listItems[index])),
@@ -1178,10 +1178,10 @@ void main() {
           return semantics.properties.customSemanticsActions!;
         }
 
-        const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
-        const CustomSemanticsAction moveToEnd = CustomSemanticsAction(label: 'Move to the end');
-        const CustomSemanticsAction moveLeft = CustomSemanticsAction(label: 'Move left');
-        const CustomSemanticsAction moveRight = CustomSemanticsAction(label: 'Move right');
+        const moveToStart = CustomSemanticsAction(label: 'Move to the start');
+        const moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+        const moveLeft = CustomSemanticsAction(label: 'Move left');
+        const moveRight = CustomSemanticsAction(label: 'Move right');
 
         testWidgets('Provides the correct accessibility actions in LTR mode', (
           WidgetTester tester,
@@ -1220,7 +1220,7 @@ void main() {
           );
 
           // Items in the middle can be moved to the start, end, left or right.
-          for (int i = 1; i < listItems.length - 1; i += 1) {
+          for (var i = 1; i < listItems.length - 1; i += 1) {
             final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions =
                 getSemanticsActions(i);
             expect(
@@ -1323,7 +1323,7 @@ void main() {
           );
 
           // Items in the middle can be moved to the start, end, left or right.
-          for (int i = 1; i < listItems.length - 1; i += 1) {
+          for (var i = 1; i < listItems.length - 1; i += 1) {
             final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions =
                 getSemanticsActions(i);
             expect(
@@ -1588,7 +1588,7 @@ void main() {
             return const SizedBox();
           },
           itemCount: -1,
-          onReorder: (int from, int to) {},
+          onReorderItem: (_, _) {},
         ),
         throwsAssertionError,
       );
@@ -1597,7 +1597,7 @@ void main() {
     testWidgets('ReorderableListView.builder only creates the children it needs', (
       WidgetTester tester,
     ) async {
-      final Set<int> itemsCreated = <int>{};
+      final itemsCreated = <int>{};
       await tester.pumpWidget(
         MaterialApp(
           home: ReorderableListView.builder(
@@ -1606,7 +1606,7 @@ void main() {
               return Text(index.toString(), key: ValueKey<int>(index));
             },
             itemCount: 1000,
-            onReorder: (int from, int to) {},
+            onReorderItem: (_, _) {},
           ),
         ),
       );
@@ -1617,7 +1617,7 @@ void main() {
 
     group('Padding', () {
       testWidgets('Padding with no header & footer', (WidgetTester tester) async {
-        const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
+        const padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
 
         // Vertical
         await tester.pumpWidget(build(padding: padding));
@@ -1643,9 +1643,9 @@ void main() {
       });
 
       testWidgets('Padding with header or footer', (WidgetTester tester) async {
-        const EdgeInsets padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
-        const Key headerKey = Key('Header');
-        const Key footerKey = Key('Footer');
+        const padding = EdgeInsets.fromLTRB(10, 20, 30, 40);
+        const headerKey = Key('Header');
+        const footerKey = Key('Footer');
         const Widget verticalHeader = SizedBox(key: headerKey, height: 10);
         const Widget horizontalHeader = SizedBox(key: headerKey, width: 10);
         const Widget verticalFooter = SizedBox(key: footerKey, height: 10);
@@ -1770,7 +1770,7 @@ void main() {
     testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
       final Widget reorderableListView = ReorderableListView(
         reverse: true,
-        onReorder: (int oldIndex, int newIndex) {},
+        onReorderItem: (_, _) {},
         children: const <Widget>[
           SizedBox(key: Key('A'), child: Text('A')),
           SizedBox(key: Key('B'), child: Text('B')),
@@ -1781,10 +1781,63 @@ void main() {
       expect(tester.getCenter(find.text('A')).dy, greaterThan(tester.getCenter(find.text('B')).dy));
     });
 
+    testWidgets(
+      'ReorderableListView in Flexible with one item does not assert when dragged to edge',
+      (WidgetTester tester) async {
+        final items = <String>['Item 1'];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: <Widget>[
+                  Flexible(
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return ReorderableListView(
+                          onReorder: (int oldIndex, int newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) {
+                                newIndex -= 1;
+                              }
+                              final String item = items.removeAt(oldIndex);
+                              items.insert(newIndex, item);
+                            });
+                          },
+                          children: <Widget>[
+                            ListTile(
+                              key: const ValueKey<String>('Item 1'),
+                              title: Text(items.first),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Offset startLocation = tester.getCenter(find.byKey(const ValueKey<String>('Item 1')));
+        final TestGesture gesture = await tester.startGesture(startLocation);
+        await tester.pump();
+        await gesture.moveTo(tester.getBottomRight(find.byType(Scaffold)) - const Offset(10, 10));
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(tester.takeException(), isNull);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+
     testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
-      const Key testItemKey = Key('Test item');
+      const testItemKey = Key('Test item');
       final Widget reorderableListView = ReorderableListView(
-        onReorder: (int oldIndex, int newIndex) {},
+        onReorderItem: (_, _) {},
         children: const <Widget>[
           SizedBox(key: Key('First item'), height: itemHeight, child: Text('First item')),
           SizedBox(key: testItemKey, height: itemHeight, child: Text('Test item')),
@@ -1792,7 +1845,9 @@ void main() {
         ],
       );
       await tester.pumpWidget(
-        MaterialApp(home: SizedBox(height: itemHeight * 10, child: reorderableListView)),
+        MaterialApp(
+          home: SizedBox(height: itemHeight * 10, child: reorderableListView),
+        ),
       );
 
       Offset getTestItemPosition() {
@@ -1876,12 +1931,9 @@ void main() {
     'ReorderableListView, can deal with the dragged item getting unmounted and rebuilt during drag',
     (WidgetTester tester) async {
       // See https://github.com/flutter/flutter/issues/74840 for more details.
-      final List<int> items = List<int>.generate(100, (int index) => index);
+      final items = List<int>.generate(100, (int index) => index);
 
       void handleReorder(int fromIndex, int toIndex) {
-        if (toIndex > fromIndex) {
-          toIndex -= 1;
-        }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
 
@@ -1906,7 +1958,7 @@ void main() {
             },
             buildDefaultDragHandles: false,
             itemCount: items.length,
-            onReorder: handleReorder,
+            onReorderItem: handleReorder,
           ),
         ),
       );
@@ -1922,7 +1974,7 @@ void main() {
       await tester.pumpAndSettle();
       // Ensure we made it to the bottom (only 4 should be showing as there should
       // be a gap at the end for the drop area of the dragged item.
-      for (final int i in <int>[95, 96, 97, 98, 99]) {
+      for (final i in <int>[95, 96, 97, 98, 99]) {
         expect(find.text('item $i'), findsOneWidget);
       }
 
@@ -1937,7 +1989,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should not have changed anything
-      for (final int i in <int>[0, 1, 2, 3, 4, 5]) {
+      for (final i in <int>[0, 1, 2, 3, 4, 5]) {
         expect(find.text('item $i'), findsOneWidget);
       }
       expect(items.take(8), orderedEquals(<int>[0, 1, 2, 3, 4, 5, 6, 7]));
@@ -1947,14 +1999,11 @@ void main() {
   testWidgets('ReorderableListView calls onReorderStart and onReorderEnd correctly', (
     WidgetTester tester,
   ) async {
-    final List<int> items = List<int>.generate(8, (int index) => index);
+    final items = List<int>.generate(8, (int index) => index);
     int? startIndex, endIndex;
     final Finder item0 = find.textContaining('item 0');
 
     void handleReorder(int fromIndex, int toIndex) {
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
-      }
       items.insert(toIndex, items.removeAt(fromIndex));
     }
 
@@ -1976,7 +2025,7 @@ void main() {
           },
           buildDefaultDragHandles: false,
           itemCount: items.length,
-          onReorder: handleReorder,
+          onReorderItem: handleReorder,
           onReorderStart: (int index) {
             startIndex = index;
           },
@@ -2023,6 +2072,293 @@ void main() {
     expect(endIndex, equals(0));
   });
 
+  testWidgets('ReorderableListView calls old onReorder callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const itemCount = 5;
+    var onReorderCallCount = 0;
+    final children = <Widget>[
+      for (int index = 0; index < itemCount; index++)
+        SizedBox(
+          key: ValueKey<int>(index),
+          height: 100,
+          child: ReorderableDragStartListener(index: index, child: Text('item $index')),
+        ),
+    ];
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+
+      if (fromIndex < toIndex) {
+        toIndex -= 1;
+      }
+
+      children.insert(toIndex, children.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableListView(onReorder: handleReorder, children: children),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+
+    final dragDownItems = <int>[
+      for (final Widget child in children)
+        if (child.key case final ValueKey<int> key) key.value,
+    ];
+
+    expect(dragDownItems, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    final dragUpItems = <int>[
+      for (final Widget child in children)
+        if (child.key case final ValueKey<int> key) key.value,
+    ];
+
+    expect(onReorderCallCount, 2);
+    expect(dragUpItems, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
+  testWidgets('ReorderableListView calls onReorderItem callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const itemCount = 5;
+    final children = <Widget>[
+      for (int index = 0; index < itemCount; index++)
+        SizedBox(
+          key: ValueKey<int>(index),
+          height: 100,
+          child: ReorderableDragStartListener(index: index, child: Text('item $index')),
+        ),
+    ];
+
+    void handleReorderItem(int fromIndex, int toIndex) {
+      children.insert(toIndex, children.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableListView(onReorderItem: handleReorderItem, children: children),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    final dragDownItems = <int>[
+      for (final Widget child in children)
+        if (child.key case final ValueKey<int> key) key.value,
+    ];
+
+    expect(dragDownItems, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    final dragUpItems = <int>[
+      for (final Widget child in children)
+        if (child.key case final ValueKey<int> key) key.value,
+    ];
+
+    expect(dragUpItems, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
+  testWidgets('ReorderableListView asserts if neither onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(() => ReorderableListView(children: const <Widget>[]), throwsAssertionError);
+  });
+
+  testWidgets('ReorderableListView asserts if both onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => ReorderableListView(
+        onReorder: (_, _) {},
+        onReorderItem: (_, _) {},
+        children: const <Widget>[],
+      ),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('ReorderableListView.builder calls old onReorder callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const itemCount = 5;
+    var onReorderCallCount = 0;
+    final items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorder(int fromIndex, int toIndex) {
+      onReorderCallCount += 1;
+
+      if (fromIndex < toIndex) {
+        toIndex -= 1;
+      }
+
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableListView.builder(
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              key: ValueKey<int>(items[index]),
+              height: 100,
+              child: ReorderableDragStartListener(
+                index: index,
+                child: Text('item ${items[index]}'),
+              ),
+            );
+          },
+          onReorder: handleReorder,
+        ),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 1);
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    expect(onReorderCallCount, 2);
+    expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
+  testWidgets('ReorderableListView.builder calls onReorderItem callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const itemCount = 5;
+    final items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorderItem(int fromIndex, int toIndex) {
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableListView.builder(
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              key: ValueKey<int>(items[index]),
+              height: 100,
+              child: ReorderableDragStartListener(
+                index: index,
+                child: Text('item ${items[index]}'),
+              ),
+            );
+          },
+          onReorderItem: handleReorderItem,
+        ),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
+  testWidgets(
+    'ReorderableListView.builder asserts if neither onReorder and onReorderItem are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => ReorderableListView.builder(itemBuilder: (_, _) => const SizedBox(), itemCount: 0),
+        throwsAssertionError,
+      );
+    },
+  );
+
+  testWidgets(
+    'ReorderableListView.builder asserts if both onReorder and onReorderItem are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => ReorderableListView.builder(
+          itemBuilder: (_, _) => const SizedBox(),
+          itemCount: 0,
+          onReorder: (_, _) {},
+          onReorderItem: (_, _) {},
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
   testWidgets('ReorderableListView throws an error when key is not passed to its children', (
     WidgetTester tester,
   ) async {
@@ -2031,7 +2367,7 @@ void main() {
         return SizedBox(child: Text('Item $index'));
       },
       itemCount: 3,
-      onReorder: (int oldIndex, int newIndex) {},
+      onReorderItem: (_, _) {},
     );
     await tester.pumpWidget(MaterialApp(home: reorderableListView));
     final dynamic exception = tester.takeException();
@@ -2046,7 +2382,7 @@ void main() {
         SizedBox(width: 100.0, height: 100.0, key: Key('B'), child: Text('B')),
         SizedBox(width: 100.0, height: 100.0, key: Key('A'), child: Text('A')),
       ],
-      onReorder: (int oldIndex, int newIndex) {},
+      onReorderItem: (_, _) {},
     );
     final Widget boilerplate = Localizations(
       locale: const Locale('en'),
@@ -2054,9 +2390,8 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child: SizedBox(
-        width: 100.0,
-        height: 100.0,
+      child: SizedBox.square(
+        dimension: 100.0,
         child: Directionality(textDirection: TextDirection.ltr, child: reorderableList),
       ),
     );
@@ -2078,7 +2413,7 @@ void main() {
       () => ReorderableListView(
         itemExtent: 30,
         prototypeItem: const SizedBox(),
-        onReorder: (int fromIndex, int toIndex) {},
+        onReorderItem: (_, _) {},
         children: const <Widget>[],
       ),
       throwsAssertionError,
@@ -2088,7 +2423,7 @@ void main() {
   testWidgets('ReorderableListView.builder asserts on both non-null itemExtent and prototypeItem', (
     WidgetTester tester,
   ) async {
-    final List<int> numbers = <int>[0, 1, 2];
+    final numbers = <int>[0, 1, 2];
     expect(
       () => ReorderableListView.builder(
         itemBuilder: (BuildContext context, int index) {
@@ -2104,7 +2439,7 @@ void main() {
         itemCount: numbers.length,
         itemExtent: 30,
         prototypeItem: const SizedBox(),
-        onReorder: (int fromIndex, int toIndex) {},
+        onReorderItem: (_, _) {},
       ),
       throwsAssertionError,
     );
@@ -2113,7 +2448,7 @@ void main() {
   testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (
     WidgetTester tester,
   ) async {
-    final List<int> numbers = <int>[0, 1, 2];
+    final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2134,7 +2469,7 @@ void main() {
                 },
                 itemCount: numbers.length,
                 itemExtent: 30,
-                onReorder: (int fromIndex, int toIndex) {},
+                onReorderItem: (_, _) {},
               );
             },
           ),
@@ -2154,7 +2489,7 @@ void main() {
   testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (
     WidgetTester tester,
   ) async {
-    final List<int> numbers = <int>[0, 1, 2];
+    final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2175,7 +2510,7 @@ void main() {
                 },
                 itemCount: numbers.length,
                 prototypeItem: const SizedBox(height: 30, child: Text('3')),
-                onReorder: (int oldIndex, int newIndex) {},
+                onReorderItem: (_, _) {},
               );
             },
           ),
@@ -2210,8 +2545,8 @@ void main() {
     }
 
     Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
-      final List<int> items = List<int>.generate(10, (int index) => index);
-      final ScrollController scrollController = ScrollController();
+      final items = List<int>.generate(10, (int index) => index);
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -2232,7 +2567,7 @@ void main() {
               );
             },
             itemCount: items.length,
-            onReorder: (int fromIndex, int toIndex) {},
+            onReorderItem: (_, _) {},
             scrollController: scrollController,
             autoScrollerVelocityScalar: autoScrollerVelocityScalar,
           ),
@@ -2297,7 +2632,7 @@ void main() {
                   );
                 },
                 itemCount: 5,
-                onReorder: (int fromIndex, int toIndex) {},
+                onReorderItem: (_, _) {},
               ),
             ),
           ),
@@ -2334,7 +2669,7 @@ void main() {
               );
             },
             itemCount: 5,
-            onReorder: (int fromIndex, int toIndex) {},
+            onReorderItem: (_, _) {},
           ),
         ),
       ),
@@ -2384,7 +2719,7 @@ void main() {
                 );
               },
               itemCount: 5,
-              onReorder: (int fromIndex, int toIndex) {},
+              onReorderItem: (_, _) {},
             ),
           ),
         ),
@@ -2415,6 +2750,25 @@ void main() {
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  testWidgets('ReorderableListView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: ReorderableListView(
+              children: const <Widget>[
+                Text(key: Key('x'), 'X'),
+                Text(key: Key('y'), 'Y'),
+              ],
+              onReorderItem: (_, _) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ReorderableListView)), Size.zero);
+  });
 }
 
 Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
@@ -2439,9 +2793,8 @@ class _StatefulState extends State<_Stateful> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48.0,
-      height: 48.0,
+    return SizedBox.square(
+      dimension: 48.0,
       child: Material(
         child: Checkbox(value: checked, onChanged: (bool? newValue) => checked = newValue),
       ),

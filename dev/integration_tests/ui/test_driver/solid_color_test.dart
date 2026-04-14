@@ -17,8 +17,7 @@ void main() {
 
   test('Can render solid red', () async {
     // RGBA Encoded Bytes.
-    final Uint8List data =
-        (await driver.screenshot(format: ScreenshotFormat.rawStraightRgba)) as Uint8List;
+    final data = (await driver.screenshot(format: ScreenshotFormat.rawStraightRgba)) as Uint8List;
 
     expect(data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3], 0xFF0000FF);
   }, timeout: Timeout.none);

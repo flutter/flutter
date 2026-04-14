@@ -19,24 +19,32 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
-        body: const Center(child: SliverAnimatedOpacityExample(duration: duration, curve: curve)),
+        body: const Center(
+          child: SliverAnimatedOpacityExample(duration: duration, curve: curve),
+        ),
       ),
     );
   }
 }
 
 class SliverAnimatedOpacityExample extends StatefulWidget {
-  const SliverAnimatedOpacityExample({required this.duration, required this.curve, super.key});
+  const SliverAnimatedOpacityExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
 
   final Duration duration;
 
   final Curve curve;
 
   @override
-  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
+  State<SliverAnimatedOpacityExample> createState() =>
+      _SliverAnimatedOpacityExampleState();
 }
 
-class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
+class _SliverAnimatedOpacityExampleState
+    extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 
@@ -48,11 +56,14 @@ class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExam
           opacity: _visible ? 1.0 : 0.0,
           duration: widget.duration,
           curve: widget.curve,
-          sliver: SliverFixedExtentList(
+          sliver: SliverFixedExtentList.builder(
             itemExtent: 100.0,
-            delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-              return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
-            }, childCount: 5),
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
+              );
+            },
           ),
         ),
         SliverToBoxAdapter(

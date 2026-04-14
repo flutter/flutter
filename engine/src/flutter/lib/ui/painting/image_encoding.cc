@@ -146,7 +146,7 @@ void EncodeImageAndInvokeDataCallback(
   if (is_impeller_enabled) {
     ImageEncodingImpeller::ConvertImageToRaster(
         image, encode_task, raster_task_runner, io_task_runner,
-        is_gpu_disabled_sync_switch, impeller_context);
+        snapshot_delegate, is_gpu_disabled_sync_switch, impeller_context);
     return;
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -177,14 +177,6 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
 
   auto callback = std::make_unique<DartPersistentValue>(
       tonic::DartState::Current(), callback_handle);
-
-#if IMPELLER_SUPPORTS_RENDERING && FML_OS_IOS_SIMULATOR
-  if (canvas_image->image()->IsFakeImage()) {
-    sk_sp<SkData> data = SkData::MakeEmpty();
-    InvokeDataCallback(std::move(callback), data);
-    return Dart_Null();
-  }
-#endif  // IMPELLER_SUPPORTS_RENDERING && FML_OS_IOS_SIMULATOR
 
   const auto& task_runners = UIDartState::Current()->GetTaskRunners();
 

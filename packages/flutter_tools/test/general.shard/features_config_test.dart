@@ -11,10 +11,10 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import '../src/common.dart';
 
-const Feature _noConfigFeature = Feature(name: 'example');
-const Feature _configOnlyFeature = Feature(name: 'example', configSetting: 'enable-flag');
-const Feature _envOnlyFeature = Feature(name: 'example', environmentOverride: 'ENABLE_FLAG');
-const Feature _configAndEnvFeature = Feature(
+const _noConfigFeature = Feature(name: 'example');
+const _configOnlyFeature = Feature(name: 'example', configSetting: 'enable-flag');
+const _envOnlyFeature = Feature(name: 'example', environmentOverride: 'ENABLE_FLAG');
+const _configAndEnvFeature = Feature(
   name: 'example',
   configSetting: 'enable-flag',
   environmentOverride: 'ENABLE_FLAG',
@@ -27,21 +27,20 @@ void main() {
     Map<String, Object> globalConfig = const <String, Object>{},
     String? projectManifest,
   }) {
-    final Config globalConfigReader = Config.test();
+    final globalConfigReader = Config.test();
     for (final MapEntry<String, Object>(:String key, :Object value) in globalConfig.entries) {
       globalConfigReader.setValue(key, value);
     }
 
-    final BufferLogger logger = BufferLogger.test();
-    final FlutterManifest? flutterManifest =
-        projectManifest != null
-            ? FlutterManifest.createFromString(projectManifest, logger: logger)
-            : FlutterManifest.empty(logger: logger);
+    final logger = BufferLogger.test();
+    final FlutterManifest? flutterManifest = projectManifest != null
+        ? FlutterManifest.createFromString(projectManifest, logger: logger)
+        : FlutterManifest.empty(logger: logger);
     if (flutterManifest == null) {
       fail(logger.errorText);
     }
 
-    final FlutterFeaturesConfig featuresConfig = FlutterFeaturesConfig(
+    final featuresConfig = FlutterFeaturesConfig(
       globalConfig: globalConfigReader,
       platform: FakePlatform(environment: <String, String>{...environment}),
       projectManifest: flutterManifest,

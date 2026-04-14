@@ -71,6 +71,37 @@ class DeathRattle final {
   std::function<void()> callback_;
 };
 
+// Wait for reclaim of recycled command pools.
+void WaitForReclaim(const std::shared_ptr<ContextVK>& context) {
+  // Add a resource to the resource manager and wait for its destructor to
+  // signal an event.
+  //
+  // This must be done twice because the resource manager does not guarantee
+  // the order in which resources are handled within the set of reclaimable
+  // resources.  When the first DeathRattle is signaled there may be pools
+  // within the pending set that have not yet been reclaimed.  After the second
+  // DeathRattle is signaled all resources in the original set will have been
+  // reclaimed.
+  for (int i = 0; i < 2; i++) {
+    auto waiter = fml::AutoResetWaitableEvent();
+    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
+    {
+      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
+                                              std::move(rattle));
+    }
+    waiter.Wait();
+  }
+}
+
+// The list of function calls returned by the mock Vulkan device is not thread
+// safe.  Wait for the background thread to finish any pending reclaim
+// operations before obtaining the list.
+std::shared_ptr<std::vector<std::string>> ReclaimAndGetMockVulkanFunctions(
+    const std::shared_ptr<ContextVK>& context) {
+  WaitForReclaim(context);
+  return GetMockVulkanFunctions(context->GetDevice());
+}
+
 }  // namespace
 
 TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
@@ -85,16 +116,7 @@ TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
     recycler->Dispose();
   }
 
-  // Add something to the resource manager and have it notify us when it's
-  // destroyed. That should give us a non-flaky signal that the pool has been
-  // reclaimed as well.
-  auto waiter = fml::AutoResetWaitableEvent();
-  auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-  {
-    UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                            std::move(rattle));
-  }
-  waiter.Wait();
+  WaitForReclaim(context);
 
   // On another thread explicitly, request a new pool.
   std::thread thread([&]() {
@@ -105,7 +127,7 @@ TEST(CommandPoolRecyclerVKTest, ReclaimMakesCommandPoolAvailable) {
   thread.join();
 
   // Now check that we only ever created one pool.
-  auto const called = GetMockVulkanFunctions(context->GetDevice());
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
   EXPECT_EQ(std::count(called->begin(), called->end(), "vkCreateCommandPool"),
             1u);
 
@@ -127,16 +149,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
     recycler->Dispose();
   }
 
-  // Wait for the pool to be reclaimed.
-  for (auto i = 0u; i < 2u; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
-    }
-    waiter.Wait();
-  }
+  WaitForReclaim(context);
 
   {
     // Create a second pool and command buffer, which should reused the existing
@@ -152,7 +165,7 @@ TEST(CommandPoolRecyclerVKTest, CommandBuffersAreRecycled) {
   }
 
   // Now check that we only ever created one pool and one command buffer.
-  auto const called = GetMockVulkanFunctions(context->GetDevice());
+  auto const called = ReclaimAndGetMockVulkanFunctions(context);
   EXPECT_EQ(std::count(called->begin(), called->end(), "vkCreateCommandPool"),
             1u);
   EXPECT_EQ(
@@ -180,19 +193,8 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     recycler->Dispose();
   }
 
-  // Wait for the pool to be reclaimed.
-  for (auto i = 0u; i < 2u; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
-    }
-    waiter.Wait();
-  }
-
   // Command pool is reset but does not release resources.
-  auto called = GetMockVulkanFunctions(context->GetDevice());
+  auto called = ReclaimAndGetMockVulkanFunctions(context);
   EXPECT_EQ(std::count(called->begin(), called->end(), "vkResetCommandPool"),
             1u);
 
@@ -206,24 +208,32 @@ TEST(CommandPoolRecyclerVKTest, ExtraCommandBufferAllocationsTriggerTrim) {
     recycler->Dispose();
   }
 
-  // Wait for the pool to be reclaimed.
-  for (auto i = 0u; i < 2u; i++) {
-    auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
-    {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
-    }
-    waiter.Wait();
-  }
-
   // Verify that the cmd pool was trimmed.
 
   // Now check that we only ever created one pool and one command buffer.
-  called = GetMockVulkanFunctions(context->GetDevice());
+  called = ReclaimAndGetMockVulkanFunctions(context);
   EXPECT_EQ(std::count(called->begin(), called->end(),
                        "vkResetCommandPoolReleaseResources"),
             1u);
+
+  context->Shutdown();
+}
+
+TEST(CommandPoolRecyclerVKTest, RecyclerGlobalPoolMapSize) {
+  auto context = MockVulkanContextBuilder().Build();
+  auto const recycler = context->GetCommandPoolRecycler();
+
+  // The global pool list for this context should initially be empty.
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
+
+  // Creating a pool for this thread should insert the pool into the global map.
+  auto pool = recycler->Get();
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 1);
+
+  // Disposing this thread's pool should remove it from the global map.
+  pool.reset();
+  recycler->Dispose();
+  EXPECT_EQ(CommandPoolRecyclerVK::GetGlobalPoolCount(*context), 0);
 
   context->Shutdown();
 }

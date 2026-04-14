@@ -23,6 +23,16 @@ class MockWindowsProcTable : public WindowsProcTable {
               (UINT32 pointer_id, POINTER_INPUT_TYPE* pointer_type),
               (const, override));
 
+  MOCK_METHOD(BOOL,
+              GetPointerInfo,
+              (UINT32 pointer_id, POINTER_INFO* pointer_info),
+              (const, override));
+
+  MOCK_METHOD(BOOL,
+              GetPointerPenInfo,
+              (UINT32 pointer_id, POINTER_PEN_INFO* pointer_info),
+              (const, override));
+
   MOCK_METHOD(LRESULT,
               GetThreadPreferredUILanguages,
               (DWORD, PULONG, PZZWSTR, PULONG),
@@ -40,6 +50,24 @@ class MockWindowsProcTable : public WindowsProcTable {
               (const, override));
 
   MOCK_METHOD(HCURSOR, SetCursor, (HCURSOR cursor), (const, override));
+
+  MOCK_METHOD(BOOL,
+              EnumDisplaySettings,
+              (LPCWSTR lpszDeviceName, DWORD iModeNum, DEVMODEW* lpDevMode),
+              (const, override));
+
+  MOCK_METHOD(BOOL,
+              GetMonitorInfo,
+              (HMONITOR hMonitor, LPMONITORINFO lpmi),
+              (const, override));
+
+  MOCK_METHOD(
+      BOOL,
+      EnumDisplayMonitors,
+      (HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum, LPARAM dwData),
+      (const, override));
+
+  MOCK_METHOD(UINT, GetDpiForMonitor, (HMONITOR, UINT), ());
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsProcTable);

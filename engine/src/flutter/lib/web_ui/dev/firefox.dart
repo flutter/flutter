@@ -23,6 +23,7 @@ class FirefoxEnvironment implements BrowserEnvironment {
 
   @override
   Future<Browser> launchBrowserInstance(Uri url, {bool debug = false}) async {
+    await Firefox.printActualVersion(_installation);
     return Firefox(url, _installation, debug: debug);
   }
 
@@ -58,11 +59,11 @@ class Firefox extends Browser {
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
-    final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
+    final remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
-        const String profile = '''
+        const profile = '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
@@ -70,7 +71,7 @@ user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
 ''';
 
-        final Directory temporaryProfileDirectory = Directory(
+        final temporaryProfileDirectory = Directory(
           path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
         );
 
@@ -83,7 +84,25 @@ user_pref("browser.aboutwelcome.enabled", false);
         temporaryProfileDirectory.createSync(recursive: true);
         File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
 
-        final List<String> args = <String>[
+        // Policies
+
+        final executable = File(installation.executable);
+        // The FIREFOX_EXECUTABLE path points to a symlink to the downloaded CIPD package. So we
+        // need to create the policies file in the same directory as the actual executable.
+        final resolved = File(executable.resolveSymbolicLinksSync());
+
+        final policiesDir = Directory(path.join(resolved.parent.absolute.path, 'distribution'));
+        policiesDir.createSync(recursive: true);
+        final policiesFile = File(path.join(policiesDir.path, 'policies.json'));
+        policiesFile.writeAsStringSync('''
+{
+  "policies": {
+    "DisableAppUpdate": true
+  }
+}
+''');
+
+        final args = <String>[
           url.toString(),
           '--profile',
           temporaryProfileDirectory.path,
@@ -120,6 +139,13 @@ user_pref("browser.aboutwelcome.enabled", false);
   }
 
   Firefox._(this._process, this.remoteDebuggerUrl);
+
+  static Future<void> printActualVersion(BrowserInstallation installation) async {
+    final ProcessResult result = await Process.run(installation.executable, ['--version']);
+    // Example:
+    // "Browser: Mozilla Firefox 141.0"
+    print('Browser: ${result.stdout}');
+  }
 
   final BrowserProcess _process;
 

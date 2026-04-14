@@ -21,7 +21,8 @@ GeometryResult FillPathSourceGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+  auto& indexes_host_buffer = renderer.GetTransientsIndexesBuffer();
 
   const auto& bounding_box = GetSource().GetBounds();
   if (bounding_box.IsEmpty()) {
@@ -43,7 +44,8 @@ GeometryResult FillPathSourceGeometry::GetPositionBuffer(
       renderer.GetDeviceCapabilities().SupportsTriangleFan() &&
       supports_primitive_restart;
   VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
-      GetSource(), host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
+      GetSource(), data_host_buffer, indexes_host_buffer,
+      entity.GetTransform().GetMaxBasisLengthXY(),
       /*supports_primitive_restart=*/supports_primitive_restart,
       /*supports_triangle_fan=*/supports_triangle_fan);
 
@@ -90,30 +92,19 @@ bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
   return coverage.Contains(rect);
 }
 
+FillPathFromSourceGeometry::FillPathFromSourceGeometry(const PathSource& source)
+    : FillPathSourceGeometry(std::nullopt), source_(source) {}
+
+const PathSource& FillPathFromSourceGeometry::GetSource() const {
+  return source_;
+}
+
 FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
                                    std::optional<Rect> inner_rect)
     : FillPathSourceGeometry(inner_rect), path_(path) {}
 
 const PathSource& FillPathGeometry::GetSource() const {
   return path_;
-}
-
-ArcFillPathGeometry::ArcFillPathGeometry(const flutter::DlPath& path,
-                                         const Rect& oval_bounds)
-    : FillPathSourceGeometry(std::nullopt),
-      path_(path),
-      oval_bounds_(oval_bounds) {}
-
-const PathSource& ArcFillPathGeometry::GetSource() const {
-  return path_;
-}
-
-std::optional<Rect> ArcFillPathGeometry::GetCoverage(
-    const Matrix& transform) const {
-  return GetSource()
-      .GetBounds()
-      .IntersectionOrEmpty(oval_bounds_)
-      .TransformAndClipBounds(transform);
 }
 
 FillDiffRoundRectGeometry::FillDiffRoundRectGeometry(const RoundRect& outer,

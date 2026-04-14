@@ -322,7 +322,7 @@ class GestureDetector extends StatelessWidget {
                ErrorHint('Just use the scale gesture recognizer.'),
              ]);
            }
-           final String recognizer = havePan ? 'pan' : 'scale';
+           final recognizer = havePan ? 'pan' : 'scale';
            if (haveVerticalDrag && haveHorizontalDrag) {
              throw FlutterError(
                'Incorrect GestureDetector arguments.\n'
@@ -1047,7 +1047,7 @@ class GestureDetector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final gestures = <Type, GestureRecognizerFactory>{};
     final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     final ScrollBehavior configuration = ScrollConfiguration.of(context);
 
@@ -1180,23 +1180,25 @@ class GestureDetector extends StatelessWidget {
         onHorizontalDragUpdate != null ||
         onHorizontalDragEnd != null ||
         onHorizontalDragCancel != null) {
-      gestures[HorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<
-        HorizontalDragGestureRecognizer
-      >(
-        () => HorizontalDragGestureRecognizer(debugOwner: this, supportedDevices: supportedDevices),
-        (HorizontalDragGestureRecognizer instance) {
-          instance
-            ..onDown = onHorizontalDragDown
-            ..onStart = onHorizontalDragStart
-            ..onUpdate = onHorizontalDragUpdate
-            ..onEnd = onHorizontalDragEnd
-            ..onCancel = onHorizontalDragCancel
-            ..dragStartBehavior = dragStartBehavior
-            ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
-            ..gestureSettings = gestureSettings
-            ..supportedDevices = supportedDevices;
-        },
-      );
+      gestures[HorizontalDragGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+            () => HorizontalDragGestureRecognizer(
+              debugOwner: this,
+              supportedDevices: supportedDevices,
+            ),
+            (HorizontalDragGestureRecognizer instance) {
+              instance
+                ..onDown = onHorizontalDragDown
+                ..onStart = onHorizontalDragStart
+                ..onUpdate = onHorizontalDragUpdate
+                ..onEnd = onHorizontalDragEnd
+                ..onCancel = onHorizontalDragCancel
+                ..dragStartBehavior = dragStartBehavior
+                ..multitouchDragStrategy = configuration.getMultitouchDragStrategy(context)
+                ..gestureSettings = gestureSettings
+                ..supportedDevices = supportedDevices;
+            },
+          );
     }
 
     if (onPanDown != null ||
@@ -1484,8 +1486,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler =
-          context.findRenderObject()! as RenderSemanticsGestureHandler;
+      final semanticsGestureHandler = context.findRenderObject()! as RenderSemanticsGestureHandler;
       _updateSemanticsForRenderObject(semanticsGestureHandler);
     }
   }
@@ -1506,8 +1507,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       return;
     }
 
-    final RenderSemanticsGestureHandler? semanticsGestureHandler =
-        context.findRenderObject() as RenderSemanticsGestureHandler?;
+    final semanticsGestureHandler = context.findRenderObject() as RenderSemanticsGestureHandler?;
     assert(() {
       if (semanticsGestureHandler == null) {
         throw FlutterError(
@@ -1604,10 +1604,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (_recognizers == null) {
       properties.add(DiagnosticsNode.message('DISPOSED'));
     } else {
-      final List<String> gestures =
-          _recognizers!.values
-              .map<String>((GestureRecognizer recognizer) => recognizer.debugDescription)
-              .toList();
+      final List<String> gestures = _recognizers!.values
+          .map<String>((GestureRecognizer recognizer) => recognizer.debugDescription)
+          .toList();
       properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
       properties.add(
         IterableProperty<GestureRecognizer>(
@@ -1647,8 +1646,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler renderObject =
-        RenderSemanticsGestureHandler()..behavior = behavior;
+    final renderObject = RenderSemanticsGestureHandler()..behavior = behavior;
     assignSemantics(renderObject);
     return renderObject;
   }
@@ -1695,72 +1693,138 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   final RawGestureDetectorState detectorState;
 
+  static Rect _getLocalRectFromRenderObject(RenderObject renderObject) {
+    if (renderObject is! RenderBox) {
+      return Rect.zero;
+    }
+
+    final Size size = renderObject.size;
+    return Rect.fromLTWH(0, 0, size.width, size.height);
+  }
+
+  static Offset _transformOffsetToGlobal(RenderObject object, Offset local) {
+    final Matrix4 transform = object.getTransformTo(null);
+    return MatrixUtils.transformPoint(transform, local);
+  }
+
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
     assert(!detectorState.widget.excludeFromSemantics);
     final Map<Type, GestureRecognizer> recognizers = detectorState._recognizers!;
     renderObject
-      ..onTap = _getTapHandler(recognizers)
-      ..onLongPress = _getLongPressHandler(recognizers)
-      ..onHorizontalDragUpdate = _getHorizontalDragUpdateHandler(recognizers)
-      ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(recognizers);
+      ..onTap = _getTapHandler(renderObject, recognizers)
+      ..onLongPress = _getLongPressHandler(renderObject, recognizers)
+      ..onHorizontalDragUpdate = _getHorizontalDragUpdateHandler(renderObject, recognizers)
+      ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(renderObject, recognizers);
   }
 
-  GestureTapCallback? _getTapHandler(Map<Type, GestureRecognizer> recognizers) {
-    final TapGestureRecognizer? tap = recognizers[TapGestureRecognizer] as TapGestureRecognizer?;
+  GestureTapCallback? _getTapHandler(
+    RenderObject renderObject,
+    Map<Type, GestureRecognizer> recognizers,
+  ) {
+    final tap = recognizers[TapGestureRecognizer] as TapGestureRecognizer?;
     if (tap == null) {
       return null;
     }
 
     return () {
-      tap.onTapDown?.call(TapDownDetails());
-      tap.onTapUp?.call(TapUpDetails(kind: PointerDeviceKind.unknown));
+      final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
+      final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
+      tap.onTapDown?.call(
+        TapDownDetails(
+          globalPosition: globalCenter,
+          localPosition: localCenter,
+          kind: PointerDeviceKind.unknown,
+        ),
+      );
+      tap.onTapUp?.call(
+        TapUpDetails(
+          globalPosition: globalCenter,
+          localPosition: localCenter,
+          kind: PointerDeviceKind.unknown,
+        ),
+      );
       tap.onTap?.call();
     };
   }
 
-  GestureLongPressCallback? _getLongPressHandler(Map<Type, GestureRecognizer> recognizers) {
-    final LongPressGestureRecognizer? longPress =
-        recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
+  GestureLongPressCallback? _getLongPressHandler(
+    RenderObject renderObject,
+    Map<Type, GestureRecognizer> recognizers,
+  ) {
+    final longPress = recognizers[LongPressGestureRecognizer] as LongPressGestureRecognizer?;
     if (longPress == null) {
       return null;
     }
 
     return () {
-      longPress.onLongPressDown?.call(const LongPressDownDetails());
-      longPress.onLongPressStart?.call(const LongPressStartDetails());
+      final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
+      final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
+
+      longPress.onLongPressDown?.call(
+        LongPressDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
+      longPress.onLongPressStart?.call(
+        LongPressStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
       longPress.onLongPress?.call();
-      longPress.onLongPressEnd?.call(const LongPressEndDetails());
+      longPress.onLongPressEnd?.call(
+        LongPressEndDetails(localPosition: localCenter, globalPosition: globalCenter),
+      );
       longPress.onLongPressUp?.call();
     };
   }
 
   GestureDragUpdateCallback? _getHorizontalDragUpdateHandler(
+    RenderObject renderObject,
     Map<Type, GestureRecognizer> recognizers,
   ) {
-    final HorizontalDragGestureRecognizer? horizontal =
+    final horizontal =
         recognizers[HorizontalDragGestureRecognizer] as HorizontalDragGestureRecognizer?;
-    final PanGestureRecognizer? pan = recognizers[PanGestureRecognizer] as PanGestureRecognizer?;
+    final pan = recognizers[PanGestureRecognizer] as PanGestureRecognizer?;
 
-    final GestureDragUpdateCallback? horizontalHandler =
-        horizontal == null
-            ? null
-            : (DragUpdateDetails details) {
-              horizontal.onDown?.call(DragDownDetails());
-              horizontal.onStart?.call(DragStartDetails());
-              horizontal.onUpdate?.call(details);
-              horizontal.onEnd?.call(DragEndDetails(primaryVelocity: 0.0));
-            };
+    final GestureDragUpdateCallback? horizontalHandler = horizontal == null
+        ? null
+        : (DragUpdateDetails details) {
+            final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
+            final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
+            final Offset newLocalOffset = localCenter + details.delta;
+            final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
+            horizontal.onDown?.call(
+              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            horizontal.onStart?.call(
+              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            horizontal.onUpdate?.call(details);
+            horizontal.onEnd?.call(
+              DragEndDetails(
+                primaryVelocity: 0.0,
+                localPosition: newLocalOffset,
+                globalPosition: newGlobalOffset,
+              ),
+            );
+          };
 
-    final GestureDragUpdateCallback? panHandler =
-        pan == null
-            ? null
-            : (DragUpdateDetails details) {
-              pan.onDown?.call(DragDownDetails());
-              pan.onStart?.call(DragStartDetails());
-              pan.onUpdate?.call(details);
-              pan.onEnd?.call(DragEndDetails());
-            };
+    final GestureDragUpdateCallback? panHandler = pan == null
+        ? null
+        : (DragUpdateDetails details) {
+            final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
+            final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
+            final Offset newLocalOffset = localCenter + details.delta;
+            final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
+
+            pan.onDown?.call(
+              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            pan.onStart?.call(
+              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            pan.onUpdate?.call(details);
+            pan.onEnd?.call(
+              DragEndDetails(localPosition: newLocalOffset, globalPosition: newGlobalOffset),
+            );
+          };
 
     if (horizontalHandler == null && panHandler == null) {
       return null;
@@ -1772,31 +1836,53 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
   }
 
   GestureDragUpdateCallback? _getVerticalDragUpdateHandler(
+    RenderObject renderObject,
     Map<Type, GestureRecognizer> recognizers,
   ) {
-    final VerticalDragGestureRecognizer? vertical =
-        recognizers[VerticalDragGestureRecognizer] as VerticalDragGestureRecognizer?;
-    final PanGestureRecognizer? pan = recognizers[PanGestureRecognizer] as PanGestureRecognizer?;
+    final vertical = recognizers[VerticalDragGestureRecognizer] as VerticalDragGestureRecognizer?;
+    final pan = recognizers[PanGestureRecognizer] as PanGestureRecognizer?;
 
-    final GestureDragUpdateCallback? verticalHandler =
-        vertical == null
-            ? null
-            : (DragUpdateDetails details) {
-              vertical.onDown?.call(DragDownDetails());
-              vertical.onStart?.call(DragStartDetails());
-              vertical.onUpdate?.call(details);
-              vertical.onEnd?.call(DragEndDetails(primaryVelocity: 0.0));
-            };
+    final GestureDragUpdateCallback? verticalHandler = vertical == null
+        ? null
+        : (DragUpdateDetails details) {
+            final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
+            final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
+            final Offset newLocalOffset = localCenter + details.delta;
+            final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
+            vertical.onDown?.call(
+              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            vertical.onStart?.call(
+              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            vertical.onUpdate?.call(details);
+            vertical.onEnd?.call(
+              DragEndDetails(
+                primaryVelocity: 0.0,
+                localPosition: newLocalOffset,
+                globalPosition: newGlobalOffset,
+              ),
+            );
+          };
 
-    final GestureDragUpdateCallback? panHandler =
-        pan == null
-            ? null
-            : (DragUpdateDetails details) {
-              pan.onDown?.call(DragDownDetails());
-              pan.onStart?.call(DragStartDetails());
-              pan.onUpdate?.call(details);
-              pan.onEnd?.call(DragEndDetails());
-            };
+    final GestureDragUpdateCallback? panHandler = pan == null
+        ? null
+        : (DragUpdateDetails details) {
+            final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
+            final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
+            final Offset newLocalOffset = localCenter + details.delta;
+            final Offset newGlobalOffset = _transformOffsetToGlobal(renderObject, newLocalOffset);
+            pan.onDown?.call(
+              DragDownDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            pan.onStart?.call(
+              DragStartDetails(localPosition: localCenter, globalPosition: globalCenter),
+            );
+            pan.onUpdate?.call(details);
+            pan.onEnd?.call(
+              DragEndDetails(localPosition: newLocalOffset, globalPosition: newGlobalOffset),
+            );
+          };
 
     if (verticalHandler == null && panHandler == null) {
       return null;

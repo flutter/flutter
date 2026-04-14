@@ -26,7 +26,7 @@ class _GenerationTextState extends State<GenerationText> {
 // Creates a SliverList with `keys.length` children and each child having a key from `keys` and a text of `key:generation`.
 // The generation is increased with every call to this method.
 Future<void> test(WidgetTester tester, double offset, List<int> keys) {
-  final ViewportOffset viewportOffset = ViewportOffset.fixed(offset);
+  final viewportOffset = ViewportOffset.fixed(offset);
   addTearDown(viewportOffset.dispose);
   globalGeneration += 1;
   return tester.pumpWidget(
@@ -36,16 +36,10 @@ Future<void> test(WidgetTester tester, double offset, List<int> keys) {
         cacheExtent: 0.0,
         offset: viewportOffset,
         slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(
-              keys.map<Widget>((int key) {
-                return SizedBox(
-                  key: GlobalObjectKey(key),
-                  height: 100.0,
-                  child: GenerationText(key),
-                );
-              }).toList(),
-            ),
+          SliverList.list(
+            children: keys.map<Widget>((int key) {
+              return SizedBox(key: GlobalObjectKey(key), height: 100.0, child: GenerationText(key));
+            }).toList(),
           ),
         ],
       ),
@@ -56,11 +50,10 @@ Future<void> test(WidgetTester tester, double offset, List<int> keys) {
 // `answerKey`: Expected offsets of visible SliverList children in global coordinate system.
 // `text`: A space-separated list of expected `key:generation` pairs for the visible SliverList children.
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
-  final List<Offset> testAnswers =
-      tester
-          .renderObjectList<RenderBox>(find.byType(SizedBox))
-          .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
-          .toList();
+  final List<Offset> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox))
+      .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
+      .toList();
   expect(testAnswers, equals(answerKey));
   final String foundText = tester
       .widgetList<Text>(find.byType(Text))

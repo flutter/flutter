@@ -22,15 +22,14 @@ class LayerTreeTest : public CanvasTest {
   LayerTreeTest()
       : root_transform_(DlMatrix::MakeTranslation({1.0f, 1.0f})),
         builder_(DisplayListBuilder::kMaxCullRect),
-        scoped_frame_(
-            compositor_context_.AcquireFrame(nullptr,
-                                             &builder_,
-                                             nullptr,
-                                             ToSkMatrix(root_transform_),
-                                             false,
-                                             true,
-                                             nullptr,
-                                             nullptr)) {}
+        scoped_frame_(compositor_context_.AcquireFrame(nullptr,
+                                                       &builder_,
+                                                       nullptr,
+                                                       root_transform_,
+                                                       false,
+                                                       true,
+                                                       nullptr,
+                                                       nullptr)) {}
 
   CompositorContext::ScopedFrame& frame() { return *scoped_frame_.get(); }
   const DlMatrix& root_transform() { return root_transform_; }

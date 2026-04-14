@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/decorated_box_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/decorated_box_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,11 +13,17 @@ void main() {
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Center), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(Center), matching: find.byType(FlutterLogo)),
+      find.descendant(
+        of: find.byType(Center),
+        matching: find.byType(FlutterLogo),
+      ),
       findsOneWidget,
     );
     expect(
-      find.ancestor(of: find.byType(FlutterLogo), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(FlutterLogo),
+        matching: find.byType(Container),
+      ),
       findsAtLeast(1),
     );
     expect(find.byType(DecoratedBoxTransition), findsOneWidget);
@@ -28,8 +35,8 @@ void main() {
         'decoration',
         BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          border: Border.all(style: BorderStyle.none),
-          borderRadius: BorderRadius.circular(60.0),
+          border: .all(style: .none),
+          borderRadius: .circular(60.0),
           boxShadow: const <BoxShadow>[
             BoxShadow(
               color: Color(0x66666666),
@@ -52,8 +59,8 @@ void main() {
         'decoration',
         BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          border: Border.all(style: BorderStyle.none),
-          borderRadius: BorderRadius.zero,
+          border: .all(style: .none),
+          borderRadius: .zero,
           // No shadow.
         ),
       ),

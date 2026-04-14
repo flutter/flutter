@@ -580,8 +580,8 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     required bool isScrolling,
     required double velocity,
   }) {
-    bool maintainOverscroll = true;
-    bool enforceBoundary = true;
+    var maintainOverscroll = true;
+    var enforceBoundary = true;
     if (velocity != 0.0) {
       // Don't try to adjust an animating position, the jumping around
       // would be distracting.
@@ -691,13 +691,16 @@ class BouncingScrollPhysics extends ScrollPhysics {
   }
 
   /// The multiple applied to overscroll to make it appear that scrolling past
-  /// the edge of the scrollable contents is harder than scrolling the list.
+  /// the edge of the scrollable contents is harder than scrolling within bounds.
   /// This is done by reducing the ratio of the scroll effect output vs the
   /// scroll gesture input.
   ///
-  /// This factor starts at 0.52 and progressively becomes harder to overscroll
-  /// as more of the area past the edge is dragged in (represented by an increasing
-  /// `overscrollFraction` which starts at 0 when there is no overscroll).
+  /// This factor starts at 0.52 for [ScrollDecelerationRate.normal] and 0.26 for
+  /// [ScrollDecelerationRate.fast].
+  ///
+  /// The `overscrollFraction` represents how far past the edge the user has
+  /// dragged, where 0.0 means no overscroll. As this value increases, the
+  /// friction factor decreases quadratically, making further overscroll harder.
   double frictionFactor(double overscrollFraction) {
     return math.pow(1 - overscrollFraction, 2) *
         switch (decelerationRate) {
@@ -721,11 +724,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
     final bool easing =
         (overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0);
 
-    final double friction =
-        easing
-            // Apply less resistance when easing the overscroll vs tensioning.
-            ? frictionFactor((overscrollPast - offset.abs()) / position.viewportDimension)
-            : frictionFactor(overscrollPast / position.viewportDimension);
+    final double friction = easing
+        // Apply less resistance when easing the overscroll vs tensioning.
+        ? frictionFactor((overscrollPast - offset.abs()) / position.viewportDimension)
+        : frictionFactor(overscrollPast / position.viewportDimension);
     final double direction = offset.sign;
 
     if (easing && decelerationRate == ScrollDecelerationRate.fast) {
@@ -736,7 +738,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   static double _applyFriction(double extentOutside, double absDelta, double gamma) {
     assert(absDelta > 0);
-    double total = 0.0;
+    var total = 0.0;
     if (extentOutside > 0) {
       final double deltaToLimit = extentOutside / gamma;
       if (absDelta < deltaToLimit) {

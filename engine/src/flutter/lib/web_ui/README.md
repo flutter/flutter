@@ -27,10 +27,11 @@ The `build` subcommand builds web engine gn/ninja targets. Targets can be
 individually specified in the command line invocation, or if none are specified,
 all web engine targets are built. Common targets are as follows:
   * `sdk` - The flutter_web_sdk itself.
-  * `canvaskit` - Flutter's version of canvakit.
+  * `canvaskit` - Flutter's version of canvaskit.
   * `canvaskit_chromium` - A version of canvaskit optimized for use with
     chromium-based browsers.
   * `skwasm` - Builds experimental skia wasm module renderer.
+
 The output of these steps is used in unit tests, and can be used with the flutter
 command via the `--local-web-sdk=wasm_release` command.
 
@@ -42,7 +43,7 @@ Builds all web engine targets, then runs a Flutter app using it:
 ```
 felt build
 cd path/to/some/app
-flutter --local-web-sdk=wasm_release run -d chrome
+flutter run -d chrome --local-web-sdk=wasm_release
 ```
 
 Builds only the `sdk` and the `canvaskit` targets:
@@ -61,10 +62,10 @@ host system. Some useful flags supported by this command:
     of these can be specified to run multiple actions. If none are specified, then
     *all* of these actions are performed
     * `--compile` performs compilation of the test bundles.
-    * `--run` runs the unit tests
     * `--copy-artifacts` will copy build artifacts needed for the tests to run.
       * The `--profile` or `--debug` flags can be specified to copy over artifacts
         from the profile or debug build folders instead of release.
+    * `--run` runs the unit tests
   * `--list` will list all the test suites and test bundles and exit without
     compiling or running anything.
   * `--verbose` will output some extra information that may be useful for debugging.
@@ -77,7 +78,7 @@ Several other flags can be passed that filter which test suites should be run:
   * `--compiler` runs only the test suites that use a particular compiler. Valid
     values for this are `dart2js` or `dart2wasm`
   * `--renderer` runs only the test suites that use a particular renderer. Valid
-    values for this are `html`, `canvakit`, or `skwasm`
+    values for this are `canvaskit`, or `skwasm`
   * `--suite` runs a suite by name.
   * `--bundle` runs suites that target a particular test bundle.
 
@@ -176,7 +177,7 @@ The available versions of Chrome for Testing available can be found [here](https
   the engine code, you probably do).
 - If not already authenticated with CIPD, run `cipd auth-login` and follow
   instructions (this step requires sufficient privileges; contact
-  #hackers-infra-🌡 on [Flutter's Discord server](https://github.com/flutter/flutter/wiki/Chat)).
+  #hackers-infra-🌡 on [Flutter's Discord server](https://github.com/flutter/flutter/blob/main/docs/contributing/Chat.md)).
 - Edit `dev/package_lock.yaml` and update the following values under `chrome`:
   - Set `version` to the full four part version number of the build of Chrome
     for Testing you want to roll (for example, `118.0.5993.70`)
@@ -194,20 +195,17 @@ If you have questions, contact the Flutter Web team on Flutter Discord on the
 
 We test with Firefox on LUCI in the Linux Web Engine builder. The process for
 rolling Firefox is even easier than Chromium. Simply update `package_lock.yaml`
-with the latest version of Firefox, and run `package_roller.dart`.
+with the latest version of Firefox, and run:
+```
+dart dev/package_roller.dart
+```
 
 #### .ci.yaml
 
-After rolling Chrome and/or Firefox, also update the CI dependencies in
-`.ci.yaml` to make use of the new versions. The lines look like
+After rolling Chrome and/or Firefox, also update the CI dependencies by running:
 
-```yaml
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:107.0"},
-          {"dependency": "firefox", "version": "version:83.0"},
-          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
-        ]
+```
+felt generate-builder-json
 ```
 
 ##### **package_roller.dart**
@@ -247,9 +245,6 @@ Resources:
 web. Versions are not automatically updated whenever a new release is available.
 Instead, we update this file manually once in a while.
 
-`canvaskit_lock.yaml` locks the version of CanvasKit for tests and production
-use.
-
 ### Debugging the Web Engine
 
 Build the Flutter Web engine locally:
@@ -270,7 +265,7 @@ Run a Flutter app in debug mode using your locally built Web Engine artifacts:
   flutter run --local-web-sdk=wasm_release --debug -d web-server --web-port 8080
   ```
   To see your Flutter app, navigate your browser to http://localhost:8080.
-  
+
   This option is useful if you want to keep your browser window when you
   you restart `flutter run`, or, if you need to debug using browsers that
   aren't supported by `flutter run`, such as Firefox and Safari.
@@ -282,35 +277,18 @@ The Flutter Web engine's sources are in `localhost:<port>` > `lib` > `_engine` >
 `engine`. You can set breakpoints in Dart source files and use the Chrome
 debugger to inspect variables' values.
 
-## Building CanvasKit
+## Building CanvasKit and Skwasm
 
-To build CanvasKit locally, you must first set up your gclient config to
-activate the Emscripten SDK, which is the toolchain used to build CanvasKit.
-To do this, replace the contents of your .gclient file at the root of the
-project (i.e. in the parent directory of the `src` directory) with:
-
-```
-solutions = [
-  {
-    "managed": False,
-    "name": "src/flutter",
-    "url": "git@github.com:<your_username_here>/engine.git",
-    "custom_deps": {},
-    "deps_file": "DEPS",
-    "safesync_url": "",
-    "custom_vars": {
-      "download_emsdk": True,
-    },
-  },
-]
-```
+To build CanvasKit and/or Skwasm locally, you must first set up your gclient config to
+activate the Emscripten SDK, which is the toolchain used to build CanvasKit and Skwasm.
+To do this, make sure to follow the [Additional Steps for Web Engine][9].
 
 Now run `gclient sync` and it should pull in the Emscripten SDK and activate it.
 
 To build CanvasKit with `felt`, run:
 
 ```
-felt build --build-canvaskit
+felt build canvaskit
 ```
 
 This will build CanvasKit in `out/wasm_debug`. If you now run
@@ -333,9 +311,16 @@ roll the dependency on `third_party/emsdk` in DEPS to the same version as in
 Once you know the version for the Emscripten SDK, change the line in
 `tools/activate_emsdk.py` which defines `EMSDK_VERSION` to match Skia.
 
+## Using a locally built Dart SDK
+
+In order to use a locally built Dart SDK, you simply set the `DART_SDK_DIR` environment variable like so:
+```
+DART_SDK_DIR=path/to/dart-sdk/ felt test
+```
+Note: The provided Dart SDK is used to run the `felt` tool itself, and to compile and run tests. But `felt build` invokes the `gn` build which is unaffected by the `DART_SDK_DIR` environment variable.
 
 
-[1]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md
+[1]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
 [2]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/test/README.md
 [3]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/dev/package_lock.yaml
 [4]: https://chrome-infra-packages.appspot.com/p/flutter_internal
@@ -343,7 +328,4 @@ Once you know the version for the Emscripten SDK, change the line in
 [6]: https://chromium.googlesource.com/chromium/src.git/+/main/docs/cipd_and_3pp.md#What-is-CIPD
 [7]: https://developer.chrome.com/docs/devtools
 [8]: https://developer.chrome.com/docs/devtools/sources
-
-## Unicode properties
-
-We pull the unicode properties we need from `third_party/web_unicode`. See `third_party/web_unicode/README.md` for more details on how we generate Dart code from unicode properties.
+[9]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md#additional-steps-for-web-engine

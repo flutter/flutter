@@ -88,7 +88,7 @@ class WebFlutterDriver extends FlutterDriver {
     Duration? timeout,
   }) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    final Map<String, dynamic> settings = <String, dynamic>{
+    final settings = <String, dynamic>{
       'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
       'session-id': Platform.environment['DRIVER_SESSION_ID'],
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
@@ -210,15 +210,15 @@ class WebFlutterDriver extends FlutterDriver {
   }) async {
     _checkBrowserSupportsTimeline();
 
-    final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+    final events = <Map<String, dynamic>>[];
     for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
-        final Map<String, dynamic> data =
+        final data =
             (jsonDecode(entry.message!) as Map<String, dynamic>)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
           try {
-            final Map<String, dynamic> params = data['params'] as Map<String, dynamic>;
+            final params = data['params'] as Map<String, dynamic>;
             params['ts'] = double.parse(params['ts'].toString()).toInt();
           } on FormatException catch (_) {
             // data is corrupted, skip
@@ -228,7 +228,7 @@ class WebFlutterDriver extends FlutterDriver {
         }
       }
     }
-    final Map<String, dynamic> json = <String, dynamic>{'traceEvents': events};
+    final json = <String, dynamic>{'traceEvents': events};
     return Timeline.fromJson(json);
   }
 
@@ -282,9 +282,9 @@ class FlutterWebConnection {
     Map<String, dynamic> settings, {
     Duration? timeout,
   }) async {
-    final String sessionId = settings['session-id'].toString();
+    final sessionId = settings['session-id'].toString();
     final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
-    final async_io.WebDriver driver = async_io.WebDriver(
+    final driver = async_io.WebDriver(
       sessionUri,
       sessionId,
       json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
@@ -329,7 +329,7 @@ class FlutterWebConnection {
       );
     }
 
-    String phase = 'executing';
+    var phase = 'executing';
     try {
       // Execute the script, which should leave the result in the `$flutterDriverResult` global variable.
       await _driver.execute(script, <void>[]);

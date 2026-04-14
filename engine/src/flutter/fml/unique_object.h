@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_UNIQUE_OBJECT_H_
 #define FLUTTER_FML_UNIQUE_OBJECT_H_
 
+#include <concepts>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -12,18 +13,20 @@
 
 namespace fml {
 
-// struct UniqueFooTraits {
-//   // This function should be fast and inline.
-//   static int InvalidValue() { return 0; }
-//
-//   // This function should be fast and inline.
-//   static bool IsValid(const T& value) { return value != InvalidValue(); }
-//
-//   // This free function will not be called if f == InvalidValue()!
-//   static void Free(int f) { ::FreeFoo(f); }
-// };
+template <typename T, typename Traits>
+concept UniqueObjectTraits = requires {
+  // |InvalidValue| should be fast and inline.
+  { Traits::InvalidValue() } -> std::same_as<T>;
+
+  // |IsValid| function should be fast and inline.
+  { Traits::IsValid(std::declval<T>()) } -> std::same_as<bool>;
+
+  // |Free| function will not be called if value == InvalidValue()!
+  { Traits::Free(std::declval<T>()) };
+};
 
 template <typename T, typename Traits>
+  requires UniqueObjectTraits<T, Traits>
 class UniqueObject {
  private:
   // This must be first since it's used inline below.
@@ -51,7 +54,10 @@ class UniqueObject {
   UniqueObject(UniqueObject&& other)
       : data_(other.release(), other.get_traits()) {}
 
-  ~UniqueObject() { FreeIfNecessary(); }
+  ~UniqueObject() {
+    // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
+    FreeIfNecessary();
+  }
 
   UniqueObject& operator=(UniqueObject&& other) {
     reset(other.release());
@@ -88,8 +94,6 @@ class UniqueObject {
   bool is_valid() const { return Traits::IsValid(data_.generic); }
 
   bool operator==(const T& value) const { return data_.generic == value; }
-
-  bool operator!=(const T& value) const { return data_.generic != value; }
 
   Traits& get_traits() { return data_; }
   const Traits& get_traits() const { return data_; }

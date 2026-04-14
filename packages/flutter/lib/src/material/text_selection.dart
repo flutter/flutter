@@ -81,9 +81,8 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     final ThemeData theme = Theme.of(context);
     final Color handleColor =
         TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
-    final Widget handle = SizedBox(
-      width: _kHandleSize,
-      height: _kHandleSize,
+    final Widget handle = SizedBox.square(
+      dimension: _kHandleSize,
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(color: handleColor),
         child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.translucent),
@@ -218,8 +217,9 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     // Calculate the positioning of the menu. It is placed above the selection
     // if there is enough room, or otherwise below.
     final TextSelectionPoint startTextSelectionPoint = widget.endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint =
-        widget.endpoints.length > 1 ? widget.endpoints[1] : widget.endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = widget.endpoints.length > 1
+        ? widget.endpoints[1]
+        : widget.endpoints[0];
     final double topAmountInEditableRegion =
         startTextSelectionPoint.point.dy - widget.textLineHeight;
     final double anchorTop =
@@ -227,11 +227,11 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
         widget.globalEditableRegion.top -
         _kToolbarContentDistance;
 
-    final Offset anchorAbove = Offset(
+    final anchorAbove = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
       anchorTop,
     );
-    final Offset anchorBelow = Offset(
+    final anchorBelow = Offset(
       widget.globalEditableRegion.left + widget.selectionMidpoint.dx,
       widget.globalEditableRegion.top +
           endTextSelectionPoint.point.dy +
@@ -243,7 +243,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     // appearance.
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<_TextSelectionToolbarItemData> itemDatas = <_TextSelectionToolbarItemData>[
+    final itemDatas = <_TextSelectionToolbarItemData>[
       if (widget.handleCut != null)
         _TextSelectionToolbarItemData(
           label: localizations.cutButtonLabel,
@@ -274,15 +274,14 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      children:
-          itemDatas.asMap().entries.map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
-            return TextSelectionToolbarTextButton(
-              padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
-              alignment: AlignmentDirectional.centerStart,
-              onPressed: entry.value.onPressed,
-              child: Text(entry.value.label),
-            );
-          }).toList(),
+      children: itemDatas.asMap().entries.map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
+        return TextSelectionToolbarTextButton(
+          padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
+          alignment: AlignmentDirectional.centerStart,
+          onPressed: entry.value.onPressed,
+          child: Text(entry.value.label),
+        );
+      }).toList(),
     );
   }
 }
@@ -295,14 +294,13 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = color;
+    final paint = Paint()..color = color;
     final double radius = size.width / 2.0;
-    final Rect circle = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
-    final Rect point = Rect.fromLTWH(0.0, 0.0, radius, radius);
-    final Path path =
-        Path()
-          ..addOval(circle)
-          ..addRect(point);
+    final circle = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
+    final point = Rect.fromLTWH(0.0, 0.0, radius, radius);
+    final path = Path()
+      ..addOval(circle)
+      ..addRect(point);
     canvas.drawPath(path, paint);
   }
 

@@ -76,6 +76,17 @@ class Geometry {
                                                      Scalar radius,
                                                      Scalar stroke_width);
 
+  static std::unique_ptr<Geometry> MakeFilledArc(const Rect& oval_bounds,
+                                                 Degrees start,
+                                                 Degrees sweep,
+                                                 bool include_center);
+
+  static std::unique_ptr<Geometry> MakeStrokedArc(
+      const Rect& oval_bounds,
+      Degrees start,
+      Degrees sweep,
+      const StrokeParameters& stroke);
+
   static std::unique_ptr<Geometry> MakeRoundRect(const Rect& rect,
                                                  const Size& radii);
 

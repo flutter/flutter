@@ -22,33 +22,32 @@ static constexpr size_t kMaxFramesInFlight = 2u;
 
 struct KHRFrameSynchronizerVK {
   vk::UniqueFence acquire;
+  bool acquire_fence_pending = false;
   vk::UniqueSemaphore render_ready;
-  vk::UniqueSemaphore present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
   bool is_valid = false;
   // Whether the renderer attached an onscreen command buffer to render to.
   bool has_onscreen = false;
 
   explicit KHRFrameSynchronizerVK(const vk::Device& device) {
-    auto acquire_res = device.createFenceUnique(
-        vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
+    auto acquire_res = device.createFenceUnique({});
     auto render_res = device.createSemaphoreUnique({});
-    auto present_res = device.createSemaphoreUnique({});
     if (acquire_res.result != vk::Result::eSuccess ||
-        render_res.result != vk::Result::eSuccess ||
-        present_res.result != vk::Result::eSuccess) {
+        render_res.result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not create synchronizer.";
       return;
     }
     acquire = std::move(acquire_res.value);
     render_ready = std::move(render_res.value);
-    present_ready = std::move(present_res.value);
     is_valid = true;
   }
 
   ~KHRFrameSynchronizerVK() = default;
 
   bool WaitForFence(const vk::Device& device) {
+    if (!acquire_fence_pending) {
+      return true;
+    }
     if (auto result = device.waitForFences(
             *acquire,                             // fence
             true,                                 // wait all
@@ -58,6 +57,7 @@ struct KHRFrameSynchronizerVK {
       VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
       return false;
     }
+    acquire_fence_pending = false;
     if (auto result = device.resetFences(*acquire);
         result != vk::Result::eSuccess) {
       VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
@@ -224,6 +224,7 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
                                     swapchain_info.imageExtent.height);
 
   std::vector<std::shared_ptr<KHRSwapchainImageVK>> swapchain_images;
+  std::vector<vk::UniqueSemaphore> present_semaphores;
   for (const auto& image : images) {
     auto swapchain_image = std::make_shared<KHRSwapchainImageVK>(
         texture_desc,            // texture descriptor
@@ -242,6 +243,13 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
         "SwapchainImageView" + std::to_string(swapchain_images.size()));
 
     swapchain_images.emplace_back(swapchain_image);
+
+    auto present_res = vk_context.GetDevice().createSemaphoreUnique({});
+    if (present_res.result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not create presentation semaphore.";
+      return;
+    }
+    present_semaphores.push_back(std::move(present_res.value));
   }
 
   std::vector<std::unique_ptr<KHRFrameSynchronizerVK>> synchronizers;
@@ -264,6 +272,7 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
                                                         enable_msaa);
   images_ = std::move(swapchain_images);
   synchronizers_ = std::move(synchronizers);
+  present_semaphores_ = std::move(present_semaphores);
   current_frame_ = synchronizers_.size() - 1u;
   size_ = size;
   enable_msaa_ = enable_msaa;
@@ -382,6 +391,10 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
       // A recoverable error. Just say we are out of date.
       return AcquireResult{true /* out of date */};
       break;
+    case vk::Result::eErrorSurfaceLostKHR:
+      // This error code is returned by Android for some situations that are
+      // recoverable but do not require recreating the swapchain.
+      return AcquireResult{false /* out of date */};
     default:
       // An unrecoverable error.
       VALIDATION_LOG << "Could not acquire next swapchain image: "
@@ -471,7 +484,7 @@ bool KHRSwapchainImplVK::Present(
         vk::PipelineStageFlagBits::eColorAttachmentOutput;
     submit_info.setWaitDstStageMask(wait_stage);
     submit_info.setWaitSemaphores(*sync->render_ready);
-    submit_info.setSignalSemaphores(*sync->present_ready);
+    submit_info.setSignalSemaphores(*present_semaphores_[index]);
     submit_info.setCommandBuffers(vk_final_cmd_buffer);
     auto result =
         context.GetGraphicsQueue()->Submit(submit_info, *sync->acquire);
@@ -480,6 +493,7 @@ bool KHRSwapchainImplVK::Present(
                      << vk::to_string(result);
       return false;
     }
+    sync->acquire_fence_pending = true;
   }
 
   //----------------------------------------------------------------------------
@@ -490,7 +504,7 @@ bool KHRSwapchainImplVK::Present(
   vk::PresentInfoKHR present_info;
   present_info.setSwapchains(*swapchain_);
   present_info.setImageIndices(indices);
-  present_info.setWaitSemaphores(*sync->present_ready);
+  present_info.setWaitSemaphores(*present_semaphores_[index]);
 
   auto result = context.GetGraphicsQueue()->Present(present_info);
 

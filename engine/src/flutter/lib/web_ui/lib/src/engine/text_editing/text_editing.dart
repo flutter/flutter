@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../configuration.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
@@ -67,6 +68,7 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
     ..position = 'absolute'
     ..top = '0'
     ..left = '0'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -107,6 +109,7 @@ void _styleAutofillElements(
   final DomCSSStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -170,7 +173,7 @@ void _insertEditingElementInView(DomElement element, int viewId) {
     view != null,
     'Could not find View with id $viewId. This should never happen, please file a bug!',
   );
-  final host = view!.dom.textEditingHost;
+  final DomElement host = view!.dom.textEditingHost;
   // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
   // harmless, but it actually causes focus changes that could break things.
   if (!host.contains(element)) {
@@ -186,20 +189,16 @@ void _insertEditingElementInView(DomElement element, int viewId) {
 class EngineAutofillForm {
   EngineAutofillForm({
     required this.viewId,
-    required this.formElement,
-    this.elements,
-    this.items,
-    this.formIdentifier = '',
-    this.insertionReferenceNode,
+    required this.items,
+    required this.formIdentifier,
+    required this.focusedElementId,
   });
 
-  final DomHTMLFormElement formElement;
+  DomHTMLFormElement? formElement;
 
-  final Map<String, DomHTMLElement>? elements;
+  final elements = <String, DomHTMLElement>{};
 
-  final Map<String, AutofillInfo>? items;
-
-  final DomHTMLElement? insertionReferenceNode;
+  final Map<String, FieldItem> items;
 
   /// Identifier for the form.
   ///
@@ -207,13 +206,19 @@ class EngineAutofillForm {
   /// form.
   ///
   /// It is used for storing the form until submission.
-  /// See [formsOnTheDom].
+  /// See [dormantForms].
   final String formIdentifier;
 
   /// The ID of the view that this form is rendered into.
   final int viewId;
 
-  /// Creates an [EngineAutofillFrom] from the JSON representation of a Flutter
+  final String focusedElementId;
+
+  bool get _isSafariStrategy =>
+      textEditing.strategy is SafariDesktopTextEditingStrategy ||
+      textEditing.strategy is IOSTextEditingStrategy;
+
+  /// Creates an [EngineAutofillForm] from the JSON representation of a Flutter
   /// framework `TextInputConfiguration` object.
   ///
   /// The `focusedElementAutofill` argument corresponds to the "autofill" field
@@ -235,105 +240,162 @@ class EngineAutofillForm {
       return null;
     }
 
+    final items = <String, FieldItem>{};
+
     // If there is only one text field in the autofill model, `fields` will be
     // null. `focusedElementAutofill` contains the information about the one
     // text field.
-    final Map<String, DomHTMLElement> elements = <String, DomHTMLElement>{};
-    final Map<String, AutofillInfo> items = <String, AutofillInfo>{};
-    final DomHTMLFormElement formElement = createDomHTMLFormElement();
-    final bool isSafariDesktopStrategy = textEditing.strategy is SafariDesktopTextEditingStrategy;
-    DomHTMLElement? insertionReferenceNode;
+    if (fields != null) {
+      for (final Map<String, dynamic> field in fields.cast<Map<String, dynamic>>()) {
+        final autofillInfo = AutofillInfo.fromFrameworkMessage(
+          field.readJson('autofill'),
+          textCapitalization: TextCapitalizationConfig.fromInputConfiguration(
+            field.readString('textCapitalization'),
+          ),
+        );
 
+        final EngineInputType inputType = EngineInputType.fromName(
+          field.readJson('inputType').readString('name'),
+        );
+
+        items[autofillInfo.uniqueIdentifier] = FieldItem(
+          inputType: inputType,
+          autofillInfo: autofillInfo,
+        );
+      }
+    } else {
+      final autofillInfo = AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
+
+      // Any `inputType` is okay here since this will not be used to create the focused element
+      // here. The focused element is a special case that is created outside of the
+      // `EngineAutofillForm`.
+      const EngineInputType inputType = EngineInputType.none;
+
+      items[autofillInfo.uniqueIdentifier] = FieldItem(
+        inputType: inputType,
+        autofillInfo: autofillInfo,
+      );
+    }
+
+    return EngineAutofillForm(
+      viewId: viewId,
+      items: items,
+      formIdentifier: _getFormIdentifier(items),
+      focusedElementId: focusedElementAutofill.readString('uniqueIdentifier'),
+    );
+  }
+
+  static String _getFormIdentifier(Map<String, FieldItem> items) {
+    final ids = <String>[];
+    for (final FieldItem item in items.values) {
+      ids.add(item.autofillInfo.uniqueIdentifier);
+    }
+
+    ids.sort();
+    return ids.join('*');
+  }
+
+  /// Wakes up the form with the given focused element.
+  ///
+  /// The [focusedElement] is inserted into the form, replacing the old focused element.
+  void wakeUp(DomHTMLElement focusedElement, AutofillInfo focusedAutofill) {
+    // Since we're disabling pointer events on the form to fix Safari autofill,
+    // we need to explicitly set pointer events on the active input element in
+    // order to calculate the correct pointer event offsets.
+    // See: https://github.com/flutter/flutter/issues/136006
+    if (_isSafariStrategy) {
+      focusedElement.style.pointerEvents = 'all';
+    }
+
+    final EngineAutofillForm? existingForm = dormantForms[formIdentifier];
+
+    final firstWakeUp = formElement == null;
+
+    if (firstWakeUp) {
+      assert(elements.isEmpty);
+
+      if (existingForm != null) {
+        // If the form already has a dormant DOM element, let's use it instead of creating a new one.
+        formElement = existingForm.formElement;
+        elements.addAll(existingForm.elements);
+      } else {
+        formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
+        _insertEditingElementInView(formElement!, viewId);
+      }
+    }
+
+    // There's potentially a new focused element that needs to be inserted into the existing form.
+    //
+    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+    // harmless, but it actually causes focus changes that could break things.
+    if (!formElement!.contains(focusedElement)) {
+      // Find the matching element and replace it with the new focused element.
+      final DomElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
+      elements[focusedAutofill.uniqueIdentifier] = focusedElement;
+      oldFocusedElement.replaceWith(focusedElement);
+    }
+
+    _updateFieldValues();
+  }
+
+  /// Makes the form dormant.
+  ///
+  /// A dormant form stays in the DOM and does not interact with the framework until it's woken up.
+  ///
+  /// The form is kept in the DOM to:
+  /// 1. Allow the browser to autofill it.
+  /// 2. Allow submitting the form later.
+  void goDormant() {
+    assert(formElement != null);
+
+    dormantForms[formIdentifier] = this;
+    _styleAutofillElements(formElement!, isOffScreen: true);
+  }
+
+  DomHTMLFormElement _createFormElementAndFields(
+    DomHTMLElement focusedElement,
+    AutofillInfo focusedAutofill,
+  ) {
+    assert(this.formElement == null);
+    assert(elements.isEmpty);
+
+    final DomHTMLFormElement formElement = createDomHTMLFormElement();
     // Validation is in the framework side.
     formElement.noValidate = true;
     formElement.method = 'post';
     formElement.action = '#';
     formElement.addEventListener('submit', preventDefaultListener);
 
-    // We need to explicitly disable pointer events on the form in Safari Desktop,
+    // We need to explicitly disable pointer events on the form in Safari Desktop and iOS,
     // so that we don't have pointer event collisions if users hover over or click
     // into the invisible autofill elements within the form.
-    _styleAutofillElements(formElement, shouldDisablePointerEvents: isSafariDesktopStrategy);
+    _styleAutofillElements(formElement, shouldDisablePointerEvents: _isSafariStrategy);
 
-    // We keep the ids in a list then sort them later, in case the text fields'
-    // locations are re-ordered on the framework side.
-    final List<String> ids = List<String>.empty(growable: true);
+    for (final FieldItem field in items.values) {
+      final DomHTMLElement htmlElement;
+      if (field.autofillInfo.uniqueIdentifier == focusedAutofill.uniqueIdentifier) {
+        // Do not create the focused element here since it is created already. Use the provided one.
+        htmlElement = focusedElement;
+      } else {
+        htmlElement = field.inputType.createDomElement();
+        field.autofillInfo.applyToDomElement(htmlElement);
 
-    // The focused text editing element will not be created here.
-    final AutofillInfo focusedElement = AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
-
-    if (fields != null) {
-      bool fieldIsFocusedElement = false;
-      for (final Map<String, dynamic> field in fields.cast<Map<String, dynamic>>()) {
-        final Map<String, dynamic> autofillInfo = field.readJson('autofill');
-        final AutofillInfo autofill = AutofillInfo.fromFrameworkMessage(
-          autofillInfo,
-          textCapitalization: TextCapitalizationConfig.fromInputConfiguration(
-            field.readString('textCapitalization'),
-          ),
+        // Safari does not respect elements that are invisible (or
+        // have no size) and that leads to issues with autofill only partially
+        // working (ref: https://github.com/flutter/flutter/issues/71275).
+        // Thus, we have to make sure that the elements remain invisible to users,
+        // but not to Safari for autofill to work. Since these elements are
+        // sized and placed on the DOM, we also have to disable pointer events.
+        _styleAutofillElements(
+          htmlElement,
+          shouldHideElement: !_isSafariStrategy,
+          shouldDisablePointerEvents: _isSafariStrategy,
         );
-
-        ids.add(autofill.uniqueIdentifier);
-
-        if (autofill.uniqueIdentifier != focusedElement.uniqueIdentifier) {
-          final EngineInputType engineInputType = EngineInputType.fromName(
-            field.readJson('inputType').readString('name'),
-          );
-
-          final DomHTMLElement htmlElement = engineInputType.createDomElement();
-          autofill.editingState.applyToDomElement(htmlElement);
-          autofill.applyToDomElement(htmlElement);
-
-          // Safari Desktop does not respect elements that are invisible (or
-          // have no size) and that leads to issues with autofill only partially
-          // working (ref: https://github.com/flutter/flutter/issues/71275).
-          // Thus, we have to make sure that the elements remain invisible to users,
-          // but not to Safari for autofill to work. Since these elements are
-          // sized and placed on the DOM, we also have to disable pointer events.
-          _styleAutofillElements(
-            htmlElement,
-            shouldHideElement: !isSafariDesktopStrategy,
-            shouldDisablePointerEvents: isSafariDesktopStrategy,
-          );
-
-          items[autofill.uniqueIdentifier] = autofill;
-          elements[autofill.uniqueIdentifier] = htmlElement;
-          formElement.append(htmlElement);
-
-          // We want to track the node in the position directly after our focused
-          // element, so we can later insert that element in the correct position
-          // right before this node.
-          if (fieldIsFocusedElement) {
-            insertionReferenceNode = htmlElement;
-            fieldIsFocusedElement = false;
-          }
-        } else {
-          // current field is the focused element that we create elsewhere
-          fieldIsFocusedElement = true;
-        }
       }
-    } else {
-      // There is one input element in the form.
-      ids.add(focusedElement.uniqueIdentifier);
+
+      elements[field.autofillInfo.uniqueIdentifier] = htmlElement;
+      formElement.append(htmlElement);
     }
-
-    ids.sort();
-    final StringBuffer idBuffer = StringBuffer();
-
-    // Add a separator between element identifiers.
-    for (final String id in ids) {
-      if (idBuffer.length > 0) {
-        idBuffer.write('*');
-      }
-      idBuffer.write(id);
-    }
-
-    final String formIdentifier = idBuffer.toString();
-
-    // If a form with the same Autofill elements is already on the dom, remove
-    // it from DOM.
-    final DomHTMLFormElement? form = formsOnTheDom[formIdentifier];
-    form?.remove();
 
     // In order to submit the form when Framework sends a `TextInput.commit`
     // message, we add a submit button to the form.
@@ -342,43 +404,23 @@ class EngineAutofillForm {
     _styleAutofillElements(submitButton, isOffScreen: true);
     submitButton.className = 'submitBtn';
     submitButton.type = 'submit';
-
     formElement.append(submitButton);
 
-    // If the focused node is at the end of the form, we'll default to inserting
-    // it before the submit field.
-    insertionReferenceNode ??= submitButton;
-
-    return EngineAutofillForm(
-      viewId: viewId,
-      formElement: formElement,
-      elements: elements,
-      items: items,
-      formIdentifier: formIdentifier,
-      insertionReferenceNode: insertionReferenceNode,
-    );
+    return formElement;
   }
 
-  void placeForm(DomHTMLElement mainTextEditingElement) {
-    // Since we're disabling pointer events on the form to fix Safari autofill,
-    // we need to explicitly set pointer events on the active input element in
-    // order to calculate the correct pointer event offsets.
-    // See: https://github.com/flutter/flutter/issues/136006
-    if (textEditing.strategy is SafariDesktopTextEditingStrategy) {
-      mainTextEditingElement.style.pointerEvents = 'all';
+  /// Updates the field values in this form.
+  void _updateFieldValues() {
+    for (final String key in elements.keys) {
+      final DomHTMLElement element = elements[key]!;
+      final AutofillInfo autofill = items[key]!.autofillInfo;
+      // Focused elements are updated directly through `setEditingState`.
+      if (key != focusedElementId) {
+        // Non-focused elements do not have selection, and applying selection on them may cause them
+        // to gain focus unexpectedly.
+        autofill.editingState.applyTextToDomElement(element);
+      }
     }
-
-    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
-    // harmless, but it actually causes focus changes that could break things.
-    if (!formElement.contains(mainTextEditingElement)) {
-      formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
-    }
-    _insertEditingElementInView(formElement, viewId);
-  }
-
-  void storeForm() {
-    formsOnTheDom[formIdentifier] = formElement;
-    _styleAutofillElements(formElement, isOffScreen: true);
   }
 
   /// Listens to `onInput` event on the form fields.
@@ -392,21 +434,22 @@ class EngineAutofillForm {
   /// [TextEditingStrategy.addEventHandlers] method call and all
   /// listeners are removed during [TextEditingStrategy.disable] method call.
   List<DomSubscription> addInputEventListeners() {
-    final Iterable<String> keys = elements!.keys;
-    final List<DomSubscription> subscriptions = <DomSubscription>[];
+    final Iterable<String> keys = elements.keys;
+    final subscriptions = <DomSubscription>[];
 
     void addSubscriptionForKey(String key) {
-      final DomElement element = elements![key]!;
+      final DomHTMLElement element = elements[key]!;
       subscriptions.add(
         DomSubscription(
           element,
           'input',
           createDomEventListener((DomEvent e) {
-            if (items![key] == null) {
+            if (items[key] == null) {
               throw StateError('AutofillInfo must have a valid uniqueIdentifier.');
-            } else {
-              final AutofillInfo autofillInfo = items![key]!;
-              handleChange(element, autofillInfo);
+            } else if (key != focusedElementId) {
+              // `input` events on the focused element are handled elsewhere.
+              final AutofillInfo autofillInfo = items[key]!.autofillInfo;
+              _handleChange(element, autofillInfo);
             }
           }),
         ),
@@ -417,25 +460,35 @@ class EngineAutofillForm {
     return subscriptions;
   }
 
-  void handleChange(DomElement domElement, AutofillInfo autofillInfo) {
-    final EditingState newEditingState = EditingState.fromDomElement(domElement as DomHTMLElement);
-
+  void _handleChange(DomHTMLElement domElement, AutofillInfo autofillInfo) {
+    final newEditingState = EditingState.fromDomElement(domElement);
     _sendAutofillEditingState(autofillInfo.uniqueIdentifier, newEditingState);
   }
 
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
-  void _sendAutofillEditingState(String? tag, EditingState editingState) {
+  void _sendAutofillEditingState(String tag, EditingState editingState) {
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
         MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
           0,
-          <String?, dynamic>{tag: editingState.toFlutter()},
+          <String, dynamic>{tag: editingState.toFlutter()},
         ]),
       ),
       _emptyCallback,
     );
   }
+}
+
+/// Holds information about a single field in an autofill group.
+class FieldItem {
+  FieldItem({required this.inputType, required this.autofillInfo});
+
+  /// The input type of the field.
+  final EngineInputType inputType;
+
+  /// The autofill information for the field.
+  final AutofillInfo autofillInfo;
 }
 
 /// Autofill related values.
@@ -458,15 +511,15 @@ class AutofillInfo {
   }) {
     final String uniqueIdentifier = autofill.readString('uniqueIdentifier');
     final List<dynamic>? hintsList = autofill.tryList('hints');
-    final String? firstHint =
-        (hintsList == null || hintsList.isEmpty) ? null : hintsList.first as String;
-    final EditingState editingState = EditingState.fromFrameworkMessage(
-      autofill.readJson('editingValue'),
-    );
+    final String? firstHint = (hintsList == null || hintsList.isEmpty)
+        ? null
+        : hintsList.first as String;
+    final editingState = EditingState.fromFrameworkMessage(autofill.readJson('editingValue'));
     return AutofillInfo(
       uniqueIdentifier: uniqueIdentifier,
-      autofillHint:
-          (firstHint != null) ? BrowserAutofillHints.instance.flutterToEngine(firstHint) : null,
+      autofillHint: (firstHint != null)
+          ? BrowserAutofillHints.instance.flutterToEngine(firstHint)
+          : null,
       editingState: editingState,
       placeholder: autofill.tryString('hintText'),
       textCapitalization: textCapitalization,
@@ -515,7 +568,7 @@ class AutofillInfo {
     final String? autofillHint = this.autofillHint;
     final String? placeholder = this.placeholder;
     if (domElement.isA<DomHTMLInputElement>()) {
-      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
+      final element = domElement as DomHTMLInputElement;
       if (placeholder != null) {
         element.placeholder = placeholder;
       }
@@ -530,7 +583,7 @@ class AutofillInfo {
       }
       element.autocomplete = autofillHint ?? 'on';
     } else if (domElement.isA<DomHTMLTextAreaElement>()) {
-      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
+      final element = domElement as DomHTMLTextAreaElement;
       if (placeholder != null) {
         element.placeholder = placeholder;
       }
@@ -549,7 +602,7 @@ String _replace(String originalText, String replacementText, ui.TextRange replac
   assert(replacedRange.isValid);
   assert(replacedRange.start <= originalText.length && replacedRange.end <= originalText.length);
 
-  final ui.TextRange normalizedRange = ui.TextRange(
+  final normalizedRange = ui.TextRange(
     start: math.min(replacedRange.start, replacedRange.end),
     end: math.max(replacedRange.start, replacedRange.end),
   );
@@ -602,7 +655,7 @@ class TextEditingDeltaState {
     TextEditingDeltaState lastTextEditingDeltaState,
   ) {
     final TextEditingDeltaState newTextEditingDeltaState = lastTextEditingDeltaState.copyWith();
-    final bool previousSelectionWasCollapsed =
+    final previousSelectionWasCollapsed =
         lastEditingState?.baseOffset == lastEditingState?.extentOffset;
     final bool isTextBeingRemoved =
         newTextEditingDeltaState.deltaText.isEmpty && newTextEditingDeltaState.deltaEnd != -1;
@@ -618,7 +671,7 @@ class TextEditingDeltaState {
       // and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
       final int deletedLength =
           newTextEditingDeltaState.oldText.length - newEditingState.text.length;
-      final bool backwardDeletion = newEditingState.baseOffset != lastEditingState?.baseOffset;
+      final backwardDeletion = newEditingState.baseOffset != lastEditingState?.baseOffset;
       if (backwardDeletion) {
         newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
       } else {
@@ -631,8 +684,9 @@ class TextEditingDeltaState {
           lastEditingState!.baseOffset > lastEditingState.extentOffset;
       // When a selection of text is replaced by a copy/paste operation we set the starting range
       // of the delta to be the beginning of the selection of the previous editing state.
-      newTextEditingDeltaState.deltaStart =
-          isPreviousSelectionInverted ? lastEditingState.extentOffset : lastEditingState.baseOffset;
+      newTextEditingDeltaState.deltaStart = isPreviousSelectionInverted
+          ? lastEditingState.extentOffset
+          : lastEditingState.baseOffset;
     }
 
     // If we are composing then set the delta range to the composing region we
@@ -662,7 +716,7 @@ class TextEditingDeltaState {
       // This verification is needed for cases such as the insertion of a period
       // after a double space, and the insertion of an accented character through
       // a native composing menu.
-      final ui.TextRange replacementRange = ui.TextRange(
+      final replacementRange = ui.TextRange(
         start: newTextEditingDeltaState.deltaStart,
         end: newTextEditingDeltaState.deltaEnd,
       );
@@ -671,14 +725,14 @@ class TextEditingDeltaState {
         newTextEditingDeltaState.deltaText,
         replacementRange,
       );
-      final bool isDeltaVerified = textAfterDelta == newEditingState.text;
+      final isDeltaVerified = textAfterDelta == newEditingState.text;
 
       if (!isDeltaVerified) {
         // 1. Find all matches for deltaText.
         // 2. Apply matches/replacement to oldText until oldText matches the
         // new editing state's text value.
         final bool isPeriodInsertion = newTextEditingDeltaState.deltaText.contains('.');
-        final RegExp deltaTextPattern = RegExp(RegExp.escape(newTextEditingDeltaState.deltaText));
+        final deltaTextPattern = RegExp(RegExp.escape(newTextEditingDeltaState.deltaText));
         for (final Match match in deltaTextPattern.allMatches(newEditingState.text)) {
           String textAfterMatch;
           int actualEnd;
@@ -840,8 +894,8 @@ class EditingState {
   factory EditingState.fromDomElement(DomHTMLElement domElement) {
     if (domElement.isA<DomHTMLInputElement>()) {
       final element = domElement as DomHTMLInputElement;
-      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
-      final selectionStart = element.selectionStart?.toInt() ?? 0;
+      final int selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final int selectionStart = element.selectionStart?.toInt() ?? 0;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
@@ -857,8 +911,8 @@ class EditingState {
       }
     } else if (domElement.isA<DomHTMLTextAreaElement>()) {
       final element = domElement as DomHTMLTextAreaElement;
-      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
-      final selectionStart = element.selectionStart?.toInt() ?? 0;
+      final int selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final int selectionStart = element.selectionStart?.toInt() ?? 0;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
@@ -949,7 +1003,7 @@ class EditingState {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'EditingState("$text", base:$baseOffset, extent:$extentOffset, composingBase:$composingBaseOffset, composingExtent:$composingExtentOffset)';
@@ -972,11 +1026,11 @@ class EditingState {
   ///  * [applyTextToDomElement], which is used for non-focused elements.
   void applyToDomElement(DomHTMLElement? domElement) {
     if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
-      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
+      final element = domElement as DomHTMLInputElement;
       element.value = text;
       element.setSelectionRange(minOffset, maxOffset);
     } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
-      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
+      final element = domElement as DomHTMLTextAreaElement;
       element.value = text;
       element.setSelectionRange(minOffset, maxOffset);
     } else {
@@ -995,10 +1049,10 @@ class EditingState {
   ///  * [applyToDomElement], which is used for focused elements.
   void applyTextToDomElement(DomHTMLElement? domElement) {
     if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
-      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
+      final element = domElement as DomHTMLInputElement;
       element.value = text;
     } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
-      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
+      final element = domElement as DomHTMLTextAreaElement;
       element.value = text;
     } else {
       throw UnsupportedError('Unsupported DOM element type');
@@ -1024,6 +1078,7 @@ class InputConfiguration {
     this.autofill,
     this.autofillGroup,
     this.enableDeltaModel = false,
+    this.enableInteractiveSelection = true,
   });
 
   InputConfiguration.fromFrameworkMessage(Map<String, dynamic> flutterInputConfiguration)
@@ -1041,16 +1096,17 @@ class InputConfiguration {
       textCapitalization = TextCapitalizationConfig.fromInputConfiguration(
         flutterInputConfiguration.readString('textCapitalization'),
       ),
-      autofill =
-          flutterInputConfiguration.containsKey('autofill')
-              ? AutofillInfo.fromFrameworkMessage(flutterInputConfiguration.readJson('autofill'))
-              : null,
+      autofill = flutterInputConfiguration.containsKey('autofill')
+          ? AutofillInfo.fromFrameworkMessage(flutterInputConfiguration.readJson('autofill'))
+          : null,
       autofillGroup = EngineAutofillForm.fromFrameworkMessage(
         flutterInputConfiguration.tryInt('viewId') ?? kImplicitViewId,
         flutterInputConfiguration.tryJson('autofill'),
         flutterInputConfiguration.tryList('fields'),
       ),
-      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false;
+      enableDeltaModel = flutterInputConfiguration.tryBool('enableDeltaModel') ?? false,
+      enableInteractiveSelection =
+          flutterInputConfiguration.tryBool('enableInteractiveSelection') ?? true;
 
   /// The ID of the view that contains the text field.
   final int viewId;
@@ -1080,11 +1136,19 @@ class InputConfiguration {
 
   final bool enableDeltaModel;
 
+  /// Autofill information for the focused text field.
   final AutofillInfo? autofill;
 
   final EngineAutofillForm? autofillGroup;
 
   final TextCapitalizationConfig textCapitalization;
+
+  /// Whether the user can change the text selection.
+  ///
+  /// When this is false, the text selection cannot be adjusted by
+  /// the user, text cannot be copied, and the user cannot paste into
+  /// the text field from the clipboard.
+  final bool enableInteractiveSelection;
 }
 
 typedef OnChangeCallback =
@@ -1150,12 +1214,12 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
   @override
   void placeElement() {
     geometry?.applyToDomElement(activeDomElement);
+    // Set the last editing state if it exists, this is critical for a
+    // users ongoing work to continue uninterrupted when there is an update to
+    // the transform.
+    lastEditingState?.applyToDomElement(domElement);
     if (hasAutofillGroup) {
       placeForm();
-      // Set the last editing state if it exists, this is critical for a
-      // users ongoing work to continue uninterrupted when there is an update to
-      // the transform.
-      lastEditingState?.applyToDomElement(domElement);
       // On Chrome, when a form is focused, it opens an autofill menu
       // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
@@ -1166,7 +1230,11 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // only after placing it to the correct position. Hence autofill menu
       // does not appear on top-left of the page.
       // Refocus on the elements after applying the geometry.
-      focusedFormElement!.focusWithoutScroll();
+      // placeForm() involves DOM manipulation which can trigger synchronous
+      // events (like blur). These events might invalidate the current
+      // inputConfiguration or disable the strategy before placeForm() returns.
+      // Therefore, we must defensively check if the element is still valid/present.
+      focusedFormElement?.focusWithoutScroll();
       moveFocusToActiveDomElement();
     }
   }
@@ -1201,13 +1269,13 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
     geometry?.applyToDomElement(activeDomElement);
     if (hasAutofillGroup) {
       placeForm();
-      // Set the last editing state if it exists, this is critical for a
-      // users ongoing work to continue uninterrupted when there is an update to
-      // the transform.
       // If domElement is not focused cursor location will not be correct.
       moveFocusToActiveDomElement();
-      lastEditingState?.applyToDomElement(activeDomElement);
     }
+    // Set the last editing state if it exists, this is critical for a
+    // users ongoing work to continue uninterrupted when there is an update to
+    // the transform.
+    lastEditingState?.applyToDomElement(activeDomElement);
   }
 
   @override
@@ -1285,6 +1353,9 @@ abstract class DefaultTextEditingStrategy
   /// Size and transform of the editable text on the page.
   EditableTextGeometry? geometry;
 
+  /// The scroll top of the editable text on the page.
+  final Map<String, double> _preservedScrollTops = <String, double>{};
+
   OnChangeCallback? onChange;
   OnActionCallback? onAction;
 
@@ -1297,6 +1368,21 @@ abstract class DefaultTextEditingStrategy
   bool _appendedToForm = false;
 
   DomHTMLFormElement? get focusedFormElement => inputConfiguration.autofillGroup?.formElement;
+
+  /// Scrolls the active DOM element into view if running inside an iframe
+  /// or in multi-view mode.
+  ///
+  /// This handles two cases where iOS browsers don't automatically scroll
+  /// text fields into view when the keyboard appears:
+  /// 1. Flutter embedded in an iframe
+  /// 2. Flutter in multi-view mode (embedded as a component)
+  ///
+  /// See: https://github.com/flutter/flutter/issues/178743
+  void scrollIntoViewIfEmbedded() {
+    if (isEmbeddedInIframe() || configuration.multiViewEnabled) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+    }
+  }
 
   @override
   void initializeTextEditing(
@@ -1359,7 +1445,7 @@ abstract class DefaultTextEditingStrategy
       _ensureEditingElementInView(activeDomElement, inputConfiguration.viewId);
     }
 
-    final String autocorrectValue = config.autocorrect ? 'on' : 'off';
+    final autocorrectValue = config.autocorrect ? 'on' : 'off';
     activeDomElement.setAttribute('autocorrect', autocorrectValue);
   }
 
@@ -1399,6 +1485,14 @@ abstract class DefaultTextEditingStrategy
       );
     }
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     preventDefaultForMouseEvents();
@@ -1432,6 +1526,11 @@ abstract class DefaultTextEditingStrategy
   @override
   void disable() {
     assert(isEnabled);
+    // Preserve the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      _preservedScrollTops[key] = activeDomElement.scrollTop;
+    }
 
     isEnabled = false;
     lastEditingState = null;
@@ -1439,7 +1538,7 @@ abstract class DefaultTextEditingStrategy
     style = null;
     geometry = null;
 
-    for (int i = 0; i < subscriptions.length; i++) {
+    for (var i = 0; i < subscriptions.length; i++) {
       subscriptions[i].cancel();
     }
     subscriptions.clear();
@@ -1450,7 +1549,7 @@ abstract class DefaultTextEditingStrategy
     // More details on `TextInput.finishAutofillContext` call.
     if (_appendedToForm && inputConfiguration.autofillGroup?.formElement != null) {
       _styleAutofillElements(activeDomElement, isOffScreen: true);
-      inputConfiguration.autofillGroup?.storeForm();
+      inputConfiguration.autofillGroup?.goDormant();
       EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     } else {
       EnginePlatformDispatcher.instance.viewManager.safeRemove(activeDomElement);
@@ -1472,14 +1571,15 @@ abstract class DefaultTextEditingStrategy
   }
 
   void placeForm() {
-    inputConfiguration.autofillGroup!.placeForm(activeDomElement);
+    inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
     _appendedToForm = true;
   }
 
   void handleChange(DomEvent event) {
     assert(isEnabled);
 
-    EditingState newEditingState = EditingState.fromDomElement(activeDomElement);
+    var newEditingState = EditingState.fromDomElement(activeDomElement);
+    newEditingState = suppressInteractiveSelectionIfNeeded(newEditingState);
     newEditingState = determineCompositionState(newEditingState);
 
     TextEditingDeltaState? newTextEditingDeltaState;
@@ -1502,6 +1602,24 @@ abstract class DefaultTextEditingStrategy
     _editingDeltaState = null;
   }
 
+  EditingState suppressInteractiveSelectionIfNeeded(EditingState editingState) {
+    if (inputConfiguration.enableInteractiveSelection) {
+      return editingState;
+    }
+
+    if (editingState.baseOffset == editingState.extentOffset) {
+      return editingState;
+    }
+
+    // If interactive selection is disabled, collapse the selection to the end.
+    final EditingState newEditingState = editingState.copyWith(
+      baseOffset: editingState.extentOffset,
+      extentOffset: editingState.extentOffset,
+    );
+    newEditingState.applyToDomElement(activeDomElement);
+    return newEditingState;
+  }
+
   void handleBeforeInput(DomEvent event) {
     // In some cases the beforeinput event is not fired such as when the selection
     // of a text field is updated. In this case only the oninput event is fired.
@@ -1517,8 +1635,9 @@ abstract class DefaultTextEditingStrategy
     if (inputType != null) {
       final bool isSelectionInverted =
           lastEditingState!.baseOffset > lastEditingState!.extentOffset;
-      final int deltaOffset =
-          isSelectionInverted ? lastEditingState!.baseOffset : lastEditingState!.extentOffset;
+      final int deltaOffset = isSelectionInverted
+          ? lastEditingState!.baseOffset
+          : lastEditingState!.extentOffset;
       if (inputType.contains('delete')) {
         // The deltaStart is set in handleChange because there is where we get access
         // to the new selection baseOffset which is our new deltaStart.
@@ -1543,7 +1662,7 @@ abstract class DefaultTextEditingStrategy
   void handleBlur(DomEvent event) {
     event as DomFocusEvent;
 
-    final DomElement? willGainFocusElement = event.relatedTarget as DomElement?;
+    final willGainFocusElement = event.relatedTarget as DomElement?;
     if (willGainFocusElement == null) {
       // If the element to gain focus is reported as `null`, it means that the
       // window/iframe that Flutter runs in is losing focus. In this case, the
@@ -1568,9 +1687,16 @@ abstract class DefaultTextEditingStrategy
     }
   }
 
+  void handleClipboardEvent(DomEvent event) {
+    // Prevent clipboard copy/paste if interactive selection is disabled.
+    if (!inputConfiguration.enableInteractiveSelection) {
+      event.preventDefault();
+    }
+  }
+
   void maybeSendAction(DomEvent e) {
     if (e.isA<DomKeyboardEvent>()) {
-      final DomKeyboardEvent event = e as DomKeyboardEvent;
+      final event = e as DomKeyboardEvent;
       if (event.keyCode == _kReturnKeyCode) {
         onAction!(inputConfiguration.inputAction);
         if (inputConfiguration.inputType is MultilineInputType &&
@@ -1608,6 +1734,12 @@ abstract class DefaultTextEditingStrategy
 
     // Re-focuses after setting editing state.
     moveFocusToActiveDomElement();
+
+    // Restore the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      activeDomElement.scrollTop = _preservedScrollTops.remove(key) ?? 0.0;
+    }
   }
 
   /// Prevent default behavior for mouse down, up and move.
@@ -1751,6 +1883,14 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
     );
 
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
+    );
+
     addCompositionEventHandlers(activeDomElement);
 
     // Position the DOM element after it is focused.
@@ -1833,6 +1973,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   void placeElement() {
     moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
+    scrollIntoViewIfEmbedded();
   }
 }
 
@@ -1887,6 +2028,14 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
     );
 
     addCompositionEventHandlers(activeDomElement);
@@ -1973,6 +2122,14 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
     subscriptions.add(
       DomSubscription(activeDomElement, 'blur', createDomEventListener(handleBlur)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'copy', createDomEventListener(handleClipboardEvent)),
+    );
+
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'paste', createDomEventListener(handleClipboardEvent)),
     );
 
     preventDefaultForMouseEvents();
@@ -2172,9 +2329,8 @@ class TextInputFinishAutofillContext extends TextInputCommand {
 /// Called when the form is finalized with save option `true`.
 /// See: https://github.com/flutter/flutter/blob/bf9f3a3dcfea3022f9cf2dfc3ab10b120b48b19d/packages/flutter/lib/src/services/text_input.dart#L1277
 void saveForms() {
-  formsOnTheDom.forEach((String identifier, DomHTMLFormElement form) {
-    final DomHTMLInputElement submitBtn =
-        form.getElementsByClassName('submitBtn').first as DomHTMLInputElement;
+  dormantForms.forEach((String identifier, EngineAutofillForm form) {
+    final submitBtn = form.formElement!.getElementsByClassName('submitBtn').first as DomElement;
     submitBtn.click();
   });
 }
@@ -2183,10 +2339,10 @@ void saveForms() {
 ///
 /// Called when the form is finalized.
 void cleanForms() {
-  for (final DomHTMLFormElement form in formsOnTheDom.values) {
-    form.remove();
+  for (final EngineAutofillForm form in dormantForms.values) {
+    form.formElement?.remove();
   }
-  formsOnTheDom.clear();
+  dormantForms.clear();
 }
 
 /// Translates the message-based communication between the framework and the
@@ -2201,7 +2357,7 @@ class TextEditingChannel {
 
   /// Handles "flutter/textinput" platform messages received from the framework.
   void handleTextInput(ByteData? data, ui.PlatformMessageResponseCallback? callback) {
-    const JSONMethodCodec codec = JSONMethodCodec();
+    const codec = JSONMethodCodec();
     final MethodCall call = codec.decodeMethodCall(data);
     final TextInputCommand command;
     switch (call.method) {
@@ -2214,7 +2370,7 @@ class TextEditingChannel {
 
       case 'TextInput.updateConfig':
         // Set configuration eagerly because it contains data about the text
-        // field used to flush the command queue. However, delaye applying the
+        // field used to flush the command queue. However, delay applying the
         // configuration because the strategy may not be available yet.
         implementation.configuration = InputConfiguration.fromFrameworkMessage(
           call.arguments as Map<String, dynamic>,
@@ -2327,6 +2483,25 @@ class TextEditingChannel {
       _emptyCallback,
     );
   }
+
+  /// Sends the 'TextInputClient.onFocusReceived' message to the framework.
+  void onFocusReceived(int? clientId) {
+    EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+      'flutter/textinput',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('TextInputClient.onFocusReceived', <dynamic>[clientId]),
+      ),
+      (ByteData? data) {
+        if (data == null) {
+          return;
+        }
+        final result = const JSONMethodCodec().decodeEnvelope(data) as bool;
+        if (!result) {
+          printWarning('Text input client did not acquire focus after platform focus received.');
+        }
+      },
+    );
+  }
 }
 
 /// Text editing singleton.
@@ -2338,7 +2513,7 @@ final HybridTextEditing textEditing = HybridTextEditing();
 /// save or cancel them.
 ///
 /// See: https://github.com/flutter/flutter/blob/bf9f3a3dcfea3022f9cf2dfc3ab10b120b48b19d/packages/flutter/lib/src/services/text_input.dart#L1277
-final Map<String, DomHTMLFormElement> formsOnTheDom = <String, DomHTMLFormElement>{};
+final dormantForms = <String, EngineAutofillForm>{};
 
 /// Should be used as a singleton to provide support for text editing in
 /// Flutter Web.
@@ -2353,7 +2528,19 @@ class HybridTextEditing {
   ///
   /// The constructor also decides which text editing strategy to use depending
   /// on the operating system and browser engine.
-  HybridTextEditing();
+  HybridTextEditing() {
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
+      // In iOS 26, the text field is blurred right before autofill occurs. We need to keep listening
+      // for focus events in order to re-establish the connection with the framework when the text
+      // field is focused again for autofill.
+      for (final EngineFlutterView view in EnginePlatformDispatcher.instance.views) {
+        _addFocusReceivedListenerToView(view.viewId);
+      }
+      EnginePlatformDispatcher.instance.viewManager.onViewCreated.listen(
+        _addFocusReceivedListenerToView,
+      );
+    }
+  }
 
   late final TextEditingChannel channel = TextEditingChannel(this);
 
@@ -2417,6 +2604,27 @@ class HybridTextEditing {
       channel.onConnectionClosed(_clientId);
     }
   }
+
+  void _addFocusReceivedListenerToView(int viewId) {
+    final EngineFlutterView? view = EnginePlatformDispatcher.instance.viewManager[viewId];
+    view!.dom.textEditingHost.addEventListener(
+      'focusin',
+      createDomEventListener(_handleFocusReceived),
+    );
+  }
+
+  void _handleFocusReceived(DomEvent event) {
+    if (isEditing) {
+      return;
+    }
+    final target = event.target as DomElement?;
+    if (target == null) {
+      return;
+    }
+    if (target.classList.contains(HybridTextEditing.textEditingClass)) {
+      channel.onFocusReceived(_clientId);
+    }
+  }
 }
 
 /// Information on the font and alignment of a text editing element.
@@ -2429,6 +2637,9 @@ class EditableTextStyle {
     required this.textAlign,
     required this.fontFamily,
     required this.fontWeight,
+    required this.letterSpacing,
+    required this.wordSpacing,
+    required this.lineHeight,
   });
 
   factory EditableTextStyle.fromFrameworkMessage(Map<String, dynamic> flutterStyle) {
@@ -2437,13 +2648,14 @@ class EditableTextStyle {
     assert(flutterStyle.containsKey('textAlignIndex'));
     assert(flutterStyle.containsKey('textDirectionIndex'));
 
-    final int textAlignIndex = flutterStyle['textAlignIndex'] as int;
-    final int textDirectionIndex = flutterStyle['textDirectionIndex'] as int;
-    final int? fontWeightIndex = flutterStyle['fontWeightIndex'] as int?;
+    final textAlignIndex = flutterStyle['textAlignIndex'] as int;
+    final textDirectionIndex = flutterStyle['textDirectionIndex'] as int;
+    final fontWeightIndex = flutterStyle['fontWeightIndex'] as int?;
 
     // Convert [fontWeightIndex] to its CSS equivalent value.
-    final String fontWeight =
-        fontWeightIndex != null ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex) : 'normal';
+    final String fontWeight = fontWeightIndex != null
+        ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex)
+        : 'normal';
 
     // Also convert [textAlignIndex] and [textDirectionIndex] to their
     // corresponding enum values in [ui.TextAlign] and [ui.TextDirection]
@@ -2454,6 +2666,9 @@ class EditableTextStyle {
       textAlign: ui.TextAlign.values[textAlignIndex],
       textDirection: ui.TextDirection.values[textDirectionIndex],
       fontWeight: fontWeight,
+      letterSpacing: flutterStyle.tryDouble('letterSpacing'),
+      wordSpacing: flutterStyle.tryDouble('wordSpacing'),
+      lineHeight: flutterStyle.tryDouble('lineHeight'),
     );
   }
 
@@ -2464,6 +2679,9 @@ class EditableTextStyle {
   final String? fontFamily;
   final ui.TextAlign textAlign;
   final ui.TextDirection textDirection;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? lineHeight;
 
   String? get align => textAlignToCssValue(textAlign, textDirection);
 
@@ -2472,7 +2690,10 @@ class EditableTextStyle {
   void applyToDomElement(DomHTMLElement domElement) {
     domElement.style
       ..textAlign = align!
-      ..font = cssFont;
+      ..font = cssFont
+      ..letterSpacing = letterSpacing != null ? '${letterSpacing}px' : ''
+      ..wordSpacing = wordSpacing != null ? '${wordSpacing}px' : ''
+      ..lineHeight = lineHeight != null ? '${lineHeight}px' : 'normal';
   }
 }
 
@@ -2494,7 +2715,7 @@ class EditableTextGeometry {
     assert(encodedGeometry.containsKey('height'));
     assert(encodedGeometry.containsKey('transform'));
 
-    final List<double> transformList = List<double>.from(
+    final transformList = List<double>.from(
       encodedGeometry.readList('transform').map((final dynamic e) => (e as num).toDouble()),
     );
     return EditableTextGeometry(
@@ -2532,4 +2753,18 @@ class EditableTextGeometry {
       ..height = '${height}px'
       ..transform = cssTransform;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is EditableTextGeometry &&
+        other.width == width &&
+        other.height == height &&
+        listEquals<double>(other.globalTransform, globalTransform);
+  }
+
+  @override
+  int get hashCode => Object.hash(width, height, Object.hashAll(globalTransform));
 }

@@ -15,7 +15,6 @@
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/vulkan/swiftshader_path.h"
-#include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
 #include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
@@ -49,7 +48,7 @@ TestVulkanContext::TestVulkanContext() {
 
   application_ = std::make_unique<vulkan::VulkanApplication>(
       *vk_, "Flutter Unittests", std::vector<std::string>{},
-      VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 0, 0), true);
+      VK_MAKE_VERSION(1, 0, 0), VK_MAKE_VERSION(1, 1, 0), true);
   if (!application_->IsValid()) {
     FML_LOG(ERROR) << "Failed to initialize basic Vulkan state.";
     return;
@@ -85,7 +84,7 @@ TestVulkanContext::TestVulkanContext() {
 
   sk_sp<skgpu::VulkanMemoryAllocator> allocator =
       flutter::FlutterSkiaVulkanMemoryAllocator::Make(
-          VK_MAKE_VERSION(1, 0, 0), application_->GetInstance(),
+          VK_MAKE_VERSION(1, 1, 0), application_->GetInstance(),
           device_->GetPhysicalDeviceHandle(), device_->GetHandle(), vk_, true);
 
   skgpu::VulkanExtensions extensions;
@@ -96,7 +95,7 @@ TestVulkanContext::TestVulkanContext() {
   backend_context.fDevice = device_->GetHandle();
   backend_context.fQueue = device_->GetQueueHandle();
   backend_context.fGraphicsQueueIndex = device_->GetGraphicsQueueIndex();
-  backend_context.fMaxAPIVersion = VK_MAKE_VERSION(1, 0, 0);
+  backend_context.fMaxAPIVersion = VK_MAKE_VERSION(1, 1, 0);
   backend_context.fDeviceFeatures = &features;
   backend_context.fVkExtensions = &extensions;
   backend_context.fGetProc = get_proc;
@@ -115,7 +114,7 @@ TestVulkanContext::~TestVulkanContext() {
 }
 
 std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
-    const SkISize& size) const {
+    const DlISize& size) const {
   TestVulkanImage result;
 
   VkImageCreateInfo info = {
@@ -124,8 +123,8 @@ std::optional<TestVulkanImage> TestVulkanContext::CreateImage(
       .flags = 0,
       .imageType = VK_IMAGE_TYPE_2D,
       .format = VK_FORMAT_R8G8B8A8_UNORM,
-      .extent = VkExtent3D{static_cast<uint32_t>(size.width()),
-                           static_cast<uint32_t>(size.height()), 1},
+      .extent = VkExtent3D{static_cast<uint32_t>(size.width),
+                           static_cast<uint32_t>(size.height), 1},
       .mipLevels = 1,
       .arrayLayers = 1,
       .samples = VK_SAMPLE_COUNT_1_BIT,

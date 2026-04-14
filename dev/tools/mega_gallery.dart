@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml_edit/yaml_edit.dart';
 
 /// If no `copies` param is passed in, we scale the generated app up to 60k lines.
 const int kTargetLineCount = 60 * 1024;
@@ -17,8 +18,8 @@ void main(List<String> args) {
     Directory.current = Directory.current.parent.parent;
   }
 
-  final ArgParser argParser = ArgParser();
-  argParser.addOption('out');
+  final argParser = ArgParser();
+  argParser.addOption('out', mandatory: true);
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
   argParser.addFlag('help', abbr: 'h', negatable: false);
@@ -32,13 +33,14 @@ void main(List<String> args) {
     exit(0);
   }
 
-  final Directory source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
-  final Directory out = Directory(_normalize(results['out'] as String));
+  final source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
+  final outParent = Directory(_normalize(results['out'] as String));
+  final out = Directory(path.join(outParent.path, 'packages'));
 
   if (results['delete'] as bool) {
-    if (out.existsSync()) {
-      print('Deleting ${out.path}');
-      out.deleteSync(recursive: true);
+    if (outParent.existsSync()) {
+      print('Deleting ${outParent.path}');
+      outParent.deleteSync(recursive: true);
     }
 
     exit(0);
@@ -75,7 +77,7 @@ void main(List<String> args) {
   _copy(source, out);
 
   // Make n - 1 copies.
-  for (int i = 1; i < copies; i++) {
+  for (var i = 1; i < copies; i++) {
     _copyGallery(out, i);
   }
 
@@ -83,9 +85,11 @@ void main(List<String> args) {
   _createEntry(_file(out, 'lib/main.dart'), copies);
 
   // Update the pubspec.
-  String pubspec = _file(out, 'pubspec.yaml').readAsStringSync();
-  pubspec = pubspec.replaceAll('../../packages/flutter', '../../../packages/flutter');
-  _file(out, 'pubspec.yaml').writeAsStringSync(pubspec);
+  final String pubspec = _file(Directory(''), 'pubspec.yaml').readAsStringSync();
+
+  final yamlEditor = YamlEditor(pubspec);
+  yamlEditor.update(<String>['workspace'], <String>['packages']);
+  File(path.join(outParent.path, 'pubspec.yaml')).writeAsStringSync(yamlEditor.toString());
 
   // Replace the (flutter_gallery specific) analysis_options.yaml file with a default one.
   _file(out, 'analysis_options.yaml').writeAsStringSync('''
@@ -104,14 +108,15 @@ analyzer:
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
 void _createEntry(File mainFile, int copies) {
-  final StringBuffer imports = StringBuffer();
+  final imports = StringBuffer();
 
-  for (int i = 1; i < copies; i++) {
+  for (var i = 1; i < copies; i++) {
     imports.writeln('// ignore: unused_import');
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
   }
 
-  final String contents = '''
+  final contents =
+      '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -153,7 +158,7 @@ void _copy(Directory source, Directory target) {
         _copy(entity, Directory(path.join(target.path, name)));
 
       case File() when name != '.packages' && name != 'pubspec.lock':
-        final File dest = File(path.join(target.path, name));
+        final dest = File(path.join(target.path, name));
         dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
@@ -198,7 +203,7 @@ int _lineCount(File file) {
 }
 
 String _comma(int count) {
-  final String str = count.toString();
+  final str = count.toString();
   if (str.length > 3) {
     return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
   }

@@ -1,0 +1,31 @@
+import("//flutter/common/config.gni")
+import("//flutter/testing/testing.gni")
+
+source_set("geometry") {
+  visibility = [
+    ":geometry_unittests",
+    "//flutter/shell/common:*",
+    "//flutter/shell/platform/common:*",
+    "//flutter/shell/platform/windows:*",
+  ]
+
+  sources = [ "geometry.h" ]
+}
+
+if (enable_unittests) {
+  test_fixtures("geometry_fixtures") {
+    fixtures = []
+  }
+
+  executable("geometry_unittests") {
+    testonly = true
+
+    sources = [ "geometry_unittests.cc" ]
+
+    deps = [
+      ":geometry",
+      ":geometry_fixtures",
+      "//flutter/testing",
+    ]
+  }
+}

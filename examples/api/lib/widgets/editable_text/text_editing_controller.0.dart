@@ -21,10 +21,12 @@ class TextEditingControllerExample extends StatefulWidget {
   const TextEditingControllerExample({super.key});
 
   @override
-  State<TextEditingControllerExample> createState() => _TextEditingControllerExampleState();
+  State<TextEditingControllerExample> createState() =>
+      _TextEditingControllerExampleState();
 }
 
-class _TextEditingControllerExampleState extends State<TextEditingControllerExample> {
+class _TextEditingControllerExampleState
+    extends State<TextEditingControllerExample> {
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -34,7 +36,10 @@ class _TextEditingControllerExampleState extends State<TextEditingControllerExam
       final String text = _controller.text.toLowerCase();
       _controller.value = _controller.value.copyWith(
         text: text,
-        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
+        selection: TextSelection(
+          baseOffset: text.length,
+          extentOffset: text.length,
+        ),
         composing: TextRange.empty,
       );
     });
@@ -50,8 +55,8 @@ class _TextEditingControllerExampleState extends State<TextEditingControllerExam
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(6),
+        alignment: .center,
+        padding: const .all(6),
         child: TextFormField(
           controller: _controller,
           decoration: const InputDecoration(border: OutlineInputBorder()),

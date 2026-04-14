@@ -15,13 +15,17 @@ namespace testing {
 
 using ::testing::Contains;
 
+FlutterSemanticsFlags kEmptyFlags = FlutterSemanticsFlags{};
+
 FlutterSemanticsNode2 CreateSemanticsNode(
     int32_t id,
     const char* label,
     const std::vector<int32_t>* children = nullptr) {
   return {
       .id = id,
-      .flags = static_cast<FlutterSemanticsFlag>(0),
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
+      .flags__deprecated__ = static_cast<FlutterSemanticsFlag>(0),
+      // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
       .actions = static_cast<FlutterSemanticsAction>(0),
       .text_selection_base = -1,
       .text_selection_extent = -1,
@@ -34,6 +38,7 @@ FlutterSemanticsNode2 CreateSemanticsNode(
       .children_in_traversal_order = children ? children->data() : nullptr,
       .custom_accessibility_actions_count = 0,
       .tooltip = "",
+      .flags2 = &kEmptyFlags,
   };
 }
 
@@ -43,6 +48,7 @@ TEST(AccessibilityBridgeTest, BasicTest) {
 
   std::vector<int32_t> children{1, 2};
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root", &children);
+  root.identifier = "identifier";
   FlutterSemanticsNode2 child1 = CreateSemanticsNode(1, "child 1");
   FlutterSemanticsNode2 child2 = CreateSemanticsNode(2, "child 2");
 
@@ -58,6 +64,7 @@ TEST(AccessibilityBridgeTest, BasicTest) {
   EXPECT_EQ(root_node->GetData().child_ids[0], 1);
   EXPECT_EQ(root_node->GetData().child_ids[1], 2);
   EXPECT_EQ(root_node->GetName(), "root");
+  EXPECT_EQ(root_node->GetAuthorUniqueId(), u"identifier");
 
   EXPECT_EQ(child1_node->GetChildCount(), 0);
   EXPECT_EQ(child1_node->GetName(), "child 1");
@@ -209,9 +216,12 @@ TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocused);
+  auto flags = FlutterSemanticsFlags{
+      .is_focused = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+  };
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -241,9 +251,12 @@ TEST(AccessibilityBridgeTest, DoesNotAssignEditableRootToSelectableText) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly);
+  auto flags = FlutterSemanticsFlags{
+      .is_text_field = true,
+      .is_read_only = true,
+  };
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -257,10 +270,12 @@ TEST(AccessibilityBridgeTest, SwitchHasSwitchRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsEnabled);
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_toggled = FlutterTristate::kFlutterTristateFalse,
+  };
+
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -272,11 +287,14 @@ TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsSlider |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsEnabled |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocusable);
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_focused = FlutterTristate::kFlutterTristateFalse,
+      .is_slider = true,
+  };
+
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -293,9 +311,11 @@ TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
+  auto flags = FlutterSemanticsFlags{
+      .is_checked = FlutterCheckState::kFlutterCheckStateTrue,
+  };
+
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -570,6 +590,49 @@ TEST(AccessibilityBridgeTest, LineBreakingObjectTest) {
       ax::mojom::BoolAttribute::kIsLineBreakingObject));
   EXPECT_TRUE(root_data.GetBoolAttribute(
       ax::mojom::BoolAttribute::kIsLineBreakingObject));
+}
+
+TEST(AccessibilityBridgeTest, IsSelectedAttribute) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+
+  std::vector<int32_t> children{1, 2};
+  FlutterSemanticsNode2 node0 = CreateSemanticsNode(0, "node 0", &children);
+  auto flags0 = FlutterSemanticsFlags{
+      .is_selected = FlutterTristate::kFlutterTristateNone,
+  };
+  node0.flags2 = &flags0;
+
+  FlutterSemanticsNode2 node1 = CreateSemanticsNode(1, "node 1");
+  auto flags1 = FlutterSemanticsFlags{
+      .is_selected = FlutterTristate::kFlutterTristateTrue,
+  };
+  node1.flags2 = &flags1;
+
+  FlutterSemanticsNode2 node2 = CreateSemanticsNode(2, "node 2");
+  auto flags2 = FlutterSemanticsFlags{
+      .is_selected = FlutterTristate::kFlutterTristateFalse,
+  };
+  node2.flags2 = &flags2;
+
+  bridge->AddFlutterSemanticsNodeUpdate(node0);
+  bridge->AddFlutterSemanticsNodeUpdate(node1);
+  bridge->AddFlutterSemanticsNodeUpdate(node2);
+  bridge->CommitUpdates();
+
+  auto delegate0 = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  auto delegate1 = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
+  auto delegate2 = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
+
+  // For kFlutterTristateNone, selected should be false.
+  EXPECT_FALSE(delegate0->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected));
+  // For kFlutterTristateTrue, selected should be true.
+  EXPECT_TRUE(delegate1->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected));
+  // For kFlutterTristateFalse, selected should be false.
+  EXPECT_FALSE(delegate2->GetData().GetBoolAttribute(
+      ax::mojom::BoolAttribute::kSelected));
 }
 
 }  // namespace testing

@@ -23,7 +23,8 @@ class SliverAutoScrollExample extends StatefulWidget {
   const SliverAutoScrollExample({super.key});
 
   @override
-  State<SliverAutoScrollExample> createState() => _SliverAutoScrollExampleState();
+  State<SliverAutoScrollExample> createState() =>
+      _SliverAutoScrollExampleState();
 }
 
 class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
@@ -61,7 +62,8 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     final SliverGeometry geometry = alignedItem.geometry!;
     final double sliverOffset = constraints.scrollOffset;
 
-    if ((scrollController.offset - lastScrollOffset).abs() <= geometry.maxPaintExtent) {
+    if ((scrollController.offset - lastScrollOffset).abs() <=
+        geometry.maxPaintExtent) {
       // Ignore scrolls that are smaller than the aligned item's extent.
       return;
     }
@@ -85,8 +87,8 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
     }
     if (notification is ScrollEndNotification) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        final RenderSliver? sliver =
-            alignedItemKey.currentContext?.findAncestorRenderObjectOfType<RenderSliver>();
+        final RenderSliver? sliver = alignedItemKey.currentContext
+            ?.findAncestorRenderObjectOfType<RenderSliver>();
         if (sliver != null && sliver.geometry != null) {
           maybeAutoScrollAlignedItem(sliver);
         }
@@ -97,12 +99,12 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
 
   @override
   Widget build(BuildContext context) {
-    const EdgeInsets horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
+    const EdgeInsets horizontalPadding = .symmetric(horizontal: 8);
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const .symmetric(horizontal: 4),
           child: NotificationListener<ScrollNotification>(
             onNotification: handleScrollNotification,
             child: Scrollbar(
@@ -111,12 +113,18 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
               child: CustomScrollView(
                 controller: scrollController,
                 slivers: <Widget>[
-                  const SliverPadding(padding: horizontalPadding, sliver: ItemList(itemCount: 15)),
+                  const SliverPadding(
+                    padding: horizontalPadding,
+                    sliver: ItemList(itemCount: 15),
+                  ),
                   SliverPadding(
                     padding: horizontalPadding,
                     sliver: BigOrangeSliver(sliverChildKey: alignedItemKey),
                   ),
-                  const SliverPadding(padding: horizontalPadding, sliver: ItemList(itemCount: 25)),
+                  const SliverPadding(
+                    padding: horizontalPadding,
+                    sliver: ItemList(itemCount: 25),
+                  ),
                 ],
               ),
             ),
@@ -146,7 +154,7 @@ class BigOrangeSliver extends StatelessWidget {
           child: ListTile(
             textColor: Colors.white,
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
+              padding: .symmetric(vertical: 32),
               child: Text('Aligned Item'),
             ),
           ),
@@ -165,8 +173,9 @@ class ItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+    return SliverList.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
         return Card(
           color: colorScheme.onSecondary,
           child: SizedBox(
@@ -177,7 +186,7 @@ class ItemList extends StatelessWidget {
             ),
           ),
         );
-      }, childCount: itemCount),
+      },
     );
   }
 }

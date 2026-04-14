@@ -46,16 +46,16 @@ class EmbedderExternalView {
   };
 
   struct RenderTargetDescriptor {
-    SkISize surface_size;
+    DlISize surface_size;
 
-    explicit RenderTargetDescriptor(const SkISize& p_surface_size)
+    explicit RenderTargetDescriptor(const DlISize& p_surface_size)
         : surface_size(p_surface_size) {}
 
     struct Hash {
       constexpr std::size_t operator()(
           const RenderTargetDescriptor& desc) const {
-        return fml::HashCombine(desc.surface_size.width(),
-                                desc.surface_size.height());
+        return fml::HashCombine(desc.surface_size.width,
+                                desc.surface_size.height);
       }
     };
 
@@ -76,11 +76,11 @@ class EmbedderExternalView {
                                           ViewIdentifier::Hash,
                                           ViewIdentifier::Equal>;
 
-  EmbedderExternalView(const SkISize& frame_size,
-                       const SkMatrix& surface_transformation);
+  EmbedderExternalView(const DlISize& frame_size,
+                       const DlMatrix& surface_transformation);
 
-  EmbedderExternalView(const SkISize& frame_size,
-                       const SkMatrix& surface_transformation,
+  EmbedderExternalView(const DlISize& frame_size,
+                       const DlMatrix& surface_transformation,
                        ViewIdentifier view_identifier,
                        std::unique_ptr<EmbeddedViewParams> params);
 
@@ -100,7 +100,7 @@ class EmbedderExternalView {
 
   DlCanvas* GetCanvas();
 
-  SkISize GetRenderSurfaceSize() const;
+  DlISize GetRenderSurfaceSize() const;
 
   bool Render(const EmbedderRenderTarget& render_target,
               bool clear_surface = true);
@@ -112,8 +112,8 @@ class EmbedderExternalView {
   // Noop if the slice's recording has already ended.
   void TryEndRecording() const;
 
-  const SkISize render_surface_size_;
-  const SkMatrix surface_transformation_;
+  const DlISize render_surface_size_;
+  const DlMatrix surface_transformation_;
   ViewIdentifier view_identifier_;
   std::unique_ptr<EmbeddedViewParams> embedded_view_params_;
   std::unique_ptr<DisplayListEmbedderViewSlice> slice_;

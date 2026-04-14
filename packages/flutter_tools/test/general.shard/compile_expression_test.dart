@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -32,15 +33,18 @@ void main() {
     testLogger = BufferLogger.test();
     processManager = FakeProcessManager();
     frontendServerStdIn = MemoryIOSink();
-    fileSystem = MemoryFileSystem.test();
-    generator = ResidentCompiler(
-      'sdkroot',
-      buildMode: BuildMode.debug,
-      artifacts: Artifacts.test(),
+    fileSystem = MemoryFileSystem.test()
+      ..file(Artifact.flutterPatchedSdkPath.toString()).createSync();
+    generator = const ResidentCompilerFactory().create(
+      targetPlatform: .tester,
+      buildInfo: BuildInfo.debug,
+      artifacts: Artifacts.test(fileSystem: fileSystem),
       processManager: processManager,
       logger: testLogger,
       platform: FakePlatform(),
       fileSystem: fileSystem,
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
     );
 
     stdErrStreamController = StreamController<String>();
@@ -66,8 +70,8 @@ void main() {
   });
 
   testWithoutContext('compile expression can compile single expression', () async {
-    final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter = Completer<List<int>>();
+    final compileResponseCompleter = Completer<List<int>>();
+    final compileExpressionResponseCompleter = Completer<List<int>>();
     fileSystem.file('/path/to/main.dart.dill')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3, 4]);
@@ -114,9 +118,9 @@ void main() {
   });
 
   testWithoutContext('compile expressions without awaiting', () async {
-    final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
-    final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
+    final compileResponseCompleter = Completer<List<int>>();
+    final compileExpressionResponseCompleter1 = Completer<List<int>>();
+    final compileExpressionResponseCompleter2 = Completer<List<int>>();
 
     processManager.process.stdout = Stream<List<int>>.fromFutures(<Future<List<int>>>[
       compileResponseCompleter.future,
@@ -154,7 +158,7 @@ void main() {
     );
 
     // The test manages timing via completers.
-    final Completer<bool> lastExpressionCompleted = Completer<bool>();
+    final lastExpressionCompleted = Completer<bool>();
     unawaited(
       generator
           .compileExpression('0+1', null, null, null, null, null, null, null, null, false)
@@ -211,7 +215,7 @@ class FakeProcess extends Fake implements Process {
 }
 
 class FakeProcessManager extends Fake implements ProcessManager {
-  final FakeProcess process = FakeProcess();
+  final process = FakeProcess();
 
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {

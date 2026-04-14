@@ -4,7 +4,8 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/basic/mouse_region.on_exit.0.dart' as example;
+import 'package:flutter_api_samples/widgets/basic/mouse_region.on_exit.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,7 +15,9 @@ void main() {
     Container container = tester.widget<Container>(find.byType(Container));
     expect(container.decoration, const BoxDecoration(color: Colors.blue));
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.byType(Container)));
     await tester.pump();

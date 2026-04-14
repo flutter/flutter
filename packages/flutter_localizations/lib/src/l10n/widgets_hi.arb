@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "वेब पर खोजें",
   "shareButtonLabel": "शेयर करें",
   "pasteButtonLabel": "चिपकाएं",
-  "selectAllButtonLabel": "सभी को चुनें"
+  "selectAllButtonLabel": "सभी को चुनें",
+  "searchResultsFound": "खोज के नतीजे मिले",
+  "noResultsFound": "कोई नतीजा नहीं मिला",
+  "radioButtonUnselectedLabel": "नहीं चुना गया"
 }

@@ -80,7 +80,7 @@ class RenderPass : public ResourceBinder {
   /// scissor rect must lie entirely within the render target.
   /// If unset, no scissor is applied.
   ///
-  virtual void SetScissor(IRect scissor);
+  virtual void SetScissor(IRect32 scissor);
 
   //----------------------------------------------------------------------------
   /// The number of elements to draw. When only a vertex buffer is set, this is

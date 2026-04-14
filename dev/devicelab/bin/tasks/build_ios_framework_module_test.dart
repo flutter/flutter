@@ -13,11 +13,6 @@ import 'package:path/path.dart' as path;
 /// Tests that iOS and macOS .xcframeworks can be built.
 Future<void> main() async {
   await task(() async {
-    // TODO(matanlurey): Remove after default.
-    // https://github.com/flutter/flutter/issues/160257
-    section('Opt-in to --explicit-package-dependencies');
-    await flutter('config', options: <String>['--explicit-package-dependencies']);
-
     section('Create module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
@@ -25,7 +20,7 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         section('Test iOS module template');
 
-        final Directory moduleProjectDir = Directory(path.join(tempDir.path, 'hello_module'));
+        final moduleProjectDir = Directory(path.join(tempDir.path, 'hello_module'));
         await flutter(
           'create',
           options: <String>[
@@ -42,7 +37,7 @@ Future<void> main() async {
 
         section('Test app template');
 
-        final Directory projectDir = Directory(path.join(tempDir.path, 'hello_project'));
+        final projectDir = Directory(path.join(tempDir.path, 'hello_project'));
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', 'hello_project'],
@@ -56,7 +51,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
@@ -67,7 +63,7 @@ Future<void> main() async {
 Future<void> _addPlugin(Directory projectDir) async {
   section('Add plugins');
 
-  final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+  final pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
   String content = pubspec.readAsStringSync();
   content = content.replaceFirst(
     '\ndependencies:\n',
@@ -83,7 +79,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
   // This builds all build modes' frameworks by default
   section('Build iOS app');
 
-  const String outputDirectoryName = 'flutter-frameworks';
+  const outputDirectoryName = 'flutter-frameworks';
 
   await inDirectory(projectDir, () async {
     await flutter(
@@ -93,6 +89,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
         '--output=$outputDirectoryName',
         '--obfuscate',
         '--split-debug-info=symbols',
+        '--codesign-identity',
+        '-',
       ],
     );
   });
@@ -152,7 +150,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   section('Check profile, release builds has Dart AOT dylib');
 
-  for (final String mode in <String>['Profile', 'Release']) {
+  for (final mode in <String>['Profile', 'Release']) {
     final String appFrameworkPath = path.join(
       outputPath,
       mode,
@@ -219,7 +217,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   section("Check all modes' engine dylib");
 
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     checkFileExists(
       path.join(
         outputPath,
@@ -257,7 +255,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   section('Check all modes have plugins');
 
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     final String pluginFrameworkPath = path.join(
       outputPath,
       mode,
@@ -341,7 +339,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   section('Check all modes have generated plugin registrant');
 
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     if (!isModule) {
       continue;
     }
@@ -378,10 +376,22 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     checkFileExists(simulatorHeaderPath);
   }
 
+  section('Check all XCFrameworks are codesigned');
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
+    final String modePath = path.join(outputPath, mode);
+    await _checkCodeSignature(path.join(modePath, 'Flutter.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'connectivity.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
+    if (isModule) {
+      await _checkCodeSignature(path.join(modePath, 'FlutterPluginRegistrant.xcframework'));
+    }
+  }
+
   // This builds all build modes' frameworks by default
   section('Build podspec and static plugins');
 
-  const String cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
+  const cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
 
   await inDirectory(projectDir, () async {
     await flutter(
@@ -392,12 +402,13 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
         '--force', // Allow podspec creation on master.
         '--output=$cocoapodsOutputDirectoryName',
         '--static',
+        '--no-codesign',
       ],
     );
   });
 
   final String cocoapodsOutputPath = path.join(projectDir.path, cocoapodsOutputDirectoryName);
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     checkFileExists(path.join(cocoapodsOutputPath, mode, 'Flutter.podspec'));
     await _checkDylib(
       path.join(cocoapodsOutputPath, mode, 'App.xcframework', 'ios-arm64', 'App.framework', 'App'),
@@ -456,14 +467,6 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
     throw TaskResult.failure('Unexpected GeneratedPluginRegistrant.m.');
   }
 
-  if (File(path.join(outputPath, 'flutter_lldbinit')).existsSync() == isModule) {
-    throw TaskResult.failure('Unexpected flutter_lldbinit');
-  }
-
-  if (File(path.join(outputPath, 'flutter_lldb_helper.py')).existsSync() == isModule) {
-    throw TaskResult.failure('Unexpected flutter_lldb_helper.py.');
-  }
-
   section('Build frameworks without plugins');
   await _testBuildFrameworksWithoutPlugins(projectDir, platform: 'ios');
 
@@ -475,7 +478,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
   // This builds all build modes' frameworks by default
   section('Build macOS frameworks');
 
-  const String outputDirectoryName = 'flutter-frameworks';
+  const outputDirectoryName = 'flutter-frameworks';
 
   await inDirectory(projectDir, () async {
     await flutter(
@@ -485,6 +488,8 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
         '--output=$outputDirectoryName',
         '--obfuscate',
         '--split-debug-info=symbols',
+        '--codesign-identity',
+        '-',
       ],
     );
   });
@@ -552,7 +557,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   section('Check profile, release builds has Dart AOT dylib');
 
-  for (final String mode in <String>['Profile', 'Release']) {
+  for (final mode in <String>['Profile', 'Release']) {
     final String appFrameworkPath = path.join(
       outputPath,
       mode,
@@ -609,7 +614,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   section("Check all modes' engine dylib");
 
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     final String engineBinary = path.join(
       outputPath,
       mode,
@@ -635,7 +640,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   section('Check all modes have plugins');
 
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     final String pluginFrameworkPath = path.join(
       outputPath,
       mode,
@@ -713,10 +718,19 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
     );
   }
 
+  section('Check all XCFrameworks are codesigned');
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
+    final String modePath = path.join(outputPath, mode);
+    await _checkCodeSignature(path.join(modePath, 'FlutterMacOS.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'App.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'connectivity_macos.xcframework'));
+    await _checkCodeSignature(path.join(modePath, 'Reachability.xcframework'));
+  }
+
   // This builds all build modes' frameworks by default
   section('Build podspec and static plugins');
 
-  const String cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
+  const cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
 
   await inDirectory(projectDir, () async {
     await flutter(
@@ -727,12 +741,13 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
         '--force', // Allow podspec creation on master.
         '--output=$cocoapodsOutputDirectoryName',
         '--static',
+        '--no-codesign',
       ],
     );
   });
 
   final String cocoapodsOutputPath = path.join(projectDir.path, cocoapodsOutputDirectoryName);
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     checkFileExists(path.join(cocoapodsOutputPath, mode, 'FlutterMacOS.podspec'));
     await _checkDylib(
       path.join(
@@ -787,12 +802,12 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   section('Validate embed FlutterMacOS.framework with CocoaPods');
 
-  final File podspec = File(path.join(cocoapodsOutputPath, 'Debug', 'FlutterMacOS.podspec'));
+  final podspec = File(path.join(cocoapodsOutputPath, 'Debug', 'FlutterMacOS.podspec'));
 
   podspec.writeAsStringSync(podspec.readAsStringSync().replaceFirst('null.null.0', '0.0.0'));
 
-  final Directory macosDirectory = Directory(path.join(projectDir.path, 'macos'));
-  final File podfile = File(path.join(macosDirectory.path, 'Podfile'));
+  final macosDirectory = Directory(path.join(projectDir.path, 'macos'));
+  final podfile = File(path.join(macosDirectory.path, 'Podfile'));
   final String currentPodfile = podfile.readAsStringSync();
 
   // Temporarily test Add-to-App Cocoapods podspec for framework
@@ -822,7 +837,7 @@ Future<void> _testBuildFrameworksWithoutPlugins(
   Directory projectDir, {
   required String platform,
 }) async {
-  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins';
+  const noPluginsOutputDir = 'flutter-frameworks-no-plugins';
 
   await inDirectory(projectDir, () async {
     await flutter(
@@ -833,12 +848,13 @@ Future<void> _testBuildFrameworksWithoutPlugins(
         '--force', // Allow podspec creation on master.
         '--output=$noPluginsOutputDir',
         '--no-plugins',
+        '--no-codesign',
       ],
     );
   });
 
   final String noPluginsOutputPath = path.join(projectDir.path, noPluginsOutputDir);
-  for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+  for (final mode in <String>['Debug', 'Profile', 'Release']) {
     checkFileExists(
       path.join(noPluginsOutputPath, mode, 'Flutter${platform == 'macos' ? 'MacOS' : ''}.podspec'),
     );
@@ -853,7 +869,7 @@ Future<void> _testBuildFrameworksWithoutPlugins(
 }
 
 Future<void> _testStaticAndNoPlugins(Directory projectDir) async {
-  const String noPluginsOutputDir = 'flutter-frameworks-no-plugins-static';
+  const noPluginsOutputDir = 'flutter-frameworks-no-plugins-static';
   final ProcessResult result = await inDirectory(projectDir, () async {
     return executeFlutter(
       'build',
@@ -864,6 +880,7 @@ Future<void> _testStaticAndNoPlugins(Directory projectDir) async {
         '--output=$noPluginsOutputDir',
         '--no-plugins',
         '--static',
+        '--no-codesign',
       ],
       canFail: true,
     );
@@ -871,7 +888,7 @@ Future<void> _testStaticAndNoPlugins(Directory projectDir) async {
   if (result.exitCode == 0) {
     throw TaskResult.failure('Build framework command did not exit with error as expected');
   }
-  final String output = '${result.stdout}\n${result.stderr}';
+  final output = '${result.stdout}\n${result.stderr}';
   if (!output.contains('--static cannot be used with the --no-plugins flag')) {
     throw TaskResult.failure(output);
   }
@@ -895,6 +912,14 @@ Future<void> _checkStatic(String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('current ar archive random library')) {
     throw TaskResult.failure('$pathToLibrary is not a static library, found: $binaryFileType');
+  }
+}
+
+Future<void> _checkCodeSignature(String pathToArtifact) async {
+  final stderrBuffer = StringBuffer();
+  await eval('codesign', <String>['-dv', pathToArtifact], canFail: true, stderr: stderrBuffer);
+  if (stderrBuffer.toString().contains('not signed at all')) {
+    throw TaskResult.failure('$pathToArtifact is not signed');
   }
 }
 

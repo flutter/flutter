@@ -6,8 +6,8 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/fake_asset_manager.dart';
 import '../common/test_initialization.dart';
@@ -18,9 +18,9 @@ void main() {
 
 void testMain() {
   group('$SkiaFontCollection', () {
-    setUpUnitTests();
+    setUpUnitTests(testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true));
 
-    final List<String> warnings = <String>[];
+    final warnings = <String>[];
     late void Function(String) oldPrintWarning;
     late FakeAssetScope testAssetScope;
 
@@ -47,7 +47,7 @@ void testMain() {
     });
 
     test('logs no warnings with the default mock asset manager', () async {
-      final SkiaFontCollection fontCollection = SkiaFontCollection();
+      final fontCollection = SkiaFontCollection();
       await fontCollection.loadAssetFonts(await fetchFontManifest(fakeAssetManager));
 
       expect(warnings, isEmpty);
@@ -55,8 +55,9 @@ void testMain() {
 
     test('logs a warning if one of the registered fonts is invalid', () async {
       mockHttpFetchResponseFactory = (String url) async {
-        final ByteBuffer bogusData =
-            Uint8List.fromList('this is not valid font data'.codeUnits).buffer;
+        final ByteBuffer bogusData = Uint8List.fromList(
+          'this is not valid font data'.codeUnits,
+        ).buffer;
         return MockHttpFetchResponse(
           status: 200,
           url: url,
@@ -64,7 +65,7 @@ void testMain() {
           payload: MockHttpFetchPayload(byteBuffer: bogusData),
         );
       };
-      final SkiaFontCollection fontCollection = SkiaFontCollection();
+      final fontCollection = SkiaFontCollection();
       testAssetScope.setAsset(
         'FontManifest.json',
         stringAsUtf8Data('''
@@ -94,7 +95,7 @@ void testMain() {
     test(
       'logs an HTTP warning if one of the registered fonts is missing (404 file not found)',
       () async {
-        final SkiaFontCollection fontCollection = SkiaFontCollection();
+        final fontCollection = SkiaFontCollection();
         testAssetScope.setAsset(
           'FontManifest.json',
           stringAsUtf8Data('''
@@ -123,7 +124,7 @@ void testMain() {
     );
 
     test('prioritizes Ahem loaded via FontManifest.json', () async {
-      final SkiaFontCollection fontCollection = SkiaFontCollection();
+      final fontCollection = SkiaFontCollection();
       testAssetScope.setAsset(
         'FontManifest.json',
         stringAsUtf8Data(
@@ -138,7 +139,8 @@ void testMain() {
             "fonts":[{"asset":"/assets/fonts/Roboto-Regular.ttf"}]
           }
         ]
-      '''.trim(),
+      '''
+              .trim(),
         ),
       );
 
@@ -158,7 +160,7 @@ void testMain() {
     });
 
     test('falls back to default Ahem URL', () async {
-      final SkiaFontCollection fontCollection = renderer.fontCollection as SkiaFontCollection;
+      final fontCollection = renderer.fontCollection as SkiaFontCollection;
 
       final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
 
@@ -173,7 +175,7 @@ void testMain() {
     });
 
     test('FlutterTest is the default test font', () async {
-      final SkiaFontCollection fontCollection = renderer.fontCollection as SkiaFontCollection;
+      final fontCollection = renderer.fontCollection as SkiaFontCollection;
 
       expect(fontCollection.debugRegisteredFonts, isNotEmpty);
       expect(fontCollection.debugRegisteredFonts!.first.family, 'FlutterTest');

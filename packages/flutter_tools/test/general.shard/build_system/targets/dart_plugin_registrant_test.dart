@@ -10,16 +10,14 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart_plugin_registrant.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
-import '../../../src/fake_pub_deps.dart';
-import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
+import '../../../src/throwing_pub.dart';
 
-const String _kEmptyPubspecFile = '''
+const _kEmptyPubspecFile = '''
 name: path_provider_example
 
 dependencies:
@@ -27,7 +25,7 @@ dependencies:
     sdk: flutter
 ''';
 
-const String _kSamplePubspecFile = '''
+const _kSamplePubspecFile = '''
 name: path_provider_example
 description: Demonstrates how to use the path_provider plugin.
 
@@ -37,7 +35,7 @@ dependencies:
   path_provider_linux: 1.0.0
 ''';
 
-const String _kSamplePluginPubspec = '''
+const _kSamplePluginPubspec = '''
 name: path_provider_linux
 description: linux implementation of the path_provider plugin
 // version: 2.0.1
@@ -57,12 +55,6 @@ environment:
 ''';
 
 void main() {
-  // TODO(matanlurey): Remove after `explicit-package-dependencies` is enabled by default.
-  // See https://github.com/flutter/flutter/issues/160257 for details.
-  FeatureFlags enableExplicitPackageDependencies() {
-    return TestFeatureFlags(isExplicitPackageDependenciesEnabled: true);
-  }
-
   group('Dart plugin registrant', () {
     late FileSystem fileSystem;
 
@@ -71,7 +63,7 @@ void main() {
     });
 
     testWithoutContext('skipped based on environment.generateDartPluginRegistry', () async {
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -79,9 +71,9 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
 
-      expect(const DartPluginRegistrantTarget().canSkip(environment), isTrue);
+      expect(await const DartPluginRegistrantTarget().canSkip(environment), isTrue);
 
-      final Environment environment2 = Environment.test(
+      final environment2 = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
@@ -90,14 +82,15 @@ void main() {
         generateDartPluginRegistry: true,
       );
 
-      expect(const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
+      expect(await const DartPluginRegistrantTarget().canSkip(environment2), isFalse);
     });
 
     testWithoutContext('skipped based on platform', () async {
-      const Map<String, bool> canSkip = <String, bool>{
+      const canSkip = <String, bool>{
         'darwin-x64': false,
         'linux-x64': false,
         'linux-arm64': false,
+        'linux-riscv64': false,
         'windows-x64': false,
         'web-javascript': true,
         'ios': false,
@@ -108,7 +101,7 @@ void main() {
 
       for (final String targetPlatform in canSkip.keys) {
         expect(
-          const DartPluginRegistrantTarget().canSkip(
+          await const DartPluginRegistrantTarget().canSkip(
             Environment.test(
               fileSystem.currentDirectory,
               artifacts: Artifacts.test(),
@@ -128,7 +121,7 @@ void main() {
       "doesn't generate dart_plugin_registrant.dart if there aren't Dart plugins",
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -141,7 +134,7 @@ void main() {
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -162,8 +155,7 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -171,7 +163,7 @@ name: path_provider_example
       'regenerates dart_plugin_registrant.dart',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -184,7 +176,7 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -220,7 +212,7 @@ name: path_provider_example
             '// @dart = 2.12\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:path_provider_linux/path_provider_linux.dart';\n"
+            "import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -231,7 +223,7 @@ name: path_provider_example
             '    } else if (Platform.isIOS) {\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        PathProviderLinux.registerWith();\n'
+            '        path_provider_linux.PathProviderLinux.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`path_provider_linux` threw an error: \$err. '\n"
@@ -249,8 +241,7 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -258,7 +249,7 @@ name: path_provider_example
       'removes dart_plugin_registrant.dart if plugins are removed from pubspec.yaml',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -270,7 +261,7 @@ name: path_provider_example
           },
           generateDartPluginRegistry: true,
         );
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -296,15 +287,14 @@ name: path_provider_example
 
         // Simulate a user removing everything from pubspec.yaml.
         pubspec.writeAsStringSync(_kEmptyPubspecFile);
-        writePackageConfigFile(directory: projectDir, mainLibName: 'path_provider_example');
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'path_provider_example');
 
         await DartPluginRegistrantTarget.test(testProject).build(environment);
         expect(generatedMain.existsSync(), isFalse);
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
 
@@ -312,7 +302,7 @@ name: path_provider_example
       'target file is outside the current project package',
       () async {
         final Directory projectDir = fileSystem.directory('project')..createSync();
-        final Environment environment = Environment.test(
+        final environment = Environment.test(
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
@@ -325,7 +315,7 @@ name: path_provider_example
           generateDartPluginRegistry: true,
         );
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: projectDir,
           mainLibName: 'path_provider_example',
           packages: <String, String>{'path_provider_linux': '/path_provider_linux'},
@@ -361,7 +351,7 @@ name: path_provider_example
             '// @dart = 2.12\n'
             '\n'
             "import 'dart:io'; // flutter_ignore: dart_io_import.\n"
-            "import 'package:path_provider_linux/path_provider_linux.dart';\n"
+            "import 'package:path_provider_linux/path_provider_linux.dart' as path_provider_linux;\n"
             '\n'
             "@pragma('vm:entry-point')\n"
             'class _PluginRegistrant {\n'
@@ -372,7 +362,7 @@ name: path_provider_example
             '    } else if (Platform.isIOS) {\n'
             '    } else if (Platform.isLinux) {\n'
             '      try {\n'
-            '        PathProviderLinux.registerWith();\n'
+            '        path_provider_linux.PathProviderLinux.registerWith();\n'
             '      } catch (err) {\n'
             '        print(\n'
             "          '`path_provider_linux` threw an error: \$err. '\n"
@@ -390,8 +380,7 @@ name: path_provider_example
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     );
   });

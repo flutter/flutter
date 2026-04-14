@@ -40,6 +40,7 @@ async function timeout(promise, duration, debugName) {
 }
 
 /**
+ * @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release.
  * Handles loading/reloading Flutter's service worker, if configured.
  *
  * @see: https://developers.google.com/web/fundamentals/primers/service-workers
@@ -62,40 +63,57 @@ export class FlutterServiceWorkerLoader {
    */
   loadServiceWorker(settings) {
     if (!settings) {
-      // In the future, settings = null -> uninstall service worker?
-      console.debug("Null serviceWorker configuration. Skipping.");
       return Promise.resolve();
     }
+
     if (!("serviceWorker" in navigator)) {
-      let errorMessage = "Service Worker API unavailable.";
-      if (!window.isSecureContext) {
-        errorMessage += "\nThe current context is NOT secure."
-        errorMessage += "\nRead more: https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts";
-      }
-      return Promise.reject(
-        new Error(errorMessage)
+      return Promise.resolve();
+    }
+
+    const printDeprecationWarning = () => {
+      console.warn(
+        'Loading the service worker using Flutter bootstrap is deprecated and will stop working in ' +
+        'a future release.\n' +
+        'For more details, see: https://github.com/flutter/flutter/issues/156910'
       );
+    };
+
+    const registerAndActivate = () => {
+      const {
+        serviceWorkerVersion,
+        serviceWorkerUrl = resolveUrlWithSegments(`flutter_service_worker.js?v=${serviceWorkerVersion}`),
+        timeoutMillis = 4000,
+      } = settings;
+      // Apply the TrustedTypes policy, if present.
+      let url = serviceWorkerUrl;
+      if (this._ttPolicy != null) {
+        url = this._ttPolicy.createScriptURL(url);
+      }
+      const serviceWorkerActivation = navigator.serviceWorker
+        .register(url)
+        .then((serviceWorkerRegistration) => this._getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion))
+        .then(this._waitForServiceWorkerActivation);
+      // Timeout race promise
+      return timeout(
+        serviceWorkerActivation,
+        timeoutMillis,
+        "prepareServiceWorker"
+      );
+    };
+
+    if (settings.serviceWorkerUrl != null) {
+      // If a custom URL is provided, print a deprecation warning and register unconditionally.
+      printDeprecationWarning();
+      return registerAndActivate();
+    } else {
+      // Otherwise, check for an existing registration first.
+      return navigator.serviceWorker.getRegistration().then((registration) => {
+        if (registration) {
+          return registerAndActivate();
+        }
+        return Promise.resolve();
+      });
     }
-    const {
-      serviceWorkerVersion,
-      serviceWorkerUrl = resolveUrlWithSegments(`flutter_service_worker.js?v=${serviceWorkerVersion}`),
-      timeoutMillis = 4000,
-    } = settings;
-    // Apply the TrustedTypes policy, if present.
-    let url = serviceWorkerUrl;
-    if (this._ttPolicy != null) {
-      url = this._ttPolicy.createScriptURL(url);
-    }
-    const serviceWorkerActivation = navigator.serviceWorker
-      .register(url)
-      .then((serviceWorkerRegistration) => this._getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion))
-      .then(this._waitForServiceWorkerActivation);
-    // Timeout race promise
-    return timeout(
-      serviceWorkerActivation,
-      timeoutMillis,
-      "prepareServiceWorker"
-    );
   }
   /**
    * Returns the latest service worker for the given `serviceWorkerRegistration`.

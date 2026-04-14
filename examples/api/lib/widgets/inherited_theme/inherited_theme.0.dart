@@ -23,7 +23,10 @@ class MyAppBody extends StatelessWidget {
     // the new route pushed onto said navigator.
     // Themes are captured outside of the route's builder because when the
     // builder executes, the context may not be valid anymore.
-    final CapturedThemes themes = InheritedTheme.capture(from: context, to: navigator.context);
+    final CapturedThemes themes = InheritedTheme.capture(
+      from: context,
+      to: navigator.context,
+    );
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -33,7 +36,7 @@ class MyAppBody extends StatelessWidget {
               // captured themes.
               return themes.wrap(
                 Container(
-                  alignment: Alignment.center,
+                  alignment: .center,
                   color: Colors.white,
                   child: const Text('Hello World'),
                 ),

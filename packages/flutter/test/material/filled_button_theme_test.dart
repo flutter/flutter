@@ -15,17 +15,19 @@ void main() {
 
   test('FilledButtonThemeData lerp special cases', () {
     expect(FilledButtonThemeData.lerp(null, null, 0), null);
-    const FilledButtonThemeData data = FilledButtonThemeData();
+    const data = FilledButtonThemeData();
     expect(identical(FilledButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Passing no FilledButtonTheme returns defaults', (WidgetTester tester) async {
-    const ColorScheme colorScheme = ColorScheme.light();
+    const colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
-          body: Center(child: FilledButton(onPressed: () {}, child: const Text('button'))),
+          body: Center(
+            child: FilledButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
       ),
     );
@@ -54,16 +56,16 @@ void main() {
   });
 
   group('[Theme, TextTheme, FilledButton style overrides]', () {
-    const Color foregroundColor = Color(0xff000001);
-    const Color backgroundColor = Color(0xff000002);
-    const Color disabledForegroundColor = Color(0xff000003);
-    const Color disabledBackgroundColor = Color(0xff000004);
-    const Color shadowColor = Color(0xff000005);
+    const foregroundColor = Color(0xff000001);
+    const backgroundColor = Color(0xff000002);
+    const disabledForegroundColor = Color(0xff000003);
+    const disabledBackgroundColor = Color(0xff000004);
+    const shadowColor = Color(0xff000005);
     const double elevation = 1;
-    const TextStyle textStyle = TextStyle(fontSize: 12.0);
-    const EdgeInsets padding = EdgeInsets.all(3);
-    const Size minimumSize = Size(200, 200);
-    const BorderSide side = BorderSide(color: Colors.green, width: 2);
+    const textStyle = TextStyle(fontSize: 12.0);
+    const padding = EdgeInsets.all(3);
+    const minimumSize = Size(200, 200);
+    const side = BorderSide(color: Colors.green, width: 2);
     const OutlinedBorder shape = RoundedRectangleBorder(
       side: side,
       borderRadius: BorderRadius.all(Radius.circular(2)),
@@ -71,8 +73,8 @@ void main() {
     const MouseCursor enabledMouseCursor = SystemMouseCursors.text;
     const MouseCursor disabledMouseCursor = SystemMouseCursors.grab;
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Duration animationDuration = Duration(milliseconds: 25);
-    const bool enableFeedback = false;
+    const animationDuration = Duration(milliseconds: 25);
+    const enableFeedback = false;
     const AlignmentGeometry alignment = Alignment.centerLeft;
 
     final ButtonStyle style = FilledButton.styleFrom(
@@ -113,13 +115,12 @@ void main() {
           body: Center(
             // If the FilledButtonTheme widget is present, it's used
             // instead of the Theme's ThemeData.FilledButtonTheme.
-            child:
-                themeStyle == null
-                    ? child
-                    : FilledButtonTheme(
-                      data: FilledButtonThemeData(style: themeStyle),
-                      child: child,
-                    ),
+            child: themeStyle == null
+                ? child
+                : FilledButtonTheme(
+                    data: FilledButtonThemeData(style: themeStyle),
+                    child: child,
+                  ),
           ),
         ),
       );
@@ -135,11 +136,11 @@ void main() {
       matching: find.byType(InkWell),
     );
 
-    const Set<MaterialState> enabled = <MaterialState>{};
-    const Set<MaterialState> disabled = <MaterialState>{MaterialState.disabled};
-    const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
-    const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
-    const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
+    const enabled = <WidgetState>{};
+    const disabled = <WidgetState>{WidgetState.disabled};
+    const hovered = <WidgetState>{WidgetState.hovered};
+    const focused = <WidgetState>{WidgetState.focused};
+    const pressed = <WidgetState>{WidgetState.pressed};
 
     void checkButton(WidgetTester tester) {
       final Material material = tester.widget<Material>(findMaterial);
@@ -150,11 +151,11 @@ void main() {
       expect(material.shadowColor, shadowColor);
       expect(material.elevation, elevation);
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, enabled),
+        WidgetStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, enabled),
         enabledMouseCursor,
       );
       expect(
-        MaterialStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, disabled),
+        WidgetStateProperty.resolveAs<MouseCursor>(inkWell.mouseCursor!, disabled),
         disabledMouseCursor,
       );
       expect(inkWell.overlayColor!.resolve(hovered), foregroundColor.withOpacity(0.08));
@@ -230,9 +231,9 @@ void main() {
   });
 
   testWidgets('FilledButton repsects Theme shadowColor', (WidgetTester tester) async {
-    const ColorScheme colorScheme = ColorScheme.light();
-    const Color shadowColor = Color(0xff000001);
-    const Color overriddenColor = Color(0xff000002);
+    const colorScheme = ColorScheme.light();
+    const shadowColor = Color(0xff000001);
+    const overriddenColor = Color(0xff000002);
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
@@ -372,7 +373,7 @@ void main() {
   testWidgets(
     'FilledButton icon uses provided FilledButtonTheme foregroundColor over default icon color',
     (WidgetTester tester) async {
-      const Color foregroundColor = Color(0xFFFFA500);
+      const foregroundColor = Color(0xFFFFA500);
 
       await tester.pumpWidget(
         MaterialApp(

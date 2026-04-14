@@ -40,9 +40,10 @@ void main() {
 
     test('waitForAbsent should resolve when text "present" disappears', () async {
       // Begin waiting for it to disappear
-      final Completer<void> whenWaitForAbsentResolves = Completer<void>();
+      final whenWaitForAbsentResolves = Completer<void>();
       driver
           .waitForAbsent(presentText)
+          // ignore: unawaited_futures
           .then(
             whenWaitForAbsentResolves.complete,
             onError: whenWaitForAbsentResolves.completeError,
@@ -58,7 +59,7 @@ void main() {
 
     test('waitFor times out waiting for "present" to reappear', () async {
       await expectLater(
-        () => driver.waitFor(presentText, timeout: const Duration(seconds: 1)),
+        driver.waitFor(presentText, timeout: const Duration(seconds: 1)),
         throwsA(
           isA<DriverError>().having(
             (DriverError error) => error.message,
@@ -71,9 +72,10 @@ void main() {
 
     test('waitFor should resolve when text "present" reappears', () async {
       // Begin waiting for it to reappear
-      final Completer<void> whenWaitForResolves = Completer<void>();
+      final whenWaitForResolves = Completer<void>();
       driver
           .waitFor(presentText)
+          // ignore: unawaited_futures
           .then(whenWaitForResolves.complete, onError: whenWaitForResolves.completeError);
 
       // Wait 1 second then make it appear

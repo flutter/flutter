@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> test(WidgetTester tester, double offset) {
-  final ViewportOffset viewportOffset = ViewportOffset.fixed(offset);
+  final viewportOffset = ViewportOffset.fixed(offset);
   addTearDown(viewportOffset.dispose);
   return tester.pumpWidget(
     Directionality(
@@ -15,14 +15,14 @@ Future<void> test(WidgetTester tester, double offset) {
       child: Viewport(
         offset: viewportOffset,
         slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(const <Widget>[
+          SliverList.list(
+            children: const <Widget>[
               SizedBox(height: 400.0, child: Text('a')),
               SizedBox(height: 400.0, child: Text('b')),
               SizedBox(height: 400.0, child: Text('c')),
               SizedBox(height: 400.0, child: Text('d')),
               SizedBox(height: 400.0, child: Text('e')),
-            ]),
+            ],
           ),
         ],
       ),
@@ -31,7 +31,7 @@ Future<void> test(WidgetTester tester, double offset) {
 }
 
 Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
-  final ViewportOffset viewportOffset = ViewportOffset.fixed(offset);
+  final viewportOffset = ViewportOffset.fixed(offset);
   addTearDown(viewportOffset.dispose);
   return tester.pumpWidget(
     Directionality(
@@ -55,11 +55,10 @@ Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
 }
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
-  final List<Offset> testAnswers =
-      tester
-          .renderObjectList<RenderBox>(find.byType(SizedBox))
-          .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
-          .toList();
+  final List<Offset> testAnswers = tester
+      .renderObjectList<RenderBox>(find.byType(SizedBox))
+      .map<Offset>((RenderBox target) => target.localToGlobal(Offset.zero))
+      .toList();
   expect(testAnswers, equals(answerKey));
   final String foundText = tester
       .widgetList<Text>(find.byType(Text))
@@ -115,7 +114,7 @@ void main() {
 
   testWidgets('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
     final Key key1 = GlobalKey();
-    final ViewportOffset offset = ViewportOffset.zero();
+    final offset = ViewportOffset.zero();
     addTearDown(offset.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -123,12 +122,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 const SizedBox(height: 251.0, child: Text('a')),
                 const SizedBox(height: 252.0, child: Text('b')),
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -145,12 +144,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
                 const SizedBox(height: 251.0, child: Text('a')),
                 const SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -167,12 +166,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 const SizedBox(height: 251.0, child: Text('a')),
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
                 const SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -189,11 +188,11 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
+            SliverList.list(
+              children: const <Widget>[
                 SizedBox(height: 251.0, child: Text('a')),
                 SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -206,12 +205,12 @@ void main() {
         child: Viewport(
           offset: offset,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
+            SliverList.list(
+              children: <Widget>[
                 const SizedBox(height: 251.0, child: Text('a')),
                 SizedBox(key: key1, height: 253.0, child: const Text('c')),
                 const SizedBox(height: 252.0, child: Text('b')),
-              ]),
+              ],
             ),
           ],
         ),
@@ -225,7 +224,7 @@ void main() {
   });
 
   testWidgets('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
-    final ViewportOffset offset1 = ViewportOffset.zero();
+    final offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 
     await tester.pumpWidget(
@@ -242,7 +241,7 @@ void main() {
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
 
-    final ViewportOffset offset2 = ViewportOffset.fixed(100.0);
+    final offset2 = ViewportOffset.fixed(100.0);
     addTearDown(offset2.dispose);
 
     await tester.pumpWidget(
@@ -259,7 +258,7 @@ void main() {
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    final ViewportOffset offset3 = ViewportOffset.fixed(100.0);
+    final offset3 = ViewportOffset.fixed(100.0);
     addTearDown(offset3.dispose);
 
     await tester.pumpWidget(
@@ -276,7 +275,7 @@ void main() {
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    final ViewportOffset offset4 = ViewportOffset.zero();
+    final offset4 = ViewportOffset.zero();
     addTearDown(offset4.dispose);
 
     await tester.pumpWidget(
@@ -295,7 +294,7 @@ void main() {
   });
 
   testWidgets('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
-    final ViewportOffset offset1 = ViewportOffset.zero();
+    final offset1 = ViewportOffset.zero();
     addTearDown(offset1.dispose);
 
     await tester.pumpWidget(
@@ -304,11 +303,7 @@ void main() {
         child: Viewport(
           offset: offset1,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 400.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 400.0, child: Text('a'))]),
           ],
         ),
       ),
@@ -316,7 +311,7 @@ void main() {
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
 
-    final ViewportOffset offset2 = ViewportOffset.fixed(100.0);
+    final offset2 = ViewportOffset.fixed(100.0);
     addTearDown(offset2.dispose);
 
     await tester.pumpWidget(
@@ -325,11 +320,7 @@ void main() {
         child: Viewport(
           offset: offset2,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 400.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 400.0, child: Text('a'))]),
           ],
         ),
       ),
@@ -337,7 +328,7 @@ void main() {
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    final ViewportOffset offset3 = ViewportOffset.fixed(100.0);
+    final offset3 = ViewportOffset.fixed(100.0);
     addTearDown(offset3.dispose);
 
     await tester.pumpWidget(
@@ -346,11 +337,7 @@ void main() {
         child: Viewport(
           offset: offset3,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 4000.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 4000.0, child: Text('a'))]),
           ],
         ),
       ),
@@ -358,7 +345,7 @@ void main() {
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    final ViewportOffset offset4 = ViewportOffset.zero();
+    final offset4 = ViewportOffset.zero();
     addTearDown(offset4.dispose);
 
     await tester.pumpWidget(
@@ -367,11 +354,7 @@ void main() {
         child: Viewport(
           offset: offset4,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
-                SizedBox(height: 4000.0, child: Text('a')),
-              ]),
-            ),
+            SliverList.list(children: const <Widget>[SizedBox(height: 4000.0, child: Text('a'))]),
           ],
         ),
       ),

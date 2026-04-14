@@ -20,7 +20,7 @@ ProcTable::ProcTable(const Resolver& resolver) {
   }
 
 #define GLVK_PROC(proc_ivar)                                    \
-  if (auto fn_ptr = resolver(proc_ivar.name)) {                 \
+  if (auto fn_ptr = resolver(proc_ivar.name.data())) {          \
     proc_ivar.function =                                        \
         reinterpret_cast<decltype(proc_ivar.function)>(fn_ptr); \
     proc_ivar.error_fn = error_fn;                              \

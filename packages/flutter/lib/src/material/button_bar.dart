@@ -22,10 +22,11 @@ import 'dialog.dart';
 ///
 /// ## Updating to [OverflowBar]
 ///
-/// [ButtonBar] has been replace by a more efficient widget, [OverflowBar].
+/// [ButtonBar] has been replaced by a more efficient widget, [OverflowBar].
 ///
 /// ```dart
 /// // Before
+/// // ignore: deprecated_member_use
 /// ButtonBar(
 ///   alignment: MainAxisAlignment.spaceEvenly,
 ///   children: <Widget>[
@@ -236,10 +237,12 @@ class ButtonBar extends StatelessWidget {
         overflowDirection:
             overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         overflowButtonSpacing: overflowButtonSpacing,
-        children:
-            children.map<Widget>((Widget child) {
-              return Padding(padding: EdgeInsets.symmetric(horizontal: paddingUnit), child: child);
-            }).toList(),
+        children: children.map<Widget>((Widget child) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+            child: child,
+          );
+        }).toList(),
       ),
     );
     switch (buttonTheme.layoutBehavior) {
@@ -360,7 +363,7 @@ class _RenderButtonBarRow extends RenderFlex {
     if (size.width <= constraints.maxWidth) {
       return super.computeDryLayout(constraints);
     }
-    double currentHeight = 0.0;
+    var currentHeight = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
@@ -394,14 +397,14 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      double currentHeight = 0.0;
+      var currentHeight = 0.0;
       RenderBox? child = switch (verticalDirection) {
         VerticalDirection.down => firstChild,
         VerticalDirection.up => lastChild,
       };
 
       while (child != null) {
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        final childParentData = child.parentData! as FlexParentData;
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.

@@ -4,8 +4,8 @@
 
 import 'dart:async' show Completer;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'sensitive_content_utils.dart';
@@ -19,10 +19,21 @@ void main() {
       null,
     );
   });
+
+  testWidgets('SensitiveContent widget can be tested without mocking method channels', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
+    );
+
+    expect(find.byType(SensitiveContent), findsOneWidget);
+  });
+
   testWidgets(
     'while SensitiveContent widget is being registered, SizedBox.shrink is built initially, then child widget is built upon completion',
     (WidgetTester tester) async {
-      final Completer<void> setContentSensitivityCompleter = Completer<void>();
+      final setContentSensitivityCompleter = Completer<void>();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) {
@@ -38,14 +49,14 @@ void main() {
         },
       );
 
-      final Container childWidget = Container();
+      final childWidget = Container();
 
       await tester.pumpWidget(
         SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: childWidget),
       );
 
       expect(find.byWidget(childWidget), findsNothing);
-      final SizedBox shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
+      final shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
       expect(shrinkBox.width, 0);
       expect(shrinkBox.height, 0);
 
@@ -63,8 +74,8 @@ void main() {
   testWidgets(
     'when SensitiveContent widget changes sensitivity, SizedBox.shrink is built initially, then child widget is built upon completion',
     (WidgetTester tester) async {
-      final Completer<void> setContentSensitivityCompleter = Completer<void>();
-      int setContentSensitivityCall = 0;
+      final setContentSensitivityCompleter = Completer<void>();
+      var setContentSensitivityCall = 0;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) {
@@ -85,8 +96,8 @@ void main() {
         },
       );
 
-      const Key scKey = Key('scKey');
-      final Container childWidget = Container();
+      const scKey = Key('scKey');
+      final childWidget = Container();
 
       await tester.pumpWidget(
         ChangeContentSensitivityTester(
@@ -104,7 +115,7 @@ void main() {
       await tester.pump();
 
       expect(find.byWidget(childWidget), findsNothing);
-      final SizedBox shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
+      final shrinkBox = tester.firstWidget(find.byType(SizedBox)) as SizedBox;
       expect(shrinkBox.width, 0);
       expect(shrinkBox.height, 0);
 

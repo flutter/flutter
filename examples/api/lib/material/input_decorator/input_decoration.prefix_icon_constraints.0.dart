@@ -28,9 +28,9 @@ class PrefixIconConstraintsExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
+      padding: .symmetric(horizontal: 8.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           TextField(
             decoration: InputDecoration(
@@ -44,7 +44,10 @@ class PrefixIconConstraintsExample extends StatelessWidget {
               isDense: true,
               hintText: 'Smaller Icon Constraints',
               prefixIcon: Icon(Icons.search),
-              prefixIconConstraints: BoxConstraints(minHeight: 32, minWidth: 32),
+              prefixIconConstraints: BoxConstraints(
+                minHeight: 32,
+                minWidth: 32,
+              ),
             ),
           ),
         ],

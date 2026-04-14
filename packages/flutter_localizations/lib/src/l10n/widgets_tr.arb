@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Web'de Ara",
   "shareButtonLabel": "Paylaş",
   "pasteButtonLabel": "Yapıştır",
-  "selectAllButtonLabel": "Tümünü seç"
+  "selectAllButtonLabel": "Tümünü seç",
+  "searchResultsFound": "Arama sonuçları bulundu",
+  "noResultsFound": "Sonuç bulunamadı",
+  "radioButtonUnselectedLabel": "Seçili değil"
 }

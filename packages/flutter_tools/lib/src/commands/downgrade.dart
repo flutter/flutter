@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -11,10 +12,23 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
+import '../git.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+
+@visibleForTesting
+String downgradePositionalArgumentErrorMessage(List<String> args) {
+  final String argString = args.join(' ');
+  final pluralized = args.length > 1 ? 'arguments' : 'argument';
+
+  return 'Unexpected positional $pluralized "$argString".\n\n'
+      '"flutter downgrade" does not support specifying a version.\n'
+      'It only undoes the last "flutter upgrade" on the current channel.\n\n'
+      'To switch to a specific Flutter version, see: '
+      'https://flutter.dev/to/switch-flutter-version';
+}
 
 /// The flutter downgrade command returns the SDK to the last recorded version
 /// for a particular branch.
@@ -31,7 +45,6 @@ class DowngradeCommand extends FlutterCommand {
     bool verboseHelp = false,
     PersistentToolState? persistentToolState,
     required Logger logger,
-    ProcessManager? processManager,
     FlutterVersion? flutterVersion,
     Terminal? terminal,
     Stdio? stdio,
@@ -39,10 +52,10 @@ class DowngradeCommand extends FlutterCommand {
   }) : _terminal = terminal,
        _flutterVersion = flutterVersion,
        _persistentToolState = persistentToolState,
-       _processManager = processManager,
        _stdio = stdio,
        _logger = logger,
-       _fileSystem = fileSystem {
+       _fileSystem = fileSystem,
+       _git = globals.git {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,
@@ -63,9 +76,9 @@ class DowngradeCommand extends FlutterCommand {
   Terminal? _terminal;
   FlutterVersion? _flutterVersion;
   PersistentToolState? _persistentToolState;
-  ProcessUtils? _processUtils;
   ProcessManager? _processManager;
   final Logger _logger;
+  final Git _git;
   Stdio? _stdio;
   FileSystem? _fileSystem;
 
@@ -80,6 +93,10 @@ class DowngradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit(downgradePositionalArgumentErrorMessage(argResults!.rest), exitCode: 2);
+    }
+
     // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
     // at least until the zone injection is refactored.
@@ -87,13 +104,12 @@ class DowngradeCommand extends FlutterCommand {
     _flutterVersion ??= globals.flutterVersion;
     _persistentToolState ??= globals.persistentToolState;
     _processManager ??= globals.processManager;
-    _processUtils ??= ProcessUtils(processManager: _processManager!, logger: _logger);
     _stdio ??= globals.stdio;
     _fileSystem ??= globals.fs;
     String workingDirectory = Cache.flutterRoot!;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
-      _flutterVersion = FlutterVersion(fs: _fileSystem!, flutterRoot: workingDirectory);
+      _flutterVersion = FlutterVersion(fs: _fileSystem!, flutterRoot: workingDirectory, git: _git);
     }
 
     final String currentChannel = _flutterVersion!.channel;
@@ -122,9 +138,7 @@ class DowngradeCommand extends FlutterCommand {
     }
 
     // Detect unknown versions.
-    final ProcessUtils processUtils = _processUtils!;
-    final RunResult parseResult = await processUtils.run(<String>[
-      'git',
+    final RunResult parseResult = await _git.run(<String>[
       'describe',
       '--tags',
       lastFlutterVersion,
@@ -155,8 +169,8 @@ class DowngradeCommand extends FlutterCommand {
     // switch channels. The version recorded must have existed on that branch
     // so this operation is safe.
     try {
-      await processUtils.run(
-        <String>['git', 'reset', '--hard', lastFlutterVersion],
+      await _git.run(
+        <String>['reset', '--hard', lastFlutterVersion],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -168,10 +182,10 @@ class DowngradeCommand extends FlutterCommand {
       );
     }
     try {
-      await processUtils.run(
+      await _git.run(
         // The `--` bit (because it's followed by nothing) means that we don't actually change
         // anything in the working tree, which avoids the need to first go into detached HEAD mode.
-        <String>['git', 'checkout', currentChannel, '--'],
+        <String>['checkout', currentChannel, '--'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
@@ -189,7 +203,7 @@ class DowngradeCommand extends FlutterCommand {
 
   // Formats an error message that lists the currently stored versions.
   Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     for (final Channel channel in Channel.values) {
       if (channel == currentChannel) {
         continue;
@@ -198,8 +212,7 @@ class DowngradeCommand extends FlutterCommand {
       if (sha == null) {
         continue;
       }
-      final RunResult parseResult = await _processUtils!.run(<String>[
-        'git',
+      final RunResult parseResult = await _git.run(<String>[
         'describe',
         '--tags',
         sha,

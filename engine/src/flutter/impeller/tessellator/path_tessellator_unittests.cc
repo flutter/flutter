@@ -544,5 +544,41 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
   PathTessellator::PathToFilledVertices(path, mock_writer, 1.0f);
 }
 
+TEST(PathTessellatorTest, LinearQuadToPointCount) {
+  flutter::DlPathBuilder builder;
+  builder.MoveTo({316.3, 121.5});
+  builder.QuadraticCurveTo({316.4, 121.5}, {316.5, 121.5});
+  builder.Close();
+  auto path = builder.TakePath();
+
+  auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
+  EXPECT_EQ(points, 3u);
+  EXPECT_EQ(contours, 1u);
+}
+
+TEST(PathTessellatorTest, LinearConicToPointCount) {
+  flutter::DlPathBuilder builder;
+  builder.MoveTo({316.3, 121.5});
+  builder.ConicCurveTo({316.4, 121.5}, {316.5, 121.5}, 2.0f);
+  builder.Close();
+  auto path = builder.TakePath();
+
+  auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
+  EXPECT_EQ(points, 3u);
+  EXPECT_EQ(contours, 1u);
+}
+
+TEST(PathTessellatorTest, LinearCubicToPointCount) {
+  flutter::DlPathBuilder builder;
+  builder.MoveTo({316.3, 121.5});
+  builder.CubicCurveTo({316.4, 121.5}, {316.5, 121.5}, {316.6, 121.5});
+  builder.Close();
+  auto path = builder.TakePath();
+
+  auto [points, contours] = PathTessellator::CountFillStorage(path, 2.0f);
+  EXPECT_EQ(points, 3u);
+  EXPECT_EQ(contours, 1u);
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -13,18 +13,17 @@ import 'common.dart';
 import 'package_lock.dart';
 import 'utils.dart';
 
-final ArgParser _argParser =
-    ArgParser(allowTrailingOptions: false)
-      ..addFlag(
-        'dry-run',
-        help:
-            'Whether or not to push changes to CIPD. When --dry-run is set, the '
-            'script will download everything and attempt to prepare the bundle '
-            'but will stop before publishing. When not set, the bundle will be '
-            'published.',
-        negatable: false,
-      )
-      ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output.', negatable: false);
+final ArgParser _argParser = ArgParser(allowTrailingOptions: false)
+  ..addFlag(
+    'dry-run',
+    help:
+        'Whether or not to push changes to CIPD. When --dry-run is set, the '
+        'script will download everything and attempt to prepare the bundle '
+        'but will stop before publishing. When not set, the bundle will be '
+        'published.',
+    negatable: false,
+  )
+  ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output.', negatable: false);
 
 late final bool dryRun;
 late final bool verbose;
@@ -136,7 +135,7 @@ class _PackageRoller {
   // Download a file from the internet, and put it in a temporary location.
   Future<io.File> _downloadTemporaryFile(String url) async {
     // Use the hash of the Url to temporarily store a file under tmp
-    final io.File downloadedFile = io.File(
+    final downloadedFile = io.File(
       path.join(io.Directory.systemTemp.path, 'download_${url.hashCode.toRadixString(16)}'),
     );
     vprint('  Downloading [$url] into [${downloadedFile.path}]');
@@ -206,8 +205,8 @@ class _PackageRoller {
   Future<void> _rollChromium(_Platform platform) async {
     final String version = _lock.chromeLock.version;
     final String url = platform.binding.getChromeDownloadUrl(version);
-    final String cipdPackageName = 'flutter_internal/browsers/chrome/${platform.name}';
-    final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
+    final cipdPackageName = 'flutter_internal/browsers/chrome/${platform.name}';
+    final platformDir = io.Directory(path.join(_rollDir.path, platform.name));
     print('\nRolling Chromium for ${platform.name} (version:$version)');
     // Bail out if CIPD already has version:$majorVersion for this package!
     if (!dryRun &&
@@ -253,10 +252,8 @@ class _PackageRoller {
   Future<void> _rollChromeDriver(_Platform platform) async {
     final String version = _lock.chromeLock.version;
     final String url = platform.binding.getChromeDriverDownloadUrl(version);
-    final String cipdPackageName = 'flutter_internal/browser-drivers/chrome/${platform.name}';
-    final io.Directory platformDir = io.Directory(
-      path.join(_rollDir.path, '${platform.name}_driver'),
-    );
+    final cipdPackageName = 'flutter_internal/browser-drivers/chrome/${platform.name}';
+    final platformDir = io.Directory(path.join(_rollDir.path, '${platform.name}_driver'));
     print('\nRolling Chromedriver for ${platform.os}-${platform.arch} (version:$version)');
     // Bail out if CIPD already has version:$majorVersion for this package!
     if (!dryRun &&
@@ -303,8 +300,8 @@ class _PackageRoller {
   Future<void> _rollFirefox(_Platform platform) async {
     final String version = _lock.firefoxLock.version;
     final String url = platform.binding.getFirefoxDownloadUrl(version);
-    final String cipdPackageName = 'flutter_internal/browsers/firefox/${platform.name}';
-    final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
+    final cipdPackageName = 'flutter_internal/browsers/firefox/${platform.name}';
+    final platformDir = io.Directory(path.join(_rollDir.path, platform.name));
     print('\nRolling Firefox for ${platform.name} (version:$version)');
     // Bail out if CIPD already has version:$majorVersion for this package!
     if (!dryRun &&
@@ -348,8 +345,8 @@ class _PackageRoller {
   Future<void> _rollEsbuild(_Platform platform) async {
     final String version = _lock.esbuildLock.version;
     final String url = platform.binding.getEsbuildDownloadUrl(version);
-    final String cipdPackageName = 'flutter/tools/esbuild/${platform.name}';
-    final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
+    final cipdPackageName = 'flutter/tools/esbuild/${platform.name}';
+    final platformDir = io.Directory(path.join(_rollDir.path, platform.name));
     print('\nRolling esbuild for ${platform.name} (version:$version)');
     // Bail out if CIPD already has version:$majorVersion for this package!
     if (!dryRun &&
@@ -373,7 +370,7 @@ class _PackageRoller {
 
     // Write out the license file from the github repo.
     // Copied from https://github.com/evanw/esbuild/blob/main/LICENSE.md
-    final io.File licenseFile = io.File(path.join(packageDir, 'LICENSE.md'));
+    final licenseFile = io.File(path.join(packageDir, 'LICENSE.md'));
     licenseFile
       ..createSync()
       ..writeAsStringSync('''

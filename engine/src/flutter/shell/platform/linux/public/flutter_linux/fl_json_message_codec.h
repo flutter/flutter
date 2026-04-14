@@ -70,7 +70,9 @@ FlJsonMessageCodec* fl_json_message_codec_new();
  * @codec: an #FlJsonMessageCodec.
  * @value: value to encode.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Encodes a value to a JSON string.
  *
@@ -85,7 +87,9 @@ gchar* fl_json_message_codec_encode(FlJsonMessageCodec* codec,
  * @codec: an #FlJsonMessageCodec.
  * @text: UTF-8 text in JSON format.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Decodes a value from a JSON string.
  *

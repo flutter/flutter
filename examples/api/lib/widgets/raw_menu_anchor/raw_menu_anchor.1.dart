@@ -59,7 +59,8 @@ class RawMenuAnchorGroupExample extends StatefulWidget {
   const RawMenuAnchorGroupExample({super.key});
 
   @override
-  State<RawMenuAnchorGroupExample> createState() => _RawMenuAnchorGroupExampleState();
+  State<RawMenuAnchorGroupExample> createState() =>
+      _RawMenuAnchorGroupExampleState();
 }
 
 class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
@@ -84,11 +85,12 @@ class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
     final TextStyle titleStyle = theme.textTheme.titleMedium!;
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
-          if (_selected != null) Text('Selected: ${_selected!.label}', style: titleStyle),
+          if (_selected != null)
+            Text('Selected: ${_selected!.label}', style: titleStyle),
           UnconstrainedBox(
-            clipBehavior: Clip.hardEdge,
+            clipBehavior: .hardEdge,
             child: RawMenuAnchorGroup(
               controller: controller,
               child: Row(
@@ -98,16 +100,20 @@ class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
                       focusNode: focusNodes[i],
                       anchor: Builder(
                         builder: (BuildContext context) {
-                          final MenuController submenuController = MenuController.maybeOf(context)!;
+                          final MenuController submenuController =
+                              MenuController.maybeOf(context)!;
                           final MenuItem item = menuItems[i];
-                          final ButtonStyle openBackground = MenuItemButton.styleFrom(
-                            backgroundColor: const Color(0x0D1A1A1A),
-                          );
+                          final ButtonStyle openBackground =
+                              MenuItemButton.styleFrom(
+                                backgroundColor: const Color(0x0D1A1A1A),
+                              );
                           return MergeSemantics(
                             child: Semantics(
                               expanded: controller.isOpen,
                               child: MenuItemButton(
-                                style: submenuController.isOpen ? openBackground : null,
+                                style: submenuController.isOpen
+                                    ? openBackground
+                                    : null,
                                 onHover: (bool value) {
                                   // If any submenu in the menu bar is already open, other
                                   // submenus should open on hover. Otherwise, blur the menu item
@@ -135,7 +141,8 @@ class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
                         },
                       ),
                       children: <Widget>[
-                        for (final MenuItem child in menuItems[i].children ?? <MenuItem>[])
+                        for (final MenuItem child
+                            in menuItems[i].children ?? <MenuItem>[])
                           MenuItemButton(
                             onPressed: () {
                               setState(() {
@@ -172,12 +179,17 @@ class CustomSubmenu extends StatefulWidget {
   final Widget anchor;
   final FocusNode focusNode;
 
-  static const Map<ShortcutActivator, Intent> _shortcuts = <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
-    SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
-  };
+  static const Map<ShortcutActivator, Intent> _shortcuts =
+      <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
+        SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+        SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
+          TraversalDirection.down,
+        ),
+        SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
+          TraversalDirection.up,
+        ),
+      };
 
   @override
   State<CustomSubmenu> createState() => _CustomSubmenuState();
@@ -207,19 +219,19 @@ class _CustomSubmenuState extends State<CustomSubmenu> {
               child: FocusScope(
                 child: IntrinsicWidth(
                   child: Container(
-                    clipBehavior: Clip.antiAlias,
+                    clipBehavior: .antiAlias,
                     constraints: const BoxConstraints(minWidth: 160),
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const .symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: .circular(6),
                       boxShadow: kElevationToShadow[4],
                     ),
                     child: Shortcuts(
                       shortcuts: CustomSubmenu._shortcuts,
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: .min,
+                        crossAxisAlignment: .stretch,
                         children: widget.children,
                       ),
                     ),
@@ -242,7 +254,9 @@ class RawMenuAnchorGroupApp extends StatelessWidget {
     splashFactory: InkSparkle.splashFactory,
     iconSize: WidgetStatePropertyAll<double>(17),
     overlayColor: WidgetStatePropertyAll<Color>(Color(0x0D1A1A1A)),
-    padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 12)),
+    padding: WidgetStatePropertyAll<EdgeInsets>(
+      EdgeInsets.symmetric(horizontal: 12),
+    ),
     textStyle: WidgetStatePropertyAll<TextStyle>(TextStyle(fontSize: 14)),
     visualDensity: VisualDensity(
       horizontal: VisualDensity.minimumDensity,
@@ -253,9 +267,12 @@ class RawMenuAnchorGroupApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ).copyWith(menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle)),
+      theme:
+          ThemeData.from(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          ).copyWith(
+            menuButtonTheme: const MenuButtonThemeData(style: menuButtonStyle),
+          ),
       home: const Scaffold(body: RawMenuAnchorGroupExample()),
     );
   }

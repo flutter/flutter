@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -33,11 +34,13 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.Build;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
@@ -476,16 +479,6 @@ public class PlatformPluginTest {
                   | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                   | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
-
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-      verify(fakeDecorView)
-          .setSystemUiVisibility(
-              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
   }
 
   @SuppressWarnings("deprecation")
@@ -556,13 +549,98 @@ public class PlatformPluginTest {
     when(mockActivity.getWindow()).thenReturn(fakeWindow);
     PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
 
-    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-        PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-    verify(fakeDecorView, never())
-        .setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+
+      // Should not enable edge-to-edge via any mechanism on API < 29.
+      verify(fakeDecorView, never())
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+      windowCompatMock.verifyNoInteractions();
+    }
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void setSystemUiMode_edgeToEdge_usesWindowCompat() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+
+      // For a plain Activity, should use WindowCompat instead of deprecated setSystemUiVisibility.
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+    }
+  }
+
+  @SuppressWarnings("deprecation")
+  // SYSTEM_UI_FLAG_*, setSystemUiVisibility
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void switchFromEdgeToEdgeToImmersive_restoresDecorFitsSystemWindows() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      // First, enter edge-to-edge mode.
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+
+      // Then switch to immersive.
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.IMMERSIVE);
+
+      // Should restore decor fits system windows when leaving edge-to-edge.
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, true));
+
+      // Should apply immersive flags via setSystemUiVisibility.
+      verify(fakeDecorView)
+          .setSystemUiVisibility(
+              View.SYSTEM_UI_FLAG_IMMERSIVE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void updateSystemUiOverlays_inEdgeToEdge_reappliesModernApi() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      // Enter edge-to-edge.
+      platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+          PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+      windowCompatMock.clearInvocations();
+
+      // Restore overlays (e.g., after returning from another activity).
+      platformPlugin.updateSystemUiOverlays();
+
+      // Should re-apply WindowCompat, not setSystemUiVisibility.
+      windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
+    }
   }
 
   @SuppressWarnings("deprecation")
@@ -751,5 +829,107 @@ public class PlatformPluginTest {
     assertEquals(sendToIntent.getAction(), Intent.ACTION_SEND);
     assertEquals(sendToIntent.getType(), "text/plain");
     assertEquals(sendToIntent.getStringExtra(Intent.EXTRA_TEXT), expectedContent);
+  }
+
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void vibrateHapticFeedbackWhenApiLevelIsLessThan30() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.STANDARD);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
+    verify(fakeDecorView, never()).performHapticFeedback(HapticFeedbackConstants.REJECT);
+    clearInvocations(fakeDecorView);
+  }
+
+  @Config(minSdk = API_LEVELS.API_30)
+  @Test
+  public void vibrateHapticFeedbackWhenApiLevelIsHigherOrEquals30() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.STANDARD);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.LIGHT_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.MEDIUM_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.HEAVY_IMPACT);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SELECTION_CLICK);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.SUCCESS_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.WARNING_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+    clearInvocations(fakeDecorView);
+
+    platformPlugin.mPlatformMessageHandler.vibrateHapticFeedback(
+        PlatformChannel.HapticFeedbackType.ERROR_NOTIFICATION);
+    verify(fakeDecorView).performHapticFeedback(HapticFeedbackConstants.REJECT);
+    clearInvocations(fakeDecorView);
   }
 }

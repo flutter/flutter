@@ -50,21 +50,22 @@ class HomePage extends StatelessWidget {
           Text('Messages', style: Theme.of(context).textTheme.headlineLarge),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const .all(20.0),
               child: Card(
-                clipBehavior: Clip.antiAlias,
+                clipBehavior: .antiAlias,
                 elevation: 0,
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 child: ListView(
-                  children: List<Widget>.generate(Colors.primaries.length, (int index) {
+                  children: List<Widget>.generate(Colors.primaries.length, (
+                    int index,
+                  ) {
                     final Text kittenName = Text('Kitten $index');
                     final CircleAvatar avatar = CircleAvatar(
                       backgroundColor: Colors.primaries[index],
                     );
-                    final String message =
-                        index.isEven
-                            ? 'Hello hooman! My name is Kitten $index'
-                            : "What's up hooman! My name is Kitten $index";
+                    final String message = index.isEven
+                        ? 'Hello hooman! My name is Kitten $index'
+                        : "What's up hooman! My name is Kitten $index";
                     return ListTile(
                       leading: avatar,
                       title: kittenName,
@@ -73,12 +74,11 @@ class HomePage extends StatelessWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<SecondPage>(
-                            builder:
-                                (BuildContext context) => SecondPage(
-                                  kittenName: kittenName,
-                                  avatar: avatar,
-                                  message: message,
-                                ),
+                            builder: (BuildContext context) => SecondPage(
+                              kittenName: kittenName,
+                              avatar: avatar,
+                              message: message,
+                            ),
                           ),
                         );
                       },
@@ -118,7 +118,7 @@ class SecondPage extends StatelessWidget {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const .all(20.0),
         child: IntrinsicHeight(
           child: Row(
             children: <Widget>[
@@ -128,7 +128,7 @@ class SecondPage extends StatelessWidget {
                 child: Card(
                   elevation: 0.0,
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: .only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
                       bottomLeft: Radius.circular(5),
@@ -138,7 +138,7 @@ class SecondPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerLowest,
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      padding: const .symmetric(horizontal: 15.0),
                       child: Text(message),
                     ),
                   ),

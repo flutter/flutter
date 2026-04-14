@@ -13,6 +13,8 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/pipeline.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/sampler_library.h"
@@ -53,7 +55,7 @@ class MockAllocator : public Allocator {
               (override));
   MOCK_METHOD(std::shared_ptr<Texture>,
               OnCreateTexture,
-              (const TextureDescriptor& desc),
+              (const TextureDescriptor& desc, bool threadsafe),
               (override));
 };
 
@@ -115,6 +117,27 @@ class MockRenderPass : public RenderPass {
   MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
 };
 
+class MockPipelineLibrary : public PipelineLibrary {
+ public:
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(PipelineFuture<PipelineDescriptor>,
+              GetPipeline,
+              (PipelineDescriptor descriptor, bool async, bool threadsafe),
+              (override));
+  MOCK_METHOD(PipelineFuture<ComputePipelineDescriptor>,
+              GetPipeline,
+              (ComputePipelineDescriptor descriptor, bool async),
+              (override));
+  MOCK_METHOD(bool,
+              HasPipeline,
+              (const PipelineDescriptor& descriptor),
+              (override));
+  MOCK_METHOD(void,
+              RemovePipelinesWithEntryPoint,
+              (std::shared_ptr<const ShaderFunction> function),
+              (override));
+};
+
 class MockCommandBuffer : public CommandBuffer {
  public:
   explicit MockCommandBuffer(std::weak_ptr<const Context> context)
@@ -124,7 +147,7 @@ class MockCommandBuffer : public CommandBuffer {
   MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));
   MOCK_METHOD(bool,
               OnSubmitCommands,
-              (CompletionCallback callback),
+              (bool block_on_schedule, CompletionCallback callback),
               (override));
   MOCK_METHOD(void, OnWaitUntilCompleted, (), (override));
   MOCK_METHOD(void, OnWaitUntilScheduled, (), (override));
@@ -225,6 +248,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(bool, SupportsDeviceTransientTextures, (), (const, override));
   MOCK_METHOD(bool, SupportsTriangleFan, (), (const override));
   MOCK_METHOD(bool, SupportsPrimitiveRestart, (), (const override));
+  MOCK_METHOD(bool, Supports32BitPrimitiveIndices, (), (const override));
   MOCK_METHOD(bool, SupportsExtendedRangeFormats, (), (const override));
   MOCK_METHOD(PixelFormat, GetDefaultColorFormat, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultStencilFormat, (), (const, override));
@@ -232,6 +256,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(PixelFormat, GetDefaultGlyphAtlasFormat, (), (const, override));
   MOCK_METHOD(ISize, GetMaximumRenderPassAttachmentSize, (), (const override));
   MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
+  MOCK_METHOD(bool, NeedsPartitionedHostBuffer, (), (const, override));
 };
 
 class MockCommandQueue : public CommandQueue {
@@ -239,7 +264,8 @@ class MockCommandQueue : public CommandQueue {
   MOCK_METHOD(fml::Status,
               Submit,
               (const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-               const CompletionCallback& cb),
+               const CompletionCallback& cb,
+               bool block_on_schedule),
               (override));
 };
 

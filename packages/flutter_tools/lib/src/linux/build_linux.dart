@@ -27,7 +27,7 @@ import '../migrations/cmake_native_assets_migration.dart';
 // - <file path>:<line>:<column>: warning: <warning...>
 // - clang: error: <link error...>
 // - Error: <tool error...>
-final RegExp errorMatcher = RegExp(
+final errorMatcher = RegExp(
   r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*',
   caseSensitive: false,
 );
@@ -42,6 +42,7 @@ Future<void> buildLinux(
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
   required Logger logger,
+  bool configOnly = false,
 }) async {
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
@@ -52,12 +53,12 @@ Future<void> buildLinux(
     );
   }
 
-  final List<ProjectMigrator> migrators = <ProjectMigrator>[
+  final migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(linuxProject, logger),
     CmakeNativeAssetsMigration(linuxProject, 'linux', logger),
   ];
 
-  final ProjectMigration migration = ProjectMigration(migrators);
+  final migration = ProjectMigration(migrators);
   await migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
@@ -93,6 +94,9 @@ Future<void> buildLinux(
       targetPlatform,
       targetSysroot,
     );
+    if (configOnly) {
+      return;
+    }
     await _runBuild(buildDirectory);
   } finally {
     status.cancel();
@@ -152,13 +156,15 @@ Future<void> _runCmake(
   TargetPlatform targetPlatform,
   String targetSysroot,
 ) async {
-  final Stopwatch sw = Stopwatch()..start();
+  final sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
 
   final String buildFlag = sentenceCase(buildModeName);
   final bool needCrossBuildOptionsForArm64 =
       needCrossBuild && targetPlatform == TargetPlatform.linux_arm64;
+  final bool needCrossBuildOptionsForRiscv64 =
+      needCrossBuild && targetPlatform == TargetPlatform.linux_riscv64;
   int result;
   if (!globals.processManager.canRun('cmake')) {
     throwToolExit(globals.userMessages.cmakeMissing);
@@ -175,6 +181,9 @@ Future<void> _runCmake(
       if (needCrossBuild) '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
       if (needCrossBuildOptionsForArm64) '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
       if (needCrossBuildOptionsForArm64) '-DCMAKE_CXX_COMPILER_TARGET=aarch64-linux-gnu',
+      // Support cross-building for riscv64 targets on x64 hosts.
+      if (needCrossBuildOptionsForRiscv64) '-DCMAKE_C_COMPILER_TARGET=riscv64-linux-gnu',
+      if (needCrossBuildOptionsForRiscv64) '-DCMAKE_CXX_COMPILER_TARGET=riscv64-linux-gnu',
       sourceDir.path,
     ],
     workingDirectory: buildDir.path,
@@ -195,7 +204,7 @@ Future<void> _runCmake(
 }
 
 Future<void> _runBuild(Directory buildDir) async {
-  final Stopwatch sw = Stopwatch()..start();
+  final sw = Stopwatch()..start();
 
   int result;
   try {

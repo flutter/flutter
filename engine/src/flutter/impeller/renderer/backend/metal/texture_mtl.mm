@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+
+#include <format>
 #include <memory>
 
 #include "impeller/base/strings.h"
@@ -87,7 +89,7 @@ void TextureMTL::SetLabel(std::string_view label, std::string_view trailing) {
   if (is_drawable_) {
     return;
   }
-  std::string combined = SPrintF("%s %s", label.data(), trailing.data());
+  std::string combined = std::format("{} {}", label, trailing);
   [aquire_proc_() setLabel:@(combined.data())];
 #endif  // IMPELLER_DEBUG
 }

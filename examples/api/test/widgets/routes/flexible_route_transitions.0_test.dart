@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/widgets/routes/flexible_route_transitions.0.dart' as example;
+import 'package:flutter_api_samples/widgets/routes/flexible_route_transitions.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Flexible Transitions App is able to build', (WidgetTester tester) async {
+  testWidgets('Flexible Transitions App is able to build', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.FlexibleRouteTransitionsApp());
 
     expect(find.text('Zoom Page'), findsOneWidget);
@@ -39,15 +42,24 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     // The current Y coordinate of the page title should be lower than it was
     // before as the page slides upwards.
-    expect(tester.getTopLeft(find.text('Zoom Page')).dy, lessThan(lastYPosition));
+    expect(
+      tester.getTopLeft(find.text('Zoom Page')).dy,
+      lessThan(lastYPosition),
+    );
     lastYPosition = tester.getTopLeft(find.text('Zoom Page')).dy;
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(tester.getTopLeft(find.text('Zoom Page')).dy, lessThan(lastYPosition));
+    expect(
+      tester.getTopLeft(find.text('Zoom Page')).dy,
+      lessThan(lastYPosition),
+    );
     lastYPosition = tester.getTopLeft(find.text('Zoom Page')).dy;
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(tester.getTopLeft(find.text('Zoom Page')).dy, lessThan(lastYPosition));
+    expect(
+      tester.getTopLeft(find.text('Zoom Page')).dy,
+      lessThan(lastYPosition),
+    );
     lastYPosition = tester.getTopLeft(find.text('Zoom Page')).dy;
 
     await tester.pumpAndSettle();

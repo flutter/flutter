@@ -39,6 +39,7 @@ class SliverFillViewport extends StatelessWidget {
     required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
+    this.allowImplicitScrolling = true,
   }) : assert(viewportFraction > 0.0);
 
   /// The fraction of the viewport that each child should fill in the main axis.
@@ -64,12 +65,16 @@ class SliverFillViewport extends StatelessWidget {
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   final SliverChildDelegate delegate;
 
+  /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
+  final bool allowImplicitScrolling;
+
   @override
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
       viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
+        allowImplicitScrolling: allowImplicitScrolling,
         delegate: delegate,
       ),
     );
@@ -80,19 +85,26 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
   const _SliverFillViewportRenderObjectWidget({
     required super.delegate,
     this.viewportFraction = 1.0,
+    this.allowImplicitScrolling = true,
   }) : assert(viewportFraction > 0.0);
 
   final double viewportFraction;
+  final bool allowImplicitScrolling;
 
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
+    final element = context as SliverMultiBoxAdaptorElement;
+    return RenderSliverFillViewport(
+      childManager: element,
+      viewportFraction: viewportFraction,
+      allowImplicitScrolling: allowImplicitScrolling,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
+    renderObject.allowImplicitScrolling = allowImplicitScrolling;
   }
 }
 
@@ -305,10 +317,7 @@ class SliverFillRemaining extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('child', child));
-    final List<String> flags = <String>[
-      if (hasScrollBody) 'scrollable',
-      if (fillOverscroll) 'fillOverscroll',
-    ];
+    final flags = <String>[if (hasScrollBody) 'scrollable', if (fillOverscroll) 'fillOverscroll'];
     if (flags.isEmpty) {
       flags.add('nonscrollable');
     }

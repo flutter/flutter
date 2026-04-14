@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -18,10 +20,12 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../reporting/reporting.dart';
 
-final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
+final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
+final _varExpr = RegExp(r'\$\(([^)]*)\)');
+const kSwiftPackageCacheDirectoryName = 'SourcePackages';
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -97,7 +101,7 @@ class XcodeProjectInterpreter {
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
   final Analytics _analytics;
-  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
+  static final _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');
 
   void _updateVersion() {
     if (!_platform.isMacOS || !_fileSystem.file('/usr/bin/xcodebuild').existsSync()) {
@@ -164,13 +168,63 @@ class XcodeProjectInterpreter {
   /// Returns `/usr/bin/arch -arm64e xcrun` on ARM macOS to force Xcode commands
   /// to run outside the x86 Rosetta translation, which may cause crashes.
   List<String> xcrunCommand() {
-    final List<String> xcrunCommand = <String>[];
+    final xcrunCommand = <String>[];
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       // Force Xcode commands to run outside Rosetta.
       xcrunCommand.addAll(<String>['/usr/bin/arch', '-arm64e']);
     }
     xcrunCommand.add('xcrun');
     return xcrunCommand;
+  }
+
+  /// Prefetches SwiftPM dependencies needed for `xcodebuild` command and then returns a list of
+  /// required arguments for the `xcodebuild` Xcode project command.
+  ///
+  /// This is not required when running commands that don't require a project (e.g.
+  /// `xcodebuild -version`).
+  ///
+  /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
+  /// and that the Swift package cache is properly configured.
+  ///
+  /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
+  /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
+  /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async {
+    // All `xcodebuild` project commands will download and resolve Swift packages.
+    // We should always prefetch Swift packages before running any `xcodebuild` project command
+    // to control the output.
+    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
+
+    return _xcodebuildProjectCommandArguments(
+      buildDirectory,
+      skipPackageResolution: skipPackageResolution,
+    );
+  }
+
+  List<String> _xcodebuildProjectCommandArguments(
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) {
+    final String cachePath = buildDirectory
+        .childDirectory(kSwiftPackageCacheDirectoryName)
+        .absolute
+        .path;
+    return <String>[
+      ...xcrunCommand(),
+      'xcodebuild',
+      '-clonedSourcePackagesDirPath',
+      cachePath,
+      if (skipPackageResolution) ...<String>[
+        '-disableAutomaticPackageResolution',
+        '-skipPackageUpdates',
+        '-skipPackagePluginValidation',
+        '-skipPackageSignatureValidation',
+      ],
+    ];
   }
 
   /// Asynchronously retrieve xcode build settings. This one is preferred for
@@ -193,26 +247,19 @@ class XcodeProjectInterpreter {
       XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
-    final List<String> showBuildSettingsCommand = <String>[
-      ...xcrunCommand(),
-      'xcodebuild',
+    final showBuildSettingsCommand = <String>[
+      ...(await xcodebuildProjectCommand(projectPath, _fileSystem.directory(buildDir))),
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
       if (configuration != null) ...<String>['-configuration', configuration],
       if (target != null) ...<String>['-target', target],
-      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>['-sdk', 'iphonesimulator'],
+      if (buildContext.sdk == XcodeSdk.IPhoneSimulator) ...<String>[
+        '-sdk',
+        XcodeSdk.IPhoneSimulator.platformName,
+      ],
       '-destination',
-      if (deviceId != null)
-        'id=$deviceId'
-      else
-        switch (buildContext.sdk) {
-          XcodeSdk.IPhoneOS => 'generic/platform=iOS',
-          XcodeSdk.IPhoneSimulator => 'generic/platform=iOS Simulator',
-          XcodeSdk.MacOSX => 'generic/platform=macOS',
-          XcodeSdk.WatchOS => 'generic/platform=watchOS',
-          XcodeSdk.WatchSimulator => 'generic/platform=watchOS Simulator',
-        },
+      if (deviceId != null) 'id=$deviceId' else buildContext.sdk.genericPlatform,
       '-showBuildSettings',
       'BUILD_DIR=${_fileSystem.path.absolute(buildDir)}',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
@@ -265,12 +312,12 @@ class XcodeProjectInterpreter {
     }
     final Status status = _logger.startSpinner();
     final String buildDirectory = _fileSystem.path.absolute(getIosBuildDirectory());
-    final List<String> showBuildSettingsCommand = <String>[
+    final showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
       'xcodebuild',
       '-alltargets',
       '-sdk',
-      'iphonesimulator',
+      XcodeSdk.IPhoneSimulator.platformName,
       '-project',
       podXcodeProject.path,
       '-showBuildSettings',
@@ -309,10 +356,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {
+  Future<void> cleanWorkspace(
+    String workspacePath,
+    String scheme, {
+    required Directory buildDirectory,
+    bool verbose = false,
+  }) async {
+    final String projectPath = _fileSystem.currentDirectory.path;
     await _processUtils.run(<String>[
-      ...xcrunCommand(),
-      'xcodebuild',
+      ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
       '-workspace',
       workspacePath,
       '-scheme',
@@ -320,21 +372,111 @@ class XcodeProjectInterpreter {
       if (!verbose) '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform),
-    ], workingDirectory: _fileSystem.currentDirectory.path);
+    ], workingDirectory: projectPath);
   }
 
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  /// The process used to fetch Swift packages.
+  Process? _swiftPackageFetchProcess;
+
+  /// The stdout subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
+
+  /// The stderr subscription for the Swift package fetch process.
+  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
+
+  /// Prefetches Swift packages for the given Xcode project.
+  ///
+  /// If a process is already running from a previous Flutter command, kill it before starting
+  /// the command. If the process is already running from the same Flutter command, wait for it to
+  /// complete if [waitForCompletion] is true.
+  ///
+  /// If [quiet] is false, it will print a spinner while the command is running and print logs of
+  /// what Swift packages are being fetched.
+  Future<void> prefetchSwiftPackages(
+    String projectPath, {
+    required Directory buildDirectory,
+    bool quiet = true,
+    bool waitForCompletion = true,
+  }) async {
+    Status? status;
+    try {
+      final command = <String>[
+        ..._xcodebuildProjectCommandArguments(buildDirectory, skipPackageResolution: false),
+        '-resolvePackageDependencies',
+      ];
+      if (_swiftPackageFetchProcess == null) {
+        // Check if process is already running from a previous Flutter command. If it is, kill it
+        // so we don't have the process running twice. When this process is run twice, it'll cause
+        // one to error. The new process will pick up where the old one left off.
+        final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
+        if (result.exitCode == 0) {
+          final int? pid = int.tryParse(result.stdout.trim());
+          if (pid != null) {
+            _logger.printTrace(
+              'Swift Package Manager dependencies are already being fetched by PID $pid',
+            );
+            await _processUtils.run(['kill', '$pid']);
+          }
+        }
+      }
+
+      final Process process =
+          _swiftPackageFetchProcess ??
+          await _processUtils.start(command, workingDirectory: projectPath);
+      _swiftPackageFetchProcess ??= process;
+      if (!waitForCompletion) {
+        return;
+      }
+      if (!quiet) {
+        var printFetchWarnings = false;
+        _swiftPackageFetchStdoutSubscription ??= process.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((String line) {
+              if (line.startsWith('Fetching')) {
+                status?.cancel();
+                if (!printFetchWarnings) {
+                  _logger.printStatus(
+                    'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
+                  );
+                  printFetchWarnings = true;
+                }
+                status = _logger.startProgress('  $line...');
+              }
+            });
+      }
+      final stderrBuffer = StringBuffer();
+      _swiftPackageFetchStderrSubscription ??= process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .listen(stderrBuffer.write);
+
+      final int exitCode = await process.exitCode.whenComplete(() async {
+        await _swiftPackageFetchStdoutSubscription?.cancel();
+        await _swiftPackageFetchStderrSubscription?.cancel();
+      });
+      if (exitCode != 0) {
+        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
+      }
+    } finally {
+      status?.cancel();
+    }
+  }
+
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
-    const int missingProjectExitCode = 66;
+    const missingProjectExitCode = 66;
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
-    const int corruptedProjectExitCode = 74;
+    const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
-        ...xcrunCommand(),
-        'xcodebuild',
+        ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
@@ -355,7 +497,7 @@ class XcodeProjectInterpreter {
 /// for or be aware of each one. This could be used to set code signing build settings in a CI
 /// environment without requiring settings changes in the Xcode project.
 List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
-  const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
+  const xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
   return platform.environment.entries
       .where((MapEntry<String, String> mapEntry) {
         return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
@@ -371,10 +513,9 @@ List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
-  final Map<String, String> settings = <String, String>{};
-  for (final Match? match in showBuildSettingsOutput
-      .split('\n')
-      .map<Match?>(_settingExpr.firstMatch)) {
+  final settings = <String, String>{};
+  for (final Match? match
+      in showBuildSettingsOutput.split('\n').map<Match?>(_settingExpr.firstMatch)) {
     if (match != null) {
       settings[match[1]!] = match[2]!;
     }
@@ -395,7 +536,34 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 
 /// Xcode SDKs. Corresponds to undocumented Xcode SUPPORTED_PLATFORMS values.
 /// Use `xcodebuild -showsdks` to get a list of SDKs installed on your machine.
-enum XcodeSdk { IPhoneOS, IPhoneSimulator, MacOSX, WatchOS, WatchSimulator }
+enum XcodeSdk {
+  IPhoneOS(displayName: 'iOS', platformName: 'iphoneos', sdkType: EnvironmentType.physical),
+  IPhoneSimulator(
+    displayName: 'iOS Simulator',
+    platformName: 'iphonesimulator',
+    sdkType: EnvironmentType.simulator,
+  ),
+  MacOSX(displayName: 'macOS', platformName: 'macosx', sdkType: EnvironmentType.physical),
+  WatchOS(displayName: 'watchOS', platformName: 'watchos', sdkType: EnvironmentType.physical),
+  WatchSimulator(
+    displayName: 'watchOS Simulator',
+    platformName: 'watchsimulator',
+    sdkType: EnvironmentType.simulator,
+  );
+
+  const XcodeSdk({required this.displayName, required this.platformName, required this.sdkType});
+
+  /// Corresponds to Xcode value PLATFORM_DISPLAY_NAME.
+  final String displayName;
+
+  /// Corresponds to Xcode value PLATFORM_NAME.
+  final String platformName;
+
+  /// The [EnvironmentType] for the sdk (simulator, physical).
+  final EnvironmentType sdkType;
+
+  String get genericPlatform => 'generic/platform=$displayName';
+}
 
 @immutable
 class XcodeProjectBuildContext {
@@ -438,9 +606,9 @@ class XcodeProjectInfo {
     : _logger = logger;
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
-    final List<String> targets = <String>[];
-    final List<String> buildConfigurations = <String>[];
-    final List<String> schemes = <String>[];
+    final targets = <String>[];
+    final buildConfigurations = <String>[];
+    final schemes = <String>[];
     List<String>? collector;
     for (final String line in output.split('\n')) {
       if (line.isEmpty) {

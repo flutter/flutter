@@ -454,10 +454,9 @@ class Focus extends StatefulWidget {
     bool scopeOk = false,
     bool createDependency = true,
   }) {
-    final _FocusInheritedScope? scope =
-        createDependency
-            ? context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>()
-            : context.getInheritedWidgetOfExactType<_FocusInheritedScope>();
+    final _FocusInheritedScope? scope = createDependency
+        ? context.dependOnInheritedWidgetOfExactType<_FocusInheritedScope>()
+        : context.getInheritedWidgetOfExactType<_FocusInheritedScope>();
 
     return switch (scope?.notifier) {
       null => null,
@@ -721,12 +720,11 @@ class _FocusState extends State<Focus> {
         // node will gain focus and take focus from this widget.
         // TODO(gspencergoog): Allow this to be set on iOS once the issue is
         // addressed: https://github.com/flutter/flutter/issues/150030
-        onFocus:
-            defaultTargetPlatform != TargetPlatform.iOS && _couldRequestFocus
-                ? focusNode.requestFocus
-                : null,
+        onFocus: defaultTargetPlatform != TargetPlatform.iOS && _couldRequestFocus
+            ? focusNode.requestFocus
+            : null,
         focusable: _couldRequestFocus,
-        focused: _hadPrimaryFocus,
+        focused: _couldRequestFocus ? _hadPrimaryFocus : null,
         child: widget.child,
       );
     }

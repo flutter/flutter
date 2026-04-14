@@ -32,8 +32,8 @@ Future<void> main(List<String> rawArgs) async {
 
   final List<String> jsonFiles = args.rest.isNotEmpty ? args.rest : <String>['ABresults.json'];
 
-  for (final String filename in jsonFiles) {
-    final File file = File(filename);
+  for (final filename in jsonFiles) {
+    final file = File(filename);
     if (!file.existsSync()) {
       _usage('File "$filename" does not exist');
       return;
@@ -65,22 +65,21 @@ Future<void> main(List<String> rawArgs) async {
 }
 
 /// Command-line options for the `summarize.dart` command.
-final ArgParser _argParser =
-    ArgParser()
-      ..addFlag(
-        kAsciiTableOpt,
-        defaultsTo: true,
-        help: 'Prints the summary in a table formatted nicely for terminal output.',
-      )
-      ..addFlag(
-        kTabTableOpt,
-        defaultsTo: true,
-        help: 'Prints the summary in a table with tabs for easy spreadsheet entry.',
-      )
-      ..addFlag(
-        kRawSummaryOpt,
-        defaultsTo: true,
-        help:
-            'Prints all per-run data collected by the A/B test formatted with\n'
-            'tabs for easy spreadsheet entry.',
-      );
+final ArgParser _argParser = ArgParser()
+  ..addFlag(
+    kAsciiTableOpt,
+    defaultsTo: true,
+    help: 'Prints the summary in a table formatted nicely for terminal output.',
+  )
+  ..addFlag(
+    kTabTableOpt,
+    defaultsTo: true,
+    help: 'Prints the summary in a table with tabs for easy spreadsheet entry.',
+  )
+  ..addFlag(
+    kRawSummaryOpt,
+    defaultsTo: true,
+    help:
+        'Prints all per-run data collected by the A/B test formatted with\n'
+        'tabs for easy spreadsheet entry.',
+  );

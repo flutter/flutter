@@ -227,19 +227,10 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        DlScalar opacity = SK_Scalar1) override;
   // |DlCanvas|
-  void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
-                    DlScalar x,
-                    DlScalar y,
-                    const DlPaint& paint) override;
-
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
-
-  void DrawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y,
-                     const DlPaint& paint) override;
+  void DrawText(const std::shared_ptr<DlText>& text,
+                DlScalar x,
+                DlScalar y,
+                const DlPaint& paint) override;
 
   // |DlCanvas|
   void DrawShadow(const DlPath& path,
@@ -497,10 +488,12 @@ class DisplayListBuilder final : public virtual DlCanvas,
                        DlScalar opacity) override {
     DrawDisplayList(display_list, opacity);
   }
+
   // |DlOpReceiver|
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override;
+  void drawText(const std::shared_ptr<DlText>& text,
+    DlScalar x,
+    DlScalar y) override;
+
   // |DlOpReceiver|
   void drawShadow(const DlPath& path,
                   const DlColor color,

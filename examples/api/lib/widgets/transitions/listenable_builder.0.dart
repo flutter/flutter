@@ -58,7 +58,8 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final OutlinedBorder effectiveBorder = widget.border ?? const RoundedRectangleBorder();
+    final OutlinedBorder effectiveBorder =
+        widget.border ?? const RoundedRectangleBorder();
     return ListenableBuilder(
       listenable: _focusNode,
       child: Focus(
@@ -72,7 +73,9 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
           padding: widget.padding,
           decoration: ShapeDecoration(
             color: _focusNode.hasFocus ? widget.focusedColor : null,
-            shape: effectiveBorder.copyWith(side: _focusNode.hasFocus ? widget.focusedSide : null),
+            shape: effectiveBorder.copyWith(
+              side: _focusNode.hasFocus ? widget.focusedSide : null,
+            ),
           ),
           child: child,
         );
@@ -103,7 +106,9 @@ class _MyFieldState extends State<MyField> {
           child: TextField(
             controller: controller,
             onEditingComplete: () {
-              debugPrint('Field ${widget.label} changed to ${controller.value}');
+              debugPrint(
+                'Field ${widget.label} changed to ${controller.value}',
+              );
             },
           ),
         ),
@@ -124,19 +129,21 @@ class ListenableBuilderExample extends StatelessWidget {
           child: SizedBox(
             width: 300,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const .all(8.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: <Widget>[
                   const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
+                    padding: .only(bottom: 8),
                     child: MyField(label: 'Company'),
                   ),
                   FocusListenerContainer(
-                    padding: const EdgeInsets.all(8),
+                    padding: const .all(8),
                     border: const RoundedRectangleBorder(
-                      side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside),
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      side: BorderSide(
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                      borderRadius: .all(Radius.circular(5)),
                     ),
                     // The border side will get wider when the subtree has focus.
                     focusedSide: const BorderSide(
@@ -147,7 +154,7 @@ class ListenableBuilderExample extends StatelessWidget {
                     // the subtree has focus.
                     focusedColor: Colors.blue.shade50,
                     child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: .start,
                       children: <Widget>[
                         Text('Owner:'),
                         MyField(label: 'First Name'),

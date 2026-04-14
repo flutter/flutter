@@ -14,9 +14,11 @@ class CupertinoRadioApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('CupertinoRadio Example')),
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('CupertinoRadio Example'),
+        ),
         child: SafeArea(child: CupertinoRadioExample()),
       ),
     );
@@ -33,37 +35,33 @@ class CupertinoRadioExample extends StatefulWidget {
 }
 
 class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
-  SingingCharacter? _character = SingingCharacter.lafayette;
+  SingingCharacter? _character = .lafayette;
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoListSection(
-      children: <Widget>[
-        CupertinoListTile(
-          title: const Text('Lafayette'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.lafayette,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+    return RadioGroup<SingingCharacter>(
+      groupValue: _character,
+      onChanged: (SingingCharacter? value) {
+        setState(() {
+          _character = value;
+        });
+      },
+      child: CupertinoListSection(
+        children: const <Widget>[
+          CupertinoListTile(
+            title: Text('Lafayette'),
+            leading: CupertinoRadio<SingingCharacter>(
+              value: SingingCharacter.lafayette,
+            ),
           ),
-        ),
-        CupertinoListTile(
-          title: const Text('Thomas Jefferson'),
-          leading: CupertinoRadio<SingingCharacter>(
-            value: SingingCharacter.jefferson,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+          CupertinoListTile(
+            title: Text('Thomas Jefferson'),
+            leading: CupertinoRadio<SingingCharacter>(
+              value: SingingCharacter.jefferson,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

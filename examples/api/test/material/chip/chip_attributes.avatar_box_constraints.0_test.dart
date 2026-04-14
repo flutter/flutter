@@ -23,7 +23,10 @@ void main() {
     Offset chipTopLeft = tester.getTopLeft(
       find.byWidget(
         tester.widget<Material>(
-          find.descendant(of: find.byType(RawChip).at(0), matching: find.byType(Material)),
+          find.descendant(
+            of: find.byType(RawChip).at(0),
+            matching: find.byType(Material),
+          ),
         ),
       ),
     );
@@ -36,7 +39,10 @@ void main() {
     chipTopLeft = tester.getTopLeft(
       find.byWidget(
         tester.widget<Material>(
-          find.descendant(of: find.byType(RawChip).at(1), matching: find.byType(Material)),
+          find.descendant(
+            of: find.byType(RawChip).at(1),
+            matching: find.byType(Material),
+          ),
         ),
       ),
     );
@@ -49,7 +55,10 @@ void main() {
     chipTopLeft = tester.getTopLeft(
       find.byWidget(
         tester.widget<Material>(
-          find.descendant(of: find.byType(RawChip).at(2), matching: find.byType(Material)),
+          find.descendant(
+            of: find.byType(RawChip).at(2),
+            matching: find.byType(Material),
+          ),
         ),
       ),
     );

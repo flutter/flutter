@@ -651,7 +651,7 @@ class AnimationController extends Animation<double>
       AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 0.05,
       AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
     };
-    Duration? simulationDuration = duration;
+    var simulationDuration = duration;
     if (simulationDuration == null) {
       assert(!(this.duration == null && _direction == _AnimationDirection.forward));
       assert(
@@ -663,8 +663,8 @@ class AnimationController extends Animation<double>
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       final Duration directionDuration =
           (_direction == _AnimationDirection.reverse && reverseDuration != null)
-              ? reverseDuration!
-              : this.duration!;
+          ? reverseDuration!
+          : this.duration!;
       simulationDuration = directionDuration * remainingFraction;
     } else if (target == value) {
       // Already at target, don't animate.
@@ -676,10 +676,9 @@ class AnimationController extends Animation<double>
         _value = clampDouble(target, lowerBound, upperBound);
         notifyListeners();
       }
-      _status =
-          (_direction == _AnimationDirection.forward)
-              ? AnimationStatus.completed
-              : AnimationStatus.dismissed;
+      _status = (_direction == _AnimationDirection.forward)
+          ? AnimationStatus.completed
+          : AnimationStatus.dismissed;
       _checkStatusChanged();
       return TickerFuture.complete();
     }
@@ -747,10 +746,9 @@ class AnimationController extends Animation<double>
 
   void _directionSetter(_AnimationDirection direction) {
     _direction = direction;
-    _status =
-        (_direction == _AnimationDirection.forward)
-            ? AnimationStatus.forward
-            : AnimationStatus.reverse;
+    _status = (_direction == _AnimationDirection.forward)
+        ? AnimationStatus.forward
+        : AnimationStatus.reverse;
     _checkStatusChanged();
   }
 
@@ -783,22 +781,17 @@ class AnimationController extends Animation<double>
   }) {
     springDescription ??= _kFlingSpringDescription;
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
-    final double target =
-        velocity < 0.0
-            ? lowerBound - _kFlingTolerance.distance
-            : upperBound + _kFlingTolerance.distance;
+    final double target = velocity < 0.0
+        ? lowerBound - _kFlingTolerance.distance
+        : upperBound + _kFlingTolerance.distance;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     final double scale = switch (behavior) {
       // This is arbitrary (it was chosen because it worked for the drawer widget).
       AnimationBehavior.normal when SemanticsBinding.instance.disableAnimations => 200.0,
       AnimationBehavior.normal || AnimationBehavior.preserve => 1.0,
     };
-    final SpringSimulation simulation = SpringSimulation(
-      springDescription,
-      value,
-      target,
-      velocity * scale,
-    )..tolerance = _kFlingTolerance;
+    final simulation = SpringSimulation(springDescription, value, target, velocity * scale)
+      ..tolerance = _kFlingTolerance;
     assert(
       simulation.type != SpringType.underDamped,
       'The specified spring simulation is of type SpringType.underDamped.\n'
@@ -871,10 +864,9 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = Duration.zero;
     _value = clampDouble(simulation.x(0.0), lowerBound, upperBound);
     final TickerFuture result = _ticker!.start();
-    _status =
-        (_direction == _AnimationDirection.forward)
-            ? AnimationStatus.forward
-            : AnimationStatus.reverse;
+    _status = (_direction == _AnimationDirection.forward)
+        ? AnimationStatus.forward
+        : AnimationStatus.reverse;
     _checkStatusChanged();
     return result;
   }
@@ -953,10 +945,9 @@ class AnimationController extends Animation<double>
     assert(elapsedInSeconds >= 0.0);
     _value = clampDouble(_simulation!.x(elapsedInSeconds), lowerBound, upperBound);
     if (_simulation!.isDone(elapsedInSeconds)) {
-      _status =
-          (_direction == _AnimationDirection.forward)
-              ? AnimationStatus.completed
-              : AnimationStatus.dismissed;
+      _status = (_direction == _AnimationDirection.forward)
+          ? AnimationStatus.completed
+          : AnimationStatus.dismissed;
       stop(canceled: false);
     }
     notifyListeners();
@@ -965,16 +956,16 @@ class AnimationController extends Animation<double>
 
   @override
   String toStringDetails() {
-    final String paused = isAnimating ? '' : '; paused';
-    final String ticker = _ticker == null ? '; DISPOSED' : (_ticker!.muted ? '; silenced' : '');
-    String label = '';
+    final paused = isAnimating ? '' : '; paused';
+    final ticker = _ticker == null ? '; DISPOSED' : (_ticker!.muted ? '; silenced' : '');
+    var label = '';
     assert(() {
       if (debugLabel != null) {
         label = '; for $debugLabel';
       }
       return true;
     }());
-    final String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
+    final more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$ticker$label';
   }
 }
@@ -1022,11 +1013,10 @@ class _RepeatingSimulation extends Simulation {
     this.count,
   ) : assert(count == null || count > 0, 'Count shall be greater than zero if not null'),
       _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
-      _initialT =
-          (max == min)
-              ? 0.0
-              : ((clampDouble(initialValue, min, max) - min) / (max - min)) *
-                  (period.inMicroseconds / Duration.microsecondsPerSecond) {
+      _initialT = (max == min)
+          ? 0.0
+          : ((clampDouble(initialValue, min, max) - min) / (max - min)) *
+                (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
     assert(_initialT >= 0.0);
   }

@@ -534,7 +534,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final double? value =
+      final value =
           PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
       if (value != null) {
         correctPixels(value);
@@ -759,7 +759,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       AxisDirection.right => (SemanticsAction.scrollLeft, SemanticsAction.scrollRight),
     };
 
-    final Set<SemanticsAction> actions = <SemanticsAction>{
+    final actions = <SemanticsAction>{
       if (pixels > minScrollExtent) backward,
       if (pixels < maxScrollExtent) forward,
     };
@@ -838,29 +838,27 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         target = viewport.getOffsetToReveal(object, alignment, rect: targetRect, axis: axis).offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target =
-            viewport
-                .getOffsetToReveal(
-                  object,
-                  1.0, // Aligns to end
-                  rect: targetRect,
-                  axis: axis,
-                )
-                .offset;
+        target = viewport
+            .getOffsetToReveal(
+              object,
+              1.0, // Aligns to end
+              rect: targetRect,
+              axis: axis,
+            )
+            .offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target =
-            viewport
-                .getOffsetToReveal(
-                  object,
-                  0.0, // Aligns to start
-                  rect: targetRect,
-                  axis: axis,
-                )
-                .offset;
+        target = viewport
+            .getOffsetToReveal(
+              object,
+              0.0, // Aligns to start
+              rect: targetRect,
+              axis: axis,
+            )
+            .offset;
         target = clampDouble(target, minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;

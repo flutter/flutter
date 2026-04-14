@@ -32,7 +32,8 @@ class RestorableValueExample extends StatefulWidget {
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _RestorableValueExampleState extends State<RestorableValueExample> with RestorationMixin {
+class _RestorableValueExampleState extends State<RestorableValueExample>
+    with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
@@ -70,7 +71,10 @@ class _RestorableValueExampleState extends State<RestorableValueExample> with Re
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: OutlinedButton(onPressed: _incrementAnswer, child: Text('${_answer.value}')),
+      child: OutlinedButton(
+        onPressed: _incrementAnswer,
+        child: Text('${_answer.value}'),
+      ),
     );
   }
 }

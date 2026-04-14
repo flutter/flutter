@@ -35,7 +35,7 @@ void _verifyRawKeyEvent<T extends RawKeyEvent>(
 }
 
 Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
-  bool hasError = false;
+  var hasError = false;
   try {
     await func();
   } catch (e) {
@@ -43,6 +43,22 @@ Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
     hasError = true;
   } finally {
     expect(hasError, true);
+  }
+}
+
+Future<void> _shouldDebugPrint(AsyncValueGetter<void> func, String containsString) async {
+  final printedMessages = <String>[];
+  final DebugPrintCallback oldDebugPrint = debugPrint;
+  debugPrint = (String? message, {int? wrapWidth}) {
+    printedMessages.add(message ?? '');
+  };
+
+  try {
+    await func();
+  } finally {
+    expect(printedMessages, isNotEmpty);
+    expect(printedMessages.join('\n'), contains(containsString));
+    debugPrint = oldDebugPrint;
   }
 }
 
@@ -65,8 +81,8 @@ void main() {
   testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <RawKeyEvent>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -86,7 +102,7 @@ void main() {
       await tester.idle();
 
       expect(events.length, 8);
-      for (int i = 0; i < events.length; ++i) {
+      for (var i = 0; i < events.length; ++i) {
         final bool isEven = i.isEven;
         if (isEven) {
           expect(events[i].runtimeType, equals(RawKeyDownEvent));
@@ -111,8 +127,8 @@ void main() {
   testWidgets('simulates keyboard events (KeyData then RawKeyEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
-    final List<KeyEvent> events = <KeyEvent>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <KeyEvent>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -430,8 +446,8 @@ void main() {
   testWidgets('simulates using the correct transit mode: rawKeyData', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
-    final List<Object> events = <Object>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <Object>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -510,8 +526,8 @@ void main() {
   ) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
-    final List<Object> events = <Object>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <Object>[];
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -551,15 +567,19 @@ void main() {
     );
     events.clear();
 
+    // Enable irregular key event warning.
+    debugPrintKeyboardEvents = true;
     // A (physical keyA, logical keyB) is released.
     //
-    // Since this event is transmitted to HardwareKeyboard as-is, it will be rejected due to
-    // inconsistent logical key. This does not indicate behavioral difference,
-    // since KeyData is will never send malformed data sequence in real applications.
-    await _shouldThrow<AssertionError>(
-      () => simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA),
-    );
+    // Since this event is transmitted to HardwareKeyboard as-is, it will
+    // trigger irregular key event warning due to inconsistent logical key. This
+    // does not indicate behavioral difference, since KeyData will never send
+    // malformed data sequence in real applications.
+    await _shouldDebugPrint(() {
+      return simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA);
+    }, 'Received unexpected KeyUpEvent for key with mismatched logical key:');
 
+    debugPrintKeyboardEvents = false;
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
@@ -567,8 +587,9 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/133955.
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
-    final FocusNode focusNode = FocusNode();
+    final events = <RawKeyEvent>[];
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       RawKeyboardListener(focusNode: focusNode, onKey: events.add, child: Container()),
@@ -579,17 +600,16 @@ void main() {
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     expect(events.length, 1);
-    final Type expectedType =
-        isBrowser
-            ? RawKeyEventDataWeb
-            : switch (defaultTargetPlatform) {
-              TargetPlatform.android => RawKeyEventDataAndroid,
-              TargetPlatform.fuchsia => RawKeyEventDataFuchsia,
-              TargetPlatform.iOS => RawKeyEventDataIos,
-              TargetPlatform.linux => RawKeyEventDataLinux,
-              TargetPlatform.macOS => RawKeyEventDataMacOs,
-              TargetPlatform.windows => RawKeyEventDataWindows,
-            };
+    final Type expectedType = isBrowser
+        ? RawKeyEventDataWeb
+        : switch (defaultTargetPlatform) {
+            TargetPlatform.android => RawKeyEventDataAndroid,
+            TargetPlatform.fuchsia => RawKeyEventDataFuchsia,
+            TargetPlatform.iOS => RawKeyEventDataIos,
+            TargetPlatform.linux => RawKeyEventDataLinux,
+            TargetPlatform.macOS => RawKeyEventDataMacOs,
+            TargetPlatform.windows => RawKeyEventDataWindows,
+          };
     expect(events.first.data.runtimeType, expectedType);
   }, variant: TargetPlatformVariant.all());
 }

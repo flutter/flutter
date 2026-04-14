@@ -9,7 +9,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 /// A 100x100 png in Display P3 colorspace.
-const String _displayP3Logo =
+const String displayP3Logo =
     'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAABdWlDQ1BrQ0dDb2xv'
     'clNwYWNlRGlzcGxheVAzAAAokXWQvUvDUBTFT6tS0DqIDh0cMolD1NIKdnFoKxRF'
     'MFQFq1OafgltfCQpUnETVyn4H1jBWXCwiFRwcXAQRAcR3Zw6KbhoeN6XVNoi3sfl'
@@ -142,6 +142,7 @@ void main() => run(Setup.sweepGradient);
 enum Setup {
   none,
   image,
+  codecImage,
   canvasSaveLayer,
   blur,
   drawnImage,
@@ -153,7 +154,9 @@ enum Setup {
 }
 
 void run(Setup setup) {
-  runApp(MyApp(setup));
+  // Use UniqueKey to force fresh State on each run. Needed for integration
+  // tests where runApp is called multiple times with different setups.
+  runApp(MyApp(setup, key: UniqueKey()));
 }
 
 class MyApp extends StatelessWidget {
@@ -166,7 +169,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Wide Gamut Test',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage(_setup, title: 'Wide Gamut Test'),
+      home: MyHomePage(_setup, key: UniqueKey(), title: 'Wide Gamut Test'),
     );
   }
 }
@@ -179,7 +182,7 @@ class _SaveLayerDrawer extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (_image != null) {
-      final Rect imageRect = Rect.fromCenter(
+      final imageRect = Rect.fromCenter(
         center: Offset.zero,
         width: _image!.width.toDouble(),
         height: _image!.height.toDouble(),
@@ -203,23 +206,37 @@ class _SaveLayerDrawer extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-Future<ui.Image> _drawImage() async {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  const Size markerSize = Size(120, 120);
-  final double canvasSize = markerSize.height + 3;
-  final Canvas canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
+/// Load the Display P3 PNG via the low-level codec API
+/// (ImageDescriptor.encoded -> instantiateCodec -> getNextFrame).
+/// This path does NOT go through ImageDecoderImpeller.
+Future<ui.Image> _loadCodecImage() async {
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
+    base64Decode(displayP3Logo),
+  );
+  final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
+  final ui.Codec codec = await descriptor.instantiateCodec();
+  final ui.FrameInfo frameInfo = await codec.getNextFrame();
+  codec.dispose();
+  return frameInfo.image;
+}
 
-  final Paint ovalPaint = Paint()..color = const Color(0xff00ff00);
-  final Path ovalPath =
-      Path()..addOval(
-        Rect.fromLTWH((canvasSize - markerSize.width) / 2, 1, markerSize.width, markerSize.height),
-      );
+Future<ui.Image> _drawImage() async {
+  final recorder = ui.PictureRecorder();
+  const markerSize = Size(120, 120);
+  final double canvasSize = markerSize.height + 3;
+  final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, canvasSize, canvasSize));
+
+  final ovalPaint = Paint()..color = const Color(0xff00ff00);
+  final ovalPath = Path()
+    ..addOval(
+      Rect.fromLTWH((canvasSize - markerSize.width) / 2, 1, markerSize.width, markerSize.height),
+    );
   canvas.drawPath(ovalPath, ovalPaint);
 
   final ui.Picture picture = recorder.endRecording();
   final ui.Image image = await picture.toImage(canvasSize.toInt(), (canvasSize + 0).toInt());
   final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawExtendedRgba128);
-  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
     Uint8List.view(byteData!.buffer),
     canvasSize.toInt(),
@@ -230,17 +247,6 @@ Future<ui.Image> _drawImage() async {
     },
   );
   return completer.future;
-}
-
-Future<ui.Image> _loadImage() async {
-  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
-    base64Decode(_displayP3Logo),
-  );
-  final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
-  final ui.Codec codec = await descriptor.instantiateCodec();
-  final ui.FrameInfo frameInfo = await codec.getNextFrame();
-  codec.dispose();
-  return frameInfo.image;
 }
 
 class MyHomePage extends StatefulWidget {
@@ -259,8 +265,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     switch (widget.setup) {
+      case Setup.image || Setup.blur:
+        break;
       case Setup.canvasSaveLayer:
-        _loadImage().then(
+        _loadCodecImage().then(
+          (ui.Image? value) => setState(() {
+            _image = value;
+          }),
+        );
+      case Setup.codecImage:
+        _loadCodecImage().then(
           (ui.Image? value) => setState(() {
             _image = value;
           }),
@@ -271,9 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
             _image = value;
           }),
         );
-      case Setup.image ||
-          Setup.blur ||
-          Setup.none ||
+      case Setup.none ||
           Setup.container ||
           Setup.linearGradient ||
           Setup.radialGradient ||
@@ -291,7 +303,11 @@ class _MyHomePageState extends State<MyHomePage> {
       case Setup.none:
         imageWidget = Container();
       case Setup.image:
-        imageWidget = Image.memory(base64Decode(_displayP3Logo));
+        imageWidget = Image.memory(base64Decode(displayP3Logo));
+      case Setup.codecImage:
+        imageWidget = _image != null
+            ? RawImage(image: _image, width: 100, height: 100)
+            : const SizedBox(width: 100, height: 100);
       case Setup.drawnImage:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
       case Setup.canvasSaveLayer:
@@ -302,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const ColoredBox(color: Color(0xff00ff00), child: SizedBox(width: 100, height: 100)),
             ImageFiltered(
               imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Image.memory(base64Decode(_displayP3Logo)),
+              child: Image.memory(base64Decode(displayP3Logo)),
             ),
           ],
         );

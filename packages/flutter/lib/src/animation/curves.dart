@@ -401,8 +401,8 @@ class Cubic extends Curve {
 
   @override
   double transformInternal(double t) {
-    double start = 0.0;
-    double end = 1.0;
+    var start = 0.0;
+    var end = 1.0;
     while (true) {
       final double midpoint = (start + end) / 2;
       final double estimate = _evaluateCubic(a, c, midpoint);
@@ -578,7 +578,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     assert(end > start);
     // We want to pick a random seed that will keep the result stable if
     // evaluated again, so we use the first non-generated control point.
-    final math.Random rand = math.Random(samplingSeed);
+    final rand = math.Random(samplingSeed);
     bool isFlat(Offset p, Offset q, Offset r) {
       // Calculates the area of the triangle given by the three points.
       final Offset pr = p - r;
@@ -587,14 +587,14 @@ abstract class Curve2D extends ParametricCurve<Offset> {
       return (z * z) < tolerance;
     }
 
-    final Curve2DSample first = Curve2DSample(start, transform(start));
-    final Curve2DSample last = Curve2DSample(end, transform(end));
-    final List<Curve2DSample> samples = <Curve2DSample>[first];
+    final first = Curve2DSample(start, transform(start));
+    final last = Curve2DSample(end, transform(end));
+    final samples = <Curve2DSample>[first];
     void sample(Curve2DSample p, Curve2DSample q, {bool forceSubdivide = false}) {
       // Pick a random point somewhat near the center, which avoids aliasing
       // problems with periodic curves.
       final double t = p.t + (0.45 + 0.1 * rand.nextDouble()) * (q.t - p.t);
-      final Curve2DSample r = Curve2DSample(t, transform(t));
+      final r = Curve2DSample(t, transform(t));
 
       if (!forceSubdivide && isFlat(p.value, q.value, r.value)) {
         samples.add(q);
@@ -634,14 +634,14 @@ abstract class Curve2D extends ParametricCurve<Offset> {
   /// single-valued, it will return the parameter for only one of the values at
   /// the given `x` location.
   double findInverse(double x) {
-    double start = 0.0;
-    double end = 1.0;
+    var start = 0.0;
+    var end = 1.0;
     late double mid;
     double offsetToOrigin(double pos) => x - transform(pos).dx;
     // Use a binary search to find the inverse point within 1e-6, or 100
     // subdivisions, whichever comes first.
-    const double errorLimit = 1e-6;
-    int count = 100;
+    const errorLimit = 1e-6;
+    var count = 100;
     final double startValue = offsetToOrigin(start);
     while ((end - start) / 2.0 > errorLimit && count > 0) {
       mid = (end + start) / 2.0;
@@ -790,7 +790,7 @@ class CatmullRomSpline extends Curve2D {
       'given was $endHandle.',
     );
     assert(() {
-      for (int index = 0; index < controlPoints.length; index++) {
+      for (var index = 0; index < controlPoints.length; index++) {
         if (!controlPoints[index].isFinite) {
           throw FlutterError(
             'The provided CatmullRomSpline control point at index $index is not '
@@ -805,23 +805,18 @@ class CatmullRomSpline extends Curve2D {
     // extend the first and last segments, respectively.
     startHandle ??= controlPoints[0] * 2.0 - controlPoints[1];
     endHandle ??= controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
-    final List<Offset> allPoints = <Offset>[startHandle, ...controlPoints, endHandle];
+    final allPoints = <Offset>[startHandle, ...controlPoints, endHandle];
 
     // An alpha of 0.5 is what makes it a centripetal Catmull-Rom spline. A
     // value of 0.0 would make it a uniform Catmull-Rom spline, and a value of
     // 1.0 would make it a chordal Catmull-Rom spline. Non-centripetal values
     // for alpha can give self-intersecting behavior or looping within a
     // segment.
-    const double alpha = 0.5;
+    const alpha = 0.5;
     final double reverseTension = 1.0 - tension;
-    final List<List<Offset>> result = <List<Offset>>[];
-    for (int i = 0; i < allPoints.length - 3; ++i) {
-      final List<Offset> curve = <Offset>[
-        allPoints[i],
-        allPoints[i + 1],
-        allPoints[i + 2],
-        allPoints[i + 3],
-      ];
+    final result = <List<Offset>>[];
+    for (var i = 0; i < allPoints.length - 3; ++i) {
+      final curve = <Offset>[allPoints[i], allPoints[i + 1], allPoints[i + 2], allPoints[i + 3]];
       final Offset diffCurve10 = curve[1] - curve[0];
       final Offset diffCurve21 = curve[2] - curve[1];
       final Offset diffCurve32 = curve[3] - curve[2];
@@ -837,7 +832,7 @@ class CatmullRomSpline extends Curve2D {
           reverseTension;
       final Offset sumM12 = m1 + m2;
 
-      final List<Offset> segment = <Offset>[
+      final segment = <Offset>[
         diffCurve21 * -2.0 + sumM12,
         diffCurve21 * 3.0 - m1 - sumM12,
         m1,
@@ -1076,7 +1071,7 @@ class CatmullRomCurve extends Curve {
     final Offset endHandle = controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
     controlPoints = <Offset>[startHandle, ...controlPoints, endHandle];
     double lastX = -double.infinity;
-    for (int i = 0; i < controlPoints.length; ++i) {
+    for (var i = 0; i < controlPoints.length; ++i) {
       if (i > 1 &&
           i < controlPoints.length - 2 &&
           (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
@@ -1103,12 +1098,12 @@ class CatmullRomCurve extends Curve {
       lastX = controlPoints[i].dx;
     }
 
-    bool success = true;
+    var success = true;
 
     // An empirical test to make sure things are single-valued in X.
     lastX = -double.infinity;
-    const double tolerance = 1e-3;
-    final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
+    const tolerance = 1e-3;
+    final testSpline = CatmullRomSpline(controlPoints, tension: tension);
     final double start = testSpline.findInverse(0.0);
     final double end = testSpline.findInverse(1.0);
     final Iterable<Curve2DSample> samplePoints = testSpline.generateSamples(start: start, end: end);
@@ -1117,7 +1112,7 @@ class CatmullRomCurve extends Curve {
     /// respectively, then the curve is multi-valued at the ends.
     if (samplePoints.first.value.dy.abs() > tolerance ||
         (1.0 - samplePoints.last.value.dy).abs() > tolerance) {
-      bool bail = true;
+      var bail = true;
       success = false;
       assert(() {
         reasons?.add(
@@ -1135,12 +1130,12 @@ class CatmullRomCurve extends Curve {
         return false;
       }
     }
-    for (final Curve2DSample sample in samplePoints) {
+    for (final sample in samplePoints) {
       final Offset point = sample.value;
       final double t = sample.t;
       final double x = point.dx;
       if (t >= start && t <= end && (x < -1e-3 || x > 1.0 + 1e-3)) {
-        bool bail = true;
+        var bail = true;
         success = false;
         assert(() {
           reasons?.add(
@@ -1158,7 +1153,7 @@ class CatmullRomCurve extends Curve {
         }
       }
       if (x < lastX) {
-        bool bail = true;
+        var bail = true;
         success = false;
         assert(() {
           reasons?.add(
@@ -1188,7 +1183,7 @@ class CatmullRomCurve extends Curve {
       // Compute the samples now if we were constructed lazily.
       _precomputedSamples.addAll(_computeSamples(controlPoints, tension));
     }
-    int start = 0;
+    var start = 0;
     int end = _precomputedSamples.length - 1;
     int mid;
     Offset value;

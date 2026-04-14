@@ -1,4 +1,10 @@
 {
+  "expansionTileExpandedHint": "double-tap to collapse",
+  "collapsedHint": "Expanded",
+  "expandedHint": "Collapsed",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedHint": "double-tap to expand",
   "cancelButtonLabel": "Cancel",
   "backButtonLabel": "Back",
   "searchWebButtonLabel": "Search Web",

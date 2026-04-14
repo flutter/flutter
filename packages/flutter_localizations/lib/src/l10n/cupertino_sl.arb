@@ -39,5 +39,11 @@
   "shareButtonLabel": "Deli …",
   "clearButtonLabel": "Počisti",
   "cancelButtonLabel": "Prekliči",
-  "backButtonLabel": "Nazaj"
+  "backButtonLabel": "Nazaj",
+  "expansionTileExpandedHint": "za strnitev se dvakrat dotaknite",
+  "expansionTileCollapsedHint": "za razširitev se dvakrat dotaknite",
+  "expansionTileExpandedTapHint": "Strni",
+  "expansionTileCollapsedTapHint": "Razširitev za več podrobnosti",
+  "expandedHint": "Strnjeno",
+  "collapsedHint": "Razširjeno"
 }

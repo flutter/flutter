@@ -17,22 +17,29 @@ class SnapshotControllerSkia : public SnapshotController {
   explicit SnapshotControllerSkia(const SnapshotController::Delegate& delegate)
       : SnapshotController(delegate) {}
 
-  void MakeRasterSnapshot(
-      sk_sp<DisplayList> display_list,
-      SkISize picture_size,
-      std::function<void(const sk_sp<DlImage>&)> callback) override;
+  void MakeRasterSnapshot(sk_sp<DisplayList> display_list,
+                          DlISize picture_size,
+                          std::function<void(const sk_sp<DlImage>&)> callback,
+                          SnapshotPixelFormat pixel_format) override;
 
-  sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
-                                        SkISize size) override;
+  sk_sp<DlImage> MakeRasterSnapshotSync(
+      sk_sp<DisplayList> display_list,
+      DlISize size,
+      SnapshotPixelFormat pixel_format) override;
+
+  sk_sp<DlImage> MakeTextureImage(sk_sp<SkImage> image,
+                                  SnapshotPixelFormat pixel_format) override;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
   void CacheRuntimeStage(
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 
+  bool MakeRenderContextCurrent() override;
+
  private:
   sk_sp<DlImage> DoMakeRasterSnapshot(
-      SkISize size,
+      DlISize size,
       std::function<void(SkCanvas*)> draw_callback);
 
   FML_DISALLOW_COPY_AND_ASSIGN(SnapshotControllerSkia);

@@ -267,7 +267,7 @@ class PointerDataConverter {
     if (_debugLogPointerConverter) {
       print('>> view=$viewId device=$device change=$change buttons=$buttons');
     }
-    final bool isDown = buttons != 0;
+    final isDown = buttons != 0;
     if (signalKind == null || signalKind == ui.PointerSignalKind.none) {
       switch (change) {
         case ui.PointerChange.add:

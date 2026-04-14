@@ -22,8 +22,9 @@ Future<void> main() async {
 
     await tester.idle();
     expect(imageCache.currentSize, 1);
-    final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'type': 'memoryPressure',
+    })!;
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/system',
       message,
@@ -33,7 +34,7 @@ Future<void> main() async {
   });
 
   test('evict clears live references', () async {
-    final TestPaintingBinding binding = TestPaintingBinding();
+    final binding = TestPaintingBinding();
     expect(binding.imageCache.clearCount, 0);
     expect(binding.imageCache.liveClearCount, 0);
 

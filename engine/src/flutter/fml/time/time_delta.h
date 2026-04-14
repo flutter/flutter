@@ -96,12 +96,7 @@ class TimeDelta {
     return TimeDelta::FromNanoseconds(delta_ % other.delta_);
   }
 
-  bool operator==(TimeDelta other) const { return delta_ == other.delta_; }
-  bool operator!=(TimeDelta other) const { return delta_ != other.delta_; }
-  bool operator<(TimeDelta other) const { return delta_ < other.delta_; }
-  bool operator<=(TimeDelta other) const { return delta_ <= other.delta_; }
-  bool operator>(TimeDelta other) const { return delta_ > other.delta_; }
-  bool operator>=(TimeDelta other) const { return delta_ >= other.delta_; }
+  constexpr auto operator<=>(const TimeDelta& other) const = default;
 
   static constexpr TimeDelta FromTimespec(struct timespec ts) {
     return TimeDelta::FromSeconds(ts.tv_sec) +

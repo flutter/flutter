@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_STORAGE_H_
 #define FLUTTER_DISPLAY_LIST_DL_STORAGE_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "flutter/fml/logging.h"
@@ -42,6 +43,9 @@ class DisplayListStorage {
   void reset();
 
   DisplayListStorage& operator=(DisplayListStorage&& other);
+
+  /// @brief Compute the next power of two from [x].
+  static size_t NextPowerOfTwoSize(size_t x);
 
  private:
   void realloc(size_t count);

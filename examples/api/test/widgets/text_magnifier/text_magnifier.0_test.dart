@@ -4,33 +4,44 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_api_samples/widgets/text_magnifier/text_magnifier.0.dart' as example;
+import 'package:flutter_api_samples/widgets/text_magnifier/text_magnifier.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
-List<TextSelectionPoint> _globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+List<TextSelectionPoint> _globalize(
+  Iterable<TextSelectionPoint> points,
+  RenderBox box,
+) {
   return points.map<TextSelectionPoint>((TextSelectionPoint point) {
     return TextSelectionPoint(box.localToGlobal(point.point), point.direction);
   }).toList();
 }
 
-RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester tester) {
-  return (tester.state(find.byType(TextField)) as TextSelectionGestureDetectorBuilderDelegate)
+RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(
+  WidgetTester tester,
+) {
+  return (tester.state(find.byType(TextField))
+          as TextSelectionGestureDetectorBuilderDelegate)
       .editableTextKey
       .currentState!
       .renderEditable;
 }
 
-Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester tester, int offset) {
+Offset _textOffsetToPosition<T extends State<StatefulWidget>>(
+  WidgetTester tester,
+  int offset,
+) {
   final RenderEditable renderEditable = _findRenderEditable(tester);
 
-  final List<TextSelectionPoint> endpoints =
-      renderEditable
-          .getEndpointsForSelection(TextSelection.collapsed(offset: offset))
-          .map<TextSelectionPoint>(
-            (TextSelectionPoint point) =>
-                TextSelectionPoint(renderEditable.localToGlobal(point.point), point.direction),
-          )
-          .toList();
+  final List<TextSelectionPoint> endpoints = renderEditable
+      .getEndpointsForSelection(TextSelection.collapsed(offset: offset))
+      .map<TextSelectionPoint>(
+        (TextSelectionPoint point) => TextSelectionPoint(
+          renderEditable.localToGlobal(point.point),
+          point.direction,
+        ),
+      )
+      .toList();
 
   return endpoints[0].point + const Offset(0.0, -2.0);
 }
@@ -53,8 +64,9 @@ void main() {
     await testGesture.up();
     await tester.pumpAndSettle();
 
-    final TextEditingController controller =
-        tester.firstWidget<TextField>(find.byType(TextField)).controller!;
+    final TextEditingController controller = tester
+        .firstWidget<TextField>(find.byType(TextField))
+        .controller!;
 
     final TextSelection selection = controller.selection;
     final RenderEditable renderEditable = _findRenderEditable(tester);
@@ -74,7 +86,9 @@ void main() {
   testWidgets(
     'should show custom magnifier on drag',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
+      await tester.pumpWidget(
+        const example.TextMagnifierExampleApp(text: defaultText),
+      );
 
       await showMagnifier(tester, defaultText.indexOf('e'));
       expect(find.byType(example.CustomMagnifier), findsOneWidget);
@@ -84,19 +98,19 @@ void main() {
         matchesGoldenFile('text_magnifier.0_test.png'),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.android,
-    }),
-    skip: true, // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    variant: const TargetPlatformVariant(<TargetPlatform>{.iOS, .android}),
+    // This image is flaky. https://github.com/flutter/flutter/issues/144350
+    skip: true,
   );
 
-  testWidgets('should show custom magnifier in RTL', (WidgetTester tester) async {
+  testWidgets('should show custom magnifier in RTL', (
+    WidgetTester tester,
+  ) async {
     const String text = 'أثارت زر';
     const String textToTapOn = 'ت';
 
     await tester.pumpWidget(
-      const example.TextMagnifierExampleApp(textDirection: TextDirection.rtl, text: text),
+      const example.TextMagnifierExampleApp(textDirection: .rtl, text: text),
     );
 
     await showMagnifier(tester, text.indexOf(textToTapOn));

@@ -36,18 +36,51 @@ application (which is necessary to use `flutter run` with a test).
 
 Unit tests run with `flutter test` run inside a headless flutter shell on your workstation,
 you won't see any UI. You can use `print` to generate console output or you can interact
-with the Dart VM via the Dart Observatory at [http://localhost:8181/](http://localhost:8181/).
+with the Dart VM via Flutter DevTools at [http://localhost:8181/](http://localhost:8181/).
 
-To debug tests in Observatory, use the `--start-paused` option to start the test in a
+To debug tests in Flutter DevTools, use the `--start-paused` option to start the test in a
 paused state and wait for connection from a debugger. This option lets you set breakpoints
 before the test runs.
 
 To run analysis and all the tests for the entire Flutter repository, the same way that LUCI
 runs them, run `dart dev/bots/test.dart` and `dart --enable-asserts dev/bots/analyze.dart`.
 
+### Organizing test files
+
+Organize tests into smaller, focused files grouped by feature, widget, or behavior, rather than creating large files with many unrelated test cases.
+
+This approach aligns with the Flutter style guide's principle to [prefer more test files and avoid long test files](../Style-guide-for-Flutter-repo.md#prefer-more-test-files-avoid-long-test-files).
+
+Splitting large test files has several benefits:
+
+- Readability
+- Navigation
+- Maintainability
+- Reviewability for contributors
+
+#### Naming conventions and examples
+
+Instead of keeping everything in a single file like:
+
+- `button_test.dart`
+
+that includes layout, semantics, and interaction tests, it can be split into:
+
+- `button_layout_test.dart`
+- `button_semantics_test.dart`
+- `button_interaction_test.dart`
+
+Or group tests by behavior:
+
+- `navigator_push_test.dart`
+- `navigator_pop_test.dart`
+- `navigator_transition_test.dart`
+
+The goal is to keep each test file focused on a single feature or behavior so it remains easier to understand, review, and maintain over time.
+
 ### Locally built engines
 
-If you've built your own flutter engine (see [Setting up the Engine development environment](../../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md)), you
+If you've built your own flutter engine (see [Setting up the Engine development environment](../../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md)), you
 can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can use:
 
@@ -120,8 +153,8 @@ The following is an example of what running the local engine command might look 
 
 The above command would use the local Flutter engine located at `/Users/myname/flutter/engine` to execute the `external_ui_integration_test` test on an Android emulator, which is why the `android_debug_unopt_x86` version of the engine is used.
 
-Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../../engine/src/flutter/docs/contributing/Compiling-the-engine.md) for more details.
+Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../../docs/engine/contributing/Compiling-the-engine.md) for more details.
 
 ## For the engine
 
-See the [Testing the engine](../../../engine/src/flutter/docs/testing/Testing-the-engine.md) wiki.
+See the [Testing the engine](../../../docs/engine/testing/Testing-the-engine.md) wiki.

@@ -22,7 +22,7 @@ void main() {
 
       // When we eventually add more test panes we will want to tweak these
       // to go through all the panes
-      for (int i = 0; i < 6; i += 1) {
+      for (var i = 0; i < 6; i += 1) {
         await scrollOnce(-300.0);
         await scrollOnce(300.0);
       }

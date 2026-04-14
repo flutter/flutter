@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -25,7 +26,7 @@ final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
 void main() {
   testWithoutContext('correct logger instance is created', () {
-    final LoggerFactory loggerFactory = LoggerFactory(
+    final loggerFactory = LoggerFactory(
       terminal: Terminal.test(),
       stdio: FakeStdio(),
       outputPreferences: OutputPreferences.test(),
@@ -37,6 +38,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<StdoutLogger>(),
@@ -47,6 +49,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: true,
       ),
       isA<WindowsStdoutLogger>(),
@@ -57,6 +60,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: true,
       ),
       isA<VerboseLogger>(),
@@ -67,6 +71,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<VerboseLogger>(),
@@ -77,6 +82,7 @@ void main() {
         prefixedErrors: true,
         machine: false,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<PrefixedErrorLogger>(),
@@ -87,6 +93,7 @@ void main() {
         prefixedErrors: false,
         machine: false,
         daemon: true,
+        widgetPreviews: false,
         windows: false,
       ),
       isA<NotifyingLogger>(),
@@ -97,17 +104,39 @@ void main() {
         prefixedErrors: false,
         machine: true,
         daemon: false,
+        widgetPreviews: false,
         windows: false,
       ),
-      isA<AppRunLogger>(),
+      isA<MachineOutputLogger>(),
     );
+
+    for (final verbose in [false, true]) {
+      for (final machine in [false, true]) {
+        for (final windows in [false, true]) {
+          expect(
+            loggerFactory.createLogger(
+              verbose: verbose,
+              prefixedErrors: false,
+              machine: machine,
+              daemon: false,
+              widgetPreviews: true,
+              windows: windows,
+            ),
+            isA<WidgetPreviewMachineAwareLogger>(),
+            reason:
+                'Did not produce WidgetPreviewMachineAwareLogger for '
+                'verbose: $verbose machine: $machine windows: $windows.',
+          );
+        }
+      }
+    }
   });
 
   testWithoutContext(
     'WindowsStdoutLogger rewrites emojis when terminal does not support emoji',
     () {
-      final FakeStdio stdio = FakeStdio();
-      final WindowsStdoutLogger logger = WindowsStdoutLogger(
+      final stdio = FakeStdio();
+      final logger = WindowsStdoutLogger(
         outputPreferences: OutputPreferences.test(),
         stdio: stdio,
         terminal: Terminal.test(),
@@ -122,8 +151,8 @@ void main() {
   testWithoutContext(
     'WindowsStdoutLogger does not rewrite emojis when terminal does support emoji',
     () {
-      final FakeStdio stdio = FakeStdio();
-      final WindowsStdoutLogger logger = WindowsStdoutLogger(
+      final stdio = FakeStdio();
+      final logger = WindowsStdoutLogger(
         outputPreferences: OutputPreferences.test(),
         stdio: stdio,
         terminal: Terminal.test(supportsColor: true, supportsEmoji: true),
@@ -136,8 +165,8 @@ void main() {
   );
 
   testWithoutContext('DelegatingLogger delegates', () {
-    final FakeLogger fakeLogger = FakeLogger();
-    final DelegatingLogger delegatingLogger = DelegatingLogger(fakeLogger);
+    final fakeLogger = FakeLogger();
+    final delegatingLogger = DelegatingLogger(fakeLogger);
 
     expect(() => delegatingLogger.quiet, _throwsInvocationFor(() => fakeLogger.quiet));
 
@@ -150,14 +179,14 @@ void main() {
 
     expect(() => delegatingLogger.isVerbose, _throwsInvocationFor(() => fakeLogger.isVerbose));
 
-    const String message = 'message';
+    const message = 'message';
     final StackTrace stackTrace = StackTrace.current;
-    const bool emphasis = true;
+    const emphasis = true;
     const TerminalColor color = TerminalColor.cyan;
-    const int indent = 88;
-    const int hangingIndent = 52;
-    const bool wrap = true;
-    const bool newline = true;
+    const indent = 88;
+    const hangingIndent = 52;
+    const wrap = true;
+    const newline = true;
     expect(
       () => delegatingLogger.printError(
         message,
@@ -209,13 +238,13 @@ void main() {
       _throwsInvocationFor(() => fakeLogger.printTrace(message)),
     );
 
-    final Map<String, dynamic> eventArgs = <String, dynamic>{};
+    final eventArgs = <String, dynamic>{};
     expect(
       () => delegatingLogger.sendEvent(message, eventArgs),
       _throwsInvocationFor(() => fakeLogger.sendEvent(message, eventArgs)),
     );
 
-    const String progressId = 'progressId';
+    const progressId = 'progressId';
     const int progressIndicatorPadding = kDefaultStatusPadding * 2;
     expect(
       () => delegatingLogger.startProgress(
@@ -241,15 +270,15 @@ void main() {
   });
 
   testWithoutContext('asLogger finds the correct delegate', () async {
-    final FakeLogger fakeLogger = FakeLogger();
-    final VerboseLogger verboseLogger = VerboseLogger(fakeLogger);
-    final NotifyingLogger notifyingLogger = NotifyingLogger(verbose: true, parent: verboseLogger);
+    final fakeLogger = FakeLogger();
+    final verboseLogger = VerboseLogger(fakeLogger);
+    final notifyingLogger = NotifyingLogger(verbose: true, parent: verboseLogger);
     expect(asLogger<Logger>(notifyingLogger), notifyingLogger);
     expect(asLogger<NotifyingLogger>(notifyingLogger), notifyingLogger);
     expect(asLogger<VerboseLogger>(notifyingLogger), verboseLogger);
     expect(asLogger<FakeLogger>(notifyingLogger), fakeLogger);
 
-    expect(() => asLogger<AppRunLogger>(notifyingLogger), throwsStateError);
+    expect(() => asLogger<MachineOutputLogger>(notifyingLogger), throwsStateError);
   });
 
   group('AppContext', () {
@@ -260,10 +289,8 @@ void main() {
     });
 
     testWithoutContext('error', () async {
-      final BufferLogger mockLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences.test(),
-      );
-      final VerboseLogger verboseLogger = VerboseLogger(
+      final mockLogger = BufferLogger.test(outputPreferences: OutputPreferences.test());
+      final verboseLogger = VerboseLogger(
         mockLogger,
         stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
       );
@@ -287,14 +314,14 @@ void main() {
     });
 
     testWithoutContext('ANSI colored errors', () async {
-      final BufferLogger mockLogger = BufferLogger(
+      final mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
           platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
       );
-      final VerboseLogger verboseLogger = VerboseLogger(
+      final verboseLogger = VerboseLogger(
         mockLogger,
         stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
       );
@@ -324,14 +351,14 @@ void main() {
     });
 
     testWithoutContext('printBox', () {
-      final BufferLogger mockLogger = BufferLogger(
+      final mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: FakeStdio(),
           platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
       );
-      final VerboseLogger verboseLogger = VerboseLogger(
+      final verboseLogger = VerboseLogger(
         mockLogger,
         stopwatchFactory: FakeStopwatchFactory(stopwatch: fakeStopWatch),
       );
@@ -352,9 +379,9 @@ void main() {
   });
 
   testWithoutContext('Logger does not throw when stdio write throws synchronously', () async {
-    final FakeStdout stdout = FakeStdout(syncError: true);
-    final FakeStdout stderr = FakeStdout(syncError: true);
-    final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
+    final stdout = FakeStdout(syncError: true);
+    final stderr = FakeStdout(syncError: true);
+    final stdio = Stdio.test(stdout: stdout, stderr: stderr);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(stdio: stdio, platform: _kNoAnsiPlatform),
       stdio: stdio,
@@ -366,9 +393,9 @@ void main() {
   });
 
   testWithoutContext('Logger does not throw when stdio write throws asynchronously', () async {
-    final FakeStdout stdout = FakeStdout(syncError: false);
-    final FakeStdout stderr = FakeStdout(syncError: false);
-    final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
+    final stdout = FakeStdout(syncError: false);
+    final stderr = FakeStdout(syncError: false);
+    final stdio = Stdio.test(stdout: stdout, stderr: stderr);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(stdio: stdio, platform: _kNoAnsiPlatform),
       stdio: stdio,
@@ -382,9 +409,9 @@ void main() {
   });
 
   testWithoutContext('Logger does not throw when stdio completes done with an error', () async {
-    final FakeStdout stdout = FakeStdout(syncError: false, completeWithError: true);
-    final FakeStdout stderr = FakeStdout(syncError: false, completeWithError: true);
-    final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
+    final stdout = FakeStdout(syncError: false, completeWithError: true);
+    final stderr = FakeStdout(syncError: false, completeWithError: true);
+    final stdio = Stdio.test(stdout: stdout, stderr: stderr);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(stdio: stdio, platform: _kNoAnsiPlatform),
       stdio: stdio,
@@ -402,7 +429,7 @@ void main() {
     late FakeStopwatch mockStopwatch;
     late FakeStopwatchFactory stopwatchFactory;
     late int called;
-    final List<Platform> testPlatforms = <Platform>[
+    final testPlatforms = <Platform>[
       FakePlatform(environment: <String, String>{}, executableArguments: <String>[]),
       FakePlatform(
         operatingSystem: 'macos',
@@ -425,7 +452,7 @@ void main() {
         executableArguments: <String>[],
       ),
     ];
-    final RegExp secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
+    final secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
 
     setUp(() {
       mockStopwatch = FakeStopwatch();
@@ -444,7 +471,7 @@ void main() {
       } while (doThis());
     }
 
-    for (final Platform testPlatform in testPlatforms) {
+    for (final testPlatform in testPlatforms) {
       group('(${testPlatform.operatingSystem})', () {
         late Platform platform;
         late Platform ansiPlatform;
@@ -470,10 +497,10 @@ void main() {
         });
 
         testWithoutContext('AnonymousSpinnerStatus works (1)', () async {
-          bool done = false;
+          var done = false;
           mockStopwatch = FakeStopwatch();
           FakeAsync().run((FakeAsync time) {
-            final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+            final spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
               stopwatch: mockStopwatch,
               terminal: terminal,
@@ -509,9 +536,9 @@ void main() {
           'AnonymousSpinnerStatus logs warning after timeout without color support',
           () async {
             mockStopwatch = FakeStopwatch();
-            const String warningMessage = 'a warning message.';
+            const warningMessage = 'a warning message.';
             final bool done = FakeAsync().run<bool>((FakeAsync time) {
-              final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+              final spinner = AnonymousSpinnerStatus(
                 stdio: mockStdio,
                 stopwatch: mockStopwatch,
                 terminal: terminal,
@@ -520,7 +547,7 @@ void main() {
                 timeout: const Duration(milliseconds: 100),
               )..start();
               // must be greater than the spinner timer duration
-              const Duration timeLapse = Duration(milliseconds: 101);
+              const timeLapse = Duration(milliseconds: 101);
               mockStopwatch.elapsed += timeLapse;
               time.elapse(timeLapse);
 
@@ -540,9 +567,9 @@ void main() {
           'AnonymousSpinnerStatus logs warning after timeout with color support',
           () async {
             mockStopwatch = FakeStopwatch();
-            const String warningMessage = 'a warning message.';
+            const warningMessage = 'a warning message.';
             final bool done = FakeAsync().run<bool>((FakeAsync time) {
-              final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
+              final spinner = AnonymousSpinnerStatus(
                 stdio: mockStdio,
                 stopwatch: mockStopwatch,
                 terminal: coloredTerminal,
@@ -551,7 +578,7 @@ void main() {
                 timeout: const Duration(milliseconds: 100),
               )..start();
               // must be greater than the spinner timer duration
-              const Duration timeLapse = Duration(milliseconds: 101);
+              const timeLapse = Duration(milliseconds: 101);
               mockStopwatch.elapsed += timeLapse;
               time.elapse(timeLapse);
 
@@ -603,7 +630,7 @@ void main() {
         });
 
         testWithoutContext('Stdout startProgress on colored terminal pauses', () async {
-          bool done = false;
+          var done = false;
           FakeAsync().run((FakeAsync time) {
             mockStopwatch.elapsed = const Duration(seconds: 5);
             final Logger logger = StdoutLogger(
@@ -612,16 +639,16 @@ void main() {
               outputPreferences: OutputPreferences.test(showColor: true),
               stopwatchFactory: stopwatchFactory,
             );
-            const String message = "Knock Knock, Who's There";
+            const message = "Knock Knock, Who's There";
             final Status status = logger.startProgress(
               message,
               progressIndicatorPadding: 10, // ignored
             );
             logger.printStatus('Rude Interrupting Cow');
             status.stop();
-            final String a = terminal.supportsEmoji ? '⣽' : r'\';
-            final String b = terminal.supportsEmoji ? '⣻' : '|';
-            const String blankLine = '\r\x1B[K';
+            final a = terminal.supportsEmoji ? '⣽' : r'\';
+            final b = terminal.supportsEmoji ? '⣻' : '|';
+            const blankLine = '\r\x1B[K';
             expect(
               outputStdout().join('\n'),
               '$message' // initial message
@@ -643,7 +670,7 @@ void main() {
         });
 
         testWithoutContext('Stdout startProgress on non-colored terminal pauses', () async {
-          bool done = false;
+          var done = false;
           FakeAsync().run((FakeAsync time) {
             mockStopwatch.elapsed = const Duration(seconds: 5);
             final Logger logger = StdoutLogger(
@@ -652,7 +679,7 @@ void main() {
               outputPreferences: OutputPreferences.test(showColor: true),
               stopwatchFactory: stopwatchFactory,
             );
-            const String message = "Knock Knock, Who's There";
+            const message = "Knock Knock, Who's There";
             final Status status = logger.startProgress(
               message,
               progressIndicatorPadding: 10, // ignored
@@ -673,7 +700,7 @@ void main() {
         });
 
         testWithoutContext('SpinnerStatus works when canceled', () async {
-          bool done = false;
+          var done = false;
           FakeAsync().run((FakeAsync time) {
             spinnerStatus.start();
             mockStopwatch.elapsed = const Duration(seconds: 1);
@@ -696,7 +723,7 @@ void main() {
             lines = outputStdout();
             final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
             expect(matches, isEmpty);
-            final String leading = terminal.supportsEmoji ? '⣻' : '|';
+            final leading = terminal.supportsEmoji ? '⣻' : '|';
 
             expect(lines[0], endsWith('$leading\b \b'));
             expect(called, equals(1));
@@ -712,7 +739,7 @@ void main() {
         });
 
         testWithoutContext('SpinnerStatus works when stopped', () async {
-          bool done = false;
+          var done = false;
           FakeAsync().run((FakeAsync time) {
             spinnerStatus.start();
             mockStopwatch.elapsed = const Duration(seconds: 1);
@@ -798,13 +825,13 @@ void main() {
       expect(lines[3], equals('0123456789' * 3));
     });
 
-    testWithoutContext('AppRunLogger writes plain text statuses when no app is active', () async {
-      final BufferLogger buffer = BufferLogger.test();
-      final AppRunLogger logger = AppRunLogger(parent: buffer);
+    testWithoutContext('MachineFlagLogger does not output text statuses', () async {
+      final buffer = BufferLogger.test();
+      final logger = MachineOutputLogger(parent: buffer);
 
       logger.startProgress('Test status...').stop();
 
-      expect(buffer.statusText.trim(), equals('Test status...'));
+      expect(buffer.statusText, isEmpty);
     });
 
     testWithoutContext('Error logs are wrapped and can be indented.', () async {
@@ -1036,8 +1063,8 @@ void main() {
         stdio: fakeStdio,
         outputPreferences: OutputPreferences.test(showColor: true),
       );
-      const String bold = '\u001B[1m';
-      const String clear = '\u001B[2J\u001B[H';
+      const bold = '\u001B[1m';
+      const clear = '\u001B[2J\u001B[H';
       logger.printBox('${bold}Hello world$clear', title: 'Test title');
       final String stdout = fakeStdio.writtenToStdout.join();
       expect(
@@ -1052,7 +1079,7 @@ void main() {
     });
 
     testWithoutContext('Stdout printBox handles column limit', () {
-      const int columnLimit = 14;
+      const columnLimit = 14;
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(stdio: fakeStdio, platform: FakePlatform()),
         stdio: fakeStdio,
@@ -1079,7 +1106,7 @@ void main() {
     });
 
     testWithoutContext('Stdout printBox handles column limit and respects new lines', () {
-      const int columnLimit = 14;
+      const columnLimit = 14;
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(stdio: fakeStdio, platform: FakePlatform()),
         stdio: fakeStdio,
@@ -1109,7 +1136,7 @@ void main() {
     });
 
     testWithoutContext('Stdout printBox breaks long words that exceed the column limit', () {
-      const int columnLimit = 14;
+      const columnLimit = 14;
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(stdio: fakeStdio, platform: FakePlatform()),
         stdio: fakeStdio,
@@ -1136,7 +1163,7 @@ void main() {
     });
 
     testWithoutContext('Stdout startProgress on non-color terminal', () async {
-      final FakeStopwatch fakeStopwatch = FakeStopwatch();
+      final fakeStopwatch = FakeStopwatch();
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(stdio: fakeStdio, platform: _kNoAnsiPlatform),
         stdio: fakeStdio,
@@ -1159,7 +1186,7 @@ void main() {
     });
 
     testWithoutContext('SummaryStatus works when canceled', () async {
-      final SummaryStatus summaryStatus = SummaryStatus(
+      final summaryStatus = SummaryStatus(
         message: 'Hello world',
         padding: 20,
         onFinish: () => called++,
@@ -1240,7 +1267,7 @@ void main() {
     );
 
     testWithoutContext('sequential startProgress calls with BufferLogger', () async {
-      final BufferLogger logger = BufferLogger(
+      final logger = BufferLogger(
         terminal: AnsiTerminal(stdio: fakeStdio, platform: _kNoAnsiPlatform),
         outputPreferences: OutputPreferences.test(),
       );
@@ -1251,9 +1278,7 @@ void main() {
     });
 
     testWithoutContext('BufferLogger prints status, trace, error', () async {
-      final BufferLogger mockLogger = BufferLogger.test(
-        outputPreferences: OutputPreferences.test(),
-      );
+      final mockLogger = BufferLogger.test(outputPreferences: OutputPreferences.test());
 
       mockLogger.printStatus('Hey Hey Hey Hey');
       mockLogger.printTrace('Oooh, I do I do I do');
@@ -1362,7 +1387,7 @@ class FakeStdout extends Fake implements Stdout {
 
   final bool syncError;
   final bool completeWithError;
-  final Completer<void> _completer = Completer<void>();
+  final _completer = Completer<void>();
 
   @override
   void write(Object? object) {

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/scale_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/scale_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,7 +13,10 @@ void main() {
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Center), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(Center), matching: find.byType(ScaleTransition)),
+      find.descendant(
+        of: find.byType(Center),
+        matching: find.byType(ScaleTransition),
+      ),
       findsOneWidget,
     );
     expect(

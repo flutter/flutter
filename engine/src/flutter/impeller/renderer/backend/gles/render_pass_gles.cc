@@ -189,6 +189,38 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
 }
 
+static void EncodeViewport(const ProcTableGLES& gl,
+                           const RenderPassData& pass_data,
+                           const std::optional<Viewport>& command_viewport,
+                           const ISize& target_size,
+                           std::optional<Viewport>& current_viewport) {
+  auto new_viewport = command_viewport.value_or(pass_data.viewport);
+
+  if (current_viewport.has_value() &&
+      current_viewport.value() == new_viewport) {
+    // The viewport is the same as the last command. Skip an unnecessary call.
+    return;
+  }
+
+  current_viewport = new_viewport;
+
+  gl.Viewport(new_viewport.rect.GetX(),  // x
+              target_size.height - new_viewport.rect.GetY() -
+                  new_viewport.rect.GetHeight(),  // y
+              new_viewport.rect.GetWidth(),       // width
+              new_viewport.rect.GetHeight()       // height
+  );
+  if (pass_data.depth_attachment) {
+    if (gl.DepthRangef.IsAvailable()) {
+      gl.DepthRangef(new_viewport.depth_range.z_near,
+                     new_viewport.depth_range.z_far);
+    } else {
+      gl.DepthRange(new_viewport.depth_range.z_near,
+                    new_viewport.depth_range.z_far);
+    }
+  }
+}
+
 [[nodiscard]] bool EncodeCommandsInReactor(
     const RenderPassData& pass_data,
     const ReactorGLES& reactor,
@@ -196,7 +228,8 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     const std::vector<BufferView>& vertex_buffers,
     const std::vector<TextureAndSampler>& bound_textures,
     const std::vector<BufferResource>& bound_buffers,
-    const std::shared_ptr<GPUTracerGLES>& tracer) {
+    const std::shared_ptr<GPUTracerGLES>& tracer,
+    const std::shared_ptr<const Context>& impeller_context) {
   TRACE_EVENT0("impeller", "RenderPassGLES::EncodeCommandsInReactor");
 
   const auto& gl = reactor.GetProcTable();
@@ -213,10 +246,10 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 #endif  // IMPELLER_DEBUG
 
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
-  const bool is_default_fbo = color_gles.IsWrapped();
+  const bool is_wrapped_fbo = color_gles.IsWrapped();
 
   std::optional<GLuint> fbo = 0;
-  if (is_default_fbo) {
+  if (is_wrapped_fbo) {
     if (color_gles.GetFBO().has_value()) {
       // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
@@ -258,7 +291,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
         }
       }
 
-      auto status = gl.CheckFramebufferStatus(GL_FRAMEBUFFER);
+      auto status = gl.CheckFramebufferStatusDebug(GL_FRAMEBUFFER);
       if (status != GL_FRAMEBUFFER_COMPLETE) {
         VALIDATION_LOG << "Could not create a complete framebuffer: "
                        << DebugToFramebufferError(status);
@@ -303,24 +336,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   // is bottom left origin, so we convert the coordinates here.
   ISize target_size = pass_data.color_attachment->GetSize();
 
-  //--------------------------------------------------------------------------
-  /// Setup the viewport.
-  ///
-  const auto& viewport = pass_data.viewport;
-  gl.Viewport(viewport.rect.GetX(),  // x
-              target_size.height - viewport.rect.GetY() -
-                  viewport.rect.GetHeight(),  // y
-              viewport.rect.GetWidth(),       // width
-              viewport.rect.GetHeight()       // height
-  );
-  if (pass_data.depth_attachment) {
-    if (gl.DepthRangef.IsAvailable()) {
-      gl.DepthRangef(viewport.depth_range.z_near, viewport.depth_range.z_far);
-    } else {
-      gl.DepthRange(viewport.depth_range.z_near, viewport.depth_range.z_far);
-    }
-  }
-
+  std::optional<Viewport> current_viewport;
   CullMode current_cull_mode = CullMode::kNone;
   WindingOrder current_winding_order = WindingOrder::kClockwise;
   gl.FrontFace(GL_CW);
@@ -335,9 +351,9 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       pop_cmd_debug_marker.Release();
     }
 #endif  // IMPELLER_DEBUG
-
     const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
-
+    impeller_context->GetPipelineLibrary()->LogPipelineUsage(
+        pipeline.GetDescriptor());
     const auto* color_attachment =
         pipeline.GetDescriptor().GetLegacyCompatibleColorAttachment();
     if (!color_attachment) {
@@ -372,23 +388,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     //--------------------------------------------------------------------------
     /// Setup the viewport.
     ///
-    if (command.viewport.has_value()) {
-      gl.Viewport(viewport.rect.GetX(),  // x
-                  target_size.height - viewport.rect.GetY() -
-                      viewport.rect.GetHeight(),  // y
-                  viewport.rect.GetWidth(),       // width
-                  viewport.rect.GetHeight()       // height
-      );
-      if (pass_data.depth_attachment) {
-        if (gl.DepthRangef.IsAvailable()) {
-          gl.DepthRangef(viewport.depth_range.z_near,
-                         viewport.depth_range.z_far);
-        } else {
-          gl.DepthRange(viewport.depth_range.z_near,
-                        viewport.depth_range.z_far);
-        }
-      }
-    }
+    EncodeViewport(gl,                //
+                   pass_data,         //
+                   command.viewport,  //
+                   target_size,       //
+                   current_viewport   //
+    );
 
     //--------------------------------------------------------------------------
     /// Setup the scissor rect.
@@ -524,30 +529,41 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 
   if (pass_data.resolve_attachment &&
       !gl.GetCapabilities()->SupportsImplicitResolvingMSAA() &&
-      !is_default_fbo) {
+      !is_wrapped_fbo) {
     FML_DCHECK(pass_data.resolve_attachment != pass_data.color_attachment);
-    // Perform multisample resolve via blit.
-    // Create and bind a resolve FBO.
-    GLuint resolve_fbo;
-    gl.GenFramebuffers(1u, &resolve_fbo);
-    gl.BindFramebuffer(GL_FRAMEBUFFER, resolve_fbo);
+    TextureGLES& resolve_gles =
+        TextureGLES::Cast(*pass_data.resolve_attachment);
+    std::optional<GLuint> resolve_fbo_opt;
 
-    if (!TextureGLES::Cast(*pass_data.resolve_attachment)
-             .SetAsFramebufferAttachment(
-                 GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
-      return false;
+    if (!resolve_gles.GetCachedFBO().IsDead()) {
+      resolve_fbo_opt = reactor.GetGLHandle(resolve_gles.GetCachedFBO());
     }
 
-    auto status = gl.CheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (gl.CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-      VALIDATION_LOG << "Could not create a complete frambuffer: "
-                     << DebugToFramebufferError(status);
-      return false;
+    if (!resolve_fbo_opt.has_value()) {
+      HandleGLES cached_fbo =
+          reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
+      resolve_gles.SetCachedFBO(cached_fbo);
+      resolve_fbo_opt = reactor.GetGLHandle(cached_fbo);
+      gl.BindFramebuffer(GL_FRAMEBUFFER, resolve_fbo_opt.value());
+
+      if (!resolve_gles.SetAsFramebufferAttachment(
+              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
+        return false;
+      }
+
+      auto status = gl.CheckFramebufferStatusDebug(GL_FRAMEBUFFER);
+      if (status != GL_FRAMEBUFFER_COMPLETE) {
+        VALIDATION_LOG << "Could not create a complete frambuffer: "
+                       << DebugToFramebufferError(status);
+        return false;
+      }
+    } else {
+      gl.BindFramebuffer(GL_FRAMEBUFFER, resolve_fbo_opt.value());
     }
 
     // Bind MSAA renderbuffer to read framebuffer.
     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, fbo.value());
-    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
+    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo_opt.value());
 
     RenderPassGLES::ResetGLState(gl);
     auto size = pass_data.color_attachment->GetSize();
@@ -565,12 +581,39 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, GL_NONE);
     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, GL_NONE);
-    gl.DeleteFramebuffers(1u, &resolve_fbo);
     // Rebind the original FBO so that we can discard it below.
     gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
   }
 
-  if (gl.DiscardFramebufferEXT.IsAvailable()) {
+  GLint framebuffer_id = 0;
+  gl.GetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer_id);
+  const bool is_default_fbo = framebuffer_id == 0;
+
+  if (gl.InvalidateFramebuffer.IsAvailable()) {
+    std::array<GLenum, 3> attachments;
+    size_t attachment_count = 0;
+
+    bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
+
+    if (pass_data.discard_color_attachment) {
+      attachments[attachment_count++] =
+          (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
+    }
+
+    if (pass_data.discard_depth_attachment && angle_safe) {
+      attachments[attachment_count++] =
+          (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
+    }
+
+    if (pass_data.discard_stencil_attachment && angle_safe) {
+      attachments[attachment_count++] =
+          (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
+    }
+    gl.InvalidateFramebuffer(GL_FRAMEBUFFER,     // target
+                             attachment_count,   // attachments to discard
+                             attachments.data()  // size
+    );
+  } else if (gl.DiscardFramebufferEXT.IsAvailable()) {
     std::array<GLenum, 3> attachments;
     size_t attachment_count = 0;
 
@@ -583,6 +626,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       attachments[attachment_count++] =
           (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
     }
+
     if (pass_data.discard_depth_attachment && angle_safe) {
       attachments[attachment_count++] =
           (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
@@ -681,8 +725,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
             /*vertex_buffers=*/render_pass->vertex_buffers_,  //
             /*bound_textures=*/render_pass->bound_textures_,  //
             /*bound_buffers=*/render_pass->bound_buffers_,    //
-            /*tracer=*/tracer                                 //
-        );
+            /*tracer=*/tracer,                                //
+            /*impeller_context=*/render_pass->context_);
         FML_CHECK(result)
             << "Must be able to encode GL commands without error.";
       },

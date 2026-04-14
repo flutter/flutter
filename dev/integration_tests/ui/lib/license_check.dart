@@ -18,11 +18,11 @@ class ShowLicenses extends StatelessWidget {
 
   Widget _buildTestResultWidget(BuildContext context, AsyncSnapshot<List<LicenseEntry>> snapshot) {
     final List<LicenseEntry> entries = snapshot.data ?? <LicenseEntry>[];
-    String flutterPackage = '';
-    final List<String> flutterParagraphs = <String>[];
-    String enginePackage = '';
-    final List<String> engineParagraphs = <String>[];
-    for (final LicenseEntry entry in entries) {
+    var flutterPackage = '';
+    final flutterParagraphs = <String>[];
+    var enginePackage = '';
+    final engineParagraphs = <String>[];
+    for (final entry in entries) {
       if (entry.packages.contains('flutter')) {
         flutterPackage = 'flutter';
         flutterParagraphs.addAll(
@@ -35,7 +35,7 @@ class ShowLicenses extends StatelessWidget {
       }
     }
 
-    final List<Widget> result = <Widget>[];
+    final result = <Widget>[];
     result.addAll(<Widget>[
       const Text('License Check Test', key: ValueKey<String>('Header')),
       Text(flutterPackage, key: const ValueKey<String>('FlutterPackage')),

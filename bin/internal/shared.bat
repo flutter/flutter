@@ -13,6 +13,17 @@ REM --------------------------------------------------------------------------
 
 SETLOCAL
 
+REM Ensure we are running on 64-bit Windows (32-bit is not supported).
+REM If this is a 32-bit process emulated by WOW64,
+REM PROCESSOR_ARCHITECTURE is the process architecture and
+REM PROCESSOR_ARCHITEW6432 is the processor architecture.
+IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
+  IF "%PROCESSOR_ARCHITEW6432%"=="" (
+    ECHO Flutter requires 64-bit versions of Windows
+    EXIT 1
+  )
+)
+
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
@@ -52,12 +63,7 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
-  REM Check that git exists and get the revision.
-  WHERE git >NUL 2>&1
-  IF "%ERRORLEVEL%" NEQ "0" (
-    REM Could not find git. Exit without /B to avoid retrying.
-    ECHO Error: Unable to find git in your PATH. && EXIT 1
-  )
+  REM Get the Git revision.
   2>NUL (
     REM 'FOR /f' spawns a new terminal instance to run the command. If an
     REM 'AutoRun' command is defined in the user's registry, that command could
@@ -103,18 +109,6 @@ GOTO :after_subroutine
   EXIT /B
 
   :do_ensure_engine_version
-    REM Detect which PowerShell executable is available on the Host
-    REM PowerShell version <= 5: PowerShell.exe
-    REM PowerShell version >= 6: pwsh.exe
-    WHERE /Q pwsh.exe && (
-        SET powershell_executable=pwsh.exe
-    ) || WHERE /Q PowerShell.exe && (
-        SET powershell_executable=PowerShell.exe
-    ) || (
-        ECHO Error: PowerShell executable not found.                        1>&2
-        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-        EXIT 1
-    )
     SET update_engine_bin=%FLUTTER_ROOT%\bin\internal\update_engine_version.ps1
     REM Escape apostrophes from the executable path
     SET "update_engine_bin=%update_engine_bin:'=''%"
@@ -133,18 +127,6 @@ GOTO :after_subroutine
     EXIT /B
 
   :do_sdk_update_and_snapshot
-    REM Detect which PowerShell executable is available on the Host
-    REM PowerShell version <= 5: PowerShell.exe
-    REM PowerShell version >= 6: pwsh.exe
-    WHERE /Q pwsh.exe && (
-        SET powershell_executable=pwsh.exe
-    ) || WHERE /Q PowerShell.exe && (
-        SET powershell_executable=PowerShell.exe
-    ) || (
-        ECHO Error: PowerShell executable not found.                        1>&2
-        ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
-        EXIT 1
-    )
     SET /A dart_sdk_retries+=1
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
@@ -210,6 +192,11 @@ GOTO :after_subroutine
         ECHO Error: 'pub upgrade' still failing after %total_tries% tries. 1>&2
         GOTO final_exit
       :upgrade_succeeded
+        REM Ensure that pubspec.lock has a >= MTIME to pubspec.yaml at this point
+        REM https://github.com/flutter/flutter/issues/171024
+        SET "PUBSPEC_LOCK_FILE=%FLUTTER_TOOLS_DIR%\pubspec.lock"
+        COPY /B "%PUBSPEC_LOCK_FILE%"+,, "%PUBSPEC_LOCK_FILE%" >NUL
+
     ENDLOCAL
 
     POPD

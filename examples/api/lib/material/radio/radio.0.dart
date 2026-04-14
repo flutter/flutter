@@ -32,37 +32,29 @@ class RadioExample extends StatefulWidget {
 }
 
 class _RadioExampleState extends State<RadioExample> {
-  SingingCharacter? _character = SingingCharacter.lafayette;
+  SingingCharacter? _character = .lafayette;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        ListTile(
-          title: const Text('Lafayette'),
-          leading: Radio<SingingCharacter>(
-            value: SingingCharacter.lafayette,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+    return RadioGroup<SingingCharacter>(
+      groupValue: _character,
+      onChanged: (SingingCharacter? value) {
+        setState(() {
+          _character = value;
+        });
+      },
+      child: const Column(
+        children: <Widget>[
+          ListTile(
+            title: Text('Lafayette'),
+            leading: Radio<SingingCharacter>(value: SingingCharacter.lafayette),
           ),
-        ),
-        ListTile(
-          title: const Text('Thomas Jefferson'),
-          leading: Radio<SingingCharacter>(
-            value: SingingCharacter.jefferson,
-            groupValue: _character,
-            onChanged: (SingingCharacter? value) {
-              setState(() {
-                _character = value;
-              });
-            },
+          ListTile(
+            title: Text('Thomas Jefferson'),
+            leading: Radio<SingingCharacter>(value: SingingCharacter.jefferson),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

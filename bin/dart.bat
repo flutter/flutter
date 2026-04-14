@@ -15,6 +15,19 @@ SETLOCAL
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
+REM Detect which PowerShell executable is available on the host
+REM PowerShell version <= 5: PowerShell.exe
+REM PowerShell version >= 6: pwsh.exe
+WHERE /Q pwsh && (
+    SET "powershell_executable=call pwsh"
+) || WHERE /Q PowerShell.exe && (
+    SET powershell_executable=PowerShell.exe
+) || (
+    ECHO Error: PowerShell executable not found.                        1>&2
+    ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
+    EXIT /B 1
+)
+
 REM Include shared scripts in shared.bat
 SET shared_bin=%FLUTTER_ROOT%/bin/internal/shared.bat
 CALL "%shared_bin%"

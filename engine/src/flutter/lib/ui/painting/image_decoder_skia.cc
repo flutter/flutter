@@ -41,7 +41,7 @@ static sk_sp<SkImage> ResizeRasterImage(const sk_sp<SkImage>& image,
   }
 
   if (image->dimensions() == resized_dimensions) {
-    return image->makeRasterImage();
+    return image->makeRasterImage(nullptr);
   }
 
   const auto scaled_image_info =
@@ -83,7 +83,8 @@ static sk_sp<SkImage> ImageFromDecompressedData(
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);
   auto image = SkImages::RasterFromData(
-      descriptor->image_info(), descriptor->data(), descriptor->row_bytes());
+      ImageDescriptor::ToSkImageInfo(descriptor->image_info()),
+      descriptor->data(), descriptor->row_bytes());
 
   if (!image) {
     FML_LOG(ERROR) << "Could not create image from decompressed bytes.";
@@ -92,7 +93,7 @@ static sk_sp<SkImage> ImageFromDecompressedData(
 
   if (!target_width && !target_height) {
     // No resizing requested. Just rasterize the image.
-    return image->makeRasterImage();
+    return image->makeRasterImage(nullptr);
   }
 
   return ResizeRasterImage(image, SkISize::Make(target_width, target_height),
@@ -110,10 +111,12 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
   if (!descriptor->should_resize(target_width, target_height)) {
     // No resizing requested. Just decode & rasterize the image.
     sk_sp<SkImage> image = descriptor->image();
-    return image ? image->makeRasterImage() : nullptr;
+    return image ? image->makeRasterImage(nullptr) : nullptr;
   }
 
-  const SkISize source_dimensions = descriptor->image_info().dimensions();
+  const SkImageInfo image_info =
+      ImageDescriptor::ToSkImageInfo(descriptor->image_info());
+  const SkISize source_dimensions = image_info.dimensions();
   const SkISize resized_dimensions = {static_cast<int32_t>(target_width),
                                       static_cast<int32_t>(target_height)};
 
@@ -126,8 +129,7 @@ sk_sp<SkImage> ImageDecoderSkia::ImageFromCompressedData(
   // If the codec supports efficient sub-pixel decoding, decoded at a resolution
   // close to the target resolution before resizing.
   if (decode_dimensions != source_dimensions) {
-    auto scaled_image_info =
-        descriptor->image_info().makeDimensions(decode_dimensions);
+    auto scaled_image_info = image_info.makeDimensions(decode_dimensions);
 
     SkBitmap scaled_bitmap;
     if (!scaled_bitmap.tryAllocPixels(scaled_image_info)) {
@@ -220,8 +222,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
 
 // |ImageDecoder|
 void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
-                              uint32_t target_width,
-                              uint32_t target_height,
+                              const ImageDecoder::Options& options,
                               const ImageResult& callback) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   fml::tracing::TraceFlow flow(__FUNCTION__);
@@ -271,8 +272,8 @@ void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
                          io_manager = io_manager_,                //
                          io_runner = runners_.GetIOTaskRunner(),  //
                          result,                                  //
-                         target_width = target_width,             //
-                         target_height = target_height,           //
+                         target_width = options.target_width,     //
+                         target_height = options.target_height,   //
                          flow = std::move(flow)                   //
   ]() mutable {
         // Step 1: Decompress the image.

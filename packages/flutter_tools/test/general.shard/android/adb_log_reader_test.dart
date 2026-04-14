@@ -13,13 +13,13 @@ import 'package:vm_service/vm_service.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const int kLollipopVersionCode = 21;
-const String kLastLogcatTimestamp = '11-27 15:39:04.506';
+const kLollipopVersionCode = 21;
+const kLastLogcatTimestamp = '11-27 15:39:04.506';
 
 /// By default the android log reader accepts lines that match no patterns
 /// if the previous line was a match. Include an intentionally non-matching
 /// line as the first input to disable this behavior.
-const String kDummyLine = 'Contents are not important\n';
+const kDummyLine = 'Contents are not important\n';
 
 class _FakeVm extends Fake implements VM {
   _FakeVm(this._appPid);
@@ -41,8 +41,8 @@ class _FakeFlutterVmService extends Fake implements FlutterVmService {
 
 void main() {
   testWithoutContext('AdbLogReader ignores spam from SurfaceSyncer', () async {
-    const int appPid = 1;
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    const appPid = 1;
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
         completer: Completer<void>.sync(),
@@ -59,8 +59,8 @@ void main() {
       BufferLogger.test(),
     );
     await logReader.provideVmService(_FakeFlutterVmService(appPid));
-    final Completer<void> onDone = Completer<void>.sync();
-    final List<String> emittedLines = <String>[];
+    final onDone = Completer<void>.sync();
+    final emittedLines = <String>[];
     logReader.logLines.listen((String line) {
       emittedLines.add(line);
     }, onDone: onDone.complete);
@@ -71,8 +71,8 @@ void main() {
   });
 
   testWithoutContext('AdbLogReader ignores spam from Samsung/Mali', () async {
-    const int appPid = 1;
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    const appPid = 1;
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
         completer: Completer<void>.sync(),
@@ -90,8 +90,40 @@ void main() {
       BufferLogger.test(),
     );
     await logReader.provideVmService(_FakeFlutterVmService(appPid));
-    final Completer<void> onDone = Completer<void>.sync();
-    final List<String> emittedLines = <String>[];
+    final onDone = Completer<void>.sync();
+    final emittedLines = <String>[];
+    logReader.logLines.listen((String line) {
+      emittedLines.add(line);
+    }, onDone: onDone.complete);
+    await null;
+    logReader.dispose();
+    await onDone.future;
+    expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/104268
+  testWithoutContext('AdbLogReader ignores spam from FrameEvents/updateAcquireFence', () async {
+    const appPid = 1;
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+        completer: Completer<void>.sync(),
+        stdout:
+            '$kDummyLine'
+            '05-11 12:54:46.665 W/flutter($appPid): Hello there!\n'
+            '05-11 12:54:46.665 E/FrameEvents($appPid): updateAcquireFence: Did not find frame.\n'
+            '05-11 12:54:46.666 E/FrameEvents($appPid): updateAcquireFence: Did not find frame.\n'
+            '05-11 12:54:46.667 E/FrameEvents($appPid): updateAcquireFence: Did not find frame.\n',
+      ),
+    ]);
+    final AdbLogReader logReader = await AdbLogReader.createLogReader(
+      createFakeDevice(null),
+      processManager,
+      BufferLogger.test(),
+    );
+    await logReader.provideVmService(_FakeFlutterVmService(appPid));
+    final onDone = Completer<void>.sync();
+    final emittedLines = <String>[];
     logReader.logLines.listen((String line) {
       emittedLines.add(line);
     }, onDone: onDone.complete);
@@ -102,7 +134,7 @@ void main() {
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
           'adb',
@@ -128,7 +160,7 @@ void main() {
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion < 21', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
       ),
@@ -143,7 +175,7 @@ void main() {
   });
 
   testWithoutContext('AdbLogReader calls adb logcat with expected flags null apiVersion', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
       ),
@@ -156,7 +188,7 @@ void main() {
   testWithoutContext(
     'AdbLogReader calls adb logcat with expected flags when requesting past logs',
     () async {
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
             'adb',
@@ -184,7 +216,7 @@ void main() {
   );
 
   testWithoutContext('AdbLogReader handles process early exit', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
         completer: Completer<void>.sync(),
@@ -196,7 +228,7 @@ void main() {
       processManager,
       BufferLogger.test(),
     );
-    final Completer<void> onDone = Completer<void>.sync();
+    final onDone = Completer<void>.sync();
     logReader.logLines.listen((String _) {}, onDone: onDone.complete);
 
     logReader.dispose();
@@ -204,7 +236,7 @@ void main() {
   });
 
   testWithoutContext('AdbLogReader does not filter output from AndroidRuntime crashes', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
         completer: Completer<void>.sync(),

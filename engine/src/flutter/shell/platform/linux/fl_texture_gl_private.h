@@ -17,8 +17,10 @@ G_BEGIN_DECLS
  * @width: width of the texture.
  * @height: height of the texture.
  * @opengl_texture: (out): return an #FlutterOpenGLTexture.
- * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL to ignore.
+ * @error: (allow-none): #GError location to store the error occurring, or %NULL
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Attempts to populate the specified @opengl_texture with texture details
  * such as the name, width, height and the pixel format.

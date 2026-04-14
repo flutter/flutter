@@ -244,4 +244,52 @@ transforms:
     - kind: 'removeParameter'
       name: 'backwardsCompatibility'
 
+  # Changes made in https://github.com/flutter/flutter/pull/170624
+  - title: "Migrate to 'backgroundColor'"
+    date: 2025-06-14
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'color'
+        newName: 'backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170624
+  - title: "Migrate to 'backgroundColor'"
+    date: 2025-06-14
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarTheme'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'color'
+        newName: 'backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170624
+  - title: "Migrate to 'backgroundColor'"
+    date: 2025-06-14
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'color'
+        newName: 'backgroundColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170624
+  - title: "Migrate to 'backgroundColor'"
+    date: 2025-06-14
+    element:
+      uris: [ 'material.dart' ]
+      method: 'copyWith'
+      inClass: 'AppBarThemeData'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'color'
+        newName: 'backgroundColor'
+
 # Before adding a new fix: read instructions at the top of this file.

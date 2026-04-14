@@ -75,7 +75,7 @@ class HotEvent extends UsageEvent {
 
   @override
   void send() {
-    final CustomDimensions parameters = CustomDimensions(
+    final parameters = CustomDimensions(
       hotEventTargetPlatform: targetPlatform,
       hotEventSdkName: sdkName,
       hotEventEmulator: emulator,
@@ -118,13 +118,13 @@ class DoctorResultEvent extends UsageEvent {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    final GroupedValidator group = validator as GroupedValidator;
+    final group = validator as GroupedValidator;
     // The validator crashed.
     if (group.subResults.isEmpty) {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    for (int i = 0; i < group.subValidators.length; i++) {
+    for (var i = 0; i < group.subValidators.length; i++) {
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
       DoctorResultEvent(validator: v, result: r, flutterUsage: flutterUsage).send();
@@ -145,7 +145,7 @@ class BuildEvent extends UsageEvent {
     String? command,
     String? settings,
     String? eventError,
-    required Usage flutterUsage,
+    required super.flutterUsage,
     required String type,
   }) : _command = command,
        _settings = settings,
@@ -156,7 +156,6 @@ class BuildEvent extends UsageEvent {
          // parameter
          type,
          label: label,
-         flutterUsage: flutterUsage,
        );
 
   final String? _command;
@@ -165,7 +164,7 @@ class BuildEvent extends UsageEvent {
 
   @override
   void send() {
-    final CustomDimensions parameters = CustomDimensions(
+    final parameters = CustomDimensions(
       buildEventCommand: _command,
       buildEventSettings: _settings,
       buildEventError: _eventError,
@@ -211,8 +210,8 @@ class AnalyticsConfigEvent extends UsageEvent {
 
 /// An event that reports when the code size measurement is run via `--analyze-size`.
 class CodeSizeEvent extends UsageEvent {
-  CodeSizeEvent(String platform, {required Usage flutterUsage})
-    : super('code-size-analysis', platform, flutterUsage: flutterUsage);
+  CodeSizeEvent(String platform, {required super.flutterUsage})
+    : super('code-size-analysis', platform);
 }
 
 /// An event for tracking the usage of specific error handling fallbacks.

@@ -6,11 +6,23 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [ToggleButtons].
 
-const List<Widget> fruits = <Widget>[Text('Apple'), Text('Banana'), Text('Orange')];
+const List<Widget> fruits = <Widget>[
+  Text('Apple'),
+  Text('Banana'),
+  Text('Orange'),
+];
 
-const List<Widget> vegetables = <Widget>[Text('Tomatoes'), Text('Potatoes'), Text('Carrots')];
+const List<Widget> vegetables = <Widget>[
+  Text('Tomatoes'),
+  Text('Potatoes'),
+  Text('Carrots'),
+];
 
-const List<Widget> icons = <Widget>[Icon(Icons.sunny), Icon(Icons.cloud), Icon(Icons.ac_unit)];
+const List<Widget> icons = <Widget>[
+  Icon(Icons.sunny),
+  Icon(Icons.cloud),
+  Icon(Icons.ac_unit),
+];
 
 void main() => runApp(const ToggleButtonsExampleApp());
 
@@ -19,7 +31,9 @@ class ToggleButtonsExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ToggleButtonsSample(title: 'ToggleButtons Sample'));
+    return const MaterialApp(
+      home: ToggleButtonsSample(title: 'ToggleButtons Sample'),
+    );
   }
 }
 
@@ -47,8 +61,8 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
       body: Center(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
             children: <Widget>[
               // ToggleButtons with a single selection.
               Text('Single-select', style: theme.textTheme.titleSmall),
@@ -63,12 +77,15 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                     }
                   });
                 },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const .all(Radius.circular(8)),
                 selectedBorderColor: Colors.red[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.red[200],
                 color: Colors.red[400],
-                constraints: const BoxConstraints(minHeight: 40.0, minWidth: 80.0),
+                constraints: const BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: 80.0,
+                ),
                 isSelected: _selectedFruits,
                 children: fruits,
               ),
@@ -84,12 +101,15 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                     _selectedVegetables[index] = !_selectedVegetables[index];
                   });
                 },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const .all(Radius.circular(8)),
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
                 color: Colors.green[400],
-                constraints: const BoxConstraints(minHeight: 40.0, minWidth: 80.0),
+                constraints: const BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: 80.0,
+                ),
                 isSelected: _selectedVegetables,
                 children: vegetables,
               ),
@@ -107,7 +127,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                     }
                   });
                 },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const .all(Radius.circular(8)),
                 selectedBorderColor: Colors.blue[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.blue[200],

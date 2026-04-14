@@ -32,12 +32,14 @@ void main() {
   testWidgets('Dialog interaction', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
+    final focusNode = FocusNode(debugLabel: 'Editable Text Node');
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: Center(child: TextField(focusNode: focusNode, autofocus: true))),
+        home: Material(
+          child: Center(child: TextField(focusNode: focusNode, autofocus: true)),
+        ),
       ),
     );
 
@@ -67,11 +69,15 @@ void main() {
   });
 
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: Center(child: TextField(focusNode: focusNode)))),
+      MaterialApp(
+        home: Material(
+          child: Center(child: TextField(focusNode: focusNode)),
+        ),
+      ),
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
@@ -90,7 +96,9 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(autofocus: true)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(autofocus: true))),
+      ),
     );
 
     expect(tester.testTextInput.isVisible, isTrue);
@@ -103,7 +111,11 @@ void main() {
   testWidgets('Tap shows keyboard', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
-    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: TextField()))));
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: TextField())),
+      ),
+    );
 
     expect(tester.testTextInput.isVisible, isFalse);
 
@@ -132,14 +144,17 @@ void main() {
   });
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: ListView(
-            children: <Widget>[TextField(focusNode: focusNode), Container(height: 1000.0)],
+            children: <Widget>[
+              TextField(focusNode: focusNode),
+              Container(height: 1000.0),
+            ],
           ),
         ),
       ),
@@ -166,7 +181,7 @@ void main() {
   });
 
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     Widget makeTest(String? prefix) {
@@ -174,7 +189,10 @@ void main() {
         home: Material(
           child: ListView(
             children: <Widget>[
-              TextField(focusNode: focusNode, decoration: InputDecoration(prefixText: prefix)),
+              TextField(
+                focusNode: focusNode,
+                decoration: InputDecoration(prefixText: prefix),
+              ),
               Container(height: 1000.0),
             ],
           ),
@@ -198,7 +216,9 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
-      const MaterialApp(home: Material(child: Center(child: TextField(decoration: null)))),
+      const MaterialApp(
+        home: Material(child: Center(child: TextField(decoration: null))),
+      ),
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
@@ -210,9 +230,9 @@ void main() {
   testWidgets('Sibling FocusScopes', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
-    final FocusScopeNode focusScopeNode0 = FocusScopeNode();
+    final focusScopeNode0 = FocusScopeNode();
     addTearDown(focusScopeNode0.dispose);
-    final FocusScopeNode focusScopeNode1 = FocusScopeNode();
+    final focusScopeNode1 = FocusScopeNode();
     addTearDown(focusScopeNode1.dispose);
 
     final Key textField0 = UniqueKey();
@@ -350,9 +370,9 @@ void main() {
   testWidgets(
     'A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop',
     (WidgetTester tester) async {
-      final FocusNode focusNodeA = FocusNode();
+      final focusNodeA = FocusNode();
       addTearDown(focusNodeA.dispose);
-      final FocusNode focusNodeB = FocusNode();
+      final focusNodeB = FocusNode();
       addTearDown(focusNodeB.dispose);
 
       final Key key = UniqueKey();
@@ -416,7 +436,7 @@ void main() {
   testWidgets(
     'A Focused text-field will not lose focus when clicking on its decoration',
     (WidgetTester tester) async {
-      final FocusNode focusNodeA = FocusNode();
+      final focusNodeA = FocusNode();
       addTearDown(focusNodeA.dispose);
       final Key iconKey = UniqueKey();
 
@@ -462,9 +482,9 @@ void main() {
   testWidgets(
     'A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation',
     (WidgetTester tester) async {
-      final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
+      final focusNodeA = FocusNode(debugLabel: 'A');
       addTearDown(focusNodeA.dispose);
-      final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
+      final focusNodeB = FocusNode(debugLabel: 'B');
       addTearDown(focusNodeB.dispose);
 
       final Key key = UniqueKey();
@@ -485,7 +505,7 @@ void main() {
         ),
       );
       // Tab over to the 3rd text field.
-      for (int i = 0; i < 3; i += 1) {
+      for (var i = 0; i < 3; i += 1) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }

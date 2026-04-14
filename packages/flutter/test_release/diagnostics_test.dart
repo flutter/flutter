@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TextTreeRenderer returns an empty string in release mode', () {
-    final TextTreeRenderer renderer = TextTreeRenderer();
-    final TestDiagnosticsNode node = TestDiagnosticsNode();
+    final renderer = TextTreeRenderer();
+    final node = TestDiagnosticsNode();
 
     expect(renderer.render(node), '');
   });

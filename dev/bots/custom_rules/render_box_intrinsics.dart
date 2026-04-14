@@ -32,7 +32,7 @@ class _RenderBoxIntrinsicCalculationRule implements AnalyzeRule {
 
   @override
   void applyTo(ResolvedUnitResult unit) {
-    final _RenderBoxSubclassVisitor visitor = _RenderBoxSubclassVisitor();
+    final visitor = _RenderBoxSubclassVisitor();
     unit.unit.visitChildren(visitor);
     final List<(AstNode, String)> violationsInUnit = visitor.violationNodes;
     if (violationsInUnit.isNotEmpty) {
@@ -66,7 +66,7 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
   // The cached version, call this method instead of _checkIfImplementsRenderBox.
   static bool _implementsRenderBox(InterfaceElement interfaceElement) {
     // Framework naming convention: a RenderObject subclass names have "Render" in its name.
-    if (!interfaceElement.name.contains('Render')) {
+    if (!interfaceElement.name!.contains('Render')) {
       return false;
     }
     return interfaceElement.name == 'RenderBox' ||
@@ -115,7 +115,7 @@ class _RenderBoxSubclassVisitor extends RecursiveAstVisitor<void> {
     if (isCallingSuperImplementation) {
       return;
     }
-    final Element? declaredInClassElement = node.staticElement?.declaration?.enclosingElement3;
+    final Element? declaredInClassElement = node.element?.enclosingElement;
     if (declaredInClassElement is InterfaceElement &&
         _implementsRenderBox(declaredInClassElement)) {
       violationNodes.add((node, correctMethodName));

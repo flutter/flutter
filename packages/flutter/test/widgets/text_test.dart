@@ -6,22 +6,29 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kBlack = Color(0xFF000000);
+  const kRed = Color(0xFFFF0000);
+  const kGreen = Color(0xFF00FF00);
+  const kOpaqueColor = Color(0xFF123456);
+  const kTranslucentColor = Color(0x87654321);
+
   testWidgets('DefaultTextStyle.merge correctly merges arguments', (WidgetTester tester) async {
-    DefaultTextStyle defaultTextStyle = const DefaultTextStyle.fallback();
+    var defaultTextStyle = const DefaultTextStyle.fallback();
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: DefaultTextStyle(
-          style: const TextStyle(color: Colors.black, fontSize: 20),
+          style: const TextStyle(color: kBlack, fontSize: 20),
           textAlign: TextAlign.left,
           softWrap: false,
           overflow: TextOverflow.ellipsis,
@@ -29,7 +36,7 @@ void main() {
           textWidthBasis: TextWidthBasis.longestLine,
           textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
           child: DefaultTextStyle.merge(
-            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: kRed, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
             softWrap: true,
             overflow: TextOverflow.fade,
@@ -49,7 +56,7 @@ void main() {
 
     expect(
       defaultTextStyle.style,
-      const TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
+      const TextStyle(color: kRed, fontSize: 20, fontWeight: FontWeight.bold),
     );
     expect(defaultTextStyle.textAlign, TextAlign.center);
     expect(defaultTextStyle.softWrap, true);
@@ -61,6 +68,111 @@ void main() {
       const TextHeightBehavior(applyHeightToLastDescent: false),
     );
   });
+
+  testWidgets(
+    'Text respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(child: Text('Hello', textDirection: TextDirection.ltr)),
+        ),
+      );
+
+      RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, 2.0);
+      expect(text.text.style?.letterSpacing, 2.0);
+      expect(text.text.style?.wordSpacing, 2.0);
+
+      await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
+
+      text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+    },
+  );
+
+  testWidgets(
+    'Text.rich respects MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(
+            child: Text.rich(
+              TextSpan(text: 'Hello'),
+              textDirection: TextDirection.ltr,
+              strutStyle: StrutStyle(height: 0.9),
+            ),
+          ),
+        ),
+      );
+
+      RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, 2.0);
+      expect(text.text.style?.letterSpacing, 2.0);
+      expect(text.text.style?.wordSpacing, 2.0);
+      expect(text.strutStyle?.height, 2.0);
+
+      await tester.pumpWidget(
+        const Center(
+          child: Text.rich(
+            TextSpan(text: 'Hello'),
+            textDirection: TextDirection.ltr,
+            strutStyle: StrutStyle(height: 0.9),
+          ),
+        ),
+      );
+
+      text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+      expect(text.strutStyle?.height, 0.9);
+    },
+  );
+
+  testWidgets(
+    'RichText ignores MediaQueryData.lineHeightScaleFactorOverride, MediaQueryData.letterSpacingOverride, and MediaQueryData.wordSpacingOverride',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            lineHeightScaleFactorOverride: 2.0,
+            letterSpacingOverride: 2.0,
+            wordSpacingOverride: 2.0,
+          ),
+          child: Center(
+            child: RichText(
+              text: const TextSpan(text: 'Hello'),
+              textDirection: TextDirection.ltr,
+              strutStyle: const StrutStyle(height: 0.9),
+            ),
+          ),
+        ),
+      );
+
+      final RichText text = tester.firstWidget(find.byType(RichText));
+      expect(text, isNotNull);
+      expect(text.text.style?.height, isNull);
+      expect(text.text.style?.letterSpacing, isNull);
+      expect(text.text.style?.wordSpacing, isNull);
+      expect(text.strutStyle?.height, 0.9);
+    },
+  );
 
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -139,11 +251,11 @@ void main() {
 
   testWidgets(
     "Text throws a nice error message if there's no Directionality",
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const Text('Hello'));
-      final String message = tester.takeException().toString();
+      final message = tester.takeException().toString();
       expect(message, contains('Directionality'));
       expect(message, contains(' Text '));
     },
@@ -159,8 +271,14 @@ void main() {
           TextSpan(
             text: 'Hello',
             children: <TextSpan>[
-              TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
-              TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' beautiful ',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+              TextSpan(
+                text: 'world',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           textDirection: TextDirection.ltr,
@@ -175,7 +293,7 @@ void main() {
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35869
-    const TextStyle textStyle = TextStyle();
+    const textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -185,11 +303,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'widget should be truncated'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'widget should be truncated'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -206,7 +322,7 @@ void main() {
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
-    const TextStyle textStyle = TextStyle();
+    const textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -216,11 +332,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'widget should be truncated'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'widget should be truncated'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -240,29 +354,25 @@ void main() {
 
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
-    final UniqueKey key = UniqueKey();
-    double textScaleFactor = 1.0;
+    final key = UniqueKey();
+    var textScaleFactor = 1.0;
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('title')),
-          body: Center(
-            child: Text.rich(
-              TextSpan(
-                children: <InlineSpan>[
-                  WidgetSpan(
-                    child: RichText(
-                      text: const TextSpan(text: 'widget should be truncated'),
-                      textDirection: TextDirection.ltr,
-                    ),
+      TestWidgetsApp(
+        home: Center(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.ltr,
                   ),
-                ],
-              ),
-              key: key,
-              textDirection: TextDirection.ltr,
-              textScaleFactor: textScaleFactor,
+                ),
+              ],
             ),
+            key: key,
+            textDirection: TextDirection.ltr,
+            textScaleFactor: textScaleFactor,
           ),
         ),
       ),
@@ -272,26 +382,23 @@ void main() {
     // Now, increases the text scale factor by 5 times.
     textScaleFactor = textScaleFactor * 5;
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('title')),
-          body: Center(
-            child: Text.rich(
-              TextSpan(
-                children: <InlineSpan>[
-                  WidgetSpan(
-                    child: RichText(
-                      text: const TextSpan(text: 'widget should be truncated'),
-                      textDirection: TextDirection.ltr,
-                    ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.ltr,
                   ),
-                ],
-              ),
-              key: key,
-              textDirection: TextDirection.ltr,
-              textScaleFactor: textScaleFactor,
+                ),
+              ],
             ),
+            key: key,
+            textDirection: TextDirection.ltr,
+            textScaleFactor: textScaleFactor,
           ),
         ),
       ),
@@ -320,11 +427,11 @@ void main() {
   });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text(r'$$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(label: 'Double dollars', textDirection: TextDirection.ltr),
       ],
@@ -517,8 +624,8 @@ void main() {
   });
 
   testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -534,7 +641,7 @@ void main() {
         ),
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -557,9 +664,9 @@ void main() {
   });
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -576,7 +683,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -603,13 +710,13 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontSize: 200);
-    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
-    const String offScreenText = 'off screen';
-    final ScrollController controller = ScrollController();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle(fontSize: 200);
+    const onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const offScreenText = 'off screen';
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -628,7 +735,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
@@ -666,9 +773,9 @@ void main() {
   testWidgets('recognizers split semantic node when TextSpan overflows', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -686,7 +793,7 @@ void main() {
         ),
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -714,9 +821,9 @@ void main() {
   testWidgets('recognizers split semantic nodes with text span labels', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -733,7 +840,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -757,11 +864,11 @@ void main() {
   });
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final LongPressGestureRecognizer recognizer1 = LongPressGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer1 = LongPressGestureRecognizer();
     addTearDown(recognizer1.dispose);
-    final TapGestureRecognizer recognizer2 = TapGestureRecognizer();
+    final recognizer2 = TapGestureRecognizer();
     addTearDown(recognizer2.dispose);
 
     await tester.pumpWidget(
@@ -788,7 +895,7 @@ void main() {
     // The presence of the bidi formatting characters in the text is a
     // bit dubious, but that's what we do currently, and it's not really
     // clear what the perfect behavior would be...
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
@@ -830,9 +937,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -844,7 +951,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -866,9 +973,9 @@ void main() {
   });
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -882,11 +989,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'INTERRUPTION'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'INTERRUPTION'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -897,7 +1002,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -923,9 +1028,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -939,11 +1044,9 @@ void main() {
               child: SizedBox(
                 width: 20,
                 height: 40,
-                child: Card(
-                  child: RichText(
-                    text: const TextSpan(text: 'INTERRUPTION'),
-                    textDirection: TextDirection.rtl,
-                  ),
+                child: RichText(
+                  text: const TextSpan(text: 'INTERRUPTION'),
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -955,7 +1058,7 @@ void main() {
         textScaleFactor: 2,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
@@ -995,21 +1098,22 @@ void main() {
     semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
-  testWidgets('receives fontFamilyFallback and package from root ThemeData', (
+  testWidgets('receives fontFamilyFallback and package from DefaultTextStyle', (
     WidgetTester tester,
   ) async {
-    const String fontFamily = 'fontFamily';
-    const String package = 'package_name';
-    final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    const fontFamily = 'fontFamily';
+    const package = 'package_name';
+    final fontFamilyFallback = <String>['font', 'family', 'fallback'];
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          fontFamily: fontFamily,
-          fontFamilyFallback: fontFamilyFallback,
-          package: package,
-          primarySwatch: Colors.blue,
+      TestWidgetsApp(
+        home: DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: fontFamily,
+            fontFamilyFallback: fontFamilyFallback,
+            package: package,
+          ),
+          child: const Center(child: Text('foo')),
         ),
-        home: const Scaffold(body: Center(child: Text('foo'))),
       ),
     );
 
@@ -1018,7 +1122,7 @@ void main() {
     final InlineSpan text = richText.text;
     final TextStyle? style = text.style;
     expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
-    for (int i = 0; i < fontFamilyFallback.length; i++) {
+    for (var i = 0; i < fontFamilyFallback.length; i++) {
       final String fallback = fontFamilyFallback[i];
       expect(style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
     }
@@ -1095,25 +1199,22 @@ void main() {
   testWidgets('textWidthBasis affects the width of a Text widget', (WidgetTester tester) async {
     Future<void> createText(TextWidthBasis textWidthBasis) {
       return tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            body: Center(
-              // Each word takes up more than a half of a line. Together they
-              // wrap onto two lines, but leave a lot of extra space.
-              child: Text(
-                'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
-                textDirection: TextDirection.ltr,
-                textWidthBasis: textWidthBasis,
-              ),
+        TestWidgetsApp(
+          home: Center(
+            // Each word takes up more than a half of a line. Together they
+            // wrap onto two lines, but leave a lot of extra space.
+            child: Text(
+              'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+              textDirection: TextDirection.ltr,
+              textWidthBasis: textWidthBasis,
             ),
           ),
         ),
       );
     }
 
-    const double fontHeight = 14.0;
-    const double screenWidth = 800.0;
+    const fontHeight = 14.0;
+    const screenWidth = 800.0;
 
     // When textWidthBasis is parent, takes up full screen width.
     await createText(TextWidthBasis.parent);
@@ -1133,35 +1234,33 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'LEFT ALIGNED, PARENT',
-                  textAlign: TextAlign.left,
-                  textWidthBasis: TextWidthBasis.parent,
-                ),
-                Text(
-                  'RIGHT ALIGNED, PARENT',
-                  textAlign: TextAlign.right,
-                  textWidthBasis: TextWidthBasis.parent,
-                ),
-                Text(
-                  'LEFT ALIGNED, LONGEST LINE',
-                  textAlign: TextAlign.left,
-                  textWidthBasis: TextWidthBasis.longestLine,
-                ),
-                Text(
-                  'RIGHT ALIGNED, LONGEST LINE',
-                  textAlign: TextAlign.right,
-                  textWidthBasis: TextWidthBasis.longestLine,
-                ),
-              ],
-            ),
+      const TestWidgetsApp(
+        home: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'LEFT ALIGNED, PARENT',
+                textAlign: TextAlign.left,
+                textWidthBasis: TextWidthBasis.parent,
+              ),
+              Text(
+                'RIGHT ALIGNED, PARENT',
+                textAlign: TextAlign.right,
+                textWidthBasis: TextWidthBasis.parent,
+              ),
+              Text(
+                'LEFT ALIGNED, LONGEST LINE',
+                textAlign: TextAlign.left,
+                textWidthBasis: TextWidthBasis.longestLine,
+              ),
+              Text(
+                'RIGHT ALIGNED, LONGEST LINE',
+                textAlign: TextAlign.right,
+                textWidthBasis: TextWidthBasis.longestLine,
+              ),
+            ],
           ),
         ),
       ),
@@ -1211,10 +1310,10 @@ void main() {
           if (method != #drawParagraph) {
             return false;
           }
-          final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-          final Offset offset = arguments[1] as Offset;
+          final paragraph = arguments[0] as ui.Paragraph;
+          final offset = arguments[1] as Offset;
           final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
-          for (final ui.LineMetrics line in lines) {
+          for (final line in lines) {
             if (line.left + offset.dx + line.width >= 400) {
               throw 'line $line is greater than the max width constraints';
             }
@@ -1229,7 +1328,7 @@ void main() {
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (
     WidgetTester tester,
   ) async {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle());
     builder.addText('hello');
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
@@ -1241,8 +1340,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
     // Without the fix for this bug the pump widget will throw a RangeError.
     await tester.pumpWidget(
@@ -1253,7 +1352,7 @@ void main() {
             const WidgetSpan(child: SizedBox.shrink()),
             TextSpan(
               text: 'HELLO',
-              style: const TextStyle(color: Colors.black),
+              style: const TextStyle(color: kBlack),
               recognizer: recognizer..onTap = () {},
             ),
           ],
@@ -1308,8 +1407,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1322,7 +1421,7 @@ void main() {
               const WidgetSpan(child: Text('included')),
               TextSpan(
                 text: 'HELLO',
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(color: kBlack),
                 recognizer: recognizer..onTap = () {},
               ),
               const WidgetSpan(child: Text('included2')),
@@ -1362,8 +1461,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1383,7 +1482,7 @@ void main() {
               ),
               TextSpan(
                 text: 'HELLO',
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(color: kBlack),
                 recognizer: recognizer..onTap = () {},
               ),
             ],
@@ -1422,8 +1521,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1432,7 +1531,7 @@ void main() {
         child: Center(
           child: ClipRect(
             child: Container(
-              color: Colors.green,
+              color: kGreen,
               height: 100,
               width: 100,
               child: OverflowBox(
@@ -1441,11 +1540,19 @@ void main() {
                 child: RichText(
                   text: TextSpan(
                     children: <InlineSpan>[
-                      const WidgetSpan(
-                        child: Icon(Icons.edit, size: 16, semanticLabel: 'not clipped'),
+                      WidgetSpan(
+                        child: Semantics(
+                          label: 'not clipped',
+                          child: const SizedBox(width: 16, height: 16),
+                        ),
                       ),
                       TextSpan(text: 'next WS is clipped', recognizer: recognizer..onTap = () {}),
-                      const WidgetSpan(child: Icon(Icons.edit, size: 16, semanticLabel: 'clipped')),
+                      WidgetSpan(
+                        child: Semantics(
+                          label: 'clipped',
+                          child: const SizedBox(width: 16, height: 16),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -1526,7 +1633,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
-    const Key textKey = Key('RichText');
+    const textKey = Key('RichText');
     Widget textWithNestedInlineSpans({
       required double textScaleFactor,
       required double screenWidth,
@@ -1602,7 +1709,7 @@ void main() {
         child: Text(
           'Hello World',
           textDirection: TextDirection.ltr,
-          style: TextStyle(color: Color(0xFF123456)),
+          style: TextStyle(color: kOpaqueColor),
         ),
       ),
     );
@@ -1619,7 +1726,7 @@ void main() {
         child: Text(
           'Hello World',
           textDirection: TextDirection.ltr,
-          style: TextStyle(color: Color(0x87654321)),
+          style: TextStyle(color: kTranslucentColor),
         ),
       ),
     );
@@ -1631,7 +1738,17 @@ void main() {
   testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: SelectionArea(child: Text('Flutter'))));
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          focusNode: focusNode,
+          child: const Text('Flutter'),
+        ),
+      ),
+    );
 
     final TestGesture gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
@@ -1650,9 +1767,13 @@ void main() {
   testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (
     WidgetTester tester,
   ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          focusNode: focusNode,
           child: DefaultSelectionStyle.merge(
             mouseCursor: SystemMouseCursors.click,
             child: const Text('Flutter'),
@@ -1676,16 +1797,16 @@ void main() {
   });
 
   testWidgets('can set heading level', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    for (int level = 1; level <= 6; level++) {
+    for (var level = 1; level <= 6; level++) {
       await tester.pumpWidget(
         Semantics(
           headingLevel: 1,
           child: Text('Heading level $level', textDirection: TextDirection.ltr),
         ),
       );
-      final TestSemantics expectedSemantics = TestSemantics.root(
+      final expectedSemantics = TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
             label: 'Heading level $level',

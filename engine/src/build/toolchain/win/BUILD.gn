@@ -35,9 +35,8 @@ assert(is_win)
 tool_wrapper_path = rebase_path("tool_wrapper.py", root_build_dir)
 
 if (use_rbe) {
-  compiler_args = rewrapper_command + [
-    "--labels=type=compile,compiler=clang-cl,lang=cpp ",
-  ]
+  compiler_args = rewrapper_command +
+                  [ "--labels=type=compile,compiler=clang-cl,lang=cpp " ]
   compiler_prefix = string_join(" ", compiler_args)
   asm_prefix = " "
 } else {
@@ -115,7 +114,9 @@ template("msvc_toolchain") {
       pdbname = "{{target_out_dir}}/{{label_name}}_c.pdb"
       depsformat = "msvc"
       description = "CC {{output}}"
-      outputs = [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj" ]
+      outputs = [
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
+      ]
 
       # Label names may have spaces in them so the pdbname must be quoted. The
       # source and output don't need to be quoted because GN knows they're a
@@ -138,7 +139,9 @@ template("msvc_toolchain") {
 
       depsformat = "msvc"
       description = "CXX {{output}}"
-      outputs = [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj" ]
+      outputs = [
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.obj",
+      ]
 
       # See comment in CC tool about quoting.
       command = "$env_wrapper$cl /c {{source}} /Fo{{output}} $flags /nologo /showIncludes:user $sys_include_flags{{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} /Fd\"$pdbname\""

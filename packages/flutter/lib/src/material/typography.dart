@@ -182,7 +182,7 @@ class Typography with Diagnosticable {
     TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
-    final Typography base = Typography._withPlatform(
+    final base = Typography._withPlatform(
       platform,
       black,
       white,
@@ -194,10 +194,12 @@ class Typography with Diagnosticable {
     // Ensure they are all uniformly dark or light, with
     // no color variation based on style as it was in previous
     // versions of Material Design.
-    final Color dark =
-        colorScheme.brightness == Brightness.light ? colorScheme.onSurface : colorScheme.surface;
-    final Color light =
-        colorScheme.brightness == Brightness.light ? colorScheme.surface : colorScheme.onSurface;
+    final Color dark = colorScheme.brightness == Brightness.light
+        ? colorScheme.onSurface
+        : colorScheme.surface;
+    final Color light = colorScheme.brightness == Brightness.light
+        ? colorScheme.surface
+        : colorScheme.onSurface;
     return base.copyWith(
       black: base.black.apply(displayColor: dark, bodyColor: dark, decorationColor: dark),
       white: base.white.apply(displayColor: light, bodyColor: light, decorationColor: light),
@@ -213,27 +215,16 @@ class Typography with Diagnosticable {
     TextTheme tall,
   ) {
     assert(platform != null || (black != null && white != null));
-    switch (platform) {
-      case TargetPlatform.iOS:
-        black ??= blackCupertino;
-        white ??= whiteCupertino;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        black ??= blackMountainView;
-        white ??= whiteMountainView;
-      case TargetPlatform.windows:
-        black ??= blackRedmond;
-        white ??= whiteRedmond;
-      case TargetPlatform.macOS:
-        black ??= blackRedwoodCity;
-        white ??= whiteRedwoodCity;
-      case TargetPlatform.linux:
-        black ??= blackHelsinki;
-        white ??= whiteHelsinki;
-      case null:
-        break;
-    }
-    return Typography._(black!, white!, englishLike, dense, tall);
+    final (TextTheme blackResolved, TextTheme whiteResolved) = switch (platform) {
+      TargetPlatform.iOS => (black ?? blackCupertino, white ?? whiteCupertino),
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => (black ?? blackMountainView, white ?? whiteMountainView),
+      TargetPlatform.windows => (black ?? blackRedmond, white ?? whiteRedmond),
+      TargetPlatform.macOS => (black ?? blackRedwoodCity, white ?? whiteRedwoodCity),
+      TargetPlatform.linux => (black ?? blackHelsinki, white ?? whiteHelsinki),
+      null => (black!, white!),
+    };
+    return Typography._(blackResolved, whiteResolved, englishLike, dense, tall);
   }
 
   const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall);
@@ -357,7 +348,7 @@ class Typography with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final Typography defaultTypography = Typography.material2014();
+    final defaultTypography = Typography.material2014();
     properties.add(
       DiagnosticsProperty<TextTheme>('black', black, defaultValue: defaultTypography.black),
     );
@@ -765,6 +756,7 @@ class Typography with Diagnosticable {
 
   static const List<String> _helsinkiFontFallbacks = <String>[
     'Ubuntu',
+    'Adwaita Sans',
     'Cantarell',
     'DejaVu Sans',
     'Liberation Sans',

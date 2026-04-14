@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Deursoek web",
   "shareButtonLabel": "Deel",
   "pasteButtonLabel": "Plak",
-  "selectAllButtonLabel": "Kies alles"
+  "selectAllButtonLabel": "Kies alles",
+  "searchResultsFound": "Soekresultate gevind",
+  "noResultsFound": "Geen resultate gekry nie",
+  "radioButtonUnselectedLabel": "Nie gekies nie"
 }

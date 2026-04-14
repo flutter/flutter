@@ -106,7 +106,7 @@ that describe these methodologies. The following list is ordered: you
 are strongly recommended to go through these documents in the order
 presented.
 
-1. [Setting up your engine development environment](./engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md),
+1. [Setting up your engine development environment](./docs/engine/contributing/Setting-up-the-Engine-development-environment.md),
    which describes the steps you need to configure your computer to
    work on Flutter's engine. If you only want to write code for the
    Flutter framework, you can skip this step. Flutter's engine mainly
@@ -155,6 +155,35 @@ might be interested in helping other developers complete their contributions by 
 incomplete patch from the list of [issues with partial patches][has-partial-patch].
 
 [has-partial-patch]: https://github.com/flutter/flutter/labels/has%20partial%20patch
+
+
+Reviewing Code
+--------------
+
+Reviewing code is just as valuable as writing it. It is one of the fastest ways
+to learn the codebase and help the team move faster. We welcome reviews from
+everyone, regardless of whether you have commit access.
+
+### The Reviewer Path
+
+Anyone can provide review feedback on a change, and doing so is an excellent way
+to learn the codebase.
+
+While reviews are welcome from the entire community, currently only members of
+the `flutter-hackers` group can grant the final approval required for a change
+to land. Consistently providing helpful code reviews is a valid and highly
+encouraged path to joining this group.
+
+For more information on how to earn commit access, please read the
+[Contributor access guide](./docs/contributing/Contributor-access.md).
+
+### How to Review
+
+If you are new to reviewing, start by:
+
+1. **[Reading the Tree Hygiene guide.](./docs/contributing/Tree-hygiene.md#how)** It contains a 10-point checklist of what we look for (CLA, tests, API design, etc.).
+2. **Leaving comments.** Even if you can't "Approve" a PR yet, pointing out a missing test or a style violation helps the author and saves the maintainers time.
+3. **Being Gracious.** Follow our mantra: Be polite, explain the why, and provide clear next steps.
 
 Outreach
 --------

@@ -6,9 +6,9 @@
 
 namespace flutter {
 
-DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(SkRect view_bounds) {
+DisplayListEmbedderViewSlice::DisplayListEmbedderViewSlice(DlRect view_bounds) {
   builder_ = std::make_unique<DisplayListBuilder>(
-      /*bounds=*/ToDlRect(view_bounds),
+      /*bounds=*/view_bounds,
       /*prepare_rtree=*/true);
 }
 
@@ -93,6 +93,28 @@ void MutatorsStack::PushBackdropFilter(
     const DlRect& filter_rect) {
   std::shared_ptr<Mutator> element =
       std::make_shared<Mutator>(filter, filter_rect);
+  vector_.push_back(element);
+}
+
+void MutatorsStack::PushPlatformViewClipRect(const DlRect& rect) {
+  std::shared_ptr<Mutator> element =
+      std::make_shared<Mutator>(BackdropClipRect(rect));
+  vector_.push_back(element);
+}
+void MutatorsStack::PushPlatformViewClipRRect(const DlRoundRect& rrect) {
+  std::shared_ptr<Mutator> element =
+      std::make_shared<Mutator>(BackdropClipRRect(rrect));
+  vector_.push_back(element);
+}
+void MutatorsStack::PushPlatformViewClipRSuperellipse(
+    const DlRoundSuperellipse& rse) {
+  std::shared_ptr<Mutator> element =
+      std::make_shared<Mutator>(BackdropClipRSuperellipse(rse));
+  vector_.push_back(element);
+}
+void MutatorsStack::PushPlatformViewClipPath(const DlPath& path) {
+  std::shared_ptr<Mutator> element =
+      std::make_shared<Mutator>(BackdropClipPath(path));
   vector_.push_back(element);
 }
 

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/time_picker/show_time_picker.0.dart' as example;
+import 'package:flutter_api_samples/material/time_picker/show_time_picker.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,13 +12,17 @@ void main() {
     const String openPicker = 'Open time picker';
     final List<String> options = <String>[
       '$TimePickerEntryMode',
-      ...TimePickerEntryMode.values.map<String>((TimePickerEntryMode value) => value.name),
+      ...TimePickerEntryMode.values.map<String>(
+        (TimePickerEntryMode value) => value.name,
+      ),
       '$ThemeMode',
       ...ThemeMode.values.map<String>((ThemeMode value) => value.name),
       '$TextDirection',
       ...TextDirection.values.map<String>((TextDirection value) => value.name),
       '$MaterialTapTargetSize',
-      ...MaterialTapTargetSize.values.map<String>((MaterialTapTargetSize value) => value.name),
+      ...MaterialTapTargetSize.values.map<String>(
+        (MaterialTapTargetSize value) => value.name,
+      ),
       '$Orientation',
       ...Orientation.values.map<String>((Orientation value) => value.name),
       'Time Mode',

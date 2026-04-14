@@ -2,15 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
-  final MockClipboard mockClipboard = MockClipboard();
+  const kGreyColor = Color(0xFFAAAAAA);
+  const kRedColor = Color(0xFFFF0000);
+  final mockClipboard = MockClipboard();
   TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
     SystemChannels.platform,
     mockClipboard.handleMethodCall,
@@ -28,14 +32,12 @@ void main() {
     late final BuildContext context;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (BuildContext localContext) {
-              context = localContext;
-              return const SizedBox.shrink();
-            },
-          ),
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext localContext) {
+            context = localContext;
+            return const SizedBox.shrink();
+          },
         ),
       ),
     );
@@ -43,7 +45,7 @@ void main() {
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsNothing);
 
-    final ContextMenuController controller1 = ContextMenuController();
+    final controller1 = ContextMenuController();
     await tester.pump();
     expect(find.byKey(key1), findsNothing);
     expect(find.byKey(key2), findsNothing);
@@ -73,7 +75,7 @@ void main() {
     expect(find.byKey(key2), findsNothing);
 
     // Showing a new menu hides the first.
-    final ContextMenuController controller2 = ContextMenuController();
+    final controller2 = ContextMenuController();
     controller2.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -97,21 +99,19 @@ void main() {
     late final BuildContext context;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (BuildContext localContext) {
-              context = localContext;
-              return const SizedBox.shrink();
-            },
-          ),
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext localContext) {
+            context = localContext;
+            return const SizedBox.shrink();
+          },
         ),
       ),
     );
 
     expect(find.byKey(key1), findsNothing);
 
-    final ContextMenuController controller = ContextMenuController();
+    final controller = ContextMenuController();
     addTearDown(controller.remove);
 
     // Instantiating the controller does not shown it.
@@ -145,23 +145,21 @@ void main() {
   });
 
   testWidgets('markNeedsBuild causes the builder to update', (WidgetTester tester) async {
-    int buildCount = 0;
+    var buildCount = 0;
     late final BuildContext context;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (BuildContext localContext) {
-              context = localContext;
-              return const SizedBox.shrink();
-            },
-          ),
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext localContext) {
+            context = localContext;
+            return const SizedBox.shrink();
+          },
         ),
       ),
     );
 
-    final ContextMenuController controller = ContextMenuController();
+    final controller = ContextMenuController();
     controller.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
@@ -188,31 +186,29 @@ void main() {
       final GlobalKey directKey = GlobalKey();
       late final BuildContext context;
 
-      final TextEditingController textEditingController = TextEditingController();
+      final textEditingController = TextEditingController();
       addTearDown(textEditingController.dispose);
 
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (BuildContext localContext) {
-                context = localContext;
-                return EditableText(
-                  controller: textEditingController,
-                  backgroundCursorColor: Colors.grey,
-                  focusNode: focusNode,
-                  style: const TextStyle(),
-                  cursorColor: Colors.red,
-                  selectionControls: materialTextSelectionHandleControls,
-                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                    return Placeholder(key: builtInKey);
-                  },
-                );
-              },
-            ),
+        TestWidgetsApp(
+          home: Builder(
+            builder: (BuildContext localContext) {
+              context = localContext;
+              return EditableText(
+                controller: textEditingController,
+                backgroundCursorColor: kGreyColor,
+                focusNode: focusNode,
+                style: const TextStyle(),
+                cursorColor: kRedColor,
+                selectionControls: testTextSelectionHandleControls,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  return Placeholder(key: builtInKey);
+                },
+              );
+            },
           ),
         ),
       );
@@ -230,7 +226,7 @@ void main() {
       expect(find.byKey(builtInKey), findsOneWidget);
       expect(find.byKey(directKey), findsNothing);
 
-      final ContextMenuController controller = ContextMenuController();
+      final controller = ContextMenuController();
       controller.show(
         context: context,
         contextMenuBuilder: (BuildContext context) {

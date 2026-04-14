@@ -116,18 +116,18 @@ void main() {
       handle.dispose();
     });
 
-    const Color surface = Color(0xFFF0F0F0);
+    const surface = Color(0xFFF0F0F0);
 
     /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].
-    const Color blue29 = Color(0xFF7E7EFB);
-    const Color blue44 = Color(0xFF5757FF);
-    const Color blue45 = Color(0xFF5252FF);
-    const List<TextStyle> textStylesMeetingGuideline = <TextStyle>[
+    const blue29 = Color(0xFF7E7EFB);
+    const blue44 = Color(0xFF5757FF);
+    const blue45 = Color(0xFF5252FF);
+    const textStylesMeetingGuideline = <TextStyle>[
       TextStyle(color: blue44, backgroundColor: surface, fontSize: 18),
       TextStyle(color: blue44, backgroundColor: surface, fontSize: 14, fontWeight: FontWeight.bold),
       TextStyle(color: blue45, backgroundColor: surface),
     ];
-    const List<TextStyle> textStylesDoesNotMeetingGuideline = <TextStyle>[
+    const textStylesDoesNotMeetingGuideline = <TextStyle>[
       TextStyle(color: blue44, backgroundColor: surface),
       TextStyle(color: blue29, backgroundColor: surface, fontSize: 18),
     ];
@@ -135,7 +135,7 @@ void main() {
     Widget appWithTextWidget(TextStyle style) =>
         _boilerplate(Text('this is text', style: style.copyWith(height: 30.0)));
 
-    for (final TextStyle style in textStylesMeetingGuideline) {
+    for (final style in textStylesMeetingGuideline) {
       testWidgets('text with style $style', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(appWithTextWidget(style));
@@ -144,7 +144,7 @@ void main() {
       });
     }
 
-    for (final TextStyle style in textStylesDoesNotMeetingGuideline) {
+    for (final style in textStylesDoesNotMeetingGuideline) {
       testWidgets('text with $style', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(appWithTextWidget(style));
@@ -189,6 +189,8 @@ void main() {
 
     testWidgets('Material text field - amber on amber', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = TextEditingController(text: 'this is a test');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         _boilerplate(
           Container(
@@ -197,7 +199,7 @@ void main() {
             color: Colors.amberAccent,
             child: TextField(
               style: const TextStyle(color: Colors.amber),
-              controller: TextEditingController(text: 'this is a test'),
+              controller: controller,
             ),
           ),
         ),
@@ -236,13 +238,10 @@ void main() {
 
     testWidgets('Material text field - default style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
+      final controller = TextEditingController(text: 'this is a test');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
-        _boilerplate(
-          SizedBox(
-            width: 100,
-            child: TextField(controller: TextEditingController(text: 'this is a test')),
-          ),
-        ),
+        _boilerplate(SizedBox(width: 100, child: TextField(controller: controller))),
       );
       await tester.idle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -288,7 +287,6 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
-          useMaterial3: true,
           Container(
             width: 200.0,
             height: 200.0,
@@ -307,6 +305,79 @@ void main() {
         'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
         'label: "this is a test", textDirection: ltr):\n'
         'Expected contrast ratio of at least 4.5 but found 1.16 for a font '
+        'size of 14.0.\n'
+        'The computed colors was:\n'
+        'light - ${const Color(0xfffef7ff)}, dark - ${const Color(0xffffeb3b)}\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Material2: yellow text on yellow background fails AAA with correct reason', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const guideline = MinimumTextContrastGuidelineAAA();
+
+      await tester.pumpWidget(
+        _boilerplate(
+          useMaterial3: false,
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.yellow,
+            child: const Text(
+              'this is a test',
+              style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            ),
+          ),
+        ),
+      );
+
+      final Evaluation result = await guideline.evaluate(tester);
+
+      expect(result.passed, false);
+      expect(
+        result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'label: "this is a test", textDirection: ltr):\n'
+        'Expected contrast ratio of at least 7.0 but found 1.17 for a font '
+        'size of 14.0.\n'
+        'The computed colors was:\n'
+        'light - ${const Color(0xfffafafa)}, dark - ${const Color(0xffffeb3b)}\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+      );
+      handle.dispose();
+    });
+
+    testWidgets('Material3: yellow text on yellow background fails AAA with correct reason', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const guideline = MinimumTextContrastGuidelineAAA();
+
+      await tester.pumpWidget(
+        _boilerplate(
+          Container(
+            width: 200.0,
+            height: 200.0,
+            color: Colors.yellow,
+            child: const Text(
+              'this is a test',
+              style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            ),
+          ),
+        ),
+      );
+
+      final Evaluation result = await guideline.evaluate(tester);
+
+      expect(result.passed, false);
+      expect(
+        result.reason,
+        'SemanticsNode#4(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), '
+        'label: "this is a test", textDirection: ltr):\n'
+        'Expected contrast ratio of at least 7.0 but found 1.16 for a font '
         'size of 14.0.\n'
         'The computed colors was:\n'
         'light - ${const Color(0xfffef7ff)}, dark - ${const Color(0xffffeb3b)}\n'
@@ -698,14 +769,18 @@ void main() {
       expect(overlappingLeftResult.passed, true);
 
       await tester.pumpWidget(
-        MaterialApp(home: Stack(children: <Widget>[Positioned(bottom: -1.0, child: smallBox)])),
+        MaterialApp(
+          home: Stack(children: <Widget>[Positioned(bottom: -1.0, child: smallBox)]),
+        ),
       );
 
       final Evaluation overlappingBottomResult = await androidTapTargetGuideline.evaluate(tester);
       expect(overlappingBottomResult.passed, true);
 
       await tester.pumpWidget(
-        MaterialApp(home: Stack(children: <Widget>[Positioned(right: -1.0, child: smallBox)])),
+        MaterialApp(
+          home: Stack(children: <Widget>[Positioned(right: -1.0, child: smallBox)]),
+        ),
       );
 
       final Evaluation overlappingRightResult = await androidTapTargetGuideline.evaluate(tester);
@@ -720,14 +795,13 @@ void main() {
           MergeSemantics(
             child: Semantics(
               container: true,
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
+              child: SizedBox.square(
+                dimension: 50.0,
                 child: Semantics(
                   container: true,
                   child: GestureDetector(
                     onTap: () {},
-                    child: const SizedBox(width: 4.0, height: 4.0),
+                    child: const SizedBox.square(dimension: 4.0),
                   ),
                 ),
               ),
@@ -742,6 +816,8 @@ void main() {
     });
 
     testWidgets('Does not fail on links', (WidgetTester tester) async {
+      final recognizer = TapGestureRecognizer()..onTap = () {};
+      addTearDown(recognizer.dispose);
       Widget textWithLink() {
         return Builder(
           builder: (BuildContext context) {
@@ -749,7 +825,7 @@ void main() {
               text: TextSpan(
                 children: <InlineSpan>[
                   const TextSpan(text: 'See examples at '),
-                  TextSpan(text: 'flutter repo', recognizer: TapGestureRecognizer()..onTap = () {}),
+                  TextSpan(text: 'flutter repo', recognizer: recognizer),
                 ],
               ),
             );
@@ -765,7 +841,8 @@ void main() {
     });
 
     testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -775,9 +852,8 @@ void main() {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
+                  child: SizedBox.square(
+                    dimension: 100,
                     child: Semantics(container: true, onTap: () {}, child: const Text('hello')),
                   ),
                 ),

@@ -184,7 +184,7 @@ abstract class SliverChildDelegate {
   /// included in the current layout. The `lastIndex` argument is the index of
   /// the last child that was included in the current layout.
   ///
-  /// Useful for subclasses that which to track which children are included in
+  /// Useful for subclasses that wish to track which children are included in
   /// the underlying render tree.
   void didFinishLayout(int firstIndex, int lastIndex) {}
 
@@ -212,7 +212,7 @@ abstract class SliverChildDelegate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     return '${describeIdentity(this)}(${description.join(", ")})';
   }
@@ -413,6 +413,60 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// none of the children will ever try to keep themselves alive.
   ///
   /// Defaults to true.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use the [AutomaticKeepAlive] widget in
+  /// combination with the [AutomaticKeepAliveClientMixin] to selectively preserve
+  /// the state of individual items in a scrollable list.
+  ///
+  /// Normally, widgets in a lazily built list like [ListView.builder] are
+  /// disposed of when they leave the visible area to maintain performance. This means
+  /// that any state inside a [StatefulWidget] would be lost unless explicitly
+  /// preserved.
+  ///
+  /// In this example, each list item is a [StatefulWidget] that includes a
+  /// counter and an increment button. To preserve the state of selected items
+  /// (based on their index), the [AutomaticKeepAlive] widget and
+  /// [AutomaticKeepAliveClientMixin] are used:
+  ///
+  /// - The `wantKeepAlive` getter in the item’s state class returns true for
+  ///   even-indexed items, indicating that their state should be preserved.
+  /// - For odd-indexed items, `wantKeepAlive` returns false, so their state is
+  ///   not preserved when scrolled out of view.
+  ///
+  /// ** See code in examples/api/lib/widgets/keep_alive/automatic_keep_alive.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use the [KeepAlive] widget
+  /// to preserve the state of individual list items in a [ListView] when they are
+  /// scrolled out of view.
+  ///
+  /// By default, [ListView.builder] only keeps the widgets currently visible in
+  /// the viewport alive. When an item scrolls out of view, it may be disposed to
+  /// free up resources. This can cause the state of [StatefulWidget]s to be lost
+  /// if not explicitly preserved.
+  ///
+  /// In this example, each item in the list is a [StatefulWidget] that maintains
+  /// a counter. Tapping the "+" button increments the counter. To selectively
+  /// preserve the state, each item is wrapped in a [KeepAlive] widget, with the
+  /// keepAlive parameter set based on the item’s index:
+  ///
+  /// - For even-indexed items, `keepAlive: true`, so their state is preserved
+  ///   even when scrolled off-screen.
+  /// - For odd-indexed items, `keepAlive: false`, so their state is discarded
+  ///   when they are no longer visible.
+  ///
+  /// ** See code in examples/api/lib/widgets/keep_alive/keep_alive.0.dart **
+  /// {@end-tool}
+  ///
+  ///  * [AutomaticKeepAlive], which allows subtrees to request to be kept alive
+  ///    in lazy lists.
+  ///  * [AutomaticKeepAliveClientMixin], which is a mixin with convenience
+  ///    methods for clients of [AutomaticKeepAlive]. Used with [State]
+  ///    subclasses.
+  ///  * [KeepAlive] which marks a child as needing to stay alive even when it's
+  ///    in a lazy list that would otherwise remove it.
   /// {@endtemplate}
   final bool addAutomaticKeepAlives;
 
@@ -858,7 +912,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive>
 
 // Return a Widget for the given Exception
 Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
-  final FlutterErrorDetails details = FlutterErrorDetails(
+  final details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,
     library: 'widgets library',

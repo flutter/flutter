@@ -90,6 +90,30 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
+          TextButton(
+            key: const ValueKey<String>('web_view_behind_context_menu_test'),
+            child: const Text('web view behind context menu test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<WebViewBehindContextMenuTestPage>(
+                  builder: (BuildContext context) => const WebViewBehindContextMenuTestPage(),
+                ),
+              );
+            },
+          ),
+          TextButton(
+            key: const ValueKey<String>('admob_banner_in_scrollable_list_test'),
+            child: const Text('admob banner in scrollable list test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<AdMobBannerInScrollableListTestPage>(
+                  builder: (BuildContext context) => const AdMobBannerInScrollableListTestPage(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -108,7 +132,9 @@ class MergeThreadTestPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Platform View Thread Merge Tests')),
       body: Column(
         children: <Widget>[
-          const Expanded(child: SizedBox(width: 300, child: UiKitView(viewType: 'platform_view'))),
+          const Expanded(
+            child: SizedBox(width: 300, child: UiKitView(viewType: 'platform_view')),
+          ),
           ElevatedButton(key: button, child: const Text('button'), onPressed: () {}),
         ],
       ),
@@ -170,9 +196,8 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
           children: <Widget>[
             Visibility(
               visible: _showBackground,
-              child: const SizedBox(
-                width: 500,
-                height: 500,
+              child: const SizedBox.square(
+                dimension: 500.0,
                 child: UiKitView(
                   viewType: 'platform_view',
                   creationParamsCodec: StandardMessageCodec(),
@@ -184,9 +209,8 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
                 showDialog<void>(
                   context: context,
                   builder: (BuildContext context) {
-                    return const SizedBox(
-                      width: 250,
-                      height: 250,
+                    return const SizedBox.square(
+                      dimension: 250.0,
                       child: UiKitView(
                         viewType: 'platform_button',
                         creationParamsCodec: StandardMessageCodec(),
@@ -209,6 +233,88 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A page to test a web view link is still tappable after dismissing a context menu.
+/// See [this issue](https://github.com/flutter/flutter/issues/175099).
+class WebViewBehindContextMenuTestPage extends StatefulWidget {
+  const WebViewBehindContextMenuTestPage({super.key});
+
+  @override
+  State<WebViewBehindContextMenuTestPage> createState() => _WebViewBehindContextMenuTestPageState();
+}
+
+class _WebViewBehindContextMenuTestPageState extends State<WebViewBehindContextMenuTestPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Web view behind context menu test'),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (String value) {},
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'button 1', child: Text('menu button 1')),
+                const PopupMenuItem<String>(value: 'button 2', child: Text('menu button 2')),
+                const PopupMenuItem<String>(value: 'button 3', child: Text('menu button 3')),
+                const PopupMenuItem<String>(value: 'button 4', child: Text('menu button 4')),
+                const PopupMenuItem<String>(value: 'button 5', child: Text('menu button 5')),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: const Center(
+        child: SizedBox.square(
+          dimension: 500.0,
+          child: UiKitView(
+            viewType: 'platform_web_view',
+            creationParamsCodec: StandardMessageCodec(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A page to test AdMob banners are still tappable in a scrollable list.
+/// See [this issue](https://github.com/flutter/flutter/issues/165787).
+class AdMobBannerInScrollableListTestPage extends StatefulWidget {
+  const AdMobBannerInScrollableListTestPage({super.key});
+
+  @override
+  State<AdMobBannerInScrollableListTestPage> createState() =>
+      _AdMobBannerInScrollableListTestPageState();
+}
+
+class _AdMobBannerInScrollableListTestPageState extends State<AdMobBannerInScrollableListTestPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('AdMob banner in scrollable list')),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (BuildContext context, int index) {
+          if (index.isEven) {
+            return const SizedBox(
+              height: 300,
+              child: UiKitView(
+                viewType: 'platform_fake_admob_banner',
+                creationParamsCodec: StandardMessageCodec(),
+              ),
+            );
+          }
+          return Container(
+            height: 300,
+            color: Colors.blue,
+            child: Center(child: Text('Regular row $index')),
+          );
+        },
       ),
     );
   }

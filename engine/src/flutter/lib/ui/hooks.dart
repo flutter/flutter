@@ -27,6 +27,14 @@ void _addView(
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
   int displayId,
+  double minWidth,
+  double maxWidth,
+  double minHeight,
+  double maxHeight,
+  double displayCornerRadiusTopLeft,
+  double displayCornerRadiusTopRight,
+  double displayCornerRadiusBottomRight,
+  double displayCornerRadiusBottomLeft,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -49,6 +57,14 @@ void _addView(
     displayFeaturesType,
     displayFeaturesState,
     displayId,
+    minWidth,
+    maxWidth,
+    minHeight,
+    maxHeight,
+    displayCornerRadiusTopLeft,
+    displayCornerRadiusTopRight,
+    displayCornerRadiusBottomRight,
+    displayCornerRadiusBottomLeft,
   );
   PlatformDispatcher.instance._addView(viewId, viewConfiguration);
 }
@@ -60,7 +76,7 @@ void _removeView(int viewId) {
 
 @pragma('vm:entry-point')
 void _sendViewFocusEvent(int viewId, int viewFocusState, int viewFocusDirection) {
-  final ViewFocusEvent viewFocusEvent = ViewFocusEvent(
+  final viewFocusEvent = ViewFocusEvent(
     viewId: viewId,
     state: ViewFocusState.values[viewFocusState],
     direction: ViewFocusDirection.values[viewFocusDirection],
@@ -85,8 +101,8 @@ void _updateDisplays(
   assert(ids.length == heights.length);
   assert(ids.length == devicePixelRatios.length);
   assert(ids.length == refreshRates.length);
-  final List<Display> displays = <Display>[];
-  for (int index = 0; index < ids.length; index += 1) {
+  final displays = <Display>[];
+  for (var index = 0; index < ids.length; index += 1) {
     final int displayId = ids[index];
     displays.add(
       Display._(
@@ -109,8 +125,8 @@ List<DisplayFeature> _decodeDisplayFeatures({
 }) {
   assert(bounds.length / 4 == type.length, 'Bounds are rectangles, requiring 4 measurements each');
   assert(type.length == state.length);
-  final List<DisplayFeature> result = <DisplayFeature>[];
-  for (int i = 0; i < type.length; i++) {
+  final result = <DisplayFeature>[];
+  for (var i = 0; i < type.length; i++) {
     final int rectOffset = i * 4;
     result.add(
       DisplayFeature(
@@ -121,14 +137,54 @@ List<DisplayFeature> _decodeDisplayFeatures({
           bounds[rectOffset + 3] / devicePixelRatio,
         ),
         type: DisplayFeatureType.values[type[i]],
-        state:
-            state[i] < DisplayFeatureState.values.length
-                ? DisplayFeatureState.values[state[i]]
-                : DisplayFeatureState.unknown,
+        state: state[i] < DisplayFeatureState.values.length
+            ? DisplayFeatureState.values[state[i]]
+            : DisplayFeatureState.unknown,
       ),
     );
   }
   return result;
+}
+
+DisplayCornerRadii? _decodeDisplayCornerRadii({
+  required double displayCornerRadiusTopLeft,
+  required double displayCornerRadiusTopRight,
+  required double displayCornerRadiusBottomRight,
+  required double displayCornerRadiusBottomLeft,
+}) {
+  assert(() {
+    final isTopLeftSet = displayCornerRadiusTopLeft != _kUnsetDisplayCornerRadius;
+    final bool isConsistent =
+        (displayCornerRadiusTopRight != _kUnsetDisplayCornerRadius) == isTopLeftSet &&
+        (displayCornerRadiusBottomRight != _kUnsetDisplayCornerRadius) == isTopLeftSet &&
+        (displayCornerRadiusBottomLeft != _kUnsetDisplayCornerRadius) == isTopLeftSet;
+
+    if (!isConsistent) {
+      throw ArgumentError(
+        'The display corner radii must be either all set or all unset.\n'
+        'Provided values were inconsistent:\n'
+        '  TopLeft: $displayCornerRadiusTopLeft\n'
+        '  TopRight: $displayCornerRadiusTopRight\n'
+        '  BottomRight: $displayCornerRadiusBottomRight\n'
+        '  BottomLeft: $displayCornerRadiusBottomLeft',
+      );
+    }
+    return true;
+  }());
+
+  if (displayCornerRadiusTopLeft == _kUnsetDisplayCornerRadius ||
+      displayCornerRadiusTopRight == _kUnsetDisplayCornerRadius ||
+      displayCornerRadiusBottomRight == _kUnsetDisplayCornerRadius ||
+      displayCornerRadiusBottomLeft == _kUnsetDisplayCornerRadius) {
+    return null;
+  }
+
+  return DisplayCornerRadii(
+    topLeft: displayCornerRadiusTopLeft,
+    topRight: displayCornerRadiusTopRight,
+    bottomRight: displayCornerRadiusBottomRight,
+    bottomLeft: displayCornerRadiusBottomLeft,
+  );
 }
 
 _ViewConfiguration _buildViewConfiguration(
@@ -152,6 +208,14 @@ _ViewConfiguration _buildViewConfiguration(
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
   int displayId,
+  double minWidth,
+  double maxWidth,
+  double minHeight,
+  double maxHeight,
+  double displayCornerRadiusTopLeft,
+  double displayCornerRadiusTopRight,
+  double displayCornerRadiusBottomRight,
+  double displayCornerRadiusBottomLeft,
 ) {
   return _ViewConfiguration(
     devicePixelRatio: devicePixelRatio,
@@ -190,6 +254,18 @@ _ViewConfiguration _buildViewConfiguration(
       devicePixelRatio: devicePixelRatio,
     ),
     displayId: displayId,
+    viewConstraints: ViewConstraints(
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight,
+    ),
+    displayCornerRadii: _decodeDisplayCornerRadii(
+      displayCornerRadiusTopLeft: displayCornerRadiusTopLeft,
+      displayCornerRadiusTopRight: displayCornerRadiusTopRight,
+      displayCornerRadiusBottomRight: displayCornerRadiusBottomRight,
+      displayCornerRadiusBottomLeft: displayCornerRadiusBottomLeft,
+    ),
   );
 }
 
@@ -216,6 +292,14 @@ void _updateWindowMetrics(
   List<int> displayFeaturesType,
   List<int> displayFeaturesState,
   int displayId,
+  double minWidth,
+  double maxWidth,
+  double minHeight,
+  double maxHeight,
+  double displayCornerRadiusTopLeft,
+  double displayCornerRadiusTopRight,
+  double displayCornerRadiusBottomRight,
+  double displayCornerRadiusBottomLeft,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -238,6 +322,14 @@ void _updateWindowMetrics(
     displayFeaturesType,
     displayFeaturesState,
     displayId,
+    minWidth,
+    maxWidth,
+    minHeight,
+    maxHeight,
+    displayCornerRadiusTopLeft,
+    displayCornerRadiusTopRight,
+    displayCornerRadiusBottomRight,
+    displayCornerRadiusBottomLeft,
   );
   PlatformDispatcher.instance._updateWindowMetrics(viewId, viewConfiguration);
 }
@@ -430,7 +522,7 @@ void Function(Uri) _getHttpConnectionHookClosure(bool mayInsecurelyConnectToAllD
     }
     throw UnsupportedError(
       'Non-https connection "$uri" is not supported by the platform. '
-      'Refer to https://flutter.dev/docs/release/breaking-changes/network-policy-ios-android.',
+      'Refer to https://docs.flutter.dev/release/breaking-changes/network-policy-ios-android.',
     );
   };
 }

@@ -9,7 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget boilerplate({required Widget child}) {
-    return Directionality(textDirection: TextDirection.ltr, child: Center(child: child));
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(child: child),
+    );
   }
 
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -29,12 +32,12 @@ void main() {
 
   test('ToggleButtonsThemeData lerp special cases', () {
     expect(ToggleButtonsThemeData.lerp(null, null, 0), null);
-    const ToggleButtonsThemeData data = ToggleButtonsThemeData();
+    const data = ToggleButtonsThemeData();
     expect(identical(ToggleButtonsThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ToggleButtonsThemeData defaults', () {
-    const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
+    const themeData = ToggleButtonsThemeData();
     expect(themeData.textStyle, null);
     expect(themeData.constraints, null);
     expect(themeData.color, null);
@@ -51,10 +54,7 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    const ToggleButtonsTheme theme = ToggleButtonsTheme(
-      data: ToggleButtonsThemeData(),
-      child: SizedBox(),
-    );
+    const theme = ToggleButtonsTheme(data: ToggleButtonsThemeData(), child: SizedBox());
     expect(theme.data.textStyle, null);
     expect(theme.data.constraints, null);
     expect(theme.data.color, null);
@@ -73,20 +73,19 @@ void main() {
   });
 
   testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
       textStyle: TextStyle(fontSize: 10),
       constraints: BoxConstraints(minHeight: 10.0, maxHeight: 20.0),
@@ -105,11 +104,10 @@ void main() {
       borderWidth: 2.0,
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[
       'textStyle.inherit: true',
@@ -154,28 +152,26 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle =
-        tester
-            .widget<DefaultTextStyle>(
-              find.descendant(
-                of: find.widgetWithText(TextButton, 'First child'),
-                matching: find.byType(DefaultTextStyle),
-              ),
-            )
-            .style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(
+          find.descendant(
+            of: find.widgetWithText(TextButton, 'First child'),
+            matching: find.byType(DefaultTextStyle),
+          ),
+        )
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
-    textStyle =
-        tester
-            .widget<DefaultTextStyle>(
-              find.descendant(
-                of: find.widgetWithText(TextButton, 'Second child'),
-                matching: find.byType(DefaultTextStyle),
-              ),
-            )
-            .style;
+    textStyle = tester
+        .widget<DefaultTextStyle>(
+          find.descendant(
+            of: find.widgetWithText(TextButton, 'Second child'),
+            matching: find.byType(DefaultTextStyle),
+          ),
+        )
+        .style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
@@ -263,7 +259,7 @@ void main() {
           .style;
     }
 
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     const Color enabledColor = Colors.lime;
     const Color selectedColor = Colors.green;
     const Color disabledColor = Colors.yellow;
@@ -375,10 +371,10 @@ void main() {
     const Color selectedFillColor = Colors.blue;
     const Color disabledFillColor = Colors.yellow;
 
-    Color getColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    Color getColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return selectedFillColor;
-      } else if (states.contains(MaterialState.disabled)) {
+      } else if (states.contains(WidgetState.disabled)) {
         return disabledFillColor;
       }
       return enabledFillColor;
@@ -388,7 +384,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            data: ToggleButtonsThemeData(fillColor: WidgetStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               onPressed: (int index) {},
@@ -408,7 +404,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            data: ToggleButtonsThemeData(fillColor: MaterialStateColor.resolveWith(getColor)),
+            data: ToggleButtonsThemeData(fillColor: WidgetStateColor.resolveWith(getColor)),
             child: ToggleButtons(
               isSelected: const <bool>[true, false],
               children: const <Widget>[Text('First child'), Text('Second child')],
@@ -423,11 +419,11 @@ void main() {
   });
 
   testWidgets('Theme InkWell colors', (WidgetTester tester) async {
-    const Color splashColor = Color(0xff4caf50);
-    const Color highlightColor = Color(0xffcddc39);
-    const Color hoverColor = Color(0xffffeb3b);
-    const Color focusColor = Color(0xffffff00);
-    final FocusNode focusNode = FocusNode();
+    const splashColor = Color(0xff4caf50);
+    const highlightColor = Color(0xffcddc39);
+    const hoverColor = Color(0xffffeb3b);
+    const focusColor = Color(0xffffff00);
+    final focusNode = FocusNode();
 
     await tester.pumpWidget(
       Material(
@@ -496,10 +492,10 @@ void main() {
   testWidgets('Theme border width and border colors for enabled, selected and disabled states', (
     WidgetTester tester,
   ) async {
-    const Color borderColor = Color(0xff4caf50);
-    const Color selectedBorderColor = Color(0xffcddc39);
-    const Color disabledBorderColor = Color(0xffffeb3b);
-    const double customWidth = 2.0;
+    const borderColor = Color(0xff4caf50);
+    const selectedBorderColor = Color(0xffcddc39);
+    const disabledBorderColor = Color(0xffffeb3b);
+    const customWidth = 2.0;
 
     await tester.pumpWidget(
       Material(

@@ -24,6 +24,7 @@ abstract class FlutterView {
   GestureSettings get gestureSettings;
   List<DisplayFeature> get displayFeatures;
   Display get display;
+  DisplayCornerRadii? get displayCornerRadii;
   void render(Scene scene, {Size? size});
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }
@@ -115,6 +116,10 @@ abstract class AccessibilityFeatures {
   bool get reduceMotion;
   bool get highContrast;
   bool get onOffSwitchLabels;
+  bool get supportsAnnounce;
+  bool get autoPlayAnimatedImages;
+  bool get autoPlayVideos;
+  bool get deterministicCursor;
 }
 
 enum Brightness { dark, light }
@@ -164,9 +169,15 @@ abstract final class IsolateNameServer {
 SingletonFlutterWindow get window => engine.window;
 
 class FrameData {
-  const FrameData.webOnly();
+  const FrameData({this.frameNumber = 0});
 
-  int get frameNumber => -1;
+  /// The number of the current frame.
+  ///
+  /// This number monotonically increases, but doesn't necessarily
+  /// start at a particular value.
+  ///
+  /// If not provided, defaults to 0.
+  final int frameNumber;
 }
 
 class GestureSettings {

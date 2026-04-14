@@ -84,15 +84,16 @@ static FlutterDesktopViewControllerRef CreateViewController(
   flutter::FlutterWindowsEngine* engine_ptr = EngineFromHandle(engine_ref);
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::FlutterWindow>(
-          width, height, engine_ptr->windows_proc_table());
+          width, height, engine_ptr->display_manager(),
+          engine_ptr->windows_proc_table());
 
   std::unique_ptr<flutter::FlutterWindowsEngine> engine;
   if (owns_engine) {
     engine = std::unique_ptr<flutter::FlutterWindowsEngine>(engine_ptr);
   }
 
-  std::unique_ptr<flutter::FlutterWindowsView> view =
-      engine_ptr->CreateView(std::move(window_wrapper));
+  std::unique_ptr<flutter::FlutterWindowsView> view = engine_ptr->CreateView(
+      std::move(window_wrapper), false, flutter::BoxConstraints());
   if (!view) {
     return nullptr;
   }
@@ -197,8 +198,8 @@ bool FlutterDesktopEngineDestroy(FlutterDesktopEngineRef engine_ref) {
   return result;
 }
 
-FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopEngineForId(
-    int64_t engine_id) {
+FLUTTER_EXPORT FlutterDesktopEngineRef
+FlutterDesktopEngineForId(int64_t engine_id) {
   return HandleForEngine(
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id));
 }
@@ -254,7 +255,13 @@ HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
 }
 
 IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
-  auto egl_manager = ViewFromHandle(view)->GetEngine()->egl_manager();
+  auto engine = ViewFromHandle(view)->GetEngine();
+  return FlutterDesktopEngineGetGraphicsAdapter(HandleForEngine(engine));
+}
+
+IDXGIAdapter* FlutterDesktopEngineGetGraphicsAdapter(
+    FlutterDesktopEngineRef engine) {
+  auto egl_manager = EngineFromHandle(engine)->egl_manager();
   if (egl_manager) {
     Microsoft::WRL::ComPtr<ID3D11Device> d3d_device;
     Microsoft::WRL::ComPtr<IDXGIDevice> dxgi_device;

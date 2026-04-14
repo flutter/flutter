@@ -20,7 +20,7 @@ class CardExamplesApp extends StatelessWidget {
         appBar: AppBar(title: const Text('Card Examples')),
         body: const Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Card(child: _SampleCard(cardName: 'Elevated Card')),
               Card.filled(child: _SampleCard(cardName: 'Filled Card')),
@@ -39,6 +39,10 @@ class _SampleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(width: 300, height: 100, child: Center(child: Text(cardName)));
+    return SizedBox(
+      width: 300,
+      height: 100,
+      child: Center(child: Text(cardName)),
+    );
   }
 }

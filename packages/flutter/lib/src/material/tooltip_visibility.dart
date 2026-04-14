@@ -42,8 +42,8 @@ class TooltipVisibility extends StatelessWidget {
   /// The [visible] of the closest instance of this class that encloses the
   /// given context. Defaults to `true` if none are found.
   static bool of(BuildContext context) {
-    final _TooltipVisibilityScope? visibility =
-        context.dependOnInheritedWidgetOfExactType<_TooltipVisibilityScope>();
+    final _TooltipVisibilityScope? visibility = context
+        .dependOnInheritedWidgetOfExactType<_TooltipVisibilityScope>();
     return visibility?.visible ?? true;
   }
 

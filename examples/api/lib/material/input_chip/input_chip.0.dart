@@ -37,33 +37,32 @@ class _InputChipExampleState extends State<InputChipExample> {
       appBar: AppBar(title: const Text('InputChip Sample')),
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: .min,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Wrap(
-              alignment: WrapAlignment.center,
+              alignment: .center,
               spacing: 5.0,
-              children:
-                  List<Widget>.generate(inputs, (int index) {
-                    return InputChip(
-                      label: Text('Person ${index + 1}'),
-                      selected: selectedIndex == index,
-                      onSelected: (bool selected) {
-                        setState(() {
-                          if (selectedIndex == index) {
-                            selectedIndex = null;
-                          } else {
-                            selectedIndex = index;
-                          }
-                        });
-                      },
-                      onDeleted: () {
-                        setState(() {
-                          inputs = inputs - 1;
-                        });
-                      },
-                    );
-                  }).toList(),
+              children: List<Widget>.generate(inputs, (int index) {
+                return InputChip(
+                  label: Text('Person ${index + 1}'),
+                  selected: selectedIndex == index,
+                  onSelected: (bool selected) {
+                    setState(() {
+                      if (selectedIndex == index) {
+                        selectedIndex = null;
+                      } else {
+                        selectedIndex = index;
+                      }
+                    });
+                  },
+                  onDeleted: () {
+                    setState(() {
+                      inputs = inputs - 1;
+                    });
+                  },
+                );
+              }).toList(),
             ),
             const SizedBox(height: 10),
             ElevatedButton(

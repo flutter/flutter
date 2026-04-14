@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/switch_list_tile/switch_list_tile.0.dart' as example;
+import 'package:flutter_api_samples/material/switch_list_tile/switch_list_tile.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

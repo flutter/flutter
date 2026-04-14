@@ -53,7 +53,7 @@ class FakeDevice extends Fake implements Device {
   final DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   bool supportsHotReload = true;
@@ -135,7 +135,10 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }) => updateDevFSReportCallback();
 
   @override
-  TargetPlatform? get targetPlatform => device._targetPlatform;
+  Future<void> handleHotRestart() async {}
+
+  @override
+  TargetPlatform get targetPlatform => device._targetPlatform;
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -145,6 +148,7 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
   }) : super(
          device,
+         targetPlatform: TargetPlatform.unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
@@ -164,7 +168,6 @@ class TestFlutterDevice extends FlutterDevice {
     int? hostVmServicePort,
     bool? ipv6 = false,
     bool enableDevTools = false,
-    bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }

@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
+
+const Color _debugRowDecorationColor = Color(0xFF00FF00);
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({super.key});
@@ -73,8 +78,8 @@ void main() {
   });
 
   testWidgets('Table widget calculate depth', (WidgetTester tester) async {
-    final UniqueKey outerTable = UniqueKey();
-    final UniqueKey innerTable = UniqueKey();
+    final outerTable = UniqueKey();
+    final innerTable = UniqueKey();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -107,17 +112,23 @@ void main() {
       key: GlobalKey(),
       children: const <TableRow>[
         TableRow(
-          decoration: BoxDecoration(color: Colors.yellow),
+          decoration: BoxDecoration(color: _debugRowDecorationColor),
           children: <Widget>[Placeholder()],
         ),
       ],
     );
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: Center(child: table)),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: table),
+      ),
     );
     // Move table to a different location to simulate detaching and re-attaching effect.
     await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: Center(child: Center(child: table))),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Center(child: table)),
+      ),
     );
 
     expect(tester.takeException(), isNull);
@@ -299,7 +310,7 @@ void main() {
 
   testWidgets('Really small deficit double precision error', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27083
-    const SizedBox cell = SizedBox(width: 16, height: 16);
+    const cell = SizedBox(width: 16, height: 16);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -315,7 +326,7 @@ void main() {
   });
 
   testWidgets('Calculating flex columns with small width deficit', (WidgetTester tester) async {
-    const SizedBox cell = SizedBox(width: 1, height: 1);
+    const cell = SizedBox(width: 1, height: 1);
     // If the error is present, pumpWidget() will fail due to an unsatisfied
     // assertion during the layout phase.
     await tester.pumpWidget(
@@ -478,7 +489,7 @@ void main() {
   });
 
   testWidgets('Table widget - moving test', (WidgetTester tester) async {
-    final List<BuildContext> contexts = <BuildContext>[];
+    final contexts = <BuildContext>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -711,7 +722,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(table);
-    final RenderObjectElement element = key0.currentContext! as RenderObjectElement;
+    final element = key0.currentContext! as RenderObjectElement;
     expect(element, hasAGoodToStringDeep);
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -850,7 +861,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Table(
           children: <TableRow>[
-            TableRow(children: <Widget>[KeyedSubtree(key: key, child: const Text('Hello'))]),
+            TableRow(
+              children: <Widget>[KeyedSubtree(key: key, child: const Text('Hello'))],
+            ),
           ],
         ),
       );
@@ -869,7 +882,7 @@ void main() {
 
   testWidgets('TableRow with no children throws an error message', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119541.
-    String result = 'no exception';
+    var result = 'no exception';
 
     // Test TableRow with children.
     try {
@@ -953,25 +966,23 @@ void main() {
   });
 
   testWidgets('Table has correct roles in semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Table(
-            children: const <TableRow>[
-              TableRow(
-                children: <Widget>[
-                  TableCell(child: Text('Data Cell 1')),
-                  TableCell(child: Text('Data Cell 2')),
-                ],
-              ),
-            ],
-          ),
+      TestWidgetsApp(
+        home: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                TableCell(child: Text('Data Cell 1')),
+                TableCell(child: Text('Data Cell 2')),
+              ],
+            ),
+          ],
         ),
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           textDirection: TextDirection.ltr,
@@ -979,25 +990,20 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  role: SemanticsRole.table,
                   children: <TestSemantics>[
                     TestSemantics(
-                      role: SemanticsRole.table,
+                      role: SemanticsRole.row,
                       children: <TestSemantics>[
                         TestSemantics(
-                          role: SemanticsRole.row,
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              label: 'Data Cell 1',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.cell,
-                            ),
-                            TestSemantics(
-                              label: 'Data Cell 2',
-                              textDirection: TextDirection.ltr,
-                              role: SemanticsRole.cell,
-                            ),
-                          ],
+                          label: 'Data Cell 1',
+                          textDirection: TextDirection.ltr,
+                          role: SemanticsRole.cell,
+                        ),
+                        TestSemantics(
+                          label: 'Data Cell 2',
+                          textDirection: TextDirection.ltr,
+                          role: SemanticsRole.cell,
                         ),
                       ],
                     ),
@@ -1016,5 +1022,36 @@ void main() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('Table reuse the semantics nodes for cell wrappers', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Table(
+          children: <TableRow>[
+            TableRow(children: <Widget>[TestTextField(focusNode: focusNode)]),
+          ],
+        ),
+      ),
+    );
+
+    final SemanticsNode textFieldSemanticsNode = find.semantics
+        .byFlag(SemanticsFlag.isTextField)
+        .evaluate()
+        .first;
+    final int? cellWrapperId = textFieldSemanticsNode.parent?.id;
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    final SemanticsNode textFieldSemanticsNodeNew = find.semantics
+        .byFlag(SemanticsFlag.isTextField)
+        .evaluate()
+        .first;
+
+    final int? cellWrapperIdAfterUIchanges = textFieldSemanticsNodeNew.parent?.id;
+    expect(cellWrapperIdAfterUIchanges, cellWrapperId);
   });
 }

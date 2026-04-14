@@ -18,7 +18,6 @@
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/playground/switches.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/runtime_stage/runtime_stage.h"
 
 namespace impeller {
 
@@ -26,22 +25,10 @@ class PlaygroundImpl;
 
 enum class PlaygroundBackend {
   kMetal,
+  kMetalSDF,
   kOpenGLES,
   kVulkan,
 };
-
-constexpr inline RuntimeStageBackend PlaygroundBackendToRuntimeStageBackend(
-    PlaygroundBackend backend) {
-  switch (backend) {
-    case PlaygroundBackend::kMetal:
-      return RuntimeStageBackend::kMetal;
-    case PlaygroundBackend::kOpenGLES:
-      return RuntimeStageBackend::kOpenGLES;
-    case PlaygroundBackend::kVulkan:
-      return RuntimeStageBackend::kVulkan;
-  }
-  FML_UNREACHABLE();
-}
 
 std::string PlaygroundBackendToString(PlaygroundBackend backend);
 
@@ -121,6 +108,13 @@ class Playground {
   using VKProcAddressResolver =
       std::function<void*(void* instance, const char* proc_name)>;
   VKProcAddressResolver CreateVKProcAddressResolver() const;
+
+  /// @brief Mark the GPU as unavilable.
+  ///
+  /// Only supported on the Metal backend.
+  void SetGPUDisabled(bool disabled) const;
+
+  RuntimeStageBackend GetRuntimeStageBackend() const;
 
  protected:
   const PlaygroundSwitches switches_;

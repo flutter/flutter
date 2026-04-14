@@ -98,13 +98,19 @@ void main() {
 }
 
 Future<void> pumpViews({required WidgetTester tester, required List<Widget> viewContents}) {
-  final List<Widget> views = <Widget>[
+  final views = <Widget>[
     for (int i = 0; i < viewContents.length; i++)
-      View(view: FakeView(tester.view, viewId: i + 100), child: Center(child: viewContents[i])),
+      View(
+        view: FakeView(tester.view, viewId: i + 100),
+        child: Center(child: viewContents[i]),
+      ),
   ];
 
   return tester.pumpWidget(
     wrapWithView: false,
-    Directionality(textDirection: TextDirection.ltr, child: ViewCollection(views: views)),
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: ViewCollection(views: views),
+    ),
   );
 }

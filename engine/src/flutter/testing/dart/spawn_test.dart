@@ -45,11 +45,11 @@ void testEntrypoint() {
 }
 
 void main() {
-  const bool kReleaseMode = bool.fromEnvironment('dart.vm.product');
-  const bool kProfileMode = bool.fromEnvironment('dart.vm.profile');
+  const kReleaseMode = bool.fromEnvironment('dart.vm.product');
+  const kProfileMode = bool.fromEnvironment('dart.vm.profile');
 
   test('Spawn a different entrypoint with a special route name', () async {
-    final ReceivePort port = ReceivePort();
+    final port = ReceivePort();
     spawn(port: port.sendPort, entrypoint: 'testEntrypoint', route: kTestEntrypointRouteName);
     expect(await port.first, kTestEntrypointRouteName);
     port.close();

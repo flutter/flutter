@@ -176,8 +176,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
   @override
   void update(AbstractLayoutBuilder<LayoutInfoType> newWidget) {
     assert(widget != newWidget);
-    final AbstractLayoutBuilder<LayoutInfoType> oldWidget =
-        widget as AbstractLayoutBuilder<LayoutInfoType>;
+    final oldWidget = widget as AbstractLayoutBuilder<LayoutInfoType>;
     super.update(newWidget);
     assert(widget == newWidget);
 
@@ -238,10 +237,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
       }
@@ -254,10 +252,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
             ErrorDescription('building $widget'),
             e,
             stack,
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              if (kDebugMode) DiagnosticsDebugCreator(DebugCreator(this)),
+            ],
           ),
         );
         _child = updateChild(null, built, slot);
@@ -267,8 +264,9 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
       }
     }
 
-    final VoidCallback? callback =
-        _needsBuild || (layoutInfo != _previousLayoutInfo) ? updateChildCallback : null;
+    final VoidCallback? callback = _needsBuild || (layoutInfo != _previousLayoutInfo)
+        ? updateChildCallback
+        : null;
     owner!.buildScope(this, callback);
   }
 
@@ -495,7 +493,7 @@ FlutterErrorDetails _reportException(
   StackTrace stack, {
   InformationCollector? informationCollector,
 }) {
-  final FlutterErrorDetails details = FlutterErrorDetails(
+  final details = FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',

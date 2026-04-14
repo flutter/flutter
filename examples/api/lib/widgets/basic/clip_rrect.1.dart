@@ -28,11 +28,14 @@ class ClipRRectExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(40.0),
+      padding: const .all(40.0),
       constraints: const BoxConstraints.expand(),
       // Add a FittedBox to make ClipRRect sized accordingly to the image it contains
       child: FittedBox(
-        child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: const _FakedImage()),
+        child: ClipRRect(
+          borderRadius: .circular(40.0),
+          child: const _FakedImage(),
+        ),
       ),
     );
   }

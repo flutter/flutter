@@ -12,7 +12,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:vector_math/vector_math_64.dart' show Matrix4, Quad, Vector3;
+import 'package:flutter/rendering.dart';
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
 import 'basic.dart';
 import 'framework.dart';
@@ -464,7 +465,7 @@ class InteractiveViewer extends StatefulWidget {
     }
 
     // Otherwise, return the nearest point on the quad.
-    final List<Vector3> closestPoints = <Vector3>[
+    final closestPoints = <Vector3>[
       InteractiveViewer.getNearestPointOnLine(point, quad.point0, quad.point1),
       InteractiveViewer.getNearestPointOnLine(point, quad.point1, quad.point2),
       InteractiveViewer.getNearestPointOnLine(point, quad.point2, quad.point3),
@@ -472,7 +473,7 @@ class InteractiveViewer extends StatefulWidget {
     ];
     double minDistance = double.infinity;
     late Vector3 closestOverall;
-    for (final Vector3 closePoint in closestPoints) {
+    for (final closePoint in closestPoints) {
       final double distance = math.sqrt(
         math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
       );
@@ -520,7 +521,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     assert(!widget.boundaryMargin.top.isNaN);
     assert(!widget.boundaryMargin.bottom.isNaN);
 
-    final RenderBox childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
+    final childRenderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
     final Size childSize = childRenderBox.size;
     final Rect boundaryRect = widget.boundaryMargin.inflateRect(Offset.zero & childSize);
     assert(!boundaryRect.isEmpty, "InteractiveViewer's child must have nonzero dimensions.");
@@ -540,7 +541,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // The Rect representing the child's parent.
   Rect get _viewport {
     assert(_parentKey.currentContext != null);
-    final RenderBox parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
+    final parentRenderBox = _parentKey.currentContext!.findRenderObject()! as RenderBox;
     return Offset.zero & parentRenderBox.size;
   }
 
@@ -564,8 +565,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       alignedTranslation = translation;
     }
 
-    final Matrix4 nextMatrix =
-        matrix.clone()..translate(alignedTranslation.dx, alignedTranslation.dy);
+    final Matrix4 nextMatrix = matrix.clone()
+      ..translateByDouble(alignedTranslation.dx, alignedTranslation.dy, 0, 1);
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -596,7 +597,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // in-bounds point instead.
     final Offset nextTotalTranslation = _getMatrixTranslation(nextMatrix);
     final double currentScale = matrix.getMaxScaleOnAxis();
-    final Offset correctedTotalTranslation = Offset(
+    final correctedTotalTranslation = Offset(
       nextTotalTranslation.dx - offendingDistance.dx * currentScale,
       nextTotalTranslation.dy - offendingDistance.dy * currentScale,
     );
@@ -605,10 +606,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     // calculating the translation to put the viewport inside that Quad is more
     // complicated than this when rotated.
     // https://github.com/flutter/flutter/issues/57698
-    final Matrix4 correctedMatrix =
-        matrix.clone()..setTranslation(
-          Vector3(correctedTotalTranslation.dx, correctedTotalTranslation.dy, 0.0),
-        );
+    final Matrix4 correctedMatrix = matrix.clone()
+      ..setTranslation(Vector3(correctedTotalTranslation.dx, correctedTotalTranslation.dy, 0.0));
 
     // Double check that the corrected translation fits.
     final Quad correctedViewport = _transformViewport(correctedMatrix, _viewport);
@@ -626,7 +625,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     // Otherwise, allow translation in only the direction that fits. This
     // happens when the viewport is larger than the boundary in one direction.
-    final Offset unidirectionalCorrectedTotalTranslation = Offset(
+    final unidirectionalCorrectedTotalTranslation = Offset(
       offendingCorrectedDistance.dx == 0.0 ? correctedTotalTranslation.dx : 0.0,
       offendingCorrectedDistance.dy == 0.0 ? correctedTotalTranslation.dy : 0.0,
     );
@@ -658,7 +657,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     );
     final double clampedTotalScale = clampDouble(totalScale, widget.minScale, widget.maxScale);
     final double clampedScale = clampedTotalScale / currentScale;
-    return matrix.clone()..scale(clampedScale);
+    return matrix.clone()..scaleByDouble(clampedScale, clampedScale, clampedScale, 1);
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -669,9 +668,9 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
     final Offset focalPointScene = _transformer.toScene(focalPoint);
     return matrix.clone()
-      ..translate(focalPointScene.dx, focalPointScene.dy)
+      ..translateByDouble(focalPointScene.dx, focalPointScene.dy, 0, 1)
       ..rotateZ(-rotation)
-      ..translate(-focalPointScene.dx, -focalPointScene.dy);
+      ..translateByDouble(-focalPointScene.dx, -focalPointScene.dy, 0, 1);
   }
 
   // Returns true iff the given _GestureType is enabled.
@@ -832,13 +831,13 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           return;
         }
         final Vector3 translationVector = _transformer.value.getTranslation();
-        final Offset translation = Offset(translationVector.x, translationVector.y);
-        final FrictionSimulation frictionSimulationX = FrictionSimulation(
+        final translation = Offset(translationVector.x, translationVector.y);
+        final frictionSimulationX = FrictionSimulation(
           widget.interactionEndFrictionCoefficient,
           translation.dx,
           details.velocity.pixelsPerSecond.dx,
         );
-        final FrictionSimulation frictionSimulationY = FrictionSimulation(
+        final frictionSimulationY = FrictionSimulation(
           widget.interactionEndFrictionCoefficient,
           translation.dy,
           details.velocity.pixelsPerSecond.dy,
@@ -860,7 +859,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           return;
         }
         final double scale = _transformer.value.getMaxScaleOnAxis();
-        final FrictionSimulation frictionSimulation = FrictionSimulation(
+        final frictionSimulation = FrictionSimulation(
           widget.interactionEndFrictionCoefficient * widget.scaleFactor,
           scale,
           details.scaleVelocity / 10,
@@ -977,7 +976,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     }
     // Translate such that the resulting translation is _animation.value.
     final Vector3 translationVector = _transformer.value.getTranslation();
-    final Offset translation = Offset(translationVector.x, translationVector.y);
+    final translation = Offset(translationVector.x, translationVector.y);
     _transformer.value = _matrixTranslate(
       _transformer.value,
       _transformer.toScene(_animation!.value) - _transformer.toScene(translation),
@@ -1193,7 +1192,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   Offset toScene(Offset viewportPoint) {
     // On viewportPoint, perform the inverse transformation of the scene to get
     // where the point would be in the scene before the transformation.
-    final Matrix4 inverseMatrix = Matrix4.inverted(value);
+    final inverseMatrix = Matrix4.inverted(value);
     final Vector3 untransformed = inverseMatrix.transform3(
       Vector3(viewportPoint.dx, viewportPoint.dy, 0),
     );
@@ -1234,12 +1233,11 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 // Find the axis aligned bounding box for the rect rotated about its center by
 // the given amount.
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
-  final Matrix4 rotationMatrix =
-      Matrix4.identity()
-        ..translate(rect.size.width / 2, rect.size.height / 2)
-        ..rotateZ(rotation)
-        ..translate(-rect.size.width / 2, -rect.size.height / 2);
-  final Quad boundariesRotated = Quad.points(
+  final rotationMatrix = Matrix4.identity()
+    ..translateByDouble(rect.size.width / 2, rect.size.height / 2, 0, 1)
+    ..rotateZ(rotation)
+    ..translateByDouble(-rect.size.width / 2, -rect.size.height / 2, 0, 1);
+  final boundariesRotated = Quad.points(
     rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.bottom, 0.0)),
@@ -1252,16 +1250,16 @@ Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
 // is completely contained within the boundary (inclusively), then returns
 // Offset.zero.
 Offset _exceedsBy(Quad boundary, Quad viewport) {
-  final List<Vector3> viewportPoints = <Vector3>[
+  final viewportPoints = <Vector3>[
     viewport.point0,
     viewport.point1,
     viewport.point2,
     viewport.point3,
   ];
   Offset largestExcess = Offset.zero;
-  for (final Vector3 point in viewportPoints) {
+  for (final point in viewportPoints) {
     final Vector3 pointInside = InteractiveViewer.getNearestPointInside(point, boundary);
-    final Offset excess = Offset(pointInside.x - point.x, pointInside.y - point.y);
+    final excess = Offset(pointInside.x - point.x, pointInside.y - point.y);
     if (excess.dx.abs() > largestExcess.dx.abs()) {
       largestExcess = Offset(excess.dx, largestExcess.dy);
     }

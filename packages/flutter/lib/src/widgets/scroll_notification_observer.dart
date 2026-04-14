@@ -192,8 +192,8 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
       return;
     }
 
-    final List<_ListenerEntry> localListeners = List<_ListenerEntry>.of(_listeners!);
-    for (final _ListenerEntry entry in localListeners) {
+    final localListeners = List<_ListenerEntry>.of(_listeners!);
+    for (final entry in localListeners) {
       try {
         if (entry.list != null) {
           entry.listener(notification);
@@ -205,14 +205,13 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
             stack: stack,
             library: 'widget library',
             context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector:
-                () => <DiagnosticsNode>[
-                  DiagnosticsProperty<ScrollNotificationObserverState>(
-                    'The $runtimeType sending notification was',
-                    this,
-                    style: DiagnosticsTreeStyle.errorProperty,
-                  ),
-                ],
+            informationCollector: () => <DiagnosticsNode>[
+              DiagnosticsProperty<ScrollNotificationObserverState>(
+                'The $runtimeType sending notification was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              ),
+            ],
           ),
         );
       }

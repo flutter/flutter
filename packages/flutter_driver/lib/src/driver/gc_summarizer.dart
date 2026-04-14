@@ -34,7 +34,7 @@ class GCSummarizer {
     double totalGCTimeMillis = 0;
     TimelineEvent? lastGCBeginEvent;
 
-    for (final TimelineEvent event in gcEvents) {
+    for (final event in gcEvents) {
       if (!kGCRootEvents.contains(event.name)) {
         continue;
       }

@@ -41,7 +41,7 @@ SkStringHandle skStringFromDartString(String string) {
   final List<int> rawUtf8Bytes = utf8.encode(string);
   final SkStringHandle stringHandle = skStringAllocate(rawUtf8Bytes.length);
   final Pointer<Int8> stringDataPointer = skStringGetData(stringHandle);
-  for (int i = 0; i < rawUtf8Bytes.length; i++) {
+  for (var i = 0; i < rawUtf8Bytes.length; i++) {
     stringDataPointer[i] = rawUtf8Bytes[i];
   }
   return stringHandle;
@@ -50,7 +50,7 @@ SkStringHandle skStringFromDartString(String string) {
 SkString16Handle skString16FromDartString(String string) {
   final SkString16Handle stringHandle = skString16Allocate(string.length);
   final Pointer<Int16> stringDataPointer = skString16GetData(stringHandle);
-  for (int i = 0; i < string.length; i++) {
+  for (var i = 0; i < string.length; i++) {
     stringDataPointer[i] = string.codeUnitAt(i);
   }
   return stringHandle;

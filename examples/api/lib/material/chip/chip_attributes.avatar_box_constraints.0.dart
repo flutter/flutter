@@ -13,7 +13,9 @@ class AvatarBoxConstraintsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: Center(child: AvatarBoxConstraintsExample())));
+    return const MaterialApp(
+      home: Scaffold(body: Center(child: AvatarBoxConstraintsExample())),
+    );
   }
 }
 
@@ -23,14 +25,14 @@ class AvatarBoxConstraintsExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         RawChip(
           avatarBoxConstraints: BoxConstraints.tightForFinite(),
           avatar: Icon(Icons.star),
           label: SizedBox(
             width: 150,
-            child: Text('One line text.', maxLines: 3, overflow: TextOverflow.ellipsis),
+            child: Text('One line text.', maxLines: 3, overflow: .ellipsis),
           ),
         ),
         SizedBox(height: 10),
@@ -42,7 +44,7 @@ class AvatarBoxConstraintsExample extends StatelessWidget {
             child: Text(
               'This text will wrap into two lines.',
               maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              overflow: .ellipsis,
             ),
           ),
         ),
@@ -55,7 +57,7 @@ class AvatarBoxConstraintsExample extends StatelessWidget {
             child: Text(
               'This is a very long text that will wrap into three lines.',
               maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              overflow: .ellipsis,
             ),
           ),
         ),

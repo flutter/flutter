@@ -42,7 +42,7 @@ void main() {
       phase: EnginePhase.layout,
     );
     final Object? exception = tester.takeException();
-    final String text = exception.toString();
+    final text = exception.toString();
     expect(text, contains('BoxConstraints has non-normalized width constraints.'));
     expect(
       text,

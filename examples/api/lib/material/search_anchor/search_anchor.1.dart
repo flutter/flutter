@@ -27,7 +27,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
-                clipBehavior: Clip.none,
+                clipBehavior: .none,
                 shape: const StadiumBorder(),
                 scrolledUnderElevation: 0.0,
                 titleSpacing: 0.0,
@@ -35,21 +35,22 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 floating:
                     true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    return List<Widget>.generate(5, (int index) {
-                      return ListTile(
-                        titleAlignment: ListTileTitleAlignment.center,
-                        title: Text('Initial list item $index'),
-                      );
-                    });
-                  },
+                  suggestionsBuilder:
+                      (BuildContext context, SearchController controller) {
+                        return List<Widget>.generate(5, (int index) {
+                          return ListTile(
+                            titleAlignment: .center,
+                            title: Text('Initial list item $index'),
+                          );
+                        });
+                      },
                 ),
               ),
               // The listed items below are just for filling the screen
               // so we can see the scrolling effect.
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const .all(20),
                   child: SizedBox(
                     height: 100.0,
                     child: ListView.builder(
@@ -58,7 +59,9 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                       itemBuilder: (BuildContext context, int index) {
                         return SizedBox(
                           width: 100.0,
-                          child: Card(child: Center(child: Text('Card $index'))),
+                          child: Card(
+                            child: Center(child: Text('Card $index')),
+                          ),
                         );
                       },
                     ),
@@ -67,8 +70,11 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                  padding: const .symmetric(horizontal: 20),
+                  child: Container(
+                    height: 1000,
+                    color: Colors.deepPurple.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
             ],

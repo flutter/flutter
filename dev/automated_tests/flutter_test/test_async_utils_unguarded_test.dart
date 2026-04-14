@@ -22,8 +22,8 @@ void main() {
   testWidgets('TestAsyncUtils - handling unguarded async helper functions', (
     WidgetTester tester,
   ) async {
-    helperFunction(tester);
-    helperFunction(tester);
+    helperFunction(tester); // ignore: unawaited_futures
+    helperFunction(tester); // ignore: unawaited_futures
     // this should fail
   });
 }

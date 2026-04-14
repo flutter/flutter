@@ -17,7 +17,7 @@ import 'common.dart';
 typedef AsyncVoidCallback = Future<void> Function();
 
 Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = false}) async {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
     print = (Object? line) {
@@ -27,12 +27,11 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
     expect(
       hasError,
       shouldHaveErrors,
-      reason:
-          buffer.isEmpty
-              ? '(No output to report.)'
-              : hasError
-              ? 'Unexpected errors:\n$buffer'
-              : 'Unexpected success:\n$buffer',
+      reason: buffer.isEmpty
+          ? '(No output to report.)'
+          : hasError
+          ? 'Unexpected errors:\n$buffer'
+          : 'Unexpected success:\n$buffer',
     );
   } finally {
     print = oldPrint;
@@ -48,7 +47,7 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
 
 void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
-  final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
+  final dartName = Platform.isWindows ? 'dart.exe' : 'dart';
   final String dartPath = path.canonicalize(
     path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName),
   );
@@ -64,7 +63,7 @@ void main() {
         'Error summary',
       ]);
     }, shouldHaveErrors: true);
-    final File fixture = File(path.join(testRootPath, 'packages', 'foo', 'meta.dart'));
+    final fixture = File(path.join(testRootPath, 'packages', 'foo', 'meta.dart'));
     expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
   });
 
@@ -73,7 +72,7 @@ void main() {
       () => verifyDeprecations(testRootPath, minimumMatches: 2),
       shouldHaveErrors: true,
     );
-    final File fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
+    final fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
     expect(
       result,
       matchesErrorsInFile(
@@ -90,16 +89,14 @@ void main() {
       () => verifyGoldenTags(testRootPath, minimumMatches: 6),
       shouldHaveErrors: true,
     )).split('\n');
-    const String noTag =
+    const noTag =
         "Files containing golden tests must be tagged using @Tags(<String>['reduced-test-set']) "
         'at the top of the file before import statements.';
-    const String missingTag =
-        "Files containing golden tests must be tagged with 'reduced-test-set'.";
-    final List<String> lines =
-        <String>[
-          '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
-          '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
-        ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
+    const missingTag = "Files containing golden tests must be tagged with 'reduced-test-set'.";
+    final List<String> lines = <String>[
+      '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
+      '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
+    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).toList();
     expect(
       result.length,
       4 + lines.length,
@@ -166,11 +163,10 @@ void main() {
       () => verifyRepositoryLinks(testRootPath),
       shouldHaveErrors: true,
     );
-    const String bannedBranch = 'master';
-    final String file =
-        Platform.isWindows
-            ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
-            : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
+    const bannedBranch = 'master';
+    final file = Platform.isWindows
+        ? r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart'
+        : 'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
     final String lines = <String>[
       '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
       '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
@@ -273,7 +269,7 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    final File fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'bar.dart'));
+    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'bar.dart'));
     expect(
       result,
       matchesErrorsInFile(
@@ -295,9 +291,7 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    final File fixture = File(
-      path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'),
-    );
+    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'));
     expect(
       result,
       matchesErrorsInFile(
@@ -322,7 +316,7 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    final File fixture = File(
+    final fixture = File(
       path.join(testRootPath, 'packages', 'flutter', 'lib', 'double_clamp.dart'),
     );
     expect(
@@ -347,9 +341,7 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    final File fixture = File(
-      path.join(testRootPath, 'packages', 'flutter', 'lib', 'stopwatch.dart'),
-    );
+    final fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'stopwatch.dart'));
     expect(
       result,
       matchesErrorsInFile(
@@ -372,7 +364,7 @@ void main() {
       ),
       shouldHaveErrors: true,
     );
-    final File fixture = File(
+    final fixture = File(
       path.join(testRootPath, 'packages', 'flutter', 'lib', 'renderbox_intrinsics.dart'),
     );
     expect(
@@ -395,7 +387,7 @@ void main() {
     final String lines = <String>[
       '║ chip.dart is not up-to-date with the token template file.',
     ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
-    const String errorStart = '╔═';
+    const errorStart = '╔═';
     result = result.substring(result.indexOf(errorStart));
     expect(
       result,

@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets(
@@ -14,12 +15,12 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/20313.
 
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
-      const String initialLabel = 'Foo';
-      const double bottomScrollOffset = 3000.0;
+      const initialLabel = 'Foo';
+      const bottomScrollOffset = 3000.0;
 
-      final ScrollController controller = ScrollController(initialScrollOffset: bottomScrollOffset);
+      final controller = ScrollController(initialScrollOffset: bottomScrollOffset);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -55,7 +56,7 @@ void main() {
       expect(semantics, isNot(includesNodeWith(label: initialLabel)));
 
       // Change the semantics of the offstage ProblemWidget without crashing.
-      const String newLabel = 'Bar';
+      const newLabel = 'Bar';
       expect(newLabel, isNot(equals(initialLabel)));
       await tester.pumpWidget(
         _buildTestWidget(extraPadding: true, text: newLabel, controller: controller),
@@ -94,27 +95,27 @@ Widget _buildTestWidget({
   required String text,
   required ScrollController controller,
 }) {
-  return MaterialApp(
-    home: Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(child: Container()),
-          SizedBox(
-            height: 500.0,
-            child: ListView(
-              controller: controller,
-              children: List<Widget>.generate(10, (int i) {
-                return Container(
-                  color: i.isEven ? Colors.red : Colors.blue,
+  return TestWidgetsApp(
+    home: Column(
+      children: <Widget>[
+        Expanded(child: Container()),
+        SizedBox(
+          height: 500.0,
+          child: ListView(
+            controller: controller,
+            children: <Widget>[
+              for (int i = 0; i < 10; i += 1)
+                Container(
+                  color: i.isEven ? const Color(0xFFFF0000) : const Color(0xFF0000FF),
                   height: 250.0,
                   child: Text('Item $i'),
-                );
-              })..add(ProblemWidget(extraPadding: extraPadding, text: text)),
-            ),
+                ),
+              ProblemWidget(extraPadding: extraPadding, text: text),
+            ],
           ),
-          Expanded(child: Container()),
-        ],
-      ),
+        ),
+        Expanded(child: Container()),
+      ],
     ),
   );
 }

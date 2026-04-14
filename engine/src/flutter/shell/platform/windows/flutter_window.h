@@ -9,8 +9,8 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/common/alert_platform_node_delegate.h"
-#include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/direct_manipulation.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
@@ -28,6 +28,8 @@
 
 namespace flutter {
 
+class DisplayManagerWin32;
+
 // A win32 flutter child window used as implementations for flutter view.  In
 // the future, there will likely be a CoreWindow-based FlutterWindow as well.
 // At the point may make sense to dependency inject the native window rather
@@ -38,6 +40,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Create flutter Window for use as child window
   FlutterWindow(int width,
                 int height,
+                std::shared_ptr<DisplayManagerWin32> const& display_manager,
                 std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr,
                 std::unique_ptr<TextInputManager> text_input_manager = nullptr);
 
@@ -81,6 +84,8 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
+                             uint32_t rotation,
+                             uint32_t pressure,
                              int modifiers_state);
 
   // Called when the a mouse button, determined by |button|, goes down.
@@ -88,7 +93,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             UINT button);
+                             UINT button,
+                             uint32_t rotation,
+                             uint32_t pressure);
 
   // Called when the a mouse button, determined by |button|, goes from
   // down to up
@@ -168,6 +175,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // |FlutterWindowBindingHandler|
   virtual PointerLocation GetPrimaryPointerLocation() override;
+
+  // [FlutterWindowBindingHandler]
+  virtual FlutterEngineDisplayId GetDisplayId() override;
 
   // Called when a theme change message is issued.
   virtual void OnThemeChange();
@@ -355,6 +365,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // Generates touch point IDs for touch events.
   SequentialIdGenerator touch_id_generator_;
+
+  // Provides access to the list of available displays.
+  std::shared_ptr<DisplayManagerWin32> display_manager_;
 
   // Abstracts Windows APIs that may not be available on all supported versions
   // of Windows.

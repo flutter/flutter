@@ -19,7 +19,7 @@ void main() {
   testWidgets('GridView displays correct children with nonzero padding', (
     WidgetTester tester,
   ) async {
-    const EdgeInsets padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
+    const padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     final Widget testWidget = Directionality(
       textDirection: TextDirection.ltr,
@@ -30,10 +30,9 @@ void main() {
           child: GridView.count(
             crossAxisCount: 1,
             padding: padding,
-            children:
-                List<Widget>.generate(10, (int index) {
-                  return Text('$index', key: ValueKey<int>(index));
-                }).toList(),
+            children: List<Widget>.generate(10, (int index) {
+              return Text('$index', key: ValueKey<int>(index));
+            }).toList(),
           ),
         ),
       ),

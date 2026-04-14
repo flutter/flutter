@@ -26,8 +26,13 @@ const int chromeDebugPort = 10000;
 /// The port at which the benchmark's app is being served.
 const int benchmarksAppPort = 10001;
 
-typedef WebBenchmarkOptions =
-    ({bool useWasm, bool forceSingleThreadedSkwasm, bool useDdc, bool withHotReload});
+typedef WebBenchmarkOptions = ({
+  bool useWasm,
+  bool forceSingleThreadedSkwasm,
+  bool useDdc,
+  bool withHotReload,
+  String buildMode,
+});
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
@@ -44,7 +49,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     // Chrome instance instead of starting a new one.
     io.Process? flutterRunProcess;
     if (benchmarkOptions.useDdc) {
-      final Completer<void> ddcAppReady = Completer<void>();
+      final ddcAppReady = Completer<void>();
       flutterRunProcess = await startFlutter(
         'run',
         options: <String>[
@@ -71,7 +76,10 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-browser-flag=--headless=new',
           '--web-browser-flag=--no-sandbox',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          if (benchmarkOptions.withHotReload) '--web-experimental-hot-reload',
+          if (benchmarkOptions.withHotReload)
+            '--web-experimental-hot-reload'
+          else
+            '--no-web-experimental-hot-reload',
           '--no-web-resources-cdn',
           'lib/web_benchmarks_ddc.dart',
         ],
@@ -79,7 +87,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       flutterRunProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
         String line,
       ) {
-        if (line.startsWith('This app is linked to the debug service')) {
+        if (!ddcAppReady.isCompleted && line.startsWith('Debug service listening on')) {
           ddcAppReady.complete();
         }
         print('[CHROME STDOUT]: $line');
@@ -100,16 +108,15 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
           if (benchmarkOptions.useWasm) ...<String>['--wasm', '--no-strip-wasm'],
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          '--profile',
+          '--${benchmarkOptions.buildMode}',
           '--no-web-resources-cdn',
           '-t',
           'lib/web_benchmarks.dart',
         ],
       );
     }
-    final Completer<List<Map<String, dynamic>>> profileData =
-        Completer<List<Map<String, dynamic>>>();
-    final List<Map<String, dynamic>> collectedProfiles = <Map<String, dynamic>>[];
+    final profileData = Completer<List<Map<String, dynamic>>>();
+    final collectedProfiles = <Map<String, dynamic>>[];
     List<String>? benchmarks;
     late Iterator<String> benchmarkIterator;
 
@@ -119,9 +126,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
     Future<Chrome>? whenChromeIsReady;
     Chrome? chrome;
     late io.HttpServer server;
-    Cascade cascade = Cascade();
+    var cascade = Cascade();
     List<Map<String, dynamic>>? latestPerformanceTrace;
-    final Map<String, List<String>> requestHeaders = <String, List<String>>{
+    final requestHeaders = <String, List<String>>{
       'Access-Control-Allow-Headers': <String>[
         'Accept',
         'Access-Control-Allow-Headers',
@@ -142,8 +149,8 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           return Response.ok('', headers: requestHeaders);
         }
         if (request.requestedUri.path.endsWith('/profile-data')) {
-          final Map<String, dynamic> profile = json.decode(requestContents) as Map<String, dynamic>;
-          final String benchmarkName = profile['name'] as String;
+          final profile = json.decode(requestContents) as Map<String, dynamic>;
+          final benchmarkName = profile['name'] as String;
           if (benchmarkName != benchmarkIterator.current) {
             profileData.completeError(
               Exception(
@@ -157,8 +164,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
 
           // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
           if (latestPerformanceTrace != null) {
-            final BlinkTraceSummary traceSummary =
-                BlinkTraceSummary.fromJson(latestPerformanceTrace!)!;
+            final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(
+              latestPerformanceTrace!,
+            )!;
             profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
             profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
             (profile['scoreKeys'] as List<dynamic>).add('totalUiFrame.average');
@@ -174,8 +182,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           latestPerformanceTrace = await chrome!.endRecordingPerformance();
           return Response.ok('Stopped performance tracing', headers: requestHeaders);
         } else if (request.requestedUri.path.endsWith('/on-error')) {
-          final Map<String, dynamic> errorDetails =
-              json.decode(requestContents) as Map<String, dynamic>;
+          final errorDetails = json.decode(requestContents) as Map<String, dynamic>;
           unawaited(server.close());
           // Keep the stack trace as a string. It's thrown in the browser, not this Dart VM.
           profileData.completeError('${errorDetails['error']}\n${errorDetails['stackTrace']}');
@@ -197,7 +204,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           // A passthrough used by
           // `dev/benchmarks/macrobenchmarks/lib/web_benchmarks.dart`
           // to print information.
-          final String message = requestContents;
+          final message = requestContents;
           print('[APP] $message');
           return Response.ok('Reported.', headers: requestHeaders);
         } else {
@@ -223,20 +230,21 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       shelf_io.serveRequests(server, cascade.handler);
 
       final String dartToolDirectory = path.join('$macrobenchmarksDirectory/.dart_tool');
-      final String userDataDir =
-          io.Directory(dartToolDirectory).createTempSync('flutter_chrome_user_data.').path;
+      final String userDataDir = io.Directory(
+        dartToolDirectory,
+      ).createTempSync('flutter_chrome_user_data.').path;
 
       // TODO(yjbanov): temporarily disables headful Chrome until we get
       //                devicelab hardware that is able to run it. Our current
       //                GCE VMs can only run in headless mode.
       //                See: https://github.com/flutter/flutter/issues/50164
-      final bool isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
+      final isUncalibratedSmokeTest = io.Platform.environment['CALIBRATED'] != 'true';
       // final bool isUncalibratedSmokeTest =
       //     io.Platform.environment['UNCALIBRATED_SMOKE_TEST'] == 'true';
-      final String urlParams = benchmarkOptions.forceSingleThreadedSkwasm ? '?force_st=true' : '';
+      final urlParams = benchmarkOptions.forceSingleThreadedSkwasm ? '?force_st=true' : '';
       // DDC apps are served from a different port from the orchestration server.
       final int appServingPort = benchmarkOptions.useDdc ? benchmarksAppPort : benchmarkServerPort;
-      final ChromeOptions options = ChromeOptions(
+      final options = ChromeOptions(
         url: 'http://localhost:$appServingPort/index.html$urlParams',
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
@@ -267,13 +275,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       }
 
       print('Waiting for the benchmark to report benchmark profile.');
-      final Map<String, dynamic> taskResult = <String, dynamic>{};
-      final List<String> benchmarkScoreKeys = <String>[];
+      final taskResult = <String, dynamic>{};
+      final benchmarkScoreKeys = <String>[];
       final List<Map<String, dynamic>> profiles = await profileData.future;
 
       print('Received profile data');
-      for (final Map<String, dynamic> profile in profiles) {
-        final String benchmarkName = profile['name'] as String;
+      for (final profile in profiles) {
+        final benchmarkName = profile['name'] as String;
         if (benchmarkName.isEmpty) {
           throw 'Benchmark name is empty';
         }
@@ -284,12 +292,12 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         } else {
           webRendererName = 'canvaskit';
         }
-        final String namespace = '$benchmarkName.$webRendererName';
-        final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
+        final namespace = '$benchmarkName.$webRendererName';
+        final scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
         if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';
         }
-        for (final String scoreKey in scoreKeys) {
+        for (final scoreKey in scoreKeys) {
           if (scoreKey.isEmpty) {
             throw 'Score key is empty in benchmark "$benchmarkName". '
                 'Received [${scoreKeys.join(', ')}]';

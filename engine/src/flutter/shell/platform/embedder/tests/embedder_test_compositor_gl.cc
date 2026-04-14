@@ -18,7 +18,7 @@ namespace testing {
 
 EmbedderTestCompositorGL::EmbedderTestCompositorGL(
     std::shared_ptr<TestEGLContext> egl_context,
-    SkISize surface_size,
+    DlISize surface_size,
     sk_sp<GrDirectContext> context)
     : EmbedderTestCompositor(surface_size, std::move(context)),
       egl_context_(std::move(egl_context)) {}
@@ -56,7 +56,7 @@ bool EmbedderTestCompositorGL::UpdateOffscrenComposition(
     size_t layers_count) {
   last_composition_ = nullptr;
 
-  const auto image_info = SkImageInfo::MakeN32Premul(surface_size_);
+  const auto image_info = SkImageInfo::MakeN32Premul(ToSkISize(surface_size_));
 
   auto surface =
       SkSurfaces::RenderTarget(context_.get(),            // context
@@ -130,7 +130,8 @@ bool EmbedderTestCompositorGL::UpdateOffscrenComposition(
   }
 
   if (next_scene_callback_) {
-    auto last_composition_snapshot = last_composition_->makeRasterImage();
+    auto last_composition_snapshot =
+        last_composition_->makeRasterImage(nullptr);
     FML_CHECK(last_composition_snapshot);
     auto callback = next_scene_callback_;
     next_scene_callback_ = nullptr;

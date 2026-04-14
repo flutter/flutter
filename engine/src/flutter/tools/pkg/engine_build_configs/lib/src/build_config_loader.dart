@@ -36,18 +36,17 @@ class BuildConfigLoader {
   }();
 
   Map<String, BuilderConfig> _parseAllBuildConfigs(io.Directory dir) {
-    final Map<String, BuilderConfig> result = <String, BuilderConfig>{};
+    final result = <String, BuilderConfig>{};
     if (!dir.existsSync()) {
       errors.add('${buildConfigsDir.path} does not exist.');
       return result;
     }
-    final List<io.File> jsonFiles =
-        dir
-            .listSync(recursive: true)
-            .whereType<io.File>()
-            .where((io.File f) => f.path.endsWith('.json'))
-            .toList();
-    for (final io.File jsonFile in jsonFiles) {
+    final List<io.File> jsonFiles = dir
+        .listSync(recursive: true)
+        .whereType<io.File>()
+        .where((io.File f) => f.path.endsWith('.json'))
+        .toList();
+    for (final jsonFile in jsonFiles) {
       final String basename = p.basename(jsonFile.path);
       final String name = basename.substring(0, basename.length - 5);
       final String jsonData = jsonFile.readAsStringSync();

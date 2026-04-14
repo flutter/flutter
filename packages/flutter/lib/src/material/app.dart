@@ -63,7 +63,16 @@ enum ThemeMode {
   light,
 
   /// Always use the dark mode (if available) regardless of system preference.
-  dark,
+  dark;
+
+  /// Whether this theme mode follows the system setting.
+  bool get isSystem => this == ThemeMode.system;
+
+  /// Whether this theme mode forces light mode.
+  bool get isLight => this == ThemeMode.light;
+
+  /// Whether this theme mode forces dark mode.
+  bool get isDark => this == ThemeMode.dark;
 }
 
 /// An application that uses Material Design.
@@ -870,10 +879,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
-    final AndroidOverscrollIndicator indicator =
-        Theme.of(context).useMaterial3
-            ? AndroidOverscrollIndicator.stretch
-            : AndroidOverscrollIndicator.glow;
+    final AndroidOverscrollIndicator indicator = Theme.of(context).useMaterial3
+        ? AndroidOverscrollIndicator.stretch
+        : AndroidOverscrollIndicator.glow;
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -926,7 +934,7 @@ class _MaterialAppState extends State<MaterialApp> {
   // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
+      ...?widget.localizationsDelegates,
       DefaultMaterialLocalizations.delegate,
       DefaultCupertinoLocalizations.delegate,
     ];
@@ -951,12 +959,12 @@ class _MaterialAppState extends State<MaterialApp> {
     BuildContext context, {
     required VoidCallback onPressed,
     required String semanticsLabel,
-    bool isLeftAligned = true,
+    bool usesDefaultAlignment = true,
   }) {
     return _MaterialInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticsLabel: semanticsLabel,
-      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+      icon: usesDefaultAlignment ? Icons.arrow_right : Icons.arrow_left,
       isDarkTheme: _isDarkTheme(context),
     );
   }
@@ -1138,17 +1146,6 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   Widget build(BuildContext context) {
     Widget result = _buildWidgetApp(context);
-    result = Focus(
-      canRequestFocus: false,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
-            event.logicalKey != LogicalKeyboardKey.escape) {
-          return KeyEventResult.ignored;
-        }
-        return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
-      },
-      child: result,
-    );
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = GridPaper(

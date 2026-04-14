@@ -20,6 +20,7 @@ import 'navigation_bar.dart';
 import 'navigation_drawer.dart';
 import 'navigation_rail.dart';
 import 'radio_list_tile.dart';
+import 'range_slider.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
 import 'switch_list_tile.dart';
@@ -28,7 +29,22 @@ import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
 
+/// The category a use-case falls under.
+enum UseCaseCategory {
+  /// An essential use-case requested to be covered for the purpose of various
+  /// a11y certifications.
+  core,
+
+  /// An additional use-case that the team considers important to cover, even if
+  /// nobody requested this as part of any certification process.
+  additional,
+}
+
 abstract class UseCase {
+  UseCase({required this.useCaseCategory});
+
+  final UseCaseCategory useCaseCategory;
+
   String get name;
   String get route;
 
@@ -43,6 +59,7 @@ final List<UseCase> useCases = <UseCase>[
   CheckBoxListTile(),
   DialogUseCase(),
   SliderUseCase(),
+  RangeSliderUseCase(),
   TextFieldUseCase(),
   TextFieldPasswordUseCase(),
   DatePickerUseCase(),

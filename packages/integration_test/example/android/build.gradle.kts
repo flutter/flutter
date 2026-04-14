@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // This file is auto generated.
-// To update all the build.gradle files in the Flutter repo,
+// To update all the settings.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 allprojects {
@@ -13,22 +13,31 @@ allprojects {
     }
 }
 
-rootProject.buildDir = file("../build")
+rootProject.layout.buildDirectory.value(
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
+)
 
 subprojects {
-    project.buildDir = file("${rootProject.buildDir}/${project.name}")
+    project.layout.buildDirectory.value(
+        rootProject.layout.buildDirectory
+            .dir(project.name)
+            .get()
+    )
 }
 subprojects {
     project.evaluationDependsOn(":app")
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty("local-engine-repo")) {
+        var ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
+        if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
     }
 }
 
 tasks.register<Delete>("clean") {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }

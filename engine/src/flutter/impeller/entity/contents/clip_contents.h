@@ -62,17 +62,6 @@ class ClipContents {
   Entity::ClipOperation clip_op_ = Entity::ClipOperation::kIntersect;
 };
 
-/// @brief Render a restore clip.
-///
-/// This is is intended to be used for prevent overdraw mechanism. The clip
-/// depth should be the depth of the entity that is currently being drawn, and
-/// restore_coverage should be its coverage. If restore_coverage is
-/// std::nullopt, the render pass coverage is used instead.
-bool RenderClipRestore(const ContentContext& renderer,
-                       RenderPass& pass,
-                       uint32_t clip_depth,
-                       std::optional<Rect> restore_coverage);
-
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_CLIP_CONTENTS_H_

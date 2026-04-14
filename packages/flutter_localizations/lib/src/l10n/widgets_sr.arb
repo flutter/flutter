@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели",
   "pasteButtonLabel": "Налепи",
-  "selectAllButtonLabel": "Изабери све"
+  "selectAllButtonLabel": "Изабери све",
+  "searchResultsFound": "Пронађени су резултати претраге",
+  "noResultsFound": "Није пронађен ниједан резултат",
+  "radioButtonUnselectedLabel": "Није изабрано"
 }

@@ -22,8 +22,8 @@ Future<void> testMain() async {
 
   Future<List<String>> createTestFiles() async {
     final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-    List<String> testFiles =
-        ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>).cast<String>();
+    List<String> testFiles = ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>)
+        .cast<String>();
     testFiles = testFiles.map((String baseName) => '/test_images/$baseName').toList();
 
     // Sanity-check the test file list. If suddenly test files are moved or
@@ -52,7 +52,7 @@ Future<void> testMain() async {
       final Uint8List responseBytes = await response.asUint8List();
 
       // WebP files which are known to be animated.
-      const List<String> animatedWebpFiles = <String>[
+      const animatedWebpFiles = <String>[
         '/test_images/blendBG.webp',
         '/test_images/required.webp',
         '/test_images/stoplight_h.webp',
@@ -60,7 +60,7 @@ Future<void> testMain() async {
       ];
 
       // GIF files which are known to be animated.
-      const List<String> animatedGifFiles = <String>[
+      const animatedGifFiles = <String>[
         '/test_images/alphabetAnim.gif',
         '/test_images/colorTables.gif',
         '/test_images/flightAnim.gif',
@@ -94,13 +94,11 @@ Future<void> testMain() async {
 }
 
 /// Generates a blank GIF to be used in tests.
-Uint8List _createTestGif({
-  int width = 1,
-  int height = 1,
-  int numFrames = 2,
-  bool includeManyCommentBlocks = true,
-}) {
-  final List<int> bytes = <int>[];
+Uint8List _createTestGif() {
+  const width = 1;
+  const height = 1;
+  const numFrames = 2;
+  final bytes = <int>[];
   // Generate header.
   bytes.addAll('GIF'.codeUnits);
   bytes.addAll('89a'.codeUnits);
@@ -123,20 +121,18 @@ Uint8List _createTestGif({
 
   // Generate data.
   List<int> generateCommentBlock() {
-    final List<int> comment = <int>[];
+    final comment = <int>[];
     comment.add(0x21);
     comment.add(0xfe);
-    const String commentString = 'This is a comment';
+    const commentString = 'This is a comment';
     comment.add(commentString.codeUnits.length);
     comment.addAll(commentString.codeUnits);
     comment.add(0);
     return comment;
   }
 
-  for (int i = 0; i < numFrames; i++) {
-    if (includeManyCommentBlocks) {
-      bytes.addAll(generateCommentBlock());
-    }
+  for (var i = 0; i < numFrames; i++) {
+    bytes.addAll(generateCommentBlock());
     // Add a Graphic Control Extension block.
     bytes.add(0x21);
     bytes.add(0xf9);
@@ -148,9 +144,7 @@ Uint8List _createTestGif({
     bytes.add(0);
     bytes.add(0);
 
-    if (includeManyCommentBlocks) {
-      bytes.addAll(generateCommentBlock());
-    }
+    bytes.addAll(generateCommentBlock());
 
     // Add a Table-Based Image.
     bytes.add(0x2c);
@@ -163,15 +157,13 @@ Uint8List _createTestGif({
     bytes.add(0);
 
     bytes.add(0);
-    const String fakeImageData = 'This is an image';
+    const fakeImageData = 'This is an image';
     bytes.add(fakeImageData.codeUnits.length);
     bytes.addAll(fakeImageData.codeUnits);
     bytes.add(0);
   }
 
-  if (includeManyCommentBlocks) {
-    bytes.addAll(generateCommentBlock());
-  }
+  bytes.addAll(generateCommentBlock());
 
   // Generate trailer.
   bytes.add(0x3b);

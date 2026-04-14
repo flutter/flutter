@@ -35,7 +35,8 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Future<void> _summarizeStats() async {
     final double? framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double? framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
-    _summary = '''
+    _summary =
+        '''
 Produced: ${framesProduced?.toStringAsFixed(1)}fps
 Consumed: ${framesConsumed?.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
@@ -49,7 +50,7 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at .5x speed...';
         _state = FrameState.slow;
         _icon = Icons.stop;
-        channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
+        await channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
         await channel.invokeMethod<void>('stop');
@@ -62,7 +63,7 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at 2x speed...';
         _state = FrameState.fast;
         _icon = Icons.stop;
-        channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
+        await channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
         await channel.invokeMethod<void>('stop');
@@ -92,7 +93,7 @@ Widget builds: $_widgetBuilds''';
     await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
     late DateTime startTime;
-    int tickCount = 0;
+    var tickCount = 0;
     Ticker? ticker;
     ticker = createTicker((Duration time) {
       tickCount += 1;
@@ -104,7 +105,8 @@ Widget builds: $_widgetBuilds''';
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
           debugPrint('Calibrated: frame rate ${_flutterFrameRate.toStringAsFixed(1)}fps.');
-          _summary = '''
+          _summary =
+              '''
 Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.
 Press play to produce texture frames.''';
           _icon = Icons.play_arrow;
@@ -143,14 +145,13 @@ Press play to produce texture frames.''';
             ],
           ),
         ),
-        floatingActionButton:
-            _icon == null
-                ? null
-                : FloatingActionButton(
-                  key: const ValueKey<String>('fab'),
-                  onPressed: _nextState,
-                  child: Icon(_icon),
-                ),
+        floatingActionButton: _icon == null
+            ? null
+            : FloatingActionButton(
+                key: const ValueKey<String>('fab'),
+                onPressed: _nextState,
+                child: Icon(_icon),
+              ),
       ),
     );
   }

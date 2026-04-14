@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollPhysics extends ScrollPhysics {
@@ -28,12 +28,14 @@ class TestScrollPhysics extends ScrollPhysics {
 }
 
 void main() {
+  const kBlueColor = Color(0xFF0000FF);
+
   test('ScrollPhysics applyTo()', () {
-    const TestScrollPhysics a = TestScrollPhysics(name: 'a');
-    const TestScrollPhysics b = TestScrollPhysics(name: 'b');
-    const TestScrollPhysics c = TestScrollPhysics(name: 'c');
-    const TestScrollPhysics d = TestScrollPhysics(name: 'd');
-    const TestScrollPhysics e = TestScrollPhysics(name: 'e');
+    const a = TestScrollPhysics(name: 'a');
+    const b = TestScrollPhysics(name: 'b');
+    const c = TestScrollPhysics(name: 'c');
+    const d = TestScrollPhysics(name: 'd');
+    const e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -62,10 +64,9 @@ void main() {
       decelerationRate: ScrollDecelerationRate.fast,
     );
 
-    String types(ScrollPhysics? value) =>
-        value!.parent == null
-            ? '${value.runtimeType}'
-            : '${value.runtimeType} ${types(value.parent)}';
+    String types(ScrollPhysics? value) => value!.parent == null
+        ? '${value.runtimeType}'
+        : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -110,9 +111,9 @@ void main() {
         devicePixelRatio: 3.0,
       );
 
-      const BouncingScrollPhysics bounce = BouncingScrollPhysics();
-      const ClampingScrollPhysics clamp = ClampingScrollPhysics();
-      const PageScrollPhysics page = PageScrollPhysics();
+      const bounce = BouncingScrollPhysics();
+      const clamp = ClampingScrollPhysics();
+      const page = PageScrollPhysics();
 
       // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
       // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
@@ -224,9 +225,7 @@ void main() {
     });
 
     test('no easing resistance for ScrollDecelerationRate.fast', () {
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(
-        decelerationRate: ScrollDecelerationRate.fast,
-      );
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
       final ScrollMetrics overscrolledPosition = FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
@@ -279,10 +278,8 @@ void main() {
     });
 
     test('frictionFactor', () {
-      const BouncingScrollPhysics mobile = BouncingScrollPhysics();
-      const BouncingScrollPhysics desktop = BouncingScrollPhysics(
-        decelerationRate: ScrollDecelerationRate.fast,
-      );
+      const mobile = BouncingScrollPhysics();
+      const desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
       expect(desktop.frictionFactor(0), 0.26);
       expect(mobile.frictionFactor(0), 0.52);
@@ -296,7 +293,7 @@ void main() {
   });
 
   test('ClampingScrollPhysics assertion test', () {
-    const ClampingScrollPhysics physics = ClampingScrollPhysics();
+    const physics = ClampingScrollPhysics();
     const double pixels = 500;
     final ScrollMetrics position = FixedScrollMetrics(
       pixels: pixels,
@@ -349,22 +346,18 @@ FlutterError
   testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: NestedScrollView(
-            physics: const PageScrollPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
-              ];
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NestedScrollView(
+          physics: const PageScrollPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[SliverToBoxAdapter(child: Container(height: 300, color: kBlueColor))];
+          },
+          body: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Index $index');
             },
-            body: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Index $index');
-              },
-              itemCount: 100,
-            ),
+            itemCount: 100,
           ),
         ),
       ),

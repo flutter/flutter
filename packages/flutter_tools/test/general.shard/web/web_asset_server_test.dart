@@ -2,17 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/isolated/devfs_web.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/isolated/release_asset_server.dart';
+import 'package:flutter_tools/src/isolated/web_asset_server.dart';
+import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
 
-const List<int> kTransparentImage = <int>[
+const kTransparentImage = <int>[
   0x89,
   0x50,
   0x4E,
@@ -101,7 +107,7 @@ void main() {
   testWithoutContext(
     'release asset server serves correct mime type and content length for png',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -128,7 +134,7 @@ void main() {
   testWithoutContext(
     'release asset server serves correct mime type and content length for JavaScript',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -155,7 +161,7 @@ void main() {
   testWithoutContext(
     'release asset server serves correct mime type and content length for html',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -180,7 +186,7 @@ void main() {
   );
 
   testWithoutContext('release asset server serves content from flutter root', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(
+    final assetServer = ReleaseAssetServer(
       Uri.base,
       fileSystem: fileSystem,
       platform: platform,
@@ -199,7 +205,7 @@ void main() {
   });
 
   testWithoutContext('release asset server serves content from project directory', () async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(
+    final assetServer = ReleaseAssetServer(
       Uri.base,
       fileSystem: fileSystem,
       platform: platform,
@@ -220,7 +226,7 @@ void main() {
   testWithoutContext(
     'release asset server serves html content with COOP/COEP headers when specified',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -237,7 +243,7 @@ void main() {
 
       expect(response.statusCode, HttpStatus.ok);
       final Map<String, String> headers = response.headers;
-      for (final MapEntry<String, String> entry in kMultiThreadedHeaders.entries) {
+      for (final MapEntry<String, String> entry in kCrossOriginIsolationHeaders.entries) {
         expect(headers, containsPair(entry.key, entry.value));
       }
     },
@@ -246,7 +252,7 @@ void main() {
   testWithoutContext(
     'release asset server serves html content without COOP/COEP headers when specified',
     () async {
-      final ReleaseAssetServer assetServer = ReleaseAssetServer(
+      final assetServer = ReleaseAssetServer(
         Uri.base,
         fileSystem: fileSystem,
         platform: platform,
@@ -267,4 +273,172 @@ void main() {
       expect(headers.containsKey('Cross-Origin-Embedder-Policy'), false);
     },
   );
+
+  group('WebAssetServer', () {
+    testWithoutContext('serves with COOP/COEP headers when crossOriginIsolation is true', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: true,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
+      expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], ['credentialless']);
+    });
+
+    testWithoutContext(
+      'serves without COOP/COEP headers when crossOriginIsolation is false',
+      () async {
+        final WebAssetServer server = await WebAssetServer.start(
+          null,
+          null,
+          false,
+          false,
+          false,
+          BuildInfo.debug,
+          false,
+          const DartDevelopmentServiceConfiguration(enable: false),
+          Uri.base,
+          null,
+          crossOriginIsolation: false,
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webRenderer: WebRendererMode.canvaskit,
+          isWasm: false,
+          useLocalCanvasKit: false,
+          testMode: true,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        );
+
+        expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
+        expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], isNull);
+      },
+    );
+
+    testWithoutContext('serves with COOP/COEP headers when web renderer is skwasm', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: true,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.skwasm,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
+      expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], ['credentialless']);
+    });
+
+    testWithoutContext(
+      'serves without COOP/COEP headers when web renderer is not skwasm',
+      () async {
+        final WebAssetServer server = await WebAssetServer.start(
+          null,
+          null,
+          false,
+          false,
+          false,
+          BuildInfo.debug,
+          false,
+          const DartDevelopmentServiceConfiguration(enable: false),
+          Uri.base,
+          null,
+          crossOriginIsolation: false,
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webRenderer: WebRendererMode.canvaskit,
+          isWasm: false,
+          useLocalCanvasKit: false,
+          testMode: true,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        );
+
+        expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
+        expect(server.defaultResponseHeaders['Cross-Origin-Embedder-Policy'], isNull);
+      },
+    );
+
+    testWithoutContext('sets basePath from baseHref config', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost', baseHref: '/preview/'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      expect(server.basePath, 'preview');
+    });
+
+    testWithoutContext('basePath defaults to empty when baseHref is not provided', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      expect(server.basePath, isEmpty);
+    });
+  });
 }

@@ -21,7 +21,7 @@ void main() {
 void doTests() {
   group('DomManager', () {
     test('DOM tree looks right', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
 
       // Check tag names.
 
@@ -42,8 +42,9 @@ void doTests() {
       expect(rootChildren[2], domManager.semanticsHost);
       expect(rootChildren[3].tagName, equalsIgnoringCase('style'));
 
-      final List<DomElement> shadowChildren =
-          domManager.renderingHost.childNodes.cast<DomElement>().toList();
+      final List<DomElement> shadowChildren = domManager.renderingHost.childNodes
+          .cast<DomElement>()
+          .toList();
       expect(shadowChildren.length, 2);
       expect(shadowChildren[0], domManager.sceneHost);
       expect(shadowChildren[1].tagName, equalsIgnoringCase('style'));
@@ -52,7 +53,7 @@ void doTests() {
     test(
       'hide placeholder text for textfield',
       () {
-        final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+        final domManager = DomManager(devicePixelRatio: 3.0);
         domDocument.body!.append(domManager.rootElement);
 
         final DomHTMLInputElement regularTextField = createDomHTMLInputElement();
@@ -101,7 +102,7 @@ void doTests() {
     });
 
     test('Initializes and attaches a shadow root', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
 
       expect(domManager.renderingHost.isA<DomShadowRoot>(), isTrue);
       expect(domManager.renderingHost.host, domManager.platformViewsHost);
@@ -118,7 +119,7 @@ void doTests() {
     });
 
     test('Attaches a stylesheet to the shadow root', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
       final DomElement? style = domManager.renderingHost.querySelector('#flt-internals-stylesheet');
 
       expect(style, isNotNull);
@@ -127,7 +128,7 @@ void doTests() {
     });
 
     test('setScene', () {
-      final DomManager domManager = DomManager(devicePixelRatio: 3.0);
+      final domManager = DomManager(devicePixelRatio: 3.0);
 
       final DomElement sceneHost = domManager.renderingHost.querySelector('flt-scene-host')!;
 

@@ -7,6 +7,8 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CheckBoxListTile extends UseCase {
+  CheckBoxListTile() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'CheckBoxListTile';
 

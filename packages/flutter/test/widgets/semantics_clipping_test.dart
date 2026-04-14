@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,7 +9,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('SemanticNode.rect is clipped', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -63,7 +62,7 @@ void main() {
   testWidgets(
     'SemanticsNode is not removed if out of bounds and merged into something within bounds',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
         const Directionality(

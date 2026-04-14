@@ -68,7 +68,9 @@ class _ListDemoState extends State<ListDemo> {
       BuildContext bottomSheetContext,
     ) {
       return Container(
-        decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black26))),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.black26)),
+        ),
         child: ListView(
           shrinkWrap: true,
           primary: false,
@@ -78,10 +80,9 @@ class _ListDemoState extends State<ListDemo> {
                 dense: true,
                 title: const Text('One-line'),
                 trailing: Radio<_MaterialListType>(
-                  value:
-                      _showAvatars!
-                          ? _MaterialListType.oneLineWithAvatar
-                          : _MaterialListType.oneLine,
+                  value: _showAvatars!
+                      ? _MaterialListType.oneLineWithAvatar
+                      : _MaterialListType.oneLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 ),
@@ -210,19 +211,21 @@ class _ListDemoState extends State<ListDemo> {
       child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
         dense: _dense,
-        leading:
-            _showAvatars != null ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
+        leading: _showAvatars != null
+            ? ExcludeSemantics(child: CircleAvatar(child: Text(item)))
+            : null,
         title: Text('This item represents $item.'),
         subtitle: subtitle != null ? Text(subtitle) : null,
-        trailing:
-            _showIcons != null ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+        trailing: _showIcons != null
+            ? Icon(Icons.info, color: Theme.of(context).disabledColor)
+            : null,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final String layoutText = _dense != null ? ' \u2013 Dense' : '';
+    final layoutText = _dense != null ? ' \u2013 Dense' : '';
     final String? itemTypeText = switch (_itemType) {
       _MaterialListType.oneLine || _MaterialListType.oneLineWithAvatar => 'Single-line',
       _MaterialListType.twoLine => 'Two-line',

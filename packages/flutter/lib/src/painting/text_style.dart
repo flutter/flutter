@@ -93,15 +93,15 @@ const String _kColorBackgroundWarning =
 ///     children: <TextSpan>[
 ///       TextSpan(
 ///         text: "You don't have the votes.\n",
-///         style: TextStyle(color: Colors.black.withOpacity(0.6)),
+///         style: TextStyle(color: Colors.black.withValues(alpha: 0.6)),
 ///       ),
 ///       TextSpan(
 ///         text: "You don't have the votes!\n",
-///         style: TextStyle(color: Colors.black.withOpacity(0.8)),
+///         style: TextStyle(color: Colors.black.withValues(alpha: 0.8)),
 ///       ),
 ///       TextSpan(
 ///         text: "You're gonna need congressional approval and you don't have the votes!\n",
-///         style: TextStyle(color: Colors.black.withOpacity(1.0)),
+///         style: TextStyle(color: Colors.black.withValues(alpha: 1.0)),
 ///       ),
 ///     ],
 ///   ),
@@ -598,10 +598,9 @@ class TextStyle with Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String>? get fontFamilyFallback =>
-      _package == null
-          ? _fontFamilyFallback
-          : _fontFamilyFallback?.map((String str) => 'packages/$_package/$str').toList();
+  List<String>? get fontFamilyFallback => _package == null
+      ? _fontFamilyFallback
+      : _fontFamilyFallback?.map((String str) => 'packages/$_package/$str').toList();
   final List<String>? _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
@@ -849,7 +848,7 @@ class TextStyle with Diagnosticable {
   // "packages/$_package/" prefix.
   String? get _fontFamily {
     if (_package != null) {
-      final String fontFamilyPrefix = 'packages/$_package/';
+      final fontFamilyPrefix = 'packages/$_package/';
       assert(fontFamily?.startsWith(fontFamilyPrefix) ?? true);
       return fontFamily?.substring(fontFamilyPrefix.length);
     }
@@ -908,10 +907,9 @@ class TextStyle with Diagnosticable {
     return TextStyle(
       inherit: inherit ?? this.inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
-      backgroundColor:
-          this.background == null && background == null
-              ? backgroundColor ?? this.backgroundColor
-              : null,
+      backgroundColor: this.background == null && background == null
+          ? backgroundColor ?? this.backgroundColor
+          : null,
       fontSize: fontSize ?? this.fontSize,
       fontWeight: fontWeight ?? this.fontWeight,
       fontStyle: fontStyle ?? this.fontStyle,
@@ -1019,22 +1017,21 @@ class TextStyle with Diagnosticable {
       fontFamily: fontFamily ?? _fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
-      fontWeight:
-          fontWeight == null
-              ? null
-              : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(
-                0,
-                FontWeight.values.length - 1,
-              )],
+      fontWeight: fontWeight == null
+          ? null
+          : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(
+              0,
+              FontWeight.values.length - 1,
+            )],
       fontStyle: fontStyle ?? this.fontStyle,
-      letterSpacing:
-          letterSpacing == null ? null : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
+      letterSpacing: letterSpacing == null
+          ? null
+          : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline ?? this.textBaseline,
-      height:
-          (height == null || height == ui.kTextHeightNone)
-              ? height
-              : height! * heightFactor + heightDelta,
+      height: (height == null || height == ui.kTextHeightNone)
+          ? height
+          : height! * heightFactor + heightDelta,
       leadingDistribution: leadingDistribution ?? this.leadingDistribution,
       locale: locale ?? this.locale,
       foreground: foreground,
@@ -1045,10 +1042,9 @@ class TextStyle with Diagnosticable {
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
-      decorationThickness:
-          decorationThickness == null
-              ? null
-              : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
+      decorationThickness: decorationThickness == null
+          ? null
+          : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
       overflow: overflow ?? this.overflow,
       package: package ?? _package,
       debugLabel: modifiedDebugLabel,
@@ -1223,7 +1219,7 @@ class TextStyle with Diagnosticable {
         return true;
       }
 
-      final List<String> nullFields = <String>[
+      final nullFields = <String>[
         if (a.foreground == null && b.foreground == null && a.color == null && b.color == null)
           'color',
         if (a.background == null &&
@@ -1288,10 +1284,9 @@ class TextStyle with Diagnosticable {
     return TextStyle(
       inherit: t < 0.5 ? a.inherit : b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
-      backgroundColor:
-          a.background == null && b.background == null
-              ? Color.lerp(a.backgroundColor, b.backgroundColor, t)
-              : null,
+      backgroundColor: a.background == null && b.background == null
+          ? Color.lerp(a.backgroundColor, b.backgroundColor, t)
+          : null,
       fontSize: ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
       fontWeight: FontWeight.lerp(a.fontWeight, b.fontWeight, t),
       fontStyle: t < 0.5 ? a.fontStyle : b.fontStyle,
@@ -1305,18 +1300,16 @@ class TextStyle with Diagnosticable {
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
       leadingDistribution: t < 0.5 ? a.leadingDistribution : b.leadingDistribution,
       locale: t < 0.5 ? a.locale : b.locale,
-      foreground:
-          (a.foreground != null || b.foreground != null)
-              ? t < 0.5
-                  ? a.foreground ?? (Paint()..color = a.color!)
-                  : b.foreground ?? (Paint()..color = b.color!)
-              : null,
-      background:
-          (a.background != null || b.background != null)
-              ? t < 0.5
-                  ? a.background ?? (Paint()..color = a.backgroundColor!)
-                  : b.background ?? (Paint()..color = b.backgroundColor!)
-              : null,
+      foreground: (a.foreground != null || b.foreground != null)
+          ? t < 0.5
+                ? a.foreground ?? (Paint()..color = a.color!)
+                : b.foreground ?? (Paint()..color = b.color!)
+          : null,
+      background: (a.background != null || b.background != null)
+          ? t < 0.5
+                ? a.background ?? (Paint()..color = a.backgroundColor!)
+                : b.background ?? (Paint()..color = b.backgroundColor!)
+          : null,
       shadows: ui.Shadow.lerpList(a.shadows, b.shadows, t),
       fontFeatures: t < 0.5 ? a.fontFeatures : b.fontFeatures,
       fontVariations: lerpFontVariations(a.fontVariations, b.fontVariations, t),
@@ -1426,23 +1419,22 @@ class TextStyle with Diagnosticable {
       fontSize: textScaler.scale(fontSize ?? this.fontSize ?? kDefaultFontSize),
       height: height ?? this.height,
       textHeightBehavior: effectiveTextHeightBehavior,
-      strutStyle:
-          strutStyle == null
-              ? null
-              : ui.StrutStyle(
-                fontFamily: strutStyle.fontFamily,
-                fontFamilyFallback: strutStyle.fontFamilyFallback,
-                fontSize: switch (strutStyle.fontSize) {
-                  null => null,
-                  final double unscaled => textScaler.scale(unscaled),
-                },
-                height: strutStyle.height,
-                leading: strutStyle.leading,
-                leadingDistribution: strutStyle.leadingDistribution,
-                fontWeight: strutStyle.fontWeight,
-                fontStyle: strutStyle.fontStyle,
-                forceStrutHeight: strutStyle.forceStrutHeight,
-              ),
+      strutStyle: strutStyle == null
+          ? null
+          : ui.StrutStyle(
+              fontFamily: strutStyle.fontFamily,
+              fontFamilyFallback: strutStyle.fontFamilyFallback,
+              fontSize: switch (strutStyle.fontSize) {
+                null => null,
+                final double unscaled => textScaler.scale(unscaled),
+              },
+              height: strutStyle.height,
+              leading: strutStyle.leading,
+              leadingDistribution: strutStyle.leadingDistribution,
+              fontWeight: strutStyle.fontWeight,
+              fontStyle: strutStyle.fontStyle,
+              forceStrutHeight: strutStyle.forceStrutHeight,
+            ),
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -1575,7 +1567,7 @@ class TextStyle with Diagnosticable {
     if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
     }
-    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
+    final styles = <DiagnosticsNode>[
       ColorProperty('${prefix}color', color, defaultValue: null),
       ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null),
       StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
@@ -1616,7 +1608,7 @@ class TextStyle with Diagnosticable {
         decorationColor != null ||
         decorationStyle != null ||
         decorationThickness != null) {
-      final List<String> decorationDescription = <String>[];
+      final decorationDescription = <String>[];
       if (decorationStyle != null) {
         decorationDescription.add(decorationStyle!.name);
       }
@@ -1744,10 +1736,10 @@ List<FontVariation>? lerpFontVariations(List<FontVariation>? a, List<FontVariati
     return t < 0.5 ? a : b;
   }
   assert(a.isNotEmpty && b.isNotEmpty);
-  final List<FontVariation> result = <FontVariation>[];
+  final result = <FontVariation>[];
   // First, try the efficient O(N) solution in the event that
   // the lists are compatible.
-  int index = 0;
+  var index = 0;
   final int minLength = a.length < b.length ? a.length : b.length;
   for (; index < minLength; index += 1) {
     if (a[index].axis != b[index].axis) {
@@ -1762,16 +1754,16 @@ List<FontVariation>? lerpFontVariations(List<FontVariation>? a, List<FontVariati
     // use the efficient approach.
     final Set<String> axes = HashSet<String>();
     final Map<String, FontVariation> aVariations = HashMap<String, FontVariation>();
-    for (int indexA = index; indexA < a.length; indexA += 1) {
+    for (var indexA = index; indexA < a.length; indexA += 1) {
       aVariations[a[indexA].axis] = a[indexA];
       axes.add(a[indexA].axis);
     }
     final Map<String, FontVariation> bVariations = HashMap<String, FontVariation>();
-    for (int indexB = index; indexB < b.length; indexB += 1) {
+    for (var indexB = index; indexB < b.length; indexB += 1) {
       bVariations[b[indexB].axis] = b[indexB];
       axes.add(b[indexB].axis);
     }
-    for (final String axis in axes) {
+    for (final axis in axes) {
       final FontVariation? variation = FontVariation.lerp(aVariations[axis], bVariations[axis], t);
       if (variation != null) {
         result.add(variation);

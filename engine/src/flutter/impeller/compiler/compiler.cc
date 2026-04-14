@@ -22,6 +22,8 @@
 #include "impeller/compiler/types.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
+#include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace impeller {
 namespace compiler {
@@ -30,6 +32,7 @@ namespace {
 constexpr const char* kEGLImageExternalExtension = "GL_OES_EGL_image_external";
 constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
+constexpr int kVerboseErrorLineThreshold = 6;
 }  // namespace
 
 // This value should be <= 7372. UBOs can be larger on some devices but a
@@ -240,7 +243,6 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
     case TargetPlatform::kRuntimeStageVulkan:
       compiler = CreateVulkanCompiler(ir, source_options);
       break;
-    case TargetPlatform::kUnknown:
     case TargetPlatform::kOpenGLES:
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
@@ -249,6 +251,9 @@ static CompilerBackend CreateCompiler(const spirv_cross::ParsedIR& ir,
       break;
     case TargetPlatform::kSkSL:
       compiler = CreateSkSLCompiler(ir, source_options);
+      break;
+    case TargetPlatform::kUnknown:
+      FML_UNREACHABLE();
   }
   if (!compiler) {
     return {};
@@ -363,6 +368,11 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
 
       spirv_options.target = target;
       spirv_options.macro_definitions.push_back("IMPELLER_GRAPHICS_BACKEND");
+      if (source_options.target_platform == TargetPlatform::kRuntimeStageGLES ||
+          source_options.target_platform ==
+              TargetPlatform::kRuntimeStageGLES3) {
+        spirv_options.macro_definitions.push_back("IMPELLER_TARGET_OPENGLES");
+      }
     } break;
     case TargetPlatform::kSkSL: {
       SPIRVCompilerTargetEnv target;
@@ -440,8 +450,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   // We need to invoke the compiler even if we don't use the SL mapping later
   // for Vulkan. The reflector needs information that is only valid after a
   // successful compilation call.
+  auto sl_compilation_result_str = sl_compiler.GetCompiler()->compile();
   auto sl_compilation_result =
-      CreateMappingWithString(sl_compiler.GetCompiler()->compile());
+      CreateMappingWithString(sl_compilation_result_str);
 
   // If the target is Vulkan, our shading language is SPIRV which we already
   // have. We just need to strip it of debug information. If it isn't, we need
@@ -461,6 +472,11 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
     return;
   }
 
+  if (sl_compiler.GetType() == CompilerBackend::Type::kSkSL &&
+      !ValidateSkSLResult(sl_compilation_result_str).ok()) {
+    return;
+  }
+
   reflector_ = std::make_unique<Reflector>(std::move(reflector_options),  //
                                            parsed_ir,                     //
                                            GetSLShaderSource(),           //
@@ -474,6 +490,59 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   }
 
   is_valid_ = true;
+}
+
+absl::Status Compiler::ValidateSkSLResult(const std::string& sksl) {
+  // Validate compiled SkSL by trying to create a SkRuntimeEffect.
+  SkRuntimeEffect::Result result =
+      SkRuntimeEffect::MakeForShader(SkString(sksl));
+
+  if (result.effect != nullptr) {
+    return absl::OkStatus();
+  }
+
+  // SkSL is invalid. Output the SkSL and the error.
+
+  std::stringstream output;
+  bool is_truncated = false;
+
+  // Lambda to append text to the output stream, truncating if needed.
+  auto append_and_truncate = [&](const std::string& text) {
+    std::stringstream text_stream(text);
+    std::string line;
+    int lines_outputted = 0;
+    while (std::getline(text_stream, line)) {
+      output << "\n        " << line;
+      if (++lines_outputted == kVerboseErrorLineThreshold) {
+        break;
+      }
+    }
+    if (lines_outputted == kVerboseErrorLineThreshold) {
+      auto full_line_count = std::count(text.begin(), text.end(), '\n') + 1;
+      output << "\n... (truncated " << full_line_count - lines_outputted
+             << " lines)";
+      is_truncated = true;
+    }
+  };
+
+  output << "\nCompiled to invalid SkSL:";
+  append_and_truncate(sksl);
+  output << "\nSkSL Error:";
+  std::string error_text(result.errorText.c_str());
+  append_and_truncate(error_text);
+
+  // Output maybe-truncated SkSL and error to error_stream_.
+  COMPILER_ERROR(error_stream_) << output.str();
+
+  // If the output was truncated, output the full SkSL and error to
+  // verbose_error_stream_.
+  if (is_truncated) {
+    COMPILER_ERROR(verbose_error_stream_) << "\nCompiled to invalid SkSL:\n"
+                                          << sksl << "\nSkSL Error:\n"
+                                          << error_text;
+  }
+
+  return absl::InternalError("SkSL validation failed.");
 }
 
 Compiler::~Compiler() = default;
@@ -500,6 +569,10 @@ std::string Compiler::GetErrorMessages() const {
   return error_stream_.str();
 }
 
+std::string Compiler::GetVerboseErrorMessages() const {
+  return verbose_error_stream_.str();
+}
+
 const std::vector<std::string>& Compiler::GetIncludedFileNames() const {
   return included_file_names_;
 }
@@ -520,7 +593,7 @@ static std::string JoinStrings(std::vector<std::string> items,
 
 std::string Compiler::GetDependencyNames(const std::string& separator) const {
   std::vector<std::string> dependencies = included_file_names_;
-  dependencies.push_back(options_.file_name);
+  dependencies.push_back(Utf8FromPath(options_.file_name));
   return JoinStrings(dependencies, separator);
 }
 

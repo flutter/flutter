@@ -17,7 +17,9 @@ class TapAndDragToZoomApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: TapAndDragToZoomWidget(child: MyBoxWidget()))),
+      home: Scaffold(
+        body: Center(child: TapAndDragToZoomWidget(child: MyBoxWidget())),
+      ),
     );
   }
 }
@@ -62,8 +64,10 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
   }
 
   void _zoomLogic(Offset currentDragPosition) {
-    final double dx = (_previousDragPosition!.dx - currentDragPosition.dx).abs();
-    final double dy = (_previousDragPosition!.dy - currentDragPosition.dy).abs();
+    final double dx = (_previousDragPosition!.dx - currentDragPosition.dx)
+        .abs();
+    final double dy = (_previousDragPosition!.dy - currentDragPosition.dy)
+        .abs();
 
     if (dx > dy) {
       // Ignore horizontal drags.

@@ -34,7 +34,7 @@ void main() {
     expect(TestValueKey<String>(nonconst('')) == TestValueKey<dynamic>(nonconst('')), isFalse);
 
     expect(UniqueKey() == UniqueKey(), isFalse);
-    final UniqueKey k = UniqueKey();
+    final k = UniqueKey();
     expect(UniqueKey() == UniqueKey(), isFalse);
     expect(k == k, isTrue);
 

@@ -227,6 +227,8 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   last_entry_point_args_ = configuration.GetEntrypointArgs();
 #endif
 
+  last_engine_id_ = configuration.GetEngineId();
+
   UpdateAssetManager(configuration.GetAssetManager());
 
   if (runtime_controller_->IsRootIsolateRunning()) {
@@ -301,11 +303,6 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
 
 void Engine::NotifyIdle(fml::TimeDelta deadline) {
   runtime_controller_->NotifyIdle(deadline);
-}
-
-void Engine::NotifyDestroyed() {
-  TRACE_EVENT0("flutter", "Engine::NotifyDestroyed");
-  runtime_controller_->NotifyDestroyed();
 }
 
 std::optional<uint32_t> Engine::GetUIIsolateReturnCode() {
@@ -407,7 +404,7 @@ bool Engine::HandleNavigationPlatformMessage(
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method->value != "setInitialRoute") {
     return false;
@@ -426,7 +423,7 @@ bool Engine::HandleLocalizationPlatformMessage(PlatformMessage* message) {
   if (document.HasParseError() || !document.IsObject()) {
     return false;
   }
-  auto root = document.GetObject();
+  auto root = document.GetObj();
   auto method = root.FindMember("method");
   if (method == root.MemberEnd()) {
     return false;
@@ -532,6 +529,14 @@ void Engine::UpdateSemantics(int64_t view_id,
                                     std::move(actions));
 }
 
+void Engine::SetApplicationLocale(std::string locale) {
+  delegate_.OnEngineSetApplicationLocale(std::move(locale));
+}
+
+void Engine::SetSemanticsTreeEnabled(bool enabled) {
+  delegate_.OnEngineSetSemanticsTreeEnabled(enabled);
+}
+
 void Engine::HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
@@ -616,6 +621,10 @@ const std::string& Engine::GetLastEntrypointLibrary() const {
 
 const std::vector<std::string>& Engine::GetLastEntrypointArgs() const {
   return last_entry_point_args_;
+}
+
+std::optional<int64_t> Engine::GetLastEngineId() const {
+  return last_engine_id_;
 }
 
 // |RuntimeDelegate|

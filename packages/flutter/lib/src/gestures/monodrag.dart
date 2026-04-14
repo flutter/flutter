@@ -485,7 +485,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     required bool positive,
     required _DragDirection axis,
   }) {
-    double sum = 0.0;
+    var sum = 0.0;
 
     if (!_moveDeltaBeforeFrame.containsKey(pointer)) {
       return sum;
@@ -639,7 +639,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final int pointerCount = _acceptedActivePointers.length;
     assert(pointerCount >= 1);
 
-    double sum = delta;
+    var sum = delta;
     for (final Offset offset in _moveDeltaBeforeFrame.values) {
       if (axis == _DragDirection.horizontal) {
         sum += offset.dx;
@@ -671,20 +671,18 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     }
     if ((event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) &&
         _shouldTrackMoveEvent(event.pointer)) {
-      final Offset delta =
-          (event is PointerMoveEvent) ? event.delta : (event as PointerPanZoomUpdateEvent).panDelta;
-      final Offset localDelta =
-          (event is PointerMoveEvent)
-              ? event.localDelta
-              : (event as PointerPanZoomUpdateEvent).localPanDelta;
-      final Offset position =
-          (event is PointerMoveEvent)
-              ? event.position
-              : (event.position + (event as PointerPanZoomUpdateEvent).pan);
-      final Offset localPosition =
-          (event is PointerMoveEvent)
-              ? event.localPosition
-              : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
+      final Offset delta = (event is PointerMoveEvent)
+          ? event.delta
+          : (event as PointerPanZoomUpdateEvent).panDelta;
+      final Offset localDelta = (event is PointerMoveEvent)
+          ? event.localDelta
+          : (event as PointerPanZoomUpdateEvent).localPanDelta;
+      final Offset position = (event is PointerMoveEvent)
+          ? event.position
+          : (event.position + (event as PointerPanZoomUpdateEvent).pan);
+      final Offset localPosition = (event is PointerMoveEvent)
+          ? event.localPosition
+          : (event.localPosition + (event as PointerPanZoomUpdateEvent).localPan);
       _lastPosition = OffsetPair(local: localPosition, global: position);
       final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
       switch (_state) {
@@ -693,8 +691,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           _lastPendingEventTimestamp = event.timeStamp;
           _lastTransform = event.transform;
           final Offset movedLocally = _getDeltaForDetails(localDelta);
-          final Matrix4? localToGlobalTransform =
-              event.transform == null ? null : Matrix4.tryInvert(event.transform!);
+          final Matrix4? localToGlobalTransform = event.transform == null
+              ? null
+              : Matrix4.tryInvert(event.transform!);
           _globalDistanceMoved +=
               PointerEvent.transformDeltaViaPositions(
                 transform: localToGlobalTransform,
@@ -717,6 +716,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             primaryDelta: _getPrimaryValueFromOffset(resolvedDelta),
             globalPosition: position,
             localPosition: localPosition,
+            pointer: event.pointer,
           );
       }
       _recordMoveDeltaForMultitouch(event.pointer, localDelta);
@@ -785,7 +785,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkDown() {
     if (onDown != null) {
-      final DragDownDetails details = DragDownDetails(
+      final details = DragDownDetails(
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
       );
@@ -821,7 +821,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         untransformedDelta: localUpdateDelta,
         transform: localToGlobal,
       );
-      final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
+      final updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
       final OffsetPair correctedPosition =
           _initialPosition + updateDelta; // Only adds delta for down behaviour
       _checkUpdate(
@@ -830,6 +830,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
         globalPosition: correctedPosition.global,
         localPosition: correctedPosition.local,
+        pointer: pointer,
       );
     }
     // This acceptGesture might have been called only for one pointer, instead
@@ -840,7 +841,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _checkStart(Duration? timestamp, int pointer) {
     if (onStart != null) {
-      final DragStartDetails details = DragStartDetails(
+      final details = DragStartDetails(
         sourceTimeStamp: timestamp,
         globalPosition: _initialPosition.global,
         localPosition: _initialPosition.local,
@@ -856,14 +857,16 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     double? primaryDelta,
     required Offset globalPosition,
     Offset? localPosition,
+    required int pointer,
   }) {
     if (onUpdate != null) {
-      final DragUpdateDetails details = DragUpdateDetails(
+      final details = DragUpdateDetails(
         sourceTimeStamp: sourceTimeStamp,
         delta: delta,
         primaryDelta: primaryDelta,
         globalPosition: globalPosition,
         localPosition: localPosition,
+        kind: getKindForPointer(pointer),
       );
       invokeCallback<void>('onUpdate', () => onUpdate!(details));
     }
@@ -883,10 +886,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       debugReport = () => 'Could not estimate velocity.';
     } else {
       details = considerFling(estimate, tracker.kind);
-      debugReport =
-          (details != null)
-              ? () => '$estimate; fling at ${details!.velocity}.'
-              : () => '$estimate; judged to not be a fling.';
+      debugReport = (details != null)
+          ? () => '$estimate; fling at ${details!.velocity}.'
+          : () => '$estimate; judged to not be a fling.';
     }
     details ??= DragEndDetails(
       primaryVelocity: 0.0,

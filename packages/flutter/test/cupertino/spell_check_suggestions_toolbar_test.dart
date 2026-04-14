@@ -20,10 +20,9 @@ void main() {
             home: Center(
               child: CupertinoSpellCheckSuggestionsToolbar(
                 anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
-                buttonItems:
-                    suggestions.map((String string) {
-                      return ContextMenuButtonItem(onPressed: () {}, label: string);
-                    }).toList(),
+                buttonItems: suggestions.map((String string) {
+                  return ContextMenuButtonItem(onPressed: () {}, label: string);
+                }).toList(),
               ),
             ),
           ),
@@ -39,7 +38,7 @@ void main() {
   );
 
   test('buildSuggestionButtons only considers the first three suggestions', () {
-    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
+    final editableTextState = _FakeEditableTextState(
       suggestions: <String>['hello', 'yellow', 'yell', 'yeller'],
     );
     final List<ContextMenuButtonItem>? buttonItems =
@@ -58,9 +57,9 @@ void main() {
   testWidgets(
     'buildButtonItems builds a disabled "No Replacements Found" button when no suggestions',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(CupertinoApp(home: _FakeEditableText(focusNode, controller)));
       final _FakeEditableTextState editableTextState = tester.state(find.byType(_FakeEditableText));
@@ -73,6 +72,24 @@ void main() {
       expect(buttonItems.first.onPressed, isNull);
     },
   );
+
+  testWidgets('CupertinoSpellCheckSuggestionsToolbar does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoSpellCheckSuggestionsToolbar(
+              anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset(1, 1)),
+              buttonItems: const <ContextMenuButtonItem>[],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoSpellCheckSuggestionsToolbar)), Size.zero);
+  });
 }
 
 class _FakeEditableText extends EditableText {

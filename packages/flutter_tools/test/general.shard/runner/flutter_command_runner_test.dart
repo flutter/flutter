@@ -22,8 +22,8 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
-const String _kFlutterRoot = '/flutter/flutter';
-const String _kProjectRoot = '/project';
+const _kFlutterRoot = '/flutter/flutter';
+const _kProjectRoot = '/project';
 
 void main() {
   group('FlutterCommandRunner', () {
@@ -55,9 +55,8 @@ void main() {
       testUsingContext(
         'checks that Flutter installation is up-to-date',
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy']);
 
@@ -76,9 +75,8 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with --machine flag',
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy', '--machine', '--version']);
 
@@ -96,10 +94,10 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag())
+          final runner =
+              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag(verboseHelp: false))
                   as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy-with-machine', '--machine']);
 
@@ -117,9 +115,8 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with CI=true in environment',
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy', '--version']);
 
@@ -137,9 +134,8 @@ void main() {
       testUsingContext(
         'checks that Flutter installation is up-to-date with CI=true and --machine when explicit --version-check',
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy', '--version', '--machine', '--version-check']);
 
@@ -158,9 +154,8 @@ void main() {
         'checks that Flutter installation is up-to-date if shell completion to terminal',
         () async {
           final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(command) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(command) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['bash-completion']);
 
@@ -180,9 +175,8 @@ void main() {
         'does not check that Flutter installation is up-to-date if redirecting shell completion',
         () async {
           final FlutterCommand command = DummyFlutterCommand(name: 'bash-completion');
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(command) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(command) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['bash-completion']);
 
@@ -201,9 +195,8 @@ void main() {
       testUsingContext(
         'Fetches tags when --version is used',
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-          final FakeFlutterVersion version = globals.flutterVersion as FakeFlutterVersion;
+          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['--version']);
           expect(version.didFetchTagsAndUpdate, true);
@@ -233,8 +226,7 @@ void main() {
         testUsingContext(
           'sets DevtoolsLauncher.printDtdUri to false when not present',
           () async {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             await runner.run(<String>[]);
             expect(DevtoolsLauncher.instance!.printDtdUri, false);
           },
@@ -246,8 +238,7 @@ void main() {
         testUsingContext(
           'sets DevtoolsLauncher.printDtdUri to true when present',
           () async {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
             expect(DevtoolsLauncher.instance!.printDtdUri, true);
           },
@@ -258,10 +249,9 @@ void main() {
       });
 
       testUsingContext(
-        "Doesn't crash on invalid .packages file",
+        "Doesn't crash on invalid package_config.json file",
         () async {
-          final FlutterCommandRunner runner =
-              createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
           fileSystem.file('pubspec.yaml').createSync();
           fileSystem.directory('.dart_tool').childFile('package_config.json')
             ..createSync(recursive: true)
@@ -308,10 +298,11 @@ void main() {
         testUsingContext(
           '',
           () {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            final List<String> packagePaths =
-                runner.getRepoPackages().map((Directory d) => d.path).toList();
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final List<String> packagePaths = runner
+                .getRepoPackages()
+                .map((Directory d) => d.path)
+                .toList();
             expect(packagePaths, <String>[
               fileSystem
                   .directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
@@ -333,9 +324,8 @@ void main() {
         testUsingContext(
           'checks that output wrapping is turned on when writing to a terminal',
           () async {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final fakeCommand = FakeFlutterCommand();
             runner.addCommand(fakeCommand);
             await runner.run(<String>['fake']);
             expect(fakeCommand.preferences.wrapText, isTrue);
@@ -352,9 +342,8 @@ void main() {
         testUsingContext(
           'checks that output wrapping is turned off when not writing to a terminal',
           () async {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final fakeCommand = FakeFlutterCommand();
             runner.addCommand(fakeCommand);
             await runner.run(<String>['fake']);
             expect(fakeCommand.preferences.wrapText, isFalse);
@@ -371,9 +360,8 @@ void main() {
         testUsingContext(
           'checks that output wrapping is turned off when set on the command line and writing to a terminal',
           () async {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final fakeCommand = FakeFlutterCommand();
             runner.addCommand(fakeCommand);
             await runner.run(<String>['--no-wrap', 'fake']);
             expect(fakeCommand.preferences.wrapText, isFalse);
@@ -390,9 +378,8 @@ void main() {
         testUsingContext(
           'checks that output wrapping is turned on when set on the command line, but not writing to a terminal',
           () async {
-            final FlutterCommandRunner runner =
-                createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final fakeCommand = FakeFlutterCommand();
             runner.addCommand(fakeCommand);
             await runner.run(<String>['--wrap', 'fake']);
             expect(fakeCommand.preferences.wrapText, isTrue);
@@ -444,8 +431,8 @@ class FakeStdio extends Stdio {
 }
 
 final class _FlutterCommandWithItsOwnMachineFlag extends FlutterCommand {
-  _FlutterCommandWithItsOwnMachineFlag() {
-    argParser.addFlag('machine', negatable: false);
+  _FlutterCommandWithItsOwnMachineFlag({required bool verboseHelp}) {
+    addMachineOutputFlag(verboseHelp: verboseHelp);
   }
 
   @override

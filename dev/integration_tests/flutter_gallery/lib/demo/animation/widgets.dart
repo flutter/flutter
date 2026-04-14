@@ -131,6 +131,9 @@ class SectionDetailView extends StatelessWidget {
       );
     }
 
-    return DecoratedBox(decoration: BoxDecoration(color: Colors.grey.shade200), child: item);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: Colors.grey.shade200),
+      child: item,
+    );
   }
 }

@@ -36,9 +36,7 @@ void main() {
   }();
 
   const FileSystem localFs = LocalFileSystem();
-  final _FlutterRootUnderTest flutterRoot = _FlutterRootUnderTest.findWithin(
-    forcePowershell: usePowershellOnPosix,
-  );
+  final flutterRoot = _FlutterRootUnderTest.findWithin(forcePowershell: usePowershellOnPosix);
 
   late Directory tmpDir;
   late _FlutterRootUnderTest testRoot;
@@ -53,7 +51,6 @@ void main() {
   }
 
   io.ProcessResult run(String executable, List<String> args) {
-    print('Running "$executable ${args.join(" ")}');
     final io.ProcessResult result = io.Process.runSync(
       executable,
       args,
@@ -76,7 +73,9 @@ void main() {
   setUpAll(() async {
     if (usePowershellOnPosix) {
       final io.ProcessResult result = io.Process.runSync('pwsh', <String>['--version']);
-      print('Using Powershell (${result.stdout}) on POSIX for local debugging and testing');
+      print(
+        'Using Powershell (${(result.stdout as String).trim()}) on POSIX for local debugging and testing',
+      );
     }
   });
 
@@ -104,8 +103,8 @@ void main() {
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
-      const List<String> powerShellVariables = <String>['SystemRoot', 'Path', 'PATHEXT'];
-      for (final String key in powerShellVariables) {
+      const powerShellVariables = <String>['SYSTEMROOT', 'PATH', 'PATHEXT'];
+      for (final key in powerShellVariables) {
         final String? value = io.Platform.environment[key];
         if (value != null) {
           environment[key] = value;
@@ -143,12 +142,17 @@ void main() {
       executable = testRoot.binInternalLastEngineCommit.path;
       args = <String>[];
     }
-    return run(executable, args).stdout as String;
+    return (run(executable, args).stdout as String).trim();
+  }
+
+  /// Gets the latest commit on the current branch.
+  String getLastCommit() {
+    return (run('git', <String>['rev-parse', 'HEAD']).stdout as String).trim();
   }
 
   void writeCommit(Iterable<String> files) {
     commitCount++;
-    for (final String relativePath in files) {
+    for (final relativePath in files) {
       localFs.file(localFs.path.join(testRoot.root.path, relativePath))
         ..createSync(recursive: true)
         ..writeAsStringSync('$commitCount');
@@ -158,6 +162,7 @@ void main() {
   }
 
   test('returns the last engine commit', () {
+    writeCommit(<String>['bin/internal/release-candidate-branch.version']);
     writeCommit(<String>['DEPS', 'engine/README.md']);
 
     final String lastEngine = getLastEngineCommit();
@@ -168,6 +173,7 @@ void main() {
   });
 
   test('considers DEPS an engine change', () {
+    writeCommit(<String>['bin/internal/release-candidate-branch.version']);
     writeCommit(<String>['DEPS', 'engine/README.md']);
 
     final String lastEngineA = getLastEngineCommit();
@@ -176,6 +182,39 @@ void main() {
     writeCommit(<String>['DEPS']);
     final String lastEngineB = getLastEngineCommit();
     expect(lastEngineB, allOf(isNotEmpty, isNot(equals(lastEngineA))));
+  });
+
+  test('if there have been no engine changes, uses the first commit since the branch point', () {
+    final String initialStartingCommit = getLastCommit();
+
+    // Make an engine change *before* the branch.
+    writeCommit(<String>['engine/README.md']);
+    final String engineCommitPreBranch = getLastCommit();
+
+    // Write the branch file.
+    writeCommit(<String>['bin/internal/release-candidate-branch.version']);
+    final String initialBranchCommit = getLastCommit();
+
+    // Write another commit to make sure we don't always use the latest.
+    writeCommit(<String>['CHANGELOG.md']);
+    final String latestCommitIgnore = getLastCommit();
+
+    // Get the engine commit, which should fallback to HEAD~2 (in this case).
+    final String lastCommitToEngine = getLastEngineCommit();
+    expect(
+      lastCommitToEngine,
+      initialBranchCommit,
+      reason:
+          'The git history for this simulation looks like this:\n'
+          'master                    | $initialStartingCommit\n'
+          'master                    | $engineCommitPreBranch\n'
+          'release                   | $initialBranchCommit\n'
+          'release                   | $latestCommitIgnore\n'
+          '\n'
+          'We expected our script to select HEAD~2, $initialBranchCommit, but '
+          'instead it selected $lastCommitToEngine, which is incorrect. See '
+          'the table above to help debug.',
+    );
   });
 }
 

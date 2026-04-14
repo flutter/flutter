@@ -21,10 +21,12 @@ class ValueListenableBuilderExample extends StatefulWidget {
   const ValueListenableBuilderExample({super.key});
 
   @override
-  State<ValueListenableBuilderExample> createState() => _ValueListenableBuilderExampleState();
+  State<ValueListenableBuilderExample> createState() =>
+      _ValueListenableBuilderExampleState();
 }
 
-class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderExample> {
+class _ValueListenableBuilderExampleState
+    extends State<ValueListenableBuilderExample> {
   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 
   @override
@@ -33,7 +35,7 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
       appBar: AppBar(title: const Text('ValueListenableBuilder Sample')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
             ValueListenableBuilder<int>(
@@ -41,9 +43,12 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
                 // This builder will only get called when the _counter
                 // is updated.
                 return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[CountDisplay(count: value), child!],
+                  mainAxisAlignment: .center,
+                  crossAxisAlignment: .start,
+                  children: <Widget>[
+                    CountDisplay(count: value),
+                    child!,
+                  ],
                 );
               },
               valueListenable: _counter,
@@ -51,8 +56,11 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
               // expensive to build and does not depend on the value from
               // the notifier.
               child: const Padding(
-                padding: EdgeInsets.all(10.0),
-                child: SizedBox(width: 40, height: 40, child: FlutterLogo(size: 40)),
+                padding: .all(10.0),
+                child: SizedBox.square(
+                  dimension: 40,
+                  child: FlutterLogo(size: 40),
+                ),
               ),
             ),
           ],
@@ -76,7 +84,7 @@ class CountDisplay extends StatelessWidget {
     return Container(
       width: 100,
       height: 100,
-      padding: const EdgeInsetsDirectional.all(10),
+      padding: const .all(10),
       child: Text('$count', style: Theme.of(context).textTheme.headlineMedium),
     );
   }

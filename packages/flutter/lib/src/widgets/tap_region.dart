@@ -234,7 +234,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     final bool hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
 
     if (hitTarget) {
-      final BoxHitTestEntry entry = BoxHitTestEntry(this, position);
+      final entry = BoxHitTestEntry(this, position);
       _cachedResults[entry] = result;
       result.add(entry);
     }
@@ -272,11 +272,13 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
 
     // A child was hit, so we need to call onTapOutside / onTapUpOutside for
     // those regions or groups of regions that were not hit.
-    final Set<RenderTapRegion> hitRegions =
-        _getRegionsHit(_registeredRegions, result.path).cast<RenderTapRegion>().toSet();
+    final Set<RenderTapRegion> hitRegions = _getRegionsHit(
+      _registeredRegions,
+      result.path,
+    ).cast<RenderTapRegion>().toSet();
     assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
 
-    final Set<RenderTapRegion> insideRegions = <RenderTapRegion>{
+    final insideRegions = <RenderTapRegion>{
       for (final RenderTapRegion region in hitRegions)
         if (region.groupId == null)
           region
@@ -287,8 +289,8 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     // If they're not inside, then they're outside.
     final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(insideRegions);
 
-    bool consumeOutsideTaps = false;
-    for (final RenderTapRegion region in outsideRegions) {
+    var consumeOutsideTaps = false;
+    for (final region in outsideRegions) {
       if (event is PointerDownEvent) {
         assert(_tapRegionDebug('Calling onTapOutside for $region'));
         region.onTapOutside?.call(event);
@@ -304,7 +306,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
         consumeOutsideTaps = true;
       }
     }
-    for (final RenderTapRegion region in insideRegions) {
+    for (final region in insideRegions) {
       if (event is PointerDownEvent) {
         assert(_tapRegionDebug('Calling onTapInside for $region'));
         region.onTapInside?.call(event);
@@ -480,7 +482,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
-      consumeOutsideTaps: consumeOutsideTaps,
+      consumeOutsideTaps: isCurrent && consumeOutsideTaps,
       behavior: behavior,
       onTapOutside: isCurrent ? onTapOutside : null,
       onTapInside: onTapInside,
@@ -498,6 +500,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     renderObject
       ..registry = TapRegionRegistry.maybeOf(context)
       ..enabled = enabled
+      ..consumeOutsideTaps = isCurrent && consumeOutsideTaps
       ..behavior = behavior
       ..groupId = groupId
       ..onTapOutside = isCurrent ? onTapOutside : null

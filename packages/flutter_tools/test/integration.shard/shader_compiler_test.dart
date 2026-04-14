@@ -18,19 +18,23 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  Future<void> testCompileShader(String source) async {
+  Future<bool> testCompileShader(String source, {required bool targetSkslOnly}) async {
     final Directory tmpDir = globals.fs.systemTempDirectory.createTempSync('shader_compiler_test.');
     final File file = tmpDir.childFile('test_shader.frag')..writeAsStringSync(source);
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: globals.processManager,
       logger: logger,
       fileSystem: globals.fs,
       artifacts: globals.artifacts!,
     );
-    await shaderCompiler.compileShader(
+    return shaderCompiler.compileShader(
       input: file,
       outputPath: tmpDir.childFile('test_shader.frag.out').path,
-      targetPlatform: TargetPlatform.tester,
+      targetPlatform: targetSkslOnly
+          // web_javascript compiles to sksl only.
+          ? TargetPlatform.web_javascript
+          // tester compiles to sksl and runtime-stage-vulkan
+          : TargetPlatform.tester,
     );
   }
 
@@ -53,7 +57,7 @@ void main() {
     final Directory tmpDir = globals.fs.systemTempDirectory.createTempSync('shader_compiler_test.');
     final String inkSparkleOutputPath = globals.fs.path.join(tmpDir.path, 'ink_sparkle.frag');
 
-    final ShaderCompiler shaderCompiler = ShaderCompiler(
+    final shaderCompiler = ShaderCompiler(
       processManager: globals.processManager,
       logger: logger,
       fileSystem: globals.fs,
@@ -73,31 +77,42 @@ void main() {
     expect(resultFile.statSync().mode & expectedMode, equals(expectedMode));
   });
 
-  testUsingContext('Compilation error with in storage', () async {
-    const String kShaderWithInput = '''
-in float foo;
+  group('shader with inputs', () {
+    const kShaderWithInput = '''
+    in float foo;
 
-out vec4 fragColor;
+    out vec4 fragColor;
 
-void main() {
-  fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-}
-''';
+    void main() {
+      fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+    ''';
 
-    expect(
-      () => testCompileShader(kShaderWithInput),
-      throwsA(
-        isA<ShaderCompilerException>().having(
-          (ShaderCompilerException exception) => exception.message,
-          'message',
-          contains('SkSL does not support inputs'),
+    testUsingContext('fails SkSL compilation', () async {
+      await expectLater(
+        () => testCompileShader(kShaderWithInput, targetSkslOnly: true),
+        throwsA(isA<ShaderCompilerException>()),
+      );
+      expect(logger.errorText, contains('SkSL does not support inputs'));
+    });
+
+    testUsingContext('succeeds with non-SkSL compilation', () async {
+      final bool compileResult = await testCompileShader(kShaderWithInput, targetSkslOnly: false);
+      expect(compileResult, true);
+      expect(
+        logger.errorText,
+        matches(
+          r'warning: Shader `.+` is incompatible with SkSL. '
+          r'This shader will not load when running with the Skia backend.\n'
+          r'impellerc failure: There was a compiler error: '
+          r"SkSL does not support inputs: 'foo'",
         ),
-      ),
-    );
+      );
+    });
   });
 
-  testUsingContext('Compilation error with UBO', () async {
-    const String kShaderWithInput = '''
+  group('shader with UBO', () {
+    const kShaderWithUbo = '''
 uniform Data {
   vec4 foo;
 } data;
@@ -109,22 +124,31 @@ void main() {
 }
 ''';
 
-    expect(
-      () => testCompileShader(kShaderWithInput),
-      throwsA(
-        isA<ShaderCompilerException>().having(
-          (ShaderCompilerException exception) => exception.message,
-          'message',
-          contains('SkSL does not support UBOs or SSBOs'),
+    testUsingContext('fails SkSL compilation', () async {
+      await expectLater(
+        () => testCompileShader(kShaderWithUbo, targetSkslOnly: true),
+        throwsA(isA<ShaderCompilerException>()),
+      );
+      expect(logger.errorText, contains('SkSL does not support UBOs or SSBOs'));
+    });
+
+    testUsingContext('succeeds with non-SkSL compilation', () async {
+      final bool compileResult = await testCompileShader(kShaderWithUbo, targetSkslOnly: false);
+      expect(compileResult, true);
+      expect(
+        logger.errorText,
+        matches(
+          r'warning: Shader `.+` is incompatible with SkSL. '
+          r'This shader will not load when running with the Skia backend.\n'
+          r'impellerc failure: There was a compiler error: '
+          r"SkSL does not support UBOs or SSBOs: 'data'",
         ),
-      ),
-    );
+      );
+    });
   });
 
-  testUsingContext(
-    'Compilation error with texture arguments besides position or sampler',
-    () async {
-      const String kShaderWithInput = '''
+  group('shader with texture arguments besides position or sampler', () {
+    const kShaderWithTextureArguments = '''
 uniform sampler2D tex;
 
 out vec4 fragColor;
@@ -134,38 +158,95 @@ void main() {
 }
 ''';
 
+    testUsingContext('fails SkSL compilation', () async {
+      await expectLater(
+        () => testCompileShader(kShaderWithTextureArguments, targetSkslOnly: true),
+        throwsA(isA<ShaderCompilerException>()),
+      );
       expect(
-        () => testCompileShader(kShaderWithInput),
-        throwsA(
-          isA<ShaderCompilerException>().having(
-            (ShaderCompilerException exception) => exception.message,
-            'message',
-            contains('Only sampler and position arguments are supported in texture() calls'),
-          ),
+        logger.errorText,
+        contains('Only sampler and position arguments are supported in texture() calls'),
+      );
+    });
+
+    testUsingContext('succeeds with non-SkSL compilation', () async {
+      final bool compileResult = await testCompileShader(
+        kShaderWithTextureArguments,
+        targetSkslOnly: false,
+      );
+      expect(compileResult, true);
+      expect(
+        logger.errorText,
+        matches(
+          r'warning: Shader `.+` is incompatible with SkSL. '
+          r'This shader will not load when running with the Skia backend.\n'
+          r'impellerc failure: There was a compiler error: '
+          r'Only sampler and position arguments are supported in texture\(\) calls.',
         ),
       );
-    },
-  );
+    });
+  });
 
-  testUsingContext('Compilation error with uint8 uniforms', () async {
-    const String kShaderWithInput = '''
-#version 310 es
+  group('shader with uint8 uniforms', () {
+    const kShaderWithUint8Uniforms = '''
+  #version 310 es
 
-layout(location = 0) uniform uint foo;
-layout(location = 0) out vec4 fragColor;
+  layout(location = 0) uniform uint foo;
+  layout(location = 0) out vec4 fragColor;
 
-void main() {}
+  void main() {}
+  ''';
+
+    testUsingContext('fails SkSL compilation', () async {
+      await expectLater(
+        () => testCompileShader(kShaderWithUint8Uniforms, targetSkslOnly: true),
+        throwsA(isA<ShaderCompilerException>()),
+      );
+      expect(logger.errorText, contains('SkSL does not support unsigned integers'));
+    });
+
+    testUsingContext('fails with non-SkSL compilation', () async {
+      await expectLater(
+        () => testCompileShader(kShaderWithUint8Uniforms, targetSkslOnly: false),
+        throwsA(isA<ShaderCompilerException>()),
+      );
+      expect(logger.errorText, contains('Non-floating-type struct member foo is not supported.'));
+    });
+  });
+
+  group('shader with array initializer list', () {
+    const kShaderWithArrayInitializer = '''
+out vec4 fragColor;
+
+void main() {
+  float array_with_initializer_list[2] = {1.0, 0.0};
+  fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
 ''';
 
-    expect(
-      () => testCompileShader(kShaderWithInput),
-      throwsA(
-        isA<ShaderCompilerException>().having(
-          (ShaderCompilerException exception) => exception.message,
-          'message',
-          contains('SkSL does not support unsigned integers'),
+    testUsingContext('fails SkSL compilation', () async {
+      await expectLater(
+        () => testCompileShader(kShaderWithArrayInitializer, targetSkslOnly: true),
+        throwsA(isA<ShaderCompilerException>()),
+      );
+      expect(logger.errorText, contains('SkSL does not support array initializers'));
+    });
+
+    testUsingContext('succeeds with non-SkSL compilation', () async {
+      final bool compilationResult = await testCompileShader(
+        kShaderWithArrayInitializer,
+        targetSkslOnly: false,
+      );
+      expect(compilationResult, isTrue);
+      expect(
+        logger.errorText,
+        matches(
+          r'warning: Shader `.+` is incompatible with SkSL. '
+          r'This shader will not load when running with the Skia backend.\n'
+          r'impellerc failure: There was a compiler error: '
+          r'SkSL does not support array initializers: .+',
         ),
-      ),
-    );
+      );
+    });
   });
 }

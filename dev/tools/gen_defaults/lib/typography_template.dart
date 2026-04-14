@@ -8,7 +8,8 @@ class TypographyTemplate extends TokenTemplate {
   const TypographyTemplate(super.blockName, super.fileName, super.tokens);
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 abstract final class _M3Typography {
   ${_textTheme('englishLike', 'alphabetic')}
 
@@ -19,7 +20,7 @@ abstract final class _M3Typography {
 ''';
 
   String _textTheme(String name, String baseline) {
-    final StringBuffer theme = StringBuffer('static const TextTheme $name = TextTheme(\n');
+    final theme = StringBuffer('static const TextTheme $name = TextTheme(\n');
     theme.writeln(
       '    displayLarge: ${_textStyleDef('md.sys.typescale.display-large', '$name displayLarge 2021', baseline)},',
     );
@@ -70,7 +71,7 @@ abstract final class _M3Typography {
   }
 
   String _textStyleDef(String tokenPrefix, String debugLabel, String baseline) {
-    final StringBuffer style = StringBuffer("TextStyle(debugLabel: '$debugLabel'");
+    final style = StringBuffer("TextStyle(debugLabel: '$debugLabel'");
     style.write(', inherit: false');
     style.write(', fontSize: ${_fontSize(tokenPrefix)}');
     style.write(', fontWeight: ${_fontWeight(tokenPrefix)}');
@@ -87,8 +88,7 @@ abstract final class _M3Typography {
   }
 
   String _fontWeight(String textStyleTokenName) {
-    final String weightValue =
-        getToken(getToken('$textStyleTokenName.weight') as String).toString();
+    final weightValue = getToken(getToken('$textStyleTokenName.weight') as String).toString();
     return 'FontWeight.w$weightValue';
   }
 
@@ -97,8 +97,8 @@ abstract final class _M3Typography {
   }
 
   String _fontHeight(String textStyleTokenName) {
-    final double size = getToken('$textStyleTokenName.size') as double;
-    final double lineHeight = getToken('$textStyleTokenName.line-height') as double;
+    final size = getToken('$textStyleTokenName.size') as double;
+    final lineHeight = getToken('$textStyleTokenName.line-height') as double;
     return (lineHeight / size).toStringAsFixed(2);
   }
 }

@@ -28,11 +28,11 @@ import 'native_assets_test_utils.dart';
 
 final String hostOs = platform.operatingSystem;
 
-final List<String> devices = <String>['flutter-tester', hostOs];
+final devices = <String>['flutter-tester', hostOs];
 
-final List<String> buildSubcommands = <String>[hostOs, if (hostOs == 'macos') 'ios', 'apk'];
+final buildSubcommands = <String>[hostOs, if (hostOs == 'macos') 'ios', 'apk'];
 
-final List<String> add2appBuildSubcommands = <String>[
+final add2appBuildSubcommands = <String>[
   if (hostOs == 'macos') ...<String>['macos-framework', 'ios-framework'],
 ];
 
@@ -41,11 +41,11 @@ final List<String> add2appBuildSubcommands = <String>[
 ///
 /// The flow of compiling kernel as well as bundling dylibs can differ based on
 /// build mode, so we should cover this.
-const List<String> buildModes = <String>['debug', 'profile', 'release'];
+const buildModes = <String>['debug', 'profile', 'release'];
 
-const String packageName = 'package_with_native_assets';
+const packageName = 'package_with_native_assets';
 
-const String exampleAppName = '${packageName}_example';
+const exampleAppName = '${packageName}_example';
 
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
@@ -53,16 +53,12 @@ void main() {
     return;
   }
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   for (final String device in devices) {
     for (final String buildMode in buildModes) {
       if (device == 'flutter-tester' && buildMode != 'debug') {
         continue;
       }
-      final String hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
+      final hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
       testWithoutContext('flutter run$hotReload with native assets $device $buildMode', () async {
         await inTempDir((Directory tempDirectory) async {
           final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
@@ -163,6 +159,29 @@ void main() {
     });
   });
 
+  for (final String device in devices) {
+    testWithoutContext('flutter test integration_test $device native assets', () async {
+      await inTempDir((Directory tempDirectory) async {
+        final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+
+        final Uri exampleDirectory = Uri.directory(packageDirectory.path).resolve('example/');
+        addIntegrationTest(exampleDirectory, packageName);
+
+        final ProcessTestResult result = await runFlutter(
+          <String>['test', 'integration_test', '-d', device],
+          exampleDirectory.toFilePath(),
+          <Transition>[Barrier(RegExp('.* All tests passed!'))],
+          logging: false,
+        );
+        if (result.exitCode != 0) {
+          throw Exception(
+            'flutter test integration_test failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+          );
+        }
+      });
+    });
+  }
+
   for (final String buildSubcommand in buildSubcommands) {
     for (final String buildMode in buildModes) {
       testWithoutContext(
@@ -216,6 +235,8 @@ void main() {
           flutterBin,
           'build',
           add2appBuildSubcommand,
+          '--codesign-identity',
+          '-',
         ], workingDirectory: exampleDirectory.path);
         if (result.exitCode != 0) {
           throw Exception(
@@ -234,6 +255,43 @@ void main() {
       });
     });
   }
+}
+
+void addIntegrationTest(Uri exampleDirectory, String packageName) {
+  final ProcessResult result = processManager.runSync(<String>[
+    'flutter',
+    'pub',
+    'add',
+    'dev:integration_test:{"sdk":"flutter"}',
+  ], workingDirectory: exampleDirectory.toFilePath());
+  if (result.exitCode != 0) {
+    throw Exception(
+      'flutter pub add failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+    );
+  }
+
+  final Uri integrationTestPath = exampleDirectory.resolve('integration_test/my_test.dart');
+  final File integrationTestFile = fileSystem.file(integrationTestPath);
+  integrationTestFile.createSync(recursive: true);
+  integrationTestFile.writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+import 'package:${packageName}_example/main.dart';
+import 'package:integration_test/integration_test.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('end-to-end test', () {
+    testWidgets('invoke native code', (tester) async {
+      // Load app widget.
+      await tester.pumpWidget(const MyApp());
+
+      // Verify the native function was called.
+      expect(find.text('sum(1, 2) = 3'), findsOneWidget);
+    });
+  });
+}
+''');
 }
 
 void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
@@ -262,9 +320,10 @@ void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
 /// For `flutter build` we can't easily test whether running the app works.
 /// Check that we have the dylibs in the app.
 void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
-  final Directory appBundle = appDirectory.childDirectory(
-    'build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app',
+  final Directory productsDirectory = appDirectory.childDirectory(
+    'build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/',
   );
+  final Directory appBundle = productsDirectory.childDirectory('$exampleAppName.app');
   expect(appBundle, exists);
   final Directory frameworksFolder = appBundle.childDirectory('Contents/Frameworks');
   expect(frameworksFolder, exists);
@@ -286,6 +345,12 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   expect(resourcesDir, exists);
   final File dylibFile = versionADir.childFile(frameworkName);
   expect(dylibFile, exists);
+  final stripped = buildMode != 'debug';
+  expectDylibIsStripped(dylibFile, stripped: stripped);
+  if (stripped) {
+    final Directory dsymDir = productsDirectory.childDirectory('$frameworkName.framework.dsym');
+    expect(dsymDir, exists);
+  }
   final Link currentLink = versionsDir.childLink('Current');
   expect(currentLink, exists);
   expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
@@ -324,9 +389,10 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
 }
 
 void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
-  final Directory appBundle = appDirectory.childDirectory(
-    'build/ios/${buildMode.upperCaseFirst()}-iphoneos/Runner.app',
+  final Directory productsDirectory = appDirectory.childDirectory(
+    'build/ios/${buildMode.upperCaseFirst()}-iphoneos/',
   );
+  final Directory appBundle = productsDirectory.childDirectory('Runner.app');
   expect(appBundle, exists);
   final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
   expect(frameworksFolder, exists);
@@ -335,11 +401,16 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
   expect(dylib, exists);
-  final String infoPlist =
-      frameworksFolder
-          .childDirectory('$frameworkName.framework')
-          .childFile('Info.plist')
-          .readAsStringSync();
+  final stripped = buildMode != 'debug';
+  expectDylibIsStripped(dylib, stripped: stripped);
+  if (stripped) {
+    final Directory dsymDir = productsDirectory.childDirectory('$frameworkName.framework.dsym');
+    expect(dsymDir, exists);
+  }
+  final String infoPlist = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile('Info.plist')
+      .readAsStringSync();
   expect(infoPlist, '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -364,7 +435,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>MinimumOSVersion</key>
-	<string>12.0</string>
+	<string>13.0</string>
 </dict>
 </plist>''');
 }
@@ -413,7 +484,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
       .childDirectory('flutter-apk')
       .childFile('app-$buildMode.apk');
   expect(apk, exists);
-  final OperatingSystemUtils osUtils = OperatingSystemUtils(
+  final osUtils = OperatingSystemUtils(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
     platform: platform,
@@ -423,7 +494,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
   apkUnzipped.createSync();
   osUtils.unzip(apk, apkUnzipped);
   final Directory lib = apkUnzipped.childDirectory('lib');
-  for (final String arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
+  for (final arch in <String>['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
     final Directory archDir = lib.childDirectory(arch);
     expect(archDir, exists);
     // The dylibs should be next to the flutter and app so.
@@ -443,11 +514,34 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
     'build/$os/framework/${buildMode.upperCaseFirst()}',
   );
   expect(frameworksFolder, exists);
-  const String frameworkName = packageName;
-  final File dylib = frameworksFolder
-      .childDirectory('$frameworkName.framework')
-      .childFile(frameworkName);
-  expect(dylib, exists);
+  final Directory xcFrameworkDirectory = frameworksFolder.childDirectory(
+    '$packageName.xcframework',
+  );
+  if (os == 'macos') {
+    final File dylib = xcFrameworkDirectory
+        .childDirectory('macos-arm64_x86_64')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(dylib, exists);
+    _expectBinaryContainsArchitectures(dylib, ['x86_64', 'arm64']);
+  } else {
+    assert(os == 'ios');
+    final File deviceDylib = xcFrameworkDirectory
+        .childDirectory('ios-arm64')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(deviceDylib, exists);
+    _expectBinaryContainsArchitectures(deviceDylib, ['arm64']);
+
+    final File simulatorDylib = xcFrameworkDirectory
+        .childDirectory('ios-arm64_x86_64-simulator')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(simulatorDylib, exists);
+    _expectBinaryContainsArchitectures(simulatorDylib, ['x86_64', 'arm64']);
+  }
+
+  _expectXCFrameworkCodesigned(xcFrameworkDirectory);
 }
 
 /// Check that the native assets are built with the C Compiler that Flutter uses.
@@ -467,9 +561,8 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
 
     final File inputFile = subDir.childFile('input.json');
     expect(inputFile, exists);
-    final Map<String, Object?> inputContents =
-        json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
-    final BuildInput input = BuildInput(inputContents);
+    final inputContents = json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
+    final input = BuildInput(inputContents);
     final BuildConfig config = input.config;
     if (!config.buildCodeAssets) {
       continue;
@@ -478,8 +571,101 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
   }
 }
 
+/// Check whether a dylib is stripped with `otool`.
+///
+/// ```text
+///       cmd LC_DYSYMTAB
+///   cmdsize 80
+/// ilocalsym 0
+/// nlocalsym 0              0 or 1 means stripped
+/// iextdefsym 0
+/// nextdefsym 2
+/// iundefsym 2
+/// nundefsym 1
+/// ```
+///
+/// ```text
+///       cmd LC_DYSYMTAB
+///   cmdsize 80
+/// ilocalsym 0
+/// nlocalsym 8              >0 means unstripped, note: unstripped can be 0!
+/// iextdefsym 8
+/// nextdefsym 2
+/// ```
+void expectDylibIsStripped(File dylib, {required bool stripped}) {
+  final ProcessResult result = processManager.runSync(<String>['otool', '-l', dylib.path]);
+  expect(result.exitCode, 0);
+  final stdout = result.stdout.toString();
+
+  // Find LC_DYSYMTAB section and check nlocalsym.
+  final List<String> lines = stdout.split('\n');
+  int? nlocalsym;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].contains('LC_DYSYMTAB')) {
+      const kMaxDsymtabSearchLines = 20;
+      for (int j = i + 1; j < i + kMaxDsymtabSearchLines && j < lines.length; j++) {
+        if (lines[j].contains('nlocalsym')) {
+          final RegExpMatch? match = RegExp(r'nlocalsym\s+(\d+)').firstMatch(lines[j]);
+          if (match != null) {
+            nlocalsym = int.parse(match.group(1)!);
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  if (nlocalsym == null) {
+    throw Exception('nlocalsym not found in LC_DYSYMTAB section of ${dylib.path}\n$stdout');
+  }
+
+  if (stripped) {
+    expect(
+      nlocalsym,
+      lessThanOrEqualTo(1),
+      reason: 'Expected stripped binary to have nlocalsym 0 in ${dylib.path}',
+    );
+  } else {
+    // Unstripped can be 0 if compiled with a modern XCode, so nothing to check
+    // here.
+  }
+}
+
 extension on String {
   String upperCaseFirst() {
     return replaceFirst(this[0], this[0].toUpperCase());
+  }
+}
+
+/// Runs 'lipo -info' on a binary and asserts that it contains the expected architectures.
+void _expectBinaryContainsArchitectures(File binary, List<String> expectedArchs) {
+  expect(binary, exists);
+  final ProcessResult lipoResult = processManager.runSync(<String>['lipo', '-info', binary.path]);
+  expect(
+    lipoResult.exitCode,
+    0,
+    reason: 'lipo -info failed for ${binary.path}:\n${lipoResult.stderr}',
+  );
+  final lipoOutput = lipoResult.stdout.toString();
+  for (final arch in expectedArchs) {
+    expect(
+      lipoOutput,
+      contains(arch),
+      reason:
+          'Binary ${binary.path} does not contain expected architecture $arch.\nLipo output: $lipoOutput',
+    );
+  }
+}
+
+void _expectXCFrameworkCodesigned(Directory xcFramework) {
+  expect(xcFramework, exists);
+  final ProcessResult result = processManager.runSync(<String>[
+    'codesign',
+    '-dv',
+    xcFramework.path,
+  ]);
+  if (!result.stderr.toString().contains('Signature=adhoc')) {
+    throw Exception('XCFramework ${xcFramework.path} is not codesigned:\n${result.stderr}');
   }
 }

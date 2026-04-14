@@ -14,7 +14,9 @@ void main() {
   testWidgets('showing and hiding the custom context menu on SelectionArea', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const example.SelectableRegionToolbarBuilderExampleApp());
+    await tester.pumpWidget(
+      const example.SelectableRegionToolbarBuilderExampleApp(),
+    );
 
     expect(BrowserContextMenu.enabled, !kIsWeb);
 
@@ -41,7 +43,9 @@ void main() {
     expect(find.text('Print'), findsOneWidget);
 
     // Tap to dismiss.
-    await primaryMouseButtonGesture.down(tester.getCenter(find.byType(Scaffold)));
+    await primaryMouseButtonGesture.down(
+      tester.getCenter(find.byType(Scaffold)),
+    );
     await tester.pump();
     await primaryMouseButtonGesture.up();
     await tester.pumpAndSettle();

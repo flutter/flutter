@@ -17,7 +17,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 
 // Libraries that allow making arbitrary calls to JavaScript.
-const List<String> _jsAccessLibraries = <String>['dart:js_util'];
+const List<String> _jsAccessLibraries = <String>['dart:js_interop_unsafe'];
 
 // Libraries that are allowed to make direct calls to JavaScript. These
 // libraries must be reviewed carefully to make sure JavaScript APIs are used
@@ -25,10 +25,18 @@ const List<String> _jsAccessLibraries = <String>['dart:js_util'];
 const List<String> _auditedLibraries = <String>[
   'lib/web_ui/lib/src/engine/canvaskit/canvaskit_api.dart',
   'lib/web_ui/lib/src/engine/safe_browser_api.dart',
+
+  // TODO(176365): Clean up the following unaudited uses:
+  'lib/web_ui/lib/src/engine/js_interop/js_loader.dart',
+  'lib/web_ui/lib/src/engine/dom.dart',
+  'lib/web_ui/lib/src/engine/pointer_binding.dart',
+  'lib/web_ui/lib/src/engine/view_embedder/dom_manager.dart',
+  'lib/web_ui/lib/src/engine/text_editing/text_editing.dart',
+  'lib/web_ui/lib/src/engine/js_interop/js_promise.dart',
 ];
 
 Future<void> main(List<String> args) async {
-  bool shouldThrow = true;
+  var shouldThrow = true;
   assert(() {
     shouldThrow = false;
     return true;
@@ -89,31 +97,30 @@ import 'package:ui/ui.dart' as ui;
   });
 
   test('Check JavaScript access', () async {
-    final Directory webUiLibDir = Directory('lib/web_ui/lib');
-    final List<File> dartFiles =
-        webUiLibDir
-            .listSync(recursive: true)
-            .whereType<File>()
-            .where((File file) => file.path.endsWith('.dart'))
-            .toList();
+    final webUiLibDir = Directory('lib/web_ui/lib');
+    final List<File> dartFiles = webUiLibDir
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((File file) => file.path.endsWith('.dart'))
+        .toList();
 
     expect(dartFiles, isNotEmpty);
 
-    final List<_CheckResult> results = <_CheckResult>[];
-    for (final File dartFile in dartFiles) {
+    final results = <_CheckResult>[];
+    for (final dartFile in dartFiles) {
       results.add(_checkFile(dartFile, await dartFile.readAsString()));
     }
 
     if (results.any((_CheckResult result) => result.failed)) {
       // Sort to show failures last.
       results.sort((_CheckResult a, _CheckResult b) {
-        final int aSortKey = a.passed ? 1 : 0;
-        final int bSortKey = b.passed ? 1 : 0;
+        final aSortKey = a.passed ? 1 : 0;
+        final bSortKey = b.passed ? 1 : 0;
         return bSortKey - aSortKey;
       });
-      int passedCount = 0;
-      int failedCount = 0;
-      for (final _CheckResult result in results) {
+      var passedCount = 0;
+      var failedCount = 0;
+      for (final result in results) {
         if (result.passed) {
           passedCount += 1;
           print('PASSED: ${result.file.path}');
@@ -133,9 +140,9 @@ import 'package:ui/ui.dart' as ui;
 }
 
 _CheckResult _checkFile(File dartFile, String code) {
-  final List<String> violations = <String>[];
+  final violations = <String>[];
   final List<String> lines = code.split('\n');
-  for (int i = 0; i < lines.length; i += 1) {
+  for (var i = 0; i < lines.length; i += 1) {
     final int lineNumber = i + 1;
     final String line = lines[i].trim();
     final bool isImport = line.startsWith('import');

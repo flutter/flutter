@@ -29,5 +29,11 @@
   "shareButtonLabel": "გაზიარება...",
   "clearButtonLabel": "გასუფთავება",
   "cancelButtonLabel": "გაუქმება",
-  "backButtonLabel": "უკან"
+  "backButtonLabel": "უკან",
+  "expansionTileExpandedHint": "ორმაგად შეეხეთ ჩასაკეცად",
+  "expansionTileCollapsedHint": "გასაფართოებლად ორჯერ შეეხეთ",
+  "expansionTileExpandedTapHint": "ჩაკეცვა",
+  "expansionTileCollapsedTapHint": "მეტი დეტალებისთვის გააფართოეთ",
+  "expandedHint": "ჩაკეცილია",
+  "collapsedHint": "გაფართოებულია"
 }

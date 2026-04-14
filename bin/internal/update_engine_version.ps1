@@ -6,6 +6,8 @@
 #
 # bin/cache/engine.stamp <-- SHA of the commit that engine artifacts were built
 # bin/cache/engine.realm <-- optional; ; whether the SHA is from presubmit builds or staging (bringup: true).
+#
+# *DOES NOT* update engine.version.
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
@@ -57,24 +59,37 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # the current branch is forked from, which would be the last version of the
 # engine artifacts built from CI.
 } else {
-  $ErrorActionPreference = "Continue"
-  git -C "$flutterRoot" remote get-url upstream *> $null
-  $exitCode = $?
-  $ErrorActionPreference = "Stop"
-  if ($exitCode) {
-    $engineVersion = (git -C "$flutterRoot"  merge-base HEAD upstream/master)
-  } else {
-    $engineVersion = (git -C "$flutterRoot"  merge-base HEAD origin/master)
-  }
+  $engineVersion = Invoke-Expression "& '$flutterRoot/bin/internal/content_aware_hash.ps1'"
 }
 
 # Write the engine version out so downstream tools know what to look for.
-$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-[System.IO.File]::WriteAllText("$flutterRoot/bin/cache/engine.stamp", $engineVersion, $utf8NoBom)
+# Use a temporary file and a retry logic to minimize chances of a race condition during
+# parallel flutter executions.
+$esTmp = "$flutterRoot/bin/cache/engine.stamp.tmp.$PID"
+try {
+    Set-Content -Path $esTmp -Value $engineVersion -Encoding Ascii
+    $retryCount = 0
+    while ($true) {
+        try {
+            Move-Item -Path $esTmp -Destination "$flutterRoot/bin/cache/engine.stamp" -Force
+            break
+        } catch {
+            if ($retryCount -ge 2) {
+                throw
+            }
+            $retryCount++
+            Start-Sleep -Milliseconds 50
+        }
+    }
+} finally {
+    if (Test-Path -Path $esTmp) {
+        Remove-Item -Path $esTmp -Force -ErrorAction SilentlyContinue
+    }
+}
 
 # The realm on CI is passed in.
-if ($Env:FLUTTER_REALM) {
-    [System.IO.File]::WriteAllText("$flutterRoot/bin/cache/engine.realm", $Env:FLUTTER_REALM, $utf8NoBom)
+if ($env:FLUTTER_REALM) {
+    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value $env:FLUTTER_REALM -Encoding Ascii
 } else {
-    [System.IO.File]::WriteAllText("$flutterRoot/bin/cache/engine.realm", "", $utf8NoBom)
+    Set-Content -Path $flutterRoot/bin/cache/engine.realm -Value "" -Encoding Ascii
 }

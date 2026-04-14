@@ -6,16 +6,8 @@ apply plugin: 'com.android.application'
 
 android {
     namespace = "io.flutter.add2app"
-    compileSdk = 35
-
-    // Flutter's CI installs the NDK at a non-standard path.
-    // This non-standard structure is initially created by
-    // https://github.com/flutter/engine/blob/3.27.0/tools/android_sdk/create_cipd_packages.sh.
-    String systemNdkPath = System.getenv("ANDROID_NDK_PATH")
-    if (systemNdkPath != null) {
-        ndkVersion = "26.3.11579264" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
-        ndkPath = systemNdkPath
-    }
+    compileSdk = 36
+    ndkVersion = "28.2.13676358" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -24,13 +16,20 @@ android {
 
     defaultConfig {
         applicationId "io.flutter.add2app"
-        minSdk = 21
-        targetSdk = 35
+        minSdk = 24
+        targetSdk = 36
         versionCode 1
         versionName "1.0"
+    }
+    buildTypes {
+        profile {
+            initWith debug
+        }
     }
 }
 
 dependencies {
-    implementation project(':flutter')
+    debugImplementation 'io.flutter.devicelab.hello:flutter_debug:1.0'
+    profileImplementation 'io.flutter.devicelab.hello:flutter_profile:1.0'
+    releaseImplementation 'io.flutter.devicelab.hello:flutter_release:1.0'
 }

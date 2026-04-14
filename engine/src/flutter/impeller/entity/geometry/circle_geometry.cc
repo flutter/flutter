@@ -9,11 +9,15 @@
 #include "flutter/impeller/entity/geometry/line_geometry.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/scalar.h"
 
 namespace impeller {
 
 CircleGeometry::CircleGeometry(const Point& center, Scalar radius)
-    : center_(center), radius_(radius), stroke_width_(-1.0f) {
+    : center_(center),
+      radius_(radius),
+      stroke_width_(-1.0f),
+      padding_pixels_(0.0f) {
   FML_DCHECK(radius >= 0);
 }
 
@@ -24,7 +28,8 @@ CircleGeometry::CircleGeometry(const Point& center,
                                Scalar stroke_width)
     : center_(center),
       radius_(radius),
-      stroke_width_(std::max(stroke_width, 0.0f)) {
+      stroke_width_(std::max(stroke_width, 0.0f)),
+      padding_pixels_(0.0) {
   FML_DCHECK(radius >= 0);
   FML_DCHECK(stroke_width >= 0);
 }
@@ -37,37 +42,59 @@ Scalar CircleGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
   return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
 }
 
+Point CircleGeometry::GetCenter() const {
+  return center_;
+}
+
+Scalar CircleGeometry::GetRadius() const {
+  return radius_;
+}
+
+Scalar CircleGeometry::GetStrokeWidth() const {
+  return stroke_width_;
+}
+
+void CircleGeometry::SetAntialiasPadding(Scalar extra_padding) {
+  padding_pixels_ = extra_padding;
+}
+
+Scalar CircleGeometry::GetAntialiasPadding() const {
+  return padding_pixels_;
+}
+
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {
   auto& transform = entity.GetTransform();
 
-  Scalar half_width = stroke_width_ < 0 ? 0.0
-                                        : LineGeometry::ComputePixelHalfWidth(
-                                              transform, stroke_width_);
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  Scalar expansion = max_basis == 0 ? 0.0 : padding_pixels_ / max_basis;
 
-  // We call the StrokedCircle method which will simplify to a
-  // FilledCircleGenerator if the inner_radius is <= 0.
-  auto generator = renderer.GetTessellator().StrokedCircle(transform, center_,
-                                                           radius_, half_width);
+  if (stroke_width_ < 0) {
+    auto generator = renderer.GetTessellator().FilledCircle(
+        transform, center_, radius_ + expansion);
+    return ComputePositionGeometry(renderer, generator, entity, pass);
+  }
+
+  Scalar half_width =
+      LineGeometry::ComputePixelHalfWidth(transform, stroke_width_);
+
+  auto generator = renderer.GetTessellator().StrokedCircle(
+      transform, center_, radius_, half_width + expansion);
 
   return ComputePositionGeometry(renderer, generator, entity, pass);
 }
 
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
-  Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
-  Scalar outer_radius = radius_ + half_width;
-  Point corners[4]{
-      {center_.x, center_.y - outer_radius},
-      {center_.x + outer_radius, center_.y},
-      {center_.x, center_.y + outer_radius},
-      {center_.x - outer_radius, center_.y},
-  };
+  Scalar max_basis = transform.GetMaxBasisLengthXY();
+  Scalar expansion = max_basis == 0 ? 0.0 : padding_pixels_ / max_basis;
 
-  for (int i = 0; i < 4; i++) {
-    corners[i] = transform * corners[i];
-  }
-  return Rect::MakePointBounds(std::begin(corners), std::end(corners));
+  Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
+  Scalar outer_radius = radius_ + half_width + expansion;
+  return Rect::MakeLTRB(-outer_radius, -outer_radius,  //
+                        +outer_radius, +outer_radius)
+      .Shift(center_)
+      .TransformAndClipBounds(transform);
 }
 
 bool CircleGeometry::CoversArea(const Matrix& transform,

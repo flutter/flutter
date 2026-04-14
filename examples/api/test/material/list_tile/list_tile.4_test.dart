@@ -3,16 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/list_tile/list_tile.4.dart' as example;
+import 'package:flutter_api_samples/material/list_tile/list_tile.4.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can choose different title alignments from popup menu', (WidgetTester tester) async {
+  testWidgets('Can choose different title alignments from popup menu', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ListTileApp());
 
     Offset titleOffset = tester.getTopLeft(find.text('Headline Text'));
     Offset leadingOffset = tester.getTopLeft(find.byType(Checkbox));
-    Offset trailingOffset = tester.getTopRight(find.byIcon(Icons.adaptive.more));
+    Offset trailingOffset = tester.getTopRight(
+      find.byIcon(Icons.adaptive.more),
+    );
 
     // The default title alignment is threeLine.
     expect(leadingOffset.dy - titleOffset.dy, 48.0);

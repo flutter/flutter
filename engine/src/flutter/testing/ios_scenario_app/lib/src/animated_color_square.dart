@@ -31,9 +31,9 @@ class AnimatedColorSquareScenario extends Scenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final builder = SceneBuilder();
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
 
     canvas.drawRect(
       const Rect.fromLTWH(0, 0, _squareSize, _squareSize),

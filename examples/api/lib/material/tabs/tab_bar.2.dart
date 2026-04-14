@@ -58,7 +58,8 @@ class NestedTabBar extends StatefulWidget {
   State<NestedTabBar> createState() => _NestedTabBarState();
 }
 
-class _NestedTabBarState extends State<NestedTabBar> with TickerProviderStateMixin {
+class _NestedTabBarState extends State<NestedTabBar>
+    with TickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -79,19 +80,24 @@ class _NestedTabBarState extends State<NestedTabBar> with TickerProviderStateMix
       children: <Widget>[
         TabBar.secondary(
           controller: _tabController,
-          tabs: const <Widget>[Tab(text: 'Overview'), Tab(text: 'Specifications')],
+          tabs: const <Widget>[
+            Tab(text: 'Overview'),
+            Tab(text: 'Specifications'),
+          ],
         ),
         Expanded(
           child: TabBarView(
             controller: _tabController,
             children: <Widget>[
               Card(
-                margin: const EdgeInsets.all(16.0),
+                margin: const .all(16.0),
                 child: Center(child: Text('${widget.outerTab}: Overview tab')),
               ),
               Card(
-                margin: const EdgeInsets.all(16.0),
-                child: Center(child: Text('${widget.outerTab}: Specifications tab')),
+                margin: const .all(16.0),
+                child: Center(
+                  child: Text('${widget.outerTab}: Specifications tab'),
+                ),
               ),
             ],
           ),

@@ -29,17 +29,17 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const .symmetric(horizontal: 16.0),
             child: Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: <Widget>[
                   const SizedBox(height: 16.0),
                   Align(
                     child: Text(
                       'Demonstration of automation tools support in Semantics for Text and RichText',
                       style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
+                      textAlign: .center,
                     ),
                   ),
                   const SizedBox(height: 16.0),
@@ -73,7 +73,8 @@ class _MyAppState extends State<MyApp> {
                           semanticsIdentifier: 'Hello to the automation tool',
                         ),
                         TextSpan(
-                          text: ' this text contains neither identifier nor label.',
+                          text:
+                              ' this text contains neither identifier nor label.',
                           style: customStyle2,
                         ),
                       ],
@@ -103,15 +104,14 @@ class _MyAppState extends State<MyApp> {
                                 text: ' Learn more',
                                 semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print('Learn more');
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    print('Learn more');
+                                  },
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                       Center(
@@ -132,15 +132,14 @@ class _MyAppState extends State<MyApp> {
                                 text: ' Find out more',
                                 semanticsIdentifier: 'learn_more_link',
                                 style: const TextStyle(color: Colors.blue),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print('Learn more');
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    print('Learn more');
+                                  },
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.center,
+                          textAlign: .center,
                         ),
                       ),
                     ],

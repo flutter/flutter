@@ -6,6 +6,8 @@ package io.flutter.embedding.android;
 
 import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -425,8 +427,8 @@ public class AndroidTouchProcessorTest {
     final double verticalScaleFactor =
         ViewConfiguration.get(context).getScaledVerticalScrollFactor();
     // Zero verticalScaleFactor will cause this test to miss bugs.
-    assertEquals("zero horizontal scale factor", true, horizontalScaleFactor != 0);
-    assertEquals("zero vertical scale factor", true, verticalScaleFactor != 0);
+    assertTrue("zero horizontal scale factor", horizontalScaleFactor != 0);
+    assertTrue("zero vertical scale factor", verticalScaleFactor != 0);
 
     final MotionEvent event =
         mocker.mockEvent(
@@ -483,7 +485,7 @@ public class AndroidTouchProcessorTest {
             0.0f,
             0.0f);
     boolean handled = touchProcessor.onGenericMotionEvent(event, context);
-    assertEquals(true, handled);
+    assertTrue(handled);
 
     InOrder inOrder = inOrder(mockRenderer);
     inOrder
@@ -537,23 +539,34 @@ public class AndroidTouchProcessorTest {
   }
 
   @Test
-  public void device() {
+  public void samePointerIdWithDifferentToolTypes_mapsToUniqueDevice() {
     final int pointerId = 2;
-    MotionEventMocker mocker =
+    MotionEventMocker mouseMocker =
         new MotionEventMocker(
             pointerId, InputDevice.SOURCE_CLASS_POINTER, MotionEvent.TOOL_TYPE_MOUSE);
-
-    final MotionEvent event = mocker.mockEvent(MotionEvent.ACTION_SCROLL, 1f, 1f, 1);
-    boolean handled = touchProcessor.onTouchEvent(event);
+    MotionEventMocker fingerMocker =
+        new MotionEventMocker(
+            pointerId, InputDevice.SOURCE_CLASS_POINTER, MotionEvent.TOOL_TYPE_FINGER);
 
     InOrder inOrder = inOrder(mockRenderer);
+
+    final MotionEvent mouseEvent = mouseMocker.mockEvent(MotionEvent.ACTION_HOVER_MOVE, 1f, 1f, 1);
+    touchProcessor.onTouchEvent(mouseEvent);
+
     inOrder
         .verify(mockRenderer)
         .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
-    ByteBuffer packet = packetCaptor.getValue();
+    ByteBuffer mousePacket = packetCaptor.getValue();
 
-    assertEquals(pointerId, readDevice(packet));
-    verify(event).getPointerId(0);
+    final MotionEvent fingerEvent = fingerMocker.mockEvent(MotionEvent.ACTION_DOWN, 1f, 1f, 1);
+    touchProcessor.onTouchEvent(fingerEvent);
+
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer fingerPacket = packetCaptor.getValue();
+
+    assertNotEquals(readDevice(mousePacket), readDevice(fingerPacket));
 
     inOrder.verifyNoMoreInteractions();
   }

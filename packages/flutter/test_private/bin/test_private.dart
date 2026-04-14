@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 import 'package:process_runner/process_runner.dart';
 
@@ -12,8 +13,9 @@ import 'package:process_runner/process_runner.dart';
 //
 // See README.md for more information.
 
-final Directory flutterRoot =
-    Directory(path.fromUri(Platform.script)).absolute.parent.parent.parent.parent.parent;
+final Directory flutterRoot = Directory(
+  path.fromUri(Platform.script),
+).absolute.parent.parent.parent.parent.parent;
 final Directory flutterPackageDir = Directory(path.join(flutterRoot.path, 'packages', 'flutter'));
 final Directory testPrivateDir = Directory(path.join(flutterPackageDir.path, 'test_private'));
 final Directory privateTestsDir = Directory(path.join(testPrivateDir.path, 'test'));
@@ -64,7 +66,7 @@ Future<void> main(List<String> args) async {
   }
 
   Directory tempDir;
-  bool removeTempDir = false;
+  var removeTempDir = false;
   if (tempDirArg == null || tempDirArg.isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
@@ -75,7 +77,7 @@ Future<void> main(List<String> args) async {
     }
   }
 
-  bool success = true;
+  var success = true;
   try {
     await for (final TestCase testCase in getTestCases(tempDir)) {
       stderr.writeln('Analyzing test case $testCase');
@@ -138,7 +140,7 @@ class TestCase {
 
   Iterable<File> _getList(String name) sync* {
     for (final dynamic entry in _json[name] as List<dynamic>) {
-      final String name = entry as String;
+      final name = entry as String;
       yield File(path.joinAll(name.split('/')));
     }
   }
@@ -153,7 +155,7 @@ class TestCase {
     // tmpdir.
     for (final File file in dependencies) {
       try {
-        final Directory destDir = Directory(path.join(tmpdir.absolute.path, file.parent.path));
+        final destDir = Directory(path.join(tmpdir.absolute.path, file.parent.path));
         destDir.createSync(recursive: true);
         final File absFile = makeAbsolute(file, workingDirectory: flutterPackageDir);
         final String destination = path.join(tmpdir.absolute.path, file.path);
@@ -165,9 +167,7 @@ class TestCase {
     }
     for (final File file in testDependencies) {
       try {
-        final Directory destDir = Directory(
-          path.join(tmpdir.absolute.path, 'lib', file.parent.path),
-        );
+        final destDir = Directory(path.join(tmpdir.absolute.path, 'lib', file.parent.path));
         destDir.createSync(recursive: true);
         final File absFile = makeAbsolute(file, workingDirectory: flutterPackageDir);
         final String destination = path.join(tmpdir.absolute.path, 'lib', file.path);
@@ -196,10 +196,16 @@ class TestCase {
     }
 
     // Copy the pubspec to the right place.
-    makeAbsolute(
-      pubspec,
-      workingDirectory: privateTestsDir,
-    ).copySync(path.join(tmpdir.absolute.path, 'pubspec.yaml'));
+    final String pubspecPath = path.join(tmpdir.absolute.path, 'pubspec.yaml');
+    makeAbsolute(pubspec, workingDirectory: privateTestsDir).copySync(pubspecPath);
+
+    final pubspecCopy = File(pubspecPath);
+    pubspecCopy.writeAsStringSync(
+      pubspecCopy
+          .readAsLinesSync()
+          .whereNot((String line) => line.startsWith('resolution: workspace'))
+          .join('\n'),
+    );
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
     File(path.join(tmpdir.absolute.path, 'analysis_options.yaml')).writeAsStringSync(
@@ -215,7 +221,7 @@ class TestCase {
 
   Future<bool> runAnalyzer() async {
     final String flutter = path.join(flutterRoot.path, 'bin', 'flutter');
-    final ProcessRunner runner = ProcessRunner(
+    final runner = ProcessRunner(
       defaultWorkingDirectory: tmpdir.absolute,
       printOutputDefault: true,
     );
@@ -234,7 +240,7 @@ class TestCase {
   }
 
   Future<bool> runTests() async {
-    final ProcessRunner runner = ProcessRunner(
+    final runner = ProcessRunner(
       defaultWorkingDirectory: tmpdir.absolute,
       printOutputDefault: true,
     );
@@ -264,7 +270,7 @@ class TestCase {
 }
 
 Stream<TestCase> getTestCases(Directory tmpdir) async* {
-  final Directory testDir = Directory(path.join(testPrivateDir.path, 'test'));
+  final testDir = Directory(path.join(testPrivateDir.path, 'test'));
   await for (final FileSystemEntity entity in testDir.list(recursive: true)) {
     if (path.split(entity.path).where((String element) => element.startsWith('.')).isNotEmpty) {
       // Skip hidden files, directories, and the files inside them, like
@@ -273,7 +279,7 @@ Stream<TestCase> getTestCases(Directory tmpdir) async* {
     }
     if (entity is File && path.basename(entity.path).endsWith('_test.json')) {
       print('Found manifest ${entity.path}');
-      final Directory testTmpDir = Directory(
+      final testTmpDir = Directory(
         path.join(tmpdir.absolute.path, path.basenameWithoutExtension(entity.path)),
       );
       yield TestCase.fromManifest(entity, testTmpDir);

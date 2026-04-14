@@ -9,14 +9,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Shows flutter logo in transition', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RelativePositionedTransitionExampleApp());
+    await tester.pumpWidget(
+      const example.RelativePositionedTransitionExampleApp(),
+    );
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Padding), findsAtLeast(1));
     expect(find.byType(RelativePositionedTransition), findsOneWidget);
   });
 
-  testWidgets('Animates repeatedly every 2 seconds', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RelativePositionedTransitionExampleApp());
+  testWidgets('Animates repeatedly every 2 seconds', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.RelativePositionedTransitionExampleApp(),
+    );
 
     expect(
       tester.getSize(find.byType(FlutterLogo)),

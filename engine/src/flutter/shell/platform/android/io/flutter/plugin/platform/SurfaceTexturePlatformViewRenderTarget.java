@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package io.flutter.plugin.platform;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
@@ -57,11 +61,6 @@ public class SurfaceTexturePlatformViewRenderTarget implements PlatformViewRende
 
   /** Implementation of PlatformViewRenderTarget */
   public SurfaceTexturePlatformViewRenderTarget(SurfaceTextureEntry surfaceTextureEntry) {
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
-      throw new UnsupportedOperationException(
-          "Platform views cannot be displayed below API level 23"
-              + "You can prevent this issue by setting `minSdkVersion: 23` in build.gradle.");
-    }
     this.surfaceTextureEntry = surfaceTextureEntry;
     this.surfaceTexture = surfaceTextureEntry.surfaceTexture();
     surfaceTextureEntry.setOnTrimMemoryListener(trimMemoryListener);

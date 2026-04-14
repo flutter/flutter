@@ -11,7 +11,8 @@
 
 namespace impeller {
 
-SolidColorContents::SolidColorContents() = default;
+SolidColorContents::SolidColorContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 SolidColorContents::~SolidColorContents() = default;
 
@@ -21,6 +22,10 @@ void SolidColorContents::SetColor(Color color) {
 
 Color SolidColorContents::GetColor() const {
   return color_.WithAlpha(color_.alpha * GetOpacityFactor());
+}
+
+const Geometry* SolidColorContents::GetGeometry() const {
+  return geometry_;
 }
 
 bool SolidColorContents::IsSolidColor() const {
@@ -49,7 +54,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
                                 RenderPass& pass) const {
   using VS = SolidFillPipeline::VertexShader;
   using FS = SolidFillPipeline::FragmentShader;
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
@@ -62,8 +67,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       };
   return ColorSourceContents::DrawGeometry<VS>(
       renderer, entity, pass, pipeline_callback, frame_info,
-      [&frag_info, &host_buffer](RenderPass& pass) {
-        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+      [&frag_info, &data_host_buffer](RenderPass& pass) {
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("Solid Fill");
         return true;
       });
@@ -72,8 +77,12 @@ bool SolidColorContents::Render(const ContentContext& renderer,
 std::optional<Color> SolidColorContents::AsBackgroundColor(
     const Entity& entity,
     ISize target_size) const {
+  const Geometry* geometry = GetGeometry();
+  if (geometry == nullptr) {
+    return std::nullopt;
+  }
   Rect target_rect = Rect::MakeSize(target_size);
-  return GetGeometry()->CoversArea(entity.GetTransform(), target_rect)
+  return geometry->CoversArea(entity.GetTransform(), target_rect)
              ? GetColor()
              : std::optional<Color>();
 }

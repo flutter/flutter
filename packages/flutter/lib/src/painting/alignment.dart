@@ -11,12 +11,13 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'debug.dart';
 
 /// Base class for [Alignment] that allows for text-direction aware
 /// resolution.
 ///
-/// A property or argument of this type accepts classes created either with [
-/// Alignment] and its variants, or [AlignmentDirectional.new].
+/// A property or argument of this type accepts classes created either with
+/// [Alignment] and its variants, or [AlignmentDirectional.new].
 ///
 /// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
@@ -31,6 +32,131 @@ abstract class AlignmentGeometry {
 
   /// Creates a directional alignment, or [AlignmentDirectional].
   const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
+
+  /// The top left corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topLeft], which is the same thing.
+  static const AlignmentGeometry topLeft = Alignment.topLeft;
+
+  /// The center point along the top edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topCenter], which is the same thing.
+  static const AlignmentGeometry topCenter = Alignment.topCenter;
+
+  /// The top right corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.topRight], which is the same thing.
+  static const AlignmentGeometry topRight = Alignment.topRight;
+
+  /// The top corner on the "start" edge.
+  ///
+  /// {@template flutter.painting.alignment.directional.start}
+  /// This can be used to indicate an offset from the left in [TextDirection.ltr]
+  /// text and an offset from the right in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.topStart], which is the same thing.
+  static const AlignmentGeometry topStart = AlignmentDirectional.topStart;
+
+  /// The top corner on the "end" edge.
+  ///
+  /// {@template flutter.painting.alignment.directional.end}
+  /// This can be used to indicate an offset from the right in [TextDirection.ltr]
+  /// text and an offset from the left in [TextDirection.rtl] text without having
+  /// to be aware of the current text direction.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.topEnd], which is the same thing.
+  static const AlignmentGeometry topEnd = AlignmentDirectional.topEnd;
+
+  /// The center point along the left edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.centerLeft], which is the same thing.
+  static const AlignmentGeometry centerLeft = Alignment.centerLeft;
+
+  /// The center point, both horizontally and vertically.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.center], which is the same thing.
+  static const AlignmentGeometry center = Alignment.center;
+
+  /// The center point along the right edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.centerRight], which is the same thing.
+  static const AlignmentGeometry centerRight = Alignment.centerRight;
+
+  /// The center point along the "start" edge.
+  ///
+  /// {@macro flutter.painting.alignment.directional.start}
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.centerStart], which is the same thing.
+  static const AlignmentGeometry centerStart = AlignmentDirectional.centerStart;
+
+  /// The center point along the "end" edge.
+  ///
+  /// {@macro flutter.painting.alignment.directional.end}
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.centerEnd], which is the same thing.
+  static const AlignmentGeometry centerEnd = AlignmentDirectional.centerEnd;
+
+  /// The bottom left corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomLeft], which is the same thing.
+  static const AlignmentGeometry bottomLeft = Alignment.bottomLeft;
+
+  /// The center point along the bottom edge.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomCenter], which is the same thing.
+  static const AlignmentGeometry bottomCenter = Alignment.bottomCenter;
+
+  /// The bottom right corner.
+  ///
+  /// See also:
+  ///
+  /// * [Alignment.bottomRight], which is the same thing.
+  static const AlignmentGeometry bottomRight = Alignment.bottomRight;
+
+  /// The bottom corner on the "start" edge.
+  ///
+  /// {@macro flutter.painting.alignment.directional.start}
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.bottomStart], which is the same thing.
+  static const AlignmentGeometry bottomStart = AlignmentDirectional.bottomStart;
+
+  /// The bottom corner on the "end" edge.
+  ///
+  /// {@macro flutter.painting.alignment.directional.end}
+  ///
+  /// See also:
+  ///
+  /// * [AlignmentDirectional.bottomEnd], which is the same thing.
+  static const AlignmentGeometry bottomEnd = AlignmentDirectional.bottomEnd;
 
   double get _x;
 
@@ -521,7 +647,7 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
+    assert(debugCheckCanResolveTextDirection(direction, '$AlignmentDirectional'));
     return switch (direction!) {
       TextDirection.rtl => Alignment(-start, y),
       TextDirection.ltr => Alignment(start, y),
@@ -590,7 +716,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
+    assert(debugCheckCanResolveTextDirection(direction, '$_MixedAlignment'));
     return switch (direction!) {
       TextDirection.rtl => Alignment(_x - _start, _y),
       TextDirection.ltr => Alignment(_x + _start, _y),

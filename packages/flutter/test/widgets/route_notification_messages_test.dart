@@ -6,9 +6,11 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class OnTapPage extends StatelessWidget {
   const OnTapPage({super.key, required this.id, required this.onTap});
@@ -18,37 +20,34 @@ class OnTapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Page $id')),
-      body: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Center(child: Text(id, style: Theme.of(context).textTheme.displaySmall)),
-      ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Center(child: Text(id)),
     );
   }
 }
 
 void main() {
+  const kWhiteColor = Color(0xFFFFFFFF);
+
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => OnTapPage(
-            id: '/',
-            onTap: () {
-              Navigator.pushNamed(context, '/A');
-            },
-          ),
-      '/A':
-          (BuildContext context) => OnTapPage(
-            id: 'A',
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        },
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pop(context);
+        },
+      ),
     };
 
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
@@ -57,7 +56,7 @@ void main() {
       return null;
     });
 
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
@@ -97,7 +96,7 @@ void main() {
   });
 
   testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -121,7 +120,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Navigator(
-          pages: const <Page<void>>[TestPage(name: '/'), TestPage(name: '/abc')],
+          pages: const <Page<void>>[
+            TestPage(name: '/'),
+            TestPage(name: '/abc'),
+          ],
           onPopPage: (Route<void> route, void result) => false,
         ),
       ),
@@ -132,25 +134,23 @@ void main() {
   });
 
   testWidgets('Replace should send platform messages', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/':
-          (BuildContext context) => OnTapPage(
-            id: '/',
-            onTap: () {
-              Navigator.pushNamed(context, '/A');
-            },
-          ),
-      '/A':
-          (BuildContext context) => OnTapPage(
-            id: 'A',
-            onTap: () {
-              Navigator.pushReplacementNamed(context, '/B');
-            },
-          ),
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => OnTapPage(
+        id: '/',
+        onTap: () {
+          Navigator.pushNamed(context, '/A');
+        },
+      ),
+      '/A': (BuildContext context) => OnTapPage(
+        id: 'A',
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/B');
+        },
+      ),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
@@ -159,7 +159,7 @@ void main() {
       return null;
     });
 
-    await tester.pumpWidget(MaterialApp(routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
 
     expect(log, <Object>[
       isMethodCall('selectSingleEntryHistory', arguments: null),
@@ -199,7 +199,7 @@ void main() {
   });
 
   testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -208,16 +208,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         initialRoute: '/home',
         routes: <String, WidgetBuilder>{
+          '/': (_) => const SizedBox.shrink(),
           '/home': (BuildContext context) {
             return OnTapPage(
               id: 'Home',
               onTap: () {
                 // Create a route with no name.
-                final Route<void> route = MaterialPageRoute<void>(
-                  builder: (BuildContext context) => const Text('Nameless Route'),
+                final Route<void> route = PageRouteBuilder<void>(
+                  pageBuilder:
+                      (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) => const Text('Nameless Route'),
                 );
                 Navigator.push<void>(context, route);
               },
@@ -244,7 +250,7 @@ void main() {
   });
 
   testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (
       MethodCall methodCall,
     ) async {
@@ -252,11 +258,11 @@ void main() {
       return null;
     });
 
-    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+    final provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(uri: Uri.parse('initial')),
     );
     addTearDown(provider.dispose);
-    final SimpleRouterDelegate delegate = SimpleRouterDelegate(
+    final delegate = SimpleRouterDelegate(
       reportConfiguration: true,
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -265,7 +271,8 @@ void main() {
     addTearDown(delegate.dispose);
 
     await tester.pumpWidget(
-      MaterialApp.router(
+      WidgetsApp.router(
+        color: kWhiteColor,
         routeInformationProvider: provider,
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: delegate,

@@ -35,9 +35,13 @@ class SliverFillRemainingExample extends StatelessWidget {
       // example, which are provided by default on the iOS platform.
       // BouncingScrollPhysics is combined with AlwaysScrollableScrollPhysics to
       // allow for the overscroll, regardless of the depth of the scrollable.
-      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       slivers: <Widget>[
-        SliverToBoxAdapter(child: Container(color: Colors.tealAccent[700], height: 150.0)),
+        SliverToBoxAdapter(
+          child: Container(color: Colors.tealAccent[700], height: 150.0),
+        ),
         SliverFillRemaining(
           hasScrollBody: false,
           // Switch for different overscroll behavior in your layout. If your
@@ -47,9 +51,9 @@ class SliverFillRemainingExample extends StatelessWidget {
           child: Container(
             color: Colors.teal[100],
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: .bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const .all(16.0),
                 child: ElevatedButton(
                   onPressed: () {
                     /* Place your onPressed code here! */

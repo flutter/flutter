@@ -69,8 +69,8 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   static Route<TimeOfDay> _timePickerRoute(BuildContext context, Object? arguments) {
-    final List<Object> args = arguments! as List<Object>;
-    final TimeOfDay initialTime = TimeOfDay(hour: args[0] as int, minute: args[1] as int);
+    final args = arguments! as List<Object>;
+    final initialTime = TimeOfDay(hour: args[0] as int, minute: args[1] as int);
 
     return DialogRoute<TimeOfDay>(
       context: context,
@@ -107,18 +107,16 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
     );
     _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
       onComplete: _selectDateRange,
-      onPresent:
-          (NavigatorState navigator, Object? arguments) =>
-              navigator.restorablePush(_dateRangePickerRoute),
+      onPresent: (NavigatorState navigator, Object? arguments) =>
+          navigator.restorablePush(_dateRangePickerRoute),
     );
 
     _restorableTimePickerRouteFuture = RestorableRouteFuture<TimeOfDay?>(
       onComplete: _selectTime,
-      onPresent:
-          (NavigatorState navigator, Object? arguments) => navigator.restorablePush(
-            _timePickerRoute,
-            arguments: <int>[_fromTime.value.hour, _fromTime.value.minute],
-          ),
+      onPresent: (NavigatorState navigator, Object? arguments) => navigator.restorablePush(
+        _timePickerRoute,
+        arguments: <int>[_fromTime.value.hour, _fromTime.value.minute],
+      ),
     );
   }
 
@@ -146,7 +144,7 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   String get _labelText {
-    final DateFormat yMMMd = DateFormat.yMMMd();
+    final yMMMd = DateFormat.yMMMd();
     return switch (widget.type) {
       PickerDemoType.date => yMMMd.format(_fromDate.value),
       PickerDemoType.time => _fromTime.value.format(context),
@@ -159,29 +157,26 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
     return Navigator(
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute<void>(
-          builder:
-              (BuildContext context) => Scaffold(
-                appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title)),
-                body: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(_labelText),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed:
-                            () =>
-                                switch (widget.type) {
-                                  PickerDemoType.date => _restorableDatePickerRouteFuture,
-                                  PickerDemoType.time => _restorableTimePickerRouteFuture,
-                                  PickerDemoType.range => _restorableDateRangePickerRouteFuture,
-                                }.present(),
-                        child: Text(GalleryLocalizations.of(context)!.demoPickersShowPicker),
-                      ),
-                    ],
+          builder: (BuildContext context) => Scaffold(
+            appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title)),
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(_labelText),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => switch (widget.type) {
+                      PickerDemoType.date => _restorableDatePickerRouteFuture,
+                      PickerDemoType.time => _restorableTimePickerRouteFuture,
+                      PickerDemoType.range => _restorableDateRangePickerRouteFuture,
+                    }.present(),
+                    child: Text(GalleryLocalizations.of(context)!.demoPickersShowPicker),
                   ),
-                ),
+                ],
               ),
+            ),
+          ),
         );
       },
     );

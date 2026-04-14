@@ -62,9 +62,14 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
   bool handleScrollNotification(ScrollNotification notification) {
     final RenderSliver? headerSliver = keyToSliver(headerSliverKey);
     final RenderSliver? titleSliver = keyToSliver(titleSliverKey);
-    if (headerSliver != null && titleSliver != null && titleSliver.geometry != null) {
+    if (headerSliver != null &&
+        titleSliver != null &&
+        titleSliver.geometry != null) {
       final double opacity =
-          headerSliver.constraints.scrollOffset > titleSliver.geometry!.scrollExtent ? 1 : 0;
+          headerSliver.constraints.scrollOffset >
+              titleSliver.geometry!.scrollExtent
+          ? 1
+          : 0;
       if (opacity != headerOpacity) {
         setState(() {
           headerOpacity = opacity;
@@ -76,7 +81,7 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
 
   @override
   Widget build(BuildContext context) {
-    const EdgeInsets horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
+    const EdgeInsets horizontalPadding = .symmetric(horizontal: 8);
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;
@@ -104,14 +109,17 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
                     child: Text(
                       'Settings',
                       style: textTheme.titleLarge!.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: .bold,
                         fontSize: 32,
                       ),
                     ),
                   ),
                 ),
               ),
-              const SliverPadding(padding: horizontalPadding, sliver: ItemList()),
+              const SliverPadding(
+                padding: horizontalPadding,
+                sliver: ItemList(),
+              ),
             ],
           ),
         ),
@@ -136,17 +144,20 @@ class Header extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const .symmetric(vertical: 12),
       decoration: ShapeDecoration(
-        color: opacity == 0 ? colorScheme.surfaceContainer : colorScheme.surfaceContainerLowest,
+        color: opacity == 0
+            ? colorScheme.surfaceContainer
+            : colorScheme.surfaceContainerLowest,
         shape: LinearBorder.bottom(
           side: BorderSide(
-            color:
-                opacity == 0 ? colorScheme.surfaceContainer : colorScheme.surfaceContainerHighest,
+            color: opacity == 0
+                ? colorScheme.surfaceContainer
+                : colorScheme.surfaceContainerHighest,
           ),
         ),
       ),
-      alignment: Alignment.center,
+      alignment: .center,
       child: AnimatedOpacity(
         opacity: opacity,
         duration: const Duration(milliseconds: 300),
@@ -167,8 +178,8 @@ class TitleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: AlignmentDirectional.bottomStart,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      alignment: .bottomStart,
+      padding: const .symmetric(vertical: 8),
       child: child,
     );
   }
@@ -183,13 +194,17 @@ class ItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+    return SliverList.builder(
+      itemCount: itemCount,
+      itemBuilder: (BuildContext context, int index) {
         return Card(
           color: colorScheme.onSecondary,
-          child: ListTile(textColor: colorScheme.secondary, title: Text('Item $index')),
+          child: ListTile(
+            textColor: colorScheme.secondary,
+            title: Text('Item $index'),
+          ),
         );
-      }, childCount: itemCount),
+      },
     );
   }
 }

@@ -32,9 +32,9 @@ public interface ActivityPluginBinding {
    * Returns the {@code Lifecycle} associated with the attached {@code Activity}.
    *
    * <p>Use the flutter_plugin_android_lifecycle plugin to turn the returned {@code Object} into a
-   * {@code Lifecycle} object. See
-   * (https://github.com/flutter/plugins/tree/master/packages/flutter_plugin_android_lifecycle).
-   * Flutter plugins that rely on {@code Lifecycle} are forced to use the
+   * {@code androidx.lifecycle.Lifecycle} object. See (<a
+   * href="https://github.com/flutter/packages/tree/main/packages/flutter_plugin_android_lifecycle">https://github.com/flutter/packages/tree/main/packages/flutter_plugin_android_lifecycle</a>).
+   * Flutter plugins that rely on {@code androidx.lifecycle.Lifecycle} are forced to use the
    * flutter_plugin_android_lifecycle plugin so that the version of the Android Lifecycle library is
    * exposed to pub, which allows Flutter to manage different versions library over time.
    */

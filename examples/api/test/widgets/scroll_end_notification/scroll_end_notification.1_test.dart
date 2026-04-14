@@ -11,12 +11,17 @@ void main() {
   testWidgets('SliverAutoScroll example', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SliverAutoScrollExampleApp());
 
-    final double itemHeight = tester.getSize(find.widgetWithText(Card, 'Item 0.15')).height;
+    final double itemHeight = tester
+        .getSize(find.widgetWithText(Card, 'Item 0.15'))
+        .height;
 
     // The scroll view is 600 pixels high and the big orange
     // "AlignedItem" is preceded by 15 regular items. Scroll up enough
     // to make it partially visible.
-    await tester.drag(find.byType(CustomScrollView), Offset(0, 600 - 15.5 * itemHeight));
+    await tester.drag(
+      find.byType(CustomScrollView),
+      Offset(0, 600 - 15.5 * itemHeight),
+    );
     await tester.pumpAndSettle();
 
     final Finder alignedItem = find.widgetWithText(Card, 'Aligned Item');
@@ -32,13 +37,19 @@ void main() {
 
     // Scroll up a little and the "AlignedItem" does not auto-scroll, because
     // it's fully visible.
-    await tester.drag(find.byType(CustomScrollView), Offset(0, -2 * itemHeight));
+    await tester.drag(
+      find.byType(CustomScrollView),
+      Offset(0, -2 * itemHeight),
+    );
     await tester.pumpAndSettle();
     expect(tester.getRect(alignedItem).bottom, 600 - itemHeight);
 
     // Scroll up far enough to make the AlignedItem partially visible and to trigger
     // an auto-scroll that aligns it with the top of the viewport.
-    await tester.drag(find.byType(CustomScrollView), Offset(0, -600 + itemHeight * 1.5));
+    await tester.drag(
+      find.byType(CustomScrollView),
+      Offset(0, -600 + itemHeight * 1.5),
+    );
     await tester.pumpAndSettle();
     expect(tester.getRect(alignedItem).top, 0);
 

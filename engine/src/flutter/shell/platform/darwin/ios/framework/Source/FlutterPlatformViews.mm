@@ -64,7 +64,7 @@ class CGPathReceiver final : public flutter::DlPathReceiver {
   }
   void Close() override { CGPathCloseSubpath(path_ref_); }
 
-  CGMutablePathRef TakePath() { return path_ref_; }
+  CGMutablePathRef TakePath() const { return path_ref_; }
 
  private:
   CGMutablePathRef path_ref_ = CGPathCreateMutable();
@@ -94,10 +94,14 @@ static BOOL _preparedOnce = NO;
 
 - (instancetype)initWithFrame:(CGRect)frame
                    blurRadius:(CGFloat)blurRadius
+                 cornerRadius:(CGFloat)cornerRadius
+        isRoundedSuperellipse:(BOOL)isRoundedSuperellipse
              visualEffectView:(UIVisualEffectView*)visualEffectView {
   if (self = [super init]) {
     _frame = frame;
     _blurRadius = blurRadius;
+    _cornerRadius = cornerRadius;
+    _isRoundedSuperellipse = isRoundedSuperellipse;
     [PlatformViewFilter prepareOnce:visualEffectView];
     if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
       FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
@@ -162,6 +166,13 @@ static BOOL _preparedOnce = NO;
   UIView* visualEffectSubview = visualEffectView.subviews[_indexOfVisualEffectSubview];
   visualEffectSubview.layer.backgroundColor = UIColor.clearColor.CGColor;
   visualEffectView.frame = _frame;
+
+  visualEffectView.layer.cornerRadius = _cornerRadius;
+  if (@available(iOS 13.0, *)) {
+    visualEffectView.layer.cornerCurve =
+        _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
+  }
+  visualEffectView.clipsToBounds = YES;
 
   self.backdropFilterView = visualEffectView;
 }
@@ -558,19 +569,49 @@ static BOOL _preparedOnce = NO;
   self.delayingRecognizer.state = UIGestureRecognizerStateFailed;
 }
 
-- (BOOL)containsWebView:(UIView*)view remainingSubviewDepth:(int)remainingSubviewDepth {
-  if (remainingSubviewDepth < 0) {
-    return NO;
-  }
+- (BOOL)containsWebView:(UIView*)view {
   if ([view isKindOfClass:[WKWebView class]]) {
     return YES;
   }
   for (UIView* subview in view.subviews) {
-    if ([self containsWebView:subview remainingSubviewDepth:remainingSubviewDepth - 1]) {
+    if ([self containsWebView:subview]) {
       return YES;
     }
   }
   return NO;
+}
+
+- (void)searchAndFixWebView:(UIView*)view {
+  if ([view isKindOfClass:[WKWebView class]]) {
+    return [self searchAndFixWebViewGestureRecognzier:view];
+  } else {
+    for (UIView* subview in view.subviews) {
+      [self searchAndFixWebView:subview];
+    }
+  }
+}
+
+- (void)searchAndFixWebViewGestureRecognzier:(UIView*)view {
+  for (UIGestureRecognizer* recognizer in view.gestureRecognizers) {
+    // This is to fix a bug on iOS 26 where web view link is not tappable.
+    // We reset the web view's WKTouchEventsGestureRecognizer in a bad state
+    // by disabling and re-enabling it.
+    // See: https://github.com/flutter/flutter/issues/175099.
+    // See also: https://github.com/flutter/engine/pull/56804 for an explanation of the
+    // bug on iOS 18.2, which is still valid on iOS 26.
+    // Warning: This is just a quick fix that patches the bug. For example,
+    // touches on a drawing website is still not completely blocked. A proper solution
+    // should rely on overriding the hitTest behavior.
+    // See: https://github.com/flutter/flutter/issues/179916.
+    if (recognizer.enabled &&
+        [NSStringFromClass([recognizer class]) hasSuffix:@"TouchEventsGestureRecognizer"]) {
+      recognizer.enabled = NO;
+      recognizer.enabled = YES;
+    }
+  }
+  for (UIView* subview in view.subviews) {
+    [self searchAndFixWebViewGestureRecognzier:subview];
+  }
 }
 
 - (void)blockGesture {
@@ -587,14 +628,21 @@ static BOOL _preparedOnce = NO;
       // from the web view plugin level. Right now we only observe this issue for
       // FlutterPlatformViewGestureRecognizersBlockingPolicyEager, but we should try it if a similar
       // issue arises for the other policy.
-      if (@available(iOS 18.2, *)) {
-        // This workaround is designed for WKWebView only. The 1P web view plugin provides a
-        // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
-        // WKWebView instead. So we perform DFS to search the view hierarchy (with a depth limit).
-        // Passing a limit of 0 means only searching for platform view itself; Pass 1 to include its
-        // children as well, and so on. We should be conservative and start with a small number. The
-        // AdMob banner has a WKWebView at depth 7.
-        if ([self containsWebView:self.embeddedView remainingSubviewDepth:1]) {
+      if (@available(iOS 26.0, *)) {
+        // This performs a nested DFS, with the outer one searching for any web view, and the inner
+        // one searching for a TouchEventsGestureRecognizer inside the web view. Once found, disable
+        // and immediately reenable it to reset its state.
+        // TODO(hellohuanlin): remove this flag after it is battle tested.
+        NSNumber* isWorkaroundDisabled =
+            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisableWebViewGestureReset"];
+        if (!isWorkaroundDisabled.boolValue) {
+          [self searchAndFixWebView:self.embeddedView];
+        }
+      } else if (@available(iOS 18.2, *)) {
+        // The 1P web view plugin provides a WKWebView itself as the platform view. However, some 3P
+        // plugins provide wrappers of WKWebView instead, and AdMob banner has a WKWebView at
+        // depth 7. So we perform DFS to search the view hierarchy.
+        if ([self containsWebView:self.embeddedView]) {
           [self removeGestureRecognizer:self.delayingRecognizer];
           [self addGestureRecognizer:self.delayingRecognizer];
         }
@@ -770,6 +818,12 @@ static BOOL _preparedOnce = NO;
 }
 
 - (void)forceResetStateIfNeeded {
+  // Apple fixed the bug where the gesture recognizer gets stuck at "failed" state in iOS 26.
+  // The workaround is no longer needed on iOS 26+.
+  // See: https://github.com/flutter/flutter/issues/179907
+  if (@available(iOS 26.0, *)) {
+    return;
+  }
   __weak ForwardingGestureRecognizer* weakSelf = self;
   dispatch_async(dispatch_get_main_queue(), ^{
     ForwardingGestureRecognizer* strongSelf = weakSelf;
@@ -787,4 +841,7 @@ static BOOL _preparedOnce = NO;
         (UIGestureRecognizer*)otherGestureRecognizer {
   return YES;
 }
+@end
+
+@implementation PendingRRectClip
 @end

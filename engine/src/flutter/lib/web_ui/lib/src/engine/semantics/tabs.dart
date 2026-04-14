@@ -19,6 +19,7 @@ class SemanticTab extends SemanticRole {
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
       ) {
     setAriaRole('tab');
+    addTappable();
   }
 
   @override

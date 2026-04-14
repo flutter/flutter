@@ -9,11 +9,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Text getLastDayText(WidgetTester tester) {
-    final Finder dayFinder = find.descendant(of: find.byType(Ink), matching: find.byType(Text));
+    final Finder dayFinder = find.descendant(
+      of: find.byType(Ink),
+      matching: find.byType(Text),
+    );
     return tester.widget(dayFinder.last);
   }
 
-  testWidgets('Days are based on the calendar delegate', (WidgetTester tester) async {
+  testWidgets('Days are based on the calendar delegate', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CalendarDatePickerApp());
 
     final Finder nextMonthButton = find.byIcon(Icons.chevron_right);

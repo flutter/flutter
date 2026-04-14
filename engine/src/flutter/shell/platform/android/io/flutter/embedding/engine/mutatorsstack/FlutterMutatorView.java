@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package io.flutter.embedding.engine.mutatorsstack;
 
 import static android.view.View.OnFocusChangeListener;
@@ -8,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -28,8 +33,6 @@ public class FlutterMutatorView extends FrameLayout {
   private float screenDensity;
   private int left;
   private int top;
-  private int prevLeft;
-  private int prevTop;
 
   private final AndroidTouchProcessor androidTouchProcessor;
   private Paint paint;
@@ -99,7 +102,8 @@ public class FlutterMutatorView extends FrameLayout {
     this.mutatorsStack = mutatorsStack;
     this.left = left;
     this.top = top;
-    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
+    FrameLayout.LayoutParams layoutParams =
+        new FrameLayout.LayoutParams(width, height, Gravity.LEFT | Gravity.TOP);
     layoutParams.leftMargin = left;
     layoutParams.topMargin = top;
     setLayoutParams(layoutParams);
@@ -193,27 +197,8 @@ public class FlutterMutatorView extends FrameLayout {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
     }
-
     final Matrix screenMatrix = new Matrix();
-
-    switch (event.getAction()) {
-      case MotionEvent.ACTION_DOWN:
-        prevLeft = left;
-        prevTop = top;
-        screenMatrix.postTranslate(left, top);
-        break;
-      case MotionEvent.ACTION_MOVE:
-        // While the view is dragged, use the left and top positions as
-        // they were at the moment the touch event fired.
-        screenMatrix.postTranslate(prevLeft, prevTop);
-        prevLeft = left;
-        prevTop = top;
-        break;
-      case MotionEvent.ACTION_UP:
-      default:
-        screenMatrix.postTranslate(left, top);
-        break;
-    }
+    screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
 }

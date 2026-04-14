@@ -38,7 +38,7 @@ class NotAColor extends Color {
 
 void main() {
   test('color accessors should work', () {
-    const Color foo = Color(0x12345678);
+    const foo = Color(0x12345678);
     expect(foo.alpha, equals(0x12));
     expect(foo.red, equals(0x34));
     expect(foo.green, equals(0x56));
@@ -46,21 +46,21 @@ void main() {
   });
 
   test('paint set to black', () {
-    const Color c = Color(0x00000000);
-    final Paint p = Paint();
+    const c = Color(0x00000000);
+    final p = Paint();
     p.color = c;
     expect(c, equals(const Color(0x00000000)));
   });
 
   test('color created with out of bounds value', () {
-    const Color c = Color(0x100 << 24);
-    final Paint p = Paint();
+    const c = Color(0x100 << 24);
+    final p = Paint();
     p.color = c;
   });
 
   test('color created with wildly out of bounds value', () {
-    const Color c = Color(1 << 1000000);
-    final Paint p = Paint();
+    const c = Color(1 << 1000000);
+    final p = Paint();
     p.color = c;
   });
 
@@ -102,20 +102,6 @@ void main() {
     );
   });
 
-  test('Color.lerp different colorspaces', () {
-    bool didThrow = false;
-    try {
-      Color.lerp(
-        const Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3),
-        const Color.from(alpha: 1, red: 1, green: 0, blue: 0),
-        0.0,
-      );
-    } catch (ex) {
-      didThrow = true;
-    }
-    expect(didThrow, isTrue);
-  });
-
   test('Color.lerp same colorspaces', () {
     expect(
       Color.lerp(
@@ -127,6 +113,83 @@ void main() {
         const Color.from(alpha: 1, red: 0.2, green: 0, blue: 0, colorSpace: ColorSpace.displayP3),
       ),
     );
+  });
+
+  test('Color.lerp mixed colorspaces produces displayP3 result', () {
+    final Color? result = Color.lerp(
+      const Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3),
+      const Color.from(alpha: 1, red: 0, green: 0, blue: 1),
+      0.0,
+    );
+    expect(result!.colorSpace, equals(ColorSpace.displayP3));
+  });
+
+  test('Color.lerp mixed colorspaces sRGB x and displayP3 y at t=0', () {
+    final Color? result = Color.lerp(
+      const Color.from(alpha: 1, red: 1, green: 0, blue: 0),
+      const Color.from(alpha: 1, red: 0, green: 1, blue: 0, colorSpace: ColorSpace.displayP3),
+      0.0,
+    );
+    expect(result!.colorSpace, equals(ColorSpace.displayP3));
+    final Color expectedP3 = const Color.from(
+      alpha: 1,
+      red: 1,
+      green: 0,
+      blue: 0,
+    ).withValues(colorSpace: ColorSpace.displayP3);
+    expect(result, colorMatches(expectedP3));
+  });
+
+  test('Color.lerp mixed colorspaces displayP3 x and sRGB y at t=1', () {
+    final Color? result = Color.lerp(
+      const Color.from(alpha: 1, red: 0, green: 1, blue: 0, colorSpace: ColorSpace.displayP3),
+      const Color.from(alpha: 1, red: 1, green: 0, blue: 0),
+      1.0,
+    );
+    expect(result!.colorSpace, equals(ColorSpace.displayP3));
+    final Color expectedP3 = const Color.from(
+      alpha: 1,
+      red: 1,
+      green: 0,
+      blue: 0,
+    ).withValues(colorSpace: ColorSpace.displayP3);
+    expect(result, colorMatches(expectedP3));
+  });
+
+  test('Color.lerp mixed colorspaces at midpoint', () {
+    const srgbRed = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
+    const p3Green = Color.from(
+      alpha: 1,
+      red: 0,
+      green: 1,
+      blue: 0,
+      colorSpace: ColorSpace.displayP3,
+    );
+    final Color? result = Color.lerp(srgbRed, p3Green, 0.5);
+    expect(result!.colorSpace, equals(ColorSpace.displayP3));
+    final Color srgbRedAsP3 = srgbRed.withValues(colorSpace: ColorSpace.displayP3);
+    final expected = Color.from(
+      alpha: (srgbRedAsP3.a + p3Green.a) / 2,
+      red: (srgbRedAsP3.r + p3Green.r) / 2,
+      green: (srgbRedAsP3.g + p3Green.g) / 2,
+      blue: (srgbRedAsP3.b + p3Green.b) / 2,
+      colorSpace: ColorSpace.displayP3,
+    );
+    expect(result, colorMatches(expected, threshold: 1e-4));
+  });
+
+  test('Color.lerp mixed colorspaces with different alpha values', () {
+    const srgbColor = Color.from(alpha: 0.5, red: 1, green: 0, blue: 0);
+    const p3Color = Color.from(
+      alpha: 1,
+      red: 0,
+      green: 0,
+      blue: 1,
+      colorSpace: ColorSpace.displayP3,
+    );
+    final Color? result = Color.lerp(srgbColor, p3Color, 0.5);
+    expect(result!.colorSpace, equals(ColorSpace.displayP3));
+    expect(result.a, closeTo(0.75, 1e-4));
   });
 
   test('Color.alphaBlend', () {
@@ -184,14 +247,14 @@ void main() {
 
   test('compute gray luminance', () {
     // Each color component is at 20%.
-    const Color lightGray = Color(0xFF333333);
+    const lightGray = Color(0xFF333333);
     // Relative luminance's formula is just the linearized color value for gray.
     // ((0.2 + 0.055) / 1.055) ^ 2.4.
     expect(lightGray.computeLuminance(), equals(0.033104766570885055));
   });
 
   test('compute color luminance', () {
-    const Color brightRed = Color(0xFFFF3B30);
+    const brightRed = Color(0xFFFF3B30);
     // 0.2126 * ((1.0 + 0.055) / 1.055) ^ 2.4 +
     // 0.7152 * ((0.23137254902 +0.055) / 1.055) ^ 2.4 +
     // 0.0722 * ((0.18823529411 + 0.055) / 1.055) ^ 2.4
@@ -199,7 +262,7 @@ void main() {
   });
 
   test('from and accessors', () {
-    const Color color = Color.from(alpha: 0.1, red: 0.2, green: 0.3, blue: 0.4);
+    const color = Color.from(alpha: 0.1, red: 0.2, green: 0.3, blue: 0.4);
     expect(color.a, equals(0.1));
     expect(color.r, equals(0.2));
     expect(color.g, equals(0.3));
@@ -215,7 +278,7 @@ void main() {
   });
 
   test('fromARGB and accessors', () {
-    const Color color = Color.fromARGB(10, 20, 35, 47);
+    const color = Color.fromARGB(10, 20, 35, 47);
     expect(color.alpha, equals(10));
     expect(color.red, equals(20));
     expect(color.green, equals(35));
@@ -223,7 +286,7 @@ void main() {
   });
 
   test('constructor and accessors', () {
-    const Color color = Color(0xffeeddcc);
+    const color = Color(0xffeeddcc);
     expect(color.alpha, equals(0xff));
     expect(color.red, equals(0xee));
     expect(color.green, equals(0xdd));
@@ -231,13 +294,7 @@ void main() {
   });
 
   test('p3 to extended srgb', () {
-    const Color p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     final Color srgb = p3.withValues(colorSpace: ColorSpace.extendedSRGB);
     expect(srgb.a, equals(1.0));
     expect(srgb.r, closeTo(1.0931, 1e-4));
@@ -247,13 +304,7 @@ void main() {
   });
 
   test('p3 to srgb', () {
-    const Color p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     final Color srgb = p3.withValues(colorSpace: ColorSpace.sRGB);
     expect(srgb.a, equals(1.0));
     expect(srgb.r, closeTo(1, 1e-4));
@@ -263,7 +314,7 @@ void main() {
   });
 
   test('extended srgb to p3', () {
-    const Color srgb = Color.from(
+    const srgb = Color.from(
       alpha: 1,
       red: 1.0931,
       green: -0.2268,
@@ -279,7 +330,7 @@ void main() {
   });
 
   test('extended srgb to p3 clamped', () {
-    const Color srgb = Color.from(
+    const srgb = Color.from(
       alpha: 1,
       red: 2,
       green: 0,
@@ -297,40 +348,28 @@ void main() {
   });
 
   test('hash considers colorspace', () {
-    const Color srgb = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
-    const Color p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const srgb = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     expect(srgb.hashCode, isNot(p3.hashCode));
   });
 
   test('equality considers colorspace', () {
-    const Color srgb = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
-    const Color p3 = Color.from(
-      alpha: 1,
-      red: 1,
-      green: 0,
-      blue: 0,
-      colorSpace: ColorSpace.displayP3,
-    );
+    const srgb = Color.from(alpha: 1, red: 1, green: 0, blue: 0);
+    const p3 = Color.from(alpha: 1, red: 1, green: 0, blue: 0, colorSpace: ColorSpace.displayP3);
     expect(srgb, isNot(p3));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/41257
   // CupertinoDynamicColor was overriding base class and calling super(0).
   test('subclass of Color can override value', () {
-    const DynamicColorClass color = DynamicColorClass(0xF0E0D0C0);
+    const color = DynamicColorClass(0xF0E0D0C0);
     expect(color.value, 0xF0E0D0C0);
     // Call base class member, make sure it uses overridden value.
     expect(color.red, 0xE0);
   });
 
   test('toARGB32 converts to a 32-bit integer', () {
-    const Color color = Color.from(alpha: 0.1, red: 0.2, green: 0.3, blue: 0.4);
+    const color = Color.from(alpha: 0.1, red: 0.2, green: 0.3, blue: 0.4);
     expect(color.toARGB32(), equals(0x1a334d66));
   });
 }

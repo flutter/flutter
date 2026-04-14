@@ -50,7 +50,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
       body: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const .symmetric(horizontal: 16),
             child: ChipsInput<String>(
               values: _toppings,
               decoration: const InputDecoration(
@@ -69,7 +69,10 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
               child: ListView.builder(
                 itemCount: _suggestions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return ToppingSuggestion(_suggestions[index], onTap: _selectSuggestion);
+                  return ToppingSuggestion(
+                    _suggestions[index],
+                    onTap: _selectSuggestion,
+                  );
                 },
               ),
             ),
@@ -81,12 +84,18 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   Future<void> _onSearchChanged(String value) async {
     final List<String> results = await _suggestionCallback(value);
     setState(() {
-      _suggestions = results.where((String topping) => !_toppings.contains(topping)).toList();
+      _suggestions = results
+          .where((String topping) => !_toppings.contains(topping))
+          .toList();
     });
   }
 
   Widget _chipBuilder(BuildContext context, String topping) {
-    return ToppingInputChip(topping: topping, onDeleted: _onChipDeleted, onSelected: _onChipTapped);
+    return ToppingInputChip(
+      topping: topping,
+      onDeleted: _onChipDeleted,
+      onSelected: _onChipTapped,
+    );
   }
 
   void _selectSuggestion(String topping) {
@@ -175,7 +184,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
   void initState() {
     super.initState();
 
-    controller = ChipsInputEditingController<T>(<T>[...widget.values], widget.chipBuilder);
+    controller = ChipsInputEditingController<T>(<T>[
+      ...widget.values,
+    ], widget.chipBuilder);
     controller.addListener(_textListener);
   }
 
@@ -223,7 +234,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
   static int countReplacements(String text) {
     return text.codeUnits
-        .where((int u) => u == ChipsInputEditingController.kObjectReplacementChar)
+        .where(
+          (int u) => u == ChipsInputEditingController.kObjectReplacementChar,
+        )
         .length;
   }
 
@@ -234,12 +247,14 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
     return TextField(
       minLines: 1,
       maxLines: 3,
-      textInputAction: TextInputAction.done,
+      textInputAction: .done,
       style: widget.style,
       strutStyle: widget.strutStyle,
       controller: controller,
-      onChanged: (String value) => widget.onTextChanged?.call(controller.textWithoutReplacements),
-      onSubmitted: (String value) => widget.onSubmitted?.call(controller.textWithoutReplacements),
+      onChanged: (String value) =>
+          widget.onTextChanged?.call(controller.textWithoutReplacements),
+      onSubmitted: (String value) =>
+          widget.onSubmitted?.call(controller.textWithoutReplacements),
     );
   }
 }
@@ -291,7 +306,8 @@ class ChipsInputEditingController<T> extends TextEditingController {
       style: style,
       children: <InlineSpan>[
         ...chipWidgets,
-        if (textWithoutReplacements.isNotEmpty) TextSpan(text: textWithoutReplacements),
+        if (textWithoutReplacements.isNotEmpty)
+          TextSpan(text: textWithoutReplacements),
       ],
     );
   }
@@ -329,15 +345,15 @@ class ToppingInputChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 3),
+      margin: const .only(right: 3),
       child: InputChip(
         key: ObjectKey(topping),
         label: Text(topping),
         avatar: CircleAvatar(child: Text(topping[0].toUpperCase())),
         onDeleted: () => onDeleted(topping),
         onSelected: (bool value) => onSelected(topping),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: const EdgeInsets.all(2),
+        materialTapTargetSize: .shrinkWrap,
+        padding: const .all(2),
       ),
     );
   }

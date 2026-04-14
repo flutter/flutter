@@ -67,7 +67,7 @@ class PlatformViewAndroid final : public PlatformView {
   void NotifySurfaceWindowChanged(
       fml::RefPtr<AndroidNativeWindow> native_window);
 
-  void NotifyChanged(const SkISize& size);
+  void NotifyChanged(const DlISize& size);
 
   // |PlatformView|
   void NotifyDestroyed() override;
@@ -143,6 +143,12 @@ class PlatformViewAndroid final : public PlatformView {
       int64_t view_id,
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
+
+  // |PlatformView|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |PlatformView|
+  void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |PlatformView|
   void HandlePlatformMessage(

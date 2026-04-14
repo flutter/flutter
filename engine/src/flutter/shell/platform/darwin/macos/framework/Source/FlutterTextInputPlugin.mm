@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
@@ -220,6 +221,13 @@ static char markerKey;
   __weak FlutterViewController* _currentViewController;
 
   /**
+   * The originally requested view controller. This may be attached to a window
+   * that is a descendant of _currentViewController window in case the window
+   * can not become a key window (i.e. popup window).
+   */
+  __weak FlutterViewController* _originalViewController;
+
+  /**
    * Used to obtain view controller on client creation
    */
   __weak id<FlutterTextInputPluginDelegate> _delegate;
@@ -425,8 +433,25 @@ static char markerKey;
       }
 
       _activeModel = std::make_unique<flutter::TextInputModel>();
-      NSNumber* viewId = config[kViewId];
-      _currentViewController = [_delegate viewControllerForIdentifier:viewId.longLongValue];
+      FlutterViewIdentifier viewId = flutter::kFlutterImplicitViewId;
+      NSObject* requestViewId = config[kViewId];
+      if ([requestViewId isKindOfClass:[NSNumber class]]) {
+        viewId = [(NSNumber*)requestViewId longLongValue];
+      }
+      _currentViewController = [_delegate viewControllerForIdentifier:viewId];
+      _originalViewController = _currentViewController;
+      while (!_currentViewController.view.window.canBecomeKeyWindow) {
+        NSWindow* parentWindow = [_currentViewController.view.window parentWindow];
+        if (parentWindow == nil) {
+          break;
+        }
+        NSViewController* controller = parentWindow.contentViewController;
+        if ([controller isKindOfClass:[FlutterViewController class]]) {
+          _currentViewController = (FlutterViewController*)controller;
+        } else {
+          break;
+        }
+      }
       FML_DCHECK(_currentViewController != nil);
     }
   } else if ([method isEqualToString:kShowMethod]) {
@@ -458,6 +483,7 @@ static char markerKey;
     _inputType = nil;
     _activeModel = nullptr;
     _currentViewController = nil;
+    _originalViewController = nil;
   } else if ([method isEqualToString:kSetEditingStateMethod]) {
     FML_DCHECK(_currentViewController != nil);
     NSDictionary* state = call.arguments;
@@ -757,6 +783,18 @@ static char markerKey;
     size_t extent = std::clamp(location + signedLength, 0L, textLength);
 
     _activeModel->SetSelection(flutter::TextRange(base, extent));
+  } else if (_activeModel->composing() &&
+             !(_activeModel->composing_range() == _activeModel->selection())) {
+    // When confirmed by Japanese IME, string replaces range of composing_range.
+    // If selection == composing_range there is no problem.
+    // If selection ! = composing_range the range of selection is only a part of composing_range.
+    // Since _activeModel->AddText is processed first for selection, the finalization of the
+    // conversion cannot be processed correctly unless selection == composing_range or
+    // selection.collapsed(). Since _activeModel->SetSelection fails if (composing_ &&
+    // !range.collapsed()), selection == composing_range will failed. Therefore, the selection
+    // cursor should only be placed at the beginning of composing_range.
+    flutter::TextRange composing_range = _activeModel->composing_range();
+    _activeModel->SetSelection(flutter::TextRange(composing_range.start()));
   }
 
   flutter::TextRange oldSelection = _activeModel->selection();
@@ -764,7 +802,10 @@ static char markerKey;
   flutter::TextRange replacedRange(-1, -1);
 
   std::string textBeforeChange = _activeModel->GetText().c_str();
-  std::string utf8String = [string UTF8String];
+  // Input string may be NSString or NSAttributedString.
+  BOOL isAttributedString = [string isKindOfClass:[NSAttributedString class]];
+  const NSString* rawString = isAttributedString ? [string string] : string;
+  std::string utf8String = rawString ? [rawString UTF8String] : "";
   _activeModel->AddText(utf8String);
   if (_activeModel->composing()) {
     replacedRange = composingBeforeChange;
@@ -973,7 +1014,7 @@ static char markerKey;
     farthest.y = MAX(farthest.y, y);
   }
 
-  const NSView* fromView = _currentViewController.flutterView;
+  const NSView* fromView = _originalViewController.flutterView;
   const CGRect rectInWindow = [fromView
       convertRect:CGRectMake(origin.x, origin.y, farthest.x - origin.x, farthest.y - origin.y)
            toView:nil];
@@ -984,7 +1025,7 @@ static char markerKey;
 - (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange {
   // This only determines position of caret instead of any arbitrary range, but it's enough
   // to properly position accent selection popup
-  return !_currentViewController.viewLoaded || CGRectEqualToRect(_caretRect, CGRectNull)
+  return !_originalViewController.viewLoaded || CGRectEqualToRect(_caretRect, CGRectNull)
              ? CGRectZero
              : [self screenRectFromFrameworkTransform:_caretRect];
 }

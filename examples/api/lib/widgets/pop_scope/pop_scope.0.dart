@@ -37,7 +37,7 @@ class _HomePageState extends State<_HomePage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Page One'),
             TextButton(
@@ -75,14 +75,18 @@ class _PageTwoState extends State<_PageTwo> {
           content: const Text('Are you sure you want to leave this page?'),
           actions: <Widget>[
             TextButton(
-              style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
               child: const Text('Nevermind'),
               onPressed: () {
                 Navigator.pop(context, false);
               },
             ),
             TextButton(
-              style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
               child: const Text('Leave'),
               onPressed: () {
                 Navigator.pop(context, true);
@@ -99,7 +103,7 @@ class _PageTwoState extends State<_PageTwo> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Page Two'),
             PopScope<Object?>(

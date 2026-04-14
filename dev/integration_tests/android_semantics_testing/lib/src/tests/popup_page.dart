@@ -53,14 +53,13 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
               DropdownButton<String>(
                 key: const ValueKey<String>(dropdownButtonKeyValue),
                 value: dropdownValue,
-                items:
-                    popupItems.map<DropdownMenuItem<String>>((String item) {
-                      return DropdownMenuItem<String>(
-                        key: ValueKey<String>('$dropdownKeyValue.$item'),
-                        value: item,
-                        child: Text(item),
-                      );
-                    }).toList(),
+                items: popupItems.map<DropdownMenuItem<String>>((String item) {
+                  return DropdownMenuItem<String>(
+                    key: ValueKey<String>('$dropdownKeyValue.$item'),
+                    value: item,
+                    child: Text(item),
+                  );
+                }).toList(),
                 onChanged: (String? value) {
                   setState(() {
                     dropdownValue = value!;

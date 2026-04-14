@@ -42,14 +42,14 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
     final Size viewSize = view.physicalSize / view.devicePixelRatio;
-    final Size pictureSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
+    final pictureSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
 
     // Fills a single cell with random text.
     void fillCell(int row, int column) {
       sceneBuilder.pushOffset(column * pictureSize.width, row * pictureSize.height);
 
-      final PictureRecorder pictureRecorder = PictureRecorder();
-      final Canvas canvas = Canvas(pictureRecorder);
+      final pictureRecorder = PictureRecorder();
+      final canvas = Canvas(pictureRecorder);
       canvas.save();
       canvas.drawCircle(Offset(pictureSize.width / 2, pictureSize.height / 2), 5.0, paint);
       canvas.drawRect(
@@ -75,8 +75,8 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
     );
     sceneBuilder.pushOffset(5.0 * math.cos(angle), 5.0 * math.sin(angle));
     angle += math.pi / 20;
-    for (int row = 0; row < 10; row++) {
-      for (int column = 0; column < 10; column++) {
+    for (var row = 0; row < 10; row++) {
+      for (var column = 0; column < 10; column++) {
         fillCell(row, column);
       }
     }

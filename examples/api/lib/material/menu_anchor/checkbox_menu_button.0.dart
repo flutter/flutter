@@ -47,7 +47,7 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
         },
       },
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: <Widget>[
           MenuAnchor(
             childFocusNode: _buttonFocusNode,
@@ -60,28 +60,33 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
                 child: const Text('Show Message'),
               ),
             ],
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              return TextButton(
-                focusNode: _buttonFocusNode,
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
+            builder:
+                (
+                  BuildContext context,
+                  MenuController controller,
+                  Widget? child,
+                ) {
+                  return TextButton(
+                    focusNode: _buttonFocusNode,
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Text('OPEN MENU'),
+                  );
                 },
-                child: const Text('OPEN MENU'),
-              );
-            },
           ),
           Expanded(
             child: Container(
-              alignment: Alignment.center,
+              alignment: .center,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const .all(12.0),
                     child: Text(
                       _showingMessage ? widget.message : '',
                       style: Theme.of(context).textTheme.headlineSmall,
@@ -105,7 +110,9 @@ class MenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: SafeArea(child: MyCheckboxMenu(message: kMessage))),
+      home: Scaffold(
+        body: SafeArea(child: MyCheckboxMenu(message: kMessage)),
+      ),
     );
   }
 }

@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/scroll_position/scroll_controller_no
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can toggle between scroll notification types', (WidgetTester tester) async {
+  testWidgets('Can toggle between scroll notification types', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ScrollNotificationDemo());
 
     expect(find.byType(CustomScrollView), findsOneWidget);
@@ -25,6 +27,9 @@ void main() {
     expect(find.text('Last notification: Null'), findsOneWidget);
     await tester.drag(find.byType(CustomScrollView), const Offset(20.0, 20.0));
     await tester.pumpAndSettle();
-    expect(find.text('Last notification: UserScrollNotification'), findsOneWidget);
+    expect(
+      find.text('Last notification: UserScrollNotification'),
+      findsOneWidget,
+    );
   });
 }

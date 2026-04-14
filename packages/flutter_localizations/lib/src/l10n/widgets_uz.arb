@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish",
   "pasteButtonLabel": "Joylash",
-  "selectAllButtonLabel": "Hammasi"
+  "selectAllButtonLabel": "Hammasi",
+  "searchResultsFound": "Qidiruv natijalari topildi",
+  "noResultsFound": "Hech narsa topilmadi",
+  "radioButtonUnselectedLabel": "Tanlanmagan"
 }

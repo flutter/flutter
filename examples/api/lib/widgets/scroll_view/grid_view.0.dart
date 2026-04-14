@@ -16,11 +16,11 @@ class GridViewExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const .all(20.0),
         child: Card(
           elevation: 8.0,
           child: GridView.builder(
-            padding: const EdgeInsets.all(12.0),
+            padding: const .all(12.0),
             gridDelegate: CustomGridDelegate(dimension: 240.0),
             // Try uncommenting some of these properties to see the effect on the grid:
             // itemCount: 20, // The default is that the number of grid tiles is infinite.
@@ -30,18 +30,24 @@ class GridViewExampleApp extends StatelessWidget {
               final math.Random random = math.Random(index);
               return GridTile(
                 header: GridTileBar(
-                  title: Text('$index', style: const TextStyle(color: Colors.black)),
+                  title: Text(
+                    '$index',
+                    style: const TextStyle(color: Colors.black),
+                  ),
                 ),
                 child: Container(
-                  margin: const EdgeInsets.all(12.0),
+                  margin: const .all(12.0),
                   decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: .circular(12.0),
+                    ),
                     gradient: const RadialGradient(
                       colors: <Color>[Color(0x0F88EEFF), Color(0x2F0099BB)],
                     ),
                   ),
                   child: FlutterLogo(
-                    style: FlutterLogoStyle.values[random.nextInt(FlutterLogoStyle.values.length)],
+                    style: FlutterLogoStyle
+                        .values[random.nextInt(FlutterLogoStyle.values.length)],
                   ),
                 ),
               );
@@ -72,7 +78,8 @@ class CustomGridDelegate extends SliverGridDelegate {
     final double squareDimension = constraints.crossAxisExtent / count;
     return CustomGridLayout(
       crossAxisCount: count,
-      fullRowPeriod: 3, // Number of rows per block (one of which is the full row).
+      fullRowPeriod:
+          3, // Number of rows per block (one of which is the full row).
       dimension: squareDimension,
     );
   }

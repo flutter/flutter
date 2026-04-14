@@ -14,7 +14,10 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.byType(TextFormField), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.byType(TextFormField)),
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(TextFormField),
+      ),
       findsOneWidget,
     );
 
@@ -23,12 +26,17 @@ void main() {
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
     expect(
-      find.ancestor(matching: find.byType(AppBar), of: find.byType(RawAutocomplete)),
+      find.ancestor(
+        matching: find.byType(AppBar),
+        of: find.byType(RawAutocomplete),
+      ),
       findsNothing,
     );
   });
 
-  testWidgets('Options are shown correctly and selectable', (WidgetTester tester) async {
+  testWidgets('Options are shown correctly and selectable', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
     await tester.tap(find.byType(TextFormField));
     await tester.pump();
@@ -51,7 +59,10 @@ void main() {
 
     expect(find.byType(ListTile), findsNothing);
     expect(
-      find.descendant(of: find.byType(TextFormField), matching: find.text('bobcat')),
+      find.descendant(
+        of: find.byType(TextFormField),
+        matching: find.text('bobcat'),
+      ),
       findsOneWidget,
     );
   });

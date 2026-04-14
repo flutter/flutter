@@ -17,12 +17,11 @@ Future<List<double>> runBuildBenchmark() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
-  final Stopwatch watch = Stopwatch();
-  int iterations = 0;
-  final List<double> values = <double>[];
+  final watch = Stopwatch();
+  var iterations = 0;
+  final values = <double>[];
 
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
@@ -57,7 +56,7 @@ Future<List<double>> runBuildBenchmark() async {
 }
 
 Future<void> execute() async {
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResultStatistics(
     description: 'Stock build',
     values: await runBuildBenchmark(),

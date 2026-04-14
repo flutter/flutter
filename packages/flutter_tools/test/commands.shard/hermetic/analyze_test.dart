@@ -15,15 +15,15 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
-import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart' as test_process_manager;
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kFlutterRoot = '/data/flutter';
-const int SIGABRT = -6;
+const _kFlutterRoot = '/data/flutter';
+const SIGABRT = -6;
 
 void main() {
   testWithoutContext('analyze generate correct errors message', () async {
@@ -70,9 +70,9 @@ void main() {
       runner = createTestCommandRunner(command);
 
       // Setup repo roots
-      const String homePath = '/home/user/flutter';
+      const homePath = '/home/user/flutter';
       Cache.flutterRoot = homePath;
-      for (final String dir in <String>['dev', 'examples', 'packages']) {
+      for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
@@ -80,17 +80,17 @@ void main() {
     testUsingContext(
       'SIGABRT throws Exception',
       () async {
-        const String stderr = 'Something bad happened!';
+        const stderr = 'Something bad happened!';
         processManager.addCommands(<FakeCommand>[
           const FakeCommand(
             // artifact paths are from Artifacts.test() and stable
             command: <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
               '--suppress-analytics',
             ],
             exitCode: SIGABRT,
@@ -117,38 +117,71 @@ void main() {
     testUsingContext(
       '--flutter-repo analyzes everything in the flutterRoot',
       () async {
-        final StreamController<List<int>> streamController = StreamController<List<int>>();
-        final IOSink sink = IOSink(streamController.sink);
+        final streamController = StreamController<List<int>>();
+        final sink = IOSink(streamController.sink);
+        final exitCompleter = Completer<void>();
+        final process = _CustomLspProcess(stdin: sink, exitCompleter: exitCompleter);
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             // artifact paths are from Artifacts.test() and stable
             command: const <String>[
               'Artifact.engineDartSdkPath/bin/dart',
-              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--sdk',
-              'Artifact.engineDartSdkPath',
               '--suppress-analytics',
             ],
-            stdin: sink,
-            stdout: '{"event":"server.status","params":{"analysis":{"isAnalyzing":false}}}',
+            process: process,
           ),
         ]);
+
+        final buffer = StringBuffer();
+        final messageReceived = Completer<void>();
+        String? firstMessage;
+
+        streamController.stream.transform(utf8.decoder).listen((String chunk) {
+          buffer.write(chunk);
+          final current = buffer.toString();
+          if (current.contains('{') && firstMessage == null) {
+            final int startIndex = current.indexOf('{');
+            firstMessage = current.substring(startIndex);
+            final request = jsonDecode(firstMessage!) as Map<String, Object?>;
+            if (request['method'] == 'initialize') {
+              process.addResponse(
+                '{"jsonrpc":"2.0","id":1,"result":'
+                '{"capabilities":{"window":{"workDoneProgress":true}}}}',
+              );
+              process.addResponse(
+                r'{"jsonrpc":"2.0","method":"$/progress","params":'
+                r'{"token":"analyze","value":{"kind":"begin"}}}',
+              );
+              process.addResponse(
+                r'{"jsonrpc":"2.0","method":"$/progress","params":'
+                r'{"token":"analyze","value":{"kind":"end"}}}',
+              );
+              exitCompleter.complete();
+              messageReceived.complete();
+            }
+          }
+        });
+
         await runner.run(<String>['analyze', '--flutter-repo']);
-        final Map<String, Object?> setAnalysisRootsCommand =
-            jsonDecode(
-                  await streamController.stream
-                      .transform(utf8.decoder)
-                      .transform(const LineSplitter())
-                      .elementAt(1),
-                )
-                as Map<String, Object?>;
-        expect(setAnalysisRootsCommand['method'], 'analysis.setAnalysisRoots');
-        final Map<String, Object?> params =
-            setAnalysisRootsCommand['params']! as Map<String, Object?>;
-        expect(params['included'], <String?>[Cache.flutterRoot]);
-        expect(params['excluded'], isEmpty);
+
+        expect(firstMessage, isNotNull);
+        final request = jsonDecode(firstMessage!) as Map<String, Object?>;
+        expect(request['method'], 'initialize');
+        final params = request['params']! as Map<String, Object?>;
+        expect(
+          params['workspaceFolders'] as List?,
+          contains(
+            equals(<String, dynamic>{
+              'name': '/home/user/flutter',
+              'uri': 'file:///home/user/flutter/',
+            }),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -183,27 +216,6 @@ void main() {
     inRepo(null, fileSystem);
     inRepo(<String>[], fileSystem);
   });
-
-  testWithoutContext('AnalysisError from json write correct', () {
-    final Map<String, dynamic> json = <String, dynamic>{
-      'severity': 'INFO',
-      'type': 'TODO',
-      'location': <String, dynamic>{
-        'file': '/Users/.../lib/test.dart',
-        'offset': 362,
-        'length': 72,
-        'startLine': 15,
-        'startColumn': 4,
-      },
-      'message': 'Prefer final for variable declarations if they are not reassigned.',
-      'code': 'var foo = 123;',
-      'hasFix': false,
-    };
-    expect(
-      WrittenError.fromJson(json).toString(),
-      '[info] Prefer final for variable declarations if they are not reassigned (/Users/.../lib/test.dart:15:4)',
-    );
-  });
 }
 
 bool inRepo(List<String>? fileList, FileSystem fileSystem) {
@@ -219,4 +231,18 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
     }
   }
   return false;
+}
+
+class _CustomLspProcess extends test_process_manager.FakeProcess {
+  _CustomLspProcess({super.stdin, Completer<void>? exitCompleter})
+    : super(completer: exitCompleter);
+
+  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  void addResponse(String message) {
+    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message'));
+  }
 }

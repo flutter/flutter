@@ -109,7 +109,7 @@ class SkiaGoldClient {
     if (await clientIsAuthorized()) {
       return;
     }
-    final List<String> authCommand = <String>[
+    final authCommand = <String>[
       _goldctl,
       'auth',
       '--work-dir',
@@ -120,17 +120,16 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(authCommand);
 
     if (result.exitCode != 0) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold authorization failed.')
-            ..writeln(
-              'Luci environments authenticate using the file provided '
-              'by LUCI_CONTEXT. There may be an error with this file or Gold '
-              'authentication.',
-            )
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}');
+      final buf = StringBuffer()
+        ..writeln('Skia Gold authorization failed.')
+        ..writeln(
+          'Luci environments authenticate using the file provided '
+          'by LUCI_CONTEXT. There may be an error with this file or Gold '
+          'authentication.',
+        )
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
       throw SkiaException(buf.toString());
     }
   }
@@ -161,7 +160,7 @@ class SkiaGoldClient {
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    final List<String> imgtestInitCommand = <String>[
+    final imgtestInitCommand = <String>[
       _goldctl,
       'imgtest',
       'init',
@@ -178,29 +177,18 @@ class SkiaGoldClient {
       '--passfail',
     ];
 
-    if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('A null argument was provided for Skia Gold imgtest init.')
-            ..writeln('Please confirm the settings of your golden file test.')
-            ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
-
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
       _initialized = false;
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold imgtest init failed.')
-            ..writeln('An error occurred when initializing golden file test with ')
-            ..writeln('goldctl.')
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}');
+      final buf = StringBuffer()
+        ..writeln('Skia Gold imgtest init failed.')
+        ..writeln('An error occurred when initializing golden file test with ')
+        ..writeln('goldctl.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
       throw SkiaException(buf.toString());
     }
     _initialized = true;
@@ -216,7 +204,7 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
-    final List<String> imgtestCommand = <String>[
+    final imgtestCommand = <String>[
       _goldctl,
       'imgtest',
       'add',
@@ -236,28 +224,27 @@ class SkiaGoldClient {
       // tree.
       String? resultContents;
       final File resultFile = workDirectory.childFile(fs.path.join('result-state.json'));
-      if (await resultFile.exists()) {
+      if (resultFile.existsSync()) {
         resultContents = await resultFile.readAsString();
       }
 
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold received an unapproved image in post-submit ')
-            ..writeln('testing. Golden file images in flutter/flutter are triaged ')
-            ..writeln('in pre-submit during code review for the given PR.')
-            ..writeln()
-            ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
-            ..writeln('the image(s), or revert the associated change. For more ')
-            ..writeln('information, visit the wiki: ')
-            ..writeln(
-              'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md',
-            )
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}')
-            ..writeln()
-            ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+      final buf = StringBuffer()
+        ..writeln('Skia Gold received an unapproved image in post-submit ')
+        ..writeln('testing. Golden file images in flutter/flutter are triaged ')
+        ..writeln('in pre-submit during code review for the given PR.')
+        ..writeln()
+        ..writeln('Visit https://flutter-gold.skia.org/ to view and approve ')
+        ..writeln('the image(s), or revert the associated change. For more ')
+        ..writeln('information, visit the wiki: ')
+        ..writeln(
+          'https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md',
+        )
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
 
@@ -290,7 +277,7 @@ class SkiaGoldClient {
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    final List<String> imgtestInitCommand = <String>[
+    final imgtestInitCommand = <String>[
       _goldctl,
       'imgtest',
       'init',
@@ -312,29 +299,18 @@ class SkiaGoldClient {
       ...getCIArguments(),
     ];
 
-    if (imgtestInitCommand.contains(null)) {
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('A null argument was provided for Skia Gold tryjob init.')
-            ..writeln('Please confirm the settings of your golden file test.')
-            ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
-
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
       _tryjobInitialized = false;
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Skia Gold tryjobInit failure.')
-            ..writeln('An error occurred when initializing golden file tryjob with ')
-            ..writeln('goldctl.')
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}');
+      final buf = StringBuffer()
+        ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('An error occurred when initializing golden file tryjob with ')
+        ..writeln('goldctl.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
       throw SkiaException(buf.toString());
     }
     _tryjobInitialized = true;
@@ -354,7 +330,7 @@ class SkiaGoldClient {
   /// as the failure will be triaged in the 'Flutter Gold' dashboard, and the
   /// `stdout` will contain the failure message; otherwise will return `null`.
   Future<String?> tryjobAdd(String testName, File goldenFile) async {
-    final List<String> imgtestCommand = <String>[
+    final imgtestCommand = <String>[
       _goldctl,
       'imgtest',
       'add',
@@ -368,26 +344,25 @@ class SkiaGoldClient {
 
     final io.ProcessResult result = await process.run(imgtestCommand);
 
-    final String resultStdout = result.stdout.toString();
+    final resultStdout = result.stdout.toString();
     if (result.exitCode != 0 &&
         !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       String? resultContents;
       final File resultFile = workDirectory.childFile(fs.path.join('result-state.json'));
-      if (await resultFile.exists()) {
+      if (resultFile.existsSync()) {
         resultContents = await resultFile.readAsString();
       }
-      final StringBuffer buf =
-          StringBuffer()
-            ..writeln('Unexpected Gold tryjobAdd failure.')
-            ..writeln('Tryjob execution for golden file test $testName failed for')
-            ..writeln('a reason unrelated to pixel comparison.')
-            ..writeln()
-            ..writeln('Debug information for Gold --------------------------------')
-            ..writeln('stdout: ${result.stdout}')
-            ..writeln('stderr: ${result.stderr}')
-            ..writeln()
-            ..writeln()
-            ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
+      final buf = StringBuffer()
+        ..writeln('Unexpected Gold tryjobAdd failure.')
+        ..writeln('Tryjob execution for golden file test $testName failed for')
+        ..writeln('a reason unrelated to pixel comparison.')
+        ..writeln()
+        ..writeln('Debug information for Gold --------------------------------')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln()
+        ..writeln()
+        ..writeln('result-state.json: ${resultContents ?? 'No result file found.'}');
       throw SkiaException(buf.toString());
     }
     return result.exitCode == 0 ? null : resultStdout;
@@ -428,7 +403,7 @@ class SkiaGoldClient {
   ///
   /// The provided image hash represents an expectation from Flutter Gold.
   Future<List<int>> getImageBytes(String imageHash) async {
-    final List<int> imageBytes = <int>[];
+    final imageBytes = <int>[];
     final Uri requestForImage = Uri.parse(
       'https://flutter-gold.skia.org/img/images/$imageHash.png',
     );
@@ -463,7 +438,7 @@ class SkiaGoldClient {
   /// rendered on.
   String _getKeysJSON() {
     final String? webRenderer = _webRendererValue;
-    final Map<String, dynamic> keys = <String, dynamic>{
+    final keys = <String, dynamic>{
       'Platform': platform.operatingSystem,
       'CI': 'luci',
       if (_isImpeller) 'impeller': 'swiftshader',
@@ -489,9 +464,9 @@ class SkiaGoldClient {
   Future<bool> clientIsAuthorized() async {
     final File authFile = workDirectory.childFile(fs.path.join('temp', 'auth_opt.json'));
 
-    if (await authFile.exists()) {
+    if (authFile.existsSync()) {
       final String contents = await authFile.readAsString();
-      final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
+      final decoded = json.decode(contents) as Map<String, dynamic>;
       return !(decoded['GSUtil'] as bool);
     }
     return false;
@@ -537,21 +512,21 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final String? webRenderer = _webRendererValue;
-    final Map<String, Object?> parameters = <String, Object?>{
+    final parameters = <String, Object?>{
       if (_isBrowserTest) 'Browser': _browserKey,
       'CI': 'luci',
       'Platform': platform.operatingSystem,
-      if (webRenderer != null) 'WebRenderer': webRenderer,
+      'WebRenderer': ?webRenderer,
       if (_isImpeller) 'impeller': 'swiftshader',
       'name': testName,
       'source_type': 'flutter',
     };
-    final Map<String, Object?> sorted = <String, Object?>{};
+    final sorted = <String, Object?>{};
     for (final String key in parameters.keys.toList()..sort()) {
       sorted[key] = parameters[key];
     }
     final String jsonTrace = json.encode(sorted);
-    final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
+    final md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }
 }

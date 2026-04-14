@@ -37,12 +37,11 @@ Widget buildTest({
             dragStartBehavior: DragStartBehavior.down,
             key: ValueKey<int>(item),
             direction: dismissDirection,
-            confirmDismiss:
-                confirmDismiss == null
-                    ? null
-                    : (DismissDirection direction) {
-                      return confirmDismiss(context, direction);
-                    },
+            confirmDismiss: confirmDismiss == null
+                ? null
+                : (DismissDirection direction) {
+                    return confirmDismiss(context, direction);
+                  },
             onDismissed: (DismissDirection direction) {
               setState(() {
                 reportedDismissDirection = direction;
@@ -60,10 +59,9 @@ Widget buildTest({
               reportedDismissUpdateProgress = details.progress;
             },
             background: background,
-            dismissThresholds:
-                startToEndThreshold == null
-                    ? <DismissDirection, double>{}
-                    : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+            dismissThresholds: startToEndThreshold == null
+                ? <DismissDirection, double>{}
+                : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
             crossAxisEndOffset: crossAxisEndOffset,
             child: SizedBox(width: 100.0, height: 100.0, child: Text(item.toString())),
           );
@@ -77,11 +75,10 @@ Widget buildTest({
             dragStartBehavior: DragStartBehavior.down,
             scrollDirection: scrollDirection,
             itemExtent: 100.0,
-            children:
-                <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
-                    .where((int i) => !dismissedItems.contains(i))
-                    .map<Widget>(buildDismissibleItem)
-                    .toList(),
+            children: <int>[0, 1, 2, 3, 4, 5, 6, 7, 8]
+                .where((int i) => !dismissedItems.contains(i))
+                .map<Widget>(buildDismissibleItem)
+                .toList(),
           ),
         );
       },
@@ -593,7 +590,7 @@ void main() {
       buildTest(scrollDirection: Axis.horizontal, dismissDirection: DismissDirection.down),
     );
     final Offset location = tester.getTopLeft(find.text('0'));
-    const Offset offset = Offset(0.0, 5.0);
+    const offset = Offset(0.0, 5.0);
     final TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
     await tester.pumpWidget(buildTest());
@@ -847,7 +844,7 @@ void main() {
   testWidgets('Dismissible cannot be dragged with pending confirmDismiss', (
     WidgetTester tester,
   ) async {
-    final Completer<bool?> completer = Completer<bool?>();
+    final completer = Completer<bool?>();
     await tester.pumpWidget(
       buildTest(
         confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
@@ -875,7 +872,7 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/87556
 
-      final Completer<bool?> completer = Completer<bool?>();
+      final completer = Completer<bool?>();
       await tester.pumpWidget(
         buildTest(
           confirmDismiss: (BuildContext context, DismissDirection dismissDirection) {
@@ -895,8 +892,8 @@ void main() {
   testWidgets('Dismissible with null resizeDuration calls onDismissed immediately', (
     WidgetTester tester,
   ) async {
-    bool resized = false;
-    bool dismissed = false;
+    var resized = false;
+    var dismissed = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -957,9 +954,7 @@ void main() {
     await dismissItem(tester, 1, gestureDirection: AxisDirection.right);
     expect(dismissedItems, equals(<int>[1]));
     final dynamic exception = tester.takeException();
-    expect(exception, isNotNull);
-    expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final error = exception as FlutterError;
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
     expect(
       error.diagnostics.last.toStringDeep(),
@@ -982,7 +977,7 @@ void main() {
   testWidgets('Dismissible.behavior should behave correctly during hit testing', (
     WidgetTester tester,
   ) async {
-    bool didReceivePointerDown = false;
+    var didReceivePointerDown = false;
 
     Widget buildStack({required Widget child}) {
       return Directionality(
@@ -1057,7 +1052,7 @@ void main() {
   });
 
   testWidgets('DismissDirection.none does not prevent scrolling', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
 
     await tester.pumpWidget(
       buildTest(controller: controller, dismissDirection: DismissDirection.none),

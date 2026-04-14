@@ -21,7 +21,7 @@ ImageType? detectImageType(Uint8List data) {
       continue;
     }
 
-    for (int i = 0; i < format.header.length; i++) {
+    for (var i = 0; i < format.header.length; i++) {
       final int? magicByte = format.header[i];
       if (magicByte == null) {
         // Wildcard, accepts everything.
@@ -152,8 +152,8 @@ final List<int> _avifSignature = 'ftyp'.codeUnits;
 /// Optimistically detects whether [data] is an AVIF image file.
 bool isAvif(Uint8List data) {
   firstByteLoop:
-  for (int i = 0; i < 16; i += 1) {
-    for (int j = 0; j < _avifSignature.length; j += 1) {
+  for (var i = 0; i < 16; i += 1) {
+    for (var j = 0; j < _avifSignature.length; j += 1) {
       if (i + j >= data.length) {
         // Reached EOF without finding the signature.
         return false;
@@ -227,7 +227,7 @@ class _WebpHeaderReader {
   /// A four-character code is a uint32 created by concatenating four ASCII
   /// characters in little-endian order.
   String _readFourCC() {
-    final List<int> chars = <int>[
+    final chars = <int>[
       bytes.getUint8(_position),
       bytes.getUint8(_position + 1),
       bytes.getUint8(_position + 2),
@@ -265,7 +265,7 @@ class _GifHeaderReader {
 
     final int logicalScreenDescriptorFields = _readUint8();
     const int globalColorTableFlagMask = 1 << 7;
-    final bool hasGlobalColorTable = logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
+    final hasGlobalColorTable = logicalScreenDescriptorFields & globalColorTableFlagMask != 0;
 
     // Skip over the background color index and pixel aspect ratio.
     _position += 2;
@@ -279,7 +279,7 @@ class _GifHeaderReader {
       _position += globalColorTableSizeInBytes;
     }
 
-    int framesFound = 0;
+    var framesFound = 0;
     // Read the GIF until we either find 2 frames or reach the end of the GIF.
     while (true) {
       _maybeSkipSpecialPurposeBlocks();
@@ -390,7 +390,7 @@ class _GifHeaderReader {
 
     final int packedImageDescriptorFields = _readUint8();
     const int localColorTableFlagMask = 1 << 7;
-    final bool hasLocalColorTable = packedImageDescriptorFields & localColorTableFlagMask != 0;
+    final hasLocalColorTable = packedImageDescriptorFields & localColorTableFlagMask != 0;
     if (hasLocalColorTable) {
       // Skip past the local color table.
       const int localColorTableSizeMask = 1 << 2 | 1 << 1 | 1;
@@ -460,7 +460,7 @@ class _GifHeaderReader {
 
   /// Read a 3 digit character code.
   String _readCharCode() {
-    final List<int> chars = <int>[
+    final chars = <int>[
       bytes.getUint8(_position),
       bytes.getUint8(_position + 1),
       bytes.getUint8(_position + 2),

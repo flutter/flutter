@@ -13,12 +13,14 @@ tests = [
   "color_test.dart",
   "compositing_test.dart",
   "dart_test.dart",
+  "decode_image_from_pixels_sync_test.dart",
   "encoding_test.dart",
   "fragment_shader_test.dart",
   "geometry_test.dart",
   "gesture_settings_test.dart",
   "gpu_test.dart",
   "gradient_test.dart",
+  "high_bitrate_texture_test.dart",
   "http_allow_http_connections_test.dart",
   "http_disallow_http_connections_test.dart",
   "image_descriptor_test.dart",
@@ -43,6 +45,7 @@ tests = [
   "platform_isolate_test.dart",
   "platform_isolate_shutdown_test.dart",
   "plugin_utilities_test.dart",
+  "process_test.dart",
   "semantics_test.dart",
   "serial_gc_test.dart",
   "spawn_helper.dart",
@@ -72,7 +75,7 @@ foreach(test, tests) {
 
 group("dart") {
   testonly = true
-  deps = [ "//flutter/testing/dart/observatory" ]
+  deps = [ "//flutter/testing/dart/vm_service" ]
   foreach(test, tests) {
     deps += [ ":compile_$test" ]
   }

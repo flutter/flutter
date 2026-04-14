@@ -20,12 +20,19 @@ using UniqueAotDataPtr =
 enum class FlutterGpuPreference {
   NoPreference,
   LowPowerPreference,
+  HighPerformancePreference,
 };
 
 enum class FlutterUIThreadPolicy {
   Default,
   RunOnPlatformThread,
   RunOnSeparateThread,
+};
+
+enum class FlutterAccessibilityMode {
+  Default,
+  IAccessible,
+  IAccessibleEx,
 };
 
 // The data associated with a Flutter project needed to run it in an engine.
@@ -76,6 +83,11 @@ class FlutterProjectBundle {
   // Returns thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy() { return ui_thread_policy_; }
 
+  // Returns the accessibility mode.
+  FlutterAccessibilityMode accessibility_mode() const {
+    return accessibility_mode_;
+  }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -97,6 +109,9 @@ class FlutterProjectBundle {
 
   // Thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy_;
+
+  // The current accessibility mode.
+  FlutterAccessibilityMode accessibility_mode_;
 };
 
 }  // namespace flutter

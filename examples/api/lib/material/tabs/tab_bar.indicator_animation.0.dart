@@ -27,14 +27,15 @@ class IndicatorAnimationExample extends StatefulWidget {
   const IndicatorAnimationExample({super.key});
 
   @override
-  State<IndicatorAnimationExample> createState() => _IndicatorAnimationExampleState();
+  State<IndicatorAnimationExample> createState() =>
+      _IndicatorAnimationExampleState();
 }
 
 class _IndicatorAnimationExampleState extends State<IndicatorAnimationExample> {
   Set<TabIndicatorAnimation> _animationStyleSelection = <TabIndicatorAnimation>{
     TabIndicatorAnimation.linear,
   };
-  TabIndicatorAnimation _tabIndicatorAnimation = TabIndicatorAnimation.linear;
+  TabIndicatorAnimation _tabIndicatorAnimation = .linear;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +47,7 @@ class _IndicatorAnimationExampleState extends State<IndicatorAnimationExample> {
           bottom: TabBar(
             indicatorAnimation: _tabIndicatorAnimation,
             isScrollable: true,
-            tabAlignment: TabAlignment.start,
+            tabAlignment: .start,
             tabs: const <Widget>[
               Tab(text: 'Short Tab'),
               Tab(text: 'Very Very Very Long Tab'),
@@ -68,15 +69,16 @@ class _IndicatorAnimationExampleState extends State<IndicatorAnimationExample> {
                   _tabIndicatorAnimation = styles.first;
                 });
               },
-              segments:
-                  indicatorAnimationSegments.map<ButtonSegment<TabIndicatorAnimation>>((
+              segments: indicatorAnimationSegments
+                  .map<ButtonSegment<TabIndicatorAnimation>>((
                     (TabIndicatorAnimation, String) shirt,
                   ) {
                     return ButtonSegment<TabIndicatorAnimation>(
                       value: shirt.$1,
                       label: Text(shirt.$2),
                     );
-                  }).toList(),
+                  })
+                  .toList(),
             ),
             const SizedBox(height: 16),
             const Expanded(

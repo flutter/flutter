@@ -3,24 +3,27 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/listenable_builder.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/listenable_builder.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Changing focus changes border', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ListenableBuilderExample());
 
-    Finder findContainer() =>
-        find
-            .descendant(
-              of: find.byType(example.FocusListenerContainer),
-              matching: find.byType(Container),
-            )
-            .first;
-    Finder findChild() => find.descendant(of: findContainer(), matching: find.byType(Column)).first;
+    Finder findContainer() => find
+        .descendant(
+          of: find.byType(example.FocusListenerContainer),
+          matching: find.byType(Container),
+        )
+        .first;
+    Finder findChild() => find
+        .descendant(of: findContainer(), matching: find.byType(Column))
+        .first;
     bool childHasFocus() => Focus.of(tester.element(findChild())).hasFocus;
     Container getContainer() => tester.widget(findContainer()) as Container;
-    ShapeDecoration getDecoration() => getContainer().decoration! as ShapeDecoration;
+    ShapeDecoration getDecoration() =>
+        getContainer().decoration! as ShapeDecoration;
     OutlinedBorder getBorder() => getDecoration().shape as OutlinedBorder;
 
     expect(find.text('Company'), findsOneWidget);

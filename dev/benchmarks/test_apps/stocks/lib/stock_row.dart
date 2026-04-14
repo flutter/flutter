@@ -26,8 +26,8 @@ class StockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
-    String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
+    final lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
+    var changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0) {
       changeInPrice = '+$changeInPrice';
     }
@@ -45,7 +45,10 @@ class StockRow extends StatelessWidget {
           children: <Widget>[
             Container(
               margin: const EdgeInsets.only(right: 5.0),
-              child: Hero(tag: stock, child: StockArrow(percentChange: stock.percentChange)),
+              child: Hero(
+                tag: stock,
+                child: StockArrow(percentChange: stock.percentChange),
+              ),
             ),
             Expanded(
               child: Row(

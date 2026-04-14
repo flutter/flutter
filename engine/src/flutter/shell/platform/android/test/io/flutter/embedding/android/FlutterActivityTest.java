@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.Build.API_LEVELS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
@@ -38,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import io.flutter.Build.API_LEVELS;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -503,7 +503,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void itDoesNotDelayDrawingwhenUsingTextureRendering() {
+  public void itDoesNotDelayDrawingWhenUsingTextureRendering() {
     Intent intent = FlutterActivityWithTextureRendering.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithTextureRendering> activityController =
         Robolectric.buildActivity(FlutterActivityWithTextureRendering.class, intent);
@@ -547,7 +547,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void itDoesNotReleaseEnginewhenDetachFromFlutterEngine() {
+  public void itDoesNotReleaseEngineWhenDetachFromFlutterEngine() {
     FlutterActivityAndFragmentDelegate mockDelegate =
         mock(FlutterActivityAndFragmentDelegate.class);
     isDelegateAttached = true;
@@ -601,7 +601,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  @Config(minSdk = API_LEVELS.API_21, maxSdk = API_LEVELS.API_28)
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_28)
   public void fullyDrawn_beforeAndroidQ() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =

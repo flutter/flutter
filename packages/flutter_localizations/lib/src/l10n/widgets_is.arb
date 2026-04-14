@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Leita á vefnum",
   "shareButtonLabel": "Deila",
   "pasteButtonLabel": "Líma",
-  "selectAllButtonLabel": "Velja allt"
+  "selectAllButtonLabel": "Velja allt",
+  "searchResultsFound": "Leitarniðurstöður fundust",
+  "noResultsFound": "Engar niðurstöður fundust",
+  "radioButtonUnselectedLabel": "Ekki valið"
 }

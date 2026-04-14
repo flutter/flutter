@@ -16,37 +16,40 @@ void main() {
   bool? lastFrameworkHandlesBack;
   setUp(() async {
     lastFrameworkHandlesBack = null;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (MethodCall methodCall) async {
-        if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
-          expect(methodCall.arguments, isA<bool>());
-          lastFrameworkHandlesBack = methodCall.arguments as bool;
-        }
-        return;
-      },
-    );
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-      'flutter/lifecycle',
-      const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
-      (ByteData? data) {},
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (
+          MethodCall methodCall,
+        ) async {
+          if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
+            expect(methodCall.arguments, isA<bool>());
+            lastFrameworkHandlesBack = methodCall.arguments as bool;
+          }
+          return;
+        });
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          'flutter/lifecycle',
+          const StringCodec().encodeMessage(
+            AppLifecycleState.resumed.toString(),
+          ),
+          (ByteData? data) {},
+        );
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      null,
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgets('Can go back with system back gesture', (WidgetTester tester) async {
+  testWidgets('Can go back with system back gesture', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigatorPopHandlerApp());
 
     expect(find.text('Nested Navigators Example'), findsOneWidget);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -56,7 +59,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsOneWidget);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -66,7 +69,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsOneWidget);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -76,7 +79,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsOneWidget);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -86,18 +89,20 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsOneWidget);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
   });
 
-  testWidgets('restoring the app preserves the navigation stack', (WidgetTester tester) async {
+  testWidgets('restoring the app preserves the navigation stack', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NavigatorPopHandlerApp());
 
     expect(find.text('Nested Navigators Example'), findsOneWidget);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isFalse);
     }
 
@@ -107,7 +112,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsOneWidget);
     expect(find.text('Nested Navigators Page Two'), findsNothing);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -117,7 +122,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsOneWidget);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
 
@@ -126,7 +131,7 @@ void main() {
     expect(find.text('Nested Navigators Example'), findsNothing);
     expect(find.text('Nested Navigators Page One'), findsNothing);
     expect(find.text('Nested Navigators Page Two'), findsOneWidget);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb && defaultTargetPlatform == .android) {
       expect(lastFrameworkHandlesBack, isTrue);
     }
   });

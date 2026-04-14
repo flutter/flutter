@@ -19,8 +19,8 @@ class ButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.container.color')) {
       return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.container')};
       }
       return ${componentColor('$tokenGroup.container')};
@@ -35,17 +35,17 @@ class ButtonTemplate extends TokenTemplate {
     if (tokenAvailable('$tokenGroup.container.elevation')) {
       return '''
 
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${elevation("$tokenGroup.disabled.container")};
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${elevation("$tokenGroup.pressed.container")};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${elevation("$tokenGroup.hover.container")};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${elevation("$tokenGroup.focus.container")};
       }
       return ${elevation("$tokenGroup.container")};
@@ -65,7 +65,8 @@ class ButtonTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends ButtonStyle {
   _${blockName}DefaultsM3(this.context)
    : super(
@@ -78,74 +79,74 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
-  MaterialStateProperty<TextStyle?> get textStyle =>
+  WidgetStateProperty<TextStyle?> get textStyle =>
     MaterialStatePropertyAll<TextStyle?>(${textStyle("$tokenGroup.label-text")});
 
   @override
-  MaterialStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
+  WidgetStateProperty<Color?>? get backgroundColor =>${_backgroundColor()};
 
   @override
-  MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color?>? get foregroundColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${componentColor('$tokenGroup.disabled.label-text')};
       }
       return ${componentColor('$tokenGroup.label-text')};
     });
 
   @override
-  MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.pressed)) {
+  WidgetStateProperty<Color?>? get overlayColor =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.pressed)) {
         return ${componentColor('$tokenGroup.pressed.state-layer')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${componentColor('$tokenGroup.hover.state-layer')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${componentColor('$tokenGroup.focus.state-layer')};
       }
       return null;
     });
 
   @override
-  MaterialStateProperty<Color>? get shadowColor =>
+  WidgetStateProperty<Color>? get shadowColor =>
     ${_elevationColor("$tokenGroup.container.shadow-color")};
 
   @override
-  MaterialStateProperty<Color>? get surfaceTintColor =>
+  WidgetStateProperty<Color>? get surfaceTintColor =>
     ${_elevationColor("$tokenGroup.container.surface-tint-layer.color")};
 
   @override
-  MaterialStateProperty<double>? get elevation =>${_elevation()};
+  WidgetStateProperty<double>? get elevation =>${_elevation()};
 
   @override
-  MaterialStateProperty<EdgeInsetsGeometry>? get padding =>
+  WidgetStateProperty<EdgeInsetsGeometry>? get padding =>
     MaterialStatePropertyAll<EdgeInsetsGeometry>(_scaledPadding(context));
 
   @override
-  MaterialStateProperty<Size>? get minimumSize =>
+  WidgetStateProperty<Size>? get minimumSize =>
     const MaterialStatePropertyAll<Size>(Size(64.0, ${getToken("$tokenGroup.container.height")}));
 
   // No default fixedSize
 
   @override
-  MaterialStateProperty<double>? get iconSize =>
+  WidgetStateProperty<double>? get iconSize =>
     const MaterialStatePropertyAll<double>(${getToken("$tokenGroup.with-icon.icon.size")});
 
   @override
-  MaterialStateProperty<Color>? get iconColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<Color>? get iconColor {
+    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return ${color('$tokenGroup.with-icon.disabled.icon.color')}.withOpacity(${opacity("$tokenGroup.with-icon.disabled.icon.opacity")});
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return ${color('$tokenGroup.with-icon.pressed.icon.color')};
       }
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return ${color('$tokenGroup.with-icon.hover.icon.color')};
       }
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return ${color('$tokenGroup.with-icon.focus.icon.color')};
       }
       return ${color('$tokenGroup.with-icon.icon.color')};
@@ -153,17 +154,17 @@ class _${blockName}DefaultsM3 extends ButtonStyle {
   }
 
   @override
-  MaterialStateProperty<Size>? get maximumSize =>
+  WidgetStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
 ${tokenAvailable("$tokenGroup.outline.color") ? '''
   @override
-  MaterialStateProperty<BorderSide>? get side =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
+  WidgetStateProperty<BorderSide>? get side =>
+    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+    if (states.contains(WidgetState.disabled)) {
       return ${border("$tokenGroup.disabled.outline")};
     }
-    if (states.contains(MaterialState.focused)) {
+    if (states.contains(WidgetState.focused)) {
       return ${border('$tokenGroup.focus.outline')};
     }
     return ${border("$tokenGroup.outline")};
@@ -171,17 +172,11 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
   // No default side'''}
 
   @override
-  MaterialStateProperty<OutlinedBorder>? get shape =>
+  WidgetStateProperty<OutlinedBorder>? get shape =>
     const MaterialStatePropertyAll<OutlinedBorder>(${shape("$tokenGroup.container", '')});
 
   @override
-  MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => Theme.of(context).visualDensity;

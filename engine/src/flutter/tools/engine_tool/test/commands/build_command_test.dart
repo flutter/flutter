@@ -5,8 +5,10 @@
 import 'dart:convert' as convert;
 import 'dart:ffi';
 
+import 'package:engine_build_configs/src/build_config.dart';
 import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
+import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -23,12 +25,12 @@ void main() {
     final builder = TestBuilderConfig();
     builder.addBuild(name: 'macos/host_debug', dimension: TestDroneDimension.mac);
 
-    final configs = {
+    final Map<String, BuilderConfig> configs = {
       'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json'),
     };
 
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: configs);
-    final result = await runner.run(['build', '--config', 'host_debug']);
+    final int result = await runner.run(['build', '--config', 'host_debug']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -43,11 +45,11 @@ void main() {
     final builder = TestBuilderConfig();
     builder.addBuild(name: 'macos/host_debug', dimension: TestDroneDimension.mac);
 
-    final configs = {
+    final Map<String, BuilderConfig> configs = {
       'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json'),
     };
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: configs);
-    final result = await runner.run(['build', '--config', 'host_debug']);
+    final int result = await runner.run(['build', '--config', 'host_debug']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -66,11 +68,11 @@ void main() {
       generatorTask: ('gen/script.py', ['--test-param']),
     );
 
-    final configs = {
+    final Map<String, BuilderConfig> configs = {
       'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json'),
     };
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: configs);
-    final result = await runner.run(['build', '--config', 'host_debug']);
+    final int result = await runner.run(['build', '--config', 'host_debug']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -91,11 +93,11 @@ void main() {
       testTask: ('test/script.py', ['--test-param']),
     );
 
-    final configs = {
+    final Map<String, BuilderConfig> configs = {
       'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json'),
     };
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: configs);
-    final result = await runner.run(['build', '--config', 'host_debug']);
+    final int result = await runner.run(['build', '--config', 'host_debug']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -115,17 +117,17 @@ void main() {
       dimension: TestDroneDimension.mac,
       enableRbe: true,
     );
-    final configs = {
+    final Map<String, BuilderConfig> configs = {
       'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json'),
     };
 
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: configs);
-    final result = await runner.run(['build', '--config', 'ci/android_debug_rbe_arm64']);
+    final int result = await runner.run(['build', '--config', 'ci/android_debug_rbe_arm64']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final [gnCall, reclientCall, ..._] = testEnv.processHistory;
+    final [ExecutedProcess gnCall, ExecutedProcess reclientCall, ..._] = testEnv.processHistory;
     expect(gnCall.command, containsAllInOrder([endsWith('tools/gn'), contains('--rbe')]));
     expect(reclientCall.command, containsAllInOrder([endsWith('reclient/bootstrap')]));
   });
@@ -141,13 +143,19 @@ void main() {
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final result = await runner.run(['build', '--config', 'ci/android_debug_arm64', '-j', '500']);
+    final int result = await runner.run([
+      'build',
+      '--config',
+      'ci/android_debug_arm64',
+      '-j',
+      '500',
+    ]);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
     print(testEnv.processHistory);
-    final [_, ninja, ..._] = testEnv.processHistory;
+    final [_, ExecutedProcess ninja, ..._] = testEnv.processHistory;
     expect(ninja.command, containsAllInOrder([endsWith('ninja/ninja'), '-j', '500']));
   });
 
@@ -168,7 +176,7 @@ void main() {
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final result = await runner.run([
+    final int result = await runner.run([
       'build',
       '--config',
       'ci/android_debug_rbe_arm64',
@@ -178,7 +186,7 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final [gn, ninja, ..._] = testEnv.processHistory;
+    final [ExecutedProcess gn, ExecutedProcess ninja, ..._] = testEnv.processHistory;
     expect(gn.command, isNot(contains('--rbe')));
 
     expect(ninja.command, containsAllInOrder([endsWith('ninja/ninja')]));
@@ -198,12 +206,12 @@ void main() {
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final result = await runner.run(['build', '--config', 'ci/android_debug_rbe_arm64']);
+    final int result = await runner.run(['build', '--config', 'ci/android_debug_rbe_arm64']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final [gn, ninja, ..._] = testEnv.processHistory;
+    final [ExecutedProcess gn, ExecutedProcess ninja, ..._] = testEnv.processHistory;
     expect(gn.command, isNot(contains('--rbe')));
     expect(ninja.command, containsAllInOrder([endsWith('ninja/ninja')]));
   });
@@ -212,7 +220,7 @@ void main() {
     final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
-    final env = testEnv.environment;
+    final Environment env = testEnv.environment;
     expect(mangleConfigName(env, 'linux/build'), equals('build'));
     expect(mangleConfigName(env, 'ci/build'), equals('ci/build'));
   });
@@ -221,7 +229,7 @@ void main() {
     final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
-    final env = testEnv.environment;
+    final Environment env = testEnv.environment;
     expect(() => mangleConfigName(env, 'build'), throwsArgumentError);
   });
 
@@ -229,7 +237,7 @@ void main() {
     final testEnv = TestEnvironment.withTestEngine();
     addTearDown(testEnv.cleanup);
 
-    final env = testEnv.environment;
+    final Environment env = testEnv.environment;
     expect(demangleConfigName(env, 'build'), equals('linux/build'));
     expect(demangleConfigName(env, 'ci/build'), equals('ci/build'));
   });
@@ -258,7 +266,7 @@ void main() {
         ),
       },
     );
-    final result = await runner.run(['build', '--config', 'host_debug']);
+    final int result = await runner.run(['build', '--config', 'host_debug']);
     expect(result, equals(0));
     expect(testEnv.processHistory[1].command[0], contains(path.join('ninja', 'ninja')));
     expect(testEnv.processHistory[1].command[2], contains('local_host_debug'));
@@ -287,7 +295,7 @@ void main() {
         ),
       },
     );
-    final result = await runner.run(['build', '--config', 'ci/host_debug']);
+    final int result = await runner.run(['build', '--config', 'ci/host_debug']);
     expect(result, equals(0));
     expect(testEnv.processHistory[1].command[0], contains(path.join('ninja', 'ninja')));
     expect(testEnv.processHistory[1].command[2], contains('ci/host_debug'));
@@ -321,7 +329,7 @@ void main() {
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final result = await runner.run([
+    final int result = await runner.run([
       'build',
       '--config',
       'ci/host_debug',
@@ -331,7 +339,9 @@ void main() {
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final ninjaCmd = testEnv.processHistory.firstWhere((p) => p.command.first.endsWith('ninja'));
+    final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('ninja'),
+    );
     expect(ninjaCmd.command, containsAllInOrder([endsWith('ninja'), '-C', endsWith('host_debug')]));
     expect(ninjaCmd.command, contains(contains('flutter/fml:fml_unittests')));
   });
@@ -374,11 +384,13 @@ void main() {
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final result = await runner.run(['build', '--config', 'ci/host_debug', '//flutter/...']);
+    final int result = await runner.run(['build', '--config', 'ci/host_debug', '//flutter/...']);
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
 
-    final ninjaCmd = testEnv.processHistory.firstWhere((p) => p.command.first.endsWith('ninja'));
+    final ExecutedProcess ninjaCmd = testEnv.processHistory.firstWhere(
+      (p) => p.command.first.endsWith('ninja'),
+    );
     expect(ninjaCmd.command, containsAllInOrder([endsWith('ninja'), '-C', endsWith('host_debug')]));
 
     expect(
@@ -416,7 +428,7 @@ The input testing/foo:foo matches no targets, configs or files.
       environment: testEnv.environment,
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
-    final result = await runner.run([
+    final int result = await runner.run([
       'build',
       '--config',
       'ci/host_debug',
@@ -462,7 +474,7 @@ The input testing/foo:foo matches no targets, configs or files.
       configs: {'mac_test_config': builder.buildConfig(path: 'ci/builders/mac_test_config.json')},
     );
 
-    final result = await runner.run([
+    final int result = await runner.run([
       'build',
       '--config',
       'ci/host_debug',
@@ -505,7 +517,7 @@ The input testing/foo:foo matches no targets, configs or files.
     addTearDown(testEnv.cleanup);
 
     final runner = ToolCommandRunner(environment: testEnv.environment, configs: {}, help: true);
-    final result = await runner.run(['help', 'build']);
+    final int result = await runner.run(['help', 'build']);
     expect(result, equals(0));
 
     // Avoid a degenerate case where nothing is logged.
@@ -530,7 +542,7 @@ The input testing/foo:foo matches no targets, configs or files.
       },
       help: true,
     );
-    final result = await runner.run(['--verbose', 'help', 'build']);
+    final int result = await runner.run(['--verbose', 'help', 'build']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));
@@ -555,7 +567,7 @@ The input testing/foo:foo matches no targets, configs or files.
       },
       help: true,
     );
-    final result = await runner.run(['help', 'build']);
+    final int result = await runner.run(['help', 'build']);
 
     printOnFailure(testEnv.testLogs.map((r) => r.message).join('\n'));
     expect(result, equals(0));

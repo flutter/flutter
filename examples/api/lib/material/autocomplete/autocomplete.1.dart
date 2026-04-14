@@ -18,7 +18,7 @@ class AutocompleteExampleApp extends StatelessWidget {
         appBar: AppBar(title: const Text('Autocomplete Basic User')),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Text(
                 'Type below to autocomplete the following possible results: ${AutocompleteBasicUserExample._userOptions}.',
@@ -76,7 +76,9 @@ class AutocompleteBasicUserExample extends StatelessWidget {
           return const Iterable<User>.empty();
         }
         return _userOptions.where((User option) {
-          return option.toString().contains(textEditingValue.text.toLowerCase());
+          return option.toString().contains(
+            textEditingValue.text.toLowerCase(),
+          );
         });
       },
       onSelected: (User selection) {

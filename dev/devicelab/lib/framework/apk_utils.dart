@@ -10,7 +10,7 @@ import 'task_result.dart';
 import 'utils.dart';
 
 final List<String> flutterAssets = <String>[
-  'assets/flutter_assets/AssetManifest.json',
+  'assets/flutter_assets/AssetManifest.bin',
   'assets/flutter_assets/NOTICES.Z',
   'assets/flutter_assets/fonts/MaterialIcons-Regular.otf',
   'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
@@ -147,7 +147,7 @@ Future<String> _evalApkAnalyzer(
   final String libs = path.join(androidTools, 'lib');
   assert(Directory(libs).existsSync());
 
-  final String classSeparator = Platform.isWindows ? ';' : ':';
+  final classSeparator = Platform.isWindows ? ';' : ':';
   return eval(
     javaBinary,
     <String>[
@@ -228,15 +228,15 @@ Future<String> getAndroidManifest(String apk) async {
 /// Checks that the [apk] includes any classes from a particularly library with
 /// given [libraryName] in the [apk] and returns true if so, false otherwise.
 Future<bool> checkApkContainsMethodsFromLibrary(File apk, String libraryName) async {
-  final ApkExtractor extractor = ApkExtractor(apk);
+  final extractor = ApkExtractor(apk);
   final bool apkContainsMethodsFromLibrary = await extractor.containsLibrary(libraryName);
   return apkContainsMethodsFromLibrary;
 }
 
 /// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
-  final ApkExtractor extractor = ApkExtractor(apk);
-  for (final String className in classes) {
+  final extractor = ApkExtractor(apk);
+  for (final className in classes) {
     if (!(await extractor.containsClass(className))) {
       throw Exception("APK doesn't contain class `$className`.");
     }
@@ -245,8 +245,8 @@ Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
 
 /// Checks that the methods are defined in the APK, throws otherwise.
 Future<void> checkApkContainsMethods(File apk, List<String> methods) async {
-  final ApkExtractor extractor = ApkExtractor(apk);
-  for (final String method in methods) {
+  final extractor = ApkExtractor(apk);
+  for (final method in methods) {
     if (!(await extractor.containsMethod(method))) {
       throw Exception("APK doesn't contain method `$method`.");
     }
@@ -300,18 +300,6 @@ android {
     });
   }
 
-  Future<void> setMinSdkVersion(int sdkVersion) async {
-    final File buildScript = appBuildFile;
-
-    buildScript.openWrite(mode: FileMode.append).write('''
-android {
-    defaultConfig {
-        minSdk = $sdkVersion
-    }
-}
-    ''');
-  }
-
   Future<void> getPackages() async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('pub', options: <String>['get']);
@@ -350,7 +338,7 @@ android {
   }
 
   Future<void> introducePubspecError() async {
-    final File pubspec = File(path.join(parent.path, 'hello', 'pubspec.yaml'));
+    final pubspec = File(path.join(parent.path, 'hello', 'pubspec.yaml'));
     final String contents = pubspec.readAsStringSync();
     final String newContents = contents.replaceFirst(
       '${Platform.lineTerminator}flutter:${Platform.lineTerminator}',
@@ -471,7 +459,7 @@ Future<ProcessResult> _resultOfGradleTask({
 
   print('\nUsing JAVA_HOME=$javaHome');
 
-  final List<String> args = <String>['app:$task', ...?options];
+  final args = <String>['app:$task', ...?options];
   final String gradle = path.join(
     workingDirectory,
     Platform.isWindows ? 'gradlew.bat' : './gradlew',
@@ -500,7 +488,7 @@ Future<ProcessResult> _resultOfGradleTask({
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String? validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  final File snapshotBlob = File(
+  final snapshotBlob = File(
     path.join(
       project.rootPath,
       'build',
@@ -520,10 +508,8 @@ String? validateSnapshotDependency(FlutterProject project, String expectedTarget
 }
 
 File getAndroidBuildFile(String androidAppPath, {bool settings = false}) {
-  final File groovyFile = File(
-    path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'),
-  );
-  final File kotlinFile = File(
+  final groovyFile = File(path.join(androidAppPath, settings ? 'settings.gradle' : 'build.gradle'));
+  final kotlinFile = File(
     path.join(androidAppPath, settings ? 'settings.gradle.kts' : 'build.gradle.kts'),
   );
 

@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/pipeline_descriptor.h"
 
+#include <memory>
 #include <utility>
 
 #include "impeller/base/comparable.h"
@@ -99,7 +100,7 @@ PipelineDescriptor& PipelineDescriptor::SetVertexDescriptor(
   return *this;
 }
 
-size_t PipelineDescriptor::GetMaxColorAttacmentBindIndex() const {
+size_t PipelineDescriptor::GetMaxColorAttachmentBindIndex() const {
   size_t max = 0;
   for (const auto& color : color_attachment_descriptors_) {
     max = std::max(color.first, max);

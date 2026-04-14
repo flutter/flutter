@@ -286,6 +286,37 @@ TEST(MatrixTest, GetMaxBasisXYWithLargeAndSmallScalingFactorNonScaleTranslate) {
   EXPECT_TRUE(std::isinf(m.GetMaxBasisLengthXY()));
 }
 
+TEST(MatrixTest, GetBasisXYScale2D) {
+  Matrix m = Matrix::MakeScale({5.0f, 3.0f, 1.0f});
+  EXPECT_POINT_NEAR(m.GetBasisX2D(), Vector2(5.0f, 0.0f));
+  EXPECT_POINT_NEAR(m.GetBasisY2D(), Vector2(0.0f, 3.0f));
+  EXPECT_POINT_NEAR(m.GetBasisScaleXY(), Vector2(5.0f, 3.0f));
+
+  Matrix m2 = Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 3.0f, 0.0f, 0.0f,
+      5.0f, 7.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f
+      // clang-format on
+  );
+  EXPECT_POINT_NEAR(m2.GetBasisX2D(), Vector2(2.0f, 3.0f));
+  EXPECT_POINT_NEAR(m2.GetBasisY2D(), Vector2(5.0f, 7.0f));
+  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(sqrt(13.0f), sqrt(74.0f)));
+
+  Matrix m3 = Matrix::MakeColumn(
+      // clang-format off
+      2.0f, 3.0f, 4.0f, 11.0f,
+      5.0f, 7.0f, 6.0f, 13.0f,
+      1.0f, 8.0f, 9.0f, 15.0f,
+      1.0f, 1.0f, 1.0f, 17.0f
+      // clang-format on
+  );
+  EXPECT_POINT_NEAR(m3.GetBasisX2D(), Vector2(2.0f, 3.0f));
+  EXPECT_POINT_NEAR(m3.GetBasisY2D(), Vector2(5.0f, 7.0f));
+  EXPECT_POINT_NEAR(m2.GetBasisScaleXY(), Vector2(sqrt(13.0f), sqrt(74.0f)));
+}
+
 TEST(MatrixTest, TranslateWithPerspective) {
   Matrix m = Matrix::MakeRow(1.0, 0.0, 0.0, 10.0,  //
                              0.0, 1.0, 0.0, 20.0,  //
@@ -320,6 +351,126 @@ TEST(MatrixTest, To3x3) {
            0.0, 0.0, 9.0, 1.0);
 
   EXPECT_TRUE(MatrixNear(x.To3x3(), Matrix()));
+}
+
+TEST(MatrixTest, MinMaxScales2D) {
+  // The GetScales2D() method is allowed to return the scales in any
+  // order so we need to take special care in verifying the return
+  // value to test them in either order.
+  auto check_pair = [](const Matrix& matrix, Scalar scale1, Scalar scale2) {
+    auto pair = matrix.GetScales2D();
+    EXPECT_TRUE(pair.has_value())
+        << "Scales: " << scale1 << ", " << scale2 << ", " << matrix;
+    if (ScalarNearlyEqual(pair->first, scale1)) {
+      EXPECT_FLOAT_EQ(pair->first, scale1) << matrix;
+      EXPECT_FLOAT_EQ(pair->second, scale2) << matrix;
+    } else {
+      EXPECT_FLOAT_EQ(pair->first, scale2) << matrix;
+      EXPECT_FLOAT_EQ(pair->second, scale1) << matrix;
+    }
+  };
+
+  for (int i = 1; i < 10; i++) {
+    Scalar xScale = static_cast<Scalar>(i);
+    for (int j = 1; j < 10; j++) {
+      Scalar yScale = static_cast<Scalar>(j);
+      Scalar minScale = std::min(xScale, yScale);
+      Scalar maxScale = std::max(xScale, yScale);
+
+      {
+        // Simple scale
+        Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
+        check_pair(matrix, xScale, yScale);
+      }
+
+      {
+        // Simple scale with Z scale
+        Matrix matrix = Matrix::MakeScale({xScale, yScale, 5.0f});
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
+        check_pair(matrix, xScale, yScale);
+      }
+
+      {
+        // Simple scale + translate
+        Matrix matrix = Matrix::MakeTranslateScale({xScale, yScale, 1.0f},
+                                                   {10.0f, 15.0f, 2.0f});
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
+        check_pair(matrix, xScale, yScale);
+      }
+
+      for (int d = 45; d < 360; d += 45) {
+        {
+          // Rotation * Scale
+          Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f}) *
+                          Matrix::MakeRotationZ(Degrees(d));
+          EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+          EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+          EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+          EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
+          check_pair(matrix, xScale, yScale);
+        }
+
+        {
+          // Scale * Rotation
+          Matrix matrix = Matrix::MakeRotationZ(Degrees(d)) *
+                          Matrix::MakeScale({xScale, yScale, 1.0f});
+          EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+          EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+          EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+          EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
+          check_pair(matrix, xScale, yScale);
+        }
+      }
+
+      {
+        // Scale + PerspectiveX (returns invalid values)
+        Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
+        matrix.m[3] = 0.1;
+        EXPECT_FALSE(matrix.GetMinScale2D().has_value());
+        EXPECT_FALSE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FALSE(matrix.GetScales2D().has_value());
+      }
+
+      {
+        // Scale + PerspectiveY (returns invalid values)
+        Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
+        matrix.m[7] = 0.1;
+        EXPECT_FALSE(matrix.GetMinScale2D().has_value());
+        EXPECT_FALSE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FALSE(matrix.GetScales2D().has_value());
+      }
+
+      {
+        // Scale + PerspectiveZ (Z ignored; returns actual scales)
+        Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
+        matrix.m[11] = 0.1;
+        EXPECT_TRUE(matrix.GetMinScale2D().has_value());
+        EXPECT_TRUE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FLOAT_EQ(matrix.GetMinScale2D().value_or(-1.0f), minScale);
+        EXPECT_FLOAT_EQ(matrix.GetMaxScale2D().value_or(-1.0f), maxScale);
+        check_pair(matrix, xScale, yScale);
+      }
+
+      {
+        // Scale + PerspectiveW (returns invalid values)
+        Matrix matrix = Matrix::MakeScale({xScale, yScale, 1.0f});
+        matrix.m[15] = 0.1;
+        EXPECT_FALSE(matrix.GetMinScale2D().has_value());
+        EXPECT_FALSE(matrix.GetMaxScale2D().has_value());
+        EXPECT_FALSE(matrix.GetScales2D().has_value());
+      }
+    }
+  }
 }
 
 }  // namespace testing

@@ -30,6 +30,7 @@ enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
   genSnapshot,
   genSnapshotArm64,
+  genSnapshotRiscv64,
   genSnapshotX64,
 
   /// The flutter tester binary.
@@ -155,6 +156,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.darwin:
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
     case TargetPlatform.fuchsia_arm64:
@@ -164,19 +166,21 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
+    case TargetPlatform.unsupported:
     case null:
       return targetPlatform;
   }
 }
 
 String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode? mode]) {
-  final String exe = hostPlatform.isWindows ? '.exe' : '';
+  final exe = hostPlatform.isWindows ? '.exe' : '';
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.genSnapshotArm64:
       return 'gen_snapshot_arm64';
+    case Artifact.genSnapshotRiscv64:
+      return 'gen_snapshot_riscv64';
     case Artifact.genSnapshotX64:
       return 'gen_snapshot_x64';
     case Artifact.flutterTester:
@@ -227,8 +231,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
     case Artifact.fuchsiaKernelCompiler:
       return 'kernel_compiler.snapshot';
     case Artifact.fuchsiaFlutterRunner:
-      final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
-      final String productOrNo = mode.isRelease ? '_product' : '';
+      final jitOrAot = mode!.isJit ? '_jit' : '_aot';
+      final productOrNo = mode.isRelease ? '_product' : '';
       return 'flutter$jitOrAot${productOrNo}_runner-0.far';
     case Artifact.fontSubset:
       return 'font-subset$exe';
@@ -240,8 +244,8 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
 }
 
 String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
-  final String exe = platform.isWindows ? '.exe' : '';
-  String dll = '.so';
+  final exe = platform.isWindows ? '.exe' : '';
+  var dll = '.so';
   if (platform.isWindows) {
     dll = '.dll';
   } else if (platform.isMacOS) {
@@ -488,12 +492,13 @@ class CachedArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        final String engineDir =
-            _getEngineArtifactsPath(_currentHostPlatform(_platform, _operatingSystemUtils))!;
+        final String engineDir = _getEngineArtifactsPath(
+          _currentHostPlatform(_platform, _operatingSystemUtils),
+        )!;
         return _fileSystem.file(_fileSystem.path.join(engineDir, artifactFileName));
     }
   }
@@ -511,7 +516,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.ios:
@@ -519,6 +523,7 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         return _getDesktopArtifactPath(artifact, platform!, mode);
@@ -533,6 +538,8 @@ class CachedArtifacts implements Artifacts {
           platform ?? _currentHostPlatform(_platform, _operatingSystemUtils),
           mode,
         );
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -548,6 +555,7 @@ class CachedArtifacts implements Artifacts {
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
         return _fileSystem.path.join(engineDir, _artifactToFileName(artifact, _platform));
       case Artifact.engineDartSdkPath:
@@ -588,6 +596,7 @@ class CachedArtifacts implements Artifacts {
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
 
@@ -645,6 +654,7 @@ class CachedArtifacts implements Artifacts {
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
         final String artifactFileName = _artifactToFileName(artifact, _platform)!;
@@ -691,16 +701,17 @@ class CachedArtifacts implements Artifacts {
       platform.fuchsiaArchForTargetPlatform,
       mode.isRelease ? 'release' : mode.toString(),
     );
-    final String runtime = mode.isJit ? 'jit' : 'aot';
+    final runtime = mode.isJit ? 'jit' : 'aot';
     switch (artifact) {
       case Artifact.genSnapshot:
-        final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
+        final genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
         return _fileSystem.path.join(root, runtime, 'dart_binaries', genSnapshot);
       case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
         throw ArgumentError('$artifact is not available on this platform');
       case Artifact.flutterPatchedSdkPath:
-        const String artifactFileName = 'flutter_runner_patched_sdk';
+        const artifactFileName = 'flutter_runner_patched_sdk';
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.platformKernelDill:
         final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
@@ -755,6 +766,7 @@ class CachedArtifacts implements Artifacts {
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
         // android_arm in profile mode because it is available on all supported host platforms.
@@ -876,6 +888,7 @@ class CachedArtifacts implements Artifacts {
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
@@ -885,7 +898,7 @@ class CachedArtifacts implements Artifacts {
         if (mode == BuildMode.debug || mode == null) {
           return _fileSystem.path.join(engineDir, platformName);
         }
-        final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode.cliName)}' : '';
+        final suffix = mode != BuildMode.debug ? '-${kebabCase(mode.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
@@ -897,13 +910,14 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
-        final String suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
+        final suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
       case TargetPlatform.android:
         assert(false, 'cannot use TargetPlatform.android to look up artifacts');
         return null;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -916,9 +930,11 @@ TargetPlatform _currentHostPlatform(Platform platform, OperatingSystemUtils oper
     return TargetPlatform.darwin;
   }
   if (platform.isLinux) {
-    return operatingSystemUtils.hostPlatform == HostPlatform.linux_x64
-        ? TargetPlatform.linux_x64
-        : TargetPlatform.linux_arm64;
+    return switch (operatingSystemUtils.hostPlatform) {
+      HostPlatform.linux_x64 => TargetPlatform.linux_x64,
+      HostPlatform.linux_riscv64 => TargetPlatform.linux_riscv64,
+      _ => TargetPlatform.linux_arm64,
+    };
   }
   if (platform.isWindows) {
     return operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64
@@ -948,6 +964,9 @@ Directory _getIosFlutterFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".',
     );
   }
+
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
   for (final Directory platformDirectory
       in xcframeworkDirectory.listSync().whereType<Directory>()) {
     if (!platformDirectory.basename.startsWith('ios-')) {
@@ -1020,12 +1039,13 @@ Directory _getMacOSFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --macos".',
     );
   }
-  final Directory? platformDirectory =
-      xcframeworkDirectory
-          .listSync()
-          .whereType<Directory>()
-          .where((Directory platformDirectory) => platformDirectory.basename.startsWith('macos-'))
-          .firstOrNull;
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
+  final Directory? platformDirectory = xcframeworkDirectory
+      .listSync()
+      .whereType<Directory>()
+      .where((Directory platformDirectory) => platformDirectory.basename.startsWith('macos-'))
+      .firstOrNull;
   if (platformDirectory == null) {
     throwToolExit('No macOS frameworks found in ${xcframeworkDirectory.path}');
   }
@@ -1165,7 +1185,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName);
       case HostArtifact.iproxy:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
-        return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
+        return _cache.getArtifactDirectory('libusbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
@@ -1188,12 +1208,14 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }) {
     platform ??= _currentHostPlatform(_platform, _operatingSystemUtils);
     platform = _mapTargetPlatform(platform);
-    final bool isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
-    final String? artifactFileName =
-        isDirectoryArtifact ? null : _artifactToFileName(artifact, _platform, mode);
+    final isDirectoryArtifact = artifact == Artifact.flutterPatchedSdkPath;
+    final String? artifactFileName = isDirectoryArtifact
+        ? null
+        : _artifactToFileName(artifact, _platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
         return _genSnapshotPath(artifact);
       case Artifact.flutterTester:
@@ -1254,8 +1276,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.fuchsiaKernelCompiler:
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
-        final String modeName = mode!.isRelease ? 'release' : mode.toString();
-        final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
+        final modeName = mode!.isRelease ? 'release' : mode.toString();
+        final dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
         return _fileSystem.path.join(
           localEngineInfo.targetOutPath,
           'host_bundle',
@@ -1263,8 +1285,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
           'kernel_compiler.dart.snapshot',
         );
       case Artifact.fuchsiaFlutterRunner:
-        final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
-        final String productOrNo = mode.isRelease ? '_product' : '';
+        final jitOrAot = mode!.isJit ? '_jit' : '_aot';
+        final productOrNo = mode.isRelease ? '_product' : '';
         return _fileSystem.path.join(
           localEngineInfo.targetOutPath,
           'flutter$jitOrAot${productOrNo}_runner-0.far',
@@ -1335,6 +1357,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
     switch (hostPlatform) {
       case TargetPlatform.darwin:
         return 'macos-x64';
+      case TargetPlatform.linux_riscv64:
+        return 'linux-riscv64';
       case TargetPlatform.linux_arm64:
         return 'linux-arm64';
       case TargetPlatform.linux_x64:
@@ -1348,12 +1372,13 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -1362,16 +1387,17 @@ class CachedLocalEngineArtifacts implements Artifacts {
   }
 
   String _genSnapshotPath(Artifact artifact) {
-    const List<String> clangDirs = <String>[
+    const clangDirs = <String>[
       '.',
       'universal',
       'clang_x64',
       'clang_x86',
       'clang_i386',
       'clang_arm64',
+      'clang_riscv64',
     ];
     final String genSnapshotName = _artifactToFileName(artifact, _platform)!;
-    for (final String clangDir in clangDirs) {
+    for (final clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(
         localEngineInfo.targetOutPath,
         clangDir,
@@ -1441,6 +1467,7 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           );
         case Artifact.genSnapshot:
         case Artifact.genSnapshotArm64:
+        case Artifact.genSnapshotRiscv64:
         case Artifact.genSnapshotX64:
         case Artifact.flutterTester:
         case Artifact.flutterFramework:
@@ -1566,6 +1593,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         return 'macos-x64';
       case TargetPlatform.linux_arm64:
         return 'linux-arm64';
+      case TargetPlatform.linux_riscv64:
+        return 'linux-riscv64';
       case TargetPlatform.linux_x64:
         return 'linux-x64';
       case TargetPlatform.windows_x64:
@@ -1577,12 +1606,13 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
   }
 
@@ -1686,7 +1716,7 @@ class _TestArtifacts implements Artifacts {
       return _getFileGeneratorsPath();
     }
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     buffer.write(artifact);
     if (platform != null) {
       buffer.write('.$platform');

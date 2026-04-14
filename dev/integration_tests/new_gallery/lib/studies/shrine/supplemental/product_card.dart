@@ -60,12 +60,12 @@ Widget _buildProductCard({
   // Below assert is so that correct combination should always be present.
   assert(isDesktop && imageWidth != null || !isDesktop && imageAspectRatio != null);
 
-  final NumberFormat formatter = NumberFormat.simpleCurrency(
+  final formatter = NumberFormat.simpleCurrency(
     decimalDigits: 0,
     locale: Localizations.localeOf(context).toString(),
   );
   final ThemeData theme = Theme.of(context);
-  final FadeInImagePlaceholder imageWidget = FadeInImagePlaceholder(
+  final imageWidget = FadeInImagePlaceholder(
     image: AssetImage(product.assetName, package: product.assetPackage),
     placeholder: Container(
       color: Colors.black.withOpacity(0.1),

@@ -10,7 +10,10 @@ import androidx.annotation.NonNull;
 import java.util.*;
 
 /**
- * Arguments that can be delivered to the Flutter shell when it is created.
+ * DEPRECATED. Please see {@link FlutterEngineFlags} for the list of arguments to use or update if
+ * you are adding a new flag.
+ *
+ * <p>Arguments that can be delivered to the Flutter shell when it is created.
  *
  * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
  * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
@@ -18,7 +21,10 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  */
+// TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
+// is no longer supported. See https://github.com/flutter/flutter/issues/180686.
 @SuppressWarnings({"WeakerAccess", "unused"})
+@Deprecated
 public class FlutterShellArgs {
   public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
@@ -32,6 +38,8 @@ public class FlutterShellArgs {
   public static final String ARG_USE_TEST_FONTS = "--use-test-fonts";
   public static final String ARG_KEY_ENABLE_DART_PROFILING = "enable-dart-profiling";
   public static final String ARG_ENABLE_DART_PROFILING = "--enable-dart-profiling";
+  public static final String ARG_KEY_PROFILE_STARTUP = "profile-startup";
+  public static final String ARG_PROFILE_STARTUP = "--profile-startup";
   public static final String ARG_KEY_ENABLE_SOFTWARE_RENDERING = "enable-software-rendering";
   public static final String ARG_ENABLE_SOFTWARE_RENDERING = "--enable-software-rendering";
   public static final String ARG_KEY_SKIA_DETERMINISTIC_RENDERING = "skia-deterministic-rendering";
@@ -44,11 +52,19 @@ public class FlutterShellArgs {
   public static final String ARG_TRACE_SYSTRACE = "--trace-systrace";
   public static final String ARG_KEY_TRACE_TO_FILE = "trace-to-file";
   public static final String ARG_TRACE_TO_FILE = "--trace-to-file";
+  public static final String ARG_KEY_PROFILE_MICROTASKS = "profile-microtasks";
+  public static final String ARG_PROFILE_MICROTASKS = "--profile-microtasks";
   public static final String ARG_KEY_TOGGLE_IMPELLER = "enable-impeller";
   public static final String ARG_ENABLE_IMPELLER = "--enable-impeller=true";
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
   public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
   public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
+  public static final String ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL =
+      "enable-hcpp-and-surface-control";
+  public static final String ARG_ENABLE_HCPP_AND_SURFACE_CONTROL =
+      "--enable-hcpp-and-surface-control=true";
+  public static final String ARG_DISABLE_HCPP_AND_SURFACE_CONTROL =
+      "--enable-hcpp-and-surface-control=false";
   public static final String ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
       "dump-skp-on-shader-compilation";
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION =
@@ -61,9 +77,6 @@ public class FlutterShellArgs {
   public static final String ARG_VERBOSE_LOGGING = "--verbose-logging";
   public static final String ARG_KEY_VM_SERVICE_PORT = "vm-service-port";
   public static final String ARG_VM_SERVICE_PORT = "--vm-service-port=";
-  // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-  // See https://github.com/dart-lang/sdk/issues/50233
-  public static final String ARG_KEY_OBSERVATORY_PORT = "observatory-port";
   public static final String ARG_KEY_DART_FLAGS = "dart-flags";
   public static final String ARG_DART_FLAGS = "--dart-flags";
 
@@ -82,14 +95,7 @@ public class FlutterShellArgs {
     }
     int vmServicePort = intent.getIntExtra(ARG_KEY_VM_SERVICE_PORT, 0);
     if (vmServicePort > 0) {
-      args.add(ARG_VM_SERVICE_PORT + Integer.toString(vmServicePort));
-    } else {
-      // TODO(bkonyi): remove once flutter_tools no longer uses this option.
-      // See https://github.com/dart-lang/sdk/issues/50233
-      vmServicePort = intent.getIntExtra(ARG_KEY_OBSERVATORY_PORT, 0);
-      if (vmServicePort > 0) {
-        args.add(ARG_VM_SERVICE_PORT + Integer.toString(vmServicePort));
-      }
+      args.add(ARG_VM_SERVICE_PORT + vmServicePort);
     }
     if (intent.getBooleanExtra(ARG_KEY_DISABLE_SERVICE_AUTH_CODES, false)) {
       args.add(ARG_DISABLE_SERVICE_AUTH_CODES);
@@ -102,6 +108,9 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_DART_PROFILING, false)) {
       args.add(ARG_ENABLE_DART_PROFILING);
+    }
+    if (intent.getBooleanExtra(ARG_KEY_PROFILE_STARTUP, false)) {
+      args.add(ARG_PROFILE_STARTUP);
     }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)) {
       args.add(ARG_ENABLE_SOFTWARE_RENDERING);
@@ -122,6 +131,9 @@ public class FlutterShellArgs {
     if (intent.hasExtra(ARG_KEY_TRACE_TO_FILE)) {
       args.add(ARG_TRACE_TO_FILE + "=" + intent.getStringExtra(ARG_KEY_TRACE_TO_FILE));
     }
+    if (intent.hasExtra(ARG_KEY_PROFILE_MICROTASKS)) {
+      args.add(ARG_PROFILE_MICROTASKS);
+    }
     if (intent.hasExtra(ARG_KEY_TOGGLE_IMPELLER)) {
       if (intent.getBooleanExtra(ARG_KEY_TOGGLE_IMPELLER, false)) {
         args.add(ARG_ENABLE_IMPELLER);
@@ -132,6 +144,14 @@ public class FlutterShellArgs {
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);
     }
+    if (intent.hasExtra(ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL)) {
+      if (intent.getBooleanExtra(ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL, false)) {
+        args.add(ARG_ENABLE_HCPP_AND_SURFACE_CONTROL);
+      } else {
+        args.add(ARG_DISABLE_HCPP_AND_SURFACE_CONTROL);
+      }
+    }
+
     if (intent.getBooleanExtra(ARG_KEY_DUMP_SHADER_SKP_ON_SHADER_COMPILATION, false)) {
       args.add(ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION);
     }

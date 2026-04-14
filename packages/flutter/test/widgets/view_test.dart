@@ -4,15 +4,17 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
 void main() {
+  const green = Color(0xff00ff00);
+
   testWidgets('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;
     FlutterView? viewMaybeOf;
@@ -110,7 +112,7 @@ void main() {
     expect(outsideParent, tester.binding.rootPipelineOwner);
     expect(insideParent, equals(tester.renderObject(find.byType(SizedBox)).owner));
 
-    final List<PipelineOwner> pipelineOwners = <PipelineOwner>[];
+    final pipelineOwners = <PipelineOwner>[];
     tester.binding.rootPipelineOwner.visitChildren((PipelineOwner child) {
       pipelineOwners.add(child);
     });
@@ -170,13 +172,16 @@ void main() {
       return find.byWidgetPredicate((Widget w) => w is SpyRenderWidget && w.label == label);
     }
 
-    final List<String> log = <String>[];
+    final log = <String>[];
     await tester.pumpWidget(
       SpyRenderWidget(
         label: 1,
         log: log,
         child: ViewAnchor(
-          view: View(view: FakeView(tester.view), child: SpyRenderWidget(label: 2, log: log)),
+          view: View(
+            view: FakeView(tester.view),
+            child: SpyRenderWidget(label: 2, log: log),
+          ),
           child: SpyRenderWidget(label: 3, log: log),
         ),
       ),
@@ -192,7 +197,10 @@ void main() {
   testWidgets('visitChildren of ViewAnchor visits both children', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
-        view: View(view: FakeView(tester.view), child: const ColoredBox(color: Colors.green)),
+        view: View(
+          view: FakeView(tester.view),
+          child: const ColoredBox(color: green),
+        ),
         child: const SizedBox(),
       ),
     );
@@ -201,7 +209,7 @@ void main() {
         (Element e) => e.runtimeType.toString() == '_MultiChildComponentElement',
       ),
     );
-    final List<Element> children = <Element>[];
+    final children = <Element>[];
     viewAnchorElement.visitChildren((Element element) {
       children.add(element);
     });
@@ -231,7 +239,7 @@ void main() {
         (Element e) => e.runtimeType.toString() == '_MultiChildComponentElement',
       ),
     );
-    final List<Element> children = <Element>[];
+    final children = <Element>[];
     viewAnchorElement.visitChildren((Element element) {
       children.add(element);
     });
@@ -239,7 +247,9 @@ void main() {
 
     await tester.pumpWidget(
       wrapWithView: false,
-      ViewCollection(views: <Widget>[View(view: tester.view, child: const SizedBox())]),
+      ViewCollection(
+        views: <Widget>[View(view: tester.view, child: const SizedBox())],
+      ),
     );
     children.clear();
     viewAnchorElement.visitChildren((Element element) {
@@ -301,7 +311,10 @@ void main() {
           builder: (BuildContext context) {
             builderContext = context;
             return ViewAnchor(
-              view: View(view: FakeView(tester.view), child: const ColoredBox(color: Colors.green)),
+              view: View(
+                view: FakeView(tester.view),
+                child: const ColoredBox(color: green),
+              ),
               child: const SizedBox(),
             );
           },
@@ -318,8 +331,8 @@ void main() {
 
   testWidgets(
     'correctly switches between view configurations',
-    experimentalLeakTesting:
-        LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // Leaking by design as contains deprecated items.
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithView: false,
@@ -400,7 +413,7 @@ void main() {
             return View(key: viewKey, view: FakeView(tester.view), child: const SizedBox());
           },
         ),
-        child: const ColoredBox(color: Colors.green),
+        child: const ColoredBox(color: green),
       ),
     );
 
@@ -409,7 +422,7 @@ void main() {
     final RenderView rawView = tester.renderObject<RenderView>(find.byKey(viewKey));
     expect(RendererBinding.instance.renderViews, contains(rawView));
 
-    final List<PipelineOwner> children = <PipelineOwner>[];
+    final children = <PipelineOwner>[];
     parentPipelineOwner.visitChildren((PipelineOwner child) {
       children.add(child);
     });
@@ -417,7 +430,7 @@ void main() {
     expect(children, contains(rawViewOwner));
 
     // Remove that View from the tree.
-    await tester.pumpWidget(const ViewAnchor(child: ColoredBox(color: Colors.green)));
+    await tester.pumpWidget(const ViewAnchor(child: ColoredBox(color: green)));
 
     expect(rawView.owner, isNull);
     expect(RendererBinding.instance.renderViews, isNot(contains(rawView)));
@@ -431,7 +444,7 @@ void main() {
   testWidgets('RenderView does not use size of child if constraints are tight', (
     WidgetTester tester,
   ) async {
-    const Size physicalSize = Size(300, 600);
+    const physicalSize = Size(300, 600);
     final Size logicalSize = physicalSize / tester.view.devicePixelRatio;
     tester.view.physicalConstraints = ViewConstraints.tight(physicalSize);
     await tester.pumpWidget(const Placeholder());
@@ -449,7 +462,7 @@ void main() {
   testWidgets('RenderView sizes itself to child if constraints allow it (unconstrained)', (
     WidgetTester tester,
   ) async {
-    const Size size = Size(300, 600);
+    const size = Size(300, 600);
     tester.view.physicalConstraints = const ViewConstraints(); // unconstrained
     await tester.pumpWidget(SizedBox.fromSize(size: size));
 
@@ -466,9 +479,9 @@ void main() {
   testWidgets('RenderView sizes itself to child if constraints allow it (constrained)', (
     WidgetTester tester,
   ) async {
-    const Size size = Size(30, 60);
-    const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 333, maxHeight: 666);
-    final BoxConstraints boxConstraints = BoxConstraints.fromViewConstraints(
+    const size = Size(30, 60);
+    const viewConstraints = ViewConstraints(maxWidth: 333, maxHeight: 666);
+    final boxConstraints = BoxConstraints.fromViewConstraints(
       viewConstraints / tester.view.devicePixelRatio,
     );
     tester.view.physicalConstraints = viewConstraints;
@@ -487,8 +500,8 @@ void main() {
   testWidgets('RenderView respects constraints when child wants to be bigger than allowed', (
     WidgetTester tester,
   ) async {
-    const Size size = Size(3000, 6000);
-    const ViewConstraints viewConstraints = ViewConstraints(maxWidth: 300, maxHeight: 600);
+    const size = Size(3000, 6000);
+    const viewConstraints = ViewConstraints(maxWidth: 300, maxHeight: 600);
     tester.view.physicalConstraints = viewConstraints;
     await tester.pumpWidget(SizedBox.fromSize(size: size));
 
@@ -515,13 +528,13 @@ void main() {
       ),
     );
 
-    final ViewFocusEvent unfocusEvent = ViewFocusEvent(
+    final unfocusEvent = ViewFocusEvent(
       viewId: view.viewId,
       state: ViewFocusState.unfocused,
       direction: ViewFocusDirection.forward,
     );
 
-    final ViewFocusEvent focusEvent = ViewFocusEvent(
+    final focusEvent = ViewFocusEvent(
       viewId: view.viewId,
       state: ViewFocusState.focused,
       direction: ViewFocusDirection.backward,
@@ -549,7 +562,7 @@ void main() {
   testWidgets(
     'View notifies engine that a view should have focus when a widget focus change occurs.',
     (WidgetTester tester) async {
-      final FocusNode nodeA = FocusNode(debugLabel: 'a');
+      final nodeA = FocusNode(debugLabel: 'a');
       addTearDown(nodeA.dispose);
 
       FlutterView? view;
@@ -569,7 +582,7 @@ void main() {
           ),
         ),
       );
-      int notifyCount = 0;
+      var notifyCount = 0;
       void handleFocusChange() {
         notifyCount++;
       }
@@ -594,7 +607,7 @@ void main() {
   testWidgets('Switching focus between views yields the correct events.', (
     WidgetTester tester,
   ) async {
-    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    final nodeA = FocusNode(debugLabel: 'a');
     addTearDown(nodeA.dispose);
 
     FlutterView? view;
@@ -614,7 +627,7 @@ void main() {
         ),
       ),
     );
-    int notifyCount = 0;
+    var notifyCount = 0;
     void handleFocusChange() {
       notifyCount++;
     }

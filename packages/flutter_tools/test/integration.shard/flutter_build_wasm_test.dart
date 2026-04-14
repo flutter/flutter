@@ -38,7 +38,7 @@ void main() {
     final Directory appBuildDir = fileSystem.directory(
       fileSystem.path.join(exampleAppDir.path, 'build', 'web'),
     );
-    for (final String filename in const <String>[
+    for (final filename in const <String>[
       'flutter.js',
       'flutter_service_worker.js',
       'index.html',

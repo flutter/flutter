@@ -15,12 +15,27 @@ void main() => runApp(const MenuApp());
 /// they could be used for simple menu systems.
 enum MenuEntry {
   about('About'),
-  showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  hideMessage('Hide Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
+  showMessage(
+    'Show Message',
+    SingleActivator(LogicalKeyboardKey.keyS, control: true),
+  ),
+  hideMessage(
+    'Hide Message',
+    SingleActivator(LogicalKeyboardKey.keyS, control: true),
+  ),
   colorMenu('Color Menu'),
-  colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
-  colorGreen('Green Background', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
-  colorBlue('Blue Background', SingleActivator(LogicalKeyboardKey.keyB, control: true));
+  colorRed(
+    'Red Background',
+    SingleActivator(LogicalKeyboardKey.keyR, control: true),
+  ),
+  colorGreen(
+    'Green Background',
+    SingleActivator(LogicalKeyboardKey.keyG, control: true),
+  ),
+  colorBlue(
+    'Blue Background',
+    SingleActivator(LogicalKeyboardKey.keyB, control: true),
+  );
 
   const MenuEntry(this.label, [this.shortcut]);
   final String label;
@@ -40,6 +55,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   MenuEntry? _lastSelection;
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   ShortcutRegistryEntry? _shortcutsEntry;
+  AnimationStatus _animationStatus = .dismissed;
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
@@ -70,10 +86,12 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     // Collect the shortcuts from the different menu selections so that they can
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
-      for (final MenuEntry item in MenuEntry.values)
-        if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
-    };
+    final Map<ShortcutActivator, Intent> shortcuts =
+        <ShortcutActivator, Intent>{
+          for (final MenuEntry item in MenuEntry.values)
+            if (item.shortcut != null)
+              item.shortcut!: VoidCallbackIntent(() => _activate(item)),
+        };
     // Register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application.
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
@@ -89,9 +107,16 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: <Widget>[
         MenuAnchor(
+          animated: true,
+          onAnimationStatusChanged: (AnimationStatus status) {
+            // Store the animation status so that it can be used to determine
+            // whether the menu is opening or closing when the button is
+            // pressed.
+            _animationStatus = status;
+          },
           childFocusNode: _buttonFocusNode,
           menuChildren: <Widget>[
             MenuItemButton(
@@ -111,6 +136,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
                 child: Text(MenuEntry.showMessage.label),
               ),
             SubmenuButton(
+              animated: true,
               menuChildren: <Widget>[
                 MenuItemButton(
                   onPressed: () => _activate(MenuEntry.colorRed),
@@ -131,35 +157,40 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
               child: const Text('Background Color'),
             ),
           ],
-          builder: (BuildContext context, MenuController controller, Widget? child) {
-            return TextButton(
-              focusNode: _buttonFocusNode,
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
+          builder:
+              (BuildContext context, MenuController controller, Widget? child) {
+                return TextButton(
+                  focusNode: _buttonFocusNode,
+                  onPressed: () {
+                    if (_animationStatus.isForwardOrCompleted) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: const Text('OPEN MENU'),
+                );
               },
-              child: const Text('OPEN MENU'),
-            );
-          },
         ),
         Expanded(
           child: Container(
-            alignment: Alignment.center,
+            alignment: .center,
             color: backgroundColor,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const .all(12.0),
                   child: Text(
                     showingMessage ? widget.message : '',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-                Text(_lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : ''),
+                Text(
+                  _lastSelection != null
+                      ? 'Last Selected: ${_lastSelection!.label}'
+                      : '',
+                ),
               ],
             ),
           ),
@@ -203,7 +234,9 @@ class MenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: SafeArea(child: MyCascadingMenu(message: kMessage))),
+      home: Scaffold(
+        body: SafeArea(child: MyCascadingMenu(message: kMessage)),
+      ),
     );
   }
 }

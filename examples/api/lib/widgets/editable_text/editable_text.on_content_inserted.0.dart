@@ -23,10 +23,12 @@ class KeyboardInsertedContentDemo extends StatefulWidget {
   const KeyboardInsertedContentDemo({super.key});
 
   @override
-  State<KeyboardInsertedContentDemo> createState() => _KeyboardInsertedContentDemoState();
+  State<KeyboardInsertedContentDemo> createState() =>
+      _KeyboardInsertedContentDemoState();
 }
 
-class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDemo> {
+class _KeyboardInsertedContentDemoState
+    extends State<KeyboardInsertedContentDemo> {
   final TextEditingController _controller = TextEditingController();
   Uint8List? bytes;
 
@@ -41,9 +43,11 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
     return Scaffold(
       appBar: AppBar(title: const Text('Keyboard Inserted Content Sample')),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
-          const Text("Here's a text field that supports inserting only png or gif content:"),
+          const Text(
+            "Here's a text field that supports inserting only png or gif content:",
+          ),
           TextField(
             controller: _controller,
             contentInsertionConfiguration: ContentInsertionConfiguration(
@@ -57,7 +61,8 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
               },
             ),
           ),
-          if (bytes != null) const Text("Here's the most recently inserted content:"),
+          if (bytes != null)
+            const Text("Here's the most recently inserted content:"),
           if (bytes != null) Image.memory(bytes!),
         ],
       ),

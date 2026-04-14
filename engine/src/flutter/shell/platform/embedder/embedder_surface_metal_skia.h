@@ -25,7 +25,7 @@ class EmbedderSurfaceMetalSkia final : public EmbedderSurface,
  public:
   struct MetalDispatchTable {
     std::function<bool(GPUMTLTextureInfo texture)> present;  // required
-    std::function<GPUMTLTextureInfo(const SkISize& frame_size)>
+    std::function<GPUMTLTextureInfo(const DlISize& frame_size)>
         get_texture;  // required
   };
 
@@ -56,13 +56,13 @@ class EmbedderSurfaceMetalSkia final : public EmbedderSurface,
 
   // |GPUSurfaceMetalDelegate|
   GPUCAMetalLayerHandle GetCAMetalLayer(
-      const SkISize& frame_size) const override;
+      const DlISize& frame_size) const override;
 
   // |GPUSurfaceMetalDelegate|
   bool PresentDrawable(GrMTLHandle drawable) const override;
 
   // |GPUSurfaceMetalDelegate|
-  GPUMTLTextureInfo GetMTLTexture(const SkISize& frame_size) const override;
+  GPUMTLTextureInfo GetMTLTexture(const DlISize& frame_size) const override;
 
   // |GPUSurfaceMetalDelegate|
   bool PresentTexture(GPUMTLTextureInfo texture) const override;

@@ -3,7 +3,7 @@
 The arb files in this directory are used to generate `stock_strings.dart`,
 which contains the `StockStrings` class. This localizations class is
 used by the stocks application to look up localized message strings.
-The stocks app uses the [Dart `intl` package](https://github.com/dart-lang/intl).
+The stocks app uses the [Dart `intl` package](https://github.com/dart-lang/i18n/tree/main/pkgs/intl).
 
 To update the English and Spanish localizations, modify the
 `stocks_en_US.arb`, `stocks_en.arb`, or `stocks_es.arb` files. See the

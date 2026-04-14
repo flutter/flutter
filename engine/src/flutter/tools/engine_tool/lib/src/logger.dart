@@ -59,7 +59,7 @@ class Logger {
 
   static void _handler(log.LogRecord r) {
     final io.IOSink sink = r.level >= warningLevel ? io.stderr : io.stdout;
-    final String prefix = r.level >= warningLevel ? '[${r.time}] ${r.level}: ' : '';
+    final prefix = r.level >= warningLevel ? '[${r.time}] ${r.level}: ' : '';
     _ioSinkWrite(sink, '$prefix${r.message}');
   }
 
@@ -164,10 +164,9 @@ class Logger {
       _status = null;
     }
 
-    _status =
-        io.stdout.hasTerminal && !_test
-            ? FlutterSpinner(onFinish: finishCallback)
-            : Spinner(onFinish: finishCallback);
+    _status = io.stdout.hasTerminal && !_test
+        ? FlutterSpinner(onFinish: finishCallback)
+        : Spinner(onFinish: finishCallback);
     _status!.start();
     return _status!;
   }
@@ -185,7 +184,7 @@ class Logger {
   }
 
   String _formatMessage(Object? message, int indent, bool newline, bool fit) {
-    String m = '${' ' * indent}$message${newline ? '\n' : ''}';
+    var m = '${' ' * indent}$message${newline ? '\n' : ''}';
     if (fit && io.stdout.hasTerminal) {
       m = fitToWidth(m, io.stdout.terminalColumns);
     }
@@ -214,7 +213,7 @@ class Logger {
   @visibleForTesting
   static String fitToWidth(String s, int w) {
     // Preserve a trailing newline if needed.
-    final String maybeNewline = s.endsWith('\n') ? '\n' : '';
+    final maybeNewline = s.endsWith('\n') ? '\n' : '';
     if (w <= 0) {
       return maybeNewline;
     }
@@ -272,8 +271,9 @@ class FlutterSpinner extends Spinner {
   /// The frames of the animation.
   static const String frames = '⢸⡯⠭⠅⢸⣇⣀⡀⢸⣇⣸⡇⠈⢹⡏⠁⠈⢹⡏⠁⢸⣯⣭⡅⢸⡯⢕⡂⠀⠀';
 
-  static final List<String> _flutterAnimation =
-      frames.runes.map<String>((int scalar) => String.fromCharCode(scalar)).toList();
+  static final List<String> _flutterAnimation = frames.runes
+      .map<String>((int scalar) => String.fromCharCode(scalar))
+      .toList();
 
   Timer? _timer;
   int _ticks = 0;

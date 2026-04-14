@@ -18,6 +18,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterPlatformViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterWindowController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -85,6 +86,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  * True if the engine is currently running.
  */
 @property(nonatomic, readonly) BOOL running;
+
+/**
+ * The project associated with this engine.
+ */
+@property(nonatomic, readonly, nonnull) FlutterDartProject* project;
 
 /**
  * Provides the renderer config needed to initialize the engine and also handles external
@@ -223,6 +229,34 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  */
 @property(nonatomic, readonly) FlutterTextInputPlugin* textInputPlugin;
 
+@property(nonatomic, readonly) FlutterWindowController* windowController;
+
+/**
+ * Enables multi-view support.
+ *
+ * Called by [FlutterWindowController] before the first view is added. This
+ * affects the behavior when adding view controllers:
+ *
+ *  - When multiview is disabled, the engine will only assign views to the
+ *    implicit view ID. The implicit view ID can be reused if and only if the
+ *    implicit view ID is unassigned.
+ *  - When multiview is enabled, the engine will assign views to a
+ *    self-incrementing ID.
+ *
+ * Calling enableMultiView when multiview is already enabled is a noop.
+ */
+- (void)enableMultiView;
+
+/**
+ * Notifies the engine that window with the given identifier has been made key.
+ */
+- (void)windowDidBecomeKey:(FlutterViewIdentifier)viewIdentifier;
+
+/**
+ * Notifies the engine that window with the given identifier has resigned being key.
+ */
+- (void)windowDidResignKey:(FlutterViewIdentifier)viewIdentifier;
+
 /**
  * Returns an array of screen objects representing all of the screens available on the system.
  */
@@ -238,6 +272,14 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  * This function must be called on the main thread.
  */
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
+
+/**
+ * Invoked right before the engine is restarted.
+ *
+ * This should reset states to as if the application has just started.  It
+ * usually indicates a hot restart (Shift-R in Flutter CLI.)
+ */
+- (void)engineCallbackOnPreEngineRestart;
 @end
 
 NS_ASSUME_NONNULL_END

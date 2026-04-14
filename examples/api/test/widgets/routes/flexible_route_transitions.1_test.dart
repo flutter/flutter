@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../navigator_utils.dart';
 
 void main() {
-  testWidgets('Flexible Transitions App is able to build', (WidgetTester tester) async {
+  testWidgets('Flexible Transitions App is able to build', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(FlexibleRouteTransitionsApp());
 
     expect(find.text('Zoom Transition'), findsOneWidget);

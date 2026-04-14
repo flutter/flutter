@@ -7,6 +7,9 @@
 #
 # bin/cache/engine.stamp <-- SHA of the commit that engine artifacts were built
 # bin/cache/engine.realm <-- optional; whether the SHA is from presubmit builds or staging (bringup: true).
+#
+# *DOES NOT* update engine.version. To update engine.version run
+# `bin/internal/last_engine_commit.sh > bin/internal/engine.version`
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
@@ -51,31 +54,26 @@ if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
 #
 # If set, it takes precedence over the git hash.
 elif [ -n "$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)" ]; then
-  ENGINE_VERSION="$(cat "$FLUTTER_ROOT/bin/internal/engine.version")"
+  ENGINE_VERSION="$(< "$FLUTTER_ROOT/bin/internal/engine.version")"
 
 # Fallback to using git to triangulate which upstream/master (or origin/master)
 # the current branch is forked from, which would be the last version of the
 # engine artifacts built from CI.
 else
-  set +e
-  # We fallback to origin/master if upstream is not detected.
-  git -C "$FLUTTER_ROOT" remote get-url upstream >/dev/null 2>&1
-  exit_code=$?
-  set -e
-
-  if [[ $exit_code -eq 0 ]]; then
-    ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD upstream/master)
-  else
-    ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" merge-base HEAD origin/master)
-  fi
+  ENGINE_VERSION=$("$FLUTTER_ROOT/bin/internal/content_aware_hash.sh")
 fi
 
 # Write the engine version out so downstream tools know what to look for.
-echo $ENGINE_VERSION >"$FLUTTER_ROOT/bin/cache/engine.stamp"
+# Use a temporary file and atomic mv to prevent race conditions during parallel flutter executions.
+pid=$$
+es_tmp="$FLUTTER_ROOT/bin/cache/engine.stamp.tmp.$pid"
+trap 'rm -f "$es_tmp"' EXIT
+echo "$ENGINE_VERSION" >"$es_tmp" && mv "$es_tmp" "$FLUTTER_ROOT/bin/cache/engine.stamp"
+trap - EXIT
 
 # The realm on CI is passed in.
 if [ -n "${FLUTTER_REALM}" ]; then
-  echo $FLUTTER_REALM >"$FLUTTER_ROOT/bin/cache/engine.realm"
+  echo "$FLUTTER_REALM" >"$FLUTTER_ROOT/bin/cache/engine.realm"
 else
   echo "" >"$FLUTTER_ROOT/bin/cache/engine.realm"
 fi

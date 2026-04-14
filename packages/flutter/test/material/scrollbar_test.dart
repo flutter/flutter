@@ -15,7 +15,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
@@ -68,6 +70,100 @@ class NoScrollbarBehavior extends MaterialScrollBehavior {
 }
 
 void main() {
+  testWidgets('MaterialScrollBehavior flings on different platforms', (WidgetTester tester) async {
+    double getScrollOffset(WidgetTester tester, {bool last = true}) {
+      Finder viewportFinder = find.byType(Viewport);
+      if (last) {
+        viewportFinder = viewportFinder.last;
+      }
+      final RenderViewport viewport = tester.renderObject(viewportFinder);
+      return viewport.offset.pixels;
+    }
+
+    void resetScrollOffset(WidgetTester tester) {
+      final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+      final position = viewport.offset as ScrollPosition;
+      position.jumpTo(0.0);
+    }
+
+    Future<void> pumpTest(
+      WidgetTester tester,
+      TargetPlatform? platform, {
+      bool scrollable = true,
+      bool reverse = false,
+      Set<LogicalKeyboardKey>? axisModifier,
+      Axis scrollDirection = Axis.vertical,
+      ScrollController? controller,
+      bool enableMouseDrag = true,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          scrollBehavior: const NoScrollbarBehavior().copyWith(
+            dragDevices: enableMouseDrag
+                ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+                : null,
+            pointerAxisModifiers: axisModifier,
+          ),
+          theme: ThemeData(platform: platform),
+          home: CustomScrollView(
+            controller: controller,
+            reverse: reverse,
+            scrollDirection: scrollDirection,
+            physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: scrollDirection == Axis.vertical ? 2000.0 : null,
+                  width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+    }
+
+    const dragOffset = 200.0;
+
+    await pumpTest(tester, TargetPlatform.android);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(seconds: 5));
+    final double androidResult = getScrollOffset(tester);
+
+    resetScrollOffset(tester);
+
+    await pumpTest(tester, TargetPlatform.iOS);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(const Duration(seconds: 5));
+    final double iOSResult = getScrollOffset(tester);
+
+    resetScrollOffset(tester);
+
+    await pumpTest(tester, TargetPlatform.macOS);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(const Duration(seconds: 5));
+    final double macOSResult = getScrollOffset(tester);
+
+    // Android is slipperier than MacOS, so the scroll offset should be greater.
+    expect(androidResult, greaterThan(macOSResult));
+    // iOS is slipperier than Android, so the scroll offset should be greater.
+    expect(iOSResult, greaterThan(androidResult));
+    // iOS is slipperier than MacOS, so the scroll offset should be greater.
+    expect(iOSResult, greaterThan(macOSResult));
+  });
+
   testWidgets("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildBoilerplate(
@@ -130,7 +226,7 @@ void main() {
     final CustomPaint custom = tester.widget(
       find.descendant(of: find.byType(Scrollbar), matching: find.byType(CustomPaint)).first,
     );
-    final ScrollbarPainter? scrollPainter = custom.foregroundPainter as ScrollbarPainter?;
+    final scrollPainter = custom.foregroundPainter as ScrollbarPainter?;
     // Dragging makes the scrollbar first appear.
     await tester.drag(find.text('0'), const Offset(0.0, -10.0));
     await tester.pump(const Duration(milliseconds: 200));
@@ -146,7 +242,7 @@ void main() {
     );
     scrollPainter!.update(metrics, AxisDirection.down);
 
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
 
     // Scrollbar is not supposed to draw anything if there isn't enough content.
@@ -169,7 +265,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final AssertionError exception = tester.takeException() as AssertionError;
+      final exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -177,7 +273,7 @@ void main() {
   testWidgets(
     'When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: Theme(
@@ -192,7 +288,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final AssertionError exception = tester.takeException() as AssertionError;
+      final exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
 
       controller.dispose();
@@ -202,7 +298,7 @@ void main() {
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
@@ -229,7 +325,7 @@ void main() {
   testWidgets(
     'On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: Theme(
@@ -276,7 +372,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final AssertionError exception = tester.takeException() as AssertionError;
+      final exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
     },
   );
@@ -284,7 +380,7 @@ void main() {
   testWidgets(
     'When thumbVisibility is true, must pass a controller that is attached to a scroll view or find PrimaryScrollController',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: Theme(
@@ -299,7 +395,7 @@ void main() {
       }
 
       await tester.pumpWidget(viewWithScroll());
-      final AssertionError exception = tester.takeException() as AssertionError;
+      final exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
 
       controller.dispose();
@@ -309,7 +405,7 @@ void main() {
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
@@ -336,7 +432,7 @@ void main() {
   testWidgets(
     'On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: Theme(
@@ -370,7 +466,7 @@ void main() {
   testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     Widget viewWithScroll() {
       return _buildBoilerplate(
         child: Theme(
@@ -397,8 +493,8 @@ void main() {
   testWidgets(
     'With thumbVisibility: true, fling a scroll. While it is still scrolling, set thumbVisibility: false. The thumb should not fade out until the scrolling stops.',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
-      bool thumbVisibility = true;
+      final controller = ScrollController();
+      var thumbVisibility = true;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -446,8 +542,8 @@ void main() {
   testWidgets(
     'With thumbVisibility: false, set thumbVisibility: true. The thumb should be always shown directly',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
-      bool thumbVisibility = false;
+      final controller = ScrollController();
+      var thumbVisibility = false;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -494,8 +590,8 @@ void main() {
   testWidgets(
     'With thumbVisibility: false, fling a scroll. While it is still scrolling, set thumbVisibility: true. The thumb should not fade even after the scrolling stops',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
-      bool thumbVisibility = false;
+      final controller = ScrollController();
+      var thumbVisibility = false;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -549,8 +645,8 @@ void main() {
   testWidgets(
     'Toggling thumbVisibility while not scrolling fades the thumb in/out. This works even when you have never scrolled at all yet',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
-      bool thumbVisibility = true;
+      final controller = ScrollController();
+      var thumbVisibility = true;
       Widget viewWithScroll() {
         return _buildBoilerplate(
           child: StatefulBuilder(
@@ -595,7 +691,7 @@ void main() {
   );
 
   testWidgets('Scrollbar respects thickness and radius', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     Widget viewWithScroll({Radius? radius}) {
       return _buildBoilerplate(
         child: Theme(
@@ -616,7 +712,7 @@ void main() {
     // Scroll a bit to cause the scrollbar thumb to be shown;
     // undo the scroll to put the thumb back at the top.
     await tester.pumpWidget(viewWithScroll());
-    const double scrollAmount = 10.0;
+    const scrollAmount = 10.0;
     final TestGesture scrollGesture = await tester.startGesture(
       tester.getCenter(find.byType(SingleChildScrollView)),
     );
@@ -658,7 +754,7 @@ void main() {
   });
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -798,7 +894,7 @@ void main() {
   });
 
   testWidgets('Scrollbar thumb can be dragged', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -829,7 +925,7 @@ void main() {
     );
 
     // Drag the thumb down to scroll down.
-    const double scrollAmount = 10.0;
+    const scrollAmount = 10.0;
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
 
@@ -884,7 +980,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(
             useMaterial3: false,
-            scrollbarTheme: ScrollbarThemeData(thumbVisibility: MaterialStateProperty.all(true)),
+            scrollbarTheme: ScrollbarThemeData(thumbVisibility: WidgetStateProperty.all(true)),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
         ),
@@ -933,13 +1029,10 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.all(true),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              thumbVisibility: WidgetStateProperty.all(true),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1013,14 +1106,12 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.resolveWith(
-                (Set<MaterialState> states) => true,
-              ),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                return states.contains(MaterialState.hovered);
+              thumbVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) => true),
+              trackVisibility: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                return states.contains(WidgetState.hovered);
               }),
-              thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
+              thickness: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.hovered)) {
                   return 40.0;
                 }
                 // Default thickness
@@ -1087,13 +1178,10 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.all(true),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              thumbVisibility: WidgetStateProperty.all(true),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1155,13 +1243,10 @@ void main() {
           theme: ThemeData(
             useMaterial3: false,
             scrollbarTheme: ScrollbarThemeData(
-              thumbVisibility: MaterialStateProperty.all(true),
-              trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-                if (states.contains(MaterialState.hovered)) {
-                  return true;
-                }
-                return false;
-              }),
+              thumbVisibility: WidgetStateProperty.all(true),
+              trackVisibility: WidgetStateProperty.resolveWith(
+                (Set<WidgetState> states) => states.contains(WidgetState.hovered),
+              ),
             ),
           ),
           home: const SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
@@ -1251,7 +1336,7 @@ void main() {
   testWidgets(
     'Scrollbar passes controller to CupertinoScrollbar',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       Widget viewWithScroll(TargetPlatform? platform) {
         return _buildBoilerplate(
           child: Theme(
@@ -1353,7 +1438,7 @@ void main() {
   testWidgets(
     'Scrollbar dragging can be disabled',
     (WidgetTester tester) async {
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -1390,7 +1475,7 @@ void main() {
       );
 
       // Try to drag the thumb down.
-      const double scrollAmount = 10.0;
+      const scrollAmount = 10.0;
       final TestGesture dragScrollbarThumbGesture = await tester.startGesture(
         const Offset(797.0, 45.0),
       );
@@ -1425,8 +1510,8 @@ void main() {
   );
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
-    int tapCount = 0;
-    final ScrollController scrollController = ScrollController();
+    var tapCount = 0;
+    final scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         home: PrimaryScrollController(
@@ -1464,7 +1549,7 @@ void main() {
     );
 
     // Try to drag the thumb down.
-    const double scrollAmount = 50.0;
+    const scrollAmount = 50.0;
     await tester.dragFrom(
       const Offset(797.0, 45.0),
       const Offset(0.0, scrollAmount),
@@ -1512,7 +1597,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1543,7 +1628,7 @@ void main() {
     );
 
     // Drag the thumb down to scroll down.
-    const double scrollAmount = 10.0;
+    const scrollAmount = 10.0;
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
     await tester.pumpAndSettle();
 
@@ -1585,7 +1670,7 @@ void main() {
     );
 
     // Execute a pointer scroll while dragging (drag gesture has not come up yet)
-    final TestPointer pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     pointer.hover(const Offset(798.0, 15.0));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 20.0)));
     await tester.pumpAndSettle();
@@ -1695,7 +1780,7 @@ void main() {
       await tester.drag(find.text('Test').first, const Offset(-100.0, 0.0));
       await tester.pump();
 
-      FlutterError error = tester.takeException() as FlutterError;
+      var error = tester.takeException() as FlutterError;
       expect(
         error.message,
         '''
@@ -1707,7 +1792,7 @@ More than one ScrollView may have tried to use the PrimaryScrollController of th
       );
 
       // Asserts when using the ScrollController provided by the user.
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       await tester.pumpWidget(
         buildApp(id: 'Provided ScrollController', scrollController: scrollController),
       );
@@ -1728,7 +1813,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   );
 
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
 
     Widget buildScrollWithOrientation(ScrollbarOrientation orientation) {
       return _buildBoilerplate(
@@ -1765,5 +1850,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
 
     scrollController.dispose();
+  });
+
+  testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: Scrollbar(child: SingleChildScrollView())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
   });
 }

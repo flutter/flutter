@@ -34,7 +34,7 @@ const String source = r'''
 void main() {
   group(AndroidSemanticsNode, () {
     test('can be parsed from json data', () {
-      final AndroidSemanticsNode node = AndroidSemanticsNode.deserialize(source);
+      final node = AndroidSemanticsNode.deserialize(source);
 
       expect(node.isChecked, false);
       expect(node.isCheckable, false);
@@ -69,7 +69,7 @@ void main() {
 
   group('hasAndroidSemantics', () {
     test('matches all android semantics properties', () {
-      final AndroidSemanticsNode node = AndroidSemanticsNode.deserialize(source);
+      final node = AndroidSemanticsNode.deserialize(source);
 
       expect(
         node,

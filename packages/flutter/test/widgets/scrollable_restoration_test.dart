@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,13 +14,11 @@ void main() {
           restorationId: 'list',
           cacheExtent: 0,
           slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(
-                List<Widget>.generate(
-                  50,
-                  (int index) => SizedBox(height: 50, child: Text('Tile $index')),
-                ),
-              ),
+            SliverList.builder(
+              itemCount: 50,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: 50, child: Text('Tile $index'));
+              },
             ),
           ],
         ),
@@ -53,8 +51,8 @@ void main() {
         child: ListView.builder(
           restorationId: 'list',
           cacheExtent: 0,
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -70,8 +68,8 @@ void main() {
           cacheExtent: 0,
           itemCount: 50,
           separatorBuilder: (BuildContext context, int index) => const SizedBox.shrink(),
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -123,8 +121,8 @@ void main() {
           restorationId: 'grid',
           cacheExtent: 0,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -250,8 +248,8 @@ void main() {
       TestHarness(
         child: PageView.builder(
           restorationId: 'pager',
-          itemBuilder:
-              (BuildContext context, int index) => SizedBox(height: 50, child: Text('Tile $index')),
+          itemBuilder: (BuildContext context, int index) =>
+              SizedBox(height: 50, child: Text('Tile $index')),
         ),
       ),
     );
@@ -312,51 +310,56 @@ void main() {
 
   testWidgets('NestedScrollView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: TestHarness(
-          height: 200,
-          child: NestedScrollView(
-            restorationId: 'outer',
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: SliverAppBar(
-                    title: const Text('Books'),
-                    pinned: true,
-                    expandedHeight: 150.0,
-                    forceElevated: innerBoxIsScrolled,
-                  ),
+      TestHarness(
+        height: 200,
+        child: NestedScrollView(
+          restorationId: 'outer',
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _TestHeaderDelegate(minExtent: 56.0, maxExtent: 150.0),
                 ),
-              ];
-            },
-            body: ListView(
-              restorationId: 'inner',
-              cacheExtent: 0,
-              children: List<Widget>.generate(
-                50,
-                (int index) => SizedBox(height: 50, child: Text('Tile $index')),
               ),
+            ];
+          },
+          body: ListView(
+            restorationId: 'inner',
+            cacheExtent: 0,
+            children: List<Widget>.generate(
+              50,
+              (int index) => SizedBox(height: 50, child: Text('Tile $index')),
             ),
           ),
         ),
       ),
     );
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
+    expect(
+      tester.renderObject<RenderSliver>(find.byType(SliverPersistentHeader)).geometry!.paintExtent,
+      150,
+    );
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.drag(find.byType(NestedScrollView), const Offset(0, -500));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+      tester.renderObject<RenderSliver>(find.byType(SliverPersistentHeader)).geometry!.paintExtent,
+      56,
+    );
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
     await tester.restartAndRestore();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+      tester.renderObject<RenderSliver>(find.byType(SliverPersistentHeader)).geometry!.paintExtent,
+      56,
+    );
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
 
@@ -364,13 +367,19 @@ void main() {
     await tester.drag(find.byType(NestedScrollView), const Offset(0, 600));
     await tester.pump();
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 150);
+    expect(
+      tester.renderObject<RenderSliver>(find.byType(SliverPersistentHeader)).geometry!.paintExtent,
+      150,
+    );
     expect(find.text('Tile 0'), findsOneWidget);
     expect(find.text('Tile 10'), findsNothing);
 
     await tester.restoreFrom(data);
 
-    expect(tester.renderObject<RenderSliver>(find.byType(SliverAppBar)).geometry!.paintExtent, 56);
+    expect(
+      tester.renderObject<RenderSliver>(find.byType(SliverPersistentHeader)).geometry!.paintExtent,
+      56,
+    );
     expect(find.text('Tile 0'), findsNothing);
     expect(find.text('Tile 10'), findsOneWidget);
   });
@@ -514,4 +523,22 @@ class TestHarness extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TestHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TestHeaderDelegate({required this.minExtent, required this.maxExtent});
+
+  @override
+  final double minExtent;
+
+  @override
+  final double maxExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return const SizedBox.expand();
+  }
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }

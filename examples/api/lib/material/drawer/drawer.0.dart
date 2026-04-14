@@ -33,11 +33,14 @@ class _DrawerExampleState extends State<DrawerExample> {
       appBar: AppBar(title: const Text('Drawer Example')),
       drawer: Drawer(
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: .zero,
           children: <Widget>[
             const DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
-              child: Text('Drawer Header', style: TextStyle(color: Colors.white, fontSize: 24)),
+              child: Text(
+                'Drawer Header',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.message),

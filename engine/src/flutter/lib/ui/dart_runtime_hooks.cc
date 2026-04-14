@@ -64,10 +64,6 @@ static void InitDartInternal(Dart_Handle builtin_library, bool is_ui_isolate) {
 
   Dart_Handle setup_hooks = Dart_NewStringFromCString("_setupHooks");
 
-  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-  result = Dart_Invoke(io_lib, setup_hooks, 0, NULL);
-  PropagateIfError(result);
-
   Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
   result = Dart_Invoke(isolate_lib, setup_hooks, 0, NULL);
   PropagateIfError(result);
@@ -83,7 +79,9 @@ static void InitDartCore(Dart_Handle builtin, const std::string& script_uri) {
   PropagateIfError(result);
 }
 
-static void InitDartAsync(Dart_Handle builtin_library, bool is_ui_isolate) {
+static void InitDartAsync(Dart_Handle builtin_library,
+                          bool is_ui_isolate,
+                          bool enable_microtask_profiling) {
   Dart_Handle schedule_microtask;
   if (is_ui_isolate) {
     schedule_microtask =
@@ -99,45 +97,38 @@ static void InitDartAsync(Dart_Handle builtin_library, bool is_ui_isolate) {
   Dart_Handle result = Dart_Invoke(async_library, set_schedule_microtask, 1,
                                    &schedule_microtask);
   PropagateIfError(result);
-}
-
-static void InitDartIO(Dart_Handle builtin_library,
-                       const std::string& script_uri) {
-  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-  Dart_Handle platform_type =
-      Dart_GetNonNullableType(io_lib, ToDart("_Platform"), 0, nullptr);
-  if (!script_uri.empty()) {
-    Dart_Handle result = Dart_SetField(platform_type, ToDart("_nativeScript"),
-                                       ToDart(script_uri));
-    PropagateIfError(result);
-  }
-  // typedef _LocaleClosure = String Function();
-  Dart_Handle /* _LocaleClosure? */ locale_closure =
-      InvokeFunction(builtin_library, "_getLocaleClosure");
-  PropagateIfError(locale_closure);
-  //   static String Function()? _localeClosure;
-  Dart_Handle result =
-      Dart_SetField(platform_type, ToDart("_localeClosure"), locale_closure);
-  PropagateIfError(result);
 
 #if !FLUTTER_RELEASE
-  // Register dart:io service extensions used for network profiling.
-  Dart_Handle network_profiling_type =
-      Dart_GetNonNullableType(io_lib, ToDart("_NetworkProfiling"), 0, nullptr);
-  PropagateIfError(network_profiling_type);
-  result = Dart_Invoke(network_profiling_type,
-                       ToDart("_registerServiceExtension"), 0, nullptr);
-  PropagateIfError(result);
+  if (enable_microtask_profiling) {
+    Dart_Handle microtask_mirror_queue_type_name =
+        Dart_NewStringFromCString("_MicrotaskMirrorQueue");
+    PropagateIfError(microtask_mirror_queue_type_name);
+
+    Dart_Handle microtask_mirror_queue_type =
+        Dart_GetNonNullableType(async_library, microtask_mirror_queue_type_name,
+                                /*number_of_type_arguments=*/0,
+                                /*type_arguments=*/nullptr);
+    PropagateIfError(microtask_mirror_queue_type);
+
+    Dart_Handle should_profile_microtasks_field_name =
+        Dart_NewStringFromCString("_shouldProfileMicrotasks");
+    PropagateIfError(should_profile_microtasks_field_name);
+
+    Dart_Handle set_field_result =
+        Dart_SetField(microtask_mirror_queue_type,
+                      should_profile_microtasks_field_name, Dart_True());
+    PropagateIfError(set_field_result);
+  }
 #endif  // !FLUTTER_RELEASE
 }
 
 void DartRuntimeHooks::Install(bool is_ui_isolate,
+                               bool enable_microtask_profiling,
                                const std::string& script_uri) {
   Dart_Handle builtin = Dart_LookupLibrary(ToDart("dart:ui"));
   InitDartInternal(builtin, is_ui_isolate);
   InitDartCore(builtin, script_uri);
-  InitDartAsync(builtin, is_ui_isolate);
-  InitDartIO(builtin, script_uri);
+  InitDartAsync(builtin, is_ui_isolate, enable_microtask_profiling);
 }
 
 void DartRuntimeHooks::Logger_PrintDebugString(const std::string& message) {

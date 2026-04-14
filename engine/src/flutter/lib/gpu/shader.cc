@@ -62,7 +62,7 @@ std::shared_ptr<const impeller::ShaderFunction> Shader::GetFunctionFromLibrary(
 }
 
 bool Shader::IsRegistered(Context& context) {
-  auto& lib = *context.GetContext()->GetShaderLibrary();
+  auto& lib = *context.GetContext().GetShaderLibrary();
   return GetFunctionFromLibrary(lib) != nullptr;
 }
 
@@ -71,7 +71,7 @@ bool Shader::RegisterSync(Context& context) {
     return true;  // Already registered.
   }
 
-  auto& lib = *context.GetContext()->GetShaderLibrary();
+  auto& lib = *context.GetContext().GetShaderLibrary();
 
   std::promise<bool> promise;
   auto future = promise.get_future();

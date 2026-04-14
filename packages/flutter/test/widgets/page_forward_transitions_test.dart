@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
@@ -18,7 +20,7 @@ class TestTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable as Animation<double>;
+    final animation = listenable as Animation<double>;
     if (animation.value >= 0.5) {
       return childSecondHalf;
     }
@@ -55,14 +57,16 @@ class TestRoute<T> extends PageRoute<T> {
 }
 
 void main() {
-  const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
-  const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
+  const kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
+  const kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey insideKey = GlobalKey();
+    final heroController = HeroController();
+    addTearDown(heroController.dispose);
 
     String state({bool skipOffstage = true}) {
-      String result = '';
+      var result = '';
       if (tester.any(find.text('A', skipOffstage: skipOffstage))) {
         result += 'A';
       }
@@ -88,7 +92,11 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
+        initialRoute: '/',
+        builder: (BuildContext context, Widget? child) {
+          return HeroControllerScope(controller: heroController, child: child!);
+        },
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case '/':
@@ -97,7 +105,7 @@ void main() {
                 child: Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    final PageRoute<void> route = ModalRoute.of(context)! as PageRoute<void>;
+                    final route = ModalRoute.of(context)! as PageRoute<void>;
                     return Column(
                       children: <Widget>[
                         TestTransition(
@@ -127,8 +135,8 @@ void main() {
       ),
     );
 
-    final NavigatorState navigator =
-        insideKey.currentContext!.findAncestorStateOfType<NavigatorState>()!;
+    final NavigatorState navigator = insideKey.currentContext!
+        .findAncestorStateOfType<NavigatorState>()!;
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 
@@ -205,18 +213,23 @@ void main() {
   testWidgets('Check onstage/offstage handling of barriers around transitions', (
     WidgetTester tester,
   ) async {
+    final heroController = HeroController();
+    addTearDown(heroController.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        onGenerateRoute:
-            (RouteSettings settings) => switch (settings.name) {
-              '/' => TestRoute<void>(settings: settings, child: const Text('A')),
-              '/1' => TestRoute<void>(
-                settings: settings,
-                barrierColor: const Color(0xFFFFFF00),
-                child: const Text('B'),
-              ),
-              _ => null,
-            },
+      TestWidgetsApp(
+        initialRoute: '/',
+        builder: (BuildContext context, Widget? child) {
+          return HeroControllerScope(controller: heroController, child: child!);
+        },
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          '/' => TestRoute<void>(settings: settings, child: const Text('A')),
+          '/1' => TestRoute<void>(
+            settings: settings,
+            barrierColor: const Color(0xFFFFFF00),
+            child: const Text('B'),
+          ),
+          _ => null,
+        },
       ),
     );
     expect(find.byType(ModalBarrier), findsOneWidget);

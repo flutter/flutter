@@ -9,10 +9,10 @@ import 'package:process_fakes/process_fakes.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const String fakeShaHash = 'fake-sha-hash';
+  const fakeShaHash = 'fake-sha-hash';
 
   test('returns non-deleted files which differ from merge-base with main', () async {
-    final Fixture fixture = Fixture(
+    final fixture = Fixture(
       processManager: FakeProcessManager(
         onStart: (FakeCommandLogEntry entry) {
           // Succeed calling "git merge-base --fork-point FETCH_HEAD HEAD".
@@ -48,7 +48,7 @@ void main() {
   });
 
   test('returns non-deleted files which differ from default merge-base', () async {
-    final Fixture fixture = Fixture(
+    final fixture = Fixture(
       processManager: FakeProcessManager(
         onStart: (FakeCommandLogEntry entry) {
           if (entry.command.join(' ').startsWith('git merge-base --fork-point')) {
@@ -85,7 +85,7 @@ void main() {
   });
 
   test('returns non-deleted files which differ from HEAD', () async {
-    final Fixture fixture = Fixture(
+    final fixture = Fixture(
       processManager: FakeProcessManager(
         onStart: (FakeCommandLogEntry entry) {
           if (entry.command.join(' ') == 'git fetch upstream main') {
@@ -114,7 +114,7 @@ void main() {
   });
 
   test('returns non-deleted files which differ from HEAD when merge-base fails', () async {
-    final Fixture fixture = Fixture(
+    final fixture = Fixture(
       processManager: FakeProcessManager(
         onStart: (FakeCommandLogEntry entry) {
           if (entry.command.join(' ') == 'git fetch upstream main') {
@@ -151,7 +151,7 @@ void main() {
   });
 
   test('verbose output is captured', () async {
-    final Fixture fixture = Fixture(
+    final fixture = Fixture(
       processManager: FakeProcessManager(
         onStart: (FakeCommandLogEntry entry) {
           if (entry.command.join(' ').startsWith('git merge-base --fork-point')) {
@@ -194,7 +194,7 @@ void main() {
 final class Fixture {
   factory Fixture({FakeProcessManager? processManager, bool verbose = false}) {
     final io.Directory root = io.Directory.systemTemp.createTempSync('git_repo_tools.test');
-    final StringBuffer logSink = StringBuffer();
+    final logSink = StringBuffer();
     processManager ??= FakeProcessManager();
     return Fixture._(
       gitRepo: GitRepo.fromRoot(

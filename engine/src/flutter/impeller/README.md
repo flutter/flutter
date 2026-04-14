@@ -176,25 +176,20 @@ Flutter tool, follow the platform specific steps below.
 
 ### iOS
 
-Flutter enables Impeller by **default** on iOS.
+Impeller is the only rendering engine available on iOS. The legacy renderer has been removed.
+
+### Android
+
+Impeller is the **default** on Android. Impeller will attempt to use Vulkan first and then
+fall back to OpenGL rendering depending on device capabilities.
+
+To explicitly opt out of using Impeller, add the following to your `AndroidManifest.xml`
+under the `<application>` tag.
 
 > [!CAUTION]
 > The ability to disable Impeller is going to go away in a future release. Please [file
 > an issue](https://github.com/flutter/flutter/issues/new/choose) if you need to do this
-> in your application. A warning will be displayed on application launch if you opt-out.
-
-To **disable** Impeller on iOS, update your `Info.plist` file to add the following
-under the top-level `<dict>` tag:
-
-```xml
-  <key>FLTEnableImpeller</key>
-  <false/>
-```
-
-### Android
-
-Impeller will use Vulkan on Android by **default**. To explicitly opt out of using Impeller,
-add the following to your `AndroidManifest.xml` under the `<application>` tag.
+> in your application.
 
 ```xml
   <meta-data
@@ -202,11 +197,8 @@ add the following to your `AndroidManifest.xml` under the `<application>` tag.
     android:value="false" />
 ```
 
-Where Vulkan is unavailable, Impeller will fallback to Skia. 
-
-However, Impellers OpenGL backend is well under construction. To try Impeller with OpenGL
-in your application, add the following to your `AndroidManifest.xml` file under the
-`<application>` tag:
+During development, to try Impeller with OpenGL in your application, add the following
+to your `AndroidManifest.xml` file under the `<application>` tag:
 
 > [!Warning]
 > Selecting the Impeller backend this way will only work in `debug` and `profile`
@@ -229,6 +221,17 @@ To your `Info.plist` file, add under the top-level `<dict>` tag:
   <true/>
 ```
 
+### Custom Embedders
+
+Impeller is in preview on [custom embedders](https://docs.flutter.dev/embedded). It is **not**
+enabled by default.
+
+To enable it Impeller in your application, pass the `--enable-impeller=true` command line
+argument to [`FlutterProjectArgs.command_line_argv`](https://github.com/flutter/flutter/blob/63980cb25ba5b70122f2814406989eb5fa8ef5a1/engine/src/flutter/shell/platform/embedder/embedder.h#L2388)
+during application initialization.
+
+Impeller does not require any other modifications in the embedder.
+
 ## Embedding Standalone Impeller
 
 Impeller is designed to work best when used by Flutter. Most of the teams
@@ -242,22 +245,22 @@ examples, are available](toolkit/interop/README.md).
 
 ## Documentation, References, and Additional Reading
 
-* [Frequently Asked Questions](docs/faq.md)
-* [Baby's First Triangle](docs/babys_first_triangle.md)
-* [Impellers Coordinate System](docs/coordinate_system.md)
-* [How to Setup Xcode for GPU Frame Captures with Metal.](docs/xcode_frame_capture.md)
-* [How to Setup RenderDoc Frame Captures with Vulkan.](docs/renderdoc_frame_capture.md)
-* [Learning to Read GPU Frame Captures](docs/read_frame_captures.md)
-* [How to Enable Metal Validation for Command Line Apps.](docs/metal_validation.md)
-* [How Impeller Works Around The Lack of Uniform Buffers in Open GL ES 2.0.](docs/ubo_gles2.md)
-* [Guidance for writing efficient shaders](docs/shader_optimization.md)
-* [How color blending works in Impeller](docs/blending.md)
-* [Enabling Vulkan Validation Layers on Android](docs/android_validation_layers.md)
-* [Important Benchmarks](docs/benchmarks.md)
-* [Threading in the Vulkan Backend](docs/vulkan_threading.md)
-* [iOS CPU Profiling](docs/ios_cpu_profile.md)
-* [OpenGL ES Development Setup on macOS](docs/opengles_development_setup.md)
-* [Android CPU Profiling](docs/android_cpu_profile.md)
-* [Android Rendering Backend Selection](docs/android.md)
-* [Using Impeller as a Standalone Rendering Library (with OpenGL ES)](docs/standalone_gles.md)
-* [Glossary](docs/glossary.md)
+* [Frequently Asked Questions](/docs/engine/impeller/docs/faq.md)
+* [Baby's First Triangle](/docs/engine/impeller/docs/babys_first_triangle.md)
+* [Impellers Coordinate System](/docs/engine/impeller/docs/coordinate_system.md)
+* [How to Setup Xcode for GPU Frame Captures with Metal.](/docs/engine/impeller/docs/xcode_frame_capture.md)
+* [How to Setup RenderDoc Frame Captures with Vulkan.](/docs/engine/impeller/docs/renderdoc_frame_capture.md)
+* [Learning to Read GPU Frame Captures](/docs/engine/impeller/docs/read_frame_captures.md)
+* [How to Enable Metal Validation for Command Line Apps.](/docs/engine/impeller/docs/metal_validation.md)
+* [How Impeller Works Around The Lack of Uniform Buffers in Open GL ES 2.0.](/docs/engine/impeller/docs/ubo_gles2.md)
+* [Guidance for writing efficient shaders](/docs/engine/impeller/docs/shader_optimization.md)
+* [How color blending works in Impeller](/docs/engine/impeller/docs/blending.md)
+* [Enabling Vulkan Validation Layers on Android](/docs/engine/impeller/docs/android_validation_layers.md)
+* [Important Benchmarks](/docs/engine/impeller/docs/benchmarks.md)
+* [Threading in the Vulkan Backend](/docs/engine/impeller/docs/vulkan_threading.md)
+* [iOS CPU Profiling](/docs/engine/impeller/docs/ios_cpu_profile.md)
+* [OpenGL ES Development Setup on macOS](/docs/engine/impeller/docs/opengles_development_setup.md)
+* [Android CPU Profiling](/docs/engine/impeller/docs/android_cpu_profile.md)
+* [Android Rendering Backend Selection](/docs/engine/impeller/docs/android.md)
+* [Using Impeller as a Standalone Rendering Library (with OpenGL ES)](/docs/engine/impeller/docs/standalone_gles.md)
+* [Glossary](/docs/engine/impeller/docs/glossary.md)

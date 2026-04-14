@@ -14,7 +14,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'material_state.dart';
 import 'range_slider_parts.dart';
 import 'slider.dart';
 import 'slider_parts.dart';
@@ -113,7 +112,8 @@ class SliderTheme extends InheritedTheme {
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]
-/// will be shown. Used with [SliderThemeData.showValueIndicator].
+/// will be shown. Used in [Slider.showValueIndicator] and
+/// [SliderThemeData.showValueIndicator].
 ///
 /// See also:
 ///
@@ -121,16 +121,27 @@ class SliderTheme extends InheritedTheme {
 ///  * [SliderThemeData], which describes the actual configuration of a slider
 ///    theme.
 enum ShowValueIndicator {
-  /// The value indicator will only be shown for discrete sliders (sliders
+  /// The value indicator will only be shown while dragging for discrete sliders (sliders
   /// where [Slider.divisions] is non-null).
   onlyForDiscrete,
 
-  /// The value indicator will only be shown for continuous sliders (sliders
+  /// The value indicator will only be shown while dragging for continuous sliders (sliders
   /// where [Slider.divisions] is null).
   onlyForContinuous,
 
-  /// The value indicator will be shown for all types of sliders.
+  /// The value indicator is shown while dragging.
+  @Deprecated(
+    'Use ShowValueIndicator.onDrag. '
+    'This feature was deprecated after v3.28.0-1.0.pre.',
+  )
   always,
+
+  /// The value indicator is shown while dragging.
+  onDrag,
+
+  /// The value indicator is always displayed as long as the slider has a
+  /// [Slider.onChanged] callback.
+  alwaysVisible,
 
   /// The value indicator will never be shown.
   never,
@@ -151,13 +162,15 @@ enum Thumb {
   end,
 }
 
-/// Holds the color, shape, and typography values for a Material Design slider
-/// theme.
+/// Overrides the default values of visual properties for descendant
+/// [Slider] widgets.
 ///
-/// Use this class to configure a [SliderTheme] widget, or to set the
-/// [ThemeData.sliderTheme] for a [Theme] widget.
+/// Descendant widgets obtain the current [SliderThemeData] object with
+/// [SliderTheme.of]. Instances of [SliderThemeData] can
+/// be customized with [SliderThemeData.copyWith].
 ///
-/// To obtain the current ambient slider theme, use [SliderTheme.of].
+/// Typically a [SliderThemeData] is specified as part of the overall
+/// [Theme] with [ThemeData.sliderTheme].
 ///
 /// This theme is for both the [Slider] and the [RangeSlider]. The properties
 /// that are only for the [Slider] are: [tickMarkShape], [thumbShape],
@@ -324,20 +337,20 @@ class SliderThemeData with Diagnosticable {
   }) {
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
-    const int activeTrackAlpha = 0xff;
-    const int inactiveTrackAlpha = 0x3d; // 24% opacity
-    const int secondaryActiveTrackAlpha = 0x8a; // 54% opacity
-    const int disabledActiveTrackAlpha = 0x52; // 32% opacity
-    const int disabledInactiveTrackAlpha = 0x1f; // 12% opacity
-    const int disabledSecondaryActiveTrackAlpha = 0x1f; // 12% opacity
-    const int activeTickMarkAlpha = 0x8a; // 54% opacity
-    const int inactiveTickMarkAlpha = 0x8a; // 54% opacity
-    const int disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
-    const int disabledInactiveTickMarkAlpha = 0x1f; // 12% opacity
-    const int thumbAlpha = 0xff;
-    const int disabledThumbAlpha = 0x52; // 32% opacity
-    const int overlayAlpha = 0x1f; // 12% opacity
-    const int valueIndicatorAlpha = 0xff;
+    const activeTrackAlpha = 0xff;
+    const inactiveTrackAlpha = 0x3d; // 24% opacity
+    const secondaryActiveTrackAlpha = 0x8a; // 54% opacity
+    const disabledActiveTrackAlpha = 0x52; // 32% opacity
+    const disabledInactiveTrackAlpha = 0x1f; // 12% opacity
+    const disabledSecondaryActiveTrackAlpha = 0x1f; // 12% opacity
+    const activeTickMarkAlpha = 0x8a; // 54% opacity
+    const inactiveTickMarkAlpha = 0x8a; // 54% opacity
+    const disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
+    const disabledInactiveTickMarkAlpha = 0x1f; // 12% opacity
+    const thumbAlpha = 0xff;
+    const disabledThumbAlpha = 0x52; // 32% opacity
+    const overlayAlpha = 0x1f; // 12% opacity
+    const valueIndicatorAlpha = 0xff;
 
     return SliderThemeData(
       trackHeight: 2.0,
@@ -591,7 +604,7 @@ class SliderThemeData with Diagnosticable {
   /// {@macro flutter.material.slider.mouseCursor}
   ///
   /// If specified, overrides the default value of [Slider.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Allowed way for the user to interact with the [Slider].
   ///
@@ -611,7 +624,7 @@ class SliderThemeData with Diagnosticable {
   /// If [SliderThemeData.thumbShape] is [HandleThumbShape], this property is used to
   /// set the size of the thumb. Otherwise, the default thumb size is 4 pixels for the
   /// width and 44 pixels for the height.
-  final MaterialStateProperty<Size?>? thumbSize;
+  final WidgetStateProperty<Size?>? thumbSize;
 
   /// The size of the gap between the active and inactive tracks of the [GappedSliderTrackShape].
   ///
@@ -622,7 +635,7 @@ class SliderThemeData with Diagnosticable {
   /// The Slider defaults to [GappedSliderTrackShape] when the track shape is
   /// not specified, and the [trackGap] can be used to adjust the gap size.
   ///
-  /// If [Slider.year2023] is false or [ThemeData.useMaterial3] is false, then
+  /// If [Slider.year2023] is true or [ThemeData.useMaterial3] is false, then
   /// the Slider track shape defaults to [RoundedRectSliderTrackShape] and the
   /// [trackGap] is ignored. In this case, set the track shape to
   /// [GappedSliderTrackShape] to use the [trackGap].
@@ -630,12 +643,12 @@ class SliderThemeData with Diagnosticable {
   /// Defaults to 6.0 pixels of gap between the active and inactive tracks.
   final double? trackGap;
 
-  /// Overrides the default value of [Slider.year2023].
+  /// Overrides the default value of [Slider.year2023] and [RangeSlider.year2023].
   ///
-  /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
+  /// When true, the [Slider] and [RangeSlider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
   ///
-  /// If this is set to false, the [Slider] will use the latest Material Design 3
+  /// If this is set to false, the [Slider] and [RangeSlider] will use the latest Material Design 3
   /// appearance, which was introduced in December 2023.
   ///
   /// If [ThemeData.useMaterial3] is false, then this property is ignored.
@@ -679,10 +692,10 @@ class SliderThemeData with Diagnosticable {
     TextStyle? valueIndicatorTextStyle,
     double? minThumbSeparation,
     RangeThumbSelector? thumbSelector,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
     SliderInteraction? allowedInteraction,
     EdgeInsetsGeometry? padding,
-    MaterialStateProperty<Size?>? thumbSize,
+    WidgetStateProperty<Size?>? thumbSize,
     double? trackGap,
     bool? year2023,
   }) {
@@ -805,7 +818,7 @@ class SliderThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
       allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
-      thumbSize: MaterialStateProperty.lerp<Size?>(a.thumbSize, b.thumbSize, t, Size.lerp),
+      thumbSize: WidgetStateProperty.lerp<Size?>(a.thumbSize, b.thumbSize, t, Size.lerp),
       trackGap: lerpDouble(a.trackGap, b.trackGap, t),
       year2023: t < 0.5 ? a.year2023 : b.year2023,
     );
@@ -902,7 +915,7 @@ class SliderThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const SliderThemeData defaultData = SliderThemeData();
+    const defaultData = SliderThemeData();
     properties.add(
       DoubleProperty('trackHeight', trackHeight, defaultValue: defaultData.trackHeight),
     );
@@ -1100,7 +1113,7 @@ class SliderThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>(
         'mouseCursor',
         mouseCursor,
         defaultValue: defaultData.mouseCursor,
@@ -1121,7 +1134,7 @@ class SliderThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<Size?>>(
+      DiagnosticsProperty<WidgetStateProperty<Size?>>(
         'thumbSize',
         thumbSize,
         defaultValue: defaultData.thumbSize,

@@ -47,7 +47,7 @@ Future<Object> _guardedThrower() {
 
 void main() {
   test('TestAsyncUtils - one class', () async {
-    final TestAPI testAPI = TestAPI();
+    final testAPI = TestAPI();
     Future<Object?>? f1, f2;
     f1 = testAPI.testGuard1();
     try {
@@ -123,7 +123,7 @@ void main() {
   }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
-    final TestAPISubclass testAPI = TestAPISubclass();
+    final testAPI = TestAPISubclass();
     Future<Object?>? f1, f2;
     f1 = testAPI.testGuard1();
     try {
@@ -230,7 +230,7 @@ void main() {
       matcher.expect(lines.length, greaterThan(7));
       // TODO(jacobr): add more tests like this if they are useful.
 
-      final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+      final propertiesBuilder = DiagnosticPropertiesBuilder();
       e.debugFillProperties(propertiesBuilder);
       final List<DiagnosticsNode> information = propertiesBuilder.properties;
       matcher.expect(information.length, 6);
@@ -246,7 +246,7 @@ void main() {
       matcher.expect(information[3], isA<DiagnosticsProperty<void>>());
       matcher.expect(information[4], isA<DiagnosticsProperty<void>>());
       matcher.expect(information[5], isA<DiagnosticsStackTrace>());
-      final DiagnosticsStackTrace stackTraceProperty = information[5] as DiagnosticsStackTrace;
+      final stackTraceProperty = information[5] as DiagnosticsStackTrace;
       matcher.expect(
         stackTraceProperty.name,
         '\nWhen the first method was called, this was the stack',
@@ -280,7 +280,7 @@ void main() {
         ),
       );
       matcher.expect(lines.length, 4);
-      final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+      final propertiesBuilder = DiagnosticPropertiesBuilder();
       e.debugFillProperties(propertiesBuilder);
       final List<DiagnosticsNode> information = propertiesBuilder.properties;
       matcher.expect(information.length, 4);
@@ -315,7 +315,7 @@ void main() {
         ),
       );
       matcher.expect(lines.length, 4);
-      final DiagnosticPropertiesBuilder propertiesBuilder = DiagnosticPropertiesBuilder();
+      final propertiesBuilder = DiagnosticPropertiesBuilder();
       e.debugFillProperties(propertiesBuilder);
       final List<DiagnosticsNode> information = propertiesBuilder.properties;
       matcher.expect(information.length, 4);
@@ -337,7 +337,7 @@ void main() {
   });
 
   test('TestAsyncUtils - web', () async {
-    final TestAPI testAPI = TestAPI();
+    final testAPI = TestAPI();
     Future<Object?>? f1, f2;
     f1 = testAPI.testGuard1();
     try {

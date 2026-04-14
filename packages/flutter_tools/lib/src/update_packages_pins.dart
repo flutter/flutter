@@ -18,30 +18,20 @@
 /// prevent upstream changes from causing our CI to fail randomly in ways
 /// unrelated to the commits. It also, more importantly, risks breaking users
 /// in ways that prevent them from ever upgrading Flutter again!
-const Map<String, String> kManuallyPinnedDependencies = <String, String>{
+const kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here. Please leave a comment explaining why.
   'archive': '3.6.1', // https://github.com/flutter/flutter/issues/115660
-  'code_assets':
-      '0.19.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '5.0.0', // Must always exactly match flutter_tools template.
   'google_mobile_ads': '5.1.0', // https://github.com/flutter/flutter/issues/156912
-  'hooks':
-      '0.19.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
-  'hooks_runner':
-      '0.19.0', // Under active development with breaking changes until 1.0.0. Manually rolled by @dcharkes.
-  'material_color_utilities': '0.11.1', // Keep pinned to latest until 1.0.0.
-  'leak_tracker': '11.0.1', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_testing': '3.0.2', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '3.0.10', // https://github.com/flutter/devtools/issues/3951
-  'test': '1.25.15', // https://github.com/dart-lang/test/issues/2498
-  'test_api': '0.7.4', // https://github.com/dart-lang/test/issues/2498
-  'test_core': '0.6.8', // https://github.com/dart-lang/test/issues/2498
+  'material_color_utilities': '0.13.0', // Keep pinned to latest until 1.0.0.
+  'data_assets': '0.19.6', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
+  'record_use': '0.6.0', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
 /// of pinned packages added to each pubspec.yaml.
-const List<String> kExplicitlyExcludedPackages = <String>[
+const kExplicitlyExcludedPackages = <String>[
   '_macros', // Synthetic dependency for macros package, which isn't published.
   // This is effectively pinned via the Dart SDK pin, see
   // https://github.com/flutter/flutter/issues/148004 for more context.

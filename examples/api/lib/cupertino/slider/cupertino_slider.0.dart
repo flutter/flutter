@@ -14,7 +14,7 @@ class CupertinoSliderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoSliderExample(),
     );
   }
@@ -34,10 +34,12 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoSlider Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoSlider Sample'),
+      ),
       child: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             // Display the current slider value.
             Text('$_currentSliderValue'),
@@ -72,7 +74,9 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
             ),
             Text(
               _sliderStatus ?? '',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 12),
+              style: CupertinoTheme.of(
+                context,
+              ).textTheme.textStyle.copyWith(fontSize: 12),
             ),
           ],
         ),

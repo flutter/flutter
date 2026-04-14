@@ -15,7 +15,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests();
   test('RRect.contains()', () {
-    final RRect rrect = RRect.fromRectAndCorners(
+    final rrect = RRect.fromRectAndCorners(
       const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(0.5),
       topRight: const Radius.circular(0.25),
@@ -33,7 +33,7 @@ Future<void> testMain() async {
   });
 
   test('RRect.contains() large radii', () {
-    final RRect rrect = RRect.fromRectAndCorners(
+    final rrect = RRect.fromRectAndCorners(
       const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(5000.0),
       topRight: const Radius.circular(2500.0),

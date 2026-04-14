@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "Im Web suchen",
   "shareButtonLabel": "Teilen…",
   "cancelButtonLabel": "Abbrechen",
-  "backButtonLabel": "Zurück"
+  "backButtonLabel": "Zurück",
+  "expansionTileExpandedHint": "Zum Minimieren doppeltippen",
+  "expansionTileCollapsedHint": "Zum Maximieren doppeltippen",
+  "expansionTileExpandedTapHint": "Minimieren",
+  "expansionTileCollapsedTapHint": "Für weitere Details maximieren",
+  "expandedHint": "Minimiert",
+  "collapsedHint": "Maximiert"
 }

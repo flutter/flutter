@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final List<MethodCall> log = <MethodCall>[];
+  final log = <MethodCall>[];
 
   Future<void> verify(AsyncCallback test, List<Object> expectations) async {
     log.clear();
@@ -22,7 +22,7 @@ void main() {
     () {
       test('disableContextMenu asserts', () async {
         try {
-          BrowserContextMenu.disableContextMenu();
+          await BrowserContextMenu.disableContextMenu();
         } catch (error) {
           expect(error, isAssertionError);
         }
@@ -30,7 +30,7 @@ void main() {
 
       test('enableContextMenu asserts', () async {
         try {
-          BrowserContextMenu.enableContextMenu();
+          await BrowserContextMenu.enableContextMenu();
         } catch (error) {
           expect(error, isAssertionError);
         }

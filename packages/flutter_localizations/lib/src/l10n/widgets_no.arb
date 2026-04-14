@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Søk på nettet",
   "shareButtonLabel": "Del",
   "pasteButtonLabel": "Lim inn",
-  "selectAllButtonLabel": "Velg alle"
+  "selectAllButtonLabel": "Velg alle",
+  "searchResultsFound": "Søkeresultater ble funnet",
+  "noResultsFound": "Fant ingen resultater",
+  "radioButtonUnselectedLabel": "Ikke valgt"
 }

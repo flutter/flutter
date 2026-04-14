@@ -32,8 +32,8 @@ class ExpandingBottomSheet extends StatefulWidget {
   ExpandingBottomSheetState createState() => ExpandingBottomSheetState();
 
   static ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
-    final ExpandingBottomSheetState? result =
-        context.findAncestorStateOfType<ExpandingBottomSheetState>();
+    final ExpandingBottomSheetState? result = context
+        .findAncestorStateOfType<ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
     }
@@ -190,10 +190,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
     return Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller.view,
-        curve:
-            _controller.status == AnimationStatus.forward
-                ? const Interval(0.0, 0.3)
-                : const Interval(0.532, 0.766),
+        curve: _controller.status == AnimationStatus.forward
+            ? const Interval(0.0, 0.3)
+            : const Interval(0.532, 0.766),
       ),
     );
   }
@@ -201,10 +200,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   Animation<double> _getCartOpacityAnimation() {
     return CurvedAnimation(
       parent: _controller.view,
-      curve:
-          _controller.status == AnimationStatus.forward
-              ? const Interval(0.3, 0.6)
-              : const Interval(0.766, 1.0),
+      curve: _controller.status == AnimationStatus.forward
+          ? const Interval(0.3, 0.6)
+          : const Interval(0.766, 1.0),
     );
   }
 
@@ -408,7 +406,10 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
 
   Widget _buildThumbnail(BuildContext context, int index, Animation<double> animation) {
     final Animation<double> thumbnailSize = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(curve: const Interval(0.33, 1.0, curve: Curves.easeIn), parent: animation),
+      CurvedAnimation(
+        curve: const Interval(0.33, 1.0, curve: Curves.easeIn),
+        parent: animation,
+      ),
     );
 
     final Animation<double> opacity = CurvedAnimation(
@@ -425,15 +426,15 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   void _updateLists() {
     // Update _internalList based on the model
     _internalList = ScopedModel.of<AppStateModel>(context).productsInCart.keys.toList();
-    final Set<int> internalSet = Set<int>.from(_internalList);
-    final Set<int> listSet = Set<int>.from(_list.list);
+    final internalSet = Set<int>.from(_internalList);
+    final listSet = Set<int>.from(_list.list);
 
     final Set<int> difference = internalSet.difference(listSet);
     if (difference.isEmpty) {
       return;
     }
 
-    for (final int product in difference) {
+    for (final product in difference) {
       if (_internalList.length < _list.length) {
         _list.remove(product);
       } else if (_internalList.length > _list.length) {
@@ -442,7 +443,7 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
     }
 
     while (_internalList.length != _list.length) {
-      int index = 0;
+      var index = 0;
       // Check bounds and that the list elements are the same
       while (_internalList.isNotEmpty &&
           _list.length > 0 &&
@@ -486,10 +487,10 @@ class ExtraProductsNumber extends StatelessWidget {
     // List created to be able to access products by index instead of ID.
     // Order is guaranteed because productsInCart returns a LinkedHashMap.
     final List<int> products = productMap.keys.toList();
-    int overflow = 0;
+    var overflow = 0;
     final int numProducts = products.length;
     if (numProducts > 3) {
-      for (int i = 3; i < numProducts; i++) {
+      for (var i = 3; i < numProducts; i++) {
         overflow += productMap[products[i]]!;
       }
     }
@@ -503,7 +504,7 @@ class ExtraProductsNumber extends StatelessWidget {
 
     final int numOverflowProducts = _calculateOverflow(model);
     // Maximum of 99 so padding doesn't get messy.
-    final int displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
+    final displayedOverflowProducts = numOverflowProducts <= 99 ? numOverflowProducts : 99;
     return Text(
       '+$displayedOverflowProducts',
       style: Theme.of(context).primaryTextTheme.labelLarge,
@@ -513,9 +514,8 @@ class ExtraProductsNumber extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
-      builder:
-          (BuildContext builder, Widget? child, AppStateModel model) =>
-              _buildOverflow(model, context),
+      builder: (BuildContext builder, Widget? child, AppStateModel model) =>
+          _buildOverflow(model, context),
     );
   }
 }

@@ -10,16 +10,22 @@ library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kYellowColor = Color(0xFFAABB11);
+  const kRedColor = Color(0xFFAA0000);
+  const kBlackColor = Color(0xFF000000);
+  const kBlueColor = Color(0xFF0000FF);
+
   testWidgets('SnapshotWidget can rasterize child', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
     final Key key = UniqueKey();
 
@@ -29,7 +35,7 @@ void main() {
         child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
-            child: Container(width: 100, height: 100, color: const Color(0xFFAABB11)),
+            child: Container(width: 100, height: 100, color: kYellowColor),
           ),
         ),
       ),
@@ -43,7 +49,7 @@ void main() {
         child: TestDependencies(
           child: SnapshotWidget(
             controller: controller,
-            child: Container(width: 100, height: 100, color: const Color(0xFFAA0000)),
+            child: Container(width: 100, height: 100, color: kRedColor),
           ),
         ),
       ),
@@ -60,11 +66,11 @@ void main() {
   testWidgets('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController();
+    final controller = SnapshotController();
     addTearDown(controller.dispose);
-    final TestPainter painter = TestPainter();
+    final painter = TestPainter();
     addTearDown(painter.dispose);
-    double devicePixelRatio = 1.0;
+    var devicePixelRatio = 1.0;
     late StateSetter localSetState;
 
     await tester.pumpWidget(
@@ -97,11 +103,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
-    final TestPainter painter = TestPainter();
+    final painter = TestPainter();
     addTearDown(painter.dispose);
-    double devicePixelRatio = 1.0;
+    var devicePixelRatio = 1.0;
     late StateSetter localSetState;
 
     await tester.pumpWidget(
@@ -140,7 +146,7 @@ void main() {
   testWidgets('SnapshotWidget paints its child as a single picture layer', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -149,7 +155,7 @@ void main() {
           child: TestDependencies(
             child: SnapshotWidget(
               controller: controller,
-              child: Container(width: 100, height: 100, color: const Color(0xFFAABB11)),
+              child: Container(width: 100, height: 100, color: kYellowColor),
             ),
           ),
         ),
@@ -167,11 +173,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
-    final TestPainter painter1 = TestPainter();
+    final painter1 = TestPainter();
     addTearDown(painter1.dispose);
-    final TestPainter2 painter2 = TestPainter2();
+    final painter2 = TestPainter2();
     addTearDown(painter2.dispose);
 
     await tester.pumpWidget(
@@ -196,7 +202,7 @@ void main() {
   testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -213,7 +219,7 @@ void main() {
   testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -240,7 +246,7 @@ void main() {
   testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (
     WidgetTester tester,
   ) async {
-    final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+    final controller = SnapshotController(allowSnapshotting: true);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -261,7 +267,7 @@ void main() {
   testWidgets(
     'RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive',
     (WidgetTester tester) async {
-      final SnapshotController controller = SnapshotController(allowSnapshotting: true);
+      final controller = SnapshotController(allowSnapshotting: true);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
@@ -291,23 +297,22 @@ void main() {
         ..physicalSize = const Size(10, 10)
         ..devicePixelRatio = 1;
 
-      const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
-      final SnapshotController controller = SnapshotController();
+      const repaintBoundaryKey = ValueKey<String>('boundary');
+      final controller = SnapshotController();
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         RepaintBoundary(
           key: repaintBoundaryKey,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
+          child: TestWidgetsApp(
             home: Container(
-              color: Colors.black,
+              color: kBlackColor,
               padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
               child: SnapshotWidget(
                 controller: controller,
                 child: Container(
                   margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
-                  color: Colors.blue,
+                  color: kBlueColor,
                 ),
               ),
             ),

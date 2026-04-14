@@ -21,7 +21,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
@@ -55,12 +56,15 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const .all(20.0),
         child: Column(
           spacing: 16.0,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
-            const Text('Linear progress indicator', style: TextStyle(fontSize: 20)),
+            const Text(
+              'Linear progress indicator',
+              style: TextStyle(fontSize: 20),
+            ),
             LinearProgressIndicator(
               value: determinate ? controller.value : null,
               semanticsLabel: 'Linear progress indicator',

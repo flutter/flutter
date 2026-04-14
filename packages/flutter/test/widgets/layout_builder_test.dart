@@ -38,6 +38,18 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
+  testWidgets('LayoutBuilder does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: LayoutBuilder(builder: (_, _) => const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(LayoutBuilder)), Size.zero);
+  });
+
   testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
@@ -99,8 +111,8 @@ void main() {
     late StateSetter setState;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
-    double childWidth = 10.0;
-    double childHeight = 20.0;
+    var childWidth = 10.0;
+    var childHeight = 20.0;
 
     await tester.pumpWidget(
       Center(
@@ -138,8 +150,8 @@ void main() {
 
   testWidgets('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
     late StateSetter setState;
-    double childWidth = 10.0;
-    double childHeight = 20.0;
+    var childWidth = 10.0;
+    var childHeight = 20.0;
     final Key parentKey = UniqueKey();
     final Key childKey = UniqueKey();
 
@@ -205,8 +217,8 @@ void main() {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
-    double childWidth = 10.0;
-    double childHeight = 20.0;
+    var childWidth = 10.0;
+    var childHeight = 20.0;
 
     await tester.pumpWidget(
       Center(
@@ -248,7 +260,7 @@ void main() {
   testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (
     WidgetTester tester,
   ) async {
-    int built = 0;
+    var built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
@@ -258,12 +270,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
   });
@@ -271,7 +289,7 @@ void main() {
   testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (
     WidgetTester tester,
   ) async {
-    int built = 0;
+    var built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
@@ -282,19 +300,25 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 2);
   });
 
   testWidgets('LayoutBuilder rebuilds once in the same frame', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/146379.
-    int built = 0;
+    var built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return Builder(
@@ -352,7 +376,7 @@ void main() {
   });
 
   testWidgets('LayoutBuilder can change size without rebuild', (WidgetTester tester) async {
-    int built = 0;
+    var built = 0;
     final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return Builder(
@@ -391,7 +415,7 @@ void main() {
   testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (
     WidgetTester tester,
   ) async {
-    int built = 0;
+    var built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -409,12 +433,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
   });
@@ -422,7 +452,7 @@ void main() {
   testWidgets('SliverLayoutBuilder and Inherited -- do rebuild when not using inherited', (
     WidgetTester tester,
   ) async {
-    int built = 0;
+    var built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -441,12 +471,18 @@ void main() {
     expect(built, 0);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(400.0, 300.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+      ),
     );
     expect(built, 1);
 
     await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(size: Size(300.0, 400.0)), child: target),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+      ),
     );
     expect(built, 2);
   });
@@ -502,7 +538,7 @@ void main() {
   testWidgets('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
     final Key childKey1 = UniqueKey();
     final Key childKey2 = UniqueKey();
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -513,9 +549,8 @@ void main() {
           slivers: <Widget>[
             const SliverToBoxAdapter(child: SizedBox(height: 300)),
             SliverLayoutBuilder(
-              builder:
-                  (BuildContext context, SliverConstraints constraint) =>
-                      SliverToBoxAdapter(child: SizedBox(key: childKey1, height: 200)),
+              builder: (BuildContext context, SliverConstraints constraint) =>
+                  SliverToBoxAdapter(child: SizedBox(key: childKey1, height: 200)),
             ),
             SliverToBoxAdapter(child: SizedBox(key: childKey2, height: 100)),
           ],
@@ -550,9 +585,9 @@ void main() {
   });
 
   testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
-    List<int> hitCounts = <int>[0, 0, 0];
+    var hitCounts = <int>[0, 0, 0];
 
     await tester.pumpWidget(
       Directionality(
@@ -566,13 +601,9 @@ void main() {
                 child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[0]++)),
               ),
               SliverLayoutBuilder(
-                builder:
-                    (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 200,
-                        child: GestureDetector(onTap: () => hitCounts[1]++),
-                      ),
-                    ),
+                builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                  child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[1]++)),
+                ),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(height: 200, child: GestureDetector(onTap: () => hitCounts[2]++)),
@@ -647,13 +678,9 @@ void main() {
               child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[0]++)),
             ),
             SliverLayoutBuilder(
-              builder:
-                  (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 100,
-                      child: GestureDetector(onTap: () => hitCounts[1]++),
-                    ),
-                  ),
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[1]++)),
+              ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(height: 100, child: GestureDetector(onTap: () => hitCounts[2]++)),
@@ -671,7 +698,7 @@ void main() {
   testWidgets(
     'LayoutBuilder does not call builder when layout happens but layout constraints do not change',
     (WidgetTester tester) async {
-      int builderInvocationCount = 0;
+      var builderInvocationCount = 0;
 
       Future<void> pumpTestWidget(Size size) async {
         await tester.pumpWidget(
@@ -753,7 +780,7 @@ void main() {
     'LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout',
     (WidgetTester tester) async {
       Size? childSize;
-      int buildCount = 0;
+      var buildCount = 0;
 
       Future<void> pumpTestWidget(Size size) async {
         await tester.pumpWidget(
@@ -786,8 +813,8 @@ void main() {
   testWidgets('LayoutBuilder will only invoke builder if updateShouldRebuild returns true', (
     WidgetTester tester,
   ) async {
-    int buildCount = 0;
-    int paintCount = 0;
+    var buildCount = 0;
+    var paintCount = 0;
     Offset? mostRecentOffset;
     void handleChildWasPainted(Offset extraOffset) {
       paintCount++;
@@ -799,9 +826,8 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: SizedBox(
-              width: 100,
-              height: 100,
+            child: SizedBox.square(
+              dimension: 100.0,
               child: _SmartLayoutBuilder(
                 text: text,
                 offsetPercentage: offsetPercentage,
@@ -838,30 +864,27 @@ void main() {
   testWidgets(
     'LayoutBuilder in a subtree that skips layout does not throw during the initial treewalk',
     (WidgetTester tester) async {
-      final OverlayEntry overlayEntry1 = OverlayEntry(
+      final overlayEntry1 = OverlayEntry(
         maintainState: true,
-        builder:
-            (BuildContext context) => LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
-            ),
+        builder: (BuildContext context) => LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
+        ),
       );
       // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
-      final OverlayEntry overlayEntry2 = OverlayEntry(
+      final overlayEntry2 = OverlayEntry(
         opaque: true,
         canSizeOverlay: true,
         builder: (BuildContext context) => Container(),
       );
       addTearDown(
-        () =>
-            overlayEntry1
-              ..remove()
-              ..dispose(),
+        () => overlayEntry1
+          ..remove()
+          ..dispose(),
       );
       addTearDown(
-        () =>
-            overlayEntry2
-              ..remove()
-              ..dispose(),
+        () => overlayEntry2
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(
         Directionality(
@@ -883,34 +906,32 @@ void main() {
   testWidgets(
     'LayoutBuilder in a subtree that skips layout does not rebuild during the initial treewalk',
     (WidgetTester tester) async {
-      bool rebuilt = false;
-      final LayoutBuilder layoutBuilder = LayoutBuilder(
+      var rebuilt = false;
+      final layoutBuilder = LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           rebuilt = true;
           return const Placeholder();
         },
       );
-      final OverlayEntry overlayEntry1 = OverlayEntry(
+      final overlayEntry1 = OverlayEntry(
         maintainState: true,
         builder: (BuildContext context) => layoutBuilder,
       );
       // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
-      final OverlayEntry overlayEntry2 = OverlayEntry(
+      final overlayEntry2 = OverlayEntry(
         opaque: true,
         canSizeOverlay: true,
         builder: (BuildContext context) => Container(),
       );
       addTearDown(
-        () =>
-            overlayEntry1
-              ..remove()
-              ..dispose(),
+        () => overlayEntry1
+          ..remove()
+          ..dispose(),
       );
       addTearDown(
-        () =>
-            overlayEntry2
-              ..remove()
-              ..dispose(),
+        () => overlayEntry2
+          ..remove()
+          ..dispose(),
       );
       await tester.pumpWidget(
         Directionality(
@@ -935,35 +956,33 @@ void main() {
   testWidgets('LayoutBuilder in a subtree that skips layout still rebuilds', (
     WidgetTester tester,
   ) async {
-    bool rebuilt = false;
-    final LayoutBuilder layoutBuilder = LayoutBuilder(
+    var rebuilt = false;
+    final layoutBuilder = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         rebuilt = true;
         return const Placeholder();
       },
     );
-    final OverlayEntry overlayEntry1 = OverlayEntry(
+    final overlayEntry1 = OverlayEntry(
       maintainState: true,
       canSizeOverlay: true,
       builder: (BuildContext context) => layoutBuilder,
     );
     // OverlayEntry2 obstructs OverlayEntry1 and forces it to skip layout.
-    final OverlayEntry overlayEntry2 = OverlayEntry(
+    final overlayEntry2 = OverlayEntry(
       opaque: true,
       canSizeOverlay: true,
       builder: (BuildContext context) => const Placeholder(),
     );
     addTearDown(
-      () =>
-          overlayEntry1
-            ..remove()
-            ..dispose(),
+      () => overlayEntry1
+        ..remove()
+        ..dispose(),
     );
     addTearDown(
-      () =>
-          overlayEntry2
-            ..remove()
-            ..dispose(),
+      () => overlayEntry2
+        ..remove()
+        ..dispose(),
     );
     await tester.pumpWidget(
       Directionality(
@@ -983,6 +1002,60 @@ void main() {
     expect(rebuilt, isFalse);
     await tester.pump();
     expect(rebuilt, isTrue);
+  });
+
+  testWidgets('LayoutBuilder does not crash when it becomes kept-alive', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    final controller = TextEditingController();
+    addTearDown(focusNode.dispose);
+    addTearDown(controller.dispose);
+    final Widget layoutBuilderWithParent = SizedBox(
+      key: GlobalKey(),
+      child: LayoutBuilder(
+        builder: (BuildContext _, BoxConstraints _) {
+          // The text field keeps the widget alive in the SliverList.
+          return EditableText(
+            focusNode: focusNode,
+            backgroundCursorColor: const Color(0xFFFFFFFF),
+            cursorColor: const Color(0xFFFFFFFF),
+            style: const TextStyle(),
+            controller: controller,
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 60), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.list(
+              addRepaintBoundaries: false,
+              addSemanticIndexes: false,
+              children: <Widget>[const SizedBox(height: 6000), layoutBuilderWithParent],
+            ),
+          ],
+        ),
+      ),
+    );
   });
 }
 
@@ -1059,10 +1132,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      final Offset extraOffset = Offset(
-        size.width * offsetPercentage,
-        size.height * offsetPercentage,
-      );
+      final extraOffset = Offset(size.width * offsetPercentage, size.height * offsetPercentage);
       context.paintChild(child!, offset + extraOffset);
       onChildWasPainted(extraOffset);
     }

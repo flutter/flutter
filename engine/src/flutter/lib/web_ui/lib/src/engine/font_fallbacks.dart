@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 abstract class FallbackFontRegistry {
   List<int> getMissingCodePoints(List<int> codePoints, List<String> fontFamilies);
@@ -92,7 +93,7 @@ class FontFallbackManager {
   void ensureFontsSupportText(String text, List<String> fontFamilies) {
     // TODO(hterkelsen): Make this faster for the common case where the text
     // is supported by the given fonts.
-    if (debugDisableFontFallbacks) {
+    if (ui_web.TestEnvironment.instance.disableFontFallbacks) {
       return;
     }
 
@@ -100,7 +101,7 @@ class FontFallbackManager {
     // one of our fallback fonts, and a cache of code points which are known not
     // to be covered by any fallback font. From the given text, construct a set
     // of code points which need to be checked.
-    final Set<int> runesToCheck = <int>{};
+    final runesToCheck = <int>{};
     for (final int rune in text.runes) {
       // Filter out code points that don't need checking.
       if (!(rune < 160 || // ASCII and Unicode control points.
@@ -174,13 +175,13 @@ class FontFallbackManager {
   /// [_codePointsWithNoKnownFont] so it can be omitted next time to avoid
   /// searching for fonts unnecessarily.
   void findFontsForMissingCodePoints(List<int> codePoints) {
-    final List<int> missingCodePoints = <int>[];
+    final missingCodePoints = <int>[];
 
-    final List<FallbackFontComponent> requiredComponents = <FallbackFontComponent>[];
-    final List<NotoFont> candidateFonts = <NotoFont>[];
+    final requiredComponents = <FallbackFontComponent>[];
+    final candidateFonts = <NotoFont>[];
 
     // Collect the components that cover the code points.
-    for (final int codePoint in codePoints) {
+    for (final codePoint in codePoints) {
       final FallbackFontComponent component = codePointToComponents.lookup(codePoint);
       if (component.fonts.isEmpty) {
         missingCodePoints.add(codePoint);
@@ -194,7 +195,7 @@ class FontFallbackManager {
     }
 
     // Aggregate the component cover counts to the fonts that use the component.
-    for (final FallbackFontComponent component in requiredComponents) {
+    for (final component in requiredComponents) {
       for (final NotoFont font in component.fonts) {
         // A zero cover cover count means we have not yet seen this font.
         if (font.coverCount == 0) {
@@ -205,7 +206,7 @@ class FontFallbackManager {
       }
     }
 
-    final List<NotoFont> selectedFonts = <NotoFont>[];
+    final selectedFonts = <NotoFont>[];
 
     while (candidateFonts.isNotEmpty) {
       final NotoFont selectedFont = _selectFont(candidateFonts);
@@ -214,9 +215,7 @@ class FontFallbackManager {
       // All the code points in the selected font are now covered. Zero out each
       // component that is used by the font and adjust the counts of other fonts
       // that use the same components.
-      for (final FallbackFontComponent component in <FallbackFontComponent>[
-        ...selectedFont.coverComponents,
-      ]) {
+      for (final component in <FallbackFontComponent>[...selectedFont.coverComponents]) {
         for (final NotoFont font in component.fonts) {
           font.coverCount -= component.coverCount;
           font.coverComponents.remove(component);
@@ -239,7 +238,7 @@ class FontFallbackManager {
         printWarning(
           'Could not find a set of Noto fonts to display all missing '
           'characters. Please add a font asset for the missing characters.'
-          ' See: https://flutter.dev/docs/cookbook/design/fonts',
+          ' See: https://docs.flutter.dev/cookbook/design/fonts',
         );
         _codePointsWithNoKnownFont.addAll(missingCodePoints);
       }
@@ -247,11 +246,24 @@ class FontFallbackManager {
   }
 
   NotoFont _selectFont(List<NotoFont> fonts) {
-    int maxCodePointsCovered = -1;
-    final List<NotoFont> bestFonts = <NotoFont>[];
-    NotoFont? bestFont;
+    // Priority is given to fonts that match the language.
+    NotoFont? bestFont = switch (_language) {
+      'zh-Hans' || 'zh-CN' || 'zh-SG' || 'zh-MY' => fonts.firstWhereOrNull(_isNotoSansSC),
+      'zh-Hant' || 'zh-TW' || 'zh-MO' => fonts.firstWhereOrNull(_isNotoSansTC),
+      'zh-HK' => fonts.firstWhereOrNull(_isNotoSansHK),
+      'ja' => fonts.firstWhereOrNull(_isNotoSansJP),
+      'ko' => fonts.firstWhereOrNull(_isNotoSansKR),
+      _ => null,
+    };
 
-    for (final NotoFont font in fonts) {
+    if (bestFont != null) {
+      return bestFont;
+    }
+
+    var maxCodePointsCovered = -1;
+    final List<NotoFont> bestFonts = [];
+
+    for (final font in fonts) {
       if (font.coverCount > maxCodePointsCovered) {
         bestFonts.clear();
         bestFonts.add(font);
@@ -268,49 +280,19 @@ class FontFallbackManager {
       }
     }
 
-    NotoFont? bestFontForLanguage;
     if (bestFonts.length > 1) {
-      // If the list of best fonts are all CJK fonts, choose the best one based
-      // on user preferred language. Otherwise just choose the first font.
-      if (bestFonts.every(
-        (NotoFont font) =>
-            _isNotoSansSC(font) ||
-            _isNotoSansTC(font) ||
-            _isNotoSansHK(font) ||
-            _isNotoSansJP(font) ||
-            _isNotoSansKR(font),
-      )) {
-        if (_language == 'zh-Hans' ||
-            _language == 'zh-CN' ||
-            _language == 'zh-SG' ||
-            _language == 'zh-MY') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansSC);
-        } else if (_language == 'zh-Hant' || _language == 'zh-TW' || _language == 'zh-MO') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansTC);
-        } else if (_language == 'zh-HK') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansHK);
-        } else if (_language == 'ja') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansJP);
-        } else if (_language == 'ko') {
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansKR);
-        } else {
-          // Default to `Noto Sans SC` when the user preferred language is not CJK.
-          bestFontForLanguage = bestFonts.firstWhereOrNull(_isNotoSansSC);
-        }
+      // To be predictable, if there is a tie for best font, choose a font
+      // from this list first, then just choose the first font.
+      if (bestFonts.contains(_notoSymbols)) {
+        bestFont = _notoSymbols;
       } else {
-        // To be predictable, if there is a tie for best font, choose a font
-        // from this list first, then just choose the first font.
-        if (bestFonts.contains(_notoSymbols)) {
-          bestFont = _notoSymbols;
-        } else {
-          final notoSansSC = bestFonts.firstWhereOrNull(_isNotoSansSC);
-          if (notoSansSC != null) {
-            bestFont = notoSansSC;
-          }
+        final NotoFont? notoSansSC = bestFonts.firstWhereOrNull(_isNotoSansSC);
+        if (notoSansSC != null) {
+          bestFont = notoSansSC;
         }
       }
     }
-    return bestFontForLanguage ?? bestFont!;
+    return bestFont!;
   }
 
   late final List<FallbackFontComponent> fontComponents = _decodeFontComponents(encodedFontSets);
@@ -329,10 +311,10 @@ class FontFallbackManager {
   }
 
   List<NotoFont> _decodeFontSet(String data) {
-    final List<NotoFont> result = <NotoFont>[];
-    int previousIndex = -1;
-    int prefix = 0;
-    for (int i = 0; i < data.length; i++) {
+    final result = <NotoFont>[];
+    var previousIndex = -1;
+    var prefix = 0;
+    for (var i = 0; i < data.length; i++) {
       final int code = data.codeUnitAt(i);
 
       if (kFontIndexDigit0 <= code && code < kFontIndexDigit0 + kFontIndexRadix) {
@@ -356,14 +338,14 @@ class _UnicodePropertyLookup<P> {
   _UnicodePropertyLookup._(this._boundaries, this._values);
 
   factory _UnicodePropertyLookup.fromPackedData(String packedData, List<P> propertyEnumValues) {
-    final List<int> boundaries = <int>[];
-    final List<P> values = <P>[];
+    final boundaries = <int>[];
+    final values = <P>[];
 
-    int start = 0;
-    int prefix = 0;
-    int size = 1;
+    var start = 0;
+    var prefix = 0;
+    var size = 1;
 
-    for (int i = 0; i < packedData.length; i++) {
+    for (var i = 0; i < packedData.length; i++) {
       final int code = packedData.codeUnitAt(i);
       if (kRangeValueDigit0 <= code && code < kRangeValueDigit0 + kRangeValueRadix) {
         final int index = prefix * kRangeValueRadix + (code - kRangeValueDigit0);
@@ -429,8 +411,8 @@ class _UnicodePropertyLookup<P> {
   /// Iterate over the ranges, calling [action] with the start and end
   /// (inclusive) code points and value.
   void forEachRange(void Function(int start, int end, P value) action) {
-    int start = 0;
-    for (int i = 0; i < _boundaries.length; i++) {
+    var start = 0;
+    for (var i = 0; i < _boundaries.length; i++) {
       final int end = _boundaries[i];
       final P value = _values[i];
       action(start, end - 1, value);
@@ -473,11 +455,11 @@ class _FallbackFontDownloadQueue {
   }
 
   Future<void> startDownloads() async {
-    final Map<String, Future<void>> downloads = <String, Future<void>>{};
-    final List<String> downloadedFontFamilies = <String>[];
+    final downloads = <String, Future<void>>{};
+    final downloadedFontFamilies = <String>[];
     for (final NotoFont font in pendingFonts.values) {
       downloads[font.url] = Future<void>(() async {
-        final String url = '${configuration.fontFallbackBaseUrl}${font.url}';
+        final url = '${configuration.fontFallbackBaseUrl}${font.url}';
         try {
           fallbackManager.debugOnLoadFontFamily?.call(font.name);
           await fallbackManager._registry.loadFallbackFont(font.name, url);
@@ -498,7 +480,7 @@ class _FallbackFontDownloadQueue {
     // change their precedence depending on the download order causing
     // visual differences between app reloads.
     downloadedFontFamilies.sort();
-    for (final String url in downloadedFontFamilies) {
+    for (final url in downloadedFontFamilies) {
       final NotoFont font = pendingFonts.remove(url)!;
       fallbackManager.registerFallbackFont(font.name);
     }

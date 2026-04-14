@@ -59,10 +59,9 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
       home: Scaffold(
         appBar: AppBar(
           title: Text(isScrolling ? 'Scrolling' : 'Not Scrolling'),
-          backgroundColor:
-              isScrolling
-                  ? Colors.green[800]!.withOpacity(.85)
-                  : Colors.redAccent[700]!.withOpacity(.85),
+          backgroundColor: isScrolling
+              ? Colors.green[800]!.withValues(alpha: .85)
+              : Colors.redAccent[700]!.withValues(alpha: .85),
         ),
         // ListView.builder works very similarly to this example with
         // CustomScrollView & SliverList.
@@ -74,18 +73,25 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
               itemCount: 50,
               itemBuilder: (_, int index) {
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const .all(8.0),
                   child: Center(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.blueGrey[50],
                         boxShadow: const <BoxShadow>[
-                          BoxShadow(color: Colors.black12, offset: Offset(5, 5), blurRadius: 5),
+                          BoxShadow(
+                            color: Colors.black12,
+                            offset: Offset(5, 5),
+                            blurRadius: 5,
+                          ),
                         ],
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius: const .all(Radius.circular(10)),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                        padding: const .symmetric(
+                          vertical: 12.0,
+                          horizontal: 20.0,
+                        ),
                         child: Text('Item $index'),
                       ),
                     ),

@@ -10,24 +10,24 @@ import 'package:flutter_tools/src/macos/swift_packages.dart';
 
 import '../../src/common.dart';
 
-const String _doubleIndent = '        ';
+const _doubleIndent = '        ';
 
 void main() {
   group('SwiftPackage', () {
     testWithoutContext('createSwiftPackage also creates source file for each default target', () {
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final fs = MemoryFileSystem();
       final File swiftPackageFile = fs.systemTempDirectory.childFile(
         'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
       );
-      const String target1Name = 'Target1';
-      const String target2Name = 'Target2';
+      const target1Name = 'Target1';
+      const target2Name = 'Target2';
       final File target1SourceFile = fs.systemTempDirectory.childFile(
         'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target1Name/$target1Name.swift',
       );
       final File target2SourceFile = fs.systemTempDirectory.childFile(
         'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target2Name/$target2Name.swift',
       );
-      final SwiftPackage swiftPackage = SwiftPackage(
+      final swiftPackage = SwiftPackage(
         manifest: swiftPackageFile,
         name: 'FlutterGeneratedPluginSwiftPackage',
         platforms: <SwiftPackageSupportedPlatform>[],
@@ -46,11 +46,11 @@ void main() {
     });
 
     testWithoutContext('createSwiftPackage also creates source file for binary target', () {
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final fs = MemoryFileSystem();
       final File swiftPackageFile = fs.systemTempDirectory.childFile(
         'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
       );
-      final SwiftPackage swiftPackage = SwiftPackage(
+      final swiftPackage = SwiftPackage(
         manifest: swiftPackageFile,
         name: 'FlutterGeneratedPluginSwiftPackage',
         platforms: <SwiftPackageSupportedPlatform>[],
@@ -74,12 +74,12 @@ void main() {
     });
 
     testWithoutContext('createSwiftPackage does not creates source file if already exists', () {
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final fs = MemoryFileSystem();
       final File swiftPackageFile = fs.systemTempDirectory.childFile(
         'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
       );
-      const String target1Name = 'Target1';
-      const String target2Name = 'Target2';
+      const target1Name = 'Target1';
+      const target2Name = 'Target2';
       final File target1SourceFile = fs.systemTempDirectory.childFile(
         'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target1Name/$target1Name.swift',
       );
@@ -98,7 +98,7 @@ void main() {
           )
           .createSync(recursive: true);
 
-      final SwiftPackage swiftPackage = SwiftPackage(
+      final swiftPackage = SwiftPackage(
         manifest: swiftPackageFile,
         name: 'FlutterGeneratedPluginSwiftPackage',
         platforms: <SwiftPackageSupportedPlatform>[],
@@ -116,13 +116,47 @@ void main() {
       expect(target2SourceFile.existsSync(), isFalse);
     });
 
-    group('create Package.swift from template', () {
-      testWithoutContext('with none in each field', () {
-        final MemoryFileSystem fs = MemoryFileSystem();
+    testWithoutContext(
+      'createSwiftPackage does not creates source file if generateEmptySources is false',
+      () {
+        final fs = MemoryFileSystem();
         final File swiftPackageFile = fs.systemTempDirectory.childFile(
           'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
         );
-        final SwiftPackage swiftPackage = SwiftPackage(
+        const target1Name = 'Target1';
+        const target2Name = 'Target2';
+        final File target1SourceFile = fs.systemTempDirectory.childFile(
+          'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target1Name/$target1Name.swift',
+        );
+        final File target2SourceFile = fs.systemTempDirectory.childFile(
+          'Packages/FlutterGeneratedPluginSwiftPackage/Sources/$target2Name/$target2Name.swift',
+        );
+        final swiftPackage = SwiftPackage(
+          manifest: swiftPackageFile,
+          name: 'FlutterGeneratedPluginSwiftPackage',
+          platforms: <SwiftPackageSupportedPlatform>[],
+          products: <SwiftPackageProduct>[],
+          dependencies: <SwiftPackagePackageDependency>[],
+          targets: <SwiftPackageTarget>[
+            SwiftPackageTarget.defaultTarget(name: target1Name),
+            SwiftPackageTarget.defaultTarget(name: 'Target2'),
+          ],
+          templateRenderer: const MustacheTemplateRenderer(),
+        );
+        swiftPackage.createSwiftPackage(generateEmptySources: false);
+        expect(swiftPackageFile.existsSync(), isTrue);
+        expect(target1SourceFile.existsSync(), isFalse);
+        expect(target2SourceFile.existsSync(), isFalse);
+      },
+    );
+
+    group('create Package.swift from template', () {
+      testWithoutContext('with none in each field', () {
+        final fs = MemoryFileSystem();
+        final File swiftPackageFile = fs.systemTempDirectory.childFile(
+          'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
+        );
+        final swiftPackage = SwiftPackage(
           manifest: swiftPackageFile,
           name: 'FlutterGeneratedPluginSwiftPackage',
           platforms: <SwiftPackageSupportedPlatform>[],
@@ -136,7 +170,7 @@ void main() {
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -157,11 +191,11 @@ $_doubleIndent
       });
 
       testWithoutContext('with single in each field', () {
-        final MemoryFileSystem fs = MemoryFileSystem();
+        final fs = MemoryFileSystem();
         final File swiftPackageFile = fs.systemTempDirectory.childFile(
           'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
         );
-        final SwiftPackage swiftPackage = SwiftPackage(
+        final swiftPackage = SwiftPackage(
           manifest: swiftPackageFile,
           name: 'FlutterGeneratedPluginSwiftPackage',
           platforms: <SwiftPackageSupportedPlatform>[
@@ -171,7 +205,7 @@ $_doubleIndent
             ),
           ],
           products: <SwiftPackageProduct>[
-            SwiftPackageProduct(name: 'Product1', targets: <String>['Target1']),
+            SwiftPackageProduct.library(name: 'Product1', targets: <String>['Target1']),
           ],
           dependencies: <SwiftPackagePackageDependency>[
             SwiftPackagePackageDependency(name: 'Dependency1', path: '/path/to/dependency1'),
@@ -194,7 +228,7 @@ $_doubleIndent
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -223,11 +257,11 @@ let package = Package(
       });
 
       testWithoutContext('with multiple in each field', () {
-        final MemoryFileSystem fs = MemoryFileSystem();
+        final fs = MemoryFileSystem();
         final File swiftPackageFile = fs.systemTempDirectory.childFile(
           'Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
         );
-        final SwiftPackage swiftPackage = SwiftPackage(
+        final swiftPackage = SwiftPackage(
           manifest: swiftPackageFile,
           name: 'FlutterGeneratedPluginSwiftPackage',
           platforms: <SwiftPackageSupportedPlatform>[
@@ -241,8 +275,8 @@ let package = Package(
             ),
           ],
           products: <SwiftPackageProduct>[
-            SwiftPackageProduct(name: 'Product1', targets: <String>['Target1']),
-            SwiftPackageProduct(name: 'Product2', targets: <String>['Target2']),
+            SwiftPackageProduct.library(name: 'Product1', targets: <String>['Target1']),
+            SwiftPackageProduct.library(name: 'Product2', targets: <String>['Target2']),
           ],
           dependencies: <SwiftPackagePackageDependency>[
             SwiftPackagePackageDependency(name: 'Dependency1', path: '/path/to/dependency1'),
@@ -268,7 +302,7 @@ let package = Package(
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-//  Generated file. Do not edit.
+// Generated file. Do not edit.
 //
 
 import PackageDescription
@@ -307,30 +341,63 @@ let package = Package(
   });
 
   testWithoutContext('Format SwiftPackageSupportedPlatform', () {
-    final SwiftPackageSupportedPlatform supportedPlatform = SwiftPackageSupportedPlatform(
+    final supportedPlatform = SwiftPackageSupportedPlatform(
       platform: SwiftPackagePlatform.ios,
       version: Version(17, 0, null),
     );
     expect(supportedPlatform.format(), '.iOS("17.0")');
   });
 
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson parsed iOS', () {
+    final SwiftPackageSupportedPlatform? supportedPlatform = SwiftPackageSupportedPlatform.fromJson(
+      {'platformName': 'ios', 'version': '13.0'},
+    );
+    expect(supportedPlatform, isNotNull);
+    expect(supportedPlatform?.format(), '.iOS("13.0")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson parsed macOS', () {
+    final SwiftPackageSupportedPlatform? supportedPlatform = SwiftPackageSupportedPlatform.fromJson(
+      {'platformName': 'macos', 'version': '10.15'},
+    );
+    expect(supportedPlatform, isNotNull);
+    expect(supportedPlatform?.format(), '.macOS("10.15")');
+  });
+
+  testWithoutContext('SwiftPackageSupportedPlatform.fromJson returns null when invalid', () {
+    final SwiftPackageSupportedPlatform? invalidVersion = SwiftPackageSupportedPlatform.fromJson({
+      'platformName': 'ios',
+      'version': 'v15',
+    });
+    expect(invalidVersion, isNull);
+
+    final SwiftPackageSupportedPlatform? invalidPlatform = SwiftPackageSupportedPlatform.fromJson({
+      'platformName': 'asdf',
+      'version': '13.0',
+    });
+    expect(invalidPlatform, isNull);
+
+    final SwiftPackageSupportedPlatform? invalidJson = SwiftPackageSupportedPlatform.fromJson({
+      'name': 'ios',
+      'version': '13.0',
+    });
+    expect(invalidJson, isNull);
+  });
+
   group('Format SwiftPackageProduct', () {
     testWithoutContext('without targets and libraryType', () {
-      final SwiftPackageProduct product = SwiftPackageProduct(
-        name: 'ProductName',
-        targets: <String>[],
-      );
+      final product = SwiftPackageProduct.library(name: 'ProductName', targets: <String>[]);
       expect(product.format(), '.library(name: "ProductName")');
     });
 
     testWithoutContext('with targets', () {
-      final SwiftPackageProduct singleProduct = SwiftPackageProduct(
+      final singleProduct = SwiftPackageProduct.library(
         name: 'ProductName',
         targets: <String>['Target1'],
       );
       expect(singleProduct.format(), '.library(name: "ProductName", targets: ["Target1"])');
 
-      final SwiftPackageProduct multipleProducts = SwiftPackageProduct(
+      final multipleProducts = SwiftPackageProduct.library(
         name: 'ProductName',
         targets: <String>['Target1', 'Target2'],
       );
@@ -341,7 +408,7 @@ let package = Package(
     });
 
     testWithoutContext('with libraryType', () {
-      final SwiftPackageProduct product = SwiftPackageProduct(
+      final product = SwiftPackageProduct.library(
         name: 'ProductName',
         targets: <String>[],
         libraryType: SwiftPackageLibraryType.dynamic,
@@ -350,7 +417,7 @@ let package = Package(
     });
 
     testWithoutContext('with targets and libraryType', () {
-      final SwiftPackageProduct product = SwiftPackageProduct(
+      final product = SwiftPackageProduct.library(
         name: 'ProductName',
         targets: <String>['Target1', 'Target2'],
         libraryType: SwiftPackageLibraryType.dynamic,
@@ -360,10 +427,23 @@ let package = Package(
         '.library(name: "ProductName", type: .dynamic, targets: ["Target1", "Target2"])',
       );
     });
+
+    testWithoutContext('as executable', () {
+      final product = SwiftPackageProduct.executable(
+        name: 'ProductName',
+        targets: <String>['Target1'],
+      );
+      expect(product.format(), '.executable(name: "ProductName", targets: ["Target1"])');
+    });
+
+    testWithoutContext('as plugin', () {
+      final product = SwiftPackageProduct.plugin(name: 'ProductName', targets: <String>['Target1']);
+      expect(product.format(), '.plugin(name: "ProductName", targets: ["Target1"])');
+    });
   });
 
   testWithoutContext('Format SwiftPackagePackageDependency', () {
-    final SwiftPackagePackageDependency supportedPlatform = SwiftPackagePackageDependency(
+    final supportedPlatform = SwiftPackagePackageDependency(
       name: 'DependencyName',
       path: '/path/to/dependency',
     );
@@ -375,7 +455,7 @@ let package = Package(
 
   group('Format SwiftPackageTarget', () {
     testWithoutContext('as default target with multiple SwiftPackageTargetDependency', () {
-      final SwiftPackageTarget product = SwiftPackageTarget.defaultTarget(
+      final product = SwiftPackageTarget.defaultTarget(
         name: 'ProductName',
         dependencies: <SwiftPackageTargetDependency>[
           SwiftPackageTargetDependency.target(name: 'Dependency1'),
@@ -396,7 +476,7 @@ let package = Package(
     });
 
     testWithoutContext('as default target with no SwiftPackageTargetDependency', () {
-      final SwiftPackageTarget product = SwiftPackageTarget.defaultTarget(name: 'ProductName');
+      final product = SwiftPackageTarget.defaultTarget(name: 'ProductName');
       expect(product.format(), '''
 .target(
             name: "ProductName"
@@ -404,7 +484,7 @@ let package = Package(
     });
 
     testWithoutContext('as binaryTarget', () {
-      final SwiftPackageTarget product = SwiftPackageTarget.binaryTarget(
+      final product = SwiftPackageTarget.binaryTarget(
         name: 'ProductName',
         relativePath: '/path/to/target',
       );
@@ -414,18 +494,70 @@ let package = Package(
             path: "/path/to/target"
         )''');
     });
+
+    testWithoutContext('as executable', () {
+      final product = SwiftPackageTarget.executableTarget(
+        name: 'ProductName',
+        dependencies: <SwiftPackageTargetDependency>[
+          SwiftPackageTargetDependency.target(name: 'Dependency1'),
+        ],
+        path: '/path/to/target',
+      );
+      expect(product.format(), '''
+.executableTarget(
+            name: "ProductName",
+            dependencies: [
+                .target(name: "Dependency1")
+            ],
+            path: "/path/to/target"
+        )''');
+    });
+
+    testWithoutContext('as plugin', () {
+      final product = SwiftPackageTarget.pluginTarget(
+        name: 'ProductName',
+        commandCapability: SwiftPackageCommandCapability(
+          verb: 'some-command',
+          description: 'Some description',
+        ),
+      );
+      expect(product.format(), '''
+.plugin(
+            name: "ProductName",
+            capability: .command(
+                intent: .custom(verb: "some-command", description: "Some description"),
+                permissions: [
+                    .writeToPackageDirectory(reason: "Some description"),
+                ]
+            )
+        )''');
+    });
+
+    testWithoutContext('as testTarget', () {
+      final product = SwiftPackageTarget.testTarget(
+        name: 'ProductName',
+        dependencies: <SwiftPackageTargetDependency>[
+          SwiftPackageTargetDependency.target(name: 'Dependency1'),
+        ],
+      );
+      expect(product.format(), '''
+.testTarget(
+            name: "ProductName",
+            dependencies: [
+                .target(name: "Dependency1")
+            ]
+        )''');
+    });
   });
 
   group('Format SwiftPackageTargetDependency', () {
     testWithoutContext('with only name', () {
-      final SwiftPackageTargetDependency targetDependency = SwiftPackageTargetDependency.target(
-        name: 'DependencyName',
-      );
+      final targetDependency = SwiftPackageTargetDependency.target(name: 'DependencyName');
       expect(targetDependency.format(), '                .target(name: "DependencyName")');
     });
 
     testWithoutContext('with name and package', () {
-      final SwiftPackageTargetDependency targetDependency = SwiftPackageTargetDependency.product(
+      final targetDependency = SwiftPackageTargetDependency.product(
         name: 'DependencyName',
         packageName: 'PackageName',
       );

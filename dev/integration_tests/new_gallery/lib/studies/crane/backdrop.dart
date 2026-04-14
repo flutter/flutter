@@ -74,7 +74,7 @@ class _FrontLayerState extends State<_FrontLayer> {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isSmallDesktop = isDisplaySmallDesktop(context);
-    final int crossAxisCount = isDesktop ? 4 : 1;
+    final crossAxisCount = isDesktop ? 4 : 1;
 
     return FocusTraversalGroup(
       policy: ReadingOrderTraversalPolicy(),
@@ -92,12 +92,11 @@ class _FrontLayerState extends State<_FrontLayer> {
             ),
           ),
           child: Padding(
-            padding:
-                isDesktop
-                    ? EdgeInsets.symmetric(
-                      horizontal: isSmallDesktop ? appPaddingSmall : appPaddingLarge,
-                    ).add(bottomPadding)
-                    : const EdgeInsets.symmetric(horizontal: 20).add(bottomPadding),
+            padding: isDesktop
+                ? EdgeInsets.symmetric(
+                    horizontal: isSmallDesktop ? appPaddingSmall : appPaddingLarge,
+                  ).add(bottomPadding)
+                : const EdgeInsets.symmetric(horizontal: 20).add(bottomPadding),
             child: Column(
               children: <Widget>[
                 _header(),
@@ -107,9 +106,8 @@ class _FrontLayerState extends State<_FrontLayer> {
                     restorationId: widget.restorationId,
                     crossAxisCount: crossAxisCount,
                     crossAxisSpacing: 16.0,
-                    itemBuilder:
-                        (BuildContext context, int index) =>
-                            DestinationCard(destination: destinations![index]),
+                    itemBuilder: (BuildContext context, int index) =>
+                        DestinationCard(destination: destinations![index]),
                     itemCount: destinations!.length,
                   ),
                 ),
@@ -229,13 +227,12 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin, Rest
                 BackLayer(tabController: _tabController, backLayerItems: widget.backLayerItems),
                 Container(
                   margin: EdgeInsets.only(
-                    top:
-                        isDesktop
-                            ? (isDisplaySmallDesktop(context)
-                                    ? textFieldHeight * 3
-                                    : textFieldHeight * 2) +
-                                20 * textScaleFactor / 2
-                            : 175 + 140 * textScaleFactor / 2,
+                    top: isDesktop
+                        ? (isDisplaySmallDesktop(context)
+                                  ? textFieldHeight * 3
+                                  : textFieldHeight * 2) +
+                              20 * textScaleFactor / 2
+                        : 175 + 140 * textScaleFactor / 2,
                   ),
                   // To display the middle front layer higher than the others,
                   // we allow the TabBarView to overflow by an offset
@@ -246,10 +243,9 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin, Rest
                       return OverflowBox(
                         maxHeight: constraints.maxHeight + _sleepLayerTopOffset * 2,
                         child: TabBarView(
-                          physics:
-                              isDesktop
-                                  ? const NeverScrollableScrollPhysics()
-                                  : null, // use default TabBarView physics
+                          physics: isDesktop
+                              ? const NeverScrollableScrollPhysics()
+                              : null, // use default TabBarView physics
                           controller: _tabController,
                           children: <Widget>[
                             SlideTransition(
@@ -349,11 +345,10 @@ class _CraneAppBarState extends State<CraneAppBar> {
                     labelColor: cranePrimaryWhite,
                     physics: const BouncingScrollPhysics(),
                     unselectedLabelColor: cranePrimaryWhite.withOpacity(.6),
-                    onTap:
-                        (int index) => widget.tabController.animateTo(
-                          index,
-                          duration: const Duration(milliseconds: 300),
-                        ),
+                    onTap: (int index) => widget.tabController.animateTo(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                    ),
                     tabs: <Widget>[
                       Tab(text: localizations.craneFly),
                       Tab(text: localizations.craneSleep),

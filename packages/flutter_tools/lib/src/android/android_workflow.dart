@@ -18,11 +18,8 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
+import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
-
-const int kAndroidSdkMinVersion = 29;
-final Version kAndroidJavaMinVersion = Version(1, 8, 0);
-final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
 AndroidValidator? get androidValidator => context.get<AndroidValidator>();
@@ -30,9 +27,9 @@ AndroidLicenseValidator? get androidLicenseValidator => context.get<AndroidLicen
 
 enum LicensesAccepted { none, some, all, unknown }
 
-final RegExp licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
-final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
-final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
+final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
+final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
@@ -82,7 +79,7 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
         .firstWhere((String line) => line.contains('Android emulator version'), orElse: () => '');
 
     if (versionLine.isNotEmpty) {
-      final RegExp regex = RegExp(r'Android emulator version\s+(.*)');
+      final regex = RegExp(r'Android emulator version\s+(.*)');
       final Match? match = regex.firstMatch(versionLine);
       if (match != null && match.groupCount >= 1) {
         return match.group(1)?.trim();
@@ -133,22 +130,34 @@ class AndroidValidator extends DoctorValidator {
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
   String? _task;
 
+  String androidCantRunJavaBinary(String javaBinary) =>
+      'Cannot execute $javaBinary to determine the version';
+
+  String get androidUnknownJavaVersion => 'Could not determine java version';
+
+  String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidJavaMinimumVersion(String javaVersion) =>
+      'Java version $javaVersion is older than the minimum recommended version of ${gradle_utils.warnJavaMinVersionAndroid}';
+
+  String get _androidMissingJdk =>
+      'No Java Development Kit (JDK) found; You must have the environment '
+      'variable JAVA_HOME set and the java binary in your PATH. '
+      'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
+
   /// Returns false if we cannot determine the Java version or if the version
-  /// is older that the minimum allowed version of 1.8.
+  /// is older that the minimum allowed version.
   Future<bool> _checkJavaVersion(List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
       if (_java?.binaryPath == null) {
-        messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
+        messages.add(ValidationMessage.error(_androidMissingJdk));
         return false;
       }
       messages.add(
         ValidationMessage(_androidJdkLocationMessage(_java!.binaryPath, _java.javaSource)),
       );
       if (!_java.canRun()) {
-        messages.add(
-          ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java.binaryPath)),
-        );
+        messages.add(ValidationMessage.error(androidCantRunJavaBinary(_java.binaryPath)));
         return false;
       }
       Version? javaVersion;
@@ -159,25 +168,33 @@ class AndroidValidator extends DoctorValidator {
       }
       if (javaVersion == null) {
         // Could not determine the java version.
-        messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
+        messages.add(ValidationMessage.error(androidUnknownJavaVersion));
         return false;
       }
-      if (javaVersion < kAndroidJavaMinVersion) {
-        messages.add(
-          ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
-        );
+      // Should this be modified to be evaluated based on gradle version used?
+      if (javaVersion < gradle_utils.errorJavaMinVersionAndroid) {
+        messages.add(ValidationMessage.error(androidJavaMinimumVersion(javaVersion.toString())));
         return false;
       }
-      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersion.toString())));
+      if (javaVersion < gradle_utils.warnJavaMinVersionAndroid) {
+        messages.add(ValidationMessage.hint(androidJavaMinimumVersion(javaVersion.toString())));
+        return true;
+      }
+      messages.add(ValidationMessage(androidJavaVersion(javaVersion.toString())));
       return true;
     } finally {
       _task = null;
     }
   }
 
+  String _androidSdkLocation(String directory) => 'Android SDK at $directory';
+
+  String _androidSdkPlatformToolsVersion(String platform, String tools) =>
+      'Platform $platform, build-tools $tools';
+
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
       // No Android SDK found.
@@ -196,7 +213,7 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+    messages.add(ValidationMessage(_androidSdkLocation(androidSdk.directory.path)));
     messages.add(
       ValidationMessage(
         'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
@@ -226,13 +243,13 @@ class AndroidValidator extends DoctorValidator {
     String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;
     if (androidSdkLatestVersion != null) {
-      if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion ||
-          androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+      if (androidSdkLatestVersion.sdkLevel < gradle_utils.compileSdkVersionInt ||
+          androidSdkLatestVersion.buildToolsVersion < gradle_utils.minBuildToolsVersion) {
         messages.add(
           ValidationMessage.error(
             _userMessages.androidSdkBuildToolsOutdated(
-              kAndroidSdkMinVersion,
-              kAndroidSdkBuildToolsMinVersion.toString(),
+              gradle_utils.compileSdkVersionInt,
+              gradle_utils.minBuildToolsVersion.toString(),
               _platform,
             ),
           ),
@@ -245,7 +262,7 @@ class AndroidValidator extends DoctorValidator {
 
       messages.add(
         ValidationMessage(
-          _userMessages.androidSdkPlatformToolsVersion(
+          _androidSdkPlatformToolsVersion(
             androidSdkLatestVersion.platformName,
             androidSdkLatestVersion.buildToolsVersionName,
           ),
@@ -321,9 +338,19 @@ class AndroidLicenseValidator extends DoctorValidator {
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
 
+  String get _androidLicensesAll => 'All Android licenses accepted.';
+
+  String get _androidLicensesSome =>
+      'Some Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+
+  String get _androidLicensesNone =>
+      'Android licenses not accepted. To resolve this, run: flutter doctor --android-licenses';
+
+  String get _androidSdkShort => 'Unable to locate Android SDK.';
+
   @override
   Future<ValidationResult> validateImpl() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior
     if (_androidSdk == null ||
@@ -340,12 +367,12 @@ class AndroidLicenseValidator extends DoctorValidator {
     // Check for licenses.
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
-        messages.add(ValidationMessage(_userMessages.androidLicensesAll));
+        messages.add(ValidationMessage(_androidLicensesAll));
       case LicensesAccepted.some:
-        messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
+        messages.add(ValidationMessage.hint(_androidLicensesSome));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.none:
-        messages.add(ValidationMessage.error(_userMessages.androidLicensesNone));
+        messages.add(ValidationMessage.error(_androidLicensesNone));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
@@ -413,18 +440,16 @@ class AndroidLicenseValidator extends DoctorValidator {
       await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: 'n');
       // We expect logcat streams to occasionally contain invalid utf-8,
       // see: https://github.com/flutter/flutter/pull/8864.
-      final Future<void> output =
-          process.stdout
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .transform<String>(const LineSplitter())
-              .listen(handleLine)
-              .asFuture<void>();
-      final Future<void> errors =
-          process.stderr
-              .transform<String>(const Utf8Decoder(reportErrors: false))
-              .transform<String>(const LineSplitter())
-              .listen(handleLine)
-              .asFuture<void>();
+      final Future<void> output = process.stdout
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .transform<String>(const LineSplitter())
+          .listen(handleLine)
+          .asFuture<void>();
+      final Future<void> errors = process.stderr
+          .transform<String>(const Utf8Decoder(reportErrors: false))
+          .transform<String>(const LineSplitter())
+          .listen(handleLine)
+          .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
       return status ?? LicensesAccepted.unknown;
     } on IOException catch (e) {
@@ -436,7 +461,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   /// Run the Android SDK manager tool in order to accept SDK licenses.
   Future<bool> runLicenseManager() async {
     if (_androidSdk == null) {
-      _logger.printStatus(_userMessages.androidSdkShort);
+      _logger.printStatus(_androidSdkShort);
       return false;
     }
 
@@ -469,7 +494,7 @@ class AndroidLicenseValidator extends DoctorValidator {
             ),
       );
 
-      final List<String> stderrLines = <String>[];
+      final stderrLines = <String>[];
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
       try {

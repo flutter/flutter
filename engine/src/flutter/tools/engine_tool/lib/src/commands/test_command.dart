@@ -51,9 +51,9 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
 
     // Figure out what targets the user wants to build.
     final buildTargets = <BuildTarget>{};
-    for (final pattern in argResults!.rest) {
-      final target = TargetPattern.parse(pattern);
-      final found = await gn.desc('out/${plan.build.ninja.config}', target);
+    for (final String pattern in argResults!.rest) {
+      final TargetPattern target = TargetPattern.parse(pattern);
+      final List<BuildTarget> found = await gn.desc('out/${plan.build.ninja.config}', target);
       buildTargets.addAll(found);
     }
 
@@ -63,18 +63,17 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
     }
 
     // Make sure there is at least one test target.
-    final testTargets =
-        buildTargets
-            .whereType<ExecutableBuildTarget>()
-            .where((ExecutableBuildTarget t) => t.testOnly)
-            .toList();
+    final List<ExecutableBuildTarget> testTargets = buildTargets
+        .whereType<ExecutableBuildTarget>()
+        .where((ExecutableBuildTarget t) => t.testOnly)
+        .toList();
 
     if (testTargets.isEmpty) {
       environment.logger.error('No test targets found');
       return 1;
     }
 
-    final buildExitCode = await runBuild(
+    final int buildExitCode = await runBuild(
       environment,
       plan.build,
       concurrency: plan.concurrency ?? 0,

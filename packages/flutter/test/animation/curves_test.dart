@@ -35,8 +35,8 @@ void main() {
   });
 
   void assertMaximumSlope(Curve curve, double maximumSlope) {
-    const double delta = 0.005;
-    for (double x = 0.0; x < 1.0 - delta; x += delta) {
+    const delta = 0.005;
+    for (var x = 0.0; x < 1.0 - delta; x += delta) {
       final double deltaY = curve.transform(x) - curve.transform(x + delta);
       assert(deltaY.abs() < delta * maximumSlope, '$curve discontinuous at $x');
     }
@@ -106,7 +106,7 @@ void main() {
   });
 
   List<double> estimateBounds(Curve curve) {
-    final List<double> values = <double>[
+    final values = <double>[
       curve.transform(0.0),
       curve.transform(0.1),
       curve.transform(0.2),
@@ -170,7 +170,7 @@ void main() {
   });
 
   test('ThreePointCubic interpolates midpoint', () {
-    const ThreePointCubic test = ThreePointCubic(
+    const test = ThreePointCubic(
       Offset(0.05, 0),
       Offset(0.133333, 0.06),
       Offset(0.166666, 0.4),
@@ -266,9 +266,9 @@ void main() {
   });
 
   test('Split interpolates values properly', () {
-    const Split curve = Split(0.3);
+    const curve = Split(0.3);
 
-    const double tolerance = 1e-6;
+    const tolerance = 1e-6;
     expect(curve.transform(0.0), equals(0.0));
     expect(curve.transform(0.1), equals(0.1));
     expect(curve.transform(0.25), equals(0.25));
@@ -279,7 +279,7 @@ void main() {
   });
 
   test('CatmullRomSpline interpolates values properly', () {
-    final CatmullRomSpline curve = CatmullRomSpline(
+    final curve = CatmullRomSpline(
       const <Offset>[
         Offset.zero,
         Offset(0.01, 0.25),
@@ -292,7 +292,7 @@ void main() {
       startHandle: const Offset(0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
-    const double tolerance = 1e-6;
+    const tolerance = 1e-6;
     expect(curve.transform(0.0).dx, moreOrLessEquals(0.0, epsilon: tolerance));
     expect(curve.transform(0.0).dy, moreOrLessEquals(0.0, epsilon: tolerance));
     expect(curve.transform(0.25).dx, moreOrLessEquals(0.0966945, epsilon: tolerance));
@@ -369,7 +369,7 @@ void main() {
   });
 
   test('CatmullRomSpline interpolates values properly when precomputed', () {
-    final CatmullRomSpline curve = CatmullRomSpline.precompute(
+    final curve = CatmullRomSpline.precompute(
       const <Offset>[
         Offset.zero,
         Offset(0.01, 0.25),
@@ -382,7 +382,7 @@ void main() {
       startHandle: const Offset(0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
-    const double tolerance = 1e-6;
+    const tolerance = 1e-6;
     expect(curve.transform(0.0).dx, moreOrLessEquals(0.0, epsilon: tolerance));
     expect(curve.transform(0.0).dy, moreOrLessEquals(0.0, epsilon: tolerance));
     expect(curve.transform(0.25).dx, moreOrLessEquals(0.0966945, epsilon: tolerance));
@@ -459,7 +459,7 @@ void main() {
   });
 
   test('CatmullRomCurve interpolates given points correctly', () {
-    final CatmullRomCurve curve = CatmullRomCurve(const <Offset>[
+    final curve = CatmullRomCurve(const <Offset>[
       Offset(0.2, 0.25),
       Offset(0.33, 0.25),
       Offset(0.5, 1.0),
@@ -467,7 +467,7 @@ void main() {
     ]);
 
     // These values are approximations.
-    const double tolerance = 1e-6;
+    const tolerance = 1e-6;
     expect(curve.transform(0.0), moreOrLessEquals(0.0, epsilon: tolerance));
     expect(curve.transform(0.01), moreOrLessEquals(0.012874734350170863, epsilon: tolerance));
     expect(curve.transform(0.2), moreOrLessEquals(0.24989646045277542, epsilon: tolerance));
@@ -479,7 +479,7 @@ void main() {
   });
 
   test('CatmullRomCurve interpolates given points correctly when precomputed', () {
-    final CatmullRomCurve curve = CatmullRomCurve.precompute(const <Offset>[
+    final curve = CatmullRomCurve.precompute(const <Offset>[
       Offset(0.2, 0.25),
       Offset(0.33, 0.25),
       Offset(0.5, 1.0),
@@ -487,7 +487,7 @@ void main() {
     ]);
 
     // These values are approximations.
-    const double tolerance = 1e-6;
+    const tolerance = 1e-6;
     expect(curve.transform(0.0), moreOrLessEquals(0.0, epsilon: tolerance));
     expect(curve.transform(0.01), moreOrLessEquals(0.012874734350170863, epsilon: tolerance));
     expect(curve.transform(0.2), moreOrLessEquals(0.24989646045277542, epsilon: tolerance));

@@ -63,7 +63,7 @@ Future<void> enableSkiaGoldComparator({String? namePrefix}) async {
     '  - namePrefix:  $namePrefix\n'
     '  - isPresubmit: $isPresubmit\n',
   );
-  final SkiaGoldClient skiaGoldClient = SkiaGoldClient(
+  final skiaGoldClient = SkiaGoldClient(
     _localFs.directory(tmpDir.path),
     fs: _localFs,
     process: const LocalProcessManager(),
@@ -158,6 +158,6 @@ final class _SkiaGoldComparator extends GoldenFileComparator {
       'Golden files in the Flutter framework must end with the file extension '
       '.png.',
     );
-    return Uri.parse(<String>[if (namePrefix != null) namePrefix!, golden.toString()].join('.'));
+    return Uri.parse(<String>[?namePrefix, golden.toString()].join('.'));
   }
 }

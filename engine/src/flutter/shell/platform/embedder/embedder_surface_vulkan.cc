@@ -11,10 +11,10 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
 #include "flutter/vulkan/vulkan_skia_proc_table.h"
-#include "include/gpu/ganesh/GrDirectContext.h"
-#include "include/gpu/vk/VulkanBackendContext.h"
-#include "include/gpu/vk/VulkanExtensions.h"
+#include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanBackendContext.h"
+#include "third_party/skia/include/gpu/vk/VulkanExtensions.h"
 
 namespace flutter {
 
@@ -94,7 +94,7 @@ const vulkan::VulkanProcTable& EmbedderSurfaceVulkan::vk() {
 }
 
 // |GPUSurfaceVulkanDelegate|
-FlutterVulkanImage EmbedderSurfaceVulkan::AcquireImage(const SkISize& size) {
+FlutterVulkanImage EmbedderSurfaceVulkan::AcquireImage(const DlISize& size) {
   return vulkan_dispatch_table_.get_next_image(size);
 }
 

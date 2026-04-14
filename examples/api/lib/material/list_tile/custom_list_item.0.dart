@@ -34,14 +34,18 @@ class CustomListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const .symmetric(vertical: 5.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: <Widget>[
           Expanded(flex: 2, child: thumbnail),
           Expanded(
             flex: 3,
-            child: _VideoDescription(title: title, user: user, viewCount: viewCount),
+            child: _VideoDescription(
+              title: title,
+              user: user,
+              viewCount: viewCount,
+            ),
           ),
           const Icon(Icons.more_vert, size: 16.0),
         ],
@@ -51,7 +55,11 @@ class CustomListItem extends StatelessWidget {
 }
 
 class _VideoDescription extends StatelessWidget {
-  const _VideoDescription({required this.title, required this.user, required this.viewCount});
+  const _VideoDescription({
+    required this.title,
+    required this.user,
+    required this.viewCount,
+  });
 
   final String title;
   final String user;
@@ -60,14 +68,17 @@ class _VideoDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+      padding: const .fromLTRB(5.0, 0.0, 0.0, 0.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: <Widget>[
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0)),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: .w500, fontSize: 14.0),
+          ),
+          const Padding(padding: .symmetric(vertical: 2.0)),
           Text(user, style: const TextStyle(fontSize: 10.0)),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
+          const Padding(padding: .symmetric(vertical: 1.0)),
           Text('$viewCount views', style: const TextStyle(fontSize: 10.0)),
         ],
       ),
@@ -83,19 +94,23 @@ class CustomListItemExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         itemExtent: 106.0,
         children: <CustomListItem>[
           CustomListItem(
             user: 'Flutter',
             viewCount: 999000,
-            thumbnail: Container(decoration: const BoxDecoration(color: Colors.blue)),
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.blue),
+            ),
             title: 'The Flutter YouTube Channel',
           ),
           CustomListItem(
             user: 'Dash',
             viewCount: 884000,
-            thumbnail: Container(decoration: const BoxDecoration(color: Colors.yellow)),
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.yellow),
+            ),
             title: 'Announcing Flutter 1.0',
           ),
         ],

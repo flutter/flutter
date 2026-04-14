@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Вебээс хайх",
   "shareButtonLabel": "Хуваалцах",
   "pasteButtonLabel": "Буулгах",
-  "selectAllButtonLabel": "Бүгдийг сонгох"
+  "selectAllButtonLabel": "Бүгдийг сонгох",
+  "searchResultsFound": "Хайлтын илэрцүүд олдлоо",
+  "noResultsFound": "Илэрц олдсонгүй",
+  "radioButtonUnselectedLabel": "Сонгоогүй"
 }

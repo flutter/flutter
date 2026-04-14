@@ -76,14 +76,15 @@ class ActionIconThemeData with Diagnosticable {
       backButtonIconBuilder: t < 0.5 ? a?.backButtonIconBuilder : b?.backButtonIconBuilder,
       closeButtonIconBuilder: t < 0.5 ? a?.closeButtonIconBuilder : b?.closeButtonIconBuilder,
       drawerButtonIconBuilder: t < 0.5 ? a?.drawerButtonIconBuilder : b?.drawerButtonIconBuilder,
-      endDrawerButtonIconBuilder:
-          t < 0.5 ? a?.endDrawerButtonIconBuilder : b?.endDrawerButtonIconBuilder,
+      endDrawerButtonIconBuilder: t < 0.5
+          ? a?.endDrawerButtonIconBuilder
+          : b?.endDrawerButtonIconBuilder,
     );
   }
 
   @override
   int get hashCode {
-    final List<Object?> values = <Object?>[
+    final values = <Object?>[
       backButtonIconBuilder,
       closeButtonIconBuilder,
       drawerButtonIconBuilder,
@@ -173,8 +174,8 @@ class ActionIconTheme extends InheritedTheme {
   /// ActionIconThemeData? theme = ActionIconTheme.of(context);
   /// ```
   static ActionIconThemeData? of(BuildContext context) {
-    final ActionIconTheme? actionIconTheme =
-        context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
+    final ActionIconTheme? actionIconTheme = context
+        .dependOnInheritedWidgetOfExactType<ActionIconTheme>();
     return actionIconTheme?.data ?? Theme.of(context).actionIconTheme;
   }
 

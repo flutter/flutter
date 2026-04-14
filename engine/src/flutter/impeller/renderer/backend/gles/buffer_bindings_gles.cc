@@ -294,9 +294,8 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
       continue;
     }
 
-    size_t element_count = member.array_elements.value_or(1);
-    const std::string member_key =
-        CreateUniformMemberKey(metadata->name, member.name, element_count > 1);
+    const std::string member_key = CreateUniformMemberKey(
+        metadata->name, member.name, member.array_elements.has_value());
     const absl::flat_hash_map<std::string, GLint>::iterator computed_location =
         uniform_locations_.find(member_key);
     if (computed_location == uniform_locations_.end()) {
@@ -335,6 +334,9 @@ bool BufferBindingsGLES::BindUniformBufferV3(
   absl::flat_hash_map<std::string, std::pair<GLint, GLuint>>::iterator it =
       ubo_locations_.find(metadata->name);
   if (it == ubo_locations_.end()) {
+    // This should only happen if we have GLESv3 but are using v2 shaders,
+    // as GLESv3 shaders compiled by impeller always have
+    // **named** uniform buffer blocks
     return BindUniformBufferV2(gl, buffer, metadata, device_buffer_gles);
   }
   const auto& [block_index, binding_point] = it->second;
@@ -397,46 +399,39 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     }
 
     if (member.type != ShaderType::kFloat) {
-      VALIDATION_LOG << "Could not bind uniform buffer data for key: "
-                     << member.name << " : " << static_cast<int>(member.type);
+      VALIDATION_LOG << "Unsupported uniform data type for key: " << member.name
+                     << ", has type " << static_cast<int>(member.type)
+                     << ". Only float uniforms are supported.";
       return false;
     }
 
-    switch (member.size) {
-      case sizeof(Matrix):
-        gl.UniformMatrix4fv(location,       // location
-                            element_count,  // count
-                            GL_FALSE,       // normalize
-                            buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector4):
-        gl.Uniform4fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector3):
-        gl.Uniform3fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Vector2):
-        gl.Uniform2fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      case sizeof(Scalar):
-        gl.Uniform1fv(location,       // location
-                      element_count,  // count
-                      buffer_data     // data
-        );
-        continue;
-      default:
-        VALIDATION_LOG << "Invalid member size binding: " << member.size;
-        return false;
+    if (!member.float_type.has_value()) {
+      VALIDATION_LOG << "Float uniform should have a float type.";
+      return false;
+    }
+
+    switch (member.float_type.value()) {
+      case ShaderFloatType::kFloat:
+        gl.Uniform1fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec2:
+        gl.Uniform2fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec3:
+        gl.Uniform3fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kVec4:
+        gl.Uniform4fv(location, element_count, buffer_data);
+        break;
+      case ShaderFloatType::kMat2:
+        gl.UniformMatrix2fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat3:
+        gl.UniformMatrix3fv(location, element_count, GL_FALSE, buffer_data);
+        break;
+      case ShaderFloatType::kMat4:
+        gl.UniformMatrix4fv(location, element_count, GL_FALSE, buffer_data);
+        break;
     }
   }
   return true;

@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/rotation_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/rotation_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows flutter logo in rotation transition', (WidgetTester tester) async {
+  testWidgets('Shows flutter logo in rotation transition', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RotationTransitionExampleApp());
     expect(
       find.byWidgetPredicate(
@@ -21,7 +24,10 @@ void main() {
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Padding), findsAtLeast(1));
     expect(
-      find.descendant(of: find.byType(Center), matching: find.byType(FlutterLogo)),
+      find.descendant(
+        of: find.byType(Center),
+        matching: find.byType(FlutterLogo),
+      ),
       findsOneWidget,
     );
 
@@ -46,7 +52,9 @@ void main() {
             widget is RotationTransition &&
             widget.turns is CurvedAnimation &&
             (widget.turns as CurvedAnimation).parent is AnimationController &&
-            ((widget.turns as CurvedAnimation).parent as AnimationController).value == 0.5 &&
+            ((widget.turns as CurvedAnimation).parent as AnimationController)
+                    .value ==
+                0.5 &&
             widget.turns.status == AnimationStatus.reverse,
       ),
       findsOneWidget,

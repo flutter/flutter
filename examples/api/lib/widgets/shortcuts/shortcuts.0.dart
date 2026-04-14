@@ -51,16 +51,14 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke:
-                (IncrementIntent intent) => setState(() {
-                  count = count + 1;
-                }),
+            onInvoke: (IncrementIntent intent) => setState(() {
+              count = count + 1;
+            }),
           ),
           DecrementIntent: CallbackAction<DecrementIntent>(
-            onInvoke:
-                (DecrementIntent intent) => setState(() {
-                  count = count - 1;
-                }),
+            onInvoke: (DecrementIntent intent) => setState(() {
+              count = count - 1;
+            }),
           ),
         },
         child: Focus(
@@ -68,7 +66,9 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
           child: Column(
             children: <Widget>[
               const Text('Add to the counter by pressing the up arrow key'),
-              const Text('Subtract from the counter by pressing the down arrow key'),
+              const Text(
+                'Subtract from the counter by pressing the down arrow key',
+              ),
               Text('count: $count'),
             ],
           ),

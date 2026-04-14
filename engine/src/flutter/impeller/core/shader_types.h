@@ -60,6 +60,18 @@ enum class ShaderType {
   kSampler,
 };
 
+// This is a separate type from ShaderType because ShaderType is used for
+// OpenGLES's attrib type which doesn't map to things like vec4.
+enum class ShaderFloatType {
+  kFloat,
+  kVec2,
+  kVec3,
+  kVec4,
+  kMat2,
+  kMat3,
+  kMat4,
+};
+
 struct ShaderStructMemberMetadata {
   ShaderType type;
   std::string name;
@@ -67,6 +79,7 @@ struct ShaderStructMemberMetadata {
   size_t size;
   size_t byte_length;
   std::optional<size_t> array_elements;
+  std::optional<ShaderFloatType> float_type;
 };
 
 struct ShaderMetadata {
@@ -184,7 +197,7 @@ struct Padded {
   T value;
   Padding<Size> _PADDING_;
 
-  Padded(T p_value) : value(p_value){};  // NOLINT(google-explicit-constructor)
+  Padded(T p_value) : value(p_value) {};  // NOLINT(google-explicit-constructor)
 };
 
 inline constexpr Vector4 ToVector(Color color) {

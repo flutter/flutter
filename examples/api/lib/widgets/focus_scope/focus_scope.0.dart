@@ -41,11 +41,11 @@ class Pane extends StatelessWidget {
     return Material(
       color: backgroundColor,
       child: Stack(
-        fit: StackFit.expand,
+        fit: .expand,
         children: <Widget>[
           Center(child: child),
           Align(
-            alignment: Alignment.topLeft,
+            alignment: .topLeft,
             child: IconButton(
               autofocus: true,
               focusNode: focusNode,
@@ -81,7 +81,7 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Size stackSize = constraints.biggest;
     return Stack(
-      fit: StackFit.expand,
+      fit: .expand,
       // The backdrop is behind the front widget in the Stack, but the widgets
       // would still be active and traversable without the FocusScope.
       children: <Widget>[
@@ -103,7 +103,7 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
             backgroundColor: Colors.lightBlue,
             onPressed: () => setState(() => backdropIsVisible = false),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 // This button would be not visible, but still focusable from
                 // the foreground pane without the FocusScope.
@@ -135,10 +135,12 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
           child: Pane(
             icon: const Icon(Icons.menu),
             focusNode: foregroundNode,
-            // TRY THIS: Try changing this to Colors.green.withOpacity(0.8) to see for
+            // TRY THIS: Try changing this to Colors.green.withValues(alpha: 0.8) to see for
             // yourself that the hidden components do/don't get focus.
             backgroundColor: Colors.green,
-            onPressed: backdropIsVisible ? null : () => setState(() => backdropIsVisible = true),
+            onPressed: backdropIsVisible
+                ? null
+                : () => setState(() => backdropIsVisible = true),
             child: DefaultTextStyle(
               style: Theme.of(context).textTheme.displayMedium!,
               child: const Text('FOREGROUND'),

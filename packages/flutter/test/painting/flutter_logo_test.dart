@@ -12,13 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Here and below, see: https://github.com/dart-lang/sdk/issues/26980
-  const FlutterLogoDecoration start = FlutterLogoDecoration(
+  const start = FlutterLogoDecoration(
     textColor: Color(0xFFD4F144),
     style: FlutterLogoStyle.stacked,
     margin: EdgeInsets.all(10.0),
   );
 
-  const FlutterLogoDecoration end = FlutterLogoDecoration(
+  const end = FlutterLogoDecoration(
     textColor: Color(0xFF81D4FA),
     style: FlutterLogoStyle.stacked,
     margin: EdgeInsets.all(10.0),
@@ -31,7 +31,7 @@ void main() {
 
   test('FlutterLogoDecoration.lerp identical a,b', () {
     expect(FlutterLogoDecoration.lerp(null, null, 0), null);
-    const FlutterLogoDecoration logo = FlutterLogoDecoration();
+    const logo = FlutterLogoDecoration();
     expect(identical(FlutterLogoDecoration.lerp(logo, logo, 0.5), logo), true);
   });
 

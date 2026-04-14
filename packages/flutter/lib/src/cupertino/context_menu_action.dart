@@ -114,13 +114,9 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
           child: Semantics(
             button: true,
             child: ColoredBox(
-              color:
-                  _isPressed
-                      ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
-                      : CupertinoDynamicColor.resolve(
-                        CupertinoContextMenu.kBackgroundColor,
-                        context,
-                      ),
+              color: _isPressed
+                  ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
+                  : CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15.5, 8.0, 17.5, 8.0),
                 child: DefaultTextStyle(

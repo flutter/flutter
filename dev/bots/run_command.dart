@@ -25,7 +25,7 @@ Stream<String> runAndGetStdout(
   Map<String, String>? environment,
   bool expectNonZeroExit = false,
 }) async* {
-  final StreamController<String> output = StreamController<String>();
+  final output = StreamController<String>();
   final Future<CommandResult?> command = runCommand(
     executable,
     arguments,
@@ -41,6 +41,7 @@ Stream<String> runAndGetStdout(
 
   // Close the stream controller after the command is complete. Otherwise,
   // the yield* will never finish.
+  // ignore: unawaited_futures
   command.whenComplete(output.close);
 
   yield* output.stream;
@@ -94,17 +95,24 @@ Future<Command> startCommand(
   void Function(String, io.Process)? outputListener,
 }) async {
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
-  final String commandDescription =
+  final commandDescription =
       '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   print('RUNNING: cd $cyan$relativeWorkingDir$reset; $green$commandDescription$reset');
 
-  final Stopwatch time = Stopwatch()..start();
+  final time = Stopwatch()..start();
   print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
+
+  // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  // See also dev/devicelab/lib/framework/utils.dart.
+  final finalEnvironment = <String, String>{
+    ...?environment,
+    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
+  };
   final io.Process process = await io.Process.start(
     executable,
     arguments,
     workingDirectory: workingDirectory,
-    environment: environment,
+    environment: finalEnvironment,
   );
   return Command._(
     process,
@@ -114,7 +122,7 @@ Future<Command> startCommand(
         .transform(const LineSplitter())
         .where((String line) => removeLine == null || !removeLine(line))
         .map<String>((String line) {
-          final String formattedLine = '$line\n';
+          final formattedLine = '$line\n';
           if (outputListener != null) {
             outputListener(formattedLine, process);
           }
@@ -143,6 +151,76 @@ Future<Command> startCommand(
   );
 }
 
+String? _bestNdkPath;
+String? _discoverBestNdkPath() {
+  if (_bestNdkPath != null) {
+    return _bestNdkPath;
+  }
+  // If we found a valid NDK, return it.
+  // Otherwise return empty string to clear any bad inherited value.
+  final Map<String, String> env = io.Platform.environment;
+  String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    // Try to find it in common default locations.
+    if (io.Platform.isMacOS) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Library', 'Android', 'sdk');
+      }
+    } else if (io.Platform.isLinux) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Android', 'Sdk');
+      }
+    } else if (io.Platform.isWindows) {
+      final String? homeDrive = env['HOMEDRIVE'];
+      final String? homePath = env['HOMEPATH'];
+      if (homeDrive != null && homePath != null) {
+        androidHome = path.join(homeDrive + homePath, 'AppData', 'Local', 'Android', 'sdk');
+      }
+    }
+  }
+
+  if (androidHome == null) {
+    return _bestNdkPath = null;
+  }
+  final ndkDir = io.Directory(path.join(androidHome, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    return _bestNdkPath = null;
+  }
+  final versions = <String>[];
+  for (final io.FileSystemEntity entity in ndkDir.listSync()) {
+    if (entity is io.Directory) {
+      final String name = path.basename(entity.path);
+      // flutter_tools ignores non-SemVer directories. NDK versions should start with a number.
+      if (int.tryParse(name.split('.').first) != null) {
+        versions.add(name);
+      }
+    }
+  }
+  if (versions.isEmpty) {
+    return _bestNdkPath = null;
+  }
+  // Sort numerically/lexicographically to find the "highest" version.
+  // We assume versions are like "21.4.7075529" or "23.1.7779620".
+  // A simple sort works for major versions if they have the same number of digits,
+  // but to be safe we parse the major version.
+  versions.sort((String a, String b) {
+    // Try to parse major version.
+    final int? aMajor = int.tryParse(a.split('.').first);
+    final int? bMajor = int.tryParse(b.split('.').first);
+    if (aMajor != null && bMajor != null) {
+      if (aMajor != bMajor) {
+        return aMajor.compareTo(bMajor);
+      }
+    }
+    // Fallback to string comparison.
+    return a.compareTo(b);
+  });
+
+  return _bestNdkPath = path.join(ndkDir.path, versions.last);
+}
+
 /// Runs the `executable` and waits until the process exits.
 ///
 /// If the process exits with a non-zero exit code and `expectNonZeroExit` is
@@ -169,7 +247,7 @@ Future<CommandResult> runCommand(
   bool Function(String)? removeLine,
   void Function(String, io.Process)? outputListener,
 }) async {
-  final String commandDescription =
+  final commandDescription =
       '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = workingDirectory ?? path.relative(io.Directory.current.path);
   if (dryRun) {
@@ -192,7 +270,7 @@ Future<CommandResult> runCommand(
     outputListener: outputListener,
   );
 
-  final CommandResult result = CommandResult._(
+  final result = CommandResult._(
     await command.process.exitCode,
     command._time.elapsed,
     await command._savedStdout,
@@ -210,9 +288,9 @@ Future<CommandResult> runCommand(
         print(result.flattenedStdout);
         print(result.flattenedStderr);
     }
-    final String allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
+    final allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
     foundError(<String>[
-      if (failureMessage != null) failureMessage,
+      ?failureMessage,
       '${bold}Command: $green$commandDescription$reset',
       if (failureMessage == null)
         '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
@@ -233,7 +311,7 @@ final String _flutterRoot = path.dirname(
 );
 
 String _prettyPrintRunCommand(String executable, List<String> arguments, String? workingDirectory) {
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
 
   // Print CWD relative to the root.
   output.write('|> ');

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Sök på webben",
   "shareButtonLabel": "Dela",
   "pasteButtonLabel": "Klistra in",
-  "selectAllButtonLabel": "Markera allt"
+  "selectAllButtonLabel": "Markera allt",
+  "searchResultsFound": "Sökresultat hittades",
+  "noResultsFound": "Inga resultat hittades",
+  "radioButtonUnselectedLabel": "Inte markerad"
 }

@@ -131,8 +131,8 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
     if (_generateSpans()) {
       // Successfully parsed the code
-      final List<TextSpan> formattedText = <TextSpan>[];
-      int currentPosition = 0;
+      final formattedText = <TextSpan>[];
+      var currentPosition = 0;
 
       for (final _HighlightSpan span in _spans) {
         if (currentPosition != span.start) {
@@ -178,7 +178,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
       if (_scanner.scan('//')) {
         final int startComment = _scanner.lastMatch!.start;
 
-        bool eof = false;
+        var eof = false;
         int endComment;
         if (_scanner.scan(RegExp(r'.*\n'))) {
           endComment = _scanner.lastMatch!.end - 1;

@@ -29,5 +29,11 @@
   "shareButtonLabel": "షేర్ చేయండి...",
   "clearButtonLabel": "క్లియర్ చేయండి",
   "cancelButtonLabel": "రద్దు చేయండి",
-  "backButtonLabel": "Back"
+  "backButtonLabel": "Back",
+  "expansionTileExpandedHint": "కుదించడానికి డబుల్ ట్యాప్ చేయండి",
+  "expansionTileCollapsedHint": "విస్తరించడానికి డబుల్ ట్యాప్ చేయండి",
+  "expansionTileExpandedTapHint": "కుదించండి",
+  "expansionTileCollapsedTapHint": "మరిన్ని వివరాల కోసం విస్తరించండి",
+  "expandedHint": "కుదించబడింది",
+  "collapsedHint": "విస్తరించబడింది"
 }

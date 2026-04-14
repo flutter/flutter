@@ -288,7 +288,7 @@ class AssetImage extends AssetBundleImageProvider {
             configuration,
             candidateVariants,
           );
-          final AssetBundleImageKey key = AssetBundleImageKey(
+          final key = AssetBundleImageKey(
             bundle: chosenBundle,
             name: chosenVariant.key,
             scale: chosenVariant.targetDevicePixelRatio ?? _naturalResolution,
@@ -334,8 +334,7 @@ class AssetImage extends AssetBundleImageProvider {
       return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
     }
 
-    final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
-        SplayTreeMap<double, AssetMetadata>();
+    final candidatesByDevicePixelRatio = SplayTreeMap<double, AssetMetadata>();
     for (final AssetMetadata candidate in candidateVariants) {
       candidatesByDevicePixelRatio[candidate.targetDevicePixelRatio ?? _naturalResolution] =
           candidate;

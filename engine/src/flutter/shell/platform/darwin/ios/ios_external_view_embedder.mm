@@ -40,7 +40,7 @@ void IOSExternalViewEmbedder::BeginFrame(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
 
 // |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::PrepareFlutterView(SkISize frame_size, double device_pixel_ratio) {
+void IOSExternalViewEmbedder::PrepareFlutterView(DlISize frame_size, double device_pixel_ratio) {
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ beginFrameWithSize:frame_size];
 }
@@ -104,13 +104,34 @@ bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PushFilterToVisitedPlatformViews(
     const std::shared_ptr<DlImageFilter>& filter,
-    const SkRect& filter_rect) {
+    const DlRect& filter_rect) {
   [platform_views_controller_ pushFilterToVisitedPlatformViews:filter withRect:filter_rect];
 }
 
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
   [platform_views_controller_ pushVisitedPlatformViewId:view_id];
+}
+
+// |ExternalViewEmbedder|
+void IOSExternalViewEmbedder::PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) {
+  [platform_views_controller_ pushClipRectToVisitedPlatformViews:clip_rect];
+}
+
+// |ExternalViewEmbedder|
+void IOSExternalViewEmbedder::PushClipRRectToVisitedPlatformViews(const DlRoundRect& clip_rrect) {
+  [platform_views_controller_ pushClipRRectToVisitedPlatformViews:clip_rrect];
+}
+
+// |ExternalViewEmbedder|
+void IOSExternalViewEmbedder::PushClipRSuperellipseToVisitedPlatformViews(
+    const DlRoundSuperellipse& clip_rse) {
+  [platform_views_controller_ pushClipRSuperellipseToVisitedPlatformViews:clip_rse];
+}
+
+// |ExternalViewEmbedder|
+void IOSExternalViewEmbedder::PushClipPathToVisitedPlatformViews(const DlPath& clip_path) {
+  [platform_views_controller_ pushClipPathToVisitedPlatformViews:clip_path];
 }
 
 }  // namespace flutter

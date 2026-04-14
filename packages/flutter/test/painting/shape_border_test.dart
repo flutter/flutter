@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Border.lerp identical a,b', () {
     expect(Border.lerp(null, null, 0), null);
-    const Border border = Border();
+    const border = Border();
     expect(identical(Border.lerp(border, border, 0.5), border), true);
   });
 
@@ -20,7 +20,7 @@ void main() {
 
   test('BorderDirectional.lep identical a,b', () {
     expect(BorderDirectional.lerp(null, null, 0), null);
-    const BorderDirectional border = BorderDirectional();
+    const border = BorderDirectional();
     expect(identical(ShapeBorder.lerp(border, border, 0.5), border), true);
   });
 
@@ -37,8 +37,8 @@ void main() {
   });
 
   test('Compound borders', () {
-    final Border b1 = Border.all(color: const Color(0xFF00FF00));
-    final Border b2 = Border.all(color: const Color(0xFF0000FF));
+    final b1 = Border.all(color: const Color(0xFF00FF00));
+    final b2 = Border.all(color: const Color(0xFF0000FF));
     expect(
       (b1 + b2).toString(),
       'Border.all(BorderSide(color: ${const Color(0xff00ff00)})) + '
@@ -86,7 +86,7 @@ void main() {
       'Border.all(BorderSide(color: ${const Color(0xff0000ff)}))',
     );
     expect((b1 + b2).dimensions, const EdgeInsets.all(2.0));
-    const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
+    const rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
     expect(
       (Canvas canvas) => (b1 + b2).paint(canvas, rect),
       paints
@@ -104,20 +104,10 @@ void main() {
   });
 
   test('Compound borders', () {
-    const BorderSide side1 = BorderSide(color: Color(0xFF00FF00));
-    const BorderSide side2 = BorderSide(color: Color(0xFF0000FF));
-    const BorderDirectional b1 = BorderDirectional(
-      top: side1,
-      start: side1,
-      end: side1,
-      bottom: side1,
-    );
-    const BorderDirectional b2 = BorderDirectional(
-      top: side2,
-      start: side2,
-      end: side2,
-      bottom: side2,
-    );
+    const side1 = BorderSide(color: Color(0xFF00FF00));
+    const side2 = BorderSide(color: Color(0xFF0000FF));
+    const b1 = BorderDirectional(top: side1, start: side1, end: side1, bottom: side1);
+    const b2 = BorderDirectional(top: side2, start: side2, end: side2, bottom: side2);
     expect(
       (b1 + b2).toString(),
       'BorderDirectional(top: BorderSide(color: ${const Color(0xff00ff00)}), start: BorderSide(color: ${const Color(0xff00ff00)}), end: BorderSide(color: ${const Color(0xff00ff00)}), bottom: BorderSide(color: ${const Color(0xff00ff00)})) + '
@@ -165,7 +155,7 @@ void main() {
       'BorderDirectional(top: BorderSide(color: ${const Color(0xff0000ff)}), start: BorderSide(color: ${const Color(0xff0000ff)}), end: BorderSide(color: ${const Color(0xff0000ff)}), bottom: BorderSide(color: ${const Color(0xff0000ff)}))',
     );
     expect((b1 + b2).dimensions, const EdgeInsetsDirectional.fromSTEB(2.0, 2.0, 2.0, 2.0));
-    const Rect rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
+    const rect = Rect.fromLTRB(11.0, 15.0, 299.0, 175.0);
     expect(
       (Canvas canvas) => (b1 + b2).paint(canvas, rect, textDirection: TextDirection.rtl),
       paints

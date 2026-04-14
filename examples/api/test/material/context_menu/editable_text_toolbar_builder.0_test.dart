@@ -11,31 +11,34 @@ import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showing and hiding the context menu in TextField with custom buttons', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.EditableTextToolbarBuilderExampleApp());
+  testWidgets(
+    'showing and hiding the context menu in TextField with custom buttons',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const example.EditableTextToolbarBuilderExampleApp(),
+      );
 
-    expect(BrowserContextMenu.enabled, !kIsWeb);
+      expect(BrowserContextMenu.enabled, !kIsWeb);
 
-    await tester.tap(find.byType(EditableText));
-    await tester.pump();
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
 
-    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
-    // Long pressing the field shows the default context menu but with custom
-    // buttons.
-    await tester.longPress(find.byType(EditableText));
-    await tester.pumpAndSettle();
+      // Long pressing the field shows the default context menu but with custom
+      // buttons.
+      await tester.longPress(find.byType(EditableText));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
-    expect(find.byType(CupertinoButton), findsAtLeastNWidgets(1));
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+      expect(find.byType(CupertinoButton), findsAtLeastNWidgets(1));
 
-    // Tap to dismiss.
-    await tester.tapAt(tester.getTopLeft(find.byType(EditableText)));
-    await tester.pumpAndSettle();
+      // Tap to dismiss.
+      await tester.tapAt(tester.getTopLeft(find.byType(EditableText)));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
-    expect(find.byType(CupertinoButton), findsNothing);
-  });
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
 }

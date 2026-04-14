@@ -44,6 +44,7 @@ import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/popup_menu_template.dart';
 import 'package:gen_defaults/progress_indicator_template.dart';
 import 'package:gen_defaults/radio_template.dart';
+import 'package:gen_defaults/range_slider_template.dart';
 import 'package:gen_defaults/search_bar_template.dart';
 import 'package:gen_defaults/search_view_template.dart';
 import 'package:gen_defaults/segmented_button_template.dart';
@@ -66,20 +67,20 @@ const String dataDir = 'dev/tools/gen_defaults/data';
 
 Future<void> main(List<String> args) async {
   // Parse arguments
-  final ArgParser parser = ArgParser();
+  final parser = ArgParser();
   parser.addFlag('verbose', abbr: 'v', help: 'Enable verbose output', negatable: false);
   final ArgResults argResults = parser.parse(args);
-  final bool verbose = argResults['verbose'] as bool;
+  final verbose = argResults['verbose'] as bool;
 
   // Map of version number to list of data files that use that version.
-  final Map<String, List<String>> versionMap = <String, List<String>>{};
+  final versionMap = <String, List<String>>{};
   // Map of all tokens to their values.
-  final Map<String, dynamic> tokens = <String, dynamic>{};
+  final tokens = <String, dynamic>{};
 
   // Initialize.
   for (final FileSystemEntity tokenFile in Directory(dataDir).listSync()) {
     final Map<String, dynamic> tokenFileTokens = _readTokenFile(tokenFile as File);
-    final String version = tokenFileTokens['version'] as String;
+    final version = tokenFileTokens['version'] as String;
     tokenFileTokens.remove('version');
     versionMap[version] ??= <String>[];
     versionMap[version]!.add(tokenFile.uri.pathSegments.last);
@@ -136,6 +137,7 @@ Future<void> main(List<String> args) async {
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
+  RangeSliderTemplate('md.comp.slider', 'RangeSlider', '$materialLib/range_slider.dart', tokens).updateFile();
   SearchBarTemplate('SearchBar', '$materialLib/search_anchor.dart', tokens).updateFile();
   SearchViewTemplate('SearchView', '$materialLib/search_anchor.dart', tokens).updateFile();
   SegmentedButtonTemplate('md.comp.outlined-segmented-button', 'SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();

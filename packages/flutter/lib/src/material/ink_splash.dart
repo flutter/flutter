@@ -156,10 +156,9 @@ class InkSplash extends InteractiveInkFeature {
     _radius = _radiusController.drive(
       Tween<double>(begin: _kSplashInitialSize, end: _targetRadius),
     );
-    _alphaController =
-        AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
-          ..addListener(controller.markNeedsPaint)
-          ..addStatusListener(_handleAlphaStatusChanged);
+    _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged);
     _alpha = _alphaController!.drive(IntTween(begin: color.alpha, end: 0));
 
     controller.addInkFeature(this);
@@ -212,7 +211,7 @@ class InkSplash extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
+    final paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset? center = _position;
     if (_repositionToReferenceBox) {
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);

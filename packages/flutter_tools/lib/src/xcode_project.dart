@@ -5,8 +5,11 @@
 /// @docImport 'ios/mac.dart';
 library;
 
+import 'package:yaml/yaml.dart' as yaml;
+
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
@@ -14,6 +17,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'convert.dart';
+import 'darwin/darwin.dart';
 import 'features.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
@@ -21,8 +25,10 @@ import 'ios/code_signing.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcode_build_settings.dart' as xcode;
 import 'ios/xcodeproj.dart';
+import 'macos/swift_package_manager.dart';
 import 'macos/xcode.dart';
 import 'platform_plugins.dart';
+import 'plugins.dart';
 import 'project.dart';
 import 'template.dart';
 
@@ -30,7 +36,7 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  static const String _defaultHostAppName = 'Runner';
+  static const _defaultHostAppName = 'Runner';
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
   Directory? get xcodeWorkspace {
@@ -53,7 +59,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory? _xcodeDirectoryWithExtension(String extension) {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    for (final FileSystemEntity entity in contents) {
+    for (final entity in contents) {
       if (globals.fs.path.extension(entity.path) == extension &&
           !globals.fs.path.basename(entity.path).startsWith('.')) {
         return hostAppRoot.childDirectory(entity.basename);
@@ -66,6 +72,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   FlutterProject get parent;
 
   Directory get hostAppRoot;
+
+  FlutterDarwinPlatform get darwinPlatform;
+
+  /// Cached list of [Plugin]s for the [FlutterProject].
+  List<Plugin>? _plugins;
+
+  /// Returns the list of [Plugin]s for the [FlutterProject].
+  ///
+  /// On the first call, this will find plugins in the project.
+  /// On subsequent calls, this will return the cached list of plugins.
+  Future<List<Plugin>> getPlugins() async {
+    _plugins ??= await findPlugins(parent);
+    return _plugins!;
+  }
 
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist =>
@@ -109,6 +129,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// tooling (`flutter build`, etc) to convert into flags.
   File get generatedEnvironmentVariableExportScript;
 
+  /// This file contains the environment variables needed for Flutter tools.
+  /// It contains the same variables as [generatedEnvironmentVariableExportScript] but without the
+  /// 'export' commands. This file is used in SwiftPM Add to App.
+  File get generatedNativeIntegrationEnvironmentFile =>
+      ephemeralDirectory.childFile('flutter_native_integration.env');
+
   /// The CocoaPods 'Podfile'.
   File get podfile => hostAppRoot.childFile('Podfile');
 
@@ -138,13 +164,24 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  /// The Flutter generated directory for the Swift Package handling plugin
-  /// dependencies.
-  Directory get flutterPluginSwiftPackageDirectory => ephemeralDirectory
-      .childDirectory('Packages')
-      .childDirectory('FlutterGeneratedPluginSwiftPackage');
+  /// The Flutter generated directory for generated Swift packages.
+  Directory get flutterSwiftPackagesDirectory => ephemeralDirectory.childDirectory('Packages');
 
-  /// The Flutter generated Swift Package manifest (Package.swift) for plugin
+  /// Flutter plugins that support SwiftPM will be symlinked in this directory to keep all
+  /// Swift packages relative to each other.
+  Directory get relativeSwiftPackagesDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory('.packages');
+
+  /// The Flutter generated directory for the Swift package handling plugin
+  /// dependencies.
+  Directory get flutterPluginSwiftPackageDirectory =>
+      flutterSwiftPackagesDirectory.childDirectory(kFlutterGeneratedPluginSwiftPackageName);
+
+  /// The Flutter generated directory for the Swift package handling the Flutter framework.
+  Directory get flutterFrameworkSwiftPackageDirectory => relativeSwiftPackagesDirectory
+      .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName);
+
+  /// The Flutter generated Swift package manifest (Package.swift) for plugin
   /// dependencies.
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
@@ -153,18 +190,23 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// project's build settings by checking the contents of the pbxproj.
   bool get flutterPluginSwiftPackageInProjectSettings {
     return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+        xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
-  /// True if this project doesn't have Swift Package Manager disabled in the
-  /// pubspec, has either an iOS or macOS platform implementation, is not a
-  /// module project, Xcode is 15 or greater, and the Swift Package Manager
-  /// feature is enabled.
-  bool get usesSwiftPackageManager {
-    if (!featureFlags.isSwiftPackageManagerEnabled) {
-      return false;
-    }
+  /// Checks if FlutterFramework has been added to the project's build settings by checking the
+  /// contents of the pbxproj.
+  bool get flutterFrameworkSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile.readAsStringSync().contains(
+          kFlutterGeneratedFrameworkSwiftPackageTargetName,
+        );
+  }
 
+  /// Return true if the project meets the following requirements:
+  ///   - Project is not a module
+  ///   - Xcode project exists
+  ///   - Xcode version is greater or equal to 15
+  bool get compatibleWithSwiftPackageManager {
     // TODO(loic-sharma): Support Swift Package Manager in add-to-app modules.
     // https://github.com/flutter/flutter/issues/146957
     if (parent.isModule) {
@@ -185,6 +227,11 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     return true;
   }
 
+  /// Return true if the Swift Package Manager feature is enabled and the project is
+  /// [compatibleWithSwiftPackageManager].
+  bool get usesSwiftPackageManager =>
+      featureFlags.isSwiftPackageManagerEnabled && compatibleWithSwiftPackageManager;
+
   Future<XcodeProjectInfo?> projectInfo() async {
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
     if (!xcodeProject.existsSync() ||
@@ -192,10 +239,29 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
+      hostAppRoot.path,
+      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+    );
   }
 
   XcodeProjectInfo? _projectInfo;
+
+  /// Get the scheme using the Xcode's project [XcodeProjectInfo.schemes] and
+  /// the [BuildInfo.flavor].
+  Future<String?> schemeForBuildInfo(BuildInfo buildInfo, {Logger? logger}) async {
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info == null) {
+      logger?.printError('Xcode project info not found.');
+      return null;
+    }
+
+    final String? scheme = info.schemeFor(buildInfo);
+    if (scheme == null) {
+      info.reportFlavorNotFoundAndExit();
+    }
+    return scheme;
+  }
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -262,8 +328,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     return _buildSettingsByBuildContext[buildContext];
   }
 
-  final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext =
-      <XcodeProjectBuildContext, Map<String, String>>{};
+  final _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
 
   Future<Map<String, String>?> _xcodeProjectBuildSettings(
     XcodeProjectBuildContext buildContext,
@@ -334,23 +399,27 @@ class IosProject extends XcodeBasedProject {
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
 
-  // build setting keys
-  static const String kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
-  static const String kTeamIdKey = 'DEVELOPMENT_TEAM';
-  static const String kEntitlementFilePathKey = 'CODE_SIGN_ENTITLEMENTS';
-  static const String kProductNameKey = 'PRODUCT_NAME';
+  @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
 
-  static final RegExp _productBundleIdPattern = RegExp(
+  // build setting keys
+  static const kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
+  static const kTeamIdKey = 'DEVELOPMENT_TEAM';
+  static const kEntitlementFilePathKey = 'CODE_SIGN_ENTITLEMENTS';
+  static const kProductNameKey = 'PRODUCT_NAME';
+
+  static final _productBundleIdPattern = RegExp(
     '^\\s*$kProductBundleIdKey\\s*=\\s*(["\']?)(.*?)\\1;\\s*\$',
   );
-  static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
+  static const _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
 
   // The string starts with `applinks:` and ignores the query param which starts with `?`.
-  static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
+  static final _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
-  static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
+  static const _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
 
-  static const String _lldbInitTemplate = '''
+  static const _lldbInitTemplate =
+      '''
 #
 # Generated file, do not edit.
 #
@@ -358,7 +427,7 @@ class IosProject extends XcodeBasedProject {
 command script import --relative-to-command-file $_lldbPythonHelperTemplateName
 ''';
 
-  static const String _lldbPythonHelperTemplate = r'''
+  static const _lldbPythonHelperTemplate = r'''
 #
 # Generated file, do not edit.
 #
@@ -435,6 +504,14 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   File get appDelegateSwift =>
       _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
 
+  /// The 'AppDelegate.m' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjcImplementation =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.m');
+
+  /// The 'AppDelegate.h' file of the host app. This file might not exist if the app project uses Swift.
+  File get appDelegateObjcHeader =>
+      _editableDirectory.childDirectory('Runner').childFile('AppDelegate.h');
+
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
@@ -442,30 +519,204 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// True if the app project uses Swift.
   bool get isSwift => appDelegateSwift.existsSync();
 
-  /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
-  Future<bool> pluginsSupportArmSimulator() async {
+  /// Returns true if all plugins and their dependencies support arm64.
+  ///
+  /// When using Xcode 26+, print a warning if a plugin or its dependencies does not support
+  /// arm64.
+  Future<bool> pluginsSupportArmSimulator({required bool printWarnings}) async {
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
     final Directory podXcodeProject = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj');
     if (!podXcodeProject.existsSync()) {
-      // No plugins.
       return true;
     }
 
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null) {
       // Xcode isn't installed, don't try to check.
-      return false;
+      return true;
     }
     final String? buildSettings = await xcodeProjectInterpreter.pluginsBuildSettingsOutput(
       podXcodeProject,
     );
+    if (buildSettings == null || buildSettings.isEmpty) {
+      globals.logger.printTrace('Unable to get build settings for Pods.');
+      return true;
+    }
 
-    // See if any plugins or their dependencies exclude arm64 simulators
-    // as a valid architecture, usually because a binary is missing that slice.
-    // Example: EXCLUDED_ARCHS = arm64 i386
-    // NOT: EXCLUDED_ARCHS = i386
-    return buildSettings != null && !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+    // When using Xcode 26, print a warning if a target does not support arm.
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && printWarnings) {
+      final List<({String target, String? plugin})> targetsExcludingArm =
+          await _targetsExcludingArm(buildSettings);
+      if (targetsExcludingArm.isNotEmpty) {
+        final String list = targetsExcludingArm
+            .map((target) {
+              var targetItem = '  - ${target.target}';
+              if (target.target == target.plugin) {
+                targetItem = '$targetItem (Flutter plugin)';
+              } else if (target.plugin != null) {
+                targetItem =
+                    '$targetItem (transitive dependency of Flutter plugin ${target.plugin})';
+              }
+              return targetItem;
+            })
+            .join('\n');
+        globals.logger.printWarning(
+          'The following target(s) do not support arm64 architecture, which is a requirement for '
+          'Apple Silicon iOS 26+ simulators:\n'
+          '$list\n\n'
+          'Please contact plugin maintainers to request arm64 support to continue to be able to '
+          'use the plugin on a simulator.',
+        );
+      }
+    }
+
+    return !buildSettings.contains(RegExp(r'EXCLUDED_ARCHS.*\barm64\b'));
+  }
+
+  /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.
+  Future<List<({String target, String? plugin})>> _targetsExcludingArm(String buildSettings) async {
+    final Map<String, List<String>> cocoapodsDependencyGraph = _cocoapodsDependencyGraph();
+    final pluginNames = <String>{
+      for (final Plugin plugin in await getPlugins())
+        if (plugin.platforms.containsKey(IOSPlugin.kConfigKey)) plugin.name,
+    };
+    final targetHeaderPattern = RegExp(
+      r'^Build settings for action build and target "?([^":\r\n]+)"?:\s*$',
+    );
+
+    final List<({String target, String? plugin})> foundTargets = [];
+    String? currentTarget;
+    for (final String eachLine in buildSettings.split('\n')) {
+      final String settingsLine = eachLine.trim();
+      final RegExpMatch? headerMatch = targetHeaderPattern.firstMatch(settingsLine);
+      if (headerMatch != null) {
+        currentTarget = headerMatch.group(1)!.trim();
+        continue;
+      }
+      if (currentTarget == null ||
+          !settingsLine.startsWith('EXCLUDED_ARCHS') ||
+          !settingsLine.contains('=')) {
+        continue;
+      }
+      final Iterable<String> tokens = settingsLine.split(' ');
+      if (!tokens.contains('arm64')) {
+        continue;
+      }
+
+      if (pluginNames.contains(currentTarget)) {
+        foundTargets.add((target: currentTarget, plugin: currentTarget));
+      } else {
+        // If it's not a plugin, it may be a transitive dependency of a plugin
+        final String? parentPlugin = _pluginUsingDependency(
+          targetName: currentTarget,
+          pluginNames: pluginNames.toList(),
+          cocoapodsDependencyGraph: cocoapodsDependencyGraph,
+        );
+        if (parentPlugin != null) {
+          foundTargets.add((target: currentTarget, plugin: parentPlugin));
+        } else if (currentTarget.startsWith('Pods-')) {
+          // Skip Pods- targets since they are not actual dependencies.
+          continue;
+        } else {
+          foundTargets.add((target: currentTarget, plugin: null));
+        }
+      }
+    }
+    return foundTargets;
+  }
+
+  /// Returns the plugin that uses the given target.
+  String? _pluginUsingDependency({
+    required String targetName,
+    required List<String> pluginNames,
+    required Map<String, List<String>> cocoapodsDependencyGraph,
+  }) {
+    final String? pluginName = _findPluginForDependency(
+      targetName,
+      cocoapodsDependencyGraph,
+      pluginNames,
+    );
+    if (pluginName != null) {
+      return pluginName;
+    }
+    if (targetName.contains('-')) {
+      // Resource bundle targets are prefixed with the name of the pod and then the name of the
+      // resource. Strip the resource name to get the pod name.
+      return _findPluginForDependency(
+        targetName.split('-').first,
+        cocoapodsDependencyGraph,
+        pluginNames,
+      );
+    } else {
+      // Sometimes the target name is a prefix of pod name.
+      // Example: target name "GoogleMLKit" and pod name "GoogleMLKit/Translate".
+      return _findPluginForDependency(
+        targetName,
+        cocoapodsDependencyGraph,
+        pluginNames,
+        searchByPrefix: true,
+      );
+    }
+  }
+
+  /// Returns a map of pods and their dependencies.
+  Map<String, List<String>> _cocoapodsDependencyGraph() {
+    final Map<String, List<String>> podDependencies = {};
+    try {
+      if (podfileLock.existsSync()) {
+        final String podfileLockString = podfileLock.readAsStringSync().split('\n\n').first;
+        final dynamic podsYaml = yaml.loadYaml(podfileLockString);
+        if (podsYaml is yaml.YamlMap) {
+          final dynamic podsList = podsYaml['PODS'];
+          if (podsList is List<dynamic>) {
+            // ignore: specify_nonobvious_local_variable_types
+            for (final dynamic pod in podsList) {
+              if (pod is yaml.YamlMap) {
+                final name = pod.keys.first as String;
+                final dynamic value = pod.value[name];
+                if (value is yaml.YamlList) {
+                  podDependencies[name.split(' ').first] = value
+                      .map((dep) => (dep as String).split(' ').first)
+                      .toList();
+                }
+              }
+            }
+          }
+        }
+      }
+    } on Exception catch (e) {
+      globals.logger.printTrace('Failed to parse podfile.lock: $e');
+    }
+
+    return podDependencies;
+  }
+
+  /// Recursively searches the pod dependency graph for a Flutter plugin that uses the given target.
+  String? _findPluginForDependency(
+    String targetName,
+    Map<String, List<String>> cocoapodTree,
+    List<String> pluginNames, {
+    bool searchByPrefix = false,
+  }) {
+    for (final MapEntry<String, List<String>> pod in cocoapodTree.entries) {
+      final String podName = pod.key;
+      final List<String> podDependencies = pod.value;
+      bool podHasTargetAsDependency;
+      if (searchByPrefix) {
+        podHasTargetAsDependency = podDependencies.any((dep) => dep.startsWith('$targetName/'));
+      } else {
+        podHasTargetAsDependency = podDependencies.contains(targetName);
+      }
+      if (podHasTargetAsDependency) {
+        if (pluginNames.contains(podName)) {
+          return podName;
+        }
+        return _findPluginForDependency(podName, cocoapodTree, pluginNames);
+      }
+    }
+    return null;
   }
 
   @override
@@ -481,10 +732,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     required String configuration,
     required String target,
   }) async {
-    final XcodeProjectBuildContext context = XcodeProjectBuildContext(
-      configuration: configuration,
-      target: target,
-    );
+    final context = XcodeProjectBuildContext(configuration: configuration, target: target);
     final File file = await parent.buildDirectory
         .childDirectory('deeplink_data')
         .childFile('universal-link-settings-$configuration-$target.json')
@@ -534,8 +782,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     );
   }
 
-  final Map<XcodeProjectBuildContext?, String?> _productBundleIdentifiers =
-      <XcodeProjectBuildContext?, String?>{};
+  final _productBundleIdentifiers = <XcodeProjectBuildContext?, String?>{};
 
   Future<String?> _parseProductBundleIdentifier(XcodeProjectBuildContext? buildContext) async {
     String? fromPlist;
@@ -604,13 +851,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       if (entitlementPath != null) {
         final File entitlement = hostAppRoot.childFile(entitlementPath);
         if (entitlement.existsSync()) {
-          final List<String>? domains =
-              globals.plistParser
-                  .getValueFromFile<List<Object>>(
-                    entitlement.path,
-                    PlistParser.kAssociatedDomainsKey,
-                  )
-                  ?.cast<String>();
+          final List<String>? domains = globals.plistParser
+              .getValueFromFile<List<Object>>(entitlement.path, PlistParser.kAssociatedDomainsKey)
+              ?.cast<String>();
 
           if (domains != null) {
             return <String>[
@@ -723,13 +966,13 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       projectInfo.reportFlavorNotFoundAndExit();
     }
     for (final String scheme in projectInfo.schemes) {
-      // the default scheme should not be a watch scheme, so skip it
+      // Flutter assumes single build target per scheme, so skip default scheme.
       if (scheme == defaultScheme) {
         continue;
       }
+
       final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(
         buildInfo,
-        deviceId: deviceId,
         scheme: scheme,
         isWatch: true,
       );
@@ -754,7 +997,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        featureFlags: featureFlags,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -763,20 +1005,6 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   Future<void> _updateLLDBIfNeeded() async {
     if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
         globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
-      if (isModule) {
-        // When building a module project for Add-to-App, provide instructions
-        // to manually add the LLDB Init File to their native Xcode project.
-        globals.logger.printWarning(
-          'Debugging Flutter on new iOS versions requires an LLDB Init File. '
-          'To ensure debug mode works, please complete one of the following in '
-          'your native Xcode project:\n'
-          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
-          '    ${lldbInitFile.path}\n\n'
-          '  * If you are already using an LLDB Init File, please append the '
-          'following to your LLDB Init File:\n\n'
-          '    command source ${lldbInitFile.path}\n',
-        );
-      }
       await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
       await _renderTemplateToFile(
         _lldbPythonHelperTemplate,
@@ -857,14 +1085,16 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   }
 
   File get pluginRegistrantHeader {
-    final Directory registryDirectory =
-        isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    final Directory registryDirectory = isModule
+        ? pluginRegistrantHost.childDirectory('Classes')
+        : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.h');
   }
 
   File get pluginRegistrantImplementation {
-    final Directory registryDirectory =
-        isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
+    final Directory registryDirectory = isModule
+        ? pluginRegistrantHost.childDirectory('Classes')
+        : pluginRegistrantHost;
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
@@ -925,6 +1155,9 @@ class MacOSProject extends XcodeBasedProject {
   String get pluginConfigKey => MacOSPlugin.kConfigKey;
 
   @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
+
+  @override
   bool existsSync() => hostAppRoot.existsSync();
 
   @override
@@ -971,7 +1204,6 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        featureFlags: featureFlags,
         useMacOSConfig: true,
       );
     }

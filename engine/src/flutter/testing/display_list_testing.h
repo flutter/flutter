@@ -198,12 +198,9 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                  bool render_with_attributes) override;
   void drawDisplayList(const sk_sp<DisplayList> display_list,
                        DlScalar opacity) override;
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override;
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
+  void drawText(const std::shared_ptr<DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
   void drawShadow(const DlPath& path,
                   const DlColor color,
                   const DlScalar elevation,
@@ -238,12 +235,16 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
     explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
         : dispatcher_(dispatcher) {}
 
-    void MoveTo(const DlPoint& p2, bool will_be_closed);
-    void LineTo(const DlPoint& p2);
-    void QuadTo(const DlPoint& cp, const DlPoint& p2);
-    bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight);
-    void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2);
-    void Close();
+    void MoveTo(const DlPoint& p2, bool will_be_closed) override;
+    void LineTo(const DlPoint& p2) override;
+    void QuadTo(const DlPoint& cp, const DlPoint& p2) override;
+    bool ConicTo(const DlPoint& cp,
+                 const DlPoint& p2,
+                 DlScalar weight) override;
+    void CubicTo(const DlPoint& cp1,
+                 const DlPoint& cp2,
+                 const DlPoint& p2) override;
+    void Close() override;
 
    private:
     DisplayListStreamDispatcher& dispatcher_;
@@ -559,15 +560,10 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
                        DlScalar opacity) override {
     RecordByType(DisplayListOpType::kDrawDisplayList);
   }
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override {
-    RecordByType(DisplayListOpType::kDrawTextBlob);
-  }
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override {
-    RecordByType(DisplayListOpType::kDrawTextFrame);
+  void drawText(const std::shared_ptr<DlText>& text,
+                DlScalar x,
+                DlScalar y) override {
+    RecordByType(DisplayListOpType::kDrawText);
   }
   void drawShadow(const DlPath& path,
                   const DlColor color,

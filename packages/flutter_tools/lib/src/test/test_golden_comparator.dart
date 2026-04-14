@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
@@ -111,7 +112,7 @@ final class TestGoldenComparator {
         _logger.printWarning('An error occurred compiling ${listenerFile.uri}: $error.');
         return null;
       case TestCompilerComplete(:final String outputPath):
-        final List<String> command = <String>[
+        final command = <String>[
           _flutterTesterBinPath,
           '--disable-vm-service',
           '--non-interactive',
@@ -273,8 +274,7 @@ class TestGoldenComparatorProcess {
     // Also parse stdout as a stream of JSON objects.
     streamIterator = StreamIterator<Map<String, dynamic>>(
       process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
+          .transform(utf8LineDecoder)
           .where((String line) {
             logger.printTrace('<<< $line');
             return line.isNotEmpty && line[0] == '{';
@@ -283,9 +283,7 @@ class TestGoldenComparatorProcess {
           .cast<Map<String, dynamic>>(),
     );
 
-    process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).forEach((
-      String line,
-    ) {
+    process.stderr.transform(utf8LineDecoder).forEach((String line) {
       logger.printError('<<< $line');
     });
   }
@@ -349,8 +347,8 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } on Exception catch (ex) {
-          print(jsonEncode({'success': false, 'message': '\$ex'}));
+        } on /*FlutterError*/ Object? catch (e) {
+          print(jsonEncode({'success': false, 'message': '\$e'}));
         }
       }
     } else {

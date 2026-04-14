@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/implicit_animations/animated_align.0.dart' as example;
+import 'package:flutter_api_samples/widgets/implicit_animations/animated_align.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,8 +16,8 @@ void main() {
       matching: find.byType(Align),
     );
 
-    const Alignment beginAlignment = Alignment.bottomLeft;
-    const Alignment endAlignment = Alignment.topRight;
+    const Alignment beginAlignment = .bottomLeft;
+    const Alignment endAlignment = .topRight;
 
     Align align = tester.widget(alignFinder);
     expect(align.alignment, beginAlignment);

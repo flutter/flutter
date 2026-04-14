@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Ieškoti žiniatinklyje",
   "shareButtonLabel": "Bendrinti",
   "pasteButtonLabel": "Įklijuoti",
-  "selectAllButtonLabel": "Pasirinkti viską"
+  "selectAllButtonLabel": "Pasirinkti viską",
+  "searchResultsFound": "Rasta paieškos rezultatų",
+  "noResultsFound": "Rezultatų nerasta",
+  "radioButtonUnselectedLabel": "Nepasirinkta"
 }

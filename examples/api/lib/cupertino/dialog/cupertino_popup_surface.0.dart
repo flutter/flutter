@@ -32,17 +32,18 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
     return CupertinoPageScaffold(
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: .min,
+              mainAxisAlignment: .spaceBetween,
               children: <Widget>[
                 const Text('Paint surface'),
                 const SizedBox(width: 16.0),
                 CupertinoSwitch(
                   value: _shouldPaintSurface,
-                  onChanged: (bool value) => setState(() => _shouldPaintSurface = value),
+                  onChanged: (bool value) =>
+                      setState(() => _shouldPaintSurface = value),
                 ),
               ],
             ),
@@ -64,19 +65,20 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
           isSurfacePainted: _shouldPaintSurface,
           child: Container(
             height: 240,
-            padding: const EdgeInsets.all(8.0),
+            padding: const .all(8.0),
             child: Column(
               children: <Widget>[
                 Expanded(
                   child: Container(
-                    alignment: Alignment.center,
-                    decoration:
-                        _shouldPaintSurface
-                            ? null
-                            : BoxDecoration(
-                              color: CupertinoTheme.of(context).scaffoldBackgroundColor,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
+                    alignment: .center,
+                    decoration: _shouldPaintSurface
+                        ? null
+                        : BoxDecoration(
+                            color: CupertinoTheme.of(
+                              context,
+                            ).scaffoldBackgroundColor,
+                            borderRadius: .circular(8.0),
+                          ),
                     child: const Text('This is a popup surface.'),
                   ),
                 ),
@@ -84,12 +86,14 @@ class _PopupSurfaceExampleState extends State<PopupSurfaceExample> {
                 SizedBox(
                   width: double.infinity,
                   child: CupertinoButton(
-                    color:
-                        _shouldPaintSurface
-                            ? null
-                            : CupertinoTheme.of(context).scaffoldBackgroundColor,
+                    color: _shouldPaintSurface
+                        ? null
+                        : CupertinoTheme.of(context).scaffoldBackgroundColor,
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Close', style: TextStyle(color: CupertinoColors.systemBlue)),
+                    child: const Text(
+                      'Close',
+                      style: TextStyle(color: CupertinoColors.systemBlue),
+                    ),
                   ),
                 ),
               ],

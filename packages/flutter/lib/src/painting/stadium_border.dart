@@ -84,21 +84,21 @@ class StadiumBorder extends OutlinedBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    final Radius radius = Radius.circular(rect.shortestSide / 2.0);
-    final RRect borderRect = RRect.fromRectAndRadius(rect, radius);
+    final radius = Radius.circular(rect.shortestSide / 2.0);
+    final borderRect = RRect.fromRectAndRadius(rect, radius);
     final RRect adjustedRect = borderRect.deflate(side.strokeInset);
     return Path()..addRRect(adjustedRect);
   }
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    final Radius radius = Radius.circular(rect.shortestSide / 2.0);
+    final radius = Radius.circular(rect.shortestSide / 2.0);
     return Path()..addRRect(RRect.fromRectAndRadius(rect, radius));
   }
 
   @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
-    final Radius radius = Radius.circular(rect.shortestSide / 2.0);
+    final radius = Radius.circular(rect.shortestSide / 2.0);
     canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
   }
 
@@ -111,8 +111,8 @@ class StadiumBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Radius radius = Radius.circular(rect.shortestSide / 2);
-        final RRect borderRect = RRect.fromRectAndRadius(rect, radius);
+        final radius = Radius.circular(rect.shortestSide / 2);
+        final borderRect = RRect.fromRectAndRadius(rect, radius);
         canvas.drawRRect(borderRect.inflate(side.strokeOffset / 2), side.toPaint());
     }
   }
@@ -214,7 +214,7 @@ class _StadiumToCircleBorder extends OutlinedBorder {
   }
 
   BorderRadius _adjustBorderRadius(Rect rect) {
-    final BorderRadius circleRadius = BorderRadius.circular(rect.shortestSide / 2);
+    final circleRadius = BorderRadius.circular(rect.shortestSide / 2);
     if (eccentricity != 0.0) {
       if (rect.width < rect.height) {
         return BorderRadius.lerp(

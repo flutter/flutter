@@ -17,12 +17,8 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../browser_detection.dart';
-import '../configuration.dart';
-import '../dom.dart';
-import 'renderer.dart';
 
 /// Entrypoint into the CanvasKit API.
 late CanvasKit canvasKit;
@@ -99,6 +95,10 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
 
+  external BidiNamespace get Bidi;
+
+  external CodeUnitsNamespace get CodeUnits;
+
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
   external SkTextStyle TextStyle(SkTextStyleProperties properties);
@@ -170,11 +170,23 @@ extension type CanvasKit(JSObject _) implements JSObject {
     bool srcIsPremultiplied,
   );
 
-  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) =>
-      _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromTextureSourceWithInfo` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  }
 
-  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) =>
-      _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromImageBitmap` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  }
+
+  external SkImage? MakeImageFromCanvasImageSource(JSAny src);
 }
 
 extension type CanvasKitModule(JSObject _) implements JSObject {
@@ -478,6 +490,16 @@ final List<SkFillType> _skFillTypes = <SkFillType>[
 
 SkFillType toSkFillType(ui.PathFillType fillType) {
   return _skFillTypes[fillType.index];
+}
+
+ui.PathFillType fromSkFillType(SkFillType fillType) {
+  if (fillType == canvasKit.FillType.Winding) {
+    return ui.PathFillType.nonZero;
+  }
+  if (fillType == canvasKit.FillType.EvenOdd) {
+    return ui.PathFillType.evenOdd;
+  }
+  throw UnimplementedError('Unsupported SkFillType: $fillType');
 }
 
 extension type SkPathOpEnum(JSObject _) implements JSObject {
@@ -959,6 +981,7 @@ extension type SkPaint._(JSObject _) implements JSObject {
   external void setAntiAlias(bool isAntiAlias);
   external void setColorInt(int color);
   external void setShader(SkShader? shader);
+  external void setDither(bool isDither);
   external void setMaskFilter(SkMaskFilter? maskFilter);
   external void setColorFilter(SkColorFilter? colorFilter);
   external void setStrokeMiter(double miterLimit);
@@ -1032,12 +1055,12 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
   );
 
   @JS('MakeMatrixTransform')
-  external SkImageFilter _MakeMatrixTransform(
+  external SkImageFilter? _MakeMatrixTransform(
     JSFloat32Array matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
   );
-  SkImageFilter MakeMatrixTransform(
+  SkImageFilter? MakeMatrixTransform(
     Float32List matrix, // 3x3 matrix
     CkFilterOptions filterOptions,
     void input, // we don't use this yet
@@ -1087,9 +1110,9 @@ extension type SkPathNamespace(JSObject _) implements JSObject {
 /// column major order) to an SkM44 which is a 4x4 matrix represented
 /// as a [Float32List] in row major order.
 Float32List toSkM44FromFloat32(Float32List matrix4) {
-  final Float32List skM44 = Float32List(16);
-  for (int r = 0; r < 4; r++) {
-    for (int c = 0; c < 4; c++) {
+  final skM44 = Float32List(16);
+  for (var r = 0; r < 4; r++) {
+    for (var c = 0; c < 4; c++) {
       skM44[c * 4 + r] = matrix4[r * 4 + c];
     }
   }
@@ -1106,8 +1129,8 @@ const List<int> _skMatrixIndexToMatrix4Index = <int>[
 /// Converts a 4x4 Flutter matrix (represented as a [Float32List]) to an
 /// SkMatrix, which is a 3x3 transform matrix.
 Float32List toSkMatrixFromFloat32(Float32List matrix4) {
-  final Float32List skMatrix = Float32List(9);
-  for (int i = 0; i < 9; ++i) {
+  final skMatrix = Float32List(9);
+  for (var i = 0; i < 9; ++i) {
     final int matrix4Index = _skMatrixIndexToMatrix4Index[i];
     if (matrix4Index < matrix4.length) {
       skMatrix[i] = matrix4[matrix4Index];
@@ -1121,8 +1144,8 @@ Float32List toSkMatrixFromFloat32(Float32List matrix4) {
 /// Converts a 4x4 Flutter matrix (represented as a [Float32List]) to an
 /// SkMatrix, which is a 3x3 transform matrix.
 Float32List toSkMatrixFromFloat64(Float64List matrix4) {
-  final Float32List skMatrix = Float32List(9);
-  for (int i = 0; i < 9; ++i) {
+  final skMatrix = Float32List(9);
+  for (var i = 0; i < 9; ++i) {
     final int matrix4Index = _skMatrixIndexToMatrix4Index[i];
     if (matrix4Index < matrix4.length) {
       skMatrix[i] = matrix4[matrix4Index];
@@ -1137,17 +1160,16 @@ Float32List toSkMatrixFromFloat64(Float64List matrix4) {
 ///
 /// The returned list can be passed to CanvasKit API that take points.
 Float32List toSkPoint(ui.Offset offset) {
-  final Float32List point = Float32List(2);
+  final point = Float32List(2);
   point[0] = offset.dx;
   point[1] = offset.dy;
   return point;
 }
 
 /// Color stops used when the framework specifies `null`.
-final Float32List _kDefaultSkColorStops =
-    Float32List(2)
-      ..[0] = 0
-      ..[1] = 1;
+final Float32List _kDefaultSkColorStops = Float32List(2)
+  ..[0] = 0
+  ..[1] = 1;
 
 /// Converts a list of color stops into a Skia-compatible JS array or color stops.
 ///
@@ -1158,8 +1180,8 @@ Float32List toSkColorStops(List<double>? colorStops) {
   }
 
   final int len = colorStops.length;
-  final Float32List skColorStops = Float32List(len);
-  for (int i = 0; i < len; i++) {
+  final skColorStops = Float32List(len);
+  for (var i = 0; i < len; i++) {
     skColorStops[i] = colorStops[i];
   }
   return skColorStops;
@@ -1289,8 +1311,33 @@ final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
 extension type SkPath._(JSObject _) implements JSObject {
-  external SkPath();
-  external SkPath.from(SkPath other);
+  external SkFillType getFillType();
+  external void setFillType(SkFillType fillType);
+
+  @JS('getBounds')
+  external JSFloat32Array _getBounds();
+  Float32List getBounds() => _getBounds().toDart;
+
+  external bool contains(double x, double y);
+
+  external String toSVGString();
+  external bool isEmpty();
+  external SkPath copy();
+
+  /// Serializes the path into a list of commands.
+  ///
+  /// The list can be used to create a new [SkPath] using
+  /// [CanvasKit.Path.MakeFromCmds].
+  @JS('toCmds')
+  external JSAny _toCmds();
+  List<dynamic> toCmds() => _toCmds().toObjectShallow as List<dynamic>;
+
+  external void delete();
+}
+
+@JS('window.flutterCanvasKit.PathBuilder')
+extension type SkPathBuilder._(JSObject _) implements JSObject {
+  external SkPathBuilder([SkPath skPath]);
 
   external void setFillType(SkFillType fillType);
 
@@ -1318,9 +1365,9 @@ extension type SkPath._(JSObject _) implements JSObject {
     bool extendPath,
   );
 
-  @JS('addPoly')
-  external void _addPoly(JSFloat32Array points, bool close);
-  void addPoly(Float32List points, bool close) => _addPoly(points.toJS, close);
+  @JS('addPolygon')
+  external void _addPolygon(JSFloat32Array points, bool close);
+  void addPolygon(Float32List points, bool close) => _addPolygon(points.toJS, close);
 
   @JS('addRRect')
   external void _addRRect(JSFloat32Array rrect, bool counterClockWise);
@@ -1382,9 +1429,9 @@ extension type SkPath._(JSObject _) implements JSObject {
   external void rMoveTo(double x, double y);
   external void rQuadTo(double x1, double y1, double x2, double y2);
   external void reset();
-  external String toSVGString();
+
   external bool isEmpty();
-  external SkPath copy();
+
   external void transform(
     double scaleX,
     double skewX,
@@ -1397,13 +1444,7 @@ extension type SkPath._(JSObject _) implements JSObject {
     double pers2,
   );
 
-  /// Serializes the path into a list of commands.
-  ///
-  /// The list can be used to create a new [SkPath] using
-  /// [CanvasKit.Path.MakeFromCmds].
-  @JS('toCmds')
-  external JSAny _toCmds();
-  List<dynamic> toCmds() => _toCmds().toObjectShallow as List<dynamic>;
+  external SkPath snapshot();
 
   external void delete();
 }
@@ -1430,7 +1471,7 @@ extension type SkContourMeasure(JSObject _) implements JSObject {
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toSkRect(ui.Rect rect) {
-  final Float32List skRect = Float32List(4);
+  final skRect = Float32List(4);
   skRect[0] = rect.left;
   skRect[1] = rect.top;
   skRect[2] = rect.right;
@@ -1453,7 +1494,7 @@ ui.Rect rectFromSkIRect(Int32List skIRect) {
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toSkRRect(ui.RRect rrect) {
-  final Float32List skRRect = Float32List(12);
+  final skRRect = Float32List(12);
   skRRect[0] = rrect.left;
   skRRect[1] = rrect.top;
   skRRect[2] = rrect.right;
@@ -1471,7 +1512,7 @@ Float32List toSkRRect(ui.RRect rrect) {
 
 // TODO(hterkelsen): Use a shared malloc'ed array for performance.
 Float32List toOuterSkRect(ui.RRect rrect) {
-  final Float32List skRect = Float32List(4);
+  final skRect = Float32List(4);
   skRect[0] = rrect.left;
   skRect[1] = rrect.top;
   skRect[2] = rrect.right;
@@ -1489,7 +1530,7 @@ SkFloat32List toMallocedSkPoints(List<ui.Offset> points) {
   final int len = points.length;
   final SkFloat32List skPoints = mallocFloat32List(len * 2);
   final Float32List list = skPoints.toTypedArray();
-  for (int i = 0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     list[2 * i] = points[i].dx;
     list[2 * i + 1] = points[i].dy;
   }
@@ -1499,8 +1540,8 @@ SkFloat32List toMallocedSkPoints(List<ui.Offset> points) {
 /// Converts a list of [ui.Offset] into a flat list of points.
 Float32List toFlatSkPoints(List<ui.Offset> points) {
   final int len = points.length;
-  final Float32List result = Float32List(len * 2);
-  for (int i = 0; i < len; i++) {
+  final result = Float32List(len * 2);
+  for (var i = 0; i < len; i++) {
     result[2 * i] = points[i].dx;
     result[2 * i + 1] = points[i].dy;
   }
@@ -1510,8 +1551,8 @@ Float32List toFlatSkPoints(List<ui.Offset> points) {
 /// Converts a list of [ui.Color] into a flat list of ints.
 Uint32List toFlatColors(List<ui.Color> colors) {
   final int len = colors.length;
-  final Uint32List result = Uint32List(len);
-  for (int i = 0; i < len; i++) {
+  final result = Uint32List(len);
+  for (var i = 0; i < len; i++) {
     result[i] = colors[i].value;
   }
   return result;
@@ -1519,8 +1560,8 @@ Uint32List toFlatColors(List<ui.Color> colors) {
 
 Uint16List toUint16List(List<int> ints) {
   final int len = ints.length;
-  final Uint16List result = Uint16List(len);
-  for (int i = 0; i < len; i++) {
+  final result = Uint16List(len);
+  for (var i = 0; i < len; i++) {
     result[i] = ints[i];
   }
   return result;
@@ -1778,9 +1819,44 @@ extension type SkPicture(JSObject _) implements JSObject {
 
   @JS('cullRect')
   external JSFloat32Array _cullRect();
+
   Float32List cullRect() => _cullRect().toDart;
 
   external int approximateBytesUsed();
+}
+
+extension type BidiRegion(JSObject _) implements JSObject {
+  external int get start;
+  external int get end;
+  external int get level;
+}
+
+extension type BidiIndex(JSObject _) implements JSObject {
+  external int get index;
+}
+
+extension type BidiNamespace(JSObject _) implements JSObject {
+  @JS('getBidiRegions')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
+  external JSArray<JSAny?> _getBidiRegions(String text, SkTextDirection dir);
+  List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
+      _getBidiRegions(text, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
+
+  @JS('reorderVisual')
+  // TODO(jlavrova): Use a JSInt32Array return type instead of `List<BidiIndex>`
+  external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
+  List<BidiIndex> reorderVisual(Uint8List visuals) =>
+      _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
+}
+
+extension type CodeUnitInfo(JSObject _) implements JSObject {
+  external int get flags;
+}
+
+extension type CodeUnitsNamespace(JSObject _) implements JSObject {
+  @JS('compute')
+  external JSArray<JSAny?> _compute(String text);
+  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
 }
 
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
@@ -1796,6 +1872,8 @@ extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
     return callMethod<JSBoolean>('RequiresClientICU'.toJS).toDart;
   }
 }
+
+final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
 extension type SkParagraphBuilder(JSObject _) implements JSObject {
   external void addText(String text);
@@ -1815,6 +1893,21 @@ extension type SkParagraphBuilder(JSObject _) implements JSObject {
   // SkParagraphBuilder.getText() returns a utf8 string, we need to decode it
   // into a utf16 string.
   String getText() => utf8.decode(getTextUtf8().codeUnits);
+
+  /// Injects required ICU data into the [SkParagraphBuilder] instance if needed.
+  ///
+  /// This only works in the CanvasKit Chromium variant that's compiled
+  /// without ICU data. In other variants, it's a no-op.
+  void injectClientICUIfNeeded() {
+    if (!_ckRequiresClientICU) {
+      return;
+    }
+
+    final SegmentationResult result = segmentText(getText());
+    setWordsUtf16(result.words);
+    setGraphemeBreaksUtf16(result.graphemes);
+    setLineBreaksUtf16(result.breaks);
+  }
 
   @JS('setWordsUtf8')
   external void _setWordsUtf8(JSUint32Array words);
@@ -2032,7 +2125,10 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
   external set value(double? v);
 }
 
-extension type SkTypeface(JSObject _) implements JSObject {}
+extension type SkTypeface(JSObject _) implements JSObject {
+  /// Returns the family name of the typeface.
+  external String? getFamilyName();
+}
 
 @JS('window.flutterCanvasKit.Font')
 extension type SkFont._(JSObject _) implements JSObject {
@@ -2098,16 +2194,13 @@ extension type SkGlyphClusterInfo(JSObject _) implements JSObject {
 
   ui.GlyphInfo get _glyphInfo {
     final List<JSNumber> list = _bounds.toDart.cast<JSNumber>();
-    final ui.Rect bounds = ui.Rect.fromLTRB(
+    final bounds = ui.Rect.fromLTRB(
       list[0].toDartDouble,
       list[1].toDartDouble,
       list[2].toDartDouble,
       list[3].toDartDouble,
     );
-    final ui.TextRange textRange = ui.TextRange(
-      start: _textRange.start.toInt(),
-      end: _textRange.end.toInt(),
-    );
+    final textRange = ui.TextRange(start: _textRange.start.toInt(), end: _textRange.end.toInt());
     return ui.GlyphInfo(bounds, textRange, ui.TextDirection.values[_direction.value.toInt()]);
   }
 }
@@ -2358,7 +2451,7 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) => canvasKitBas
 Future<CanvasKit> downloadCanvasKit() async {
   final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
 
-  final CanvasKit canvasKit =
+  final canvasKit =
       (await canvasKitModule
               .defaultExport(
                 CanvasKitInitOptions(locateFile: createLocateFileCallback(canvasKitWasmModuleUrl)),
@@ -2381,7 +2474,7 @@ Future<CanvasKit> downloadCanvasKit() async {
 ///
 /// If none of the URLs can be downloaded, throws an [Exception].
 Future<CanvasKitModule> _downloadOneOf(Iterable<String> urls) async {
-  for (final String url in urls) {
+  for (final url in urls) {
     try {
       return await _downloadCanvasKitJs(url);
     } catch (_) {

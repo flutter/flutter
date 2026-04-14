@@ -48,26 +48,32 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: OutlinedButton(onPressed: _toggleState, child: Text(_on ? 'Disable' : 'Enable')),
+          padding: const .all(8.0),
+          child: OutlinedButton(
+            onPressed: _toggleState,
+            child: Text(_on ? 'Disable' : 'Enable'),
+          ),
         ),
         if (_on)
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const .all(8.0),
             child: ActionListener(
               listener: (Action<Intent> action) {
                 if (action.intentType == MyIntent) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Action Listener Called')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Action Listener Called')),
+                  );
                 }
               },
               action: _myAction,
               child: ElevatedButton(
-                onPressed: () => const ActionDispatcher().invokeAction(_myAction, const MyIntent()),
+                onPressed: () => const ActionDispatcher().invokeAction(
+                  _myAction,
+                  const MyIntent(),
+                ),
                 child: const Text('Call Action Listener'),
               ),
             ),

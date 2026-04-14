@@ -23,6 +23,8 @@ Entity Entity::FromSnapshot(const Snapshot& snapshot, BlendMode blend_mode) {
   contents->SetSamplerDescriptor(snapshot.sampler_descriptor);
   contents->SetSourceRect(texture_rect);
   contents->SetOpacity(snapshot.opacity);
+  contents->SetNeedsRasterizationForRuntimeEffects(
+      snapshot.needs_rasterization_for_runtime_effects);
 
   Entity entity;
   entity.SetBlendMode(blend_mode);
@@ -90,8 +92,7 @@ Scalar Entity::GetShaderClipDepth() const {
 }
 
 Scalar Entity::GetShaderClipDepth(uint32_t clip_depth) {
-  Scalar result = std::clamp(clip_depth * kDepthEpsilon, 0.0f, 1.0f);
-  return std::min(result, 1.0f - kDepthEpsilon);
+  return std::clamp(clip_depth * kDepthEpsilon, 0.0f, 1.0f - kDepthEpsilon);
 }
 
 void Entity::SetBlendMode(BlendMode blend_mode) {

@@ -59,18 +59,20 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _androidWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
     String text;
     try {
-      text =
-          (await _processUtils.run(<String>[
-            _androidSdk!.adbPath!,
-            'devices',
-            '-l',
-          ], throwOnError: true)).stdout.trim();
+      text = (await _processUtils.run(<String>[
+        _androidSdk!.adbPath!,
+        'devices',
+        '-l',
+      ], throwOnError: true)).stdout.trim();
     } on ProcessException catch (exception) {
       throwToolExit(
         'Unable to run "adb", check your Android SDK installation and '
@@ -78,7 +80,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
         'Error details: ${exception.message}',
       );
     }
-    final List<AndroidDevice> devices = <AndroidDevice>[];
+    final devices = <AndroidDevice>[];
     _parseADBDeviceOutput(text, devices: devices);
     return devices;
   }
@@ -97,7 +99,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     if (result.exitCode != 0) {
       return <String>[];
     }
-    final List<String> diagnostics = <String>[];
+    final diagnostics = <String>[];
     _parseADBDeviceOutput(result.stdout, diagnostics: diagnostics);
     return diagnostics;
   }
@@ -109,7 +111,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
+  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,
@@ -148,7 +150,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
         final String deviceState = match[2]!;
         String? rest = match[3];
 
-        final Map<String, String> info = <String, String>{};
+        final info = <String, String>{};
         if (rest != null && rest.isNotEmpty) {
           rest = rest.trim();
           for (final String data in rest.split(' ')) {

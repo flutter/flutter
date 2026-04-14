@@ -86,7 +86,7 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
 
   // Helper function to build the potentially nested ClipPath structure
   Widget _buildClippedContent(Widget child) {
-    Widget currentChild = child;
+    var currentChild = child;
     // Iterate through the defined nesting order
     for (final ClipperType clipperType in _clipperNestingOrder) {
       // If the clipper is active in the state map, wrap the current widget
@@ -109,10 +109,9 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
         alignment: Alignment.center,
         children: <Widget>[
           // Background
-          SizedBox(width: 500, height: 500, child: ColoredBox(color: Colors.green)),
-          SizedBox(
-            width: 400,
-            height: 400,
+          SizedBox.square(dimension: 500, child: ColoredBox(color: Colors.green)),
+          SizedBox.square(
+            dimension: 400,
             child: _HybridCompositionAndroidPlatformView(
               viewType: 'changing_color_button_platform_view',
             ),
@@ -131,14 +130,13 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
               spacing: 8.0,
               runSpacing: 4.0,
               alignment: WrapAlignment.center,
-              children:
-                  ClipperType.values.map((ClipperType type) {
-                    return ElevatedButton(
-                      key: ValueKey<String>('clipper_button_${type.name}'), // Use enum name in key
-                      onPressed: () => _toggleClipper(type),
-                      child: Text(type.name), // Display clipper name on button
-                    );
-                  }).toList(),
+              children: ClipperType.values.map((ClipperType type) {
+                return ElevatedButton(
+                  key: ValueKey<String>('clipper_button_${type.name}'), // Use enum name in key
+                  onPressed: () => _toggleClipper(type),
+                  child: Text(type.name), // Display clipper name on button
+                );
+              }).toList(),
             ),
           ),
           // Expanded takes remaining space for the clipped content
@@ -157,7 +155,7 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
 class CubicWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final Path path = Path();
+    final path = Path();
     // Closer to 1 moves the wave lower, closer to 0 moves it higher.
     final double waveHeight = size.height * 0.65;
 
@@ -189,7 +187,7 @@ class CubicWaveClipper extends CustomClipper<Path> {
 class TriangleClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final Path path = Path();
+    final path = Path();
     path.lineTo(0, size.height);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 0);
@@ -214,7 +212,7 @@ class OverlappingRectClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     // Note: Path coordinates are relative to the widget being clipped.
-    final Path path = Path();
+    final path = Path();
 
     // Define the two rectangles relative to the widget's size
     final double rectWidth = size.width * 0.4;
@@ -224,8 +222,8 @@ class OverlappingRectClipper extends CustomClipper<Path> {
     final double offsetX2 = size.width * 0.25;
     final double offsetY2 = size.height * 0.25;
 
-    final Rect rect1 = Rect.fromLTWH(offsetX1, offsetY1, rectWidth, rectHeight);
-    final Rect rect2 = Rect.fromLTWH(offsetX2, offsetY2, rectWidth, rectHeight); // Overlaps rect1
+    final rect1 = Rect.fromLTWH(offsetX1, offsetY1, rectWidth, rectHeight);
+    final rect2 = Rect.fromLTWH(offsetX2, offsetY2, rectWidth, rectHeight); // Overlaps rect1
 
     // Add the rectangles to the path
     path.addRect(rect1);

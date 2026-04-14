@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 
 const TextStyle textStyle = TextStyle();
@@ -69,7 +70,7 @@ void main() {
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final editableTextKey = GlobalKey<EditableTextState>();
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -94,7 +95,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Populate a fake clipboard.
-    const String clipboardContent = ' ';
+    const clipboardContent = ' ';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall methodCall,
     ) async {
@@ -126,7 +127,7 @@ void main() {
   });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+    final editableTextKey = GlobalKey<EditableTextState>();
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -152,7 +153,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Populate a fake clipboard.
-    const String clipboardContent = ' ';
+    const clipboardContent = ' ';
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall methodCall,
     ) async {
@@ -182,117 +183,94 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Cursor animates on iOS',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField())));
+  testWidgets('Cursor can animate', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Material(child: TestTextField(cursorOpacityAnimates: true))),
+    );
 
-      final Finder textFinder = find.byType(TextField);
-      await tester.tap(textFinder);
-      await tester.pump();
-
-      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-      final RenderEditable renderEditable = editableTextState.renderEditable;
-
-      expect(renderEditable.cursorColor!.opacity, 1.0);
-
-      int walltimeMicrosecond = 0;
-      double lastVerifiedOpacity = 1.0;
-
-      Future<void> verifyKeyFrame({required double opacity, required int at}) async {
-        const int delta = 1;
-        assert(at - delta > walltimeMicrosecond);
-        await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
-
-        // Instead of verifying the opacity at each key frame, this function
-        // verifies the opacity immediately *before* each key frame to avoid
-        // fp precision issues.
-        expect(
-          renderEditable.cursorColor!.opacity,
-          closeTo(lastVerifiedOpacity, 0.01),
-          reason: 'opacity at ${at - delta} microseconds',
-        );
-
-        walltimeMicrosecond = at - delta;
-        lastVerifiedOpacity = opacity;
-      }
-
-      await verifyKeyFrame(opacity: 1.0, at: 500000);
-      await verifyKeyFrame(opacity: 0.75, at: 537500);
-      await verifyKeyFrame(opacity: 0.5, at: 575000);
-      await verifyKeyFrame(opacity: 0.25, at: 612500);
-      await verifyKeyFrame(opacity: 0.0, at: 650000);
-      await verifyKeyFrame(opacity: 0.0, at: 850000);
-      await verifyKeyFrame(opacity: 0.25, at: 887500);
-      await verifyKeyFrame(opacity: 0.5, at: 925000);
-      await verifyKeyFrame(opacity: 0.75, at: 962500);
-      await verifyKeyFrame(opacity: 1.0, at: 1000000);
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  );
-
-  testWidgets(
-    'Cursor does not animate on non-iOS platforms',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(maxLines: 3))));
-
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-      // Wait for the current animation to finish. If the cursor never stops its
-      // blinking animation the test will timeout.
-      await tester.pumpAndSettle();
-
-      for (int i = 0; i < 40; i += 1) {
-        await tester.pump(const Duration(milliseconds: 100));
-        expect(tester.hasRunningAnimations, false);
-      }
-    },
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-  );
-
-  testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-    const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
-    await tester.pumpWidget(widget);
-
-    await tester.tap(find.byType(TextField));
+    final Finder textFinder = find.byType(TestTextField);
+    await tester.tap(textFinder);
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
+    expect(renderEditable.cursorColor!.opacity, 1.0);
+
+    var walltimeMicrosecond = 0;
+    var lastVerifiedOpacity = 1.0;
+
+    Future<void> verifyKeyFrame({required double opacity, required int at}) async {
+      const delta = 1;
+      assert(at - delta > walltimeMicrosecond);
+      await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
+
+      // Instead of verifying the opacity at each key frame, this function
+      // verifies the opacity immediately *before* each key frame to avoid
+      // fp precision issues.
+      expect(
+        renderEditable.cursorColor!.opacity,
+        closeTo(lastVerifiedOpacity, 0.01),
+        reason: 'opacity at ${at - delta} microseconds',
+      );
+
+      walltimeMicrosecond = at - delta;
+      lastVerifiedOpacity = opacity;
+    }
+
+    await verifyKeyFrame(opacity: 1.0, at: 500000);
+    await verifyKeyFrame(opacity: 0.75, at: 537500);
+    await verifyKeyFrame(opacity: 0.5, at: 575000);
+    await verifyKeyFrame(opacity: 0.25, at: 612500);
+    await verifyKeyFrame(opacity: 0.0, at: 650000);
+    await verifyKeyFrame(opacity: 0.0, at: 850000);
+    await verifyKeyFrame(opacity: 0.25, at: 887500);
+    await verifyKeyFrame(opacity: 0.5, at: 925000);
+    await verifyKeyFrame(opacity: 0.75, at: 962500);
+    await verifyKeyFrame(opacity: 1.0, at: 1000000);
+  });
+
+  testWidgets('Cursor is static when cursorOpacityAnimates is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: TestTextField(
+            // cursorOpacityAnimates: false, default value.
+            maxLines: 3,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
+    // Wait for the current animation to finish. If the cursor never stops its
+    // blinking animation the test will timeout.
+    await tester.pumpAndSettle();
 
-    // Android cursor goes from exactly on to exactly off on the 500ms dot.
-    await tester.pump(const Duration(milliseconds: 499));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
-
-    await tester.pump(const Duration(milliseconds: 1));
-    expect(renderEditable.cursorColor!.alpha, 0);
-    // Don't try to draw the cursor.
-    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 0);
-    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+    for (var i = 0; i < 40; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.hasRunningAnimations, false);
+    }
   });
 
   testWidgets(
-    'Cursor does not animates when debugDeterministicCursor is set',
+    'Cursor does not animate when EditableText.debugDeterministicCursor and cursorOpacityAnimates are true',
     (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-      const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
+      final defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
+      final Widget widget = MaterialApp(
+        home: Material(
+          child: TestTextField(
+            maxLines: 3,
+            cursorColor: defaultCursorColor,
+            cursorOpacityAnimates: true,
+          ),
+        ),
+      );
       await tester.pumpWidget(widget);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pump();
 
       final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
@@ -303,67 +281,28 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
       expect(renderEditable.cursorColor!.alpha, 255);
-      expect(renderEditable, paints..rrect(color: defaultCursorColor));
+      expect(renderEditable, paints..rect(color: defaultCursorColor));
 
       // Cursor draw never changes.
       await tester.pump(const Duration(milliseconds: 200));
       expect(renderEditable.cursorColor!.alpha, 255);
-      expect(renderEditable, paints..rrect(color: defaultCursorColor));
+      expect(renderEditable, paints..rect(color: defaultCursorColor));
 
       // No more transient calls.
       await tester.pumpAndSettle();
       expect(renderEditable.cursorColor!.alpha, 255);
-      expect(renderEditable, paints..rrect(color: defaultCursorColor));
+      expect(renderEditable, paints..rect(color: defaultCursorColor));
 
       EditableText.debugDeterministicCursor = false;
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
   );
-
-  testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (
-    WidgetTester tester,
-  ) async {
-    final Color defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-    EditableText.debugDeterministicCursor = true;
-    const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
-    await tester.pumpWidget(widget);
-
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-    final RenderEditable renderEditable = editableTextState.renderEditable;
-
-    await tester.pump();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
-
-    // Cursor draw never changes.
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
-
-    // No more transient calls.
-    await tester.pumpAndSettle();
-    expect(renderEditable.cursorColor!.alpha, 255);
-    expect(renderEditable, paints..rect(color: defaultCursorColor));
-
-    EditableText.debugDeterministicCursor = false;
-  });
 
   testWidgets(
     'Cursor animation restarts when it is moved using keys on desktop',
     (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
 
-      const String testText = 'Some text long enough to move the cursor around';
+      const testText = 'Some text long enough to move the cursor around';
       controller.text = testText;
 
       final Widget widget = MaterialApp(
@@ -442,11 +381,11 @@ void main() {
 
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
-      home: Material(child: TextField(showCursor: false, maxLines: 3)),
+      home: Material(child: TestTextField(showCursor: false, maxLines: 3)),
     );
     await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
@@ -466,7 +405,9 @@ void main() {
   testWidgets('Cursor does not show when not focused', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106512 .
     await tester.pumpWidget(
-      MaterialApp(home: Material(child: TextField(focusNode: focusNode, autofocus: true))),
+      MaterialApp(
+        home: Material(child: TestTextField(focusNode: focusNode, autofocus: true)),
+      ),
     );
     assert(focusNode.hasFocus);
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
@@ -475,7 +416,7 @@ void main() {
     focusNode.unfocus();
     await tester.pump();
 
-    for (int i = 0; i < 10; i += 10) {
+    for (var i = 0; i < 10; i += 10) {
       // Make sure it does not paint for a period of time.
       expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
       expect(tester.hasRunningAnimations, isFalse);
@@ -489,27 +430,10 @@ void main() {
     expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
   });
 
-  testWidgets(
-    'Cursor radius is 2.0',
-    (WidgetTester tester) async {
-      const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
-      await tester.pumpWidget(widget);
-
-      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-      final RenderEditable renderEditable = editableTextState.renderEditable;
-
-      expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
-
   testWidgets('Cursor gets placed correctly after going out of bounds', (
     WidgetTester tester,
   ) async {
-    const String text = 'hello world this is fun and cool and awesome!';
+    const text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
     await tester.pumpWidget(
@@ -617,7 +541,7 @@ void main() {
   testWidgets('Updating the floating cursor correctly moves the cursor', (
     WidgetTester tester,
   ) async {
-    const String text = 'hello world this is fun and cool and awesome!';
+    const text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
     await tester.pumpWidget(
@@ -673,7 +597,7 @@ void main() {
   });
 
   testWidgets('Updating the floating cursor can end without update', (WidgetTester tester) async {
-    const String text = 'hello world this is fun and cool and awesome!';
+    const text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
     await tester.pumpWidget(
@@ -720,7 +644,7 @@ void main() {
   });
 
   testWidgets("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
-    const String text = 'hello world this is fun and cool and awesome!';
+    const text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
     await tester.pumpWidget(
@@ -748,7 +672,7 @@ void main() {
     // Check that the cursor visibility toggles after each blink interval.
     // Or if it's not blinking at all, it stays on.
     Future<void> checkCursorBlinking({bool isBlinking = true}) async {
-      bool initialShowCursor = true;
+      var initialShowCursor = true;
       if (isBlinking) {
         initialShowCursor = editableText.cursorCurrentlyVisible;
       }
@@ -803,7 +727,7 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = debugDeterministicCursor;
     });
-    const Key key = Key('EditableText');
+    const key = Key('EditableText');
 
     Widget buildEditableText({required bool showCursor}) {
       return MediaQuery(
@@ -850,7 +774,7 @@ void main() {
   testWidgets('Trying to select with the floating cursor does not crash', (
     WidgetTester tester,
   ) async {
-    const String text = 'hello world this is fun and cool and awesome!';
+    const text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
 
     await tester.pumpWidget(
@@ -918,7 +842,7 @@ void main() {
   });
 
   testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
-    const String text = 'hello world';
+    const text = 'hello world';
     controller.text = text;
 
     await tester.pumpWidget(
@@ -950,8 +874,8 @@ void main() {
   testWidgets(
     'Floating cursor is painted',
     (WidgetTester tester) async {
-      const TextStyle textStyle = TextStyle();
-      const String text = 'hello world this is fun and cool and awesome!';
+      const textStyle = TextStyle();
+      const text = 'hello world this is fun and cool and awesome!';
       controller.text = text;
 
       await tester.pumpWidget(
@@ -1051,7 +975,7 @@ void main() {
     'cursor layout',
     (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+      final editableTextKey = GlobalKey<EditableTextState>();
 
       late String changedValue;
       final Widget widget = MaterialApp(
@@ -1081,7 +1005,7 @@ void main() {
       await tester.pumpWidget(widget);
 
       // Populate a fake clipboard.
-      const String clipboardContent = 'Hello world!';
+      const clipboardContent = 'Hello world!';
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
@@ -1121,7 +1045,7 @@ void main() {
     'cursor layout has correct height',
     (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
-      final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+      final editableTextKey = GlobalKey<EditableTextState>();
 
       late String changedValue;
       final Widget widget = MaterialApp(
@@ -1152,7 +1076,7 @@ void main() {
       await tester.pumpWidget(widget);
 
       // Populate a fake clipboard.
-      const String clipboardContent = 'Hello world!';
+      const clipboardContent = 'Hello world!';
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
@@ -1233,9 +1157,12 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = false;
     });
-    const String text = '12';
-    final TextEditingController controller = TextEditingController.fromValue(
-      const TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length)),
+    const text = '12';
+    final controller = TextEditingController.fromValue(
+      const TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
     );
     addTearDown(controller.dispose);
 
@@ -1258,7 +1185,7 @@ void main() {
       const TextPosition(offset: text.length),
     );
 
-    for (int i = 0; i < 3; i++) {
+    for (var i = 0; i < 3; i++) {
       Actions.invoke(primaryFocus!.context!, const DeleteCharacterIntent(forward: false));
       await tester.pump();
       expect(controller.text.length, math.max(0, text.length - 1 - i));
@@ -1279,8 +1206,8 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = false;
     });
-    final String text = 'test${' ' * 1000}';
-    final TextEditingController controller = TextEditingController.fromValue(
+    final text = 'test${' ' * 1000}';
+    final controller = TextEditingController.fromValue(
       TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
@@ -1310,7 +1237,7 @@ void main() {
     expect(renderEditable.getLineAtOffset(TextPosition(offset: text.length)).start, 0);
 
     // The caretRect shouldn't be outside of the RenderEditable.
-    final Rect caretRect = Rect.fromLTWH(
+    final caretRect = Rect.fromLTWH(
       editableTextRect.right - 13.0 - 1.0,
       editableTextRect.top,
       13.0,
@@ -1323,14 +1250,14 @@ void main() {
     'Caret with a cursorHeight smaller than font size is vertically centered on non-Apple platforms',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/143480.
-      final TextEditingController controller = TextEditingController.fromValue(
+      final controller = TextEditingController.fromValue(
         const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
       );
       addTearDown(controller.dispose);
 
-      const double cursorHeight = 12.0;
-      const double cursorWidth = 4.0;
-      const double fontSize = 16.0;
+      const cursorHeight = 12.0;
+      const cursorWidth = 4.0;
+      const fontSize = 16.0;
 
       final Widget widget = EditableText(
         autofocus: true,
@@ -1349,7 +1276,7 @@ void main() {
       final RenderEditable renderEditable = editableTextState.renderEditable;
 
       // The caretRect is vertically centered.
-      const Rect caretRect = Rect.fromLTWH(
+      const caretRect = Rect.fromLTWH(
         0.0,
         (fontSize - cursorHeight) / 2,
         cursorWidth,
@@ -1366,14 +1293,14 @@ void main() {
     'Caret with a cursorHeight bigger than font size is vertically centered on non-Apple platforms',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/143480.
-      final TextEditingController controller = TextEditingController.fromValue(
+      final controller = TextEditingController.fromValue(
         const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
       );
       addTearDown(controller.dispose);
 
-      const double cursorHeight = 24.0;
-      const double cursorWidth = 4.0;
-      const double fontSize = 16.0;
+      const cursorHeight = 24.0;
+      const cursorWidth = 4.0;
+      const fontSize = 16.0;
 
       final Widget widget = EditableText(
         autofocus: true,
@@ -1392,7 +1319,7 @@ void main() {
       final RenderEditable renderEditable = editableTextState.renderEditable;
 
       // The caretRect is vertically centered.
-      const Rect caretRect = Rect.fromLTWH(
+      const caretRect = Rect.fromLTWH(
         0.0,
         (fontSize - cursorHeight) / 2,
         cursorWidth,
@@ -1410,11 +1337,11 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = false;
     });
-    final String text =
+    final text =
         'test${' ' * 50}\n'
         '2nd line\n'
         '\n';
-    final TextEditingController controller = TextEditingController.fromValue(
+    final controller = TextEditingController.fromValue(
       TextEditingValue(text: text, selection: const TextSelection.collapsed(offset: 0)),
     );
     addTearDown(controller.dispose);
@@ -1436,16 +1363,14 @@ void main() {
     final Rect editableTextRect = tester.getRect(find.byWidget(widget));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    final Iterable<TextPosition> positions = List<int>.generate(
-      text.length + 1,
-      (int index) => index,
-    ).expand(
-      (int i) => <TextPosition>[
-        TextPosition(offset: i, affinity: TextAffinity.upstream),
-        TextPosition(offset: i),
-      ],
-    );
-    for (final TextPosition position in positions) {
+    final Iterable<TextPosition> positions =
+        List<int>.generate(text.length + 1, (int index) => index).expand(
+          (int i) => <TextPosition>[
+            TextPosition(offset: i, affinity: TextAffinity.upstream),
+            TextPosition(offset: i),
+          ],
+        );
+    for (final position in positions) {
       controller.selection = TextSelection.fromPosition(position);
       await tester.pump();
 

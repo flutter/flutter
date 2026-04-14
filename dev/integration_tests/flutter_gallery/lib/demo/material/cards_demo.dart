@@ -183,12 +183,11 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                   child: Stack(
                     children: <Widget>[
                       Container(
-                        color:
-                            _isSelected
-                                // Generally, material cards use primary with 8% opacity for the selected state.
-                                // See: https://material.io/design/interaction/states.html#anatomy
-                                ? colorScheme.primary.withOpacity(0.08)
-                                : Colors.transparent,
+                        color: _isSelected
+                            // Generally, material cards use primary with 8% opacity for the selected state.
+                            // See: https://material.io/design/interaction/states.html#anatomy
+                            ? colorScheme.primary.withOpacity(0.08)
+                            : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
                       Align(
@@ -353,17 +352,16 @@ class _CardsDemoState extends State<CardsDemo> {
             icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'update shape'),
             onPressed: () {
               setState(() {
-                _shape =
-                    _shape != null
-                        ? null
-                        : const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16.0),
-                            topRight: Radius.circular(16.0),
-                            bottomLeft: Radius.circular(2.0),
-                            bottomRight: Radius.circular(2.0),
-                          ),
-                        );
+                _shape = _shape != null
+                    ? null
+                    : const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16.0),
+                          topRight: Radius.circular(16.0),
+                          bottomLeft: Radius.circular(2.0),
+                          bottomRight: Radius.circular(2.0),
+                        ),
+                      );
               });
             },
           ),

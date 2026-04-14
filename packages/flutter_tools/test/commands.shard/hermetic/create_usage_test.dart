@@ -33,14 +33,13 @@ class FakePub extends Fake implements Pub {
     required FlutterProject project,
     bool upgrade = false,
     bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
+    bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFile(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -64,7 +63,7 @@ void main() {
         setup: () {
           fakePub = FakePub();
           Cache.flutterRoot = 'flutter';
-          final List<String> filePaths = <String>[
+          final filePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
             globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
             globals.fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
@@ -78,11 +77,19 @@ void main() {
             ),
             globals.fs.path.join('usr', 'local', 'bin', 'adb'),
             globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
+            globals.fs.path.join('flutter', 'pubspec.lock'),
+            globals.fs.path.join('flutter', 'version'),
           ];
-          for (final String filePath in filePaths) {
-            globals.fs.file(filePath).createSync(recursive: true);
+          for (final filePath in filePaths) {
+            final File file = globals.fs.file(filePath);
+            file.createSync(recursive: true);
+            if (filePath.endsWith('pubspec.yaml')) {
+              file.writeAsStringSync('dependencies: {}\n');
+            } else if (filePath.endsWith('pubspec.lock')) {
+              file.writeAsStringSync('packages: {}\n');
+            }
           }
-          final List<String> templatePaths = <String>[
+          final templatePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
             globals.fs.path.join(
               'flutter',
@@ -131,9 +138,34 @@ void main() {
               'templates',
               'plugin_cocoapods',
             ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_swift_package_manager',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_cocoapods',
+            ),
+            globals.fs.path.join(
+              'flutter',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'plugin_darwin_spm',
+            ),
           ];
-          for (final String templatePath in templatePaths) {
+          for (final templatePath in templatePaths) {
             globals.fs.directory(templatePath).createSync(recursive: true);
+            globals.fs
+                .directory(templatePath)
+                .childFile('pubspec.yaml.tmpl')
+                .writeAsStringSync('name: my_app\ndependencies: {}\n');
           }
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(
@@ -174,7 +206,6 @@ void main() {
         },
         overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-          FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
         },
       );
     });
@@ -182,7 +213,7 @@ void main() {
     testUsingContext(
       'set template type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
@@ -220,36 +251,9 @@ void main() {
     );
 
     testUsingContext(
-      'set iOS host language type as usage value',
-      () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'swift',
-        );
-
-        await runner.run(<String>[
-          'create',
-          '--no-pub',
-          '--template=app',
-          '--ios-language=objc',
-          'testy',
-        ]);
-        expect(
-          (await command.unifiedAnalyticsUsageValues('create')).eventData['createIosLanguage'],
-          'objc',
-        );
-      }),
-      overrides: <Type, Generator>{Java: () => FakeJava()},
-    );
-
-    testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
@@ -276,7 +280,7 @@ void main() {
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['create', 'testy', '--offline']);
         expect(fakePub.calledOnline, 0);
@@ -289,7 +293,7 @@ void main() {
     testUsingContext(
       'package_ffi template not enabled',
       () async {
-        final CreateCommand command = CreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         expect(
@@ -300,13 +304,20 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        FeatureFlags:
-            () => TestFeatureFlags(
-              isNativeAssetsEnabled:
-                  false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
-            ),
+        FeatureFlags: () => TestFeatureFlags(
+          isNativeAssetsEnabled:
+              false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+        ),
       },
     );
+
+    testUsingContext('plugin_ffi template is marked as deprecated in help', () {
+      final command = CreateCommand();
+      final String? templateHelp =
+          command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
+      expect(templateHelp, contains('(deprecated)'));
+      expect(templateHelp, contains('Use "package_ffi" instead.'));
+    });
   });
 }
 

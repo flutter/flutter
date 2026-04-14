@@ -4,10 +4,11 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
-
 #import <QuartzCore/QuartzCore.h>
+
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
+#import "flutter/shell/platform/darwin/macos/InternalFlutterSwift/InternalFlutterSwift.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 
 @interface FlutterView () <FlutterSurfaceManagerDelegate> {
   FlutterViewIdentifier _viewIdentifier;
@@ -24,7 +25,8 @@
 - (instancetype)initWithMTLDevice:(id<MTLDevice>)device
                      commandQueue:(id<MTLCommandQueue>)commandQueue
                          delegate:(id<FlutterViewDelegate>)delegate
-                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
+                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier
+                  enableWideGamut:(BOOL)enableWideGamut {
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
@@ -35,18 +37,30 @@
     _surfaceManager = [[FlutterSurfaceManager alloc] initWithDevice:device
                                                        commandQueue:commandQueue
                                                               layer:self.layer
-                                                           delegate:self];
+                                                           delegate:self
+                                                          wideGamut:enableWideGamut];
     _resizeSynchronizer = [[FlutterResizeSynchronizer alloc] init];
   }
   return self;
 }
 
 - (void)onPresent:(CGSize)frameSize withBlock:(dispatch_block_t)block delay:(NSTimeInterval)delay {
-  [_resizeSynchronizer performCommitForSize:frameSize notify:block delay:delay];
+  // This block will be called in main thread same run loop turn as the layer content
+  // update.
+  auto notifyBlock = ^{
+    NSSize scaledSize = [self convertSizeFromBacking:frameSize];
+    [self.sizingDelegate viewDidUpdateContents:self withSize:scaledSize];
+    block();
+  };
+  [_resizeSynchronizer performCommitForSize:frameSize afterDelay:delay notify:notifyBlock];
 }
 
 - (FlutterSurfaceManager*)surfaceManager {
   return _surfaceManager;
+}
+
+- (void)setEnableWideGamut:(BOOL)enableWideGamut {
+  [_surfaceManager setEnableWideGamut:enableWideGamut];
 }
 
 - (void)shutDown {
@@ -61,11 +75,16 @@
 
 - (void)setFrameSize:(NSSize)newSize {
   [super setFrameSize:newSize];
-  CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
-  [_resizeSynchronizer beginResizeForSize:scaledSize
-                                   notify:^{
-                                     [_viewDelegate viewDidReshape:self];
-                                   }];
+  if (!self.sizedToContents) {
+    CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
+    [_resizeSynchronizer beginResizeForSize:scaledSize
+        notify:^{
+          [_viewDelegate viewDidReshape:self];
+        }
+        onTimeout:^{
+          [FlutterLogger logError:@"Resize timed out"];
+        }];
+  }
 }
 
 /**
@@ -152,6 +171,34 @@
     applicationName = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleName"];
   }
   return applicationName;
+}
+
+- (BOOL)sizedToContents {
+  return _sizingDelegate != nil && [_sizingDelegate minimumViewSize:self] != std::nullopt;
+}
+
+- (NSSize)minimumContentSize {
+  if (_sizingDelegate != nil) {
+    std::optional<NSSize> minSize = [_sizingDelegate minimumViewSize:self];
+    if (minSize) {
+      return *minSize;
+    }
+  }
+  return self.bounds.size;
+}
+
+- (NSSize)maximumContentSize {
+  if (_sizingDelegate != nil) {
+    std::optional<NSSize> maxSize = [_sizingDelegate maximumViewSize:self];
+    if (maxSize) {
+      return *maxSize;
+    }
+  }
+  return self.bounds.size;
+}
+
+- (void)constraintsDidChange {
+  [_viewDelegate viewDidReshape:self];
 }
 
 @end

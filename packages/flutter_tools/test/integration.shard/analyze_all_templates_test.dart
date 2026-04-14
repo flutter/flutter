@@ -13,7 +13,7 @@ import 'test_utils.dart';
 
 void main() {
   group('pass analyze template:', () {
-    final List<String> templates = <String>['app', 'module', 'package', 'plugin', 'plugin_ffi'];
+    final templates = <String>['app', 'module', 'package', 'plugin', 'plugin_ffi'];
     late Directory tempDir;
 
     setUp(() {
@@ -26,7 +26,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    for (final String template in templates) {
+    for (final template in templates) {
       testUsingContext('analysis for $template', () async {
         final String projectPath = await createProject(
           tempDir,

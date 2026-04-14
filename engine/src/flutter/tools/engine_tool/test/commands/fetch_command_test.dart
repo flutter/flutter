@@ -23,7 +23,7 @@ void main() {
     return;
   }
 
-  final Map<String, BuilderConfig> configs = <String, BuilderConfig>{};
+  final configs = <String, BuilderConfig>{};
 
   (Environment, List<FakeCommandLogEntry>) linuxEnv(Logger logger) {
     final runHistory = <FakeCommandLogEntry>[];
@@ -55,9 +55,9 @@ void main() {
   }
 
   test('fetch command invokes gclient sync -D', () async {
-    final Logger logger = Logger.test((_) {});
+    final logger = Logger.test((_) {});
     final (Environment env, List<FakeCommandLogEntry> runHistory) = linuxEnv(logger);
-    final ToolCommandRunner runner = ToolCommandRunner(environment: env, configs: configs);
+    final runner = ToolCommandRunner(environment: env, configs: configs);
     final int result = await runner.run(<String>['fetch']);
     expect(result, equals(0));
     expect(runHistory.length, greaterThanOrEqualTo(1));
@@ -65,9 +65,9 @@ void main() {
   });
 
   test('fetch command has sync alias', () async {
-    final Logger logger = Logger.test((_) {});
+    final logger = Logger.test((_) {});
     final (Environment env, List<FakeCommandLogEntry> runHistory) = linuxEnv(logger);
-    final ToolCommandRunner runner = ToolCommandRunner(environment: env, configs: configs);
+    final runner = ToolCommandRunner(environment: env, configs: configs);
     final int result = await runner.run(<String>['sync']);
     expect(result, equals(0));
     expect(runHistory.length, greaterThanOrEqualTo(1));

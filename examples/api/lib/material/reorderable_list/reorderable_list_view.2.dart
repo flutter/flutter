@@ -44,11 +44,18 @@ class _ReorderableExampleState extends State<ReorderableExample> {
         Card(
           key: Key('$index'),
           color: _items[index].isOdd ? oddItemColor : evenItemColor,
-          child: SizedBox(height: 80, child: Center(child: Text('Card ${_items[index]}'))),
+          child: SizedBox(
+            height: 80,
+            child: Center(child: Text('Card ${_items[index]}')),
+          ),
         ),
     ];
 
-    Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    Widget proxyDecorator(
+      Widget child,
+      int index,
+      Animation<double> animation,
+    ) {
       return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
@@ -59,7 +66,11 @@ class _ReorderableExampleState extends State<ReorderableExample> {
             scale: scale,
             // Create a Card based on the color and the content of the dragged one
             // and set its elevation to the animated value.
-            child: Card(elevation: elevation, color: cards[index].color, child: cards[index].child),
+            child: Card(
+              elevation: elevation,
+              color: cards[index].color,
+              child: cards[index].child,
+            ),
           );
         },
         child: child,
@@ -67,13 +78,10 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     }
 
     return ReorderableListView(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       proxyDecorator: proxyDecorator,
-      onReorder: (int oldIndex, int newIndex) {
+      onReorderItem: (int oldIndex, int newIndex) {
         setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
           final int item = _items.removeAt(oldIndex);
           _items.insert(newIndex, item);
         });

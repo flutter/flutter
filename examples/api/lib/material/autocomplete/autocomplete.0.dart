@@ -18,7 +18,7 @@ class AutocompleteExampleApp extends StatelessWidget {
         appBar: AppBar(title: const Text('Autocomplete Basic')),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Text(
                 'Type below to autocomplete the following possible results: ${AutocompleteBasicExample._kOptions}.',
@@ -35,7 +35,11 @@ class AutocompleteExampleApp extends StatelessWidget {
 class AutocompleteBasicExample extends StatelessWidget {
   const AutocompleteBasicExample({super.key});
 
-  static const List<String> _kOptions = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _kOptions = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   @override
   Widget build(BuildContext context) {

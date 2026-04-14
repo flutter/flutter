@@ -3,7 +3,7 @@ description: |
   You found a bug in Flutter causing your application to crash or
   throw an exception, a widget is buggy, or something looks wrong.
 title: "[Google3 Bug]: "
-labels: 'customer: google'
+labels: ['customer: google']
 body:
   - type: markdown
     attributes:
@@ -21,7 +21,7 @@ body:
       value: |
         Before filling the form fields, please consider the following:
         - Ensure that you have searched the [existing issues](https://github.com/flutter/flutter/issues)
-        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+        - Read the [guide to filing a bug](https://docs.flutter.dev/resources/bug-reports)
   - type: markdown
     attributes:
       value: |

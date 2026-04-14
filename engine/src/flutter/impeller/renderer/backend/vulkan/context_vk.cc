@@ -119,11 +119,9 @@ size_t ContextVK::ChooseThreadCountForWorkers(size_t hardware_concurrency) {
 }
 
 namespace {
-thread_local uint64_t tls_context_count = 0;
+std::atomic_uint64_t context_count = 0;
 uint64_t CalculateHash(void* ptr) {
-  // You could make a context once per nanosecond for 584 years on one thread
-  // before this overflows.
-  return ++tls_context_count;
+  return context_count.fetch_add(1);
 }
 }  // namespace
 
@@ -134,12 +132,18 @@ ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
-  CommandPoolRecyclerVK::DestroyThreadLocalPools(this);
+  if (command_pool_recycler_) {
+    command_pool_recycler_->DestroyThreadLocalPools();
+  }
 }
 
 Context::BackendType ContextVK::GetBackendType() const {
   return Context::BackendType::kVulkan;
 }
+
+/* version 2.0.0 */
+static constexpr uint32_t kImpellerEngineVersion =
+    VK_MAKE_API_VERSION(0, 2, 0, 0);
 
 void ContextVK::Setup(Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
@@ -206,19 +210,18 @@ void ContextVK::Setup(Settings settings) {
 
   vk::ApplicationInfo application_info;
 
-  // Use the same encoding macro as vulkan versions, but otherwise application
+  // Use the same encoding macro as vulkan versions, but otherwise engine
   // version is intended to be the version of the Impeller engine. This version
   // information, along with the application name below is provided to allow
   // IHVs to make optimizations and/or disable functionality based on knowledge
   // of the engine version (for example, to work around bugs). We don't tie this
   // to the overall Flutter version as that version is not yet defined when the
-  // engine is compiled. Instead we can manually bump it occassionally.
+  // engine is compiled. Instead we can manually bump it occasionally.
   //
   // variant, major, minor, patch
-  application_info.setApplicationVersion(
-      VK_MAKE_API_VERSION(0, 2, 0, 0) /*version 2.0.0*/);
+  application_info.setApplicationVersion(VK_API_VERSION_1_0);
   application_info.setApiVersion(VK_API_VERSION_1_1);
-  application_info.setEngineVersion(VK_API_VERSION_1_0);
+  application_info.setEngineVersion(kImpellerEngineVersion);
   application_info.setPEngineName("Impeller");
   application_info.setPApplicationName("Impeller");
 
@@ -421,7 +424,7 @@ void ContextVK::Setup(Settings settings) {
   }
 
   auto command_pool_recycler =
-      std::make_shared<CommandPoolRecyclerVK>(weak_from_this());
+      std::make_shared<CommandPoolRecyclerVK>(shared_from_this());
   if (!command_pool_recycler) {
     VALIDATION_LOG << "Could not create command pool recycler.";
     return;
@@ -601,7 +604,7 @@ void ContextVK::Shutdown() {
   // pointers ensures that cleanup happens in a correct order.
   //
   // tl;dr: Without it, we get thread::join failures on shutdown.
-  fence_waiter_.reset();
+  fence_waiter_->Terminate();
   resource_manager_.reset();
 
   raster_message_loop_->Terminate();
@@ -695,14 +698,15 @@ void ContextVK::InitializeCommonlyUsedShadersIfNeeded() const {
         return true;
       });
 
-  if (auto depth = render_target.GetDepthAttachment(); depth.has_value()) {
+  if (const auto& depth = render_target.GetDepthAttachment();
+      depth.has_value()) {
     builder.SetDepthStencilAttachment(
         depth->texture->GetTextureDescriptor().format,        //
         depth->texture->GetTextureDescriptor().sample_count,  //
         depth->load_action,                                   //
         depth->store_action                                   //
     );
-  } else if (auto stencil = render_target.GetStencilAttachment();
+  } else if (const auto& stencil = render_target.GetStencilAttachment();
              stencil.has_value()) {
     builder.SetStencilAttachment(
         stencil->texture->GetTextureDescriptor().format,        //

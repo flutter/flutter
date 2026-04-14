@@ -57,7 +57,8 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
         } else {
           // As the name implies, the debugName will only print useful
           // information in debug mode.
-          _message = 'Not the key next to CAPS LOCK: Pressed ${event.physicalKey.debugName}';
+          _message =
+              'Not the key next to CAPS LOCK: Pressed ${event.physicalKey.debugName}';
         }
       }
     });
@@ -71,7 +72,7 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       color: Colors.white,
-      alignment: Alignment.center,
+      alignment: .center,
       child: DefaultTextStyle(
         style: textTheme.headlineMedium!,
         child: Focus(

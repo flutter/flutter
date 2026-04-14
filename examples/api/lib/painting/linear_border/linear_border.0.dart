@@ -17,8 +17,8 @@ class ExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: Directionality(
-        // TRY THIS: Switch to TextDirection.rtl to see how the borders change.
-        textDirection: TextDirection.ltr,
+        // TRY THIS: Switch to .rtl to see how the borders change.
+        textDirection: .ltr,
         child: Home(),
       ),
     );
@@ -45,17 +45,26 @@ class SampleCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const .all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: .start,
+          mainAxisSize: .min,
           children: <Widget>[
             Text(title, style: textTheme.titleMedium),
-            Text(subtitle, style: textTheme.bodyMedium!.copyWith(color: colorScheme.secondary)),
+            Text(
+              subtitle,
+              style: textTheme.bodyMedium!.copyWith(
+                color: colorScheme.secondary,
+              ),
+            ),
             const SizedBox(height: 16),
             Row(
-              children: List<Widget>.generate(children.length * 2 - 1, (int index) {
-                return index.isEven ? children[index ~/ 2] : const SizedBox(width: 16);
+              children: List<Widget>.generate(children.length * 2 - 1, (
+                int index,
+              ) {
+                return index.isEven
+                    ? children[index ~/ 2]
+                    : const SizedBox(width: 16);
               }),
             ),
           ],
@@ -84,15 +93,21 @@ class _HomeState extends State<Home> {
       width: 0,
       color: colorScheme.inversePrimary,
     ); // hairline
-    final BorderSide primarySide2 = BorderSide(width: 2, color: colorScheme.onPrimaryContainer);
-    final BorderSide primarySide3 = BorderSide(width: 3, color: colorScheme.inversePrimary);
+    final BorderSide primarySide2 = BorderSide(
+      width: 2,
+      color: colorScheme.onPrimaryContainer,
+    );
+    final BorderSide primarySide3 = BorderSide(
+      width: 3,
+      color: colorScheme.inversePrimary,
+    );
 
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const .all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: <Widget>[
               // Demonstrates using LinearBorder.bottom() to define
               // an underline border for the standard button types.
@@ -107,7 +122,10 @@ class _HomeState extends State<Home> {
                 subtitle: 'Standard button widgets',
                 children: <Widget>[
                   TextButton(
-                    style: TextButton.styleFrom(side: primarySide3, shape: LinearBorder.bottom()),
+                    style: TextButton.styleFrom(
+                      side: primarySide3,
+                      shape: LinearBorder.bottom(),
+                    ),
                     onPressed: () {},
                     child: const Text('Text'),
                   ),
@@ -140,22 +158,34 @@ class _HomeState extends State<Home> {
                 subtitle: 'Convenience constructors',
                 children: <Widget>[
                   TextButton(
-                    style: TextButton.styleFrom(side: primarySide0, shape: LinearBorder.start()),
+                    style: TextButton.styleFrom(
+                      side: primarySide0,
+                      shape: LinearBorder.start(),
+                    ),
                     onPressed: () {},
                     child: const Text('Start()'),
                   ),
                   TextButton(
-                    style: TextButton.styleFrom(side: primarySide0, shape: LinearBorder.end()),
+                    style: TextButton.styleFrom(
+                      side: primarySide0,
+                      shape: LinearBorder.end(),
+                    ),
                     onPressed: () {},
                     child: const Text('End()'),
                   ),
                   TextButton(
-                    style: TextButton.styleFrom(side: primarySide0, shape: LinearBorder.top()),
+                    style: TextButton.styleFrom(
+                      side: primarySide0,
+                      shape: LinearBorder.top(),
+                    ),
                     onPressed: () {},
                     child: const Text('Top()'),
                   ),
                   TextButton(
-                    style: TextButton.styleFrom(side: primarySide0, shape: LinearBorder.bottom()),
+                    style: TextButton.styleFrom(
+                      side: primarySide0,
+                      shape: LinearBorder.bottom(),
+                    ),
                     onPressed: () {},
                     child: const Text('Bottom()'),
                   ),
@@ -219,7 +249,10 @@ class _HomeState extends State<Home> {
                   TextButton(
                     style: TextButton.styleFrom(
                       side: primarySide0,
-                      shape: const LinearBorder(start: LinearBorderEdge(), end: LinearBorderEdge()),
+                      shape: const LinearBorder(
+                        start: LinearBorderEdge(),
+                        end: LinearBorderEdge(),
+                      ),
                     ),
                     onPressed: () {},
                     child: const Text('Vertical'),
@@ -253,19 +286,28 @@ class _HomeState extends State<Home> {
                     },
                   ),
                   TextButton(
-                    style: TextButton.styleFrom(side: primarySide3, shape: shape),
+                    style: TextButton.styleFrom(
+                      side: primarySide3,
+                      shape: shape,
+                    ),
                     onPressed: () {},
                     child: const Text('Press Play'),
                   ),
                   TextButton(
                     style: ButtonStyle(
-                      side: WidgetStateProperty.resolveWith<BorderSide?>((Set<WidgetState> states) {
-                        return states.contains(WidgetState.hovered) ? primarySide3 : null;
+                      side: WidgetStateProperty.resolveWith<BorderSide?>((
+                        Set<WidgetState> states,
+                      ) {
+                        return states.contains(WidgetState.hovered)
+                            ? primarySide3
+                            : null;
                       }),
                       shape: WidgetStateProperty.resolveWith<OutlinedBorder>((
                         Set<WidgetState> states,
                       ) {
-                        return states.contains(WidgetState.hovered) ? shape0 : shape1;
+                        return states.contains(WidgetState.hovered)
+                            ? shape0
+                            : shape1;
                       }),
                     ),
                     onPressed: () {},

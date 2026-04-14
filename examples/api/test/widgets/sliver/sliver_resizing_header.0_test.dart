@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/sliver/sliver_resizing_header.0.dart' as example;
+import 'package:flutter_api_samples/widgets/sliver/sliver_resizing_header.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

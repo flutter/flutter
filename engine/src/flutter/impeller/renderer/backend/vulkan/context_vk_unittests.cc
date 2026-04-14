@@ -392,5 +392,21 @@ TEST(ContextVKTest, AHBSwapchainCapabilitiesCanBeMissing) {
 
 }  // namespace impeller
 
+TEST(ContextVKTest, HashIsUniqueAcrossThreads) {
+  uint64_t hash1, hash2;
+  std::thread thread1([&]() {
+    auto context = MockVulkanContextBuilder().Build();
+    hash1 = context->GetHash();
+  });
+  std::thread thread2([&]() {
+    auto context = MockVulkanContextBuilder().Build();
+    hash2 = context->GetHash();
+  });
+  thread1.join();
+  thread2.join();
+
+  EXPECT_NE(hash1, hash2);
+}
+
 }  // namespace testing
 }  // namespace impeller

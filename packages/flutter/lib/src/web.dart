@@ -33,6 +33,9 @@ external Document get document;
 @JS()
 external Window get window;
 
+@JS()
+external Console get console;
+
 extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external set backgroundColor(String value);
   external String get backgroundColor;
@@ -42,6 +45,8 @@ extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external String get height;
   external set width(String value);
   external String get width;
+  external set pointerEvents(String value);
+  external String get pointerEvents;
 }
 
 extension type CSSStyleSheet._(JSObject _) implements JSObject {
@@ -107,6 +112,7 @@ extension type MouseEvent._(JSObject _) implements JSObject {
   external num get offsetX;
   external num get offsetY;
   external int get button;
+  external void preventDefault();
 }
 
 extension type Navigator._(JSObject _) implements JSObject {
@@ -129,6 +135,13 @@ extension type Window._(JSObject _) implements EventTarget, JSObject {
   external MediaQueryList matchMedia(String query);
   external Selection? getSelection();
   external String get origin;
+}
+
+extension type Console._(JSObject _) implements JSObject {
+  external void debug(JSAny? data);
+  external void error(JSAny? data);
+  external void info(JSAny? data);
+  external void log(JSAny? data);
 }
 
 extension type XMLHttpRequest._(JSObject _) implements XMLHttpRequestEventTarget, JSObject {

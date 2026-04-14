@@ -13,14 +13,18 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
+import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
 
 /// Defines default property values for descendant [FloatingActionButton]
 /// widgets.
 ///
 /// Descendant widgets obtain the current [FloatingActionButtonThemeData] object
-/// using `Theme.of(context).floatingActionButtonTheme`. Instances of
+/// using [FloatingActionButtonTheme.of]. Instances of
 /// [FloatingActionButtonThemeData] can be customized with
 /// [FloatingActionButtonThemeData.copyWith].
 ///
@@ -28,8 +32,7 @@ import 'material_state.dart';
 /// overall [Theme] with [ThemeData.floatingActionButtonTheme].
 ///
 /// All [FloatingActionButtonThemeData] properties are `null` by default.
-/// When null, the [FloatingActionButton] will use the values from [ThemeData]
-/// if they exist, otherwise it will provide its own defaults.
+/// When null, the [FloatingActionButton] provides its own defaults.
 ///
 /// See also:
 ///
@@ -37,8 +40,8 @@ import 'material_state.dart';
 ///    application.
 @immutable
 class FloatingActionButtonThemeData with Diagnosticable {
-  /// Creates a theme that can be used for
-  /// [ThemeData.floatingActionButtonTheme].
+  /// Creates a theme that can be used for [ThemeData.floatingActionButtonTheme] and
+  /// [FloatingActionButtonTheme].
   const FloatingActionButtonThemeData({
     this.foregroundColor,
     this.backgroundColor,
@@ -142,7 +145,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
   /// If specified, overrides the default value of [FloatingActionButton.mouseCursor].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -167,7 +170,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
     double? extendedIconLabelSpacing,
     EdgeInsetsGeometry? extendedPadding,
     TextStyle? extendedTextStyle,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -359,11 +362,50 @@ class FloatingActionButtonThemeData with Diagnosticable {
       DiagnosticsProperty<TextStyle>('extendedTextStyle', extendedTextStyle, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
+      DiagnosticsProperty<WidgetStateProperty<MouseCursor?>>(
         'mouseCursor',
         mouseCursor,
         defaultValue: null,
       ),
     );
   }
+}
+
+/// An inherited widget that defines the configuration for
+/// [FloatingActionButton]s in this widget's subtree.
+///
+/// Values specified here are used for [FloatingActionButton] properties that are not
+/// given an explicit non-null value.
+class FloatingActionButtonTheme extends InheritedTheme {
+  /// Creates a floating action button theme that controls the configurations for
+  /// [FloatingActionButton]s in its widget subtree.
+  const FloatingActionButtonTheme({super.key, required this.data, required super.child});
+
+  /// The properties for descendant [FloatingActionButton] widgets.
+  final FloatingActionButtonThemeData data;
+
+  /// The closest instance of this class's [data] value that encloses the given
+  /// context.
+  ///
+  /// If there is no ancestor, it returns [ThemeData.floatingActionButtonTheme]. Applications
+  /// can assume that the returned value will not be null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FloatingActionButtonThemeData theme = FloatingActionButtonTheme.of(context);
+  /// ```
+  static FloatingActionButtonThemeData of(BuildContext context) {
+    final FloatingActionButtonTheme? fabTheme = context
+        .dependOnInheritedWidgetOfExactType<FloatingActionButtonTheme>();
+    return fabTheme?.data ?? Theme.of(context).floatingActionButtonTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return FloatingActionButtonTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(FloatingActionButtonTheme oldWidget) => data != oldWidget.data;
 }

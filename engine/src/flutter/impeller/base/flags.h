@@ -7,11 +7,10 @@
 
 namespace impeller {
 struct Flags {
-  /// Whether to defer PSO construction until first use. Usage Will introduce
-  /// raster jank.
-  bool lazy_shader_mode = false;
   /// When turned on DrawLine will use the experimental antialiased path.
   bool antialiased_lines = false;
+  /// Use SDFs for rendering.
+  bool use_sdfs = false;
 };
 }  // namespace impeller
 

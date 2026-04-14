@@ -14,7 +14,7 @@ class NavBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: NavBarExample(),
     );
   }
@@ -33,17 +33,24 @@ class _NavBarExampleState extends State<NavBarExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar.large(largeTitle: Text('Large Sample')),
+      navigationBar: const CupertinoNavigationBar.large(
+        largeTitle: Text('Large Sample'),
+      ),
       child: SafeArea(
         child: Center(
           child: Column(
             children: <Widget>[
               const Spacer(),
               const Text('You have pushed the button this many times:'),
-              Text('$_count', style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle),
+              Text(
+                '$_count',
+                style: CupertinoTheme.of(
+                  context,
+                ).textTheme.navLargeTitleTextStyle,
+              ),
               const Spacer(),
               Padding(
-                padding: const EdgeInsets.all(15.0),
+                padding: const .all(15.0),
                 child: CupertinoButton.filled(
                   onPressed: () => setState(() => _count++),
                   child: const Text('Increment'),

@@ -47,11 +47,13 @@ class _FocusExampleState extends State<FocusExample> {
   void _addChild() {
     // Calling requestFocus here creates a deferred request for focus, since the
     // node is not yet part of the focus tree.
-    childFocusNodes.add(FocusNode(debugLabel: 'Child ${children.length}')..requestFocus());
+    childFocusNodes.add(
+      FocusNode(debugLabel: 'Child ${children.length}')..requestFocus(),
+    );
 
     children.add(
       Padding(
-        padding: const EdgeInsets.all(2.0),
+        padding: const .all(2.0),
         child: ActionChip(
           focusNode: childFocusNodes.last,
           label: Text('CHILD ${children.length}'),

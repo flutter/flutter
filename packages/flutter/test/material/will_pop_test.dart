@@ -336,9 +336,9 @@ void main() {
 
   testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
     late StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
-    bool contentsEmpty = false; // when true, don't include the SampleForm in the route
+    var contentsEmpty = false; // when true, don't include the SampleForm in the route
 
-    final _TestPageRoute<void> route = _TestPageRoute<void>(
+    final route = _TestPageRoute<void>(
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -401,9 +401,9 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/89133
     late StateSetter contentsSetState;
-    bool moveToAnotherNavigator = false;
+    var moveToAnotherNavigator = false;
 
-    final List<Page<dynamic>> pages = <Page<dynamic>>[
+    final pages = <Page<dynamic>>[
       _TestPage(
         key: UniqueKey(),
         builder: (BuildContext context) {
@@ -440,15 +440,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     await tester.pump();
-    final _TestPageRoute<dynamic> route1 =
-        ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    final route1 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
     expect(route1.hasCallback, isTrue);
     moveToAnotherNavigator = true;
     contentsSetState(() {});
 
     await tester.pump();
-    final _TestPageRoute<dynamic> route2 =
-        ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
+    final route2 = ModalRoute.of(tester.element(find.text('anchor')))! as _TestPageRoute<dynamic>;
 
     expect(route1.hasCallback, isFalse);
     expect(route2.hasCallback, isTrue);

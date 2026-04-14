@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
@@ -18,21 +19,21 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
-const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
-const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
-const FakeEmulator emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
-const List<Emulator> emulators = <Emulator>[emulator1, emulator2, emulator3];
+const emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
+const emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
+const emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
+const emulators = <Emulator>[emulator1, emulator2, emulator3];
 
 // We have to send a command that fails in order to get the list of valid
 // system images paths. This is an example of the output to use in the fake.
-const String fakeCreateFailureOutput =
+const fakeCreateFailureOutput =
     'Error: Package path (-k) not specified. Valid system image paths are:\n'
     'system-images;android-27;google_apis;x86\n'
     'system-images;android-P;google_apis;x86\n'
     'system-images;android-27;google_apis_playstore;x86\n'
     'null\n'; // Yep, these really end with null (on dantup's machine at least)
 
-const FakeCommand kListEmulatorsCommand = FakeCommand(
+const kListEmulatorsCommand = FakeCommand(
   command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
   stderr: fakeCreateFailureOutput,
   exitCode: 1,
@@ -60,7 +61,7 @@ void main() {
     // iOS discovery uses context.
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
-      final EmulatorManager emulatorManager = EmulatorManager(
+      final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -73,6 +74,36 @@ void main() {
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
     });
+
+    testUsingContext(
+      'getEmulators ignores info and warning messages in android emulator output',
+      () async {
+        final emulatorManager = EmulatorManager(
+          java: FakeJava(),
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout:
+                  'INFO    | Storing crashdata in: /tmp/some.db, detection is enabled for process: 95538\n'
+                  'WARNING | Crash annotation is very large (16415), only 16384 bytes will be recorded, 31 bytes are lost.\n'
+                  'Emulator_API_33\n'
+                  'pixel-4.api-30',
+            ),
+          ]),
+          androidSdk: sdk,
+          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        );
+
+        final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
+        expect(emulators, hasLength(2));
+        expect(emulators.first.id, 'Emulator_API_33');
+        expect(emulators.last.id, 'pixel-4.api-30');
+      },
+      // Exclude the iOS emulator discovery.
+      overrides: <Type, Generator>{Platform: () => FakePlatform()},
+    );
 
     testUsingContext('printEmulators prints the emulators information with header', () {
       Emulator.printEmulators(emulators, testLogger);
@@ -88,7 +119,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testUsingContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
-      final EmulatorManager emulatorManager = EmulatorManager(
+      final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -102,7 +133,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     });
 
     testWithoutContext('getEmulatorsById', () async {
-      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(
+      final testEmulatorManager = TestEmulatorManager(
         emulators,
         java: FakeJava(),
         logger: BufferLogger.test(),
@@ -128,7 +159,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
-      final EmulatorManager emulatorManager = EmulatorManager(
+      final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -146,7 +177,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     // iOS discovery uses context.
     testUsingContext('create emulator with an empty name does not fail', () async {
-      final EmulatorManager emulatorManager = EmulatorManager(
+      final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -180,7 +211,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     });
 
     testWithoutContext('create emulator with a unique name does not throw', () async {
-      final EmulatorManager emulatorManager = EmulatorManager(
+      final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -214,7 +245,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     });
 
     testWithoutContext('create emulator with an existing name errors', () async {
-      final EmulatorManager emulatorManager = EmulatorManager(
+      final emulatorManager = EmulatorManager(
         java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -256,7 +287,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testUsingContext(
       'create emulator without a name but when default exists adds a suffix',
       () async {
-        final EmulatorManager emulatorManager = EmulatorManager(
+        final emulatorManager = EmulatorManager(
           java: FakeJava(),
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),

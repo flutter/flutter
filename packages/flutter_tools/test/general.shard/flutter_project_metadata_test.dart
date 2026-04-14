@@ -25,7 +25,7 @@ void main() {
   });
 
   testWithoutContext('project metadata fields are empty when file does not exist', () {
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -35,7 +35,7 @@ void main() {
 
   testWithoutContext('project metadata fields are empty when file is empty', () {
     metadataFile.createSync();
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -45,7 +45,7 @@ void main() {
 
   testWithoutContext('project metadata fields are empty when file is not valid yaml', () {
     metadataFile.writeAsStringSync(' channel: @something');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -60,7 +60,7 @@ void main() {
 version:
 project_type: plugin
       ''');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.plugin);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -78,7 +78,7 @@ project_type: plugin
 version: STRING INSTEAD OF MAP
 project_type: plugin
       ''');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.plugin);
     expect(projectMetadata.versionChannel, isNull);
     expect(projectMetadata.versionRevision, isNull);
@@ -98,7 +98,7 @@ version:
   channel: stable
 project_type: {}
       ''');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(projectMetadata.versionChannel, 'stable');
     expect(projectMetadata.versionRevision, 'b59b226a49391949247e3d6122e34bb001049ae4');
@@ -127,7 +127,7 @@ migration:
   unmanaged_files:
     - 'file1'
       ''');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, isNull);
     expect(
       projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision,
@@ -168,7 +168,7 @@ migration:
 
   unmanaged_files: {}
       ''');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.app);
     expect(
       projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision,
@@ -212,7 +212,7 @@ migration:
   unmanaged_files:
     - 'file1'
       ''');
-    final FlutterProjectMetadata projectMetadata = FlutterProjectMetadata(metadataFile, logger);
+    final projectMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(projectMetadata.projectType, FlutterTemplateType.app);
     expect(
       projectMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]?.createRevision,
@@ -239,29 +239,32 @@ migration:
     expect(logger.traceText, contains('The key `create_revision` was not found'));
   });
 
-  testUsingContext('enabledValues does not contain packageFfi if native-assets not enabled', () {
-    expect(
-      ParsedFlutterTemplateType.enabledValues(featureFlags),
-      isNot(contains(FlutterTemplateType.packageFfi)),
-    );
-    expect(
-      ParsedFlutterTemplateType.enabledValues(featureFlags),
-      contains(FlutterTemplateType.plugin),
-    );
-  });
-
   testUsingContext(
-    'enabledValues contains packageFfi if natives-assets enabled',
+    'enabledValues does not contain packageFfi if native-assets not enabled',
     () {
       expect(
         ParsedFlutterTemplateType.enabledValues(featureFlags),
-        contains(FlutterTemplateType.packageFfi),
+        isNot(contains(FlutterTemplateType.packageFfi)),
       );
       expect(
         ParsedFlutterTemplateType.enabledValues(featureFlags),
         contains(FlutterTemplateType.plugin),
       );
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
+    overrides: <Type, Generator>{
+      // ignore: avoid_redundant_argument_values
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
+    },
   );
+
+  testUsingContext('enabledValues contains packageFfi if natives-assets enabled', () {
+    expect(
+      ParsedFlutterTemplateType.enabledValues(featureFlags),
+      contains(FlutterTemplateType.packageFfi),
+    );
+    expect(
+      ParsedFlutterTemplateType.enabledValues(featureFlags),
+      contains(FlutterTemplateType.plugin),
+    );
+  });
 }

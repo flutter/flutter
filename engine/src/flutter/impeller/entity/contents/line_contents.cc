@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/contents/line_contents.h"
-#include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
-#include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/renderer/texture_util.h"
 
 namespace impeller {
@@ -57,12 +55,12 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
       static_cast<const LineGeometry*>(geometry);
 
   auto& transform = entity.GetTransform();
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   size_t count = 4;
   fml::StatusOr<LineContents::EffectiveLineParameters> calculate_status =
       LineContents::EffectiveLineParameters{.width = 0, .radius = 0};
-  BufferView vertex_buffer = host_buffer.Emplace(
+  BufferView vertex_buffer = data_host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
       [line_geometry, &transform, &calculate_status](uint8_t* buffer) {
         auto vertices = reinterpret_cast<PerVertexData*>(buffer);
@@ -147,11 +145,12 @@ LineContents::LineContents(std::unique_ptr<LineGeometry> geometry, Color color)
 bool LineContents::Render(const ContentContext& renderer,
                           const Entity& entity,
                           RenderPass& pass) const {
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_;
+  frag_info.cap_type = (geometry_->GetCap() == Cap::kRound) ? 1.0f : 0.0f;
 
   Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
 
@@ -178,8 +177,8 @@ bool LineContents::Render(const ContentContext& renderer,
       this, geometry_.get(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      [&frag_info, &host_buffer](RenderPass& pass) {
-        FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+      [&frag_info, &data_host_buffer](RenderPass& pass) {
+        FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("Line");
         return true;
       },
@@ -203,6 +202,7 @@ std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
   // More simply written as rise / run:
   // double slope = 1.0 / ((radius * 2) / (scale * width + radius));
   double slope = (scale * width + radius) / (radius * 2);
+  slope = std::max(slope, 1.0);
   for (int i = 0; i < kCurveResolution; ++i) {
     double norm =
         (static_cast<double>(i)) / static_cast<double>(kCurveResolution - 1);

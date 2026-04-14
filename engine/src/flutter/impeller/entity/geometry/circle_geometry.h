@@ -30,18 +30,29 @@ class CircleGeometry final : public Geometry {
   // |Geometry|
   Scalar ComputeAlphaCoverage(const Matrix& transform) const override;
 
- private:
+  Scalar GetRadius() const;
+  Scalar GetStrokeWidth() const;
+  Point GetCenter() const;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
 
-  // |Geometry|
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+  // Set the number of pixels to add to the edge(s) of the circle for
+  // SDF-based antialiasing
+  void SetAntialiasPadding(Scalar extra_pixels);
 
+  Scalar GetAntialiasPadding() const;
+
+ private:
   Point center_;
   Scalar radius_;
   Scalar stroke_width_;
+  Scalar padding_pixels_;
 
   CircleGeometry(const CircleGeometry&) = delete;
 

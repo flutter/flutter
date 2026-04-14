@@ -672,13 +672,16 @@ bool DartIsolate::LoadLibraries() {
   tonic::DartState::Scope scope(this);
 
   DartIO::InitForIsolate(may_insecurely_connect_to_all_domains_,
-                         domain_network_policy_);
+                         domain_network_policy_, GetAdvisoryScriptURI());
 
-  DartUI::InitForIsolate(GetIsolateGroupData().GetSettings());
+  const auto& settings = GetIsolateGroupData().GetSettings();
+
+  DartUI::InitForIsolate(settings);
 
   const bool is_service_isolate = Dart_IsServiceIsolate(isolate());
 
   DartRuntimeHooks::Install(IsRootIsolate() && !is_service_isolate,
+                            settings.profile_microtasks,
                             GetAdvisoryScriptURI());
 
   if (!is_service_isolate) {

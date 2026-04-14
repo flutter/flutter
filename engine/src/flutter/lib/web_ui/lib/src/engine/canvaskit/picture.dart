@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../scene_painting.dart';
+import '../layer/layer_painting.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
@@ -16,12 +16,21 @@ import 'renderer.dart';
 import 'surface.dart';
 
 /// Implements [ui.Picture] on top of [SkPicture].
-class CkPicture implements ScenePicture {
-  CkPicture(SkPicture skPicture) {
-    _ref = UniqueRef<SkPicture>(this, skPicture, 'Picture');
+class CkPicture implements LayerPicture, StackTraceDebugger {
+  CkPicture(SkPicture skPicture) : _isClone = false {
+    _ref = CkCountedRef<CkPicture, SkPicture>(skPicture, this, 'Picture');
+    _initStackTrace();
   }
 
-  late final UniqueRef<SkPicture> _ref;
+  CkPicture._clone(CkCountedRef<CkPicture, SkPicture> ref) : _isClone = true {
+    _ref = ref;
+    ref.ref(this);
+    _initStackTrace();
+  }
+
+  final bool _isClone;
+
+  late final CkCountedRef<CkPicture, SkPicture> _ref;
 
   SkPicture get skiaObject => _ref.nativeObject;
 
@@ -85,9 +94,11 @@ class CkPicture implements ScenePicture {
       _debugDisposalStackTrace = StackTrace.current;
       return true;
     }());
-    ui.Picture.onDispose?.call(this);
+    if (!_isClone) {
+      ui.Picture.onDispose?.call(this);
+    }
     _isDisposed = true;
-    _ref.dispose();
+    _ref.unref(this);
   }
 
   @override
@@ -96,16 +107,26 @@ class CkPicture implements ScenePicture {
   }
 
   @override
-  CkImage toImageSync(int width, int height) {
+  CkImage toImageSync(
+    int width,
+    int height, {
+    ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
+  }) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    final CkSurface ckSurface = surface.createOrUpdateSurface(BitmapSize(width, height));
-    final CkCanvas ckCanvas = ckSurface.getCanvas();
+    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    surface.setSize(BitmapSize(width, height));
+    final SkSurface skiaSurface = surface.skSurface!;
+
+    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);
-    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
-    final SkImageInfo imageInfo = SkImageInfo(
+    final SkImage skImage = skiaSurface.makeImageSnapshot();
+
+    // TODO(hterkelsen): This is a hack to get the pixels from the SkImage.
+    // We should be able to do this without creating a new image. This is
+    // a workaround for a bug in CanvasKit.
+    final imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
       colorSpace: SkColorSpaceSRGB,
@@ -113,8 +134,9 @@ class CkPicture implements ScenePicture {
       height: height.toDouble(),
     );
     final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
+    skImage.delete();
     if (pixels == null) {
-      throw StateError('Unable to read pixels from SkImage.');
+      throw StateError('Unable to convert read pixels from SkImage.');
     }
     final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
     if (rasterImage == null) {
@@ -122,4 +144,24 @@ class CkPicture implements ScenePicture {
     }
     return CkImage(rasterImage);
   }
+
+  @override
+  LayerPicture clone() {
+    return CkPicture._clone(_ref);
+  }
+
+  void _initStackTrace() {
+    assert(() {
+      _debugStackTrace = StackTrace.current;
+      return true;
+    }());
+  }
+
+  late StackTrace _debugStackTrace;
+
+  @override
+  StackTrace get debugStackTrace => _debugStackTrace;
+
+  @override
+  bool get isDisposed => _isDisposed;
 }

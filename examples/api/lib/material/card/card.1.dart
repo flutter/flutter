@@ -14,7 +14,10 @@ class CardExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(appBar: AppBar(title: const Text('Card Sample')), body: const CardExample()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Card Sample')),
+        body: const CardExample(),
+      ),
     );
   }
 }
@@ -30,13 +33,17 @@ class CardExample extends StatelessWidget {
         // will extend beyond the rounded edges of the [Card] (see https://github.com/flutter/flutter/issues/109776)
         // This comes with a small performance cost, and you should not set [clipBehavior]
         // unless you need it.
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: .hardEdge,
         child: InkWell(
           splashColor: Colors.blue.withAlpha(30),
           onTap: () {
             debugPrint('Card tapped.');
           },
-          child: const SizedBox(width: 300, height: 100, child: Text('A card that can be tapped')),
+          child: const SizedBox(
+            width: 300,
+            height: 100,
+            child: Text('A card that can be tapped'),
+          ),
         ),
       ),
     );

@@ -20,6 +20,7 @@
 #include "flutter/impeller/geometry/scalar.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#include "imgui.h"
 #include "impeller/playground/widgets.h"
 
 namespace impeller {
@@ -33,6 +34,83 @@ TEST_P(AiksTest, CanRenderColoredRect) {
   paint.setColor(DlColor::kBlue());
   builder.DrawPath(DlPath::MakeRectXYWH(100.0f, 100.0f, 100.0f, 100.0f), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderColoredRectPrimitive) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  builder.DrawRect(DlRect::MakeXYWH(100.f, 100.f, 100.f, 100.f), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+using DrawRectProc =
+    std::function<void(DisplayListBuilder&, const DlRect&, const DlPaint&)>;
+
+sk_sp<DisplayList> MakeWideStrokedRects(Point scale,
+                                        const DrawRectProc& draw_rect) {
+  DisplayListBuilder builder;
+  builder.Scale(scale.x, scale.y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().withAlphaF(0.5));
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(30.0f);
+
+  // Each of these 3 sets of rects includes (with different join types):
+  // - One rectangle with a gap in the middle
+  // - One rectangle with no gap because it is too narrow
+  // - One rectangle with no gap because it is too short
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  draw_rect(builder, DlRect::MakeXYWH(100.0f, 100.0f, 100.0f, 100.0f), paint);
+  draw_rect(builder, DlRect::MakeXYWH(250.0f, 100.0f, 10.0f, 100.0f), paint);
+  draw_rect(builder, DlRect::MakeXYWH(100.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  draw_rect(builder, DlRect::MakeXYWH(350.0f, 100.0f, 100.0f, 100.0f), paint);
+  draw_rect(builder, DlRect::MakeXYWH(500.0f, 100.0f, 10.0f, 100.0f), paint);
+  draw_rect(builder, DlRect::MakeXYWH(350.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  draw_rect(builder, DlRect::MakeXYWH(600.0f, 100.0f, 100.0f, 100.0f), paint);
+  draw_rect(builder, DlRect::MakeXYWH(750.0f, 100.0f, 10.0f, 100.0f), paint);
+  draw_rect(builder, DlRect::MakeXYWH(600.0f, 250.0f, 100.0f, 10.0f), paint);
+
+  // And now draw 3 rectangles with a stroke width so large that that it
+  // overlaps in the middle in both directions (horizontal/vertical).
+  paint.setStrokeWidth(110.0f);
+
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  draw_rect(builder, DlRect::MakeXYWH(100.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  draw_rect(builder, DlRect::MakeXYWH(350.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  draw_rect(builder, DlRect::MakeXYWH(600.0f, 400.0f, 100.0f, 100.0f), paint);
+
+  return builder.Build();
+}
+}  // namespace
+
+TEST_P(AiksTest, CanRenderWideStrokedRectWithoutOverlap) {
+  ASSERT_TRUE(OpenPlaygroundHere(MakeWideStrokedRects(
+      GetContentScale(), [](DisplayListBuilder& builder, const DlRect& rect,
+                            const DlPaint& paint) {
+        // Draw the rect directly
+        builder.DrawRect(rect, paint);
+      })));
+}
+
+TEST_P(AiksTest, CanRenderWideStrokedRectPathWithoutOverlap) {
+  ASSERT_TRUE(OpenPlaygroundHere(MakeWideStrokedRects(
+      GetContentScale(), [](DisplayListBuilder& builder, const DlRect& rect,
+                            const DlPaint& paint) {
+        // Draw the rect as a Path
+        builder.DrawPath(DlPath::MakeRect(rect), paint);
+      })));
 }
 
 TEST_P(AiksTest, CanRenderImage) {
@@ -156,20 +234,17 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
 
   {
     // Should not change the image. Tests the Convex short-cut code.
-    DlPath circle = DlPath::MakeCircle(DlPoint(150, 450), 150);
 
-    // Unfortunately, the circle path can be simplified...
-    EXPECT_TRUE(circle.IsOval(nullptr));
-    // At least it's convex, though...
-    EXPECT_TRUE(circle.IsConvex());
-
-    // Let's make a copy that doesn't remember that it's just a circle...
-    DlPathBuilder path_builder;
-    // This moveTo confuses addPath into appending rather than replacing,
-    // which prevents it from noticing that it's just a circle...
-    path_builder.MoveTo({10, 10});
-    path_builder.AddPath(circle);
-    DlPath path = path_builder.TakePath();
+    // To avoid simplification, construct an explicit circle using conics.
+    constexpr float kConicWeight = 0.707106781f;  // sqrt(2)/2
+    const DlPath path = DlPathBuilder()
+                            .MoveTo({150, 300})
+                            .ConicCurveTo({300, 300}, {300, 450}, kConicWeight)
+                            .ConicCurveTo({300, 600}, {150, 600}, kConicWeight)
+                            .ConicCurveTo({0, 600}, {0, 450}, kConicWeight)
+                            .ConicCurveTo({0, 300}, {150, 300}, kConicWeight)
+                            .Close()
+                            .TakePath();
 
     // Make sure path cannot be simplified...
     EXPECT_FALSE(path.IsRect(nullptr));
@@ -620,6 +695,47 @@ TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, DrawThinStrokedCircle) {
+  auto callback = [&]() {
+    static float stroked_radius = 100.0;
+    static float stroke_width = 0.0;
+    static float stroke_width_fine = 2.0;
+    static float stroked_alpha = 255.0;
+    static float stroked_scale[2] = {1.0, 1.0};
+
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
+      ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
+      ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
+      ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
+      ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
+      ImGui::End();
+    }
+
+    flutter::DisplayListBuilder builder;
+
+    DlPaint background_paint;
+    background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background_paint);
+
+    flutter::DlPaint paint;
+
+    paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
+    paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+    paint.setStrokeWidth(stroke_width + stroke_width_fine);
+    builder.Save();
+    builder.Translate(250, 250);
+    builder.Scale(stroked_scale[0], stroked_scale[1]);
+    builder.Translate(-250, -250);
+    builder.DrawCircle(DlPoint(250, 250), stroked_radius, paint);
+    builder.Restore();
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -684,6 +800,101 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   draw(builder, DlPoint(800, 300), 5, 10, 10);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+DlPath ManuallyConstructCirclePath(Scalar radius) {
+  DlPathBuilder path_builder;
+  // Circle as 4 cubic bezier segments (standard circle approximation)
+  // Using kappa = 0.5522847498 for circular arc approximation
+  const Scalar k = 0.5522847498f;
+
+  path_builder.MoveTo(DlPoint(0.0f, -radius));  // Top
+  // Top to Right
+  path_builder.CubicCurveTo(DlPoint(radius * k, -radius),  //
+                            DlPoint(radius, -radius * k),  //
+                            DlPoint(radius, 0.0f));
+  // Right to Bottom
+  path_builder.CubicCurveTo(DlPoint(radius, radius * k),  //
+                            DlPoint(radius * k, radius),  //
+                            DlPoint(0.0f, radius));
+  // Bottom to Left
+  path_builder.CubicCurveTo(DlPoint(-radius * k, radius),  //
+                            DlPoint(-radius, radius * k),  //
+                            DlPoint(-radius, 0.0f));
+  // Left to Top
+  path_builder.CubicCurveTo(DlPoint(-radius, -radius * k),  //
+                            DlPoint(-radius * k, -radius),  //
+                            DlPoint(0.0f, -radius));
+  path_builder.Close();
+  return path_builder.TakePath();
+}
+
+void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
+                                         Scalar zoom,
+                                         Scalar radius,
+                                         Scalar stroke_width) {
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint fill_paint;
+  fill_paint.setColor(DlColor::kBlue());
+
+  DlPaint stroke_paint;
+  stroke_paint.setColor(DlColor::kGreen());
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  stroke_paint.setStrokeWidth(stroke_width);
+
+  DlPath path = ManuallyConstructCirclePath(radius);
+
+  constexpr Scalar kLeftX = 300.0f;
+  constexpr Scalar kRightX = 680.0f;
+  constexpr Scalar kTopY = 200.0f;
+  constexpr Scalar kBottomY = 580.0f;
+
+  // Upper left quadrant is fill + stroke
+  builder.Save();
+  builder.Translate(kLeftX, kTopY);
+  builder.Scale(zoom, zoom);
+  builder.DrawPath(path, fill_paint);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  // Upper right quadrant is fill only
+  builder.Save();
+  builder.Translate(kRightX, kTopY);
+  builder.Scale(zoom, zoom);
+  builder.DrawPath(path, fill_paint);
+  builder.Restore();
+
+  // Lower left quadrant is stroke only
+  builder.Save();
+  builder.Translate(kLeftX, kBottomY);
+  builder.Scale(zoom, zoom);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  // Lower right quadrant is a filled circle the size of the radius and
+  // the stroke combined for comparison to the stroked outlines.
+  builder.Save();
+  builder.Translate(kRightX, kBottomY);
+  builder.Scale(zoom, zoom);
+  builder.DrawCircle({}, radius + stroke_width * 0.5f, fill_paint);
+  builder.Restore();
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+}  // namespace
+
+TEST_P(AiksTest, ZoomedStrokedPathRendersCorrectly) {
+  DrawStrokedAndFilledCirclesWithZoom(this, /*zoom=*/80.0f, /*radius=*/2.0f,
+                                      /*stroke_width=*/0.05f);
+}
+
+TEST_P(AiksTest, StrokedPathWithLargeStrokeWidthRendersCorrectly) {
+  DrawStrokedAndFilledCirclesWithZoom(this, /*zoom=*/1.0f, /*radius=*/1.0f,
+                                      /*stroke_width=*/5.0f);
 }
 
 TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
@@ -755,6 +966,405 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
       DlImageSampling::kNearestNeighbor, &local_matrix));
   builder.DrawOval(DlRect::MakeXYWH(610, 90, 200, 50), paint);
   builder.DrawOval(DlRect::MakeXYWH(685, 15, 50, 200), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+namespace {
+struct ArcFarmOptions {
+  bool use_center = false;
+  bool full_circles = false;
+  bool sweeps_over_360 = false;
+  Scalar vertical_scale = 1.0f;
+};
+
+void RenderArcFarm(DisplayListBuilder& builder,
+                   const DlPaint& paint,
+                   const ArcFarmOptions& opts) {
+  builder.Save();
+  builder.Translate(50, 50);
+  const Rect arc_bounds = Rect::MakeLTRB(0, 0, 42, 42 * opts.vertical_scale);
+  const int sweep_limit = opts.sweeps_over_360 ? 420 : 360;
+  for (int start = 0; start <= 360; start += 30) {
+    builder.Save();
+    for (int sweep = 30; sweep <= sweep_limit; sweep += 30) {
+      builder.DrawArc(arc_bounds, start, opts.full_circles ? 360 : sweep,
+                      opts.use_center, paint);
+      builder.Translate(50, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, 50);
+  }
+  builder.Restore();
+}
+
+void RenderArcFarmForOverlappingCapsTest(DisplayListBuilder& builder,
+                                         const DlPaint& paint) {
+  builder.Save();
+  builder.Translate(40, 30);
+  const Rect arc_bounds = Rect::MakeLTRB(0, 0, 40, 40);
+  for (int stroke_width = 10; stroke_width <= 40; stroke_width += 3) {
+    DlPaint modified_paint = DlPaint(paint);
+    modified_paint.setStrokeWidth(stroke_width);
+    builder.Save();
+    for (int sweep = 160; sweep <= 360; sweep += 20) {
+      builder.DrawArc(arc_bounds, 0, sweep, false, modified_paint);
+      builder.Translate(84, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, 44 + stroke_width);
+  }
+  builder.Restore();
+}
+}  // namespace
+
+TEST_P(AiksTest, FilledArcsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TranslucentFilledArcsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, FilledArcsRenderCorrectlyWithCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, NonSquareFilledArcsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                    .vertical_scale = 0.8f,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, NonSquareFilledArcsRenderCorrectlyWithCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .vertical_scale = 0.8f,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithButtEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndSquareEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarmForOverlappingCapsTest(builder, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarmForOverlappingCapsTest(builder, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithBevelJoinsAndCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeJoin(DlStrokeJoin::kBevel);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .sweeps_over_360 = true,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithMiterJoinsAndCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeJoin(DlStrokeJoin::kMiter);
+  // Default miter of 4.0 does a miter on all of the centers, but
+  // using 3.0 will show some bevels on the widest interior angles...
+  paint.setStrokeMiter(3.0f);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .sweeps_over_360 = true,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundJoinsAndCenter) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = true,
+                    .full_circles = false,
+                    .sweeps_over_360 = true,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(8.0f);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kRed());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareAndButtAndRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(8.0f);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kRed());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kGreen());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsCoverFullArcWithButtEnds) {
+  // This test compares the rendering of a full circle arc against a partial
+  // arc by drawing a one over the other in high contrast. If the partial
+  // arc misses any pixels that were drawn by the full arc, there will be
+  // some "pixel dirt" around the missing "erased" parts of the arcs. This
+  // case arises while rendering a CircularProgressIndicator with a background
+  // color where we want the rendering of the background full arc to hit the
+  // same pixels around the edges as the partial arc that covers it.
+  //
+  // In this case we draw a full blue circle and then draw a partial arc
+  // over it in the background color (white).
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(6.0f);
+  paint.setStrokeCap(DlStrokeCap::kButt);
+  paint.setColor(DlColor::kBlue());
+
+  // First draw full circles in blue to establish the pixels to be erased
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = true,
+                });
+
+  paint.setColor(DlColor::kWhite());
+
+  // Then draw partial arcs in white over the circles to "erase" them
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -1262,7 +1872,7 @@ TEST_P(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-// This makes sure the WideGamut named tests use 16bit float pixel format.
+// This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
@@ -1770,6 +2380,57 @@ TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
                      DlPaint().setColor(DlColor::kAqua()));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, PerspectiveRectangle) {
+  int perspective = 58;
+  bool use_clip = true;
+  bool diff_clip = false;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderInt("perspective%", &perspective, 0, 100);
+      ImGui::Checkbox("use clip", &use_clip);
+      if (use_clip) {
+        ImGui::Checkbox("diff clip", &diff_clip);
+      }
+      ImGui::SetWindowPos("Controls", ImVec2(500, 100));
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+
+    Scalar val = perspective * -0.00005f;
+    builder.TransformFullPerspective(
+        // clang-format off
+        1.0f,  0.0f, 0.0f, 400.0f,
+        0.0f,  1.0f, 0.0f, 400.0f,
+        0.0f,  0.0f, 1.0f, 0.0f,
+        0.0f,  val,  0.0f, 2.2f
+        // clang-format on
+    );
+
+    if (use_clip) {
+      Rect clip = DlRect::MakeLTRB(0, 0, 400, 800);
+      DlClipOp clip_op = DlClipOp::kIntersect;
+      if (diff_clip) {
+        clip = clip.Expand(-20);
+        clip_op = DlClipOp::kDifference;
+      }
+      builder.ClipRect(clip, clip_op);
+    }
+
+    DlPaint paint;
+    paint.setColor(DlColor::kBlue());
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 800), paint);
+
+    builder.DrawColor(DlColor::kWhite().withAlphaF(0.5f),
+                      DlBlendMode::kSrcOver);
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

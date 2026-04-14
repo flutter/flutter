@@ -13,6 +13,19 @@ WindowsProcTable::WindowsProcTable() {
   user32_ = fml::NativeLibrary::Create("user32.dll");
   get_pointer_type_ =
       user32_->ResolveFunction<GetPointerType_*>("GetPointerType");
+  get_pointer_info_ =
+      user32_->ResolveFunction<GetPointerInfo_*>("GetPointerInfo");
+  get_pointer_pen_info_ =
+      user32_->ResolveFunction<GetPointerPenInfo_*>("GetPointerPenInfo");
+  enable_non_client_dpi_scaling_ =
+      user32_->ResolveFunction<EnableNonClientDpiScaling_*>(
+          "EnableNonClientDpiScaling");
+  set_window_composition_attribute_ =
+      user32_->ResolveFunction<SetWindowCompositionAttribute_*>(
+          "SetWindowCompositionAttribute");
+  adjust_window_rect_ext_for_dpi_ =
+      user32_->ResolveFunction<AdjustWindowRectExForDpi_*>(
+          "AdjustWindowRectExForDpi");
 }
 
 WindowsProcTable::~WindowsProcTable() {
@@ -26,6 +39,25 @@ BOOL WindowsProcTable::GetPointerType(UINT32 pointer_id,
   }
 
   return get_pointer_type_.value()(pointer_id, pointer_type);
+}
+
+BOOL WindowsProcTable::GetPointerInfo(UINT32 pointer_id,
+                                      POINTER_INFO* pointer_info) const {
+  if (!get_pointer_info_.has_value()) {
+    return FALSE;
+  }
+
+  return get_pointer_info_.value()(pointer_id, pointer_info);
+}
+
+BOOL WindowsProcTable::GetPointerPenInfo(
+    UINT32 pointer_id,
+    POINTER_PEN_INFO* pointer_pen_info) const {
+  if (!get_pointer_pen_info_.has_value()) {
+    return FALSE;
+  }
+
+  return get_pointer_pen_info_.value()(pointer_id, pointer_pen_info);
 }
 
 LRESULT WindowsProcTable::GetThreadPreferredUILanguages(DWORD flags,
@@ -65,6 +97,79 @@ HCURSOR WindowsProcTable::LoadCursor(HINSTANCE instance,
 
 HCURSOR WindowsProcTable::SetCursor(HCURSOR cursor) const {
   return ::SetCursor(cursor);
+}
+
+BOOL WindowsProcTable::EnableNonClientDpiScaling(HWND hwnd) const {
+  if (!enable_non_client_dpi_scaling_.has_value()) {
+    return FALSE;
+  }
+
+  return enable_non_client_dpi_scaling_.value()(hwnd);
+}
+
+BOOL WindowsProcTable::SetWindowCompositionAttribute(
+    HWND hwnd,
+    WINDOWCOMPOSITIONATTRIBDATA* data) const {
+  if (!set_window_composition_attribute_.has_value()) {
+    return FALSE;
+  }
+
+  return set_window_composition_attribute_.value()(hwnd, data);
+}
+
+HRESULT WindowsProcTable::DwmExtendFrameIntoClientArea(
+    HWND hwnd,
+    const MARGINS* pMarInset) const {
+  return ::DwmExtendFrameIntoClientArea(hwnd, pMarInset);
+}
+
+HRESULT WindowsProcTable::DwmSetWindowAttribute(HWND hwnd,
+                                                DWORD dwAttribute,
+                                                LPCVOID pvAttribute,
+                                                DWORD cbAttribute) const {
+  return ::DwmSetWindowAttribute(hwnd, dwAttribute, pvAttribute, cbAttribute);
+}
+
+BOOL WindowsProcTable::AdjustWindowRectExForDpi(LPRECT lpRect,
+                                                DWORD dwStyle,
+                                                BOOL bMenu,
+                                                DWORD dwExStyle,
+                                                UINT dpi) const {
+  if (!adjust_window_rect_ext_for_dpi_.has_value()) {
+    return FALSE;
+  }
+
+  return adjust_window_rect_ext_for_dpi_.value()(lpRect, dwStyle, bMenu,
+                                                 dwExStyle, dpi);
+}
+
+int WindowsProcTable::GetSystemMetrics(int nIndex) const {
+  return ::GetSystemMetrics(nIndex);
+}
+
+BOOL WindowsProcTable::EnumDisplayDevices(LPCWSTR lpDevice,
+                                          DWORD iDevNum,
+                                          PDISPLAY_DEVICE lpDisplayDevice,
+                                          DWORD dwFlags) const {
+  return ::EnumDisplayDevices(lpDevice, iDevNum, lpDisplayDevice, dwFlags);
+}
+
+BOOL WindowsProcTable::EnumDisplaySettings(LPCWSTR lpszDeviceName,
+                                           DWORD iModeNum,
+                                           DEVMODEW* lpDevMode) const {
+  return ::EnumDisplaySettingsW(lpszDeviceName, iModeNum, lpDevMode);
+}
+
+BOOL WindowsProcTable::GetMonitorInfo(HMONITOR hMonitor,
+                                      LPMONITORINFO lpmi) const {
+  return ::GetMonitorInfoW(hMonitor, lpmi);
+}
+
+BOOL WindowsProcTable::EnumDisplayMonitors(HDC hdc,
+                                           LPCRECT lprcClip,
+                                           MONITORENUMPROC lpfnEnum,
+                                           LPARAM dwData) const {
+  return ::EnumDisplayMonitors(hdc, lprcClip, lpfnEnum, dwData);
 }
 
 }  // namespace flutter

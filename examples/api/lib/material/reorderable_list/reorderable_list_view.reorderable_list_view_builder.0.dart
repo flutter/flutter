@@ -35,11 +35,11 @@ class _ReorderableExampleState extends State<ReorderableExample> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.primary.withValues(alpha: 0.05);
+    final Color evenItemColor = colorScheme.primary.withValues(alpha: 0.15);
 
     return ReorderableListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       itemCount: _items.length,
       itemBuilder: (BuildContext context, int index) {
         return ListTile(
@@ -48,11 +48,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
           title: Text('Item ${_items[index]}'),
         );
       },
-      onReorder: (int oldIndex, int newIndex) {
+      onReorderItem: (int oldIndex, int newIndex) {
         setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
           final int item = _items.removeAt(oldIndex);
           _items.insert(newIndex, item);
         });

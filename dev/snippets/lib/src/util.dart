@@ -25,8 +25,8 @@ class SnippetException implements Exception {
   @override
   String toString() {
     if (file != null || line != null) {
-      final String fileStr = file == null ? '' : '$file:';
-      final String lineStr = line == null ? '' : '$line:';
+      final fileStr = file == null ? '' : '$file:';
+      final lineStr = line == null ? '' : '$line:';
       return '$runtimeType: $fileStr$lineStr: $message';
     } else {
       return '$runtimeType: $message';
@@ -80,13 +80,12 @@ class FlutterInformation {
     } else {
       String flutterCommand;
       if (platform.environment['FLUTTER_ROOT'] != null) {
-        flutterCommand =
-            filesystem
-                .directory(platform.environment['FLUTTER_ROOT'])
-                .childDirectory('bin')
-                .childFile('flutter')
-                .absolute
-                .path;
+        flutterCommand = filesystem
+            .directory(platform.environment['FLUTTER_ROOT'])
+            .childDirectory('bin')
+            .childFile('flutter')
+            .absolute
+            .path;
       } else {
         flutterCommand = 'flutter';
       }
@@ -113,8 +112,7 @@ class FlutterInformation {
       );
     }
 
-    final Map<String, dynamic> flutterVersion =
-        json.decode(flutterVersionJson) as Map<String, dynamic>;
+    final flutterVersion = json.decode(flutterVersionJson) as Map<String, dynamic>;
     if (flutterVersion['flutterRoot'] == null ||
         flutterVersion['frameworkVersion'] == null ||
         flutterVersion['dartSdkVersion'] == null) {
@@ -123,7 +121,7 @@ class FlutterInformation {
       );
     }
 
-    final Map<String, dynamic> info = <String, dynamic>{};
+    final info = <String, dynamic>{};
     info['flutterRoot'] = filesystem.directory(flutterVersion['flutterRoot']! as String);
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
 
@@ -159,7 +157,7 @@ String interpolateTemplate(
     }
     // We don't wrap some sections, because otherwise they generate invalid files.
     final String result = <String>[...contents].join('\n');
-    final RegExp wrappingNewlines = RegExp(r'^\n*(.*)\n*$', dotAll: true);
+    final wrappingNewlines = RegExp(r'^\n*(.*)\n*$', dotAll: true);
     return result.replaceAllMapped(wrappingNewlines, (Match match) => match.group(1)!);
   }
 
@@ -237,18 +235,17 @@ SampleStats getSampleStats(SourceElement element) {
   final int wordCount = element.wordCount;
   final int lineCount = element.lineCount;
   final int linkCount = element.referenceCount;
-  final String description =
-      <String>[
-        'Documentation has $wordCount ${wordCount == 1 ? 'word' : 'words'} on ',
-        '$lineCount ${lineCount == 1 ? 'line' : 'lines'}',
-        if (linkCount > 0 && element.hasSeeAlso) ', ',
-        if (linkCount > 0 && !element.hasSeeAlso) ' and ',
-        if (linkCount > 0) 'refers to $linkCount other ${linkCount == 1 ? 'symbol' : 'symbols'}',
-        if (linkCount > 0 && element.hasSeeAlso) ', and ',
-        if (linkCount == 0 && element.hasSeeAlso) 'and ',
-        if (element.hasSeeAlso) 'has a "See also:" section',
-        '.',
-      ].join();
+  final String description = <String>[
+    'Documentation has $wordCount ${wordCount == 1 ? 'word' : 'words'} on ',
+    '$lineCount ${lineCount == 1 ? 'line' : 'lines'}',
+    if (linkCount > 0 && element.hasSeeAlso) ', ',
+    if (linkCount > 0 && !element.hasSeeAlso) ' and ',
+    if (linkCount > 0) 'refers to $linkCount other ${linkCount == 1 ? 'symbol' : 'symbols'}',
+    if (linkCount > 0 && element.hasSeeAlso) ', and ',
+    if (linkCount == 0 && element.hasSeeAlso) 'and ',
+    if (element.hasSeeAlso) 'has a "See also:" section',
+    '.',
+  ].join();
   return SampleStats(
     totalSamples: total,
     dartpadSamples: dartpads,

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Vyhledávat na webu",
   "shareButtonLabel": "Sdílet",
   "pasteButtonLabel": "Vložit",
-  "selectAllButtonLabel": "Vybrat vše"
+  "selectAllButtonLabel": "Vybrat vše",
+  "searchResultsFound": "Byly nalezeny výsledky vyhledávání",
+  "noResultsFound": "Nebyly nalezeny žádné výsledky",
+  "radioButtonUnselectedLabel": "Nevybráno"
 }

@@ -69,6 +69,8 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, readonly) UIView* keyboardView;
 @property(nonatomic, assign) UIView* cachedFirstResponder;
 @property(nonatomic, readonly) CGRect keyboardRect;
+@property(nonatomic, readonly) BOOL pendingAutofillRemoval;
+@property(nonatomic, readonly) BOOL pendingInputViewRemoval;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
 
@@ -168,6 +170,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
       [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
                                         arguments:@[ [NSNumber numberWithInt:clientId], config ]];
   [textInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+}
+
+- (void)setClientClear {
+  FlutterMethodCall* clearClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.clearClient" arguments:@[]];
+  [textInputPlugin handleMethodCall:clearClientCall
                              result:^(id _Nullable result){
                              }];
 }
@@ -628,6 +638,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertTrue([inputView canPerformAction:@selector(selectAll:) withSender:nil]);
 }
 
+- (void)testCanPerformActionCaptureTextFromCamera {
+  if (@available(iOS 15.0, *)) {
+    NSDictionary* config = self.mutableTemplateCopy;
+    [self setClientId:123 configuration:config];
+    NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+    FlutterTextInputView* inputView = inputFields[0];
+
+    [inputView becomeFirstResponder];
+    XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+
+    [inputView insertText:@"test"];
+    [inputView selectAll:nil];
+    XCTAssertTrue([inputView canPerformAction:@selector(captureTextFromCamera:) withSender:nil]);
+  }
+}
+
 - (void)testDeletingBackward {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -939,6 +965,33 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(inputView.spellCheckingType, UITextSpellCheckingTypeNo);
 }
 
+- (void)testEnableInlinePredictionFromConfiguration API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+
+  // Template does not include enableInlinePrediction -> disabled.
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@NO forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  [config setValue:@YES forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeYes);
+
+  // Explicit nil / missing key -> disabled.
+  [config removeObjectForKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+
+  // Key present with NSNull (e.g. framework sent null) -> disabled.
+  [config setValue:[NSNull null] forKey:@"enableInlinePrediction"];
+  [inputView configureWithDictionary:config];
+  XCTAssertEqual(inputView.inlinePredictionType, UITextInlinePredictionTypeNo);
+}
+
 - (void)testReplaceTestLocalAdjustSelectionAndMarkedTextRange {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
@@ -958,6 +1011,21 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(inputView.markedTextRange, nil);
 }
 
+- (void)testFlutterTextInputViewIsNotClearWhenKeyboardShowAndHide {
+  // Regression test for https://github.com/flutter/flutter/issues/172250.
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setMarkedText:@"test text" selectedRange:NSMakeRange(0, 5)];
+  XCTAssertEqualObjects(inputView.text, @"test text");
+
+  // Showing keyboard does not trigger clearing of marked text.
+  [self setTextInputShow];
+  XCTAssertEqualObjects(inputView.text, @"test text");
+
+  // Hiding keyboard does not trigger clearing of marked text.
+  [self setTextInputHide];
+  XCTAssertEqualObjects(inputView.text, @"test text");
+}
+
 - (void)testFlutterTextInputViewOnlyRespondsToInsertionPointColorBelowIOS17 {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   // [UITextInputTraits insertionPointColor] is non-public API, so @selector(insertionPointColor)
@@ -969,6 +1037,31 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   } else {
     XCTAssertTrue(respondsToInsertionPointColor);
   }
+}
+
+- (void)testSetAttributedMarkedTextSelectedRange API_AVAILABLE(ios(17.0)) {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  NSAttributedString* attributedText =
+      [[NSAttributedString alloc] initWithString:@"inline prediction"
+                                      attributes:@{
+                                        NSForegroundColorAttributeName : [UIColor grayColor],
+                                      }];
+  [inputView setAttributedMarkedText:attributedText selectedRange:NSMakeRange(0, 7)];
+
+  XCTAssertEqualObjects(inputView.text, @"inline prediction");
+  NSRange selectedRange = ((FlutterTextRange*)inputView.selectedTextRange).range;
+  XCTAssertEqual(selectedRange.location, 0ul);
+  XCTAssertEqual(selectedRange.length, 7ul);
+  FlutterTextRange* markedRange = (FlutterTextRange*)inputView.markedTextRange;
+  XCTAssertNotNil(markedRange);
+  XCTAssertEqual(markedRange.range.location, 0ul);
+  // Marked range length must match the attributed string length (17 for "inline prediction").
+  XCTAssertEqual(markedRange.range.length, 17ul);
+
+  // Nil attributed string should behave like empty string.
+  [inputView setAttributedMarkedText:nil selectedRange:NSMakeRange(0, 0)];
+  XCTAssertEqualObjects(inputView.text, @"");
+  XCTAssertNil(inputView.markedTextRange);
 }
 
 #pragma mark - TextEditingDelta tests
@@ -2660,6 +2753,140 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                  withTag:@"field2"]);
 }
 
+- (void)testAutofillContextPersistsAfterClearClient {
+  NSMutableDictionary* field1 = self.mutableTemplateCopy;
+  [field1 setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"username" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+            forKey:@"autofill"];
+
+  NSMutableDictionary* field2 = self.mutablePasswordTemplateCopy;
+  [field2 setValue:@{
+    @"uniqueIdentifier" : @"field2",
+    @"hints" : @[ @"password" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+            forKey:@"autofill"];
+
+  NSMutableDictionary* config = [field1 mutableCopy];
+  [config setValue:@[ field1, field2 ] forKey:@"fields"];
+
+  // Verify initial state.
+  [self setClientId:123 configuration:config];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+
+  // Retain autofill context.
+  [self setClientClear];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 2ul);
+  XCTAssertTrue(textInputPlugin.pendingAutofillRemoval);
+
+  // Consume autofill context.
+  [self commitAutofillContextAndVerify];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+}
+
+- (void)testSetClientResetsPendingAutofillRemoval {
+  // When autofill context exists and clearClient sets pendingAutofillRemoval,
+  // a subsequent setClient should reset the flag because a new client is
+  // connecting and the deferred removal is no longer needed.
+  NSMutableDictionary* field = self.mutablePasswordTemplateCopy;
+  [field setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"password" ],
+    @"editingValue" : @{@"text" : @""}
+  }
+           forKey:@"autofill"];
+  [field setValue:@[ field ] forKey:@"fields"];
+
+  // Set up autofill context.
+  [self setClientId:123 configuration:field];
+  XCTAssertGreaterThan(textInputPlugin.autofillContext.count, 0ul);
+
+  // clearClient with autofill context sets pendingAutofillRemoval.
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingAutofillRemoval);
+
+  // A new setClient resets the pending autofill removal flag.
+  [self setClientId:456 configuration:self.mutableTemplateCopy];
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+}
+
+- (void)testPendingInputViewRemovalAfterClearClient {
+  // When autofillContext is empty and the view is first responder,
+  // clearClient should set pendingInputViewRemoval,
+  // and hideTextInput should consume it.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  // Verify initial state.
+  [self setClientId:123 configuration:config];
+  XCTAssertEqual(textInputPlugin.autofillContext.count, 0ul);
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+
+  // Stub isFirstResponder to simulate the view being first responder.
+  // In the test environment, becomeFirstResponder does not work.
+  id mockActiveView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockActiveView isFirstResponder]).andReturn(YES);
+
+  // clearClient with no autofill context sets pendingInputViewRemoval.
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertFalse(textInputPlugin.pendingAutofillRemoval);
+
+  // hideTextInput consumes the flag and removes the view.
+  [self setTextInputHide];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertNil(textInputPlugin.activeView.superview);
+}
+
+- (void)testHideBeforeClearClientRemovesViewImmediately {
+  // When hideTextInput is called before clearTextInputClient,
+  // the view is no longer first responder. clearClient should
+  // remove the view immediately since no keyboard dismiss animation is needed.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  [self setClientId:123 configuration:config];
+  [self setTextInputShow];
+  XCTAssertNotNil(textInputPlugin.activeView.superview);
+
+  // Hide first: resignFirstResponder, but no removeFromSuperview.
+  [self setTextInputHide];
+  XCTAssertNotNil(textInputPlugin.activeView.superview);
+
+  // clearClient after hide: view is not first responder,
+  // so removeFromSuperview should happen immediately.
+  [self setClientClear];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+  XCTAssertNil(textInputPlugin.activeView.superview);
+}
+
+- (void)testSetClientResetsPendingInputViewRemoval {
+  // When clearClient sets pendingInputViewRemoval (no autofill, first responder),
+  // a subsequent setClient should reset the flag because a new client is
+  // connecting and the deferred removal is no longer needed.
+  NSDictionary* config = self.mutableTemplateCopy;
+
+  // Field 1: setClient → show → clearClient (sets pendingInputViewRemoval).
+  [self setClientId:123 configuration:config];
+  [self setTextInputShow];
+
+  // Stub isFirstResponder to simulate the view being first responder.
+  // In the test environment, becomeFirstResponder does not work.
+  id mockActiveView = OCMPartialMock(textInputPlugin.activeView);
+  OCMStub([mockActiveView isFirstResponder]).andReturn(YES);
+
+  [self setClientClear];
+  XCTAssertTrue(textInputPlugin.pendingInputViewRemoval);
+
+  // Field 2: setClient resets the stale flag.
+  [self setClientId:456 configuration:config];
+  XCTAssertFalse(textInputPlugin.pendingInputViewRemoval);
+}
+
 - (void)testPasswordAutofillHack {
   NSDictionary* config = self.mutableTemplateCopy;
   [config setValue:@"YES" forKey:@"obscureText"];
@@ -2796,7 +3023,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertNil(textInputPlugin.activeView.textInputDelegate);
 }
 
-- (void)testAutoFillDoesNotTriggerOnHideButTriggersOnCommit {
+- (void)testAutoFillDoesNotTriggerOnShowAndHideKeyboard {
   // Regression test for https://github.com/flutter/flutter/issues/145681.
   NSMutableDictionary* configuration = self.mutableTemplateCopy;
   [configuration setValue:@{
@@ -2806,12 +3033,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   }
                    forKey:@"autofill"];
   [configuration setValue:@[ [configuration copy] ] forKey:@"fields"];
-
   [self setClientId:123 configuration:configuration];
+
+  [self setTextInputShow];
   XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
 
+  // Hiding keyboard does not trigger showing autofill prompt.
   [self setTextInputHide];
-  // Before the fix in https://github.com/flutter/flutter/pull/160653, it was 0ul.
   XCTAssertEqual(self.viewsVisibleToAutofill.count, 1ul);
 
   [self commitAutofillContextAndVerify];
@@ -2819,19 +3047,31 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 #pragma mark - Accessibility - Tests
 
-- (void)testUITextInputAccessibilityNotHiddenWhenShowed {
+- (void)testUITextInputAccessibilityNotHiddenWhenKeyboardIsShownAndHidden {
   [self setClientId:123 configuration:self.mutableTemplateCopy];
 
-  // Send show text input method call.
-  [self setTextInputShow];
   // Find all the FlutterTextInputViews we created.
   NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
 
   // The input view should not be hidden.
   XCTAssertEqual([inputFields count], 1u);
 
+  // Send show text input method call.
+  [self setTextInputShow];
+
+  inputFields = self.installedInputViews;
+
+  XCTAssertEqual([inputFields count], 1u);
+
   // Send hide text input method call.
   [self setTextInputHide];
+
+  inputFields = self.installedInputViews;
+
+  XCTAssertEqual([inputFields count], 1u);
+
+  // Send clear text client method call.
+  [self setClientClear];
 
   inputFields = self.installedInputViews;
 
@@ -3372,6 +3612,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollWillResignFirstResponder {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [UIApplication.sharedApplication.keyWindow addSubview:inputView];
 
@@ -3396,6 +3640,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollToTopOfKeyboardWillTakeScreenshot {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3439,6 +3687,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedDownAfterUserScroll {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3489,6 +3741,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedToOrginalPositionAfterUserScroll {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3594,6 +3850,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardDidResignFirstResponderDelegateisCalledAfterDismissedKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3642,6 +3902,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardScreenshotDismissedAfterPointerLiftedAboveMiddleYOfKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3694,6 +3958,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardReappearsAfterPointerLiftedAboveMiddleYOfKeyboard {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3753,6 +4021,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardAnimatesToOriginalPositionalOnPointerUp {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3805,6 +4077,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInteractiveKeyboardKeyboardAnimatesToDismissalPositionalOnPointerUp {
+  if (@available(iOS 17.0, *)) {
+    XCTSkip(@"Interactive keyboard tests broken on iOS 17+ due to SDK bugs. See: "
+             "https://github.com/flutter/flutter/issues/183473");
+  }
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
   UIScene* scene = scenes.anyObject;
@@ -3867,6 +4143,122 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTNSPredicateExpectation* expectation =
       [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:nil];
   [self waitForExpectations:@[ expectation ] timeout:10.0];
+}
+
+- (void)testEditMenu_shouldCreateCustomMenuItemWithCorrectProperties {
+  if (@available(iOS 16.0, *)) {
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    FlutterViewController* myViewController = [[FlutterViewController alloc] init];
+    myInputPlugin.viewController = myViewController;
+    [myViewController loadView];
+
+    FlutterMethodCall* setClientCall =
+        [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                          arguments:@[ @(123), self.mutableTemplateCopy ]];
+    [myInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+
+    FlutterTextInputView* myInputView = myInputPlugin.activeView;
+    FlutterTextInputView* mockInputView = OCMPartialMock(myInputView);
+    OCMStub([mockInputView isFirstResponder]).andReturn(YES);
+
+    id mockInteraction = OCMClassMock([UIEditMenuInteraction class]);
+    OCMStub([mockInputView editMenuInteraction]).andReturn(mockInteraction);
+
+    NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
+        @{@"x" : @(0), @"y" : @(0), @"width" : @(100), @"height" : @(50)};
+
+    NSArray<NSDictionary*>* encodedItems = @[
+      @{@"type" : @"custom", @"id" : @"custom-action-1", @"title" : @"Custom Action 1"},
+      @{@"type" : @"custom", @"id" : @"custom-action-2", @"title" : @"Custom Action 2"},
+    ];
+
+    BOOL shownEditMenu =
+        [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
+    XCTAssertTrue(shownEditMenu, @"Should show edit menu");
+
+    UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
+                               menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
+                                   suggestedActions:@[]];
+
+    XCTAssertEqual(menu.children.count, 2UL, @"Should create 2 custom menu items");
+    UIAction* firstAction = (UIAction*)menu.children[0];
+    UIAction* secondAction = (UIAction*)menu.children[1];
+    XCTAssertEqualObjects(firstAction.title, @"Custom Action 1",
+                          @"First action title should match");
+    XCTAssertEqualObjects(secondAction.title, @"Custom Action 2",
+                          @"Second action title should match");
+  }
+}
+
+- (void)testEditMenu_customActionShouldTriggerDelegateCallback {
+  if (@available(iOS 16.0, *)) {
+    id mockEngine = OCMClassMock([FlutterEngine class]);
+    id mockPlatformChannel = OCMClassMock([FlutterMethodChannel class]);
+    OCMStub([mockEngine platformChannel]).andReturn(mockPlatformChannel);
+
+    OCMStub([mockEngine flutterTextInputView:[OCMArg any]
+                performContextMenuCustomActionWithActionID:@"test-callback-id"
+                                           textInputClient:123])
+        .andDo((^(NSInvocation* invocation) {
+          [mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                                  arguments:@[ @(123), @"test-callback-id" ]];
+        }));
+
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine];
+    FlutterViewController* myViewController = [[FlutterViewController alloc] init];
+    myInputPlugin.viewController = myViewController;
+    [myViewController loadView];
+
+    FlutterMethodCall* setClientCall =
+        [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                          arguments:@[ @(123), self.mutableTemplateCopy ]];
+    [myInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+
+    FlutterTextInputView* myInputView = myInputPlugin.activeView;
+    FlutterTextInputView* mockInputView = OCMPartialMock(myInputView);
+    OCMStub([mockInputView isFirstResponder]).andReturn(YES);
+    XCTestExpectation* expectation = [[XCTestExpectation alloc]
+        initWithDescription:@"Custom action delegate callback should be called"];
+    OCMStub(([mockPlatformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
+                                     arguments:@[ @(123), @"test-callback-id" ]]))
+        .andDo(^(NSInvocation* invocation) {
+          [expectation fulfill];
+        });
+    id mockInteraction = OCMClassMock([UIEditMenuInteraction class]);
+    OCMStub([mockInputView editMenuInteraction]).andReturn(mockInteraction);
+
+    NSDictionary<NSString*, NSNumber*>* encodedTargetRect =
+        @{@"x" : @(0), @"y" : @(0), @"width" : @(100), @"height" : @(50)};
+
+    NSArray<NSDictionary*>* encodedItems = @[
+      @{@"type" : @"custom", @"id" : @"test-callback-id", @"title" : @"Test Action"},
+    ];
+
+    BOOL shownEditMenu =
+        [myInputPlugin showEditMenu:@{@"targetRect" : encodedTargetRect, @"items" : encodedItems}];
+    XCTAssertTrue(shownEditMenu, @"Should show edit menu");
+
+    UIMenu* menu = [myInputView editMenuInteraction:mockInteraction
+                               menuForConfiguration:OCMClassMock([UIEditMenuConfiguration class])
+                                   suggestedActions:@[]];
+
+    XCTAssertEqual(menu.children.count, 1UL, @"Should have 1 custom menu item");
+    UIAction* customAction = (UIAction*)menu.children[0];
+    XCTAssertEqualObjects(customAction.title, @"Test Action", @"Action title should match");
+
+    [myInputView.textInputDelegate flutterTextInputView:myInputView
+             performContextMenuCustomActionWithActionID:@"test-callback-id"
+                                        textInputClient:123];
+
+    [self waitForExpectations:@[ expectation ] timeout:1.0];
+    OCMVerifyAll(mockPlatformChannel);
+  }
 }
 
 @end

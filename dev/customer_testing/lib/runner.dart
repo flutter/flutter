@@ -22,18 +22,18 @@ Future<bool> runTests({
   }
 
   // Best attempt at evenly splitting tests among the shards
-  final List<File> shardedFiles = <File>[];
-  for (int i = shardIndex; i < files.length; i += numberShards) {
+  final shardedFiles = <File>[];
+  for (var i = shardIndex; i < files.length; i += numberShards) {
     shardedFiles.add(files[i]);
   }
 
-  int testCount = 0;
-  int failures = 0;
+  var testCount = 0;
+  var failures = 0;
 
   if (verbose) {
-    final String s = files.length == 1 ? '' : 's';
+    final s = files.length == 1 ? '' : 's';
     if (numberShards > 1) {
-      final String ss = shardedFiles.length == 1 ? '' : 's';
+      final ss = shardedFiles.length == 1 ? '' : 's';
       print(
         '${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex ($numberShards shards total).',
       );
@@ -49,13 +49,13 @@ Future<bool> runTests({
     } else {
       print('Tests:');
     }
-    for (final File file in shardedFiles) {
+    for (final file in shardedFiles) {
       print(file.path);
     }
   }
   print('');
 
-  for (final File file in shardedFiles) {
+  for (final file in shardedFiles) {
     // Always print name of running task for debugging individual customer test
     // suites.
     print('Processing ${file.path}...');
@@ -78,7 +78,7 @@ Future<bool> runTests({
       continue;
     }
 
-    bool success = true;
+    var success = true;
 
     final Directory checkout = Directory.systemTemp.createTempSync(
       'flutter_customer_testing.${path.basenameWithoutExtension(file.path)}.',
@@ -109,7 +109,7 @@ Future<bool> runTests({
         }
       }
       if (success) {
-        final Directory customerRepo = Directory(path.join(checkout.path, 'tests'));
+        final customerRepo = Directory(path.join(checkout.path, 'tests'));
         for (final String setupCommand in instructions.setup) {
           if (verbose) {
             print('Running setup command: $setupCommand');
@@ -121,7 +121,7 @@ Future<bool> runTests({
           }
         }
         for (final Directory updateDirectory in instructions.update) {
-          final Directory resolvedUpdateDirectory = Directory(
+          final resolvedUpdateDirectory = Directory(
             path.join(customerRepo.path, updateDirectory.path),
           );
           if (verbose) {
@@ -155,15 +155,15 @@ Future<bool> runTests({
           }
           if (instructions.iterations != null && instructions.iterations! < repeat) {
             if (verbose) {
-              final String s = instructions.iterations == 1 ? '' : 's';
+              final s = instructions.iterations == 1 ? '' : 's';
               print(
                 'Limiting to ${instructions.iterations} round$s rather than $repeat rounds because of "iterations" directive.',
               );
             }
             repeat = instructions.iterations!;
           }
-          final Stopwatch stopwatch = Stopwatch()..start();
-          for (int iteration = 0; iteration < repeat; iteration += 1) {
+          final stopwatch = Stopwatch()..start();
+          for (var iteration = 0; iteration < repeat; iteration += 1) {
             if (verbose && repeat > 1) {
               print('Round ${iteration + 1} of $repeat.');
             }
@@ -196,7 +196,7 @@ Future<bool> runTests({
       }
     }
     if (!success) {
-      final String s = instructions.contacts.length == 1 ? '' : 's';
+      final s = instructions.contacts.length == 1 ? '' : 's';
       print('Contact$s: ${instructions.contacts.join(", ")}');
     }
     if (verbose || !success) {
@@ -204,7 +204,7 @@ Future<bool> runTests({
     }
   }
   if (failures > 0) {
-    final String s = failures == 1 ? '' : 's';
+    final s = failures == 1 ? '' : 's';
     print('$failures failure$s.');
     return false;
   }
@@ -239,7 +239,7 @@ Future<bool> shell(
       workingDirectory: directory.path,
     );
   }
-  final List<String> output = <String>[];
+  final output = <String>[];
   utf8.decoder
       .bind(process.stdout)
       .transform(const LineSplitter())
@@ -248,7 +248,7 @@ Future<bool> shell(
       .bind(process.stderr)
       .transform(const LineSplitter())
       .listen(verbose ? printLog : output.add);
-  final bool success = await process.exitCode == 0;
+  final success = await process.exitCode == 0;
   if (success || silentFailure) {
     return success;
   }

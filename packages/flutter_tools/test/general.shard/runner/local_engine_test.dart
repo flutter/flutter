@@ -12,9 +12,9 @@ import 'package:flutter_tools/src/runner/local_engine.dart';
 
 import '../../src/common.dart';
 
-const String kEngineRoot = '/flutter/flutter/engine';
-const String kArbitraryEngineRoot = '/arbitrary/engine';
-const String kPackageConfig = '.dart_tool/package_config.json';
+const kEngineRoot = '/flutter/flutter/engine';
+const kArbitraryEngineRoot = '/arbitrary/engine';
+const kPackageConfig = '.dart_tool/package_config.json';
 
 void main() {
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
@@ -40,8 +40,8 @@ void main() {
 ''');
     fileSystem.file('bin/cache/pkg/sky_engine/lib').createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: '',
       logger: logger,
@@ -98,8 +98,8 @@ void main() {
     fileSystem.directory('$kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
     fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: '',
       logger: logger,
@@ -132,8 +132,8 @@ void main() {
           .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt_arm64/')
           .createSync(recursive: true);
 
-      final BufferLogger logger = BufferLogger.test();
-      final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      final logger = BufferLogger.test();
+      final localEngineLocator = LocalEngineLocator(
         fileSystem: fileSystem,
         flutterRoot: 'flutter/flutter',
         logger: logger,
@@ -164,8 +164,8 @@ void main() {
         .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/')
         .createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -189,8 +189,8 @@ void main() {
       ..createSync(recursive: true);
     fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug/').createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -220,8 +220,8 @@ void main() {
     final Directory localEngine = fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug/')
       ..createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -248,8 +248,8 @@ void main() {
       '$kArbitraryEngineRoot/src/out/host_debug_unopt_arm64/',
     )..createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -276,8 +276,8 @@ void main() {
     )..createSync(recursive: true);
     fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug/').createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -306,8 +306,8 @@ void main() {
         .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/')
         .createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -332,7 +332,7 @@ void main() {
     final Directory localEngine = fileSystem.directory('$kArbitraryEngineRoot/src/out/ios_debug/')
       ..createSync(recursive: true);
 
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: BufferLogger.test(),
@@ -357,8 +357,8 @@ void main() {
     fileSystem.directory('$kEngineRoot/src/out/host_debug').createSync(recursive: true);
     fileSystem.file('bin/cache/pkg/sky_engine/lib').createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,
@@ -383,7 +383,7 @@ void main() {
       'cannot be determined', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
 
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: BufferLogger.test(),
@@ -409,8 +409,8 @@ void main() {
       '$kArbitraryEngineRoot/src/out/web_whatever/',
     )..createSync(recursive: true);
 
-    final BufferLogger wasmLogger = BufferLogger.test();
-    final LocalEngineLocator localWasmEngineLocator = LocalEngineLocator(
+    final wasmLogger = BufferLogger.test();
+    final localWasmEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: wasmLogger,
@@ -430,8 +430,8 @@ void main() {
     );
     expect(wasmLogger.traceText, contains('Local engine source at /arbitrary/engine/src'));
 
-    final BufferLogger webLogger = BufferLogger.test();
-    final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+    final webLogger = BufferLogger.test();
+    final localWebEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: webLogger,
@@ -453,7 +453,7 @@ void main() {
   });
 
   test('returns null without throwing if nothing is specified', () async {
-    final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+    final localWebEngineLocator = LocalEngineLocator(
       fileSystem: MemoryFileSystem.test(),
       flutterRoot: 'flutter/flutter',
       logger: BufferLogger.test(),
@@ -468,7 +468,7 @@ void main() {
   test(
     'throws if nothing is specified but the FLUTTER_ENGINE environment variable is set',
     () async {
-      final LocalEngineLocator localWebEngineLocator = LocalEngineLocator(
+      final localWebEngineLocator = LocalEngineLocator(
         fileSystem: MemoryFileSystem.test(),
         flutterRoot: 'flutter/flutter',
         logger: BufferLogger.test(),
@@ -492,8 +492,8 @@ void main() {
         .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/')
         .createSync(recursive: true);
 
-    final BufferLogger logger = BufferLogger.test();
-    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
       fileSystem: fileSystem,
       flutterRoot: 'flutter/flutter',
       logger: logger,

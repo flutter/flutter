@@ -58,7 +58,7 @@ class DummyPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String viewType = 'benchmarks/platform_views_layout_hybrid_composition/DummyPlatformView';
+    const viewType = 'benchmarks/platform_views_layout_hybrid_composition/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
       nativeView = const UiKitView(viewType: viewType);

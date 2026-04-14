@@ -3,41 +3,54 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/text_form_field/text_form_field.2.dart' as example;
+import 'package:flutter_api_samples/material/text_form_field/text_form_field.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TextFormFieldExample2 Widget Tests', () {
-    testWidgets('Input validation handles empty, incorrect, and short usernames', (
+    testWidgets(
+      'Input validation handles empty, incorrect, and short usernames',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const example.TextFormFieldExampleApp());
+        final Finder textFormField = find.byType(TextFormField);
+        final Finder saveButton = find.byType(TextButton);
+
+        await tester.enterText(textFormField, '');
+        await tester.pump();
+        await tester.tap(saveButton);
+        await tester.pump();
+        expect(find.text('This field is required'), findsOneWidget);
+
+        await tester.enterText(textFormField, 'jo hn');
+        await tester.tap(saveButton);
+        await tester.pump();
+        expect(
+          find.text('Username must not contain any spaces'),
+          findsOneWidget,
+        );
+
+        await tester.enterText(textFormField, 'jo');
+        await tester.tap(saveButton);
+        await tester.pump();
+        expect(
+          find.text('Username should be at least 3 characters long'),
+          findsOneWidget,
+        );
+
+        await tester.enterText(textFormField, '1jo');
+        await tester.tap(saveButton);
+        await tester.pump();
+        expect(
+          find.text('Username must not start with a number'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('Async validation feedback is handled correctly', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const example.TextFormFieldExampleApp());
-      final Finder textFormField = find.byType(TextFormField);
-      final Finder saveButton = find.byType(TextButton);
-
-      await tester.enterText(textFormField, '');
-      await tester.pump();
-      await tester.tap(saveButton);
-      await tester.pump();
-      expect(find.text('This field is required'), findsOneWidget);
-
-      await tester.enterText(textFormField, 'jo hn');
-      await tester.tap(saveButton);
-      await tester.pump();
-      expect(find.text('Username must not contain any spaces'), findsOneWidget);
-
-      await tester.enterText(textFormField, 'jo');
-      await tester.tap(saveButton);
-      await tester.pump();
-      expect(find.text('Username should be at least 3 characters long'), findsOneWidget);
-
-      await tester.enterText(textFormField, '1jo');
-      await tester.tap(saveButton);
-      await tester.pump();
-      expect(find.text('Username must not start with a number'), findsOneWidget);
-    });
-
-    testWidgets('Async validation feedback is handled correctly', (WidgetTester tester) async {
       await tester.pumpWidget(const example.TextFormFieldExampleApp());
       final Finder textFormField = find.byType(TextFormField);
       final Finder saveButton = find.byType(TextButton);
@@ -68,7 +81,9 @@ void main() {
       expect(find.text('Username jack is already taken'), findsOneWidget);
     });
 
-    testWidgets('Loading spinner displays correctly when saving', (WidgetTester tester) async {
+    testWidgets('Loading spinner displays correctly when saving', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const example.TextFormFieldExampleApp());
       final Finder textFormField = find.byType(TextFormField);
       final Finder saveButton = find.byType(TextButton);

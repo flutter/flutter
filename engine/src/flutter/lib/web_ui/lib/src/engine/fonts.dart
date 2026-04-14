@@ -31,8 +31,7 @@ class FontManifest {
 }
 
 Future<FontManifest> fetchFontManifest(ui_web.AssetManager assetManager) async {
-  final HttpFetchResponse response =
-      await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
+  final response = await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
   if (!response.hasPayload) {
     printWarning('Font manifest does not exist at `${response.url}` - ignoring.');
     return FontManifest(<FontFamily>[]);
@@ -53,32 +52,33 @@ Future<FontManifest> fetchFontManifest(ui_web.AssetManager assetManager) async {
   if (fontManifestJson == null) {
     throw AssertionError('There was a problem trying to load FontManifest.json');
   }
-  final List<FontFamily> families =
-      (fontManifestJson! as List<dynamic>).map((dynamic fontFamilyJson) {
-        final Map<String, dynamic> fontFamily = fontFamilyJson as Map<String, dynamic>;
-        final String familyName = fontFamily.readString('family');
-        final List<dynamic> fontAssets = fontFamily.readList('fonts');
-        return FontFamily(
-          familyName,
-          fontAssets.map((dynamic fontAssetJson) {
-            String? asset;
-            final Map<String, String> descriptors = <String, String>{};
-            for (final MapEntry<String, dynamic> descriptor
-                in (fontAssetJson as Map<String, dynamic>).entries) {
-              if (descriptor.key == 'asset') {
-                asset = descriptor.value as String;
-              } else {
-                // Sometimes these descriptors are strings, and sometimes numbers, so we stringify them here.
-                descriptors[descriptor.key] = '${descriptor.value}';
-              }
-            }
-            if (asset == null) {
-              throw AssertionError("Invalid Font manifest, missing 'asset' key on font.");
-            }
-            return FontAsset(asset, descriptors);
-          }).toList(),
-        );
-      }).toList();
+  final List<FontFamily> families = (fontManifestJson! as List<dynamic>).map((
+    dynamic fontFamilyJson,
+  ) {
+    final fontFamily = fontFamilyJson as Map<String, dynamic>;
+    final String familyName = fontFamily.readString('family');
+    final List<dynamic> fontAssets = fontFamily.readList('fonts');
+    return FontFamily(
+      familyName,
+      fontAssets.map((dynamic fontAssetJson) {
+        String? asset;
+        final descriptors = <String, String>{};
+        for (final MapEntry<String, dynamic> descriptor
+            in (fontAssetJson as Map<String, dynamic>).entries) {
+          if (descriptor.key == 'asset') {
+            asset = descriptor.value as String;
+          } else {
+            // Sometimes these descriptors are strings, and sometimes numbers, so we stringify them here.
+            descriptors[descriptor.key] = '${descriptor.value}';
+          }
+        }
+        if (asset == null) {
+          throw AssertionError("Invalid Font manifest, missing 'asset' key on font.");
+        }
+        return FontAsset(asset, descriptors);
+      }).toList(),
+    );
+  }).toList();
   return FontManifest(families);
 }
 

@@ -69,7 +69,7 @@ class EngineFlutterView implements ui.FlutterView {
     // hot restart.
     embeddingStrategy.attachViewRoot(dom.rootElement);
     pointerBinding = PointerBinding(this);
-    _resizeSubscription = onResize.listen(_didResize);
+    _resizeSubscription = onResize.listen(_handleBrowserResize);
     _globalHtmlAttributes.applyAttributes(
       viewId: viewId,
       rendererTag: renderer.rendererTag,
@@ -120,7 +120,7 @@ class EngineFlutterView implements ui.FlutterView {
   void render(ui.Scene scene, {ui.Size? size}) {
     assert(!isDisposed, 'Trying to render a disposed EngineFlutterView.');
     if (size != null) {
-      resize(size);
+      handleFrameworkResize(size);
     }
     platformDispatcher.render(scene, this);
   }
@@ -129,6 +129,16 @@ class EngineFlutterView implements ui.FlutterView {
   void updateSemantics(ui.SemanticsUpdate update) {
     assert(!isDisposed, 'Trying to update semantics on a disposed EngineFlutterView.');
     semantics.updateSemantics(update);
+  }
+
+  /// Sets the locale for this view.
+  ///
+  /// This method is typically called by the Flutter framework after it has
+  /// resolved the application's locale. It configures the view to reflect
+  /// the given locale, which is important for accessibility and for the
+  /// browser.
+  void setLocale(ui.Locale locale) {
+    embeddingStrategy.setLocale(locale);
   }
 
   late final GlobalHtmlAttributes _globalHtmlAttributes = GlobalHtmlAttributes(
@@ -197,15 +207,28 @@ class EngineFlutterView implements ui.FlutterView {
   /// the CSS box-model restrictions imposed on its `hostElement` (especially when
   /// hiding `overflow`). Flutter does not attempt to interpret the styles of
   /// `hostElement` to compute its `physicalConstraints`, only its current size.
-  void resize(ui.Size newPhysicalSize) {
+  @visibleForTesting
+  void handleFrameworkResize(ui.Size newPhysicalSize) {
+    // TODO(mdebbar): This resizing is only needed for the multiview mode. Should we make it a no-op
+    //                in the full page mode to avoid doing unnecessary work?
+
     // The browser uses CSS, and CSS operates in logical sizes.
     final ui.Size logicalSize = newPhysicalSize / devicePixelRatio;
     dom.rootElement.style
       ..width = '${logicalSize.width}px'
       ..height = '${logicalSize.height}px';
 
-    // Force an update of the physicalSize so it's ready for the renderer.
-    _computePhysicalSize();
+    // When the keyboard is active on mobile, we explicitly do not update
+    // `_physicalSize`. This is because `_handleBrowserResize` (the method
+    // that handles browser-initiated resizes) has special logic to
+    // keep `_physicalSize` stale (large) and instead rely on `viewInsets`
+    // to shrink the visible area. If `_handleFrameworkResize` were to update `_physicalSize`
+    // to the smaller visible size, it would break the `viewInsets` logic
+    // on subsequent calculations.
+    if (!_shouldPreservePhysicalSizeOnResize) {
+      // Force an update of the physicalSize so it's ready for the renderer.
+      _physicalSize = _computePhysicalSize();
+    }
   }
 
   /// Lazily populated and cleared at the end of the frame.
@@ -253,6 +276,9 @@ class EngineFlutterView implements ui.FlutterView {
   List<ui.DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
 
   @override
+  ui.DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
+
+  @override
   EngineFlutterDisplay get display => EngineFlutterDisplay.instance;
 
   @override
@@ -263,7 +289,14 @@ class EngineFlutterView implements ui.FlutterView {
 
   Stream<ui.Size?> get onResize => dimensionsProvider.onResize;
 
-  /// Called immediately after the view has been resized.
+  /// Whether to preserve the physical size of the view when the browser window
+  /// resizes.
+  ///
+  /// This is used to prevent the view from resizing when the on-screen keyboard
+  /// appears on mobile devices.
+  bool get _shouldPreservePhysicalSizeOnResize => isMobile && textEditing.isEditing;
+
+  /// Called immediately after the view has been resized by the browser.
   ///
   /// When there is a text editing going on in mobile devices, do not change
   /// the physicalSize, change the [window.viewInsets]. See:
@@ -272,12 +305,17 @@ class EngineFlutterView implements ui.FlutterView {
   ///
   /// Note: always check for rotations for a mobile device. Update the physical
   /// size if the change is caused by a rotation.
-  void _didResize(ui.Size? newSize) {
+  ///
+  /// When `_shouldPreservePhysicalSizeOnResize` is true (i.e., keyboard is active
+  /// on mobile), `_physicalSize` is deliberately kept stale (representing the
+  /// full screen size) while `viewInsets` are updated to reflect the keyboard's
+  /// presence. This allows the framework to correctly shrink its content using
+  /// `resizeToAvoidBottomInset`. When the keyboard is dismissed, `_physicalSize`
+  /// is updated to the actual new physical size of the window.
+  void _handleBrowserResize(ui.Size? _) {
     StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
     final ui.Size newPhysicalSize = _computePhysicalSize();
-    final bool isEditingOnMobile =
-        isMobile && !_isRotation(newPhysicalSize) && textEditing.isEditing;
-    if (isEditingOnMobile) {
+    if (_shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize)) {
       _computeOnScreenKeyboardInsets(true);
     } else {
       _physicalSize = newPhysicalSize;
@@ -327,6 +365,13 @@ class EngineFlutterView implements ui.FlutterView {
       _physicalSize!.height,
       isEditingOnMobile,
     );
+
+    // Ensure that viewInsets are never negative. If it's not caught here, it will be caught later
+    // in the framework, and will be hard to debug since the root cause is here.
+    assert(
+      _viewInsets.isNonNegative,
+      'ViewInsets cannot be negative. This is usually caused by an incorrect physicalSize calculation when the keyboard is being dismissed.',
+    );
   }
 }
 
@@ -334,8 +379,8 @@ final class _EngineFlutterViewImpl extends EngineFlutterView {
   _EngineFlutterViewImpl(
     EnginePlatformDispatcher platformDispatcher,
     DomElement hostElement, {
-    JsViewConstraints? viewConstraints,
-  }) : super._(_nextViewId++, platformDispatcher, hostElement, viewConstraints: viewConstraints);
+    super.viewConstraints,
+  }) : super._(_nextViewId++, platformDispatcher, hostElement);
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
@@ -475,12 +520,14 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   }
 
   @override
-  ui.FrameData get frameData => const ui.FrameData.webOnly();
+  ui.FrameData get frameData => platformDispatcher.frameData;
 
   @override
-  ui.VoidCallback? get onFrameDataChanged => null;
+  ui.VoidCallback? get onFrameDataChanged => platformDispatcher.onFrameDataChanged;
   @override
-  set onFrameDataChanged(ui.VoidCallback? callback) {}
+  set onFrameDataChanged(ui.VoidCallback? callback) {
+    platformDispatcher.onFrameDataChanged = callback;
+  }
 
   @override
   ui.AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
@@ -598,10 +645,10 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
 
   Future<bool> _waitInTheLine(_HandleMessageCallBack callback) async {
     final Future<void> currentPosition = _endOfTheLine;
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _endOfTheLine = completer.future;
     await currentPosition;
-    bool result = false;
+    var result = false;
     try {
       result = await callback();
     } finally {
@@ -613,7 +660,7 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
   Future<bool> handleNavigationMessage(ByteData? data) async {
     return _waitInTheLine(() async {
       final MethodCall decoded = const JSONMethodCodec().decodeMethodCall(data);
-      final Map<String, dynamic>? arguments = decoded.arguments as Map<String, dynamic>?;
+      final arguments = decoded.arguments as Map<String, dynamic>?;
       switch (decoded.method) {
         case 'selectMultiEntryHistory':
           await _useMultiEntryBrowserHistory();
@@ -622,11 +669,6 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
           await _useSingleEntryBrowserHistory();
           return true;
         // the following cases assert that arguments are not null
-        case 'routeUpdated': // deprecated
-          assert(arguments != null);
-          await _useSingleEntryBrowserHistory();
-          browserHistory.setRouteName(arguments!.tryString('routeName'));
-          return true;
         case 'routeInformationUpdated':
           assert(arguments != null);
           final String? uriString = arguments!.tryString('uri');
@@ -699,6 +741,9 @@ class ViewPadding implements ui.ViewPadding {
   final double right;
   @override
   final double bottom;
+
+  /// Returns true if all padding values are non-negative.
+  bool get isNonNegative => left >= 0.0 && top >= 0.0 && right >= 0.0 && bottom >= 0.0;
 }
 
 class ViewConstraints implements ui.ViewConstraints {

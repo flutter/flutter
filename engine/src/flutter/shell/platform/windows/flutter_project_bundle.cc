@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/engine_switches.h"  // nogncheck
 #include "flutter/shell/platform/common/path_utils.h"
 
@@ -34,6 +35,9 @@ FlutterProjectBundle::FlutterProjectBundle(
 
   ui_thread_policy_ =
       static_cast<FlutterUIThreadPolicy>(properties.ui_thread_policy);
+
+  accessibility_mode_ =
+      static_cast<FlutterAccessibilityMode>(properties.accessibility_mode);
 
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
@@ -69,11 +73,11 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
     return UniqueAotDataPtr(nullptr, nullptr);
   }
   if (!std::filesystem::exists(aot_library_path_)) {
-    FML_LOG(ERROR) << "Can't load AOT data from "
-                   << aot_library_path_.u8string() << "; no such file.";
+    FML_LOG(ERROR) << "Can't load AOT data from " << aot_library_path_
+                   << "; no such file.";
     return UniqueAotDataPtr(nullptr, nullptr);
   }
-  std::string path_string = aot_library_path_.u8string();
+  std::string path_string = fml::PathToUtf8(aot_library_path_);
   FlutterEngineAOTDataSource source = {};
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
   source.elf_path = path_string.c_str();

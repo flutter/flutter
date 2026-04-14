@@ -2,21 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
+import 'test_page_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
+  const kBlue = Color(0xFF0000FF);
+  const kGreen = Color(0xFF00FF00);
+  const kRed = Color(0xFFFF0000);
+  const kOrange = Color(0xFFFF8C00);
+  const kPurple = Color(0xFF800080);
+  const kYellow = Color(0xFFFFFF00);
+
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('PageView.builder respects findChildIndexCallback', (WidgetTester tester) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -27,8 +41,8 @@ void main() {
             stateSetter = setState;
             return PageView.builder(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -51,7 +65,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
-    final PageController controller = PageController(initialPage: 1);
+    final controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
 
     Widget build(Size size) {
@@ -97,7 +111,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/88956
-    final PageController controller = PageController(initialPage: 1);
+    // and https://github.com/flutter/flutter/issues/6537
+    final controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
 
     Widget build(Size size) {
@@ -118,13 +133,14 @@ void main() {
 
     // The pageView have a zero viewport, so nothing display.
     await tester.pumpWidget(build(Size.zero));
+    expect(tester.getSize(find.byType(PageView)), Size.zero);
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
 
     // Change the page through the page controller when zero viewport
     controller.animateToPage(
       kStates.indexOf('Iowa'),
-      duration: kTabScrollDuration,
+      duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
     );
     expect(controller.page, kStates.indexOf('Iowa'));
@@ -140,12 +156,12 @@ void main() {
 
   testWidgets('_PagePosition.applyViewportDimension should not throw', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/101007
-    final PageController controller = PageController(initialPage: 1);
+    final controller = PageController(initialPage: 1);
     addTearDown(controller.dispose);
 
     // Set the starting viewportDimension to 0.0
     await tester.binding.setSurfaceSize(Size.zero);
-    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+    final mediaQueryData = MediaQueryData.fromView(tester.view);
 
     Widget build(Size size) {
       return MediaQuery(
@@ -166,7 +182,7 @@ void main() {
     }
 
     await tester.pumpWidget(build(Size.zero));
-    const Size surfaceSize = Size(500, 400);
+    const surfaceSize = Size(500, 400);
     await tester.binding.setSurfaceSize(surfaceSize);
     await tester.pumpWidget(build(surfaceSize));
 
@@ -177,33 +193,28 @@ void main() {
   });
 
   testWidgets('PageController cannot return page while unattached', (WidgetTester tester) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
     expect(() => controller.page, throwsAssertionError);
   });
 
   testWidgets('PageView control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
           dragStartBehavior: DragStartBehavior.down,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    log.add(state);
-                  },
-                  child: Container(
-                    height: 200.0,
-                    color: const Color(0xFF0000FF),
-                    child: Text(state),
-                  ),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
+              onTap: () {
+                log.add(state);
+              },
+              child: Container(height: 200.0, color: kBlue, child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -256,10 +267,10 @@ void main() {
     'PageView does not squish when overscrolled',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: PageView(
             children: List<Widget>.generate(10, (int i) {
-              return Container(key: ValueKey<int>(i), color: const Color(0xFF0000FF));
+              return Container(key: ValueKey<int>(i), color: kBlue);
             }),
           ),
         ),
@@ -296,7 +307,7 @@ void main() {
   );
 
   testWidgets('PageController control test', (WidgetTester tester) async {
-    final PageController controller = PageController(initialPage: 4);
+    final controller = PageController(initialPage: 4);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -401,7 +412,7 @@ void main() {
   testWidgets('PageController nextPage and previousPage return Futures that resolve', (
     WidgetTester tester,
   ) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -414,7 +425,7 @@ void main() {
       ),
     );
 
-    bool nextPageCompleted = false;
+    var nextPageCompleted = false;
     controller
         .nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
         .then((_) => nextPageCompleted = true);
@@ -425,7 +436,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(nextPageCompleted, true);
 
-    bool previousPageCompleted = false;
+    var previousPageCompleted = false;
     controller
         .previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
         .then((_) => previousPageCompleted = true);
@@ -455,9 +466,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: SizedBox(
-            width: 200.0,
-            height: 200.0,
+          child: SizedBox.square(
+            dimension: 200.0,
             child: PageView(children: kStates.map<Widget>((String state) => Text(state)).toList()),
           ),
         ),
@@ -468,7 +478,7 @@ void main() {
   });
 
   testWidgets('Page changes at halfway point', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final log = <int>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -519,8 +529,8 @@ void main() {
   });
 
   testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
-    final List<int> log = <int>[];
-    final PageController controller = PageController(viewportFraction: 0.9);
+    final log = <int>[];
+    final controller = PageController(viewportFraction: 0.9);
     addTearDown(controller.dispose);
 
     Widget build(PageController controller, {Size? size}) {
@@ -574,7 +584,7 @@ void main() {
   });
 
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
-    PageController controller = PageController(viewportFraction: 7 / 8);
+    var controller = PageController(viewportFraction: 7 / 8);
     addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
@@ -586,7 +596,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -617,7 +627,7 @@ void main() {
   });
 
   testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final log = <int>[];
 
     Widget build({required bool pageSnapping}) {
       return Directionality(
@@ -679,7 +689,7 @@ void main() {
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
-    final PageController controller = PageController(viewportFraction: 1 / 8);
+    final controller = PageController(viewportFraction: 1 / 8);
     addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
@@ -691,7 +701,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -722,7 +732,7 @@ void main() {
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
-    final PageController controller = PageController(viewportFraction: 5 / 4);
+    final controller = PageController(viewportFraction: 5 / 4);
     addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
@@ -734,7 +744,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -763,7 +773,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(kStates[index]),
             );
           },
@@ -771,14 +781,14 @@ void main() {
       );
     }
 
-    final PageController oldController = PageController(viewportFraction: 5 / 4);
+    final oldController = PageController(viewportFraction: 5 / 4);
     addTearDown(oldController.dispose);
     await tester.pumpWidget(build(oldController));
 
     expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100, 0));
     expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
 
-    final PageController newController = PageController(viewportFraction: 4);
+    final newController = PageController(viewportFraction: 4);
     addTearDown(newController.dispose);
     await tester.pumpWidget(build(newController));
     newController.jumpToPage(10);
@@ -791,7 +801,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/45096.
-    final PageController controller = PageController(viewportFraction: 5 / 4);
+    final controller = PageController(viewportFraction: 5 / 4);
     addTearDown(controller.dispose);
 
     Widget build(PageController controller) {
@@ -803,7 +813,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 200.0,
-              color: index.isEven ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+              color: index.isEven ? kBlue : kGreen,
               child: Text(index.toString()),
             );
           },
@@ -824,7 +834,7 @@ void main() {
 
   testWidgets('All visible pages are able to receive touch events', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23873.
-    final PageController controller = PageController(viewportFraction: 1 / 4);
+    final controller = PageController(viewportFraction: 1 / 4);
     addTearDown(controller.dispose);
     late int tappedIndex;
 
@@ -848,7 +858,7 @@ void main() {
     await tester.pumpWidget(build());
 
     // The first 3 items should be visible and tappable.
-    for (final int index in visiblePages) {
+    for (final index in visiblePages) {
       expect(find.text(index.toString()), findsOneWidget);
       // The center of page 2's x-coordinate is 800, so we have to manually
       // offset it a bit to make sure the tap lands within the screen.
@@ -861,7 +871,7 @@ void main() {
     await tester.pump();
     // The last 3 items should be visible and tappable.
     visiblePages = const <int>[17, 18, 19];
-    for (final int index in visiblePages) {
+    for (final index in visiblePages) {
       expect(find.text('$index'), findsOneWidget);
       await tester.tap(find.text('$index'));
       expect(tappedIndex, index);
@@ -872,10 +882,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/50505.
-    final PageController controller = PageController(
-      initialPage: kStates.length - 1,
-      viewportFraction: 0.5,
-    );
+    final controller = PageController(initialPage: kStates.length - 1, viewportFraction: 0.5);
     addTearDown(controller.dispose);
 
     Widget build(Size size) {
@@ -914,9 +921,9 @@ void main() {
   });
 
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
-    final PageController controller = PageController(initialPage: kStates.length - 1);
+    final controller = PageController(initialPage: kStates.length - 1);
     addTearDown(controller.dispose);
-    int changeIndex = 0;
+    var changeIndex = 0;
     Widget build() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -939,7 +946,7 @@ void main() {
   });
 
   testWidgets('PageView can restore page', (WidgetTester tester) async {
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
     expect(
       () => controller.page,
@@ -951,7 +958,7 @@ void main() {
         ),
       ),
     );
-    final PageStorageBucket bucket = PageStorageBucket();
+    final bucket = PageStorageBucket();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -995,7 +1002,7 @@ void main() {
     );
     expect(controller.page, 2);
 
-    final PageController controller2 = PageController(keepPage: false);
+    final controller2 = PageController(keepPage: false);
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1016,9 +1023,9 @@ void main() {
   });
 
   testWidgets('PageView exposes semantics of children', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1055,7 +1062,7 @@ void main() {
   });
 
   testWidgets('PageMetrics', (WidgetTester tester) async {
-    final PageMetrics page = PageMetrics(
+    final page = PageMetrics(
       minScrollExtent: 100.0,
       maxScrollExtent: 200.0,
       pixels: 150.0,
@@ -1070,7 +1077,7 @@ void main() {
   });
 
   testWidgets('Page controller can handle rounding issue', (WidgetTester tester) async {
-    final PageController pageController = PageController();
+    final pageController = PageController();
     addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
@@ -1090,9 +1097,9 @@ void main() {
   });
 
   testWidgets('PageView can participate in a11y scrolling', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1171,7 +1178,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
-    final TestClipPaintingContext context = TestClipPaintingContext();
+    final context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
@@ -1212,7 +1219,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/95101
-    final PageController controller = PageController(initialPage: 152);
+    final controller = PageController(initialPage: 152);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1242,24 +1249,38 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/126561.
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
-    const double pixel6EmulatorWidth = 411.42857142857144;
+    const pixel6EmulatorWidth = 411.42857142857144;
+
+    const errorTextStyle = TextStyle(
+      color: Color(0xD0FF0000),
+      fontFamily: 'monospace',
+      fontSize: 48.0,
+      fontWeight: FontWeight.w900,
+      decoration: TextDecoration.underline,
+      decorationColor: Color(0xFFFFFF00),
+      decorationStyle: TextDecorationStyle.double,
+    );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: SizedBox(
-            width: pixel6EmulatorWidth,
-            child: PageView(
-              controller: controller,
-              physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
-              children: const <Widget>[
-                Center(child: Text('First Page')),
-                Center(child: Text('Second Page')),
-                Center(child: Text('Third Page')),
-              ],
+      TestWidgetsApp(
+        textStyle: errorTextStyle,
+        home: ScrollConfiguration(
+          behavior: const ScrollBehavior().copyWith(overscroll: false),
+          child: Center(
+            child: SizedBox(
+              width: pixel6EmulatorWidth,
+              child: PageView(
+                controller: controller,
+                physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+                children: const <Widget>[
+                  Center(child: Text('First Page')),
+                  Center(child: Text('Second Page')),
+                  Center(child: Text('Third Page')),
+                ],
+              ),
             ),
           ),
         ),
@@ -1269,25 +1290,16 @@ void main() {
     controller.animateToPage(2, duration: const Duration(milliseconds: 300), curve: Curves.ease);
     await tester.pumpAndSettle();
 
-    final Finder transformFinder = find.descendant(
-      of: find.byType(PageView),
-      matching: find.byType(Transform),
+    await expectLater(
+      find.byType(PageView),
+      matchesGoldenFile('page_view_no_stretch_precision_error.png'),
     );
-    expect(transformFinder, findsOneWidget);
-
-    // Get the Transform widget that stretches the PageView.
-    final Transform transform = tester.firstWidget<Transform>(
-      find.descendant(of: find.byType(PageView), matching: find.byType(Transform)),
-    );
-
-    // Check the stretch factor in the first element of the transform matrix.
-    expect(transform.transform.storage.first, 1.0);
   });
 
   testWidgets('PageController onAttach, onDetach', (WidgetTester tester) async {
-    int attach = 0;
-    int detach = 0;
-    final PageController controller = PageController(
+    var attach = 0;
+    var detach = 0;
+    final controller = PageController(
       onAttach: (_) {
         attach++;
       },
@@ -1298,7 +1310,7 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: PageView(
             controller: controller,
@@ -1328,17 +1340,15 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     Widget createPageView(PageController? controller) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            key: key,
-            controller: controller,
-            children: const <Widget>[
-              Center(child: Text('0')),
-              Center(child: Text('1')),
-              Center(child: Text('2')),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: PageView(
+          key: key,
+          controller: controller,
+          children: const <Widget>[
+            Center(child: Text('0')),
+            Center(child: Text('1')),
+            Center(child: Text('2')),
+          ],
         ),
       );
     }
@@ -1354,7 +1364,7 @@ void main() {
 
       final int initialPageInView = currentVisiblePage();
 
-      for (int i = 0; i < 3; i++) {
+      for (var i = 0; i < 3; i++) {
         if (controls) {
           controller.jumpToPage(i);
           await tester.pumpAndSettle();
@@ -1367,7 +1377,7 @@ void main() {
     }
 
     testWidgets('null to value', (WidgetTester tester) async {
-      final PageController controller = PageController();
+      final controller = PageController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(createPageView(null));
       await tester.pumpWidget(createPageView(controller));
@@ -1375,9 +1385,9 @@ void main() {
     });
 
     testWidgets('value to value', (WidgetTester tester) async {
-      final PageController controller1 = PageController();
+      final controller1 = PageController();
       addTearDown(controller1.dispose);
-      final PageController controller2 = PageController();
+      final controller2 = PageController();
       addTearDown(controller2.dispose);
       await tester.pumpWidget(createPageView(controller1));
       await testPageViewWithController(controller1, tester, true);
@@ -1387,7 +1397,7 @@ void main() {
     });
 
     testWidgets('value to null', (WidgetTester tester) async {
-      final PageController controller = PageController();
+      final controller = PageController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(createPageView(controller));
       await testPageViewWithController(controller, tester, true);
@@ -1403,48 +1413,44 @@ void main() {
 
   group('Asserts in jumpToPage and animateToPage methods works properly', () {
     Widget createPageView([PageController? controller]) {
-      return MaterialApp(
-        home: Scaffold(
-          body: PageView(
-            controller: controller,
-            children: <Widget>[
-              Container(color: Colors.red),
-              Container(color: Colors.green),
-              Container(color: Colors.blue),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: PageView(
+          controller: controller,
+          children: <Widget>[
+            Container(color: kRed),
+            Container(color: kGreen),
+            Container(color: kBlue),
+          ],
         ),
       );
     }
 
     group('One pageController is attached to multiple PageViews', () {
       Widget createMultiplePageViews(PageController controller) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Container(color: Colors.red),
-                      Container(color: Colors.green),
-                      Container(color: Colors.blue),
-                    ],
-                  ),
+        return TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(color: kRed),
+                    Container(color: kGreen),
+                    Container(color: kBlue),
+                  ],
                 ),
-                Expanded(
-                  child: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Container(color: Colors.orange),
-                      Container(color: Colors.purple),
-                      Container(color: Colors.yellow),
-                    ],
-                  ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: controller,
+                  children: <Widget>[
+                    Container(color: kOrange),
+                    Container(color: kPurple),
+                    Container(color: kYellow),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       }
@@ -1452,7 +1458,7 @@ void main() {
       testWidgets(
         'animateToPage assertion is working properly when pageController is attached to multiple PageViews',
         (WidgetTester tester) async {
-          final PageController controller = PageController();
+          final controller = PageController();
           addTearDown(controller.dispose);
           await tester.pumpWidget(createMultiplePageViews(controller));
 
@@ -1479,7 +1485,7 @@ void main() {
       testWidgets(
         'jumpToPage assertion is working properly when pageController is attached to multiple PageViews',
         (WidgetTester tester) async {
-          final PageController controller = PageController();
+          final controller = PageController();
           addTearDown(controller.dispose);
           await tester.pumpWidget(createMultiplePageViews(controller));
 
@@ -1502,7 +1508,7 @@ void main() {
 
     group('PageController is attached or is not attached to PageView', () {
       testWidgets('Assert behavior of animateToPage works properly', (WidgetTester tester) async {
-        final PageController controller = PageController();
+        final controller = PageController();
         addTearDown(controller.dispose);
 
         // pageController is not attached to PageView
@@ -1535,7 +1541,7 @@ void main() {
       });
 
       testWidgets('Assert behavior of jumpToPage works properly', (WidgetTester tester) async {
-        final PageController controller = PageController();
+        final controller = PageController();
         addTearDown(controller.dispose);
 
         // pageController is not attached to PageView
@@ -1562,34 +1568,38 @@ void main() {
     'Get the page value before the content dimension is determined,do not throw an assertion and return null',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/146986.
-      final PageController controller = PageController();
+      final controller = PageController();
       late String currentPage;
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: <Widget>[
-                      Builder(
-                        builder: (BuildContext context) {
-                          currentPage = controller.page == null ? 'null' : 'not empty';
-                          return Center(child: Text(currentPage));
-                        },
-                      ),
-                    ],
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                children: <Widget>[
+                  Expanded(
+                    child: PageView(
+                      controller: controller,
+                      children: <Widget>[
+                        Builder(
+                          builder: (BuildContext context) {
+                            currentPage = controller.page == null ? 'null' : 'not empty';
+                            return Center(child: Text(currentPage));
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: () {
+                  GestureDetector(
+                    key: const Key('rebuild-trigger'),
+                    onTap: () {
                       setState(() {});
                     },
+                    child: const Text('Tap'),
                   ),
-                );
-              },
-            ),
+                ],
+              );
+            },
           ),
         ),
       );
@@ -1597,7 +1607,7 @@ void main() {
       expect(find.text('not empty'), findsNothing);
       expect(currentPage, 'null');
 
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.byKey(const Key('rebuild-trigger')));
       await tester.pump();
       currentPage = controller.page == null ? 'null' : 'not empty';
       expect(find.text('not empty'), findsOneWidget);
@@ -1608,29 +1618,22 @@ void main() {
 
   testWidgets('Does not crash when calling jumpToPage before layout', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/86222.
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Navigator(
-            onDidRemovePage: (Page<Object?> page) {},
-            pages: <Page<void>>[
-              MaterialPage<void>(
-                child: Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: const <Widget>[
-                      Scaffold(body: Text('One')),
-                      Scaffold(body: Text('Two')),
-                    ],
-                  ),
-                ),
+      TestWidgetsApp(
+        home: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            TestPage<void>(
+              child: PageView(
+                controller: controller,
+                children: const <Widget>[Text('One'), Text('Two')],
               ),
-              const MaterialPage<void>(child: Scaffold()),
-            ],
-          ),
+            ),
+            const TestPage<void>(child: SizedBox.shrink()),
+          ],
         ),
       ),
     );
@@ -1643,29 +1646,22 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/86222.
-    final PageController controller = PageController();
+    final controller = PageController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Navigator(
-            onDidRemovePage: (Page<Object?> page) {},
-            pages: <Page<void>>[
-              MaterialPage<void>(
-                child: Scaffold(
-                  body: PageView(
-                    controller: controller,
-                    children: const <Widget>[
-                      Scaffold(body: Text('One')),
-                      Scaffold(body: Text('Two')),
-                    ],
-                  ),
-                ),
+      TestWidgetsApp(
+        home: Navigator(
+          onDidRemovePage: (Page<Object?> page) {},
+          pages: <Page<void>>[
+            TestPage<void>(
+              child: PageView(
+                controller: controller,
+                children: const <Widget>[Text('One'), Text('Two')],
               ),
-              const MaterialPage<void>(child: Scaffold()),
-            ],
-          ),
+            ),
+            const TestPage<void>(child: SizedBox.shrink()),
+          ],
         ),
       ),
     );
@@ -1673,4 +1669,210 @@ void main() {
     controller.animateToPage(1, duration: const Duration(milliseconds: 50), curve: Curves.bounceIn);
     expect(tester.takeException(), null);
   });
+
+  testWidgets('PageView respects scrollCacheExtent', (WidgetTester tester) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: true,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 0'), findsOneWidget);
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('PageView scrollCacheExtent defaults to allowImplicitScrolling behavior', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    Widget build({required bool allowImplicitScrolling, ScrollCacheExtent? scrollCacheExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: allowImplicitScrolling,
+          scrollCacheExtent: scrollCacheExtent,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      );
+    }
+
+    // Default (allowImplicitScrolling: false) -> scrollCacheExtent: viewport(0.0)
+    await tester.pumpWidget(build(allowImplicitScrolling: false));
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+
+    // allowImplicitScrolling: true -> scrollCacheExtent: viewport(1.0)
+    await tester.pumpWidget(build(allowImplicitScrolling: true));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('PageView updates scrollCacheExtent dynamically', (WidgetTester tester) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    Widget build({required ScrollCacheExtent scrollCacheExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: true,
+          scrollCacheExtent: scrollCacheExtent,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      );
+    }
+
+    // Start with viewport(1.0)
+    await tester.pumpWidget(build(scrollCacheExtent: const ScrollCacheExtent.viewport(1.0)));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+
+    // Update to viewport(2.0)
+    await tester.pumpWidget(build(scrollCacheExtent: const ScrollCacheExtent.viewport(2.0)));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsOneWidget);
+
+    // Update back to viewport(1.0)
+    await tester.pumpWidget(build(scrollCacheExtent: const ScrollCacheExtent.viewport(1.0)));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('PageView semantics respects allowImplicitScrolling', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    // Off-screen pages should be excluded from semantics.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(children: const <Widget>[Text('Page 1'), Text('Page 2')]),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page 2')));
+
+    // Off-screen pages should be included in semantics.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
+  });
+
+  testWidgets(
+    'PageView asserts when scrollCacheExtent and allowImplicitScrolling are inconsistent',
+    (WidgetTester tester) async {
+      // allowImplicitScrolling: true && scrollCacheExtent: 0.0
+      expect(
+        () => PageView(
+          allowImplicitScrolling: true,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(0.0),
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+        throwsAssertionError,
+      );
+
+      // allowImplicitScrolling: false && scrollCacheExtent > 0
+      expect(
+        () => PageView(
+          scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
+  testWidgets('PageView showOnScreen scrolls when allowImplicitScrolling is true', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+    expect(targetFinder, findsOneWidget);
+
+    final RenderObject target = tester.renderObject(targetFinder);
+    target.showOnScreen();
+    await tester.pumpAndSettle();
+
+    // Should scroll.
+    expect(controller.page, 1.0);
+  });
+
+  testWidgets(
+    'PageView showOnScreen scrolling behavior is consistent with default scrollCacheExtent',
+    (WidgetTester tester) async {
+      // This test verifies that providing an explicit scrollCacheExtent behaves consistently
+      // with PageView's default behavior when allowImplicitScrolling is true.
+      final controller = PageController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView(
+            controller: controller,
+            allowImplicitScrolling: true,
+            children: const <Widget>[
+              Text('Page 1'),
+              Text('Page 2'),
+              Text('Page 3'),
+              Text('Page 4'),
+            ],
+          ),
+        ),
+      );
+
+      // Page 2 (index 1) is within the implicit cache extent.
+      final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+      expect(targetFinder, findsOneWidget);
+
+      final RenderObject target = tester.renderObject(targetFinder);
+      target.showOnScreen();
+      await tester.pumpAndSettle();
+
+      // Should scroll (existing behavior).
+      expect(controller.page, 1.0);
+    },
+  );
 }

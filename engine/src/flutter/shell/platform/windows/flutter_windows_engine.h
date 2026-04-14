@@ -32,6 +32,7 @@
 #include "flutter/shell/platform/windows/flutter_desktop_messenger.h"
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
 #include "flutter/shell/platform/windows/keyboard_key_embedder_handler.h"
 #include "flutter/shell/platform/windows/platform_handler.h"
@@ -55,6 +56,7 @@ namespace flutter {
 constexpr FlutterViewId kImplicitViewId = 0;
 
 class FlutterWindowsView;
+class DisplayManagerWin32;
 
 // Update the thread priority for the Windows engine.
 static void WindowsPlatformThreadPrioritySetter(
@@ -131,7 +133,10 @@ class FlutterWindowsEngine {
   //
   // Returns null on failure.
   std::unique_ptr<FlutterWindowsView> CreateView(
-      std::unique_ptr<WindowBindingHandler> window);
+      std::unique_ptr<WindowBindingHandler> window,
+      bool is_sized_to_content,
+      const BoxConstraints& box_constraints,
+      FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Remove a view. The engine will no longer render into it.
   virtual void RemoveView(FlutterViewId view_id);
@@ -157,6 +162,13 @@ class FlutterWindowsEngine {
   IncomingMessageDispatcher* message_dispatcher() {
     return message_dispatcher_.get();
   }
+
+  std::shared_ptr<DisplayManagerWin32> display_manager() {
+    return display_manager_;
+  }
+
+  // Notifies the engine about a display update.
+  void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
 
   TaskRunner* task_runner() { return task_runner_.get(); }
 
@@ -248,6 +260,11 @@ class FlutterWindowsEngine {
   // Returns true if the semantics tree is enabled.
   bool semantics_enabled() const { return semantics_enabled_; }
 
+  bool iaccessibleex_enabled() const {
+    return project_->accessibility_mode() ==
+           FlutterAccessibilityMode::IAccessibleEx;
+  }
+
   // Refresh accessibility features and send them to the engine.
   void UpdateAccessibilityFeatures();
 
@@ -314,6 +331,12 @@ class FlutterWindowsEngine {
 
   // Sets the cursor directly from a cursor handle.
   void SetFlutterCursor(HCURSOR cursor) const;
+
+  WindowManager* window_manager() { return window_manager_.get(); }
+
+  // Returns the root view associated with the top-level window with |hwnd| as
+  // the window handle or nullptr if no such view could be found.
+  FlutterWindowsView* GetViewFromTopLevelWindow(HWND hwnd) const;
 
  protected:
   // Creates the keyboard key handler.
@@ -411,6 +434,9 @@ class FlutterWindowsEngine {
   // a view to the engine or after removing a view from the engine.
   mutable std::shared_mutex views_mutex_;
 
+  // The display monitor.
+  std::shared_ptr<DisplayManagerWin32> display_manager_;
+
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;
 
@@ -452,6 +478,10 @@ class FlutterWindowsEngine {
 
   // Handlers for keyboard events from Windows.
   std::unique_ptr<KeyboardHandlerBase> keyboard_key_handler_;
+
+  // The manager that manages the lifecycle of |HostWindow|s, native
+  // Win32 windows hosting a Flutter view in their client area.
+  std::unique_ptr<WindowManager> window_manager_;
 
   // Handlers for text events from Windows.
   std::unique_ptr<TextInputPlugin> text_input_plugin_;
@@ -498,6 +528,13 @@ class FlutterWindowsEngine {
   std::shared_ptr<egl::ProcTable> gl_;
 
   std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
+
+  // Handles display-related window messages.
+  bool HandleDisplayMonitorMessage(HWND hwnd,
+                                   UINT message,
+                                   WPARAM wparam,
+                                   LPARAM lparam,
+                                   LRESULT* result);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };

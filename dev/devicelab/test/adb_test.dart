@@ -23,12 +23,14 @@ void main() {
       device = FakeDevice(deviceId: 'fakeDeviceId');
     });
 
-    tearDown(() {});
+    tearDown(() {
+      FakeDevice.resetLog();
+    });
 
     group('cpu check', () {
       test('arm64', () async {
         FakeDevice.pretendArm64();
-        final AndroidDevice androidDevice = device as AndroidDevice;
+        final androidDevice = device as AndroidDevice;
         expect(await androidDevice.isArm64(), isTrue);
         expectLog(<CommandArgs>[
           cmd(
@@ -325,20 +327,38 @@ class FakeDevice extends AndroidDevice {
   }
 
   static void pretendAwake() {
+    // Emit an integer value in addition to the state string to ensure only
+    // the state string is matched.
+    //
+    // Regression testing for https://github.com/flutter/flutter/issues/174952.
     output = '''
+      mWakefulness=1
       mWakefulness=Awake
+
     ''';
   }
 
   static void pretendAwakeSamsung() {
+    // Emit an integer value in addition to the state string to ensure only
+    // the state string is matched.
+    //
+    // Regression testing for https://github.com/flutter/flutter/issues/174952.
     output = '''
+      getWakefulnessLocked()=1
       getWakefulnessLocked()=Awake
+
     ''';
   }
 
   static void pretendAsleep() {
+    // Emit an integer value in addition to the state string to ensure only
+    // the state string is matched.
+    //
+    // Regression testing for https://github.com/flutter/flutter/issues/174952.
     output = '''
+      mWakefulness=0
       mWakefulness=Asleep
+
     ''';
   }
 
@@ -404,7 +424,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     stream.listen(add).onDone(completer.complete);
     return completer.future;
   }
@@ -426,7 +446,7 @@ class _MemoryIOSink implements IOSink {
 
   @override
   void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    bool addSeparator = false;
+    var addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);

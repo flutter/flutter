@@ -52,11 +52,10 @@ class LinkedLabelSwitch extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   decoration: TextDecoration.underline,
                 ),
-                recognizer:
-                    TapGestureRecognizer()
-                      ..onTap = () {
-                        debugPrint('Label has been tapped.');
-                      },
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    debugPrint('Label has been tapped.');
+                  },
               ),
             ),
           ),
@@ -86,7 +85,7 @@ class _LabeledSwitchExampleState extends State<LabeledSwitchExample> {
   Widget build(BuildContext context) {
     return LinkedLabelSwitch(
       label: 'Linked, tappable label text',
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const .symmetric(horizontal: 20.0),
       value: _isSelected,
       onChanged: (bool newValue) {
         setState(() {

@@ -14,12 +14,12 @@ import '../src/fake_process_manager.dart';
 void main() {
   group(FakeProcess, () {
     testWithoutContext('exits with specified exit code', () async {
-      final FakeProcess process = FakeProcess(exitCode: 42);
+      final process = FakeProcess(exitCode: 42);
       expect(await process.exitCode, 42);
     });
 
     testWithoutContext('exits with specified stderr, stdout', () async {
-      final FakeProcess process = FakeProcess(
+      final process = FakeProcess(
         stderr: 'stderr\u{FFFD}'.codeUnits,
         stdout: 'stdout\u{FFFD}'.codeUnits,
       );
@@ -43,9 +43,9 @@ void main() {
 
     testWithoutContext('exits after specified delay (if no completer specified)', () {
       final bool done = FakeAsync().run<bool>((FakeAsync time) {
-        final FakeProcess process = FakeProcess(duration: const Duration(seconds: 30));
+        final process = FakeProcess(duration: const Duration(seconds: 30));
 
-        bool hasExited = false;
+        var hasExited = false;
         unawaited(
           process.exitCode.then((int _) {
             hasExited = true;
@@ -67,10 +67,10 @@ void main() {
 
     testWithoutContext('exits when completer completes (if no duration specified)', () {
       final bool done = FakeAsync().run<bool>((FakeAsync time) {
-        final Completer<void> completer = Completer<void>();
-        final FakeProcess process = FakeProcess(completer: completer);
+        final completer = Completer<void>();
+        final process = FakeProcess(completer: completer);
 
-        bool hasExited = false;
+        var hasExited = false;
         unawaited(
           process.exitCode.then((int _) {
             hasExited = true;
@@ -95,13 +95,10 @@ void main() {
       'when completer and duration are specified, does not exit until completer is completed',
       () {
         final bool done = FakeAsync().run<bool>((FakeAsync time) {
-          final Completer<void> completer = Completer<void>();
-          final FakeProcess process = FakeProcess(
-            duration: const Duration(seconds: 30),
-            completer: completer,
-          );
+          final completer = Completer<void>();
+          final process = FakeProcess(duration: const Duration(seconds: 30), completer: completer);
 
-          bool hasExited = false;
+          var hasExited = false;
           unawaited(
             process.exitCode.then((int _) {
               hasExited = true;
@@ -131,13 +128,10 @@ void main() {
       'when completer and duration are specified, does not exit until duration has elapsed',
       () {
         final bool done = FakeAsync().run<bool>((FakeAsync time) {
-          final Completer<void> completer = Completer<void>();
-          final FakeProcess process = FakeProcess(
-            duration: const Duration(seconds: 30),
-            completer: completer,
-          );
+          final completer = Completer<void>();
+          final process = FakeProcess(duration: const Duration(seconds: 30), completer: completer);
 
-          bool hasExited = false;
+          var hasExited = false;
           unawaited(
             process.exitCode.then((int _) {
               hasExited = true;
@@ -163,9 +157,9 @@ void main() {
     );
 
     testWithoutContext('process exit is asynchronous', () async {
-      final FakeProcess process = FakeProcess();
+      final process = FakeProcess();
 
-      bool hasExited = false;
+      var hasExited = false;
       unawaited(
         process.exitCode.then((int _) {
           hasExited = true;
@@ -183,14 +177,14 @@ void main() {
     testWithoutContext(
       'stderr, stdout stream data after exit when outputFollowsExit is true',
       () async {
-        final FakeProcess process = FakeProcess(
+        final process = FakeProcess(
           stderr: 'stderr'.codeUnits,
           stdout: 'stdout'.codeUnits,
           outputFollowsExit: true,
         );
 
-        final List<int> stderr = <int>[];
-        final List<int> stdout = <int>[];
+        final stderr = <int>[];
+        final stdout = <int>[];
         process.stderr.listen(stderr.addAll);
         process.stdout.listen(stdout.addAll);
 
@@ -207,7 +201,7 @@ void main() {
     );
 
     testWithoutContext('stdin should be flushable (all data written is consumed)', () async {
-      final FakeProcess process = FakeProcess();
+      final process = FakeProcess();
       process.stdin.write('hello');
       // If nothing is listening to the stdin stream, this test will never complete.
       await process.stdin.flush();
@@ -243,8 +237,8 @@ void main() {
             ),
           );
 
-          final List<int> stderrBytes = <int>[];
-          final List<int> stdoutBytes = <int>[];
+          final stderrBytes = <int>[];
+          final stdoutBytes = <int>[];
 
           // Start the process.
           final Process process = await manager.start(<String>['faketool']);

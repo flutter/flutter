@@ -34,7 +34,9 @@ class LabelExample extends StatelessWidget {
             TextSpan(
               children: <InlineSpan>[
                 WidgetSpan(child: Text('Username')),
-                WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
+                WidgetSpan(
+                  child: Text('*', style: TextStyle(color: Colors.red)),
+                ),
               ],
             ),
           ),

@@ -44,16 +44,18 @@ class WidgetStateMouseCursorExample extends StatefulWidget {
   const WidgetStateMouseCursorExample({super.key});
 
   @override
-  State<WidgetStateMouseCursorExample> createState() => _WidgetStateMouseCursorExampleState();
+  State<WidgetStateMouseCursorExample> createState() =>
+      _WidgetStateMouseCursorExampleState();
 }
 
-class _WidgetStateMouseCursorExampleState extends State<WidgetStateMouseCursorExample> {
+class _WidgetStateMouseCursorExampleState
+    extends State<WidgetStateMouseCursorExample> {
   bool _enabled = false;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         ListTile(
           title: const Text('ListTile'),
@@ -63,7 +65,7 @@ class _WidgetStateMouseCursorExampleState extends State<WidgetStateMouseCursorEx
         ),
         const SizedBox(height: 10),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Text('Enabled: ', style: Theme.of(context).textTheme.titleSmall),
             Switch(

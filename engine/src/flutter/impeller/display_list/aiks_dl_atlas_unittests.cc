@@ -192,7 +192,7 @@ TEST_P(AiksTest, DlAtlasGeometryNoBlendRenamed) {
 
   ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
-      geom.CreateSimpleVertexBuffer(context.GetTransientsBuffer());
+      geom.CreateSimpleVertexBuffer(context.GetTransientsDataBuffer());
 
   EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
   EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);
@@ -215,7 +215,7 @@ TEST_P(AiksTest, DlAtlasGeometryBlend) {
 
   ContentContext context(GetContext(), nullptr);
   auto vertex_buffer =
-      geom.CreateBlendVertexBuffer(context.GetTransientsBuffer());
+      geom.CreateBlendVertexBuffer(context.GetTransientsDataBuffer());
 
   EXPECT_EQ(vertex_buffer.index_type, IndexType::kNone);
   EXPECT_EQ(vertex_buffer.vertex_count, texture_coordinates.size() * 6);
@@ -313,6 +313,21 @@ TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
   builder.Translate(600, 0);
   builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
                         DlRect::MakeLTRB(0, 0, 500, 500), {}, &paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DrawAtlasWithColorBurn) {
+  DisplayListBuilder builder;
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
+
+  std::vector<DlColor> colors = {DlColor::kDarkGrey(), DlColor::kBlack(),
+                                 DlColor::kLightGrey(), DlColor::kWhite()};
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
+                    colors.data(), /*count=*/4, DlBlendMode::kColorBurn,
+                    DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

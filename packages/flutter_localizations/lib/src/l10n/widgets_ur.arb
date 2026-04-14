@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "ویب تلاش کریں",
   "shareButtonLabel": "اشتراک کریں",
   "pasteButtonLabel": "پیسٹ کریں",
-  "selectAllButtonLabel": "سبھی کو منتخب کریں"
+  "selectAllButtonLabel": "سبھی کو منتخب کریں",
+  "searchResultsFound": "تلاش کے نتائج مل گئے",
+  "noResultsFound": "کوئی نتائج نہیں ملے",
+  "radioButtonUnselectedLabel": "غیر منتخب کردہ"
 }

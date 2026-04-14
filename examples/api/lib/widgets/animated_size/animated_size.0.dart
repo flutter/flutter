@@ -19,14 +19,20 @@ class AnimatedSizeExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedSize Sample')),
-        body: const Center(child: AnimatedSizeExample(duration: duration, curve: curve)),
+        body: const Center(
+          child: AnimatedSizeExample(duration: duration, curve: curve),
+        ),
       ),
     );
   }
 }
 
 class AnimatedSizeExample extends StatefulWidget {
-  const AnimatedSizeExample({required this.duration, required this.curve, super.key});
+  const AnimatedSizeExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
 
   final Duration duration;
 

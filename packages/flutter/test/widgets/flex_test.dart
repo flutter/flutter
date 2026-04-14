@@ -15,17 +15,16 @@ void main() {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: SizedBox(
-          width: 300.0,
-          height: 300.0,
+        child: SizedBox.square(
+          dimension: 300.0,
           child: Flex(
             direction: direction,
             mainAxisAlignment: mainAxisAlignment,
             spacing: spacing,
             children: const <Widget>[
-              SizedBox(width: 50.0, height: 50.0),
-              SizedBox(width: 50.0, height: 50.0),
-              SizedBox(width: 50.0, height: 50.0),
+              SizedBox.square(dimension: 50.0),
+              SizedBox.square(dimension: 50.0),
+              SizedBox.square(dimension: 50.0),
             ],
           ),
         ),
@@ -34,7 +33,7 @@ void main() {
   }
 
   testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
-    bool didReceiveTap = false;
+    var didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -145,7 +144,7 @@ void main() {
       phase: EnginePhase.layout,
     );
     debugCheckIntrinsicSizes = true;
-    final String message = tester.takeException().toString();
+    final message = tester.takeException().toString();
     expect(message, contains('\nSee also:'));
   });
 

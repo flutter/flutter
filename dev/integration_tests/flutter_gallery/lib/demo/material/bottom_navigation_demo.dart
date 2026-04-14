@@ -161,7 +161,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
   }
 
   Widget _buildTransitionsStack() {
-    final List<FadeTransition> transitions = <FadeTransition>[
+    final transitions = <FadeTransition>[
       for (final NavigationIconView view in _navigationViews) view.transition(_type, context),
     ];
 
@@ -179,13 +179,10 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    final BottomNavigationBar botNavBar = BottomNavigationBar(
-      items:
-          _navigationViews
-              .map<BottomNavigationBarItem>(
-                (NavigationIconView navigationView) => navigationView.item,
-              )
-              .toList(),
+    final botNavBar = BottomNavigationBar(
+      items: _navigationViews
+          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
+          .toList(),
       currentIndex: _currentIndex,
       type: _type,
       onTap: (int index) {
@@ -208,17 +205,16 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
                 _type = value;
               });
             },
-            itemBuilder:
-                (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
-                  const PopupMenuItem<BottomNavigationBarType>(
-                    value: BottomNavigationBarType.fixed,
-                    child: Text('Fixed'),
-                  ),
-                  const PopupMenuItem<BottomNavigationBarType>(
-                    value: BottomNavigationBarType.shifting,
-                    child: Text('Shifting'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
+              const PopupMenuItem<BottomNavigationBarType>(
+                value: BottomNavigationBarType.fixed,
+                child: Text('Fixed'),
+              ),
+              const PopupMenuItem<BottomNavigationBarType>(
+                value: BottomNavigationBarType.shifting,
+                child: Text('Shifting'),
+              ),
+            ],
           ),
         ],
       ),

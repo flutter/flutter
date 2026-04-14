@@ -41,9 +41,9 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
         children: <Widget>[
           SwitchListTile(
             value: switchValue1,
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               setState(() {
-                switchValue1 = value!;
+                switchValue1 = value;
               });
             },
             title: const Text('Headline'),
@@ -52,9 +52,9 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
           const Divider(height: 0),
           SwitchListTile(
             value: switchValue2,
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               setState(() {
-                switchValue2 = value!;
+                switchValue2 = value;
               });
             },
             title: const Text('Headline'),
@@ -65,9 +65,9 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
           const Divider(height: 0),
           SwitchListTile(
             value: switchValue3,
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               setState(() {
-                switchValue3 = value!;
+                switchValue3 = value;
               });
             },
             title: const Text('Headline'),

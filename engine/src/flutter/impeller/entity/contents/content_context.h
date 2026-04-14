@@ -39,8 +39,7 @@ namespace impeller {
 /// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
   enum class StencilMode : uint8_t {
-    /// Turn the stencil test off. Used when drawing without stencil-then-cover
-    /// or overdraw prevention.
+    /// Turn the stencil test off. Used when drawing without stencil-then-cover.
     kIgnore,
 
     // Operations used for stencil-then-cover.
@@ -53,6 +52,11 @@ struct ContentContextOptions {
     ///
     /// The stencil ref should always be 0 on commands using this mode.
     kStencilEvenOddFill,
+    /// Draw a stencil which always increments once for everything in the vertex
+    /// coverage regardless of triangle overlap.
+    ///
+    /// The stencil ref should always be 0 on commands using this mode.
+    kStencilIncrementAll,
     /// Used for draw calls which fill in the stenciled area. Intended to be
     /// used after `kStencilNonZeroFill` or `kStencilEvenOddFill` is used to set
     /// up the stencil buffer. Also cleans up the stencil buffer by resetting
@@ -68,26 +72,6 @@ struct ContentContextOptions {
     ///
     /// The stencil ref should always be 0 on commands using this mode.
     kCoverCompareInverted,
-
-    // Operations used for the "overdraw prevention" mechanism. This is used for
-    // drawing strokes.
-
-    /// For each fragment, increment the stencil value if it's currently zero.
-    /// Discard fragments when the value is non-zero. This prevents
-    /// self-overlapping strokes from drawing over themselves.
-    ///
-    /// Note that this is done for rendering correctness, not performance. If a
-    /// stroke is drawn with a backdrop-reliant blend and self-intersects, then
-    /// the intersected geometry will render incorrectly when overdrawn because
-    /// we don't adjust the geometry prevent self-intersection.
-    ///
-    /// The stencil ref should always be 0 on commands using this mode.
-    kOverdrawPreventionIncrement,
-    /// Reset the stencil to a new maximum value specified by the ref (currently
-    /// always 0).
-    ///
-    /// The stencil ref should always be 0 on commands using this mode.
-    kOverdrawPreventionRestore,
   };
 
   SampleCount sample_count = SampleCount::kCount1;
@@ -165,6 +149,7 @@ class ContentContext {
   PipelineRef GetBlendScreenPipeline(ContentContextOptions opts) const;
   PipelineRef GetBlendSoftLightPipeline(ContentContextOptions opts) const;
   PipelineRef GetBorderMaskBlurPipeline(ContentContextOptions opts) const;
+  PipelineRef GetCirclePipeline(ContentContextOptions opts) const;
   PipelineRef GetClearBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetClipPipeline(ContentContextOptions opts) const;
   PipelineRef GetColorMatrixColorFilterPipeline(ContentContextOptions opts) const;
@@ -177,6 +162,8 @@ class ContentContext {
   PipelineRef GetDestinationOutBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDestinationOverBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDownsamplePipeline(ContentContextOptions opts) const;
+  PipelineRef GetDrawShadowVerticesPipeline(ContentContextOptions opts) const;
+  PipelineRef GetDownsampleBoundedPipeline(ContentContextOptions opts) const;
   PipelineRef GetDrawVerticesUberPipeline(BlendMode blend_mode, ContentContextOptions opts) const;
   PipelineRef GetFastGradientPipeline(ContentContextOptions opts) const;
   PipelineRef GetFramebufferBlendColorBurnPipeline(ContentContextOptions opts) const;
@@ -209,6 +196,7 @@ class ContentContext {
   PipelineRef GetRadialGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRadialGradientUniformFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const;
+  PipelineRef GetRSuperellipseBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetScreenBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSolidFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSourceATopBlendPipeline(ContentContextOptions opts) const;
@@ -225,10 +213,13 @@ class ContentContext {
   PipelineRef GetTiledTexturePipeline(ContentContextOptions opts) const;
   PipelineRef GetXorBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetYUVToRGBFilterPipeline(ContentContextOptions opts) const;
+  PipelineRef GetUberSDFPipeline(ContentContextOptions opts) const;
 #ifdef IMPELLER_ENABLE_OPENGLES
-  PipelineRef GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const;
+#if !defined(FML_OS_EMSCRIPTEN)
   PipelineRef GetTiledTextureExternalPipeline(ContentContextOptions opts) const;
   PipelineRef GetTiledTextureUvExternalPipeline(ContentContextOptions opts) const;
+#endif
+  PipelineRef GetDownsampleTextureGlesPipeline(ContentContextOptions opts) const;
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
 
@@ -289,13 +280,40 @@ class ContentContext {
   void ClearCachedRuntimeEffectPipeline(
       const std::string& unique_entrypoint_name) const;
 
-  /// @brief Retrieve the currnent host buffer for transient storage.
+  /// @brief Retrieve the current host buffer for transient storage of indexes
+  ///        used for indexed draws.
+  ///
+  /// This may or may not return the same value as `GetTransientsDataBuffer`
+  /// depending on the backend.
   ///
   /// This is only safe to use from the raster threads. Other threads should
   /// allocate their own device buffers.
-  HostBuffer& GetTransientsBuffer() const { return *host_buffer_; }
+  HostBuffer& GetTransientsIndexesBuffer() const {
+    return *indexes_host_buffer_;
+  }
+
+  /// @brief Retrieve the current host buffer for transient storage of other
+  ///        non-index data.
+  ///
+  /// This is only safe to use from the raster threads. Other threads should
+  /// allocate their own device buffers.
+  HostBuffer& GetTransientsDataBuffer() const { return *data_host_buffer_; }
+
+  /// @brief Resets the transients buffers held onto by the content context.
+  void ResetTransientsBuffers();
 
   TextShadowCache& GetTextShadowCache() const { return *text_shadow_cache_; }
+
+ protected:
+  // Visible for testing.
+  void SetTransientsIndexesBuffer(std::shared_ptr<HostBuffer> host_buffer) {
+    indexes_host_buffer_ = std::move(host_buffer);
+  }
+
+  // Visible for testing.
+  void SetTransientsDataBuffer(std::shared_ptr<HostBuffer> host_buffer) {
+    data_host_buffer_ = std::move(host_buffer);
+  }
 
  private:
   std::shared_ptr<Context> context_;
@@ -321,8 +339,8 @@ class ContentContext {
     };
 
     struct Equal {
-      constexpr bool operator()(const RuntimeEffectPipelineKey& lhs,
-                                const RuntimeEffectPipelineKey& rhs) const {
+      inline bool operator()(const RuntimeEffectPipelineKey& lhs,
+                             const RuntimeEffectPipelineKey& rhs) const {
         return lhs.unique_entrypoint_name == rhs.unique_entrypoint_name &&
                lhs.options.ToKey() == rhs.options.ToKey();
       }
@@ -341,7 +359,8 @@ class ContentContext {
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
-  std::shared_ptr<HostBuffer> host_buffer_;
+  std::shared_ptr<HostBuffer> data_host_buffer_;
+  std::shared_ptr<HostBuffer> indexes_host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
   std::unique_ptr<TextShadowCache> text_shadow_cache_;
 

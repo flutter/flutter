@@ -26,11 +26,11 @@ class FakeVmServiceHost {
     );
     _applyStreamListen();
     _output.stream.listen((String data) {
-      final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
+      final request = json.decode(data) as Map<String, Object?>;
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
-      final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
+      final fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
       expect(
         request,
         isA<Map<String, Object?>>()
@@ -71,8 +71,8 @@ class FakeVmServiceHost {
   }
 
   final List<VmServiceExpectation> _requests;
-  final StreamController<String> _input = StreamController<String>();
-  final StreamController<String> _output = StreamController<String>();
+  final _input = StreamController<String>();
+  final _output = StreamController<String>();
 
   FlutterVmService get vmService => _vmService;
   late final FlutterVmService _vmService;
@@ -83,8 +83,7 @@ class FakeVmServiceHost {
   // or until we hit a FakeRequest
   void _applyStreamListen() {
     while (_requests.isNotEmpty && !_requests.first.isRequest) {
-      final FakeVmServiceStreamResponse response =
-          _requests.removeAt(0) as FakeVmServiceStreamResponse;
+      final response = _requests.removeAt(0) as FakeVmServiceStreamResponse;
       _input.add(
         json.encode(<String, Object>{
           'jsonrpc': '2.0',

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [ExpansionTile] and [ExpansionTileController].
+/// Flutter code sample for [ExpansionTile] and [ExpansibleController].
 
 void main() {
   runApp(const ExpansionTileControllerApp());
@@ -14,11 +14,13 @@ class ExpansionTileControllerApp extends StatefulWidget {
   const ExpansionTileControllerApp({super.key});
 
   @override
-  State<ExpansionTileControllerApp> createState() => _ExpansionTileControllerAppState();
+  State<ExpansionTileControllerApp> createState() =>
+      _ExpansionTileControllerAppState();
 }
 
-class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp> {
-  final ExpansionTileController controller = ExpansionTileController();
+class _ExpansionTileControllerAppState
+    extends State<ExpansionTileControllerApp> {
+  final ExpansibleController controller = ExpansibleController();
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +37,8 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
               title: const Text('ExpansionTile with explicit controller.'),
               children: <Widget>[
                 Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(24),
+                  alignment: .center,
+                  padding: const .all(24),
                   child: const Text('ExpansionTile Contents'),
                 ),
               ],
@@ -61,12 +63,12 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
                 Builder(
                   builder: (BuildContext context) {
                     return Container(
-                      padding: const EdgeInsets.all(24),
-                      alignment: Alignment.center,
+                      padding: const .all(24),
+                      alignment: .center,
                       child: ElevatedButton(
                         child: const Text('Collapse This Tile'),
                         onPressed: () {
-                          return ExpansionTileController.of(context).collapse();
+                          return ExpansibleController.of(context).collapse();
                         },
                       ),
                     );

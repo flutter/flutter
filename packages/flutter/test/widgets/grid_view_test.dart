@@ -13,8 +13,8 @@ import 'states.dart';
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('GridView.builder respects findChildIndexCallback', (WidgetTester tester) async {
-    bool finderCalled = false;
-    int itemCount = 7;
+    var finderCalled = false;
+    var itemCount = 7;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
@@ -25,8 +25,8 @@ void main() {
             stateSetter = setState;
             return GridView.builder(
               itemCount: itemCount,
-              itemBuilder:
-                  (BuildContext _, int index) => Container(key: Key('$index'), height: 2000.0),
+              itemBuilder: (BuildContext _, int index) =>
+                  Container(key: Key('$index'), height: 2000.0),
               findChildIndexCallback: (Key key) {
                 finderCalled = true;
                 return null;
@@ -56,7 +56,7 @@ void main() {
   });
 
   testWidgets('GridView.count control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -64,23 +64,22 @@ void main() {
         child: GridView.count(
           dragStartBehavior: DragStartBehavior.down,
           crossAxisCount: 4,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    log.add(state);
-                  },
-                  child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
+              onTap: () {
+                log.add(state);
+              },
+              child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );
 
     expect(tester.getSize(find.text('Arkansas')), equals(const Size(200.0, 200.0)));
 
-    for (int i = 0; i < 8; ++i) {
+    for (var i = 0; i < 8; ++i) {
       await tester.tap(find.text(kStates[i]));
       expect(log, equals(<String>[kStates[i]]));
       log.clear();
@@ -92,11 +91,11 @@ void main() {
     await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
-    for (int i = 0; i < 4; ++i) {
+    for (var i = 0; i < 4; ++i) {
       expect(find.text(kStates[i]), findsNothing);
     }
 
-    for (int i = 4; i < 12; ++i) {
+    for (var i = 4; i < 12; ++i) {
       await tester.tap(find.text(kStates[i]));
       expect(log, equals(<String>[kStates[i]]));
       log.clear();
@@ -127,7 +126,7 @@ void main() {
   });
 
   testWidgets('GridView.extent control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -135,23 +134,22 @@ void main() {
         child: GridView.extent(
           dragStartBehavior: DragStartBehavior.down,
           maxCrossAxisExtent: 200.0,
-          children:
-              kStates.map<Widget>((String state) {
-                return GestureDetector(
-                  dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    log.add(state);
-                  },
-                  child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
-                );
-              }).toList(),
+          children: kStates.map<Widget>((String state) {
+            return GestureDetector(
+              dragStartBehavior: DragStartBehavior.down,
+              onTap: () {
+                log.add(state);
+              },
+              child: ColoredBox(color: const Color(0xFF0000FF), child: Text(state)),
+            );
+          }).toList(),
         ),
       ),
     );
 
     expect(tester.getSize(find.text('Arkansas')), equals(const Size(200.0, 200.0)));
 
-    for (int i = 0; i < 8; ++i) {
+    for (var i = 0; i < 8; ++i) {
       await tester.tap(find.text(kStates[i]));
       expect(log, equals(<String>[kStates[i]]));
       log.clear();
@@ -172,7 +170,7 @@ void main() {
   });
 
   testWidgets('GridView large scroll jump', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final log = <int>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -206,10 +204,10 @@ void main() {
     );
     log.clear();
 
-    for (int i = 0; i < 9; i++) {
+    for (var i = 0; i < 9; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
-    for (int i = 9; i < 80; i++) {
+    for (var i = 9; i < 80; i++) {
       expect(find.text('$i'), findsNothing);
     }
 
@@ -233,13 +231,13 @@ void main() {
     );
     log.clear();
 
-    for (int i = 0; i < 33; i++) {
+    for (var i = 0; i < 33; i++) {
       expect(find.text('$i'), findsNothing);
     }
-    for (int i = 33; i < 45; i++) {
+    for (var i = 33; i < 45; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
-    for (int i = 45; i < 80; i++) {
+    for (var i = 45; i < 80; i++) {
       expect(find.text('$i'), findsNothing);
     }
 
@@ -261,19 +259,19 @@ void main() {
     );
     log.clear();
 
-    for (int i = 0; i < 9; i++) {
+    for (var i = 0; i < 9; i++) {
       expect(find.text('$i'), findsNothing);
     }
-    for (int i = 9; i < 21; i++) {
+    for (var i = 9; i < 21; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
-    for (int i = 21; i < 80; i++) {
+    for (var i = 21; i < 80; i++) {
       expect(find.text('$i'), findsNothing);
     }
   });
 
   testWidgets('GridView - change crossAxisCount', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final log = <int>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -304,10 +302,10 @@ void main() {
         16, 17, 18, 19, // row 4 (in cached area)
       ]),
     );
-    for (int i = 0; i < 12; i++) {
+    for (var i = 0; i < 12; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
-    for (int i = 12; i < 40; i++) {
+    for (var i = 12; i < 40; i++) {
       expect(find.text('$i'), findsNothing);
     }
     log.clear();
@@ -348,11 +346,10 @@ void main() {
   testWidgets('SliverGridRegularTileLayout - can handle close to zero mainAxisStride', (
     WidgetTester tester,
   ) async {
-    const SliverGridDelegateWithMaxCrossAxisExtent delegate =
-        SliverGridDelegateWithMaxCrossAxisExtent(
-          childAspectRatio: 1e300,
-          maxCrossAxisExtent: 500.0,
-        );
+    const delegate = SliverGridDelegateWithMaxCrossAxisExtent(
+      childAspectRatio: 1e300,
+      maxCrossAxisExtent: 500.0,
+    );
     final SliverGridLayout layout = delegate.getLayout(
       const SliverConstraints(
         axisDirection: AxisDirection.down,
@@ -373,7 +370,7 @@ void main() {
   });
 
   testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final log = <int>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -404,10 +401,10 @@ void main() {
         16, 17, 18, 19, // row 4 (in cached area)
       ]),
     );
-    for (int i = 0; i < 12; i++) {
+    for (var i = 0; i < 12; i++) {
       expect(find.text('$i'), findsOneWidget);
     }
-    for (int i = 12; i < 40; i++) {
+    for (var i = 12; i < 40; i++) {
       expect(find.text('$i'), findsNothing);
     }
     log.clear();
@@ -446,9 +443,9 @@ void main() {
   });
 
   testWidgets('One-line GridView paints', (WidgetTester tester) async {
-    const Color green = Color(0xFF00FF00);
+    const green = Color(0xFF00FF00);
 
-    final Container container = Container(decoration: const BoxDecoration(color: green));
+    final container = Container(decoration: const BoxDecoration(color: green));
 
     await tester.pumpWidget(
       Directionality(
@@ -611,7 +608,7 @@ void main() {
   });
 
   testWidgets('GridView does not cache itemBuilder calls', (WidgetTester tester) async {
-    final Map<int, int> counters = <int, int>{};
+    final counters = <int, int>{};
 
     await tester.pumpWidget(
       Directionality(
@@ -661,7 +658,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // The context will get Clip.none because there is no actual visual overflow.
-    final TestClipPaintingContext context = TestClipPaintingContext();
+    final context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
     context.dispose();
@@ -697,7 +694,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
     // 2nd, check that the painting context has received the default clip behavior.
-    final TestClipPaintingContext context = TestClipPaintingContext();
+    final context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
@@ -798,11 +795,59 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
+  testWidgets('GridView.count respects mainAxisExtent', (WidgetTester tester) async {
+    const crossAxisCount = 4;
+    const mainAxisExtent = 100.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.count(
+          crossAxisCount: crossAxisCount,
+          mainAxisExtent: mainAxisExtent,
+          children: List<Widget>.generate(20, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Text('$i');
+              },
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
+  });
+
+  testWidgets('GridView.extent respects mainAxisExtent', (WidgetTester tester) async {
+    const maxCrossAxisExtent = 200.0;
+    const mainAxisExtent = 100.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.extent(
+          maxCrossAxisExtent: maxCrossAxisExtent,
+          mainAxisExtent: mainAxisExtent,
+          children: List<Widget>.generate(20, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Text('$i');
+              },
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
+  });
+
   testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected', (
     WidgetTester tester,
   ) async {
-    const int crossAxisCount = 4;
-    const double mainAxisExtent = 100.0;
+    const crossAxisCount = 4;
+    const mainAxisExtent = 100.0;
 
     await tester.pumpWidget(
       Directionality(
@@ -829,8 +874,8 @@ void main() {
   testWidgets('SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent works as expected', (
     WidgetTester tester,
   ) async {
-    const double maxCrossAxisExtent = 200.0;
-    const double mainAxisExtent = 100.0;
+    const maxCrossAxisExtent = 200.0;
+    const mainAxisExtent = 100.0;
 
     await tester.pumpWidget(
       Directionality(
@@ -873,7 +918,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/130685
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(

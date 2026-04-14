@@ -11,6 +11,7 @@
 
 #include <Metal/Metal.h>
 
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
@@ -36,7 +37,7 @@ class TestMetalContext {
   sk_sp<GrDirectContext> GetSkiaContext() const;
 
   /// Returns texture_id = -1 when texture creation fails.
-  TextureInfo CreateMetalTexture(const SkISize& size);
+  TextureInfo CreateMetalTexture(const DlISize& size);
 
   bool Present(int64_t texture_id);
 

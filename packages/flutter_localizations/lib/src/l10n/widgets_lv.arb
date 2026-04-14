@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Meklēt tīmeklī",
   "shareButtonLabel": "Kopīgot",
   "pasteButtonLabel": "Ielīmēt",
-  "selectAllButtonLabel": "Atlasīt visu"
+  "selectAllButtonLabel": "Atlasīt visu",
+  "searchResultsFound": "Tika atrasti meklēšanas rezultāti",
+  "noResultsFound": "Netika atrasts neviens rezultāts",
+  "radioButtonUnselectedLabel": "Nav atlasīts"
 }

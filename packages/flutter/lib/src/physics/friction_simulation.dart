@@ -19,8 +19,8 @@ double _newtonsMethod({
   required double Function(double) df,
   required int iterations,
 }) {
-  double guess = initialGuess;
-  for (int i = 0; i < iterations; i++) {
+  var guess = initialGuess;
+  for (var i = 0; i < iterations; i++) {
     guess = guess - (f(guess) - target) / df(guess);
   }
   return guess;

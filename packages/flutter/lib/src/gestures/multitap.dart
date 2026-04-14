@@ -231,7 +231,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
         _reset();
         return _trackTap(event);
       } else if (onDoubleTapDown != null) {
-        final TapDownDetails details = TapDownDetails(
+        final details = TapDownDetails(
           globalPosition: event.position,
           localPosition: event.localPosition,
           kind: getKindForPointer(event.pointer),
@@ -244,7 +244,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   void _trackTap(PointerDownEvent event) {
     _stopDoubleTapTimer();
-    final _TapTracker tracker = _TapTracker(
+    final tracker = _TapTracker(
       event: event,
       entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
@@ -593,8 +593,8 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
 
   @override
   void dispose() {
-    final List<_TapGesture> localGestures = List<_TapGesture>.of(_gestureMap.values);
-    for (final _TapGesture gesture in localGestures) {
+    final localGestures = List<_TapGesture>.of(_gestureMap.values);
+    for (final gesture in localGestures) {
       gesture.cancel();
     }
     // Rejection of each gesture should cause it to be removed from our map
@@ -914,7 +914,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
   void _trackTap(PointerDownEvent event) {
     _stopSerialTapTimer();
     if (onSerialTapDown != null) {
-      final SerialTapDownDetails details = SerialTapDownDetails(
+      final details = SerialTapDownDetails(
         globalPosition: event.position,
         localPosition: event.localPosition,
         kind: getKindForPointer(event.pointer),
@@ -923,7 +923,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
       );
       invokeCallback<void>('onSerialTapDown', () => onSerialTapDown!(details));
     }
-    final _TapTracker tracker = _TapTracker(
+    final tracker = _TapTracker(
       gestureSettings: gestureSettings,
       event: event,
       entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
@@ -1026,7 +1026,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
 
   void _checkUp(PointerUpEvent event, _TapTracker tracker) {
     if (onSerialTapUp != null) {
-      final SerialTapUpDetails details = SerialTapUpDetails(
+      final details = SerialTapUpDetails(
         globalPosition: event.position,
         localPosition: event.localPosition,
         kind: getKindForPointer(tracker.pointer),
@@ -1038,7 +1038,7 @@ class SerialTapGestureRecognizer extends GestureRecognizer {
 
   void _checkCancel(int count) {
     if (onSerialTapCancel != null) {
-      final SerialTapCancelDetails details = SerialTapCancelDetails(count: count);
+      final details = SerialTapCancelDetails(count: count);
       invokeCallback<void>('onSerialTapCancel', () => onSerialTapCancel!(details));
     }
   }

@@ -45,9 +45,13 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
           title: const Text('ExpansionTile 2'),
           subtitle: const Text('Custom expansion arrow icon'),
           trailing: Icon(
-            _customTileExpanded ? Icons.arrow_drop_down_circle : Icons.arrow_drop_down,
+            _customTileExpanded
+                ? Icons.arrow_drop_down_circle
+                : Icons.arrow_drop_down,
           ),
-          children: const <Widget>[ListTile(title: Text('This is tile number 2'))],
+          children: const <Widget>[
+            ListTile(title: Text('This is tile number 2')),
+          ],
           onExpansionChanged: (bool expanded) {
             setState(() {
               _customTileExpanded = expanded;
@@ -57,7 +61,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
         const ExpansionTile(
           title: Text('ExpansionTile 3'),
           subtitle: Text('Leading expansion arrow icon'),
-          controlAffinity: ListTileControlAffinity.leading,
+          controlAffinity: .leading,
           children: <Widget>[ListTile(title: Text('This is tile number 3'))],
         ),
       ],

@@ -19,7 +19,7 @@ class TestFlowDelegate extends FlowDelegate {
   @override
   void paintChildren(FlowPaintingContext context) {
     double dy = startOffset.value;
-    for (int i = 0; i < context.childCount; ++i) {
+    for (var i = 0; i < context.childCount; ++i) {
       context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
       dy += 0.75 * context.getChildSize(i)!.height;
     }
@@ -36,7 +36,7 @@ class OpacityFlowDelegate extends FlowDelegate {
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    for (int i = 0; i < context.childCount; ++i) {
+    for (var i = 0; i < context.childCount; ++i) {
       context.paintChild(i, opacity: opacity);
     }
   }
@@ -51,7 +51,7 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    for (int i = 0; i < context.childCount; ++i) {
+    for (var i = 0; i < context.childCount; ++i) {
       context.paintChild(i, opacity: opacity);
     }
     if (context.childCount > 0) {
@@ -62,9 +62,9 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
 
 void main() {
   testWidgets('Flow control test', (WidgetTester tester) async {
-    final AnimationController startOffset = AnimationController.unbounded(vsync: tester);
+    final startOffset = AnimationController.unbounded(vsync: tester);
     addTearDown(startOffset.dispose);
-    final List<int> log = <int>[];
+    final log = <int>[];
 
     Widget buildBox(int i) {
       return GestureDetector(
@@ -126,7 +126,7 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final error = exception as FlutterError;
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -140,7 +140,7 @@ void main() {
   });
 
   testWidgets('Flow opacity layer', (WidgetTester tester) async {
-    const double opacity = 0.2;
+    const opacity = 0.2;
     await tester.pumpWidget(
       Flow(
         delegate: OpacityFlowDelegate(opacity),
@@ -152,13 +152,13 @@ void main() {
       layer = layer.firstChild as ContainerLayer?;
     }
     expect(layer, isA<OpacityLayer>());
-    final OpacityLayer? opacityLayer = layer as OpacityLayer?;
+    final opacityLayer = layer as OpacityLayer?;
     expect(opacityLayer!.alpha, equals(opacity * 255));
     expect(layer!.firstChild, isA<TransformLayer>());
   });
 
   testWidgets('Flow can set and update clipBehavior', (WidgetTester tester) async {
-    const double opacity = 0.2;
+    const opacity = 0.2;
     await tester.pumpWidget(
       Flow(
         delegate: OpacityFlowDelegate(opacity),
@@ -183,7 +183,7 @@ void main() {
   });
 
   testWidgets('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
-    const double opacity = 0.2;
+    const opacity = 0.2;
     await tester.pumpWidget(
       Flow.unwrapped(
         delegate: OpacityFlowDelegate(opacity),

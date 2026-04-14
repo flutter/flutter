@@ -12,6 +12,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/point.h"
 #include "impeller/toolkit/interop/formats.h"
+#include "impeller/toolkit/interop/fragment_program.h"
 #include "impeller/toolkit/interop/impeller.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/texture.h"
@@ -63,6 +64,12 @@ class ColorSource final
       flutter::DlTileMode vertical_tile_mode,
       flutter::DlImageSampling sampling,
       const Matrix& transformation);
+
+  static ScopedObject<ColorSource> MakeFragmentProgram(
+      const Context& context,
+      const FragmentProgram& program,
+      std::vector<std::shared_ptr<flutter::DlColorSource>> samplers,
+      std::shared_ptr<std::vector<uint8_t>> uniform_data);
 
   explicit ColorSource(std::shared_ptr<flutter::DlColorSource> source);
 

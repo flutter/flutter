@@ -29,7 +29,6 @@ import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'page.dart';
-import 'page_transitions_theme.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
@@ -307,15 +306,14 @@ void showLicensePage({
   );
   Navigator.of(context, rootNavigator: useRootNavigator).push(
     MaterialPageRoute<void>(
-      builder:
-          (BuildContext context) => themes.wrap(
-            LicensePage(
-              applicationName: applicationName,
-              applicationVersion: applicationVersion,
-              applicationIcon: applicationIcon,
-              applicationLegalese: applicationLegalese,
-            ),
-          ),
+      builder: (BuildContext context) => themes.wrap(
+        LicensePage(
+          applicationName: applicationName,
+          applicationVersion: applicationVersion,
+          applicationIcon: applicationIcon,
+          applicationLegalese: applicationLegalese,
+        ),
+      ),
     ),
   );
 }
@@ -678,7 +676,7 @@ class _LicensePageState extends State<LicensePage> {
 
   Widget _packageLicensePage(BuildContext _, Object? args, ScrollController? scrollController) {
     assert(args is _DetailArguments);
-    final _DetailArguments detailArguments = args! as _DetailArguments;
+    final detailArguments = args! as _DetailArguments;
     return _PackageLicensePage(
       packageName: detailArguments.packageName,
       licenseEntries: detailArguments.licenseEntries,
@@ -842,7 +840,14 @@ class _PackagesViewState extends State<_PackagesView> {
     final _LicenseData data,
     final bool drawSelection,
   ) {
+    final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
+    final padding = EdgeInsets.only(
+      left: safeAreaPadding.left,
+      right: safeAreaPadding.right,
+      bottom: safeAreaPadding.bottom,
+    );
     return ListView.builder(
+      padding: padding,
       itemCount: data.packages.length + 1,
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
@@ -1003,7 +1008,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
   bool _loaded = false;
 
   Future<void> _initLicenses() async {
-    int debugFlowId = -1;
+    var debugFlowId = -1;
     assert(() {
       final Flow flow = Flow.begin();
       Timeline.timeSync('_initLicenses()', () {}, flow: flow);
@@ -1029,7 +1034,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
       }
       setState(() {
         _licenses.add(const Padding(padding: EdgeInsets.all(18.0), child: Divider()));
-        for (final LicenseParagraph paragraph in paragraphs) {
+        for (final paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(
               Padding(
@@ -1070,8 +1075,13 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
     final String title = widget.packageName;
     final String subtitle = localizations.licensesPackageDetailText(widget.licenseEntries.length);
     final double pad = _getGutterSize(context);
-    final EdgeInsets padding = EdgeInsets.only(left: pad, right: pad, bottom: pad);
-    final List<Widget> listWidgets = <Widget>[
+    final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
+    final padding = EdgeInsets.only(
+      left: pad + safeAreaPadding.left,
+      right: pad + safeAreaPadding.right,
+      bottom: pad + safeAreaPadding.bottom,
+    );
+    final listWidgets = <Widget>[
       ..._licenses,
       if (!_loaded)
         const Padding(
@@ -1130,15 +1140,15 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           ),
           SliverPadding(
             padding: padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => Localizations.override(
+            sliver: SliverList.builder(
+              itemCount: listWidgets.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Localizations.override(
                   locale: const Locale('en', 'US'),
                   context: context,
                   child: listWidgets[index],
-                ),
-                childCount: listWidgets.length,
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -1424,14 +1434,13 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       builder: (BuildContext c) {
         return BlockSemantics(
           child: _MasterPage(
-            leading:
-                Navigator.of(context).canPop()
-                    ? BackButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    )
-                    : null,
+            leading: Navigator.of(context).canPop()
+                ? BackButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                : null,
             title: widget.title,
             masterViewBuilder: widget.masterViewBuilder,
           ),
@@ -1458,13 +1467,12 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.lateral;
     return _MasterDetailScaffold(
       actionBuilder: (_, _) => const <Widget>[],
-      detailPageBuilder:
-          (BuildContext context, Object? args, ScrollController? scrollController) =>
-              widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),
+      detailPageBuilder: (BuildContext context, Object? args, ScrollController? scrollController) =>
+          widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),
       detailPageFABlessGutterWidth: widget.detailPageFABlessGutterWidth,
       initialArguments: _cachedDetailArguments,
-      masterViewBuilder:
-          (BuildContext context, bool isLateral) => widget.masterViewBuilder(context, isLateral),
+      masterViewBuilder: (BuildContext context, bool isLateral) =>
+          widget.masterViewBuilder(context, isLateral),
       title: widget.title,
     );
   }
@@ -1601,15 +1609,14 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
               valueListenable: _detailArguments,
               builder: (BuildContext context, Object? value, Widget? child) {
                 return AnimatedSwitcher(
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) =>
-                          const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
-                            null,
-                            null,
-                            animation,
-                            null,
-                            child,
-                          ),
+                  transitionBuilder: (Widget child, Animation<double> animation) =>
+                      const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
+                        null,
+                        null,
+                        animation,
+                        null,
+                        child,
+                      ),
                   duration: const Duration(milliseconds: 500),
                   child: SizedBox.expand(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
@@ -1630,16 +1637,15 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
   ConstrainedBox _masterPanel(BuildContext context, {bool needsScaffold = false}) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: masterViewWidth),
-      child:
-          needsScaffold
-              ? Scaffold(
-                appBar: AppBar(
-                  title: widget.title,
-                  actions: widget.actionBuilder!(context, _ActionLevel.top),
-                ),
-                body: widget.masterViewBuilder(context, true),
-              )
-              : widget.masterViewBuilder(context, true),
+      child: needsScaffold
+          ? Scaffold(
+              appBar: AppBar(
+                title: widget.title,
+                actions: widget.actionBuilder!(context, _ActionLevel.top),
+              ),
+              body: widget.masterViewBuilder(context, true),
+            )
+          : widget.masterViewBuilder(context, true),
     );
   }
 }

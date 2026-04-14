@@ -35,24 +35,27 @@ class _ArticleDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: <Widget>[
         Text(
           title,
           maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          overflow: .ellipsis,
+          style: const TextStyle(fontWeight: .bold),
         ),
-        const Padding(padding: EdgeInsets.only(bottom: 2.0)),
+        const Padding(padding: .only(bottom: 2.0)),
         Expanded(
           child: Text(
             subtitle,
             maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            overflow: .ellipsis,
             style: const TextStyle(fontSize: 12.0, color: Colors.black54),
           ),
         ),
-        Text(author, style: const TextStyle(fontSize: 12.0, color: Colors.black87)),
+        Text(
+          author,
+          style: const TextStyle(fontSize: 12.0, color: Colors.black87),
+        ),
         Text(
           '$publishDate - $readDuration',
           style: const TextStyle(fontSize: 12.0, color: Colors.black54),
@@ -83,16 +86,16 @@ class CustomListItemTwo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const .symmetric(vertical: 10.0),
       child: SizedBox(
         height: 100,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: <Widget>[
             AspectRatio(aspectRatio: 1.0, child: thumbnail),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
+                padding: const .fromLTRB(20.0, 0.0, 2.0, 0.0),
                 child: _ArticleDescription(
                   title: title,
                   subtitle: subtitle,
@@ -117,10 +120,12 @@ class CustomListItemExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(
-        padding: const EdgeInsets.all(10.0),
+        padding: const .all(10.0),
         children: <Widget>[
           CustomListItemTwo(
-            thumbnail: Container(decoration: const BoxDecoration(color: Colors.pink)),
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.pink),
+            ),
             title: 'Flutter 1.0 Launch',
             subtitle:
                 'Flutter continues to improve and expand its horizons. '
@@ -130,7 +135,9 @@ class CustomListItemExample extends StatelessWidget {
             readDuration: '5 mins',
           ),
           CustomListItemTwo(
-            thumbnail: Container(decoration: const BoxDecoration(color: Colors.blue)),
+            thumbnail: Container(
+              decoration: const BoxDecoration(color: Colors.blue),
+            ),
             title: 'Flutter 1.2 Release - Continual updates to the framework',
             subtitle: 'Flutter once again improves and makes updates.',
             author: 'Flutter',

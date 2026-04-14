@@ -113,7 +113,7 @@ function build_snippets_tool() (
   echo "Building snippets tool executable."
   command cd "$snippets_dir"
   mkdir -p "$output_dir"
-  dart pub get
+  "$FLUTTER" pub get
   dart compile exe -o "$output_dir/snippets" bin/snippets.dart
 )
 
@@ -121,7 +121,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 8.3.3
+    "$DART" pub global activate dartdoc 9.0.0
 
     # Build and install the snippets tool, which resides in
     # the dev/docs/snippets directory.
@@ -154,7 +154,7 @@ function main() {
     echo "Staging documentation output left in $STAGING_DIR"
   else
     echo "Removing staging documentation output from $STAGING_DIR"
-    rm -rf "$STAGING_DIR"
+    rm -rf -- "$STAGING_DIR"
   fi
   echo "Wrote docs ZIP file to $DESTINATION"
 }

@@ -24,11 +24,16 @@ class CupertinoListTileExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoListTile Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoListTile Sample'),
+      ),
       child: ListView(
         children: const <Widget>[
           CupertinoListTile(title: Text('One-line CupertinoListTile')),
-          CupertinoListTile(leading: FlutterLogo(), title: Text('One-line with leading widget')),
+          CupertinoListTile(
+            leading: FlutterLogo(),
+            title: Text('One-line with leading widget'),
+          ),
           CupertinoListTile(
             title: Text('One-line with trailing widget'),
             trailing: Icon(Icons.more_vert),

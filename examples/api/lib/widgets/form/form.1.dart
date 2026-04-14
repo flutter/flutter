@@ -99,9 +99,11 @@ class _SaveableFormState extends State<_SaveableForm> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
-          const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
+          const Text(
+            'If the field below is unsaved, a confirmation dialog will be shown on back.',
+          ),
           const SizedBox(height: 20.0),
           Form(
             canPop: !_isDirty,
@@ -115,12 +117,12 @@ class _SaveableFormState extends State<_SaveableForm> {
                 // invoking the SystemNavigator. If this wasn't the root route,
                 // then Navigator.maybePop could be used instead.
                 // See https://github.com/flutter/flutter/issues/11490
-                SystemNavigator.pop();
+                await SystemNavigator.pop();
               }
             },
-            autovalidateMode: AutovalidateMode.always,
+            autovalidateMode: .always,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 TextFormField(
                   controller: _controller,
@@ -135,7 +137,8 @@ class _SaveableFormState extends State<_SaveableForm> {
                   child: Row(
                     children: <Widget>[
                       const Text('Save'),
-                      if (_controller.text.isNotEmpty) Icon(_isDirty ? Icons.warning : Icons.check),
+                      if (_controller.text.isNotEmpty)
+                        Icon(_isDirty ? Icons.warning : Icons.check),
                     ],
                   ),
                 ),
@@ -144,7 +147,8 @@ class _SaveableFormState extends State<_SaveableForm> {
           ),
           TextButton(
             onPressed: () async {
-              final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
+              final bool shouldPop =
+                  !_isDirty || (await _showDialog() ?? false);
               if (!shouldPop) {
                 return;
               }
@@ -152,7 +156,7 @@ class _SaveableFormState extends State<_SaveableForm> {
               // invoking the SystemNavigator. If this wasn't the root route,
               // then Navigator.maybePop could be used instead.
               // See https://github.com/flutter/flutter/issues/11490
-              SystemNavigator.pop();
+              await SystemNavigator.pop();
             },
             child: const Text('Go back'),
           ),

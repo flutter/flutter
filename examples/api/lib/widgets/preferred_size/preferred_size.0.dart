@@ -23,13 +23,16 @@ class AppBarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: .end,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const .symmetric(horizontal: 10),
           child: Row(
             children: <Widget>[
-              const Text('PreferredSize Sample', style: TextStyle(color: Colors.white)),
+              const Text(
+                'PreferredSize Sample',
+                style: TextStyle(color: Colors.white),
+              ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.search, size: 20),

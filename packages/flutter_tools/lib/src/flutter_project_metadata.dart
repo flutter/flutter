@@ -16,7 +16,7 @@ import 'version.dart';
 /// The result of parsing `--template=` for `flutter create` and related commands.
 @immutable
 sealed class ParsedFlutterTemplateType implements CliEnum {
-  static const List<ParsedFlutterTemplateType> _values = <ParsedFlutterTemplateType>[
+  static const _values = <ParsedFlutterTemplateType>[
     ...FlutterTemplateType.values,
     ...RemovedFlutterTemplateType.values,
   ];
@@ -109,9 +109,10 @@ enum FlutterTemplateType implements ParsedFlutterTemplateType {
   /// This is an FFI native plugin project.
   pluginFfi(
     helpText:
-        'Generate a shareable Flutter project containing an API '
+        '(deprecated) Generate a shareable Flutter project containing an API '
         'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
-        'Linux, macOS, Windows, or any combination of these.',
+        'Linux, macOS, Windows, or any combination of these. '
+        'Use "package_ffi" instead.',
   );
 
   const FlutterTemplateType({required this.helpText});
@@ -133,7 +134,7 @@ enum FlutterTemplateType implements ParsedFlutterTemplateType {
 
 /// Verifies the expected yaml keys are present in the file.
 bool _validateMetadataMap(YamlMap map, Map<String, Type> validations, Logger logger) {
-  bool isValid = true;
+  var isValid = true;
   for (final MapEntry<String, Object> entry in validations.entries) {
     if (!map.keys.contains(entry.key)) {
       isValid = false;
@@ -213,7 +214,7 @@ class FlutterProjectMetadata {
        _projectType = projectType;
 
   /// The name of the config file.
-  static const String kFileName = '.metadata';
+  static const kFileName = '.metadata';
 
   String? _versionRevision;
   String? get versionRevision => _versionRevision;
@@ -299,7 +300,7 @@ class MigrateConfig {
   }) : platformConfigs = platformConfigs ?? <SupportedPlatform, MigratePlatformConfig>{};
 
   /// A mapping of the files that are unmanaged by default for each platform.
-  static const List<String> kDefaultUnmanagedFiles = <String>[
+  static const kDefaultUnmanagedFiles = <String>[
     'lib/main.dart',
     'ios/Runner.xcodeproj/project.pbxproj',
   ];
@@ -349,12 +350,12 @@ class MigrateConfig {
 
   /// Returns the string that should be written to the .metadata file.
   String getOutputFileString() {
-    String unmanagedFilesString = '';
+    var unmanagedFilesString = '';
     for (final String path in unmanagedFiles) {
       unmanagedFilesString += "\n    - '$path'";
     }
 
-    String platformsString = '';
+    var platformsString = '';
     for (final MapEntry<SupportedPlatform, MigratePlatformConfig> entry
         in platformConfigs.entries) {
       platformsString +=

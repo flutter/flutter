@@ -59,8 +59,6 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
-  settings.impeller_flags.lazy_shader_mode =
-      p_settings.impeller_enable_lazy_shader_mode;
   settings.impeller_flags.antialiased_lines =
       p_settings.impeller_antialiased_lines;
   return settings;
@@ -78,6 +76,11 @@ AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
+  if (android_context_->IsDynamicSelection()) {
+    auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
+        android_context_);
+    return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+  }
   switch (android_context_->RenderingApi()) {
 #if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
@@ -229,7 +232,7 @@ void PlatformViewAndroid::NotifyDestroyed() {
   }
 }
 
-void PlatformViewAndroid::NotifyChanged(const SkISize& size) {
+void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
   if (!android_surface_) {
     return;
   }
@@ -318,6 +321,16 @@ void PlatformViewAndroid::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
   platform_view_android_delegate_.UpdateSemantics(update, actions);
+}
+
+// |PlatformView|
+void PlatformViewAndroid::SetApplicationLocale(std::string locale) {
+  jni_facade_->FlutterViewSetApplicationLocale(std::move(locale));
+}
+
+// |PlatformView|
+void PlatformViewAndroid::SetSemanticsTreeEnabled(bool enabled) {
+  jni_facade_->FlutterViewSetSemanticsTreeEnabled(enabled);
 }
 
 void PlatformViewAndroid::RegisterExternalTexture(

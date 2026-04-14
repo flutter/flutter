@@ -9,7 +9,10 @@ class AnimatedIconsTestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(title: 'Animated Icons Test', home: Scaffold(body: IconsList()));
+    return const MaterialApp(
+      title: 'Animated Icons Test',
+      home: Scaffold(body: IconsList()),
+    );
   }
 }
 

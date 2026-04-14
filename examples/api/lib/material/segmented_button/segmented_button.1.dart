@@ -15,7 +15,9 @@ class SegmentedButtonApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: Center(child: SegmentedButtonExample())));
+    return const MaterialApp(
+      home: Scaffold(body: Center(child: SegmentedButtonExample())),
+    );
   }
 }
 
@@ -29,7 +31,7 @@ class SegmentedButtonExample extends StatefulWidget {
 enum Calendar { day, week, month, year }
 
 class _SegmentedButtonExampleState extends State<SegmentedButtonExample> {
-  Calendar calendarView = Calendar.week;
+  Calendar calendarView = .week;
 
   @override
   Widget build(BuildContext context) {

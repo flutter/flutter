@@ -76,7 +76,8 @@ void main() {
 
     test('"id" must match a pending request (already occurred)', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
-      const int nextId = 1;
+      const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       dev.ServiceExtensionResponse response;
@@ -99,7 +100,7 @@ void main() {
 
     test('requests that contain "error" completes it as an error', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
-      const int nextId = 1;
+      const nextId = 1;
 
       expect(
         goldenFileComparator.compare(Uint8List(0), Uri(path: 'some-file')),
@@ -113,9 +114,34 @@ void main() {
       expect(response.result, '{}');
     });
 
+    test('"id" must match a pending request (failed previously)', () async {
+      // This is based on an implementation detail of knowing how IDs are generated.
+      const nextId = 1;
+
+      expect(
+        goldenFileComparator.compare(Uint8List(0), Uri(path: 'some-file')),
+        throwsA(contains('We did a bad')),
+      );
+
+      dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId', 'error': 'We did a bad'},
+      );
+      expect(response.errorDetail, isNull);
+
+      response = await goldenFileComparator.handleEvent(<String, String>{
+        'id': '$nextId',
+        'result': 'true',
+      });
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>['No pending request with method ID', '1']),
+      );
+    });
+
     test('requests that do not contain "error" return an empty response', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
-      const int nextId = 1;
+      const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
@@ -127,7 +153,8 @@ void main() {
 
     test('"result" must be provided if "error" is omitted', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
-      const int nextId = 1;
+      const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
@@ -138,7 +165,8 @@ void main() {
 
     test('"result" must be a boolean', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
-      const int nextId = 1;
+      const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
@@ -170,9 +198,9 @@ void main() {
 
       test('posts an event and returns true', () async {
         // This is based on an implementation detail of knowing how IDs are generated.
-        const int nextId = 1;
+        const nextId = 1;
 
-        final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+        final bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
         expect(goldenFileComparator.compare(bytes, Uri(path: 'golden-path')), completion(true));
 
         await goldenFileComparator.handleEvent(<String, String>{'id': '$nextId', 'result': 'true'});
@@ -188,9 +216,9 @@ void main() {
 
       test('posts an event and returns false', () async {
         // This is based on an implementation detail of knowing how IDs are generated.
-        const int nextId = 1;
+        const nextId = 1;
 
-        final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+        final bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
         expect(goldenFileComparator.compare(bytes, Uri(path: 'golden-path')), completion(false));
 
         await goldenFileComparator.handleEvent(<String, String>{
@@ -209,9 +237,9 @@ void main() {
 
       test('posts an event and returns an error', () async {
         // This is based on an implementation detail of knowing how IDs are generated.
-        const int nextId = 1;
+        const nextId = 1;
 
-        final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+        final bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
         expect(
           goldenFileComparator.compare(bytes, Uri(path: 'golden-path')),
           throwsA(contains('We did a bad')),
@@ -249,9 +277,9 @@ void main() {
 
       test('posts an event and returns', () async {
         // This is based on an implementation detail of knowing how IDs are generated.
-        const int nextId = 1;
+        const nextId = 1;
 
-        final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+        final bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
         expect(goldenFileComparator.update(Uri(path: 'golden-path'), bytes), completes);
 
         await goldenFileComparator.handleEvent(<String, String>{'id': '$nextId', 'result': 'true'});
@@ -267,9 +295,9 @@ void main() {
 
       test('posts an event and returns an error', () async {
         // This is based on an implementation detail of knowing how IDs are generated.
-        const int nextId = 1;
+        const nextId = 1;
 
-        final Uint8List bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+        final bytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
         expect(
           goldenFileComparator.update(Uri(path: 'golden-path'), bytes),
           throwsA(contains('We did a bad')),

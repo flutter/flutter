@@ -12,13 +12,13 @@
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
-#include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "fml/closure.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -132,6 +132,11 @@ void GoldenPlaygroundTest::SetTypographerContext(
 
 void GoldenPlaygroundTest::TearDown() {
   ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
+
+  auto context = GetContext();
+  if (context) {
+    context->DisposeThreadLocalCachedResources();
+  }
 }
 
 namespace {
@@ -161,6 +166,9 @@ void GoldenPlaygroundTest::SetUp() {
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
+    case PlaygroundBackend::kMetalSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
     case PlaygroundBackend::kMetal:
       if (!DoesSupportWideGamutTests()) {
         GTEST_SKIP()
@@ -269,17 +277,20 @@ sk_sp<flutter::DlImage> GoldenPlaygroundTest::CreateDlImageForFixture(
   return DlImageImpeller::Make(texture);
 }
 
-RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
+absl::StatusOr<RuntimeStage::Map> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
     const char* asset_name) const {
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(asset_name);
   if (!fixture || fixture->GetSize() == 0) {
-    return {};
+    return absl::NotFoundError("Asset not found or empty.");
   }
   return RuntimeStage::DecodeRuntimeStages(fixture);
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
+  if (!pimpl_->screenshotter) {
+    return nullptr;
+  }
   return pimpl_->screenshotter->GetPlayground().GetContext();
 }
 
@@ -334,6 +345,10 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
       std::round(pimpl_->window_size.height * content_scale.y));
   return pimpl_->screenshotter->MakeScreenshot(
       renderer, DisplayListToTexture(list, physical_window_size, renderer));
+}
+
+RuntimeStageBackend GoldenPlaygroundTest::GetRuntimeStageBackend() const {
+  return pimpl_->screenshotter->GetPlayground().GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

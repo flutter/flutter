@@ -21,6 +21,8 @@ const List<ExampleDestination> destinations = <ExampleDestination>[
 ];
 
 class NavigationDrawerUseCase extends UseCase {
+  NavigationDrawerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
   @override
   String get name => 'NavigationDrawer';
 

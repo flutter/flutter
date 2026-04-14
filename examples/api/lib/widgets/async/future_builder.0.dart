@@ -34,16 +34,20 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.displayMedium!,
-      textAlign: TextAlign.center,
+      textAlign: .center,
       child: FutureBuilder<String>(
         future: _calculation, // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) {
             children = <Widget>[
-              const Icon(Icons.check_circle_outline, color: Colors.green, size: 60),
+              const Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 60,
+              ),
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const .only(top: 16),
                 child: Text('Result: ${snapshot.data}'),
               ),
             ];
@@ -51,18 +55,24 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
             children = <Widget>[
               const Icon(Icons.error_outline, color: Colors.red, size: 60),
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const .only(top: 16),
                 child: Text('Error: ${snapshot.error}'),
               ),
             ];
           } else {
             children = const <Widget>[
-              SizedBox(width: 60, height: 60, child: CircularProgressIndicator()),
-              Padding(padding: EdgeInsets.only(top: 16), child: Text('Awaiting result...')),
+              SizedBox.square(
+                dimension: 60,
+                child: CircularProgressIndicator(),
+              ),
+              Padding(
+                padding: .only(top: 16),
+                child: Text('Awaiting result...'),
+              ),
             ];
           }
           return Center(
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
+            child: Column(mainAxisAlignment: .center, children: children),
           );
         },
       ),

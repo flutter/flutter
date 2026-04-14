@@ -21,18 +21,20 @@ class DecoratedBoxTransitionExample extends StatefulWidget {
   const DecoratedBoxTransitionExample({super.key});
 
   @override
-  State<DecoratedBoxTransitionExample> createState() => _DecoratedBoxTransitionExampleState();
+  State<DecoratedBoxTransitionExample> createState() =>
+      _DecoratedBoxTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _DecoratedBoxTransitionExampleState extends State<DecoratedBoxTransitionExample>
+class _DecoratedBoxTransitionExampleState
+    extends State<DecoratedBoxTransitionExample>
     with TickerProviderStateMixin {
   final DecorationTween decorationTween = DecorationTween(
     begin: BoxDecoration(
       color: const Color(0xFFFFFFFF),
-      border: Border.all(style: BorderStyle.none),
-      borderRadius: BorderRadius.circular(60.0),
+      border: .all(style: .none),
+      borderRadius: .circular(60.0),
       boxShadow: const <BoxShadow>[
         BoxShadow(
           color: Color(0x66666666),
@@ -44,8 +46,8 @@ class _DecoratedBoxTransitionExampleState extends State<DecoratedBoxTransitionEx
     ),
     end: BoxDecoration(
       color: const Color(0xFFFFFFFF),
-      border: Border.all(style: BorderStyle.none),
-      borderRadius: BorderRadius.zero,
+      border: .all(style: .none),
+      borderRadius: .zero,
       // No shadow.
     ),
   );
@@ -71,7 +73,7 @@ class _DecoratedBoxTransitionExampleState extends State<DecoratedBoxTransitionEx
           child: Container(
             width: 200,
             height: 200,
-            padding: const EdgeInsets.all(10),
+            padding: const .all(10),
             child: const FlutterLogo(),
           ),
         ),

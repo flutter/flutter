@@ -254,8 +254,9 @@ class SingleChildScrollView extends StatelessWidget {
         primary ??
         controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
 
-    final ScrollController? scrollController =
-        effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
+    final ScrollController? scrollController = effectivePrimary
+        ? PrimaryScrollController.maybeOf(context)
+        : controller;
 
     Widget scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
@@ -576,7 +577,7 @@ class _RenderSingleChildViewport extends RenderBox
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final Offset paintOffset = _paintOffset;
-    transform.translate(paintOffset.dx, paintOffset.dy);
+    transform.translateByDouble(paintOffset.dx, paintOffset.dy, 0, 1);
   }
 
   @override

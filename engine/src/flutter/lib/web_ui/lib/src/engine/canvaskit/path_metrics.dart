@@ -2,49 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'canvaskit_api.dart';
-import 'native_memory.dart';
-import 'path.dart';
+class CkContourMeasureIter implements DisposablePathMetricIterator {
+  CkContourMeasureIter(this._path, bool forceClosed)
+    : skiaObject = SkContourMeasureIter(_path.skiaObject, forceClosed, 1.0);
 
-class CkPathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
-  CkPathMetrics(this._path, this._forceClosed);
-
-  final CkPath _path;
-  final bool _forceClosed;
-
-  /// The [CkPath.isEmpty] case is special-cased to avoid booting the WASM machinery just to find out there are no contours.
   @override
-  late final Iterator<ui.PathMetric> iterator =
-      _path.isEmpty ? const CkPathMetricIteratorEmpty._() : CkContourMeasureIter(this);
-}
-
-class CkContourMeasureIter implements Iterator<ui.PathMetric> {
-  CkContourMeasureIter(this._metrics) {
-    _ref = UniqueRef<SkContourMeasureIter>(
-      this,
-      SkContourMeasureIter(_metrics._path.skiaObject, _metrics._forceClosed, 1.0),
-      'Iterator<PathMetric>',
-    );
+  void dispose() {
+    skiaObject.delete();
   }
 
-  final CkPathMetrics _metrics;
-  late final UniqueRef<SkContourMeasureIter> _ref;
+  final CkPath _path;
 
-  SkContourMeasureIter get skiaObject => _ref.nativeObject;
-
-  /// A monotonically increasing counter used to generate [ui.PathMetric.contourIndex].
-  ///
-  /// CanvasKit does not supply the contour index. We have to add it ourselves.
-  int _contourIndexCounter = 0;
+  final SkContourMeasureIter skiaObject;
 
   @override
-  ui.PathMetric get current {
-    final ui.PathMetric? currentMetric = _current;
+  CkContourMeasure get current {
+    final CkContourMeasure? currentMetric = _current;
     if (currentMetric == null) {
       throw RangeError(
         'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
@@ -65,33 +43,31 @@ class CkContourMeasureIter implements Iterator<ui.PathMetric> {
       return false;
     }
 
-    _current = CkContourMeasure(_metrics, skContourMeasure, _contourIndexCounter);
-    _contourIndexCounter += 1;
+    _current = CkContourMeasure(_path.fillType, skContourMeasure);
     return true;
   }
 }
 
-class CkContourMeasure implements ui.PathMetric {
-  CkContourMeasure(this._metrics, SkContourMeasure skiaObject, this.contourIndex) {
-    _ref = UniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
+class CkContourMeasure implements DisposablePathMetric {
+  CkContourMeasure(this._fillType, SkContourMeasure skiaObject) {
+    _ref = CkUniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
   }
 
-  /// The path metrics used to create this measure.
-  ///
-  /// This is used to resurrect the object if it is deleted prematurely.
-  final CkPathMetrics _metrics;
+  final ui.PathFillType _fillType;
 
-  late final UniqueRef<SkContourMeasure> _ref;
+  late final CkUniqueRef<SkContourMeasure> _ref;
 
   SkContourMeasure get skiaObject => _ref.nativeObject;
 
   @override
-  final int contourIndex;
+  void dispose() {
+    _ref.dispose();
+  }
 
   @override
-  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
+  CkPathBuilder extractPath(double start, double end, {bool startWithMoveTo = true}) {
     final SkPath skPath = skiaObject.getSegment(start, end, startWithMoveTo);
-    return CkPath.fromSkPath(skPath, _metrics._path.fillType);
+    return CkPathBuilder.fromSkPath(skPath, _fillType);
   }
 
   @override
@@ -111,11 +87,11 @@ class CkContourMeasure implements ui.PathMetric {
   }
 }
 
-class CkPathMetricIteratorEmpty implements Iterator<ui.PathMetric> {
-  const CkPathMetricIteratorEmpty._();
+class CkPathMetricIteratorEmpty implements DisposablePathMetricIterator {
+  const CkPathMetricIteratorEmpty();
 
   @override
-  ui.PathMetric get current {
+  CkContourMeasure get current {
     throw RangeError('PathMetric iterator is empty.');
   }
 
@@ -123,4 +99,7 @@ class CkPathMetricIteratorEmpty implements Iterator<ui.PathMetric> {
   bool moveNext() {
     return false;
   }
+
+  @override
+  void dispose() {}
 }

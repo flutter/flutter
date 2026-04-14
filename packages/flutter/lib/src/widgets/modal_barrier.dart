@@ -83,7 +83,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   Rect get semanticBounds {
     final EdgeInsets clipDetails = _clipDetailsNotifier.value;
     final Rect originalRect = super.semanticBounds;
-    final Rect clippedRect = Rect.fromLTRB(
+    final clippedRect = Rect.fromLTRB(
       originalRect.left + clipDetails.left,
       originalRect.top + clipDetails.top,
       originalRect.right - clipDetails.right,
@@ -239,8 +239,9 @@ class ModalBarrier extends StatelessWidget {
       onTap: semanticsDismissible && semanticsLabel != null ? handleDismiss : null,
       onDismiss: semanticsDismissible && semanticsLabel != null ? handleDismiss : null,
       label: semanticsDismissible ? semanticsLabel : null,
-      textDirection:
-          semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
+      textDirection: semanticsDismissible && semanticsLabel != null
+          ? Directionality.of(context)
+          : null,
       child: MouseRegion(
         cursor: SystemMouseCursors.basic,
         child: ConstrainedBox(
@@ -433,7 +434,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
+    final gestures = <Type, GestureRecognizerFactory>{
       _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
     };
 

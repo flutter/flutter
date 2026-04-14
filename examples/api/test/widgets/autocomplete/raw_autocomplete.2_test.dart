@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.2.dart' as example;
+import 'package:flutter_api_samples/widgets/autocomplete/raw_autocomplete.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,7 +15,10 @@ void main() {
     expect(find.text('RawAutocomplete Form'), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
-    expect(find.text('This is a regular DropdownButtonFormField'), findsOneWidget);
+    expect(
+      find.text('This is a regular DropdownButtonFormField'),
+      findsOneWidget,
+    );
     expect(find.text('This is a regular TextFormField'), findsOneWidget);
     expect(find.text('This is a RawAutocomplete!'), findsOneWidget);
     expect(find.text('Submit'), findsOneWidget);

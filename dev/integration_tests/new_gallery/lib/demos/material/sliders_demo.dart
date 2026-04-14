@@ -180,14 +180,8 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final RangeValues continuousValues = RangeValues(
-      _continuousStartValue.value,
-      _continuousEndValue.value,
-    );
-    final RangeValues discreteValues = RangeValues(
-      _discreteStartValue.value,
-      _discreteEndValue.value,
-    );
+    final continuousValues = RangeValues(_continuousStartValue.value, _continuousEndValue.value);
+    final discreteValues = RangeValues(_discreteStartValue.value, _discreteEndValue.value);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -256,11 +250,11 @@ class _RangeSlidersState extends State<_RangeSliders> with RestorationMixin {
 // BEGIN customSlidersDemo
 
 Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
-  final Path thumbPath = Path();
+  final thumbPath = Path();
   final double height = math.sqrt(3) / 2;
   final double centerHeight = size * height / 3;
   final double halfSize = size / 2;
-  final int sign = invert ? -1 : 1;
+  final sign = invert ? -1 : 1;
   thumbPath.moveTo(thumbCenter.dx - halfSize, thumbCenter.dy + sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2 * sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy + sign * centerHeight);
@@ -269,9 +263,9 @@ Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
 }
 
 Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
-  final Path thumbPath = Path();
+  final thumbPath = Path();
   final double halfSize = size / 2;
-  final int sign = invert ? -1 : 1;
+  final sign = invert ? -1 : 1;
   thumbPath.moveTo(thumbCenter.dx + halfSize * sign, thumbCenter.dy);
   thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy - size);
   thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy + size);
@@ -317,7 +311,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     bool? isPressed,
   }) {
     final Canvas canvas = context.canvas;
-    final ColorTween colorTween = ColorTween(
+    final colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
@@ -366,7 +360,7 @@ class _CustomThumbShape extends SliderComponentShape {
     Size? sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-    final ColorTween colorTween = ColorTween(
+    final colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
@@ -409,13 +403,13 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     Size? sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-    final ColorTween enableColor = ColorTween(
+    final enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
-    final Tween<double> slideUpTween = Tween<double>(begin: 0, end: _slideUpHeight);
+    final slideUpTween = Tween<double>(begin: 0, end: _slideUpHeight);
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
-    final Offset slideUpOffset = Offset(0, -slideUpTween.evaluate(activationAnimation));
+    final slideUpOffset = Offset(0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
     final Color paintColor = enableColor
         .evaluate(enableAnimation)!
@@ -466,7 +460,7 @@ class _CustomSlidersState extends State<_CustomSliders> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final RangeValues customRangeValue = RangeValues(
+    final customRangeValue = RangeValues(
       _continuousStartCustomValue.value,
       _continuousEndCustomValue.value,
     );

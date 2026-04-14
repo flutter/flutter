@@ -12,11 +12,12 @@ void main() {
 
 enum AnimationStyles { defaultStyle, custom, none }
 
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (.defaultStyle, 'Default'),
+      (.custom, 'Custom'),
+      (.none, 'None'),
+    ];
 
 class MaterialAppExample extends StatefulWidget {
   const MaterialAppExample({super.key});
@@ -26,7 +27,9 @@ class MaterialAppExample extends StatefulWidget {
 }
 
 class _MaterialAppExampleState extends State<MaterialAppExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    .defaultStyle,
+  };
   AnimationStyle? _animationStyle;
   bool isDarkTheme = false;
 
@@ -34,13 +37,13 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       themeAnimationStyle: _animationStyle,
-      themeMode: isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+      themeMode: isDarkTheme ? .dark : .light,
       theme: ThemeData(colorSchemeSeed: Colors.green),
-      darkTheme: ThemeData(colorSchemeSeed: Colors.green, brightness: Brightness.dark),
+      darkTheme: ThemeData(colorSchemeSeed: Colors.green, brightness: .dark),
       home: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               SegmentedButton<AnimationStyles>(
                 selected: _animationStyleSelection,
@@ -56,16 +59,20 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
                           duration: Duration(seconds: 1),
                         );
                       case AnimationStyles.none:
-                        _animationStyle = AnimationStyle.noAnimation;
+                        _animationStyle = .noAnimation;
                     }
                   });
                 },
-                segments:
-                    animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+                segments: animationStyleSegments
+                    .map<ButtonSegment<AnimationStyles>>((
                       (AnimationStyles, String) shirt,
                     ) {
-                      return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                    }).toList(),
+                      return ButtonSegment<AnimationStyles>(
+                        value: shirt.$1,
+                        label: Text(shirt.$2),
+                      );
+                    })
+                    .toList(),
               ),
               const SizedBox(height: 10),
               OutlinedButton.icon(
@@ -74,7 +81,9 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
                     isDarkTheme = !isDarkTheme;
                   });
                 },
-                icon: Icon(isDarkTheme ? Icons.wb_sunny : Icons.nightlight_round),
+                icon: Icon(
+                  isDarkTheme ? Icons.wb_sunny : Icons.nightlight_round,
+                ),
                 label: const Text('Switch Theme Mode'),
               ),
             ],

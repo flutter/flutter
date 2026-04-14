@@ -67,12 +67,13 @@ ShaderLibraryGLES::ShaderLibraryGLES(
     return true;
   };
   for (auto library : shader_libraries) {
-    auto blob_library = ShaderArchive{std::move(library)};
-    if (!blob_library.IsValid()) {
-      VALIDATION_LOG << "Could not construct blob library for shaders.";
+    auto blob_library = ShaderArchive::Create(std::move(library));
+    if (!blob_library.ok()) {
+      VALIDATION_LOG << "Could not construct blob library for shaders: "
+                     << blob_library.status().ToString();
       return;
     }
-    blob_library.IterateAllShaders(iterator);
+    blob_library->IterateAllShaders(iterator);
   }
 
   functions_ = functions;

@@ -10,18 +10,22 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-// A shared interface for shaders for which you can acquire a native handle
+// A shared interface for shaders for which you can acquire a native handle.
 abstract class SkwasmShader implements ui.Shader {
   ShaderHandle get handle;
+
+  /// Whether the shader represents a gradient.
+  bool get isGradient;
 }
 
 // An implementation that handles the storage, disposal, and finalization of
 // a native shader handle.
 class SkwasmNativeShader extends SkwasmObjectWrapper<RawShader> implements SkwasmShader {
-  SkwasmNativeShader(ShaderHandle handle) : super(handle, _registry);
+  SkwasmNativeShader(ShaderHandle handle)
+    : super(handle, (ShaderHandle h) => shaderDispose(h), 'Shader');
 
-  static final SkwasmFinalizationRegistry<RawShader> _registry =
-      SkwasmFinalizationRegistry<RawShader>((ShaderHandle handle) => shaderDispose(handle));
+  @override
+  bool get isGradient => false;
 }
 
 class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
@@ -40,10 +44,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
 
     final RawPointArray endPoints = scope.convertPointArrayToNative(<ui.Offset>[from, to]);
     final RawColorArray nativeColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> stops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> stops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateLinearGradient(
       endPoints,
       nativeColors,
@@ -69,10 +75,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
     }());
 
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateRadialGradient(
       center.dx,
       center.dy,
@@ -103,10 +111,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
 
     final RawPointArray endPoints = scope.convertPointArrayToNative(<ui.Offset>[focal, center]);
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateConicalGradient(
       endPoints,
       focalRadius,
@@ -135,10 +145,12 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
     }());
 
     final RawColorArray rawColors = scope.convertColorArrayToNative(colors);
-    final Pointer<Float> rawStops =
-        colorStops != null ? scope.convertDoublesToNative(colorStops) : nullptr;
-    final Pointer<Float> matrix =
-        matrix4 != null ? scope.convertMatrix4toSkMatrix(matrix4) : nullptr;
+    final Pointer<Float> rawStops = colorStops != null
+        ? scope.convertDoublesToNative(colorStops)
+        : nullptr;
+    final Pointer<Float> matrix = matrix4 != null
+        ? scope.convertMatrix4toSkMatrix(matrix4)
+        : nullptr;
     final ShaderHandle handle = shaderCreateSweepGradient(
       center.dx,
       center.dy,
@@ -154,6 +166,9 @@ class SkwasmGradient extends SkwasmNativeShader implements ui.Gradient {
   });
 
   SkwasmGradient._(super.handle);
+
+  @override
+  bool get isGradient => true;
 
   @override
   String toString() => 'Gradient()';
@@ -198,50 +213,51 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 
 class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     implements ui.FragmentProgram {
-  SkwasmFragmentProgram._(
-    this.name,
-    RuntimeEffectHandle handle,
-    this.floatUniformCount,
-    this.childShaderCount,
-  ) : super(handle, _registry);
+  SkwasmFragmentProgram._(this.name, RuntimeEffectHandle handle, this._shaderData)
+    : super(handle, (RuntimeEffectHandle h) => runtimeEffectDispose(h), 'FragmentProgram');
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
-    final ShaderData shaderData = ShaderData.fromBytes(bytes);
+    final shaderData = ShaderData.fromBytes(bytes);
 
     // TODO(jacksongardner): Can we avoid this copy?
     final List<int> sourceData = utf8.encode(shaderData.source);
     final SkStringHandle sourceString = skStringAllocate(sourceData.length);
     final Pointer<Int8> sourceBuffer = skStringGetData(sourceString);
-    int i = 0;
-    for (final int byte in sourceData) {
+    var i = 0;
+    for (final byte in sourceData) {
       sourceBuffer[i] = byte;
       i++;
     }
     final RuntimeEffectHandle handle = runtimeEffectCreate(sourceString);
     skStringFree(sourceString);
-    return SkwasmFragmentProgram._(name, handle, shaderData.floatCount, shaderData.textureCount);
+    return SkwasmFragmentProgram._(name, handle, shaderData);
   }
 
-  static final SkwasmFinalizationRegistry<RawRuntimeEffect> _registry =
-      SkwasmFinalizationRegistry<RawRuntimeEffect>(
-        (RuntimeEffectHandle handle) => runtimeEffectDispose(handle),
-      );
-
   final String name;
-  final int floatUniformCount;
-  final int childShaderCount;
+  int get floatUniformCount => _shaderData.floatCount;
+  int get childShaderCount => _shaderData.textureCount;
+  final ShaderData _shaderData;
 
   @override
   ui.FragmentShader fragmentShader() => SkwasmFragmentShader(this);
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
+
+  UniformData _getUniformFloatInfo(String name) {
+    for (final UniformData uniform in _shaderData.uniforms) {
+      if (uniform.name == name) {
+        return uniform;
+      }
+    }
+    throw ArgumentError('No uniform named "$name".');
+  }
 }
 
-class SkwasmShaderData extends SkwasmObjectWrapper<RawSkData> {
-  SkwasmShaderData(int size) : super(skDataCreate(size), _registry);
+class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
+  SkwasmShaderData(int size)
+    : super(uniformDataCreate(size), (UniformDataHandle h) => uniformDataDispose(h), 'ShaderData');
 
-  static final SkwasmFinalizationRegistry<RawSkData> _registry =
-      SkwasmFinalizationRegistry<RawSkData>((SkDataHandle handle) => skDataDispose(handle));
+  Pointer<Void> get pointer => uniformDataGetPointer(handle);
 }
 
 // This class does not inherit from SkwasmNativeShader, as its handle might
@@ -263,7 +279,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
         Pointer<ShaderHandle> childShaders = nullptr;
         if (_childShaders.isNotEmpty) {
           childShaders = s.allocPointerArray(_childShaders.length).cast<ShaderHandle>();
-          for (int i = 0; i < _childShaders.length; i++) {
+          for (var i = 0; i < _childShaders.length; i++) {
             final SkwasmShader? child = _childShaders[i];
             childShaders[i] = child != null ? child.handle : nullptr;
           }
@@ -279,6 +295,9 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     }
     return _nativeShader!.handle;
   }
+
+  @override
+  bool get isGradient => false;
 
   SkwasmShader? _nativeShader;
   final SkwasmFragmentProgram _program;
@@ -296,7 +315,19 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
-  bool get debugDisposed => _isDisposed;
+  bool get debugDisposed {
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
+    }
+
+    throw StateError('debugDisposed is only available when asserts are enabled.');
+  }
 
   @override
   void setFloat(int index, double value) {
@@ -306,12 +337,16 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader!.dispose();
       _nativeShader = null;
     }
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData.handle).cast<Float>();
+    final Pointer<Float> dataPointer = _uniformData.pointer.cast<Float>();
     dataPointer[index] = value;
   }
 
   @override
-  void setImageSampler(int index, ui.Image image) {
+  void setImageSampler(
+    int index,
+    ui.Image image, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.none,
+  }) {
     if (_nativeShader != null) {
       // Invalidate the previous shader so that it is recreated with the new
       // child shaders.
@@ -319,19 +354,434 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader = null;
     }
 
-    final SkwasmImageShader shader = SkwasmImageShader.imageShader(
+    final shader = SkwasmImageShader.imageShader(
       image as SkwasmImage,
       ui.TileMode.clamp,
       ui.TileMode.clamp,
       null,
-      ui.FilterQuality.none,
+      filterQuality,
     );
     final SkwasmShader? oldShader = _childShaders[index];
     _childShaders[index] = shader;
     oldShader?.dispose();
 
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData.handle).cast<Float>();
+    final Pointer<Float> dataPointer = _uniformData.pointer.cast<Float>();
     dataPointer[_floatUniformCount + index * 2] = image.width.toDouble();
     dataPointer[_floatUniformCount + index * 2 + 1] = image.height.toDouble();
   }
+
+  @override
+  ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
+    index ??= 0;
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
+
+    return SkwasmUniformFloatSlot._(this, index, name, info.floatOffset + index);
+  }
+
+  @override
+  ui.UniformVec2Slot getUniformVec2(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
+    return _SkwasmUniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  @override
+  ui.UniformVec3Slot getUniformVec3(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
+    return _SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  @override
+  ui.UniformVec4Slot getUniformVec4(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  @override
+  ui.UniformMat2Slot getUniformMat2(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _SkwasmUniformMat2Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  @override
+  ui.UniformMat3Slot getUniformMat3(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 9);
+    return _SkwasmUniformMat3Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+    );
+  }
+
+  @override
+  ui.UniformMat4Slot getUniformMat4(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 16);
+    return _SkwasmUniformMat4Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+      slots[9],
+      slots[10],
+      slots[11],
+      slots[12],
+      slots[13],
+      slots[14],
+      slots[15],
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat2Slot> getUniformMat2Array(String name) {
+    return _getUniformArray<_SkwasmUniformMat2Slot>(
+      name,
+      4,
+      (components) =>
+          _SkwasmUniformMat2Slot._(components[0], components[1], components[2], components[3]),
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat3Slot> getUniformMat3Array(String name) {
+    return _getUniformArray<_SkwasmUniformMat3Slot>(
+      name,
+      9,
+      (components) => _SkwasmUniformMat3Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+      ),
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) {
+    return _getUniformArray<_SkwasmUniformMat4Slot>(
+      name,
+      16,
+      (components) => _SkwasmUniformMat4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+        components[9],
+        components[10],
+        components[11],
+        components[12],
+        components[13],
+        components[14],
+        components[15],
+      ),
+    );
+  }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.floatCount}, not size $size.');
+    }
+
+    return List<SkwasmUniformFloatSlot>.generate(
+      size,
+      (i) => SkwasmUniformFloatSlot._(this, i, name, info.floatOffset + i),
+    );
+  }
+
+  ui.UniformArray<T> _getUniformArray<T extends ui.UniformType>(
+    String name,
+    int elementSize,
+    T Function(List<SkwasmUniformFloatSlot> slots) elementFactory,
+  ) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount % elementSize != 0) {
+      throw ArgumentError(
+        'Uniform size (${info.floatCount}) for "$name" is not a multiple of $elementSize.',
+      );
+    }
+    final int numElements = info.floatCount ~/ elementSize;
+
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<SkwasmUniformFloatSlot>.generate(
+        info.floatCount,
+        (j) => SkwasmUniformFloatSlot._(this, j, name, info.floatOffset + i * elementSize + j),
+      );
+      return elementFactory(slots);
+    });
+
+    return _SkwasmUniformArray<T>._(elements);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) {
+    return _getUniformArray(name, 1, (components) => components.first);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec2Slot> getUniformVec2Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec2Slot>(
+      name,
+      2, // 2 floats per element
+      (components) => _SkwasmUniformVec2Slot._(
+        components[0],
+        components[1],
+      ), // Create Vec2 from two UniformFloat components
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec3Slot> getUniformVec3Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec3Slot>(
+      name,
+      3, // 3 floats per element
+      (components) =>
+          _SkwasmUniformVec3Slot._(components[0], components[1], components[2]), // Create Vec3
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec4Slot> getUniformVec4Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec4Slot>(
+      name,
+      4, // 4 floats per element
+      (components) => _SkwasmUniformVec4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+      ), // Create Vec4
+    );
+  }
+}
+
+class SkwasmUniformFloatSlot implements ui.UniformFloatSlot {
+  SkwasmUniformFloatSlot._(this._shader, this.index, this.name, this.shaderIndex);
+
+  final SkwasmFragmentShader _shader;
+
+  @override
+  final int index;
+
+  @override
+  final String name;
+
+  @override
+  void set(double val) {
+    _shader.setFloat(shaderIndex, val);
+  }
+
+  @override
+  final int shaderIndex;
+}
+
+class _SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
+  _SkwasmUniformVec2Slot._(this._xSlot, this._ySlot);
+
+  @override
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot;
+}
+
+class _SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
+  _SkwasmUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  @override
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
+  _SkwasmUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  @override
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+class _SkwasmUniformMat2Slot implements ui.UniformMat2Slot {
+  _SkwasmUniformMat2Slot._(this._m00, this._m10, this._m01, this._m11);
+
+  // Set the elements of the matrix in column-major order.
+  @override
+  void set(double m00, double m10, double m01, double m11) {
+    _m00.set(m00);
+    _m10.set(m10);
+    _m01.set(m01);
+    _m11.set(m11);
+  }
+
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11; // Column 1
+}
+
+class _SkwasmUniformMat3Slot implements ui.UniformMat3Slot {
+  _SkwasmUniformMat3Slot._(
+    this._m00,
+    this._m10,
+    this._m20,
+    this._m01,
+    this._m11,
+    this._m21,
+    this._m02,
+    this._m12,
+    this._m22,
+  );
+
+  // Set the elements of the matrix in column-major order.
+  @override
+  void set(
+    double m00,
+    double m10,
+    double m20,
+    double m01,
+    double m11,
+    double m21,
+    double m02,
+    double m12,
+    double m22,
+  ) {
+    _m00.set(m00);
+    _m10.set(m10);
+    _m20.set(m20);
+
+    _m01.set(m01);
+    _m11.set(m11);
+    _m21.set(m21);
+
+    _m02.set(m02);
+    _m12.set(m12);
+    _m22.set(m22);
+  }
+
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10, _m20; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11, _m21; // Column 1
+  final SkwasmUniformFloatSlot _m02, _m12, _m22; // Column 2
+}
+
+class _SkwasmUniformMat4Slot implements ui.UniformMat4Slot {
+  _SkwasmUniformMat4Slot._(
+    this._m00,
+    this._m10,
+    this._m20,
+    this._m30,
+    this._m01,
+    this._m11,
+    this._m21,
+    this._m31,
+    this._m02,
+    this._m12,
+    this._m22,
+    this._m32,
+    this._m03,
+    this._m13,
+    this._m23,
+    this._m33,
+  );
+
+  // Set the elements of the matrix in column-major order.
+  @override
+  void set(
+    double m00,
+    double m10,
+    double m20,
+    double m30,
+    double m01,
+    double m11,
+    double m21,
+    double m31,
+    double m02,
+    double m12,
+    double m22,
+    double m32,
+    double m03,
+    double m13,
+    double m23,
+    double m33,
+  ) {
+    _m00.set(m00);
+    _m10.set(m10);
+    _m20.set(m20);
+    _m30.set(m30);
+    _m01.set(m01);
+    _m11.set(m11);
+    _m21.set(m21);
+    _m31.set(m31);
+    _m02.set(m02);
+    _m12.set(m12);
+    _m22.set(m22);
+    _m32.set(m32);
+    _m03.set(m03);
+    _m13.set(m13);
+    _m23.set(m23);
+    _m33.set(m33);
+  }
+
+  // The elements of the matrix, stored in column-major order.
+  // mij refers to the ith row and the jth column.
+  final SkwasmUniformFloatSlot _m00, _m10, _m20, _m30; // Column 0
+  final SkwasmUniformFloatSlot _m01, _m11, _m21, _m31; // Column 1
+  final SkwasmUniformFloatSlot _m02, _m12, _m22, _m32; // Column 2
+  final SkwasmUniformFloatSlot _m03, _m13, _m23, _m33; // Column 3
+}
+
+class _SkwasmUniformArray<T extends ui.UniformType> implements ui.UniformArray<T> {
+  _SkwasmUniformArray._(this._elements);
+
+  @override
+  T operator [](int index) {
+    return _elements[index];
+  }
+
+  @override
+  int get length => _elements.length;
+
+  final List<T> _elements;
 }

@@ -17,7 +17,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   testWidgets('Transform origin', (WidgetTester tester) async {
-    bool didReceiveTap = false;
+    var didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -31,9 +31,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 50.0),
@@ -59,7 +58,7 @@ void main() {
   });
 
   testWidgets('Transform alignment', (WidgetTester tester) async {
-    bool didReceiveTap = false;
+    var didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -73,9 +72,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   alignment: Alignment.centerRight,
@@ -101,7 +99,7 @@ void main() {
   });
 
   testWidgets('Transform AlignmentDirectional alignment', (WidgetTester tester) async {
-    bool didReceiveTap = false;
+    var didReceiveTap = false;
 
     Widget buildFrame(TextDirection textDirection, AlignmentGeometry alignment) {
       return Directionality(
@@ -116,9 +114,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   alignment: alignment,
@@ -166,7 +163,7 @@ void main() {
   });
 
   testWidgets('Transform offset + alignment', (WidgetTester tester) async {
-    bool didReceiveTap = false;
+    var didReceiveTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -180,9 +177,8 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: SizedBox(
-                width: 100.0,
-                height: 100.0,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: Transform(
                   transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 0.0),
@@ -227,20 +223,23 @@ void main() {
     final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    final TransformLayer layer = layers[1] as TransformLayer;
+    final layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform!;
     expect(transform.getTranslation(), equals(Vector3(100.0, 75.0, 0.0)));
   });
 
   testWidgets('Transform.rotate', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi / 2.0, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi / 2.0,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    final TransformLayer layer = layers[1] as TransformLayer;
+    final layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
       moreOrLessEquals(0.0),
@@ -297,7 +296,7 @@ void main() {
     final List<Layer> layers = tester.layers..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    final TransformLayer layer = layers[1] as TransformLayer;
+    final layer = layers[1] as TransformLayer;
     final Matrix4 transform = layer.transform!;
     expect(transform.storage, <dynamic>[
       // These are column-major, not row-major.
@@ -345,7 +344,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi / 2, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(tester.layers, hasLength(3));
@@ -355,7 +357,10 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi / 2, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(
@@ -387,7 +392,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Transform.rotate(angle: math.pi, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: math.pi,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(
@@ -419,7 +427,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Transform.rotate(angle: 3 * math.pi / 2, child: RepaintBoundary(child: Container())),
+      Transform.rotate(
+        angle: 3 * math.pi / 2,
+        child: RepaintBoundary(child: Container()),
+      ),
     );
 
     expect(
@@ -488,7 +499,7 @@ void main() {
 
   testWidgets('Translated child into translated box - hit test', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
-    bool pointerDown = false;
+    var pointerDown = false;
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(100.0, 50.0),
@@ -527,7 +538,7 @@ void main() {
       for (double angle = 0; angle <= math.pi / 4; angle += 0.01) {
         await tester.pumpWidget(RepaintBoundary(child: generateTransform(true, angle)));
         final RenderBox renderBox = tester.binding.renderView.child!;
-        final OffsetLayer layer = renderBox.debugLayer! as OffsetLayer;
+        final layer = renderBox.debugLayer! as OffsetLayer;
         final ui.Image imageWithCompositing = await layer.toImage(renderBox.paintBounds);
         addTearDown(imageWithCompositing.dispose);
 
@@ -646,14 +657,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      SizedBox(
-        width: 400,
-        height: 400,
+      SizedBox.square(
+        dimension: 400,
         child: Center(
           child: Transform.rotate(
             angle: math.pi / 4,
             filterQuality: FilterQuality.low,
-            child: const SizedBox(width: 100, height: 100),
+            child: const SizedBox.square(dimension: 100),
           ),
         ),
       ),
@@ -804,15 +814,14 @@ void main() {
   testWidgets("Transform.scale() scales widget uniformly with 'scale' parameter", (
     WidgetTester tester,
   ) async {
-    const double scale = 1.5;
+    const scale = 1.5;
     const double height = 100;
     const double width = 150;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          height: 400,
-          width: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: Center(
             child: Transform.scale(
               scale: scale,
@@ -823,7 +832,7 @@ void main() {
       ),
     );
 
-    const Size target = Size(width * scale, height * scale);
+    const target = Size(width * scale, height * scale);
 
     expect(
       tester.getBottomRight(find.byType(Container)),
@@ -834,16 +843,15 @@ void main() {
   testWidgets("Transform.scale() scales widget according to 'scaleX' and 'scaleY'", (
     WidgetTester tester,
   ) async {
-    const double scaleX = 1.5;
-    const double scaleY = 1.2;
+    const scaleX = 1.5;
+    const scaleY = 1.2;
     const double height = 100;
     const double width = 150;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: SizedBox(
-          height: 400,
-          width: 400,
+        child: SizedBox.square(
+          dimension: 400,
           child: Center(
             child: Transform.scale(
               scaleX: scaleX,
@@ -855,7 +863,7 @@ void main() {
       ),
     );
 
-    const Size target = Size(width * scaleX, height * scaleY);
+    const target = Size(width * scaleX, height * scaleY);
 
     expect(
       tester.getBottomRight(find.byType(Container)),
@@ -864,11 +872,11 @@ void main() {
   });
 
   testWidgets('Transform.flip does flip child correctly', (WidgetTester tester) async {
-    const Offset topRight = Offset(60, 20);
-    const Offset bottomLeft = Offset(20, 60);
-    const Offset bottomRight = Offset(60, 60);
+    const topRight = Offset(60, 20);
+    const bottomLeft = Offset(20, 60);
+    const bottomRight = Offset(60, 60);
 
-    bool tappedRed = false;
+    var tappedRed = false;
 
     const Widget square = SizedBox.square(dimension: 40);
     final Widget child = Column(

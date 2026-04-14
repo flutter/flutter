@@ -72,8 +72,8 @@ class CommandPoolVK final {
   std::weak_ptr<ContextVK>& context_;
 
   // Used to retain a reference on these until the pool is reset.
-  std::vector<vk::UniqueCommandBuffer> collected_buffers_ IPLR_GUARDED_BY(
-      pool_mutex_);
+  std::vector<vk::UniqueCommandBuffer> collected_buffers_
+      IPLR_GUARDED_BY(pool_mutex_);
 };
 
 //------------------------------------------------------------------------------
@@ -103,8 +103,6 @@ class CommandPoolVK final {
 class CommandPoolRecyclerVK final
     : public std::enable_shared_from_this<CommandPoolRecyclerVK> {
  public:
-  ~CommandPoolRecyclerVK();
-
   /// A unique command pool and zero or more recycled command buffers.
   struct RecycledData {
     vk::UniqueCommandPool pool;
@@ -112,16 +110,13 @@ class CommandPoolRecyclerVK final
   };
 
   /// @brief      Clean up resources held by all per-thread command pools
-  ///             associated with the given context.
-  ///
-  /// @param[in]  context The context.
-  static void DestroyThreadLocalPools(const ContextVK* context);
+  ///             associated with the context.
+  void DestroyThreadLocalPools();
 
   /// @brief      Creates a recycler for the given |ContextVK|.
   ///
   /// @param[in]  context The context to create the recycler for.
-  explicit CommandPoolRecyclerVK(std::weak_ptr<ContextVK> context)
-      : context_(std::move(context)) {}
+  explicit CommandPoolRecyclerVK(const std::shared_ptr<ContextVK>& context);
 
   /// @brief      Gets a command pool for the current thread.
   ///
@@ -137,11 +132,15 @@ class CommandPoolRecyclerVK final
                std::vector<vk::UniqueCommandBuffer>&& buffers,
                bool should_trim = false);
 
-  /// @brief      Clears all recycled command pools to let them be reclaimed.
+  /// @brief      Clears this context's thread-local command pool.
   void Dispose();
+
+  // Visible for testing.
+  static int GetGlobalPoolCount(const ContextVK& context);
 
  private:
   std::weak_ptr<ContextVK> context_;
+  uint64_t context_hash_;
 
   Mutex recycled_mutex_;
   std::vector<RecycledData> recycled_ IPLR_GUARDED_BY(recycled_mutex_);

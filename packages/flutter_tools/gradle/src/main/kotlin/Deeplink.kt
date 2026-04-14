@@ -4,16 +4,20 @@
 
 package com.flutter.gradle
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-// TODO(gmackall): Identify which of these can be val instead of var.
 class Deeplink(
-    private var scheme: String?,
-    private var host: String?,
-    var path: String?,
-    private var intentFilterCheck: IntentFilterCheck
+    @VisibleForTesting
+    val scheme: String?,
+    @VisibleForTesting
+    val host: String?,
+    @VisibleForTesting
+    val path: String?,
+    @VisibleForTesting
+    val intentFilterCheck: IntentFilterCheck
 ) {
     // TODO(gmackall): This behavior was kept identical to the original Groovy behavior as part of
     // the Groovy->Kotlin conversion, but should be changed once the conversion is complete.

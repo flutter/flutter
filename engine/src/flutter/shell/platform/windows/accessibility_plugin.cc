@@ -20,6 +20,7 @@ static constexpr char kAccessibilityChannelName[] = "flutter/accessibility";
 static constexpr char kTypeKey[] = "type";
 static constexpr char kDataKey[] = "data";
 static constexpr char kMessageKey[] = "message";
+static constexpr char kViewIdKey[] = "viewId";
 static constexpr char kAnnounceValue[] = "announce";
 
 // Handles messages like:
@@ -61,7 +62,21 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
       return;
     }
 
-    plugin->Announce(*message);
+    const auto& view_itr = data->find(EncodableValue{kViewIdKey});
+    if (view_itr == data->end()) {
+      FML_LOG(ERROR) << "Announce message 'viewId' property is missing.";
+      return;
+    }
+
+    // The viewId may be encoded as either a 32-bit or 64-bit integer.
+    auto const view_id = view_itr->second.TryGetLongValue();
+    if (!view_id) {
+      FML_LOG(ERROR)
+          << "Announce message 'viewId' property must be a FlutterViewId.";
+      return;
+    }
+
+    plugin->Announce(*view_id, *message);
   } else {
     FML_LOG(WARNING) << "Accessibility message type '" << *type
                      << "' is not supported.";
@@ -89,14 +104,13 @@ void AccessibilityPlugin::SetUp(BinaryMessenger* binary_messenger,
       });
 }
 
-void AccessibilityPlugin::Announce(const std::string_view message) {
+void AccessibilityPlugin::Announce(const FlutterViewId view_id,
+                                   const std::string_view message) {
   if (!engine_->semantics_enabled()) {
     return;
   }
 
-  // TODO(loicsharma): Remove implicit view assumption.
-  // https://github.com/flutter/flutter/issues/142845
-  auto view = engine_->view(kImplicitViewId);
+  auto view = engine_->view(view_id);
   if (!view) {
     return;
   }

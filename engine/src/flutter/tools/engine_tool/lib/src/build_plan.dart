@@ -36,9 +36,11 @@ final class BuildPlan {
     required List<Build> builds,
     String? Function() defaultBuild = _defaultHostDebug,
   }) {
-    final build = () {
-      final name = args.option(_flagConfig) ?? defaultBuild();
-      final config = builds.firstWhereOrNull((b) => mangleConfigName(environment, b.name) == name);
+    final Build build = () {
+      final String? name = args.option(_flagConfig) ?? defaultBuild();
+      final Build? config = builds.firstWhereOrNull(
+        (b) => mangleConfigName(environment, b.name) == name,
+      );
       if (config == null) {
         if (name == null) {
           throw FatalError('No build configuration specified.');
@@ -51,7 +53,7 @@ final class BuildPlan {
       build: build,
       strategy: BuildStrategy.values.byName(args.option(_flagStrategy)!),
       useRbe: () {
-        final useRbe = args.flag(_flagRbe);
+        final bool useRbe = args.flag(_flagRbe);
         if (useRbe && !environment.hasRbeConfigInTree()) {
           throw FatalError('RBE requested but configuration not found.\n\n$_rbeInstructions');
         }
@@ -64,7 +66,7 @@ final class BuildPlan {
         return !build.gn.contains('--no-lto');
       }(),
       concurrency: () {
-        final value = args.option(_flagConcurrency);
+        final String? value = args.option(_flagConcurrency);
         if (value == null) {
           return null;
         }
@@ -74,7 +76,7 @@ final class BuildPlan {
         throw FatalError('Invalid value for --$_flagConcurrency: $value');
       }(),
       extraGnArgs: () {
-        final value = args.multiOption(_flagExtraGnArgs);
+        final List<String> value = args.multiOption(_flagExtraGnArgs);
         _checkExtraGnArgs(value);
         return value;
       }(),
@@ -98,7 +100,7 @@ final class BuildPlan {
   ///
   /// Instead, provide them explicitly as other [BuildPlan] arguments.
   @visibleForTesting
-  static const reservedGnArgs = {
+  static const Set<String> reservedGnArgs = {
     _flagRbe,
     _flagLto,
     'no-$_flagRbe',
@@ -135,7 +137,7 @@ final class BuildPlan {
       }
 
       // Strip off the prefix and compare it to reserved flags.
-      final withoutPrefix = arg.replaceFirst('--', '');
+      final String withoutPrefix = arg.replaceFirst('--', '');
       if (reservedGnArgs.contains(withoutPrefix)) {
         throw reservedGnArgsError;
       }
@@ -157,7 +159,7 @@ final class BuildPlan {
     required Map<String, BuilderConfig> configs,
   }) {
     // Add --config.
-    final builds = _extractBuilds(
+    final List<Build> builds = _extractBuilds(
       environment.platform,
       runnableConfigs: _runnableBuildConfigs(environment.platform, configsByName: configs),
       hideCiSpecificBuilds: help && !environment.verbose,
@@ -176,18 +178,17 @@ final class BuildPlan {
           'suitable build when targeting (via "et run") a flutter app.\n'
           '\n'
           '${environment.verbose ? ''
-                  'Since verbose mode was selected, both local development '
-                  'configurations and configurations that are typically only '
-                  'used on CI will be visible, including possible duplicates.' : ''
-                  'Configurations include (use --verbose for more details):'}',
+                    'Since verbose mode was selected, both local development '
+                    'configurations and configurations that are typically only '
+                    'used on CI will be visible, including possible duplicates.' : ''
+                    'Configurations include (use --verbose for more details):'}',
       allowed: [for (final config in builds) mangleConfigName(environment, config.name)]..sort(),
-      allowedHelp:
-          environment.verbose
-              ? {
-                for (final config in builds)
-                  mangleConfigName(environment, config.name): config.description,
-              }
-              : null,
+      allowedHelp: environment.verbose
+          ? {
+              for (final config in builds)
+                mangleConfigName(environment, config.name): config.description,
+            }
+          : null,
     );
 
     // Add --lto.
@@ -203,7 +204,7 @@ final class BuildPlan {
     );
 
     // Add --rbe.
-    final hasRbeConfigInTree = environment.hasRbeConfigInTree();
+    final bool hasRbeConfigInTree = environment.hasRbeConfigInTree();
     parser.addFlag(
       _flagRbe,
       defaultsTo: hasRbeConfigInTree,
@@ -250,7 +251,7 @@ final class BuildPlan {
 
   /// How to prefer remote or local builds.
   final BuildStrategy strategy;
-  static const _defaultStrategy = BuildStrategy.auto;
+  static const BuildStrategy _defaultStrategy = BuildStrategy.auto;
 
   /// Whether to configure the build plan to use RBE (remote build execution).
   final bool useRbe;

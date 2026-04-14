@@ -9,15 +9,16 @@
 #include <memory>
 #include <string>
 
+#include "display_list/dl_text_skia.h"
 #include "flow/stopwatch.h"
 #include "flow/stopwatch_dl.h"
-#include "flow/stopwatch_sk.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/platform.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
+#include "impeller/display_list/dl_text_impeller.h"              // nogncheck
 #include "impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
@@ -42,12 +43,8 @@ void VisualizeStopWatch(DlCanvas* canvas,
 
   if (show_graph) {
     DlRect visualization_rect = DlRect::MakeXYWH(x, y, width, height);
-    if (impeller_enabled) {
-      DlStopwatchVisualizer(stopwatch, point_storage, color_storage)
-          .Visualize(canvas, visualization_rect);
-    } else {
-      SkStopwatchVisualizer(stopwatch).Visualize(canvas, visualization_rect);
-    }
+    DlStopwatchVisualizer(stopwatch, point_storage, color_storage)
+        .Visualize(canvas, visualization_rect);
   }
 
   if (show_labels) {
@@ -57,12 +54,14 @@ void VisualizeStopWatch(DlCanvas* canvas,
     DlPaint paint(DlColor(0xFF888888));
 #ifdef IMPELLER_SUPPORTS_RENDERING
     if (impeller_enabled) {
-      canvas->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(text),
-                            x + label_x, y + height + label_y, paint);
+      canvas->DrawText(
+          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(text)),
+          x + label_x, y + height + label_y, paint);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
-    canvas->DrawTextBlob(text, x + label_x, y + height + label_y, paint);
+    canvas->DrawText(DlTextSkia::Make(text), x + label_x, y + height + label_y,
+                     paint);
   }
 }
 

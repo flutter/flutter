@@ -14,7 +14,7 @@ class TimerPickerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: TimerPickerExample(),
     );
   }
@@ -35,52 +35,58 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder:
-          (BuildContext context) => Container(
-            height: 216,
-            padding: const EdgeInsets.only(top: 6.0),
-            // The bottom margin is provided to align the popup above the system
-            // navigation bar.
-            margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            // Provide a background color for the popup.
-            color: CupertinoColors.systemBackground.resolveFrom(context),
-            // Use a SafeArea widget to avoid system overlaps.
-            child: SafeArea(top: false, child: child),
-          ),
+      builder: (BuildContext context) => Container(
+        height: 216,
+        padding: const .only(top: 6.0),
+        // The bottom margin is provided to align the popup above the system
+        // navigation bar.
+        margin: .only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        // Provide a background color for the popup.
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        // Use a SafeArea widget to avoid system overlaps.
+        child: SafeArea(top: false, child: child),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoTimerPicker Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoTimerPicker Sample'),
+      ),
       child: DefaultTextStyle(
-        style: TextStyle(color: CupertinoColors.label.resolveFrom(context), fontSize: 22.0),
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context),
+          fontSize: 22.0,
+        ),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               _TimerPickerItem(
                 children: <Widget>[
                   const Text('Timer'),
                   CupertinoButton(
                     // Display a CupertinoTimerPicker with hour/minute mode.
-                    onPressed:
-                        () => _showDialog(
-                          CupertinoTimerPicker(
-                            mode: CupertinoTimerPickerMode.hm,
-                            initialTimerDuration: duration,
-                            // This is called when the user changes the timer's
-                            // duration.
-                            onTimerDurationChanged: (Duration newDuration) {
-                              setState(() => duration = newDuration);
-                            },
-                          ),
-                        ),
+                    onPressed: () => _showDialog(
+                      CupertinoTimerPicker(
+                        mode: .hm,
+                        initialTimerDuration: duration,
+                        // This is called when the user changes the timer's
+                        // duration.
+                        onTimerDurationChanged: (Duration newDuration) {
+                          setState(() => duration = newDuration);
+                        },
+                      ),
+                    ),
                     // In this example, the timer's value is formatted manually.
                     // You can use the intl package to format the value based on
                     // the user's locale settings.
-                    child: Text('$duration', style: const TextStyle(fontSize: 22.0)),
+                    child: Text(
+                      '$duration',
+                      style: const TextStyle(fontSize: 22.0),
+                    ),
                   ),
                 ],
               ),
@@ -108,8 +114,8 @@ class _TimerPickerItem extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: children),
+        padding: const .symmetric(horizontal: 16.0),
+        child: Row(mainAxisAlignment: .spaceBetween, children: children),
       ),
     );
   }

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "ওয়েবে সার্চ করুন",
   "shareButtonLabel": "শেয়ার করুন",
   "pasteButtonLabel": "পেস্ট করুন",
-  "selectAllButtonLabel": "সব বেছে নিন"
+  "selectAllButtonLabel": "সব বেছে নিন",
+  "searchResultsFound": "সার্চ ফলাফল পাওয়া গেছে",
+  "noResultsFound": "কোনো ফলাফল পাওয়া যায়নি",
+  "radioButtonUnselectedLabel": "বেছে নেওয়া হয়নি"
 }

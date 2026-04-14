@@ -16,15 +16,15 @@ class DragBoundaryExampleApp extends StatefulWidget {
 }
 
 class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
-  Offset _currentPosition = Offset.zero;
-  Offset _initialPosition = Offset.zero;
+  Offset _currentPosition = .zero;
+  Offset _initialPosition = .zero;
   final Size _boxSize = const Size(100, 100);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.all(100),
+          padding: const .all(100),
           child: DragBoundary(
             child: Builder(
               builder: (BuildContext context) {
@@ -37,14 +37,19 @@ class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onPanStart: (DragStartDetails details) {
-                          _initialPosition = details.localPosition - _currentPosition;
+                          _initialPosition =
+                              details.localPosition - _currentPosition;
                         },
                         onPanUpdate: (DragUpdateDetails details) {
-                          _currentPosition = details.localPosition - _initialPosition;
-                          final Rect withinBoundary = DragBoundary.forRectOf(
-                            context,
-                            useGlobalPosition: false,
-                          ).nearestPositionWithinBoundary(_currentPosition & _boxSize);
+                          _currentPosition =
+                              details.localPosition - _initialPosition;
+                          final Rect withinBoundary =
+                              DragBoundary.forRectOf(
+                                context,
+                                useGlobalPosition: false,
+                              ).nearestPositionWithinBoundary(
+                                _currentPosition & _boxSize,
+                              );
                           setState(() {
                             _currentPosition = withinBoundary.topLeft;
                           });

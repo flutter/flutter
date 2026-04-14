@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FML_PLATFORM_WIN_MESSAGE_LOOP_WIN_H_
 #define FLUTTER_FML_PLATFORM_WIN_MESSAGE_LOOP_WIN_H_
 
-#include <windows.h>
+#include "flutter/fml/platform/win/windows_shim.h"
 
 #include <atomic>
 

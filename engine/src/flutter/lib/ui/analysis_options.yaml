@@ -7,5 +7,4 @@ analyzer:
 
 linter:
   rules:
-    always_specify_types: true # dart:ui is shipped as part of flutter/flutter, let's keep them consistent for now
     unreachable_from_main: false # lint not compatible with how dart:ui is structured

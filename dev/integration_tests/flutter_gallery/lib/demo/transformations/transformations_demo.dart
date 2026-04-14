@@ -34,7 +34,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final BoardPainter painter = BoardPainter(board: _board);
+    final painter = BoardPainter(board: _board);
 
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the GestureTransformable parent widget.
@@ -58,8 +58,8 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         builder: (BuildContext context, BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
           // translate beyond that to a visibleSize that's a bit bigger.
-          final Size size = Size(constraints.maxWidth, constraints.maxHeight);
-          final Size visibleSize = Size(size.width * 3, size.height * 2);
+          final size = Size(constraints.maxWidth, constraints.maxHeight);
+          final visibleSize = Size(size.width * 3, size.height * 2);
           return GestureTransformable(
             reset: _reset,
             onResetEnd: () {

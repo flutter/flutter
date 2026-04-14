@@ -89,17 +89,19 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
   Widget build(BuildContext context) {
     return Material(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const .symmetric(horizontal: 24.0),
         child: Center(
           child: Form(
             key: formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 TextFormField(
                   forceErrorText: forceErrorText,
                   controller: controller,
-                  decoration: const InputDecoration(hintText: 'Please write a username'),
+                  decoration: const InputDecoration(
+                    hintText: 'Please write a username',
+                  ),
                   validator: validator,
                   onChanged: onChanged,
                 ),

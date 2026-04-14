@@ -9,7 +9,7 @@ int yieldCount = 0;
 
 Iterable<int> range(int start, int end) sync* {
   assert(yieldCount == 0);
-  for (int index = start; index <= end; index += 1) {
+  for (var index = start; index <= end; index += 1) {
     yieldCount += 1;
     yield index;
   }

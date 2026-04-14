@@ -11,7 +11,9 @@ void main() {
   testWidgets('Each tiles should have a width of 200.0 and a height of 150.0', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const example.SliverGridDelegateWithFixedCrossAxisCountExampleApp());
+    await tester.pumpWidget(
+      const example.SliverGridDelegateWithFixedCrossAxisCountExampleApp(),
+    );
 
     for (int i = 0; i < 4; i++) {
       expect(find.text('$i'), findsOne);

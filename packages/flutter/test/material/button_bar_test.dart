@@ -64,10 +64,10 @@ void main() {
 
   group('mainAxisSize', () {
     testWidgets('Default mainAxisSize is MainAxisSize.max', (WidgetTester tester) async {
-      const Key buttonBarKey = Key('row');
-      const Key child0Key = Key('child0');
-      const Key child1Key = Key('child1');
-      const Key child2Key = Key('child2');
+      const buttonBarKey = Key('row');
+      const child0Key = Key('child0');
+      const child1Key = Key('child1');
+      const child2Key = Key('child2');
 
       await tester.pumpWidget(
         const MaterialApp(
@@ -111,10 +111,10 @@ void main() {
     });
 
     testWidgets('ButtonBarTheme.mainAxisSize overrides default', (WidgetTester tester) async {
-      const Key buttonBarKey = Key('row');
-      const Key child0Key = Key('child0');
-      const Key child1Key = Key('child1');
-      const Key child2Key = Key('child2');
+      const buttonBarKey = Key('row');
+      const child0Key = Key('child0');
+      const child1Key = Key('child1');
+      const child2Key = Key('child2');
       await tester.pumpWidget(
         const MaterialApp(
           home: ButtonBarTheme(
@@ -166,10 +166,10 @@ void main() {
     testWidgets('ButtonBar.mainAxisSize overrides ButtonBarTheme.mainAxisSize and default', (
       WidgetTester tester,
     ) async {
-      const Key buttonBarKey = Key('row');
-      const Key child0Key = Key('child0');
-      const Key child1Key = Key('child1');
-      const Key child2Key = Key('child2');
+      const buttonBarKey = Key('row');
+      const child0Key = Key('child0');
+      const child1Key = Key('child1');
+      const child2Key = Key('child2');
       await tester.pumpWidget(
         const MaterialApp(
           home: ButtonBarTheme(
@@ -627,7 +627,7 @@ void main() {
     final Finder buttonBar = find.byWidgetPredicate(
       (Widget w) => '${w.runtimeType}' == '_ButtonBarRow',
     );
-    final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
+    final renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
 
     expect(renderButtonBar.debugNeedsLayout, isTrue);
     expect(() => renderButtonBar.constraints, throwsStateError);

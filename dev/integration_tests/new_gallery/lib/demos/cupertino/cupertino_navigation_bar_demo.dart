@@ -28,8 +28,8 @@ class CupertinoNavigationBarDemo extends StatelessWidget {
               builder: (BuildContext context) => _FirstPage(),
             );
           case CupertinoNavigationBarDemo.secondPageRoute:
-            final Map<dynamic, dynamic> arguments = settings.arguments! as Map<dynamic, dynamic>;
-            final String? title = arguments['pageTitle'] as String?;
+            final arguments = settings.arguments! as Map<dynamic, dynamic>;
+            final title = arguments['pageTitle'] as String?;
             return CupertinoPageRoute<void>(
               title: title,
               settings: settings,
@@ -51,8 +51,9 @@ class _FirstPage extends StatelessWidget {
           const CupertinoSliverNavigationBar(automaticallyImplyLeading: false),
           SliverPadding(
             padding: MediaQuery.of(context).removePadding(removeTop: true).padding,
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+            sliver: SliverList.builder(
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) {
                 final String title = GalleryLocalizations.of(
                   context,
                 )!.starterAppDrawerItem(index + 1);
@@ -65,7 +66,7 @@ class _FirstPage extends StatelessWidget {
                   },
                   title: Text(title),
                 );
-              }, childCount: 20),
+              },
             ),
           ),
         ],

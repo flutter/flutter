@@ -34,7 +34,7 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Vælg timer",
   "timePickerMinuteModeAnnouncement": "Vælg minutter",
-  "modalBarrierDismissLabel": "Afvis",
+  "modalBarrierDismissLabel": "Luk",
   "signedInLabel": "Logget ind",
   "hideAccountsLabel": "Skjul konti",
   "showAccountsLabel": "Vis konti",

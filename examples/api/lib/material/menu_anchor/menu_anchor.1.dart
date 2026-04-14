@@ -16,12 +16,27 @@ void main() => runApp(const ContextMenuApp());
 /// they could be used for simple menu systems.
 enum MenuEntry {
   about('About'),
-  showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  hideMessage('Hide Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
+  showMessage(
+    'Show Message',
+    SingleActivator(LogicalKeyboardKey.keyS, control: true),
+  ),
+  hideMessage(
+    'Hide Message',
+    SingleActivator(LogicalKeyboardKey.keyS, control: true),
+  ),
   colorMenu('Color Menu'),
-  colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
-  colorGreen('Green Background', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
-  colorBlue('Blue Background', SingleActivator(LogicalKeyboardKey.keyB, control: true));
+  colorRed(
+    'Red Background',
+    SingleActivator(LogicalKeyboardKey.keyR, control: true),
+  ),
+  colorGreen(
+    'Green Background',
+    SingleActivator(LogicalKeyboardKey.keyG, control: true),
+  ),
+  colorBlue(
+    'Blue Background',
+    SingleActivator(LogicalKeyboardKey.keyB, control: true),
+  );
 
   const MenuEntry(this.label, [this.shortcut]);
   final String label;
@@ -79,10 +94,12 @@ class _MyContextMenuState extends State<MyContextMenu> {
     // Collect the shortcuts from the different menu selections so that they can
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
-      for (final MenuEntry item in MenuEntry.values)
-        if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
-    };
+    final Map<ShortcutActivator, Intent> shortcuts =
+        <ShortcutActivator, Intent>{
+          for (final MenuEntry item in MenuEntry.values)
+            if (item.shortcut != null)
+              item.shortcut!: VoidCallbackIntent(() => _activate(item)),
+        };
     // Register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application.
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
@@ -120,11 +137,12 @@ class _MyContextMenuState extends State<MyContextMenu> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(50),
+      padding: const .all(50),
       child: GestureDetector(
         onTapDown: _handleTapDown,
         onSecondaryTapDown: _handleSecondaryTapDown,
         child: MenuAnchor(
+          animated: true,
           controller: _menuController,
           menuChildren: <Widget>[
             MenuItemButton(
@@ -144,6 +162,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
                 child: Text(MenuEntry.showMessage.label),
               ),
             SubmenuButton(
+              animated: true,
               menuChildren: <Widget>[
                 MenuItemButton(
                   onPressed: () => _activate(MenuEntry.colorRed),
@@ -165,23 +184,29 @@ class _MyContextMenuState extends State<MyContextMenu> {
             ),
           ],
           child: Container(
-            alignment: Alignment.center,
+            alignment: .center,
             color: backgroundColor,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('Right-click anywhere on the background to show the menu.'),
+                  padding: .all(8.0),
+                  child: Text(
+                    'Right-click anywhere on the background to show the menu.',
+                  ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const .all(12.0),
                   child: Text(
                     showingMessage ? widget.message : '',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-                Text(_lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : ''),
+                Text(
+                  _lastSelection != null
+                      ? 'Last Selected: ${_lastSelection!.label}'
+                      : '',
+                ),
               ],
             ),
           ),
@@ -225,18 +250,20 @@ class _MyContextMenuState extends State<MyContextMenu> {
       return;
     }
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      case .android:
+      case .fuchsia:
+      case .linux:
+      case .windows:
         // Don't open the menu on these platforms with a Ctrl-tap (or a
         // tap).
         break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
+      case .iOS:
+      case .macOS:
         // Only open the menu on these platforms if the control button is down
         // when the tap occurs.
-        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
+        if (HardwareKeyboard.instance.logicalKeysPressed.contains(
+              LogicalKeyboardKey.controlLeft,
+            ) ||
             HardwareKeyboard.instance.logicalKeysPressed.contains(
               LogicalKeyboardKey.controlRight,
             )) {
@@ -253,6 +280,8 @@ class ContextMenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: Scaffold(body: MyContextMenu(message: kMessage)));
+    return const MaterialApp(
+      home: Scaffold(body: MyContextMenu(message: kMessage)),
+    );
   }
 }

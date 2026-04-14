@@ -11,7 +11,10 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
     Center(
       child: ConstrainedBox(
         constraints: constraints,
-        child: AspectRatio(aspectRatio: aspectRatio, child: Container(key: childKey)),
+        child: AspectRatio(
+          aspectRatio: aspectRatio,
+          child: Container(key: childKey),
+        ),
       ),
     ),
   );

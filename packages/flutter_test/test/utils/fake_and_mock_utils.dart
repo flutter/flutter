@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   final WidgetsBinding binding = tester.binding;
   assert(binding is TestWidgetsFlutterBinding);
-  final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
+  final testBinding = binding as TestWidgetsFlutterBinding;
   return testBinding;
 }
 
@@ -89,7 +89,7 @@ class _FakeViewPaddingMatcher extends Matcher {
     bool verbose,
   ) {
     assert(item is ViewPadding, 'Can only match against implementations of ViewPadding.');
-    final ViewPadding actual = item as ViewPadding;
+    final actual = item as ViewPadding;
 
     if (actual.left != expected.left) {
       mismatchDescription.add(
@@ -118,7 +118,7 @@ class _FakeViewPaddingMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     assert(item is ViewPadding, 'Can only match against implementations of ViewPadding.');
-    final ViewPadding actual = item as ViewPadding;
+    final actual = item as ViewPadding;
 
     return actual.left == expected.left &&
         actual.top == expected.top &&

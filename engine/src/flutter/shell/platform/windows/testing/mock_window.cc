@@ -6,25 +6,19 @@
 
 namespace flutter {
 namespace testing {
-MockWindow::MockWindow() : FlutterWindow(1, 1){};
+MockWindow::MockWindow() : FlutterWindow(1, 1, nullptr) {};
 MockWindow::MockWindow(std::unique_ptr<WindowsProcTable> window_proc_table,
                        std::unique_ptr<TextInputManager> text_input_manager)
     : FlutterWindow(1,
                     1,
+                    nullptr,
                     std::move(window_proc_table),
-                    std::move(text_input_manager)){};
+                    std::move(text_input_manager)) {};
 
 MockWindow::~MockWindow() = default;
 
 UINT MockWindow::GetDpi() {
   return GetCurrentDPI();
-}
-
-LRESULT MockWindow::Win32DefWindowProc(HWND hWnd,
-                                       UINT Msg,
-                                       WPARAM wParam,
-                                       LPARAM lParam) {
-  return kWmResultDefault;
 }
 
 void MockWindow::SetDirectManipulationOwner(

@@ -15,7 +15,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2500));
 
     final Finder indicatorFinder = find.byType(CircularProgressIndicator).first;
-    final CircularProgressIndicator progressIndicator = tester.widget(indicatorFinder);
+    final CircularProgressIndicator progressIndicator = tester.widget(
+      indicatorFinder,
+    );
     expect(progressIndicator.value, equals(0.5));
   });
 
@@ -26,20 +28,28 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2500));
 
     final Finder indicatorFinder = find.byType(CircularProgressIndicator).last;
-    final CircularProgressIndicator progressIndicator = tester.widget(indicatorFinder);
+    final CircularProgressIndicator progressIndicator = tester.widget(
+      indicatorFinder,
+    );
     expect(progressIndicator.value, null);
   });
 
-  testWidgets('Progress indicators year2023 flag can be toggled', (WidgetTester tester) async {
+  testWidgets('Progress indicators year2023 flag can be toggled', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ProgressIndicatorExampleApp());
 
-    CircularProgressIndicator determinateIndicator = tester.widget<CircularProgressIndicator>(
-      find.byType(CircularProgressIndicator).first,
-    );
+    CircularProgressIndicator determinateIndicator = tester
+        .widget<CircularProgressIndicator>(
+          find.byType(CircularProgressIndicator).first,
+        );
+    // ignore: deprecated_member_use
     expect(determinateIndicator.year2023, true);
-    CircularProgressIndicator indeterminateIndicator = tester.widget<CircularProgressIndicator>(
-      find.byType(CircularProgressIndicator).last,
-    );
+    CircularProgressIndicator indeterminateIndicator = tester
+        .widget<CircularProgressIndicator>(
+          find.byType(CircularProgressIndicator).last,
+        );
+    // ignore: deprecated_member_use
     expect(indeterminateIndicator.year2023, true);
 
     await tester.tap(find.byType(SwitchListTile));
@@ -48,10 +58,12 @@ void main() {
     determinateIndicator = tester.widget<CircularProgressIndicator>(
       find.byType(CircularProgressIndicator).first,
     );
+    // ignore: deprecated_member_use
     expect(determinateIndicator.year2023, false);
     indeterminateIndicator = tester.widget<CircularProgressIndicator>(
       find.byType(CircularProgressIndicator).last,
     );
+    // ignore: deprecated_member_use
     expect(indeterminateIndicator.year2023, false);
   });
 }

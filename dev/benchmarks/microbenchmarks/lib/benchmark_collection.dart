@@ -42,8 +42,8 @@ Future<void> main() async {
   // BenchmarkingBinding is used by animation_bench, providing a simple
   // stopwatch interface over rendering. Lifting it here makes all
   // benchmarks run together.
-  final BenchmarkingBinding binding = BenchmarkingBinding();
-  final List<Benchmark> benchmarks = <Benchmark>[
+  final binding = BenchmarkingBinding();
+  final benchmarks = <Benchmark>[
     ('foundation/change_notifier_bench.dart', change_notifier_bench.execute),
     ('foundation/clamp.dart', clamp.execute),
     ('foundation/platform_asset_bundle.dart', platform_asset_bundle.execute),
@@ -78,7 +78,7 @@ Future<void> main() async {
 
   // Parses the optional compile-time dart variables; we can't have
   // arguments passed in to main.
-  final ArgParser parser = ArgParser();
+  final parser = ArgParser();
   final List<String> allowed = benchmarks.map((Benchmark e) => e.$1).toList();
   parser.addMultiOption(
     'tests',
@@ -88,13 +88,13 @@ Future<void> main() async {
     help: 'selected tests to run',
   );
   parser.addOption('seed', defaultsTo: '12345', help: 'selects seed to sort tests by');
-  final List<String> mainArgs = <String>[];
-  const String testArgs = String.fromEnvironment('tests');
+  final mainArgs = <String>[];
+  const testArgs = String.fromEnvironment('tests');
   if (testArgs.isNotEmpty) {
     mainArgs.addAll(<String>['--tests', testArgs]);
     print('╡ ••• environment test override: $testArgs ••• ╞');
   }
-  const String seedArgs = String.fromEnvironment('seed');
+  const seedArgs = String.fromEnvironment('seed');
   if (seedArgs.isNotEmpty) {
     mainArgs.addAll(<String>['--seed', seedArgs]);
     print('╡ ••• environment seed override: $seedArgs ••• ╞');
@@ -105,12 +105,13 @@ Future<void> main() async {
   // Shuffle the tests because we don't want order dependent tests.
   // It is the responsibility of the infra to tell us what the seed value is,
   // in case we want to have the seed stable for some time period.
-  final List<Benchmark> tests =
-      benchmarks.where((Benchmark e) => selectedTests.contains(e.$1)).toList();
+  final List<Benchmark> tests = benchmarks
+      .where((Benchmark e) => selectedTests.contains(e.$1))
+      .toList();
   tests.shuffle(Random(int.parse(results.option('seed')!)));
 
   print('╡ ••• Running microbenchmarks ••• ╞');
-  for (final Benchmark mark in tests) {
+  for (final mark in tests) {
     // Reset the frame policy to default - each test can set it on their own.
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
     print('╡ ••• Running ${mark.$1} ••• ╞');
@@ -118,5 +119,12 @@ Future<void> main() async {
   }
 
   print('\n\n╡ ••• Done ••• ╞\n\n');
+
+  // Ensure stdout buffers are flushed so the collecting process gets Done
+  await stdout.flush();
+
+  // Now we're just being paranoid here and letting the process churn through
+  // log lines before handling the exit code.
+  await Future<void>.delayed(const Duration(seconds: 5));
   exit(0);
 }

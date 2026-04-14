@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
@@ -16,7 +17,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
   group('chrome: $chrome'
       '${additionalCommandArgs.isEmpty ? '' : ' with args: $additionalCommandArgs'}', () {
     late Directory tempDir;
-    final HotReloadWithAssetProject project = HotReloadWithAssetProject();
+    final project = HotReloadWithAssetProject();
     late FlutterRunTestDriver flutter;
 
     setUp(() async {
@@ -30,9 +31,10 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('hot reload does not need to sync assets on the first reload', () async {
-      final Completer<void> onFirstLoad = Completer<void>();
-      final Completer<void> onSecondLoad = Completer<void>();
+    testWithoutContext('hot reload/restart do not need to sync assets on reload', () async {
+      final onFirstLoad = Completer<void>();
+      final onSecondLoad = Completer<void>();
+      final onThirdLoad = Completer<void>();
 
       flutter.stdout.listen((String line) {
         // If the asset fails to load, this message will be printed instead.
@@ -47,47 +49,24 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
         if (line.contains('SECOND DATA')) {
           onSecondLoad.complete();
         }
+        if (line.contains('THIRD DATA')) {
+          onThirdLoad.complete();
+        }
       });
       flutter.stdout.listen(printOnFailure);
       await flutter.run(
-        device: GoogleChromeDevice.kChromeDeviceId,
+        device: chrome ? GoogleChromeDevice.kChromeDeviceId : FlutterTesterDevices.kTesterDeviceId,
         additionalCommandArgs: additionalCommandArgs,
       );
       await onFirstLoad.future;
 
-      project.uncommentHotReloadPrint();
+      project.replaceHotReloadPrint('SECOND DATA');
       await flutter.hotReload();
       await onSecondLoad.future;
-    });
 
-    testWithoutContext('hot restart does not need to sync assets on the first reload', () async {
-      final Completer<void> onFirstLoad = Completer<void>();
-      final Completer<void> onSecondLoad = Completer<void>();
-
-      flutter.stdout.listen((String line) {
-        // If the asset fails to load, this message will be printed instead.
-        // this indicates that the devFS was not able to locate the asset
-        // after the hot reload.
-        if (line.contains('FAILED TO LOAD')) {
-          fail('Did not load asset: $line');
-        }
-        if (line.contains('LOADED DATA')) {
-          onFirstLoad.complete();
-        }
-        if (line.contains('SECOND DATA')) {
-          onSecondLoad.complete();
-        }
-      });
-      flutter.stdout.listen(printOnFailure);
-      await flutter.run(
-        device: GoogleChromeDevice.kChromeDeviceId,
-        additionalCommandArgs: additionalCommandArgs,
-      );
-      await onFirstLoad.future;
-
-      project.uncommentHotReloadPrint();
+      project.replaceHotReloadPrint('THIRD DATA');
       await flutter.hotRestart();
-      await onSecondLoad.future;
+      await onThirdLoad.future;
     });
   });
 }

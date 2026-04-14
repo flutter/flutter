@@ -22,8 +22,8 @@ void main() {
 
   test('The entry points under bin/ work', () async {
     const Platform platform = LocalPlatform();
-    final ProcessRunner runner = ProcessRunner();
-    final String exe = platform.isWindows ? '.bat' : '';
+    final runner = ProcessRunner();
+    final exe = platform.isWindows ? '.bat' : '';
     final String entrypointPath = path.join(engine.flutterDir.path, 'bin', 'et$exe');
     final ProcessRunnerResult processResult = await runner.runProcess(<String>[
       entrypointPath,

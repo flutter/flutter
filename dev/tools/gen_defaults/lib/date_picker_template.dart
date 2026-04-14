@@ -15,7 +15,7 @@ class DatePickerTemplate extends TokenTemplate {
 
   String _layerOpacity(String layerToken) {
     if (tokenAvailable(layerToken)) {
-      final String layerValue = getToken(layerToken) as String;
+      final layerValue = getToken(layerToken) as String;
       if (tokenAvailable(layerValue)) {
         final String? opacityValue = opacity(layerValue);
         if (opacityValue != null) {
@@ -41,7 +41,8 @@ class DatePickerTemplate extends TokenTemplate {
   }
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends DatePickerThemeData {
   _${blockName}DefaultsM3(this.context)
     : super(

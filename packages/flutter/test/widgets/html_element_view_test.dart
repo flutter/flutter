@@ -10,8 +10,6 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/_html_element_view_web.dart'
-    show debugOverridePlatformViewRegistry;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
@@ -46,6 +44,17 @@ void main() {
         return web.document.createElement(params['tagName']! as String);
       },
     );
+    fakePlatformViewRegistry.registerViewFactory('Browser__WebContextMenuViewType__', (
+      int viewId, {
+      Object? params,
+    }) {
+      final htmlElement = web.document.createElement('div') as web.HTMLElement;
+      htmlElement
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..classList.add('web-selectable-region-context-menu');
+      return htmlElement;
+    });
   });
 
   group('HtmlElementView', () {
@@ -71,7 +80,7 @@ void main() {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
-      bool hasPlatformViewCreated = false;
+      var hasPlatformViewCreated = false;
       void onPlatformViewCreatedCallBack(int id) {
         hasPlatformViewCreated = true;
       }
@@ -143,7 +152,7 @@ void main() {
         ),
       );
 
-      final Completer<void> resizeCompleter = Completer<void>();
+      final resizeCompleter = Completer<void>();
 
       await tester.pumpWidget(
         const Center(
@@ -269,11 +278,11 @@ void main() {
 
   group('HtmlElementView.fromTagName', () {
     setUp(() {
-      debugOverridePlatformViewRegistry = fakePlatformViewRegistry;
+      ui_web.debugOverridePlatformViewRegistry(fakePlatformViewRegistry);
     });
 
     tearDown(() {
-      debugOverridePlatformViewRegistry = null;
+      ui_web.debugOverridePlatformViewRegistry(null);
     });
 
     testWidgets('Create platform view from tagName', (WidgetTester tester) async {
@@ -297,7 +306,7 @@ void main() {
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
 
       // The HTML element should be a div.
-      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      final htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
       expect(htmlElement.tagName, equalsIgnoringCase('div'));
     });
 
@@ -323,12 +332,12 @@ void main() {
       expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
 
       // The HTML element should be a script.
-      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      final htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
       expect(htmlElement.tagName, equalsIgnoringCase('script'));
     });
 
     testWidgets('onElementCreated', (WidgetTester tester) async {
-      final List<Object> createdElements = <Object>[];
+      final createdElements = <Object>[];
       void onElementCreated(Object element) {
         createdElements.add(element);
       }
@@ -359,7 +368,7 @@ void main() {
     group('hitTestBehavior', () {
       testWidgets('opaque by default', (WidgetTester tester) async {
         final Key containerKey = UniqueKey();
-        int taps = 0;
+        var taps = 0;
 
         await tester.pumpWidget(
           GestureDetector(
@@ -388,7 +397,7 @@ void main() {
 
       testWidgets('can be set to transparent', (WidgetTester tester) async {
         final Key containerKey = UniqueKey();
-        int taps = 0;
+        var taps = 0;
 
         await tester.pumpWidget(
           GestureDetector(

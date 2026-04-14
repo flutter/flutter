@@ -23,7 +23,7 @@ bool SetPermissiveAccess(const std::filesystem::path& p);
 ///         has utf16 paths), the path will get mangled.
 std::string Utf8FromPath(const std::filesystem::path& path);
 
-std::string InferShaderNameFromPath(std::string_view path);
+std::string InferShaderNameFromPath(const std::filesystem::path& path);
 
 std::string ToCamelCase(std::string_view string);
 

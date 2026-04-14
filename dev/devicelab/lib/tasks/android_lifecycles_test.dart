@@ -34,7 +34,7 @@ TaskFunction androidLifecyclesTest({Map<String, String>? environment}) {
         );
       });
 
-      final File mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
+      final mainDart = File(path.join(tempDir.absolute.path, 'app', 'lib', 'main.dart'));
       if (!mainDart.existsSync()) {
         return TaskResult.failure('${mainDart.path} does not exist');
       }
@@ -58,7 +58,7 @@ void main() {
 ''', flush: true);
 
       Future<TaskResult> runTestFor(String mode) async {
-        final AndroidDevice device = await devices.workingDevice as AndroidDevice;
+        final device = await devices.workingDevice as AndroidDevice;
         await device.unlock();
 
         section('Flutter run on device running API level ${device.apiLevel} (mode: $mode)');
@@ -68,8 +68,8 @@ void main() {
           run = await startFlutter('run', options: <String>['--$mode']);
         });
 
-        final StreamController<String> lifecycles = StreamController<String>();
-        final StreamIterator<String> lifecycleItr = StreamIterator<String>(lifecycles.stream);
+        final lifecycles = StreamController<String>();
+        final lifecycleItr = StreamIterator<String>(lifecycles.stream);
 
         final StreamSubscription<void> stdout = run.stdout
             .transform<String>(utf8.decoder)

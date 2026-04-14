@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
@@ -111,49 +112,70 @@ void main() {
 
   group('analyze --suggestions command', () {
     setUp(() {
+      Cache.disableLocking();
       fileSystem = MemoryFileSystem.test();
+      fileSystem
+          .directory('/Users/bkonyi/flutter/widget_preview_analysis_server/bin/cache')
+          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: foo_project
+environment:
+  sdk: ^3.7.0-0
+''');
       terminal = Terminal.test();
       processManager = FakeProcessManager.empty();
       platform = FakePlatform();
     });
 
-    testUsingContext('success, error and warning', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: loggerTest,
-        platform: platform,
-        terminal: terminal,
-        processManager: processManager,
-        allProjectValidators: <ProjectValidator>[
-          ProjectValidatorDummy(),
-          ProjectValidatorSecondDummy(),
-        ],
-        suppressAnalytics: true,
-      );
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['analyze', '--suggestions', './']);
-
-      const String expected =
-          '\n'
-          '┌──────────────────────────────────────────┐\n'
-          '│ First Dummy                              │\n'
-          '│ [✓] pass: value                          │\n'
-          '│ [✗] fail: my error                       │\n'
-          '│ [!] pass two: pass (warning: my warning) │\n'
-          '│ Second Dummy                             │\n'
-          '│ [✓] second: pass                         │\n'
-          '│ [✗] other fail: second fail              │\n'
-          '└──────────────────────────────────────────┘\n';
-
-      expect(loggerTest.statusText, contains(expected));
+    tearDown(() {
+      Cache.enableLocking();
     });
 
+    testUsingContext(
+      'success, error and warning',
+      () async {
+        final loggerTest = BufferLogger.test();
+        final command = AnalyzeCommand(
+          artifacts: Artifacts.test(),
+          fileSystem: fileSystem,
+          logger: loggerTest,
+          platform: platform,
+          terminal: terminal,
+          processManager: processManager,
+          allProjectValidators: <ProjectValidator>[
+            ProjectValidatorDummy(),
+            ProjectValidatorSecondDummy(),
+          ],
+          suppressAnalytics: true,
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
+
+        const expected =
+            '\n'
+            '┌──────────────────────────────────────────┐\n'
+            '│ First Dummy                              │\n'
+            '│ [✓] pass: value                          │\n'
+            '│ [✗] fail: my error                       │\n'
+            '│ [!] pass two: pass (warning: my warning) │\n'
+            '│ Second Dummy                             │\n'
+            '│ [✓] second: pass                         │\n'
+            '│ [✗] other fail: second fail              │\n'
+            '└──────────────────────────────────────────┘\n';
+
+        expect(loggerTest.statusText, contains(expected));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager, fileSystem: fileSystem),
+      },
+    );
+
     testUsingContext('crash', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: loggerTest,
@@ -165,16 +187,16 @@ void main() {
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['analyze', '--suggestions', './']);
+      await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
 
-      const String expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
+      const expected = '[☠] Exception: my exception: #0      ProjectValidatorCrash.start';
 
       expect(loggerTest.statusText, contains(expected));
     });
 
     testUsingContext('--watch and --suggestions not compatible together', () async {
-      final BufferLogger loggerTest = BufferLogger.test();
-      final AnalyzeCommand command = AnalyzeCommand(
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: loggerTest,
@@ -185,7 +207,8 @@ void main() {
         suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      Future<void> result() => runner.run(<String>['analyze', '--suggestions', '--watch']);
+      Future<void> result() =>
+          runner.run(<String>['analyze', '--suggestions', '--watch', '--no-pub']);
 
       expect(result, throwsToolExit(message: 'flag --watch is not compatible with --suggestions'));
     });

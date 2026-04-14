@@ -20,11 +20,11 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(14, null, null);
+Version get xcodeRequiredVersion => Version(15, null, null);
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
-Version get xcodeRecommendedVersion => Version(15, null, null);
+Version get xcodeRecommendedVersion => Version(16, null, null);
 
 /// SDK name passed to `xcrun --sdk`.
 ///
@@ -38,7 +38,9 @@ Version get xcodeRecommendedVersion => Version(15, null, null);
 /// --sdk <sdk name>            find the tool for the given SDK name.
 /// ```
 String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
-  return (environmentType == EnvironmentType.simulator) ? 'iphonesimulator' : 'iphoneos';
+  return (environmentType == EnvironmentType.simulator)
+      ? XcodeSdk.IPhoneSimulator.platformName
+      : XcodeSdk.IPhoneOS.platformName;
 }
 
 /// A utility class for interacting with Xcode command line tools.
@@ -101,8 +103,10 @@ class Xcode {
   String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath =
-            _processUtils.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
+        _xcodeSelectPath = _processUtils
+            .runSync(<String>['/usr/bin/xcode-select', '--print-path'])
+            .stdout
+            .trim();
       } on ProcessException {
         // Ignored, return null below.
       } on ArgumentError {
@@ -137,7 +141,7 @@ class Xcode {
       'flutter_tools',
     );
 
-    final String filePath = '$flutterToolsAbsolutePath/bin/xcode_debug.js';
+    final filePath = '$flutterToolsAbsolutePath/bin/xcode_debug.js';
     if (!_fileSystem.file(filePath).existsSync()) {
       throwToolExit('Unable to find Xcode automation script at $filePath');
     }
@@ -227,6 +231,16 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
+  Future<List<String>> xcodebuildProjectCommand(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageResolution = true,
+  }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
+    projectPath,
+    buildDirectory,
+    skipPackageResolution: skipPackageResolution,
+  );
+
   Future<RunResult> cc(List<String> args) => _run('cc', args);
 
   Future<RunResult> clang(List<String> args) => _run('clang', args);
@@ -279,6 +293,9 @@ class Xcode {
 }
 
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
+
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

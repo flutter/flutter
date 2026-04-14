@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 # TODO(matanlurey): Remove all references are gone and using run_ios_tests.dart.
 # See https://github.com/flutter/flutter/issues/143953 for tracking.
@@ -15,12 +18,12 @@ unset CDPATH
 # The function is enclosed in a subshell to avoid changing the working directory
 # of the caller.
 function follow_links() (
-  cd -P "$(dirname -- "$1")"
+  cd -P -- "$(dirname -- "$1")"
   file="$PWD/$(basename -- "$1")"
   while [[ -L "$file" ]]; do
-    cd -P "$(dirname -- "$file")"
+    cd -P -- "$(dirname -- "$file")"
     file="$(readlink -- "$file")"
-    cd -P "$(dirname -- "$file")"
+    cd -P -- "$(dirname -- "$file")"
     file="$PWD/$(basename -- "$file")"
   done
   echo "$file"

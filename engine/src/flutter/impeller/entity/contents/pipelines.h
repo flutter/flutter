@@ -5,9 +5,12 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_PIPELINES_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_PIPELINES_H_
 
+#include "flutter/fml/build_config.h"
 #include "impeller/entity/advanced_blend.frag.h"
 #include "impeller/entity/advanced_blend.vert.h"
 #include "impeller/entity/border_mask_blur.frag.h"
+#include "impeller/entity/circle.frag.h"
+#include "impeller/entity/circle.vert.h"
 #include "impeller/entity/clip.frag.h"
 #include "impeller/entity/clip.vert.h"
 #include "impeller/entity/color_matrix_color_filter.frag.h"
@@ -43,7 +46,10 @@
 #include "impeller/entity/radial_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/radial_gradient_uniform_fill.frag.h"
 #include "impeller/entity/rrect_blur.frag.h"
-#include "impeller/entity/rrect_blur.vert.h"
+#include "impeller/entity/rrect_like_blur.vert.h"
+#include "impeller/entity/rsuperellipse_blur.frag.h"
+#include "impeller/entity/shadow_vertices.frag.h"
+#include "impeller/entity/shadow_vertices.vert.h"
 #include "impeller/entity/solid_fill.frag.h"
 #include "impeller/entity/solid_fill.vert.h"
 #include "impeller/entity/srgb_to_linear_filter.frag.h"
@@ -51,11 +57,13 @@
 #include "impeller/entity/sweep_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/sweep_gradient_uniform_fill.frag.h"
 #include "impeller/entity/texture_downsample.frag.h"
+#include "impeller/entity/texture_downsample_bounded.frag.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/texture_fill_strict_src.frag.h"
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
+#include "impeller/entity/uber_sdf.frag.h"
 #include "impeller/entity/vertices_uber_1.frag.h"
 #include "impeller/entity/vertices_uber_2.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
@@ -98,6 +106,7 @@ using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
 using BlendScreenPipeline = AdvancedBlendPipelineHandle;
 using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
 using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
+using CirclePipeline = RenderPipelineHandle<CircleVertexShader, CircleFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
 using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, ColorMatrixColorFilterFragmentShader>;
 using ConicalGradientFillConicalPipeline = GradientPipelineHandle<ConicalGradientFillConicalFragmentShader>;
@@ -137,28 +146,37 @@ using PorterDuffBlendPipeline = RenderPipelineHandle<PorterDuffBlendVertexShader
 using RadialGradientFillPipeline = GradientPipelineHandle<RadialGradientFillFragmentShader>;
 using RadialGradientSSBOFillPipeline = GradientPipelineHandle<RadialGradientSsboFillFragmentShader>;
 using RadialGradientUniformFillPipeline = GradientPipelineHandle<RadialGradientUniformFillFragmentShader>;
-using RRectBlurPipeline = RenderPipelineHandle<RrectBlurVertexShader, RrectBlurFragmentShader>;
+using RRectBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader, RrectBlurFragmentShader>;
+using RSuperellipseBlurPipeline = RenderPipelineHandle<RrectLikeBlurVertexShader, RsuperellipseBlurFragmentShader>;
+using ShadowVerticesShader = RenderPipelineHandle<ShadowVerticesVertexShader, ShadowVerticesFragmentShader>;
 using SolidFillPipeline = RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>;
 using SrgbToLinearFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, SrgbToLinearFilterFragmentShader>;
 using SweepGradientFillPipeline = GradientPipelineHandle<SweepGradientFillFragmentShader>;
 using SweepGradientSSBOFillPipeline = GradientPipelineHandle<SweepGradientSsboFillFragmentShader>;
 using SweepGradientUniformFillPipeline = GradientPipelineHandle<SweepGradientUniformFillFragmentShader>;
 using TextureDownsamplePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureDownsampleFragmentShader>;
+using TextureDownsampleBoundedPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureDownsampleBoundedFragmentShader>;
 using TexturePipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillFragmentShader>;
 using TextureStrictSrcPipeline = RenderPipelineHandle<TextureFillVertexShader, TextureFillStrictSrcFragmentShader>;
 using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, TiledTextureFillFragmentShader>;
 using VerticesUber1Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber1FragmentShader>;
 using VerticesUber2Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber2FragmentShader>;
+using UberSDFPipeline = RenderPipelineHandle<CircleVertexShader, UberSdfFragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on
 
 #ifdef IMPELLER_ENABLE_OPENGLES
+
+// Web doesn't support external texture OpenGL extensions
+#if !defined(FML_OS_EMSCRIPTEN)
 using TiledTextureExternalPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
 using TiledTextureUvExternalPipeline =
     RenderPipelineHandle<TextureUvFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
+#endif
+
 using TextureDownsampleGlesPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TextureDownsampleGlesFragmentShader>;

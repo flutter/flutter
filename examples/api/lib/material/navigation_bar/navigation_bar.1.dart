@@ -26,7 +26,7 @@ class NavigationExample extends StatefulWidget {
 
 class _NavigationExampleState extends State<NavigationExample> {
   int currentPageIndex = 0;
-  NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+  NavigationDestinationLabelBehavior labelBehavior = .alwaysShow;
 
   @override
   Widget build(BuildContext context) {
@@ -51,19 +51,20 @@ class _NavigationExampleState extends State<NavigationExample> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Text('Label behavior: ${labelBehavior.name}'),
             const SizedBox(height: 10),
             OverflowBar(
               spacing: 10.0,
-              overflowAlignment: OverflowBarAlignment.center,
+              overflowAlignment: .center,
               overflowSpacing: 10.0,
               children: <Widget>[
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
+                      labelBehavior =
+                          NavigationDestinationLabelBehavior.alwaysShow;
                     });
                   },
                   child: const Text('alwaysShow'),
@@ -71,7 +72,8 @@ class _NavigationExampleState extends State<NavigationExample> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      labelBehavior = NavigationDestinationLabelBehavior.onlyShowSelected;
+                      labelBehavior =
+                          NavigationDestinationLabelBehavior.onlyShowSelected;
                     });
                   },
                   child: const Text('onlyShowSelected'),
@@ -79,7 +81,8 @@ class _NavigationExampleState extends State<NavigationExample> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      labelBehavior = NavigationDestinationLabelBehavior.alwaysHide;
+                      labelBehavior =
+                          NavigationDestinationLabelBehavior.alwaysHide;
                     });
                   },
                   child: const Text('alwaysHide'),

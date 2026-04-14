@@ -10,7 +10,7 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 void main() {
-  const String customLLDBInitFileSchemeSetting =
+  const customLLDBInitFileSchemeSetting =
       r'customLLDBInitFile = "$(SRCROOT)/Flutter/ephemeral/flutter_lldbinit"';
   test(
     'Ensure lldb is added to Xcode project',
@@ -20,7 +20,7 @@ void main() {
       );
       try {
         final String workingDirectoryPath = workingDirectory.path;
-        const String appName = 'lldb_test';
+        const appName = 'lldb_test';
 
         final ProcessResult createResult = await processManager.run(<String>[
           flutterBin,
@@ -28,8 +28,6 @@ void main() {
           'create',
           '--org',
           'io.flutter.devicelab',
-          '-i',
-          'swift',
           appName,
           '--platforms=ios',
         ], workingDirectory: workingDirectory.path);
@@ -85,6 +83,7 @@ void main() {
           ...getLocalEngineArguments(),
           'build',
           'ios',
+          '--debug',
         ], workingDirectory: appDirectoryPath);
         expect(
           buildResult.exitCode,
@@ -113,8 +112,8 @@ void main() {
       );
       try {
         final String workingDirectoryPath = workingDirectory.path;
-        const String appName = 'lldb_test';
-        const String flavor = 'vanilla';
+        const appName = 'lldb_test';
+        const flavor = 'vanilla';
 
         final ProcessResult createResult = await processManager.run(<String>[
           flutterBin,
@@ -122,8 +121,6 @@ void main() {
           'create',
           '--org',
           'io.flutter.devicelab',
-          '-i',
-          'swift',
           appName,
           '--platforms=ios',
         ], workingDirectory: workingDirectory.path);
@@ -165,22 +162,22 @@ void main() {
         flavorSchemeFile.writeAsStringSync(schemeFile.readAsStringSync());
 
         String pbxprojContents = pbxprojFile.readAsStringSync();
-        pbxprojContents = pbxprojContents.replaceAll('97C147071CF9000F007C117D /* Release */,', '''
-97C147071CF9000F007C117D /* Release */,
-78624EC12D71262400FF7985 /* Release-vanilla */,
+        pbxprojContents = pbxprojContents.replaceAll('97C147061CF9000F007C117D /* Debug */,', '''
+97C147061CF9000F007C117D /* Debug */,
+78624EC12D71262400FF7985 /* Debug-vanilla */,
 ''');
-        pbxprojContents = pbxprojContents.replaceAll('97C147041CF9000F007C117D /* Release */,', '''
-97C147041CF9000F007C117D /* Release */,
-78624EC02D71262400FF7985 /* Release-vanilla */,
+        pbxprojContents = pbxprojContents.replaceAll('97C147031CF9000F007C117D /* Debug */,', '''
+97C147031CF9000F007C117D /* Debug */,
+78624EC02D71262400FF7985 /* Debug-vanilla */,
 ''');
 
         pbxprojContents = pbxprojContents.replaceAll(
           '/* Begin XCBuildConfiguration section */',
           r'''
 /* Begin XCBuildConfiguration section */
-78624EC12D71262400FF7985 /* Release-vanilla */ = {
+78624EC12D71262400FF7985 /* Debug-vanilla */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -197,9 +194,9 @@ void main() {
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Release-vanilla";
+			name = "Debug-vanilla";
 		};
-    		78624EC02D71262400FF7985 /* Release-vanilla */ = {
+    		78624EC02D71262400FF7985 /* Debug-vanilla */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -250,7 +247,7 @@ void main() {
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-vanilla";
+			name = "Debug-vanilla";
 		};
 ''',
         );
@@ -269,6 +266,7 @@ void main() {
           'build',
           'ios',
           '--config-only',
+          '--debug',
           '--flavor',
           flavor,
         ], workingDirectory: appDirectoryPath);

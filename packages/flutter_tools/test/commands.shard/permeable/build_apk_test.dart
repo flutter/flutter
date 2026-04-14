@@ -26,6 +26,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' show FakeFlutterVersion;
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -66,6 +67,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -77,9 +79,10 @@ void main() {
             Event.commandUsageValues(
               workflow: 'apk',
               commandHasTerminal: false,
-              buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -91,9 +94,10 @@ void main() {
             Event.commandUsageValues(
               workflow: 'apk',
               commandHasTerminal: false,
-              buildApkTargetPlatform: 'android-arm,android-arm64,android-x86,android-x64',
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -108,6 +112,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -122,6 +127,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -151,6 +157,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -168,6 +175,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'debug',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -185,6 +193,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -202,6 +211,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'profile',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -219,6 +229,7 @@ void main() {
               buildApkTargetPlatform: 'android-arm',
               buildApkBuildMode: 'jit_release',
               buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: false,
             ),
           ),
         );
@@ -411,7 +422,7 @@ void main() {
       );
 
       testUsingContext(
-        'EnableImpeller="false" reports an disabled event',
+        'EnableImpeller="false" reports a disabled event',
         () async {
           final String projectPath = await createProject(
             tempDir,
@@ -510,7 +521,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -550,7 +568,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Psplit-debug-info=${tempDir.path}',
               '-Ptrack-widget-creation=true',
@@ -594,7 +619,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
@@ -638,7 +670,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -684,7 +723,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -702,7 +748,7 @@ void main() {
             containsIgnoringWhitespace("Your app isn't using AndroidX"),
             containsIgnoringWhitespace(
               'To avoid potential build failures, you can quickly migrate your app by '
-              'following the steps on https://goo.gl/CP92wY',
+              'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
             ),
           ),
         );
@@ -744,7 +790,14 @@ void main() {
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
               '-Pbase-application-name=android.app.Application',
-              '-Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              '-Pdart-defines=${encodeDartDefinesMap(<String, String>{
+                'FLUTTER_VERSION': '0.0.0', //
+                'FLUTTER_CHANNEL': 'master',
+                'FLUTTER_GIT_URL': 'https://github.com/flutter/flutter.git',
+                'FLUTTER_FRAMEWORK_REVISION': '11111',
+                'FLUTTER_ENGINE_REVISION': 'abcde',
+                'FLUTTER_DART_VERSION': '12',
+              })}',
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
@@ -794,7 +847,7 @@ void main() {
 }
 
 Future<BuildApkCommand> runBuildApkCommand(String target, {List<String>? arguments}) async {
-  final BuildApkCommand command = BuildApkCommand(logger: BufferLogger.test());
+  final command = BuildApkCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',

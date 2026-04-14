@@ -12,37 +12,37 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/session.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/element/element.dart';
 
 /// Returns all indexed fields in [className].
 ///
 /// Field names are expected to be of the form `kFooBarIndex`; prefixed with a
 /// `k` and terminated in `Index`.
-List<String> getDartClassFields({required String sourcePath, required String className}) {
-  final List<String> includedPaths = <String>[sourcePath];
-  final AnalysisContextCollection collection = AnalysisContextCollection(
-    includedPaths: includedPaths,
-  );
+Future<List<String>> getDartClassFields({
+  required String sourcePath,
+  required String className,
+}) async {
+  final includedPaths = <String>[sourcePath];
+  final collection = AnalysisContextCollection(includedPaths: includedPaths);
   final AnalysisContext context = collection.contextFor(sourcePath);
   final AnalysisSession session = context.currentSession;
 
-  final SomeParsedUnitResult result = session.getParsedUnit(sourcePath);
-  if (result is! ParsedUnitResult) {
+  final SomeUnitElementResult result = await session.getUnitElement(sourcePath);
+  if (result is! UnitElementResult) {
     return <String>[];
   }
 
   // Locate all fields matching the expression in the class.
-  final RegExp fieldExp = RegExp(r'_k(\w*)Index');
-  final List<String> fields = <String>[];
-  for (final CompilationUnitMember unitMember in result.unit.declarations) {
-    if (unitMember is ClassDeclaration && unitMember.name.lexeme == className) {
-      for (final ClassMember classMember in unitMember.members) {
-        if (classMember is FieldDeclaration) {
-          for (final VariableDeclaration field in classMember.fields.variables) {
-            final String fieldName = field.name.lexeme;
-            final RegExpMatch? match = fieldExp.firstMatch(fieldName);
-            if (match != null) {
-              fields.add(match.group(1)!);
-            }
+  final fieldExp = RegExp(r'_k(\w*)Index');
+  final fields = <String>[];
+  for (final ClassFragment cls in result.fragment.classes) {
+    if (cls.name == className) {
+      for (final FieldFragment field in cls.fields) {
+        final String? fieldName = field.name;
+        if (fieldName != null) {
+          final RegExpMatch? match = fieldExp.firstMatch(fieldName);
+          if (match != null) {
+            fields.add(match.group(1)!);
           }
         }
       }
@@ -65,7 +65,7 @@ List<String> getCppEnumValues({required String sourcePath, required String enumN
   if (enumStart < 0 || enumStart >= enumEnd) {
     return <String>[];
   }
-  final RegExp valueExp = RegExp('^\\s*k$enumName(\\w*)');
+  final valueExp = RegExp('^\\s*k$enumName(\\w*)');
   return _extractMatchingExpression(lines: lines.sublist(enumStart + 1, enumEnd), regexp: valueExp);
 }
 
@@ -77,7 +77,7 @@ List<String> getCppEnumClassValues({required String sourcePath, required String 
     source: File(sourcePath).readAsStringSync(),
     startExp: RegExp('enum class $enumName .* {'),
   );
-  final RegExp valueExp = RegExp(r'^\s*k(\w*)');
+  final valueExp = RegExp(r'^\s*k(\w*)');
   return _extractMatchingExpression(lines: lines, regexp: valueExp);
 }
 
@@ -90,7 +90,23 @@ List<String> getJavaEnumValues({required String sourcePath, required String enum
     source: File(sourcePath).readAsStringSync(),
     startExp: RegExp('enum $enumName {'),
   );
-  final RegExp valueExp = RegExp(r'^\s*([A-Z_]*)\(');
+  final valueExp = RegExp(r'^\s*([A-Z_]*)\(');
+  return _extractMatchingExpression(lines: lines, regexp: valueExp);
+}
+
+/// Returns all properties in [optionSetName].
+///
+/// Properties are expected to be of the form
+/// `static let fooBar = optionSetName(rawValue: 1 << N)`.
+List<String> getSwiftOptionSetProperties({
+  required String sourcePath,
+  required String optionSetName,
+}) {
+  final List<String> lines = _getBlockStartingWith(
+    source: File(sourcePath).readAsStringSync(),
+    startExp: RegExp('struct $optionSetName: OptionSet {'),
+  );
+  final valueExp = RegExp('^\\s*static let (\\w*) = $optionSetName\\(');
   return _extractMatchingExpression(lines: lines, regexp: valueExp);
 }
 
@@ -99,8 +115,8 @@ List<String> getJavaEnumValues({required String sourcePath, required String enum
 /// The contents of the first match group in [regexp] is returned; therefore
 /// it must contain a match group.
 List<String> _extractMatchingExpression({required Iterable<String> lines, required RegExp regexp}) {
-  final List<String> values = <String>[];
-  for (final String line in lines) {
+  final values = <String>[];
+  for (final line in lines) {
     final RegExpMatch? match = regexp.firstMatch(line);
     if (match != null) {
       values.add(match.group(1)!);
@@ -120,11 +136,11 @@ List<String> _getBlockStartingWith({required String source, required RegExp star
     return <String>[];
   }
   // Find start of block.
-  int pos = blockStart;
+  var pos = blockStart;
   while (pos < source.length && source[pos] != '{') {
     pos++;
   }
-  int braceCount = 1;
+  var braceCount = 1;
 
   // Count braces until end of block.
   pos++;
@@ -136,14 +152,14 @@ List<String> _getBlockStartingWith({required String source, required RegExp star
     }
     pos++;
   }
-  final int blockEnd = pos;
+  final blockEnd = pos;
   return LineSplitter.split(source, blockStart, blockEnd).toList();
 }
 
 /// Apply a visitor to all compilation units in the dart:ui library.
 void visitUIUnits(String flutterRoot, AstVisitor<void> visitor) {
-  final String uiRoot = '$flutterRoot/lib/ui';
-  final FeatureSet analyzerFeatures = FeatureSet.latestLanguageVersion();
+  final uiRoot = '$flutterRoot/lib/ui';
+  final analyzerFeatures = FeatureSet.latestLanguageVersion();
   final ParseStringResult uiResult = parseFile(
     path: '$uiRoot/ui.dart',
     featureSet: analyzerFeatures,

@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/bottom_app_bar/bottom_app_bar.2.dart' as example;
+import 'package:flutter_api_samples/material/bottom_app_bar/bottom_app_bar.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Floating Action Button visibility can be toggled', (WidgetTester tester) async {
+  testWidgets('Floating Action Button visibility can be toggled', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -19,7 +22,9 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('BottomAppBar elevation can be toggled', (WidgetTester tester) async {
+  testWidgets('BottomAppBar elevation can be toggled', (
+    WidgetTester tester,
+  ) async {
     // Build the app.
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
@@ -59,7 +64,9 @@ void main() {
     expect(visibleSize.height, equals(80.0));
   });
 
-  testWidgets('SnackBar is shown when Open popup menu is pressed', (WidgetTester tester) async {
+  testWidgets('SnackBar is shown when Open popup menu is pressed', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.BottomAppBarDemo());
 
     // Trigger the SnackBar.

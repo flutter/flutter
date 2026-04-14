@@ -14,7 +14,7 @@ class CupertinoIndicatorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoIndicatorExample(),
     );
   }
@@ -26,13 +26,15 @@ class CupertinoIndicatorExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: Text('CupertinoActivityIndicator Sample')),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('CupertinoActivityIndicator Sample'),
+      ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 // Cupertino activity indicator with default properties.
                 CupertinoActivityIndicator(),
@@ -41,25 +43,28 @@ class CupertinoIndicatorExample extends StatelessWidget {
               ],
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 // Cupertino activity indicator with custom radius and color.
-                CupertinoActivityIndicator(radius: 20.0, color: CupertinoColors.activeBlue),
+                CupertinoActivityIndicator(
+                  radius: 20.0,
+                  color: CupertinoColors.activeBlue,
+                ),
                 SizedBox(height: 10),
                 Text(
                   'radius: 20.0\ncolor: CupertinoColors.activeBlue',
-                  textAlign: TextAlign.center,
+                  textAlign: .center,
                 ),
               ],
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 // Cupertino activity indicator with custom radius and disabled
                 // animation.
                 CupertinoActivityIndicator(radius: 20.0, animating: false),
                 SizedBox(height: 10),
-                Text('radius: 20.0\nanimating: false', textAlign: TextAlign.center),
+                Text('radius: 20.0\nanimating: false', textAlign: .center),
               ],
             ),
           ],

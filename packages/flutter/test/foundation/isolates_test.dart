@@ -88,7 +88,7 @@ Future<void> expectFileSuccessfullyCompletes(String filename) async {
   const FileSystem fs = LocalFileSystem();
   const Platform platform = LocalPlatform();
   final String flutterRoot = platform.environment['FLUTTER_ROOT']!;
-  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+  final String dartPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartvm');
   final String scriptPath = fs.path.join(
     flutterRoot,
     'packages',
@@ -100,7 +100,6 @@ Future<void> expectFileSuccessfullyCompletes(String filename) async {
 
   // Enable asserts to also catch potentially invalid assertions.
   final ProcessResult result = await Process.run(dartPath, <String>[
-    'run',
     '--enable-asserts',
     scriptPath,
   ]);
@@ -131,7 +130,7 @@ Future<int> computeClosure(int square) {
 }
 
 Future<int> computeInvalidClosure(int square) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
 
   return compute((_) {
     r.sendPort.send('Computing!');
@@ -141,18 +140,18 @@ Future<int> computeInvalidClosure(int square) {
 }
 
 Future<int> computeInstanceMethod(int square) {
-  final ComputeTestSubject subject = ComputeTestSubject(square);
+  final subject = ComputeTestSubject(square);
   return compute(subject.method, square);
 }
 
 Future<int> computeInvalidInstanceMethod(int square) {
-  final ComputeTestSubject subject = ComputeTestSubject(square, ReceivePort());
+  final subject = ComputeTestSubject(square, ReceivePort());
   expect(subject.additional, isA<ReceivePort>());
   return compute(subject.method, square);
 }
 
 dynamic testInvalidResponse(int square) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
   try {
     return r;
   } finally {
@@ -161,7 +160,7 @@ dynamic testInvalidResponse(int square) {
 }
 
 dynamic testInvalidError(int square) {
-  final ReceivePort r = ReceivePort();
+  final r = ReceivePort();
   try {
     throw r;
   } finally {

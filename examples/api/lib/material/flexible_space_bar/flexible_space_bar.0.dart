@@ -20,7 +20,9 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: CustomScrollView(
-          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           slivers: <Widget>[
             SliverAppBar(
               stretch: true,
@@ -31,24 +33,24 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
               expandedHeight: 300.0,
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const <StretchMode>[
-                  StretchMode.zoomBackground,
-                  StretchMode.blurBackground,
-                  StretchMode.fadeTitle,
+                  .zoomBackground,
+                  .blurBackground,
+                  .fadeTitle,
                 ],
                 centerTitle: true,
                 title: const Text('Flight Report'),
                 background: Stack(
-                  fit: StackFit.expand,
+                  fit: .expand,
                   children: <Widget>[
                     Image.network(
                       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-                      fit: BoxFit.cover,
+                      fit: .cover,
                     ),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment(0.0, 0.5),
-                          end: Alignment.center,
+                          end: .center,
                           colors: <Color>[Color(0x60000000), Color(0x00000000)],
                         ),
                       ),
@@ -57,8 +59,8 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildListDelegate(const <Widget>[
+            SliverList.list(
+              children: const <Widget>[
                 ListTile(
                   leading: Icon(Icons.wb_sunny),
                   title: Text('Sunday'),
@@ -70,7 +72,7 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
                   subtitle: Text('sunny, h: 80, l: 65'),
                 ),
                 // ListTiles++
-              ]),
+              ],
             ),
           ],
         ),

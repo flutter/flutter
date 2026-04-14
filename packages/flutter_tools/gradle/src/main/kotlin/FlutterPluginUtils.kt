@@ -4,13 +4,17 @@
 
 package com.flutter.gradle
 
-import com.android.build.gradle.AbstractAppExtension
+import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import groovy.lang.Closure
-import groovy.util.Node
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -24,10 +28,6 @@ import java.util.Properties
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
-    private const val MANIFEST_NAME_KEY = "android:name"
-    private const val MANIFEST_VALUE_KEY = "android:value"
-    private const val MANIFEST_VALUE_TRUE = "true"
-
     // Gradle properties. These must correspond to the values used in
     // flutter/packages/flutter_tools/lib/src/android/gradle.dart, and therefore it is not
     // recommended to use these const values in tests.
@@ -35,11 +35,91 @@ object FlutterPluginUtils {
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
-    internal const val PROP_IS_FAST_START = "fast-start"
     internal const val PROP_TARGET = "target"
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
+    internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_PREPROVISIONED_NDK_VERSION = "flutter-preprovisioned-ndk-version"
+    internal const val TASK_PRINT_NDK_VERSION = "printNdkVersion"
+    internal const val NDK_VERSION_OUTPUT_PREFIX = "NdkVersion: "
 
+    /**
+     * The URL for documentation for general information on migration to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin"
+
+    /**
+     * The URL for documentation instructing app developers how to migrate their app to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_APPS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers"
+
+    /**
+     * The URL for documentation instructing plugin authors how to migrate to their plugin to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors"
+
+    /**
+     * The URL for documentation instructing app developers on how to report incompatible KGP usage to plugin authors.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers/report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
+
+    /**
+     * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `id("com.android.application")` or `alias(libs.plugins.android.application)`
+     * within a `plugins { ... }` block.
+     */
+    internal val appPluginRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.application['"]|libs\.plugins\.android\.application)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the AGP library plugin declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `id("com.android.library")` or `alias(libs.plugins.android.library)`
+     * within a `plugins { ... }` block.
+     */
+    internal val libPluginRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"]com\.android\.library['"]|libs\.plugins\.android\.library)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the KGP declaration in Kotlin DSL (`build.gradle.kts`).
+     * Targets `kotlin-android`, `org.jetbrains.kotlin.android`, or version catalog aliases
+     * for Kotlin Android within a `plugins { ... }` block.
+     */
+    internal val kgpRegexKotlin =
+        """(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)[ \t]*\(\s*(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)\s*\)(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the AGP application plugin in Groovy DSL (`build.gradle`).
+     * Supports both the legacy `apply plugin: 'com.android.application'` syntax and
+     * the modern `plugins { id 'com.android.application' }` syntax (with or without parentheses).
+     */
+    internal val appPluginRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.application\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.application['"]|libs\.plugins\.android\.application)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the AGO library plugin in Groovy DSL (`build.gradle`).
+     * Supports both the legacy `apply plugin: 'com.android.library'` syntax and
+     * the modern `plugins { id 'com.android.library' }` syntax (with or without parentheses).
+     */
+    internal val libPluginRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])com\.android\.library\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"]com\.android\.library['"]|libs\.plugins\.android\.library)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
+
+    /**
+     * Matches the KGP in Groovy DSL (`build.gradle`).
+     * Supports both legacy `apply plugin` and modern `plugins {}` blocks for
+     * `kotlin-android` or `org.jetbrains.kotlin.android`.
+     */
+    internal val kgpRegexGroovy =
+        """(?m)^[ \t]*apply[ \t]+plugin[ \t]*:[ \t]*(['"])(?:kotlin-android|org\.jetbrains\.kotlin\.android)\1|(?m)^[ \t]*plugins[ \t]*\{[^{}]*?(?<=[\n{])[ \t]*(?:id|alias)(?:[ \t]*\(\s*|[ \t]+)(['"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['"]|libs\.plugins\.(?:android|kotlin)\.android)(?:\s*\))?(?=[ \t]*(\n|${'$'}|\}))"""
+            .toRegex()
     // ----------------- Methods for string manipulation and comparison. -----------------
 
     @JvmStatic
@@ -58,12 +138,8 @@ object FlutterPluginUtils {
     @Suppress("DEPRECATION")
     internal fun capitalize(string: String): String = string.capitalize()
 
-    // Kotlin's toLowerCase function is deprecated, but the suggested replacement is not supported
-    // by the minimum version of Kotlin that we support. Centralize the use to one place, so that
-    // when our minimum version does support the replacement we can replace by changing a single
-    // line.
-    @Suppress("DEPRECATION")
-    internal fun lowercase(string: String): String = string.toLowerCase()
+    @OptIn(ExperimentalStdlibApi::class)
+    internal fun lowercase(string: String): String = string.lowercase()
 
     // compareTo implementation of version strings in the format of ints and periods
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
@@ -210,15 +286,15 @@ object FlutterPluginUtils {
     @JvmName("isProjectVerbose")
     internal fun isProjectVerbose(project: Project): Boolean = project.findProperty(PROP_IS_VERBOSE)?.toString()?.toBoolean() ?: false
 
-    /** Whether to build the debug app in "fast-start" mode. */
+    /**
+     *  Developers can set this value by passing `-P disable-abi-filtering=true`
+     *  to flutter build. Where "disable-abi-filtering" comes from
+     *  PROP_DISABLE_ABI_FILTERING.
+     */
     @JvmStatic
-    @JvmName("isProjectFastStart")
-    internal fun isProjectFastStart(project: Project): Boolean =
-        project
-            .findProperty(
-                PROP_IS_FAST_START
-            )?.toString()
-            ?.toBoolean() ?: false
+    @JvmName("shouldProjectDisableAbiFiltering")
+    internal fun shouldProjectDisableAbiFiltering(project: Project): Boolean =
+        project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
 
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
@@ -397,14 +473,35 @@ object FlutterPluginUtils {
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
     }
 
-    internal fun getAndroidExtension(project: Project): BaseExtension {
+    /**
+     * Returns BaseExtension for the project. Used for compatibility.
+     *
+     * From BaseExtension docs:
+     * "Don't use this extension directly Instead, use one of the following:
+     *  ApplicationExtension, LibraryExtension, TestExtension, DynamicFeatureExtension"
+     *
+     *  For ApplicationExtension use `getAndroidApplicationExtension`.
+     *  For LibraryExtension use `getAndroidLibraryExtension`.
+     */
+    internal fun getLegacyAndroidExtension(project: Project): BaseExtension {
         // Common supertype of the android extension types.
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
-    private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
-        project.extensions.findByType(AbstractAppExtension::class.java)
+    internal fun getAndroidExtension(project: Project): AgpCommonExtensionWrapper {
+        // Look up by name to completely avoid importing or resolving CommonExtension
+        val androidExtension =
+            project.extensions.findByName("android")
+                ?: throw IllegalStateException("The Android plugin must be applied before accessing the Android extension.")
+
+        return AgpCommonExtensionWrapper(androidExtension)
+    }
+
+    internal fun getAndroidLibraryExtension(project: Project): LibraryExtension = project.extensions.getByType(LibraryExtension::class.java)
+
+    internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
+        project.extensions.getByType(ApplicationExtension::class.java)
 
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
@@ -413,7 +510,7 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
 
     /**
      * Returns:
@@ -500,6 +597,94 @@ object FlutterPluginUtils {
         )
     }
 
+    /** Prints error message for usage of KGP. */
+    @JvmStatic
+    @JvmName("detectApplyingKotlinGradlePlugin")
+    internal fun detectApplyingKotlinGradlePlugin(project: Project) {
+        val pluginsWithKGPAppliedList = mutableListOf<String>()
+
+        var shouldLogForApp = false
+        project.rootProject.subprojects {
+            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
+            if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
+
+            val scriptText: String =
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(this.projectDir, this.logger).readText()
+                } else {
+                    buildFile.readText()
+                }
+
+            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+                if (buildFile.extension == "kts") {
+                    Triple(
+                        kgpRegexKotlin.containsMatchIn(scriptText),
+                        appPluginRegexKotlin.containsMatchIn(scriptText),
+                        libPluginRegexKotlin.containsMatchIn(scriptText)
+                    )
+                } else {
+                    Triple(
+                        kgpRegexGroovy.containsMatchIn(scriptText),
+                        appPluginRegexGroovy.containsMatchIn(scriptText),
+                        libPluginRegexGroovy.containsMatchIn(scriptText)
+                    )
+                }
+
+            // Ensures applying AGP exists in the build file configuration.
+            if (!hasAppPlugin && !hasLibPlugin) return@subprojects
+
+            if (!hasKgpPlugin) {
+                try {
+                    pluginManager.apply("kotlin-android")
+                } catch (_: Exception) {
+                    logger.quiet(
+                        """
+                        Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
+                        If your project uses Kotlin, ensure KGP is declared in the root plugins block.
+                        For more details check: $BUILT_IN_KOTLIN_DOCS
+                        """.trimIndent()
+                    )
+                }
+                return@subprojects
+            }
+
+            // Apply AGP exists and Apply KGP also exists in build.gradle
+            if (hasAppPlugin) {
+                shouldLogForApp = true
+            }
+
+            if (hasLibPlugin) {
+                pluginsWithKGPAppliedList.add(name)
+            }
+        }
+
+        project.gradle.projectsEvaluated {
+            if (shouldLogForApp) {
+                project.logger.error(
+                    """
+                    WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
+                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
+                    Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
+                    
+                    """.trimIndent()
+                )
+            }
+            if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
+            project.logger.error(
+                """
+                WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
+                Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+                
+                Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+                an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                
+                If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
+                """.trimIndent()
+            )
+        }
+    }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
@@ -523,7 +708,7 @@ object FlutterPluginUtils {
             //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
             @Suppress("USELESS_ELVIS")
             val projectNdkVersion: String =
-                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
+                getLegacyAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -554,7 +739,7 @@ object FlutterPluginUtils {
                     //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
                     @Suppress("USELESS_ELVIS")
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
+                        getLegacyAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
@@ -605,8 +790,16 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
+        if (isFlutterAppProject(gradleProject) && isInvokingMetadataNdkVersionTask(gradleProject)) {
+            return
+        }
+
+        if (isFlutterAppProject(gradleProject) && hasPreprovisionedNdkVersion(gradleProject)) {
+            return
+        }
+
         // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
+        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
             gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
         if (forcingNotRequired) {
@@ -648,8 +841,23 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
+    @JvmName("hasPreprovisionedNdkVersion")
+    internal fun hasPreprovisionedNdkVersion(project: Project): Boolean =
+        project.findProperty(PROP_PREPROVISIONED_NDK_VERSION)?.toString() != null
+
+    @JvmStatic
+    @JvmName("isInvokingMetadataNdkVersionTask")
+    internal fun isInvokingMetadataNdkVersionTask(project: Project): Boolean =
+        project.gradle.startParameter.taskNames.any { taskName ->
+            taskName == TASK_PRINT_NDK_VERSION || taskName.endsWith(":$TASK_PRINT_NDK_VERSION")
+        }
+
+    @JvmStatic
     @JvmName("isFlutterAppProject")
-    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
+    internal fun isFlutterAppProject(project: Project): Boolean =
+        project.extensions.findByType(
+            ApplicationExtension::class.java
+        ) != null
 
     /**
      * Ensures that the dependencies required by the Flutter project are available.
@@ -759,16 +967,40 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintBuildVariants")
     internal fun addTaskForPrintBuildVariants(project: Project) {
-        // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
-        // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
-        //                 the groovy `flutter.android` lines.
-        val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        val variantNames = project.objects.listProperty(String::class.java)
+
+        androidComponents.onVariants { variant ->
+            variantNames.add(variant.name)
+        }
+
         project.tasks.register("printBuildVariants") {
             description = "Prints out all build variants for this Android project"
             doLast {
-                androidExtension.applicationVariants.forEach { variant ->
-                    println("BuildVariant: ${variant.name}")
+                variantNames.get().forEach { name ->
+                    println("BuildVariant: $name")
                 }
+            }
+        }
+    }
+
+    // Add a task that can be called on Flutter projects that prints the effective ndkVersion
+    // configured for the Android app.
+    //
+    // This task prints the version in this format:
+    //
+    // NdkVersion: 28.2.13676358
+    //
+    // Format of the output of this task is used by Flutter tool Android NDK preflight.
+    @JvmStatic
+    @JvmName("addTaskForPrintNdkVersion")
+    internal fun addTaskForPrintNdkVersion(project: Project) {
+        val androidExtension = getAndroidApplicationExtension(project)
+        project.tasks.register(TASK_PRINT_NDK_VERSION) {
+            description = "Prints out the configured ndkVersion for this Android project"
+            doLast {
+                val configuredNdkVersion = androidExtension.ndkVersion ?: FlutterExtension().ndkVersion
+                println("$NDK_VERSION_OUTPUT_PREFIX$configuredNdkVersion")
             }
         }
     }
@@ -776,7 +1008,7 @@ object FlutterPluginUtils {
     // TODO(gmackall): Migrate to AGPs variant api.
     //    https://github.com/flutter/flutter/issues/166550
     @Suppress("DEPRECATION")
-    private fun findProcessResources(baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput): ProcessAndroidResources =
+    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
         baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
 
     /**
@@ -787,16 +1019,11 @@ object FlutterPluginUtils {
      * Add a task that can be called on Flutter projects that outputs app link related project
      * settings into a json file.
      * See https://developer.android.com/training/app-links/ for more information about app link.
-     * The json will be saved in path stored in outputPath parameter.
+     * The json will be saved in path stored in "outputPath" parameter or in the projects build
+     * directory with the file deeplink.json if not specified.
      *
-     * An example json:
-     *  {
-     *      applicationId: "com.example.app",
-     *          deeplinks: [
-     *              {"scheme":"http", "host":"example.com", "path":".*"},
-     *              {"scheme":"https","host":"example.com","path":".*"}
-     *          ]
-     *  }
+     * See DeepLinkJsonFromManifestTask for the structure of the json.
+     *
      * The output file is parsed and used by devtool.
      */
     @JvmStatic
@@ -804,182 +1031,31 @@ object FlutterPluginUtils {
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
         // Integration test for AppLinkSettings task defined in
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
-        val android = getAndroidAppExtensionOrNull(project)
-        if (android == null) {
-            project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension.")
-            return
-        }
-        android.applicationVariants.configureEach {
-            val variant = this
-            project.tasks.register("output${capitalize(variant.name)}AppLinkSettings") {
-                val task: Task = this
-                task.description =
-                    "stores app links settings for the given build variant of this Android project into a json file."
-                variant.outputs.configureEach {
-                    // TODO(gmackall): Migrate to AGPs variant api.
-                    //    https://github.com/flutter/flutter/issues/166550
-                    @Suppress("DEPRECATION")
-                    val baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput = this
-                    // Deeplinks are defined in AndroidManifest.xml and is only available after
-                    // processResourcesProvider.
-                    dependsOn(findProcessResources(baseVariantOutput))
-                }
-                doLast {
-                    // We are configuring the same object before a doLast and in a doLast.
-                    // without a clear reason why. That is not good.
-                    variant.outputs.configureEach {
-                        val appLinkSettings = createAppLinkSettings(variant, this)
-                        File(project.property("outputPath").toString()).writeText(
-                            appLinkSettings.toJson().toString()
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants { variant ->
+            val manifestUpdater =
+                project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
+                    namespace.set(variant.namespace)
+                    // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
+                    // instead of relying on passing in a path.
+                    if (project.hasProperty("outputPath")) {
+                        deepLinkJson.set(
+                            File(project.property("outputPath").toString())
                         )
+                    } else {
+                        deepLinkJson.set(project.layout.buildDirectory.file("deeplink.json"))
                     }
                 }
-            }
+            // This task does not modify the manifest despite using an api
+            // designed for modification. The task is responsible for an exact copy of the input
+            // manifest being used for the output manifest.
+            variant.artifacts
+                .use(manifestUpdater)
+                .wiredWithFiles(
+                    DeepLinkJsonFromManifestTask::manifestFile,
+                    DeepLinkJsonFromManifestTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
         }
-    }
-
-    /**
-     * Extracts app deeplink information from the Android manifest file of a variant then returns
-     * an AppLinkSettings object.
-     *
-     * @param BaseVariantOutput The output of a specific build variant (e.g., debug, release).
-     * @param variant The application variant being processed.
-     */
-    @Suppress("KDocUnresolvedReference")
-    private fun createAppLinkSettings(
-        // TODO(gmackall): Migrate to AGPs variant api.
-        //    https://github.com/flutter/flutter/issues/166550
-        @Suppress("DEPRECATION") variant: com.android.build.gradle.api.ApplicationVariant,
-        @Suppress("DEPRECATION") baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput
-    ): AppLinkSettings {
-        val appLinkSettings = AppLinkSettings(variant.applicationId)
-
-        // XmlParser is not namespace aware because it makes querying nodes cumbersome.
-        // TODO(gmackall): Migrate to AGPs variant api.
-        //    https://github.com/flutter/flutter/issues/166550
-        @Suppress("DEPRECATION")
-        val manifest: Node =
-            groovy.xml
-                .XmlParser(false, false)
-                .parse(findProcessResources(baseVariantOutput).manifestFile)
-        val applicationNode: Node? =
-            manifest.children().find { node ->
-                node is Node && node.name() == "application"
-            } as Node?
-        if (applicationNode == null) {
-            return appLinkSettings
-        }
-        val activities: List<Node> =
-            applicationNode.children().filterIsInstance<Node>().filter { item ->
-                item.name() == "activity"
-            }
-
-        activities.forEach { activity ->
-            val metaDataItems: List<Node> =
-                activity.children().filterIsInstance<Node>().filter { metaItem ->
-                    metaItem.name() == "meta-data"
-                }
-            metaDataItems.forEach { metaDataItem ->
-                val nameAttribute: Boolean =
-                    metaDataItem.attribute(MANIFEST_NAME_KEY) == "flutter_deeplinking_enabled"
-                val valueAttribute: Boolean =
-                    metaDataItem.attribute(MANIFEST_VALUE_KEY) == MANIFEST_VALUE_TRUE
-                if (nameAttribute && valueAttribute) {
-                    appLinkSettings.deeplinkingFlagEnabled = true
-                }
-            }
-            val intentFilterItems: List<Node> =
-                activity.children().filterIsInstance<Node>().filter { filterItem ->
-                    filterItem.name() == "intent-filter"
-                }
-            intentFilterItems.forEach { appLinkIntent ->
-                // Print out the host attributes in data tags.
-                val schemes: MutableSet<String?> = mutableSetOf()
-                val hosts: MutableSet<String?> = mutableSetOf()
-                val paths: MutableSet<String?> = mutableSetOf()
-                val intentFilterCheck = IntentFilterCheck()
-                if (appLinkIntent.attribute("android:autoVerify") == MANIFEST_VALUE_TRUE) {
-                    intentFilterCheck.hasAutoVerify = true
-                }
-
-                val actionItems: List<Node> =
-                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
-                        item.name() == "action"
-                    }
-                // Any action item causes intentFilterCheck to always be true
-                // and we keep looping instead of exiting out early.
-                // TODO: Exit out early per intent filter action view.
-                actionItems.forEach { action ->
-                    if (action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
-                        intentFilterCheck.hasActionView = true
-                    }
-                }
-                val categoryItems: List<Node> =
-                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
-                        item.name() == "category"
-                    }
-                categoryItems.forEach { category ->
-                    // TODO: Exit out early per intent filter default category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
-                        intentFilterCheck.hasDefaultCategory = true
-                    }
-                    // TODO: Exit out early per intent filter browsable category.
-                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
-                        intentFilterCheck.hasBrowsableCategory =
-                            true
-                    }
-                }
-                val dataItems: List<Node> =
-                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
-                        item.name() == "data"
-                    }
-                dataItems.forEach { data ->
-                    data.attributes().forEach { entry ->
-                        when (entry.key) {
-                            "android:scheme" -> schemes.add(entry.value.toString())
-                            "android:host" -> hosts.add(entry.value.toString())
-                            // All path patterns add to paths.
-                            "android:pathAdvancedPattern" ->
-                                paths.add(
-                                    entry.value.toString()
-                                )
-
-                            "android:pathPattern" -> paths.add(entry.value.toString())
-                            "android:path" -> paths.add(entry.value.toString())
-                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
-                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
-                        }
-                    }
-                }
-                if (hosts.isNotEmpty() || paths.isNotEmpty()) {
-                    if (schemes.isEmpty()) {
-                        schemes.add(null)
-                    }
-                    if (hosts.isEmpty()) {
-                        hosts.add(null)
-                    }
-                    if (paths.isEmpty()) {
-                        paths.add(".*")
-                    }
-                    // Sets are not ordered this could produce a bug.
-                    schemes.forEach { scheme ->
-                        hosts.forEach { host ->
-                            paths.forEach { path ->
-                                appLinkSettings.deeplinks.add(
-                                    Deeplink(
-                                        scheme,
-                                        host,
-                                        path,
-                                        intentFilterCheck
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return appLinkSettings
     }
 }
 

@@ -38,10 +38,13 @@ class NestedScrollViewExample extends StatelessWidget {
           ];
         },
         body: ListView.builder(
-          padding: const EdgeInsets.all(8),
+          padding: const .all(8),
           itemCount: 30,
           itemBuilder: (BuildContext context, int index) {
-            return SizedBox(height: 50, child: Center(child: Text('Item $index')));
+            return SizedBox(
+              height: 50,
+              child: Center(child: Text('Item $index')),
+            );
           },
         ),
       ),

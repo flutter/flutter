@@ -12,13 +12,16 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
+#include "impeller/geometry/arc.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/trig.h"
 
 namespace impeller {
 
 /// The size of the point arena buffer stored on the tessellator.
+[[maybe_unused]]
 static constexpr size_t kPointArenaSize = 4096u;
 
 //------------------------------------------------------------------------------
@@ -51,6 +54,8 @@ class Tessellator {
     std::vector<Trig>::iterator inline begin() const { return trigs_.begin(); }
     std::vector<Trig>::iterator inline end() const { return trigs_.end(); }
     const inline Trig& operator[](size_t index) const { return trigs_[index]; }
+
+    size_t inline GetSteps() const { return trigs_.size() - 1u; }
 
    private:
     friend class Tessellator;
@@ -181,7 +186,60 @@ class Tessellator {
                               Data&& data);
   };
 
-  Tessellator();
+  /// @brief  The |VertexGenerator| implementation common to all shapes
+  ///         that are based on a polygonal representation of an ellipse.
+  class ArcVertexGenerator : public virtual VertexGenerator {
+   public:
+    /// |VertexGenerator|
+    PrimitiveType GetTriangleType() const override;
+
+    /// |VertexGenerator|
+    size_t GetVertexCount() const override;
+
+    /// |VertexGenerator|
+    void GenerateVertices(const TessellatedVertexProc& proc) const override;
+
+    static ArcVertexGenerator MakeFilled(const Arc::Iteration& iteration,
+                                         Trigs&& trigs,
+                                         const Rect& oval_bounds,
+                                         bool use_center,
+                                         bool supports_triangle_fans);
+
+    static ArcVertexGenerator MakeStroked(
+        const Arc::Iteration& iteration,
+        Trigs&& trigs,
+        const Rect& oval_bounds,
+        Scalar half_width,
+        Cap cap,
+        std::unique_ptr<Trigs> round_cap_trigs);
+
+   private:
+    friend class Tessellator;
+
+    const Arc::Iteration iteration_;
+    const Trigs trigs_;
+    const Rect oval_bounds_;
+
+    // Used only in filled arcs.
+    const bool use_center_;
+    const bool supports_triangle_fans_;
+
+    // Used only in stroked arcs. half_width_ is set to -1.0f for filled arcs.
+    const Scalar half_width_;
+    const Cap cap_;
+    const std::unique_ptr<Trigs> round_cap_trigs_;
+
+    ArcVertexGenerator(const Arc::Iteration& iteration,
+                       Trigs&& trigs,
+                       const Rect& oval_bounds,
+                       bool use_center,
+                       bool supports_triangle_fans,
+                       Scalar half_width,
+                       Cap cap,
+                       std::unique_ptr<Trigs> round_cap_trigs);
+  };
+
+  explicit Tessellator(bool supports_32bit_primitive_indices = true);
 
   virtual ~Tessellator();
 
@@ -198,7 +256,8 @@ class Tessellator {
   ///
   /// @return A vertex buffer containing all data from the provided curve.
   VertexBuffer TessellateConvex(const PathSource& path,
-                                HostBuffer& host_buffer,
+                                HostBuffer& data_host_buffer,
+                                HostBuffer& indexes_host_buffer,
                                 Scalar tolerance,
                                 bool supports_primitive_restart = false,
                                 bool supports_triangle_fan = false);
@@ -251,6 +310,42 @@ class Tessellator {
                                           Scalar half_width);
 
   /// @brief   Create a |VertexGenerator| that can produce vertices for
+  ///          a stroked arc inscribed within the given oval_bounds with
+  ///          the given stroke half_width with enough polygon sub-divisions
+  ///          to provide reasonable fidelity when viewed under the given
+  ///          view transform. The outer edge of the stroked arc is
+  ///          generated at (radius + half_width) and the inner edge is
+  ///          generated at (radius - half_width).
+  ///
+  ///          Note that the view transform is only used to choose the
+  ///          number of sample points to use per quarter circle and the
+  ///          returned points are not transformed by it, instead they are
+  ///          relative to the coordinate space of the oval bounds.
+  ArcVertexGenerator FilledArc(const Matrix& view_transform,
+                               const Arc& arc,
+                               bool supports_triangle_fans);
+
+  /// @brief   Create a |VertexGenerator| that can produce vertices for
+  ///          a stroked arc inscribed within the given oval_bounds with
+  ///          the given stroke half_width with enough polygon sub-divisions
+  ///          to provide reasonable fidelity when viewed under the given
+  ///          view transform. The outer edge of the stroked arc is
+  ///          generated at (radius + half_width) and the inner edge is
+  ///          generated at (radius - half_width).
+  ///
+  ///          Note that the arc may not include the center and its bounds
+  ///          must be a perfect circle (width == height)
+  ///
+  ///          Note that the view transform is only used to choose the
+  ///          number of sample points to use per quarter circle and the
+  ///          returned points are not transformed by it, instead they are
+  ///          relative to the coordinate space of the oval bounds.
+  ArcVertexGenerator StrokedArc(const Matrix& view_transform,
+                                const Arc& arc,
+                                Cap cap,
+                                Scalar half_width);
+
+  /// @brief   Create a |VertexGenerator| that can produce vertices for
   ///          a line with round end caps of the given radius with enough
   ///          polygon sub-divisions to provide reasonable fidelity when
   ///          viewed under the given view transform.
@@ -296,14 +391,26 @@ class Tessellator {
   /// circle quadrant of the specified pixel radius
   Trigs GetTrigsForDeviceRadius(Scalar pixel_radius);
 
- protected:
+ private:
+  class ConvexTessellator {
+   public:
+    virtual ~ConvexTessellator() = default;
+    virtual VertexBuffer TessellateConvex(const PathSource& path,
+                                          HostBuffer& data_host_buffer,
+                                          HostBuffer& indexes_host_buffer,
+                                          Scalar tolerance,
+                                          bool supports_primitive_restart,
+                                          bool supports_triangle_fan) = 0;
+  };
+  template <typename IndexT>
+  friend class ConvexTessellatorImpl;
+
   /// Used for polyline generation.
-  std::unique_ptr<std::vector<Point>> point_buffer_;
-  std::unique_ptr<std::vector<uint16_t>> index_buffer_;
+  std::unique_ptr<ConvexTessellator> convex_tessellator_;
+
   /// Used for stroke path generation.
   std::vector<Point> stroke_points_;
 
- private:
   // Data for various Circle/EllipseGenerator classes, cached per
   // Tessellator instance which is usually the foreground life of an app
   // if not longer.
@@ -320,6 +427,26 @@ class Tessellator {
                                     const EllipticalVertexGenerator::Data& data,
                                     const TessellatedVertexProc& proc);
 
+  static void GenerateFilledArcFan(const Trigs& trigs,
+                                   const Arc::Iteration& iteration,
+                                   const Rect& oval_bounds,
+                                   bool use_center,
+                                   const TessellatedVertexProc& proc);
+
+  static void GenerateFilledArcStrip(const Trigs& trigs,
+                                     const Arc::Iteration& iteration,
+                                     const Rect& oval_bounds,
+                                     bool use_center,
+                                     const TessellatedVertexProc& proc);
+
+  static void GenerateStrokedArc(const Trigs& trigs,
+                                 const Arc::Iteration& iteration,
+                                 const Rect& oval_bounds,
+                                 Scalar half_width,
+                                 Cap cap,
+                                 const std::unique_ptr<Trigs>& round_cap_trigs,
+                                 const TessellatedVertexProc& proc);
+
   static void GenerateRoundCapLine(const Trigs& trigs,
                                    const EllipticalVertexGenerator::Data& data,
                                    const TessellatedVertexProc& proc);
@@ -332,6 +459,43 @@ class Tessellator {
       const Trigs& trigs,
       const EllipticalVertexGenerator::Data& data,
       const TessellatedVertexProc& proc);
+
+  // Generates vertices for the start round cap of a stroke.
+  //
+  // The perpendicular input points 90 degrees clockwise to the direction the
+  // stroke is traveling and is the length of half of the stroke width.
+  //
+  // The start round cap covers a semicircle formed by sweeping the
+  // perpendicular input clockwise 180 degrees about point p. This sweeps a
+  // semicircle with a curve facing away from the stroke's direction of travel.
+  //
+  // The first generated vertex is the midpoint of the semicircle's curve,
+  // directly opposite the semicircle's straight diameter. Vertices progress
+  // in the stroke's direction of travel, ending with two vertices at
+  // (p + perpendicular) and (p - perpendicular) that form the semicircle's
+  // diameter.
+  static void GenerateStartRoundCap(const Point& p,
+                                    const Vector2& perpendicular,
+                                    const Trigs& trigs,
+                                    const TessellatedVertexProc& proc);
+
+  // Generates vertices for the end round cap of a stroke.
+  //
+  // The perpendicular input points 90 degrees clockwise to the direction the
+  // stroke is traveling and is the length of half of the stroke width.
+  //
+  // The end round cap covers a semicircle formed by sweeping the
+  // perpendicular input counterclockwise 180 degrees about point p. This sweeps
+  // a semicircle with a curve facing toward the stroke's direction of travel.
+  //
+  // The generated vertices begin with two vertices at (p + perpendicular) and
+  // (p - perpendicular) which form the semicircle's diameter. Vertices progress
+  // in the stroke's direction of travel, ending with the vertex at the midpoint
+  // of the semicircle's curve.
+  static void GenerateEndRoundCap(const Point& p,
+                                  const Vector2& perpendicular,
+                                  const Trigs& trigs,
+                                  const TessellatedVertexProc& proc);
 
   Tessellator(const Tessellator&) = delete;
 

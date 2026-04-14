@@ -54,7 +54,7 @@ abstract class Harvester {
     StringSink stderr, {
     AddImageToSkiaGold? addImageToSkiaGold,
   }) async {
-    final io.File file = io.File(p.join(workDirectory.path, 'digest.json'));
+    final file = io.File(p.join(workDirectory.path, 'digest.json'));
     if (!file.existsSync()) {
       // Check if the directory exists or if the file is just missing.
       if (!workDirectory.existsSync()) {
@@ -67,7 +67,7 @@ abstract class Harvester {
         'Found files: ${files.map((io.FileSystemEntity e) => p.basename(e.path)).join(', ')}',
       );
     }
-    final Digests digests = Digests.parse(file.readAsStringSync());
+    final digests = Digests.parse(file.readAsStringSync());
 
     if (addImageToSkiaGold != null) {
       return _DryRunHarvester(digests, stderr, workDirectory, addImageToSkiaGold);
@@ -110,7 +110,7 @@ class SkiaGoldHarvester implements Harvester {
     StringSink stderr,
     io.Directory workDirectory,
   ) async {
-    final SkiaGoldClient client = SkiaGoldClient(workDirectory, dimensions: digests.dimensions);
+    final client = SkiaGoldClient(workDirectory, dimensions: digests.dimensions);
     return SkiaGoldHarvester._init(digests, stderr, workDirectory, client);
   }
 
@@ -175,9 +175,9 @@ class _DryRunHarvester implements Harvester {
 /// Uploads the images of digests in [harvester] to Skia Gold.
 Future<void> harvest(Harvester harvester) async {
   await harvester._auth();
-  final List<Future<void>> pendingComparisons = <Future<void>>[];
+  final pendingComparisons = <Future<void>>[];
   for (final DigestEntry entry in harvester._digests.entries) {
-    final io.File goldenFile = io.File(p.join(harvester._workDirectory.path, entry.filename));
+    final goldenFile = io.File(p.join(harvester._workDirectory.path, entry.filename));
     final Future<void> future = harvester
         ._addImg(
           entry.filename,

@@ -358,7 +358,7 @@ transforms:
             argumentValue:
               expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
                         if (states.contains(WidgetState.disabled)) {\n
-                          return CupertinoColors.white.withOpacity(0.5);\n
+                          return CupertinoColors.white.withValues(alpha: 0.5);\n
                         }\n
                         if (states.contains(WidgetState.selected)) {\n
                           return {% activeColor %};\n
@@ -377,7 +377,7 @@ transforms:
             argumentValue:
               expression: "WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {\n
                         if (states.contains(WidgetState.disabled)) {\n
-                          return CupertinoColors.white.withOpacity(0.5);\n
+                          return CupertinoColors.white.withValues(alpha: 0.5);\n
                         }\n
                         if (states.contains(WidgetState.selected)) {\n
                           return CupertinoDynamicColor.resolve(CupertinoDynamicColor.withBrightness(\n
@@ -428,4 +428,128 @@ transforms:
       minSize:
         kind: fragment
         value: 'arguments[minSize]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/170625
+  - title: "Migrate to 'builder'"
+    date: 2025-06-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "pageBuilder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'builder'
+            style: optional_named
+            argumentValue:
+              expression: '{% pageBuilder %}'
+              requiredIf: "pageBuilder != ''"
+          - kind: 'removeParameter'
+            name: 'pageBuilder'
+    variables:
+      pageBuilder:
+        kind: fragment
+        value: 'arguments[pageBuilder]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Rename from 'opacity' to 'a'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'opacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'a'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Replace 'value' with 'toARGB32()'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'value'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'cupertino.dart' ]
+          method: 'toARGB32'
+          inClass: 'CupertinoDynamicColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/171160
+  - title: "Rename 'withOpacity'"
+    date: 2025-06-24
+    element:
+      uris: [ 'cupertino.dart' ]
+      method: 'withOpacity'
+      inClass: 'CupertinoDynamicColor'
+    changes:
+      - kind: 'rename'
+        newName: 'withValues'
+      - kind: 'removeParameter'
+        index: 0
+      - kind: 'addParameter'
+        index: 0
+        name: 'alpha'
+        style: optional_named
+        argumentValue:
+          expression: '{% opacity %}'
+          requiredIf: "opacity != ''"
+    variables:
+      opacity:
+        kind: 'fragment'
+        value: 'arguments[0]'
+
+# Changes made in https://github.com/flutter/flutter/pull/177337
+  - title: "Migrate to 'scrollableBuilder'"
+    date: 2026-01-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "builder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'scrollableBuilder'
+            style: optional_named
+            argumentValue:
+              expression: "(BuildContext context, ScrollController controller) {\n
+                          \     WidgetBuilder widgetBuilder = {% builder %};\n
+                          \     return widgetBuilder(context);\n
+                          \   }"
+              requiredIf: "builder != ''"
+          - kind: 'removeParameter'
+            name: 'builder'
+    variables:
+      builder:
+        kind: fragment
+        value: 'arguments[builder]'
+
+# Changes made in https://github.com/flutter/flutter/pull/177337
+  - title: "Migrate to 'scrollableBuilder'"
+    date: 2026-01-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoSheetRoute'
+    oneOf:
+      - if: "builder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'scrollableBuilder'
+            style: optional_named
+            argumentValue:
+              expression: "(BuildContext context, ScrollController controller) {\n
+                          \     WidgetBuilder widgetBuilder = {% builder %};\n
+                          \     return widgetBuilder(context);\n
+                          \   }"
+              requiredIf: "builder != ''"
+          - kind: 'removeParameter'
+            name: 'builder'
+    variables:
+      builder:
+        kind: fragment
+        value: 'arguments[builder]'
 # Before adding a new fix: read instructions at the top of this file.

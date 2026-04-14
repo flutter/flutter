@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('fromMap can be created with valid Map - SwipeEdge.left', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
@@ -17,7 +17,7 @@ void main() {
   });
 
   test('fromMap can be created with valid Map - SwipeEdge.right', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 1,
@@ -27,7 +27,7 @@ void main() {
   });
 
   test('fromMap can be created with valid Map - isButtonEvent zero position', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 0.0],
       'progress': 0.0,
       'swipeEdge': 1,
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('fromMap can be created with valid Map - isButtonEvent null position', () async {
-    final PredictiveBackEvent event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': null,
       'progress': 0.0,
       'swipeEdge': 1,
@@ -67,12 +67,12 @@ void main() {
   });
 
   test('equality when created with the same parameters', () async {
-    final PredictiveBackEvent eventA = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final eventA = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });
-    final PredictiveBackEvent eventB = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final eventB = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
@@ -83,12 +83,12 @@ void main() {
   });
 
   test('when created with different parameters', () async {
-    final PredictiveBackEvent eventA = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final eventA = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,
     });
-    final PredictiveBackEvent eventB = PredictiveBackEvent.fromMap(const <String?, Object?>{
+    final eventB = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[1.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 0,

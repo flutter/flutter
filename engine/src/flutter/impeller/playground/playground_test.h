@@ -11,6 +11,8 @@
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/switches.h"
+#include "impeller/runtime_stage/runtime_stage.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 #if FML_OS_MACOSX
 #include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
@@ -35,7 +37,8 @@ class PlaygroundTest : public Playground,
   std::unique_ptr<fml::Mapping> OpenAssetAsMapping(
       std::string asset_name) const override;
 
-  RuntimeStage::Map OpenAssetAsRuntimeStage(const char* asset_name) const;
+  absl::StatusOr<RuntimeStage::Map> OpenAssetAsRuntimeStage(
+      const char* asset_name) const;
 
   // |Playground|
   std::string GetWindowTitle() const override;
@@ -58,9 +61,9 @@ class PlaygroundTest : public Playground,
       "";                                                                    \
   INSTANTIATE_TEST_SUITE_P(                                                  \
       Play, playground,                                                      \
-      ::testing::Values(PlaygroundBackend::kMetal,                           \
-                        PlaygroundBackend::kOpenGLES,                        \
-                        PlaygroundBackend::kVulkan),                         \
+      ::testing::Values(                                                     \
+          PlaygroundBackend::kMetal, PlaygroundBackend::kMetalSDF,           \
+          PlaygroundBackend::kOpenGLES, PlaygroundBackend::kVulkan),         \
       [](const ::testing::TestParamInfo<PlaygroundTest::ParamType>& info) {  \
         return PlaygroundBackendToString(info.param);                        \
       });

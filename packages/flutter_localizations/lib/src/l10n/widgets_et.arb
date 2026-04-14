@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jagamine",
   "pasteButtonLabel": "Kleebi",
-  "selectAllButtonLabel": "Vali kõik"
+  "selectAllButtonLabel": "Vali kõik",
+  "searchResultsFound": "Leiti otsingutulemusi",
+  "noResultsFound": "Tulemusi ei leitud",
+  "radioButtonUnselectedLabel": "Pole valitud"
 }

@@ -34,7 +34,8 @@ L2Paragraph2
 
 L2Paragraph3''';
 
-const String combinedLicenses = '''
+const String combinedLicenses =
+    '''
 $license1
 --------------------------------------------------------------------------------
 $license2
@@ -67,7 +68,7 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 }
 
 void main() {
-  final TestBinding binding = TestBinding();
+  final binding = TestBinding();
 
   test('Adds rootBundle LICENSES to LicenseRegistry', () async {
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
@@ -98,7 +99,7 @@ void main() {
   });
 
   test('didHaveMemoryPressure clears asset caches', () async {
-    int flutterAssetsCallCount = 0;
+    var flutterAssetsCallCount = 0;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
       ByteData? message,
     ) async {
@@ -115,8 +116,9 @@ void main() {
     await rootBundle.loadString('test_asset2');
     expect(flutterAssetsCallCount, 2);
 
-    final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'type': 'memoryPressure',
+    })!;
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) {});
 
     await rootBundle.loadString('test_asset');
@@ -130,11 +132,10 @@ void main() {
   });
 
   test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
-    final ByteData message =
-        const JSONMessageCodec().encodeMessage(<String, dynamic>{
-          'method': 'TextInput.requestElementsInRect',
-          'args': null,
-        })!;
+    final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'method': 'TextInput.requestElementsInRect',
+      'args': null,
+    })!;
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (
       ByteData? data,
     ) {
@@ -143,7 +144,7 @@ void main() {
   });
 
   test('Calling exitApplication sends a method call to the engine', () async {
-    bool sentMessage = false;
+    var sentMessage = false;
     MethodCall? methodCall;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (
       ByteData? message,
@@ -160,10 +161,10 @@ void main() {
   });
 
   test('Default handleRequestAppExit returns exit', () async {
-    const MethodCall incomingCall = MethodCall('System.requestAppExit', <dynamic>[
+    const incomingCall = MethodCall('System.requestAppExit', <dynamic>[
       <String, dynamic>{'type': 'cancelable'},
     ]);
-    bool receivedReply = false;
+    var receivedReply = false;
     Map<String, dynamic>? result;
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/platform',
@@ -192,7 +193,7 @@ void main() {
   });
 
   test('Default handleViewFocusChanged propagates event', () async {
-    const ViewFocusEvent event = ViewFocusEvent(
+    const event = ViewFocusEvent(
       viewId: 0,
       direction: ViewFocusDirection.forward,
       state: ViewFocusState.focused,

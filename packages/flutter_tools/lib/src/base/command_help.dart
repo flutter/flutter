@@ -8,8 +8,8 @@ import 'logger.dart';
 import 'platform.dart';
 import 'terminal.dart';
 
-const String fire = '🔥';
-const int maxLineWidth = 84;
+const fire = '🔥';
+const maxLineWidth = 84;
 
 /// Encapsulates the help text construction and printing.
 class CommandHelp {
@@ -198,18 +198,19 @@ class CommandHelpOption {
 
   @override
   String toString() {
-    final StringBuffer message = StringBuffer();
+    final message = StringBuffer();
     message.writeAll(<String>[_terminal.bolden(key), description], ' ');
     if (!_hasTextInParenthesis) {
       return message.toString();
     }
 
-    bool wrap = false;
+    var wrap = false;
     final int maxWidth = math.max(_outputPreferences.wrapColumn, maxLineWidth);
-    final int adjustedMessageLength =
-        _platform.stdoutSupportsAnsi ? _rawMessageLength + 1 : message.length;
+    final int adjustedMessageLength = _platform.stdoutSupportsAnsi
+        ? _rawMessageLength + 1
+        : message.length;
     int width = maxWidth - adjustedMessageLength;
-    final String parentheticalText = '($inParenthesis)';
+    final parentheticalText = '($inParenthesis)';
     if (width < parentheticalText.length) {
       width = maxWidth;
       wrap = true;

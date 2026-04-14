@@ -12,7 +12,7 @@ import '../../src/fake_process_manager.dart';
 void main() {
   testWithoutContext('AndroidDevicePortForwarder returns the generated host '
       'port from stdout', () async {
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -29,7 +29,7 @@ void main() {
 
   testWithoutContext('AndroidDevicePortForwarder returns the supplied host '
       'port when stdout is empty', () async {
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -43,7 +43,7 @@ void main() {
 
   testWithoutContext('AndroidDevicePortForwarder returns the supplied host port '
       'when stdout is the host port', () async {
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -60,7 +60,7 @@ void main() {
 
   testWithoutContext('AndroidDevicePortForwarder throws an exception when stdout '
       'is not blank nor the host port', () async {
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -77,7 +77,7 @@ void main() {
 
   testWithoutContext('AndroidDevicePortForwarder forwardedPorts returns empty '
       'list when forward failed', () {
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -90,7 +90,7 @@ void main() {
   });
 
   testWithoutContext('disposing device disposes the portForwarder', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1', 'forward', 'tcp:0', 'tcp:123'],
         stdout: '456',
@@ -101,7 +101,7 @@ void main() {
       ),
       const FakeCommand(command: <String>['adb', '-s', '1', 'forward', '--remove', 'tcp:456']),
     ]);
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: processManager,
@@ -116,14 +116,14 @@ void main() {
   });
 
   testWithoutContext('failures to unforward port do not throw if the forward is missing', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1', 'forward', '--remove', 'tcp:456'],
         stderr: "error: listener 'tcp:456' not found",
         exitCode: 1,
       ),
     ]);
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: processManager,
@@ -134,15 +134,15 @@ void main() {
   });
 
   testWithoutContext('failures to unforward port print error but are non-fatal', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+    final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['adb', '-s', '1', 'forward', '--remove', 'tcp:456'],
         stderr: 'error: everything is broken!',
         exitCode: 1,
       ),
     ]);
-    final BufferLogger logger = BufferLogger.test();
-    final AndroidDevicePortForwarder forwarder = AndroidDevicePortForwarder(
+    final logger = BufferLogger.test();
+    final forwarder = AndroidDevicePortForwarder(
       adbPath: 'adb',
       deviceId: '1',
       processManager: processManager,

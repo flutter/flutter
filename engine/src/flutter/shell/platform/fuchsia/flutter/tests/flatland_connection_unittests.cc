@@ -19,7 +19,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "gtest/gtest.h"
 
-#include "fakes/scenic/fake_flatland.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/scenic/fake_flatland.h"
 
 namespace flutter_runner::testing {
 

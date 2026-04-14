@@ -9,8 +9,7 @@ void main() {
   test('LicenseEntryWithLineBreaks - most cases', () {
     // There's some trailing spaces in this string.
     // To avoid IDEs stripping them, I've escaped them as \u0020.
-    final List<LicenseParagraph> paragraphs =
-        const LicenseEntryWithLineBreaks(<String>[], '''
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(<String>[], '''
 A
 A
 A
@@ -78,7 +77,7 @@ S
 \u0020\u0020\u0020\u0020\u0020\u0020
       Y''').paragraphs.toList();
 
-    int index = 0;
+    var index = 0;
     expect(paragraphs[index].text, 'A A A');
     expect(paragraphs[index].indent, 0);
     index += 1;

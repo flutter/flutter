@@ -7,7 +7,9 @@ import 'package:flutter_api_samples/widgets/keep_alive/automatic_keep_alive.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The state is maintained for the even items', (WidgetTester tester) async {
+  testWidgets('The state is maintained for the even items', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const AutomaticKeepAliveExampleApp());
 
     expect(find.text('Item 0: 0'), findsOne);
@@ -30,7 +32,11 @@ void main() {
     await tester.fling(find.byType(ListView), const Offset(0, 6000), 1000);
     await tester.pumpAndSettle();
 
-    expect(find.text('Item 0: 1'), findsOne, reason: 'The state of item 0 should be maintained');
+    expect(
+      find.text('Item 0: 1'),
+      findsOne,
+      reason: 'The state of item 0 should be maintained',
+    );
     expect(
       find.text('Item 1: 0'),
       findsOne,

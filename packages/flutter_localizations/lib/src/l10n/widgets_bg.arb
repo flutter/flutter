@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Търсене в мрежата",
   "shareButtonLabel": "Споделяне",
   "pasteButtonLabel": "Поставяне",
-  "selectAllButtonLabel": "Избиране на всички"
+  "selectAllButtonLabel": "Избиране на всички",
+  "searchResultsFound": "Намерени резултати от търсенето",
+  "noResultsFound": "Няма намерени резултати",
+  "radioButtonUnselectedLabel": "Не е избран"
 }

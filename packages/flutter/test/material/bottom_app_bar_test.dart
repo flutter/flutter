@@ -80,7 +80,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
+    final expectedPath = Path()..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
     expect(
@@ -93,9 +93,8 @@ void main() {
     final Key key = UniqueKey();
     Future<void> pump(FloatingActionButtonLocation location) async {
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200,
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(
@@ -132,9 +131,8 @@ void main() {
     final Key key = UniqueKey();
     Future<void> pump(FloatingActionButtonLocation location) async {
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200,
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(
@@ -168,7 +166,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
   testWidgets('Custom Padding', (WidgetTester tester) async {
-    const EdgeInsets customPadding = EdgeInsets.all(10);
+    const customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -191,7 +189,9 @@ void main() {
     final BottomAppBar bottomAppBar = tester.widget(find.byType(BottomAppBar));
     expect(bottomAppBar.padding, customPadding);
     final Rect babRect = tester.getRect(find.byType(BottomAppBar));
-    final Rect childRect = tester.getRect(find.byType(ColoredBox));
+    final Rect childRect = tester.getRect(
+      find.descendant(of: find.byType(BottomAppBar), matching: find.byType(ColoredBox)),
+    );
     expect(childRect, const Rect.fromLTRB(250, 530, 550, 590));
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
@@ -310,7 +310,7 @@ void main() {
   testWidgets('Material3 - Dark theme applies an elevation overlay color', (
     WidgetTester tester,
   ) async {
-    const ColorScheme colorScheme = ColorScheme.dark();
+    const colorScheme = ColorScheme.dark();
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: colorScheme),
@@ -320,7 +320,7 @@ void main() {
 
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
-    const double elevation = 3.0; // Default for M3.
+    const elevation = 3.0; // Default for M3.
     final Color overlayColor = ElevationOverlay.applySurfaceTint(
       colorScheme.surfaceContainer,
       colorScheme.surfaceTint,
@@ -362,7 +362,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = Path()..addRect(Offset.zero & renderBox.size);
+    final expectedPath = Path()..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -399,17 +399,16 @@ void main() {
     final double fabRight = fabLeft + fabSize.width;
     final double fabBottom = fabSize.height / 2.0;
 
-    final Path expectedPath =
-        Path()
-          ..moveTo(0.0, 0.0)
-          ..lineTo(fabLeft, 0.0)
-          ..lineTo(fabLeft, fabBottom)
-          ..lineTo(fabRight, fabBottom)
-          ..lineTo(fabRight, 0.0)
-          ..lineTo(babSize.width, 0.0)
-          ..lineTo(babSize.width, babSize.height)
-          ..lineTo(0.0, babSize.height)
-          ..close();
+    final expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -446,17 +445,16 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath =
-        Path()
-          ..moveTo(0.0, 0.0)
-          ..lineTo(fabLeft, 0.0)
-          ..lineTo(fabLeft, fabBottom)
-          ..lineTo(fabRight, fabBottom)
-          ..lineTo(fabRight, 0.0)
-          ..lineTo(babSize.width, 0.0)
-          ..lineTo(babSize.width, babSize.height)
-          ..lineTo(0.0, babSize.height)
-          ..close();
+    final expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -472,7 +470,9 @@ void main() {
         theme: ThemeData(useMaterial3: false),
         home: const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(50.0)),
-          child: Scaffold(bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe')))),
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe'))),
+          ),
         ),
       ),
     );
@@ -481,19 +481,21 @@ void main() {
   });
 
   testWidgets('Material3 - Observes safe area', (WidgetTester tester) async {
-    const double safeAreaPadding = 50.0;
+    const safeAreaPadding = 50.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(),
         home: const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(safeAreaPadding)),
-          child: Scaffold(bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe')))),
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(child: Center(child: Text('safe'))),
+          ),
         ),
       ),
     );
 
-    const double appBarVerticalPadding = 12.0;
-    const double appBarHorizontalPadding = 16.0;
+    const appBarVerticalPadding = 12.0;
+    const appBarHorizontalPadding = 16.0;
     expect(
       tester.getBottomLeft(find.widgetWithText(Center, 'safe')),
       const Offset(
@@ -540,7 +542,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
-    final ThemeData theme = ThemeData(useMaterial3: false);
+    final theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -579,7 +581,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -648,17 +650,16 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath =
-        Path()
-          ..moveTo(0.0, 0.0)
-          ..lineTo(fabLeft, 0.0)
-          ..lineTo(fabLeft, fabBottom)
-          ..lineTo(fabRight, fabBottom)
-          ..lineTo(fabRight, 0.0)
-          ..lineTo(babSize.width, 0.0)
-          ..lineTo(babSize.width, babSize.height)
-          ..lineTo(0.0, babSize.height)
-          ..close();
+    final expectedPath = Path()
+      ..moveTo(0.0, 0.0)
+      ..lineTo(fabLeft, 0.0)
+      ..lineTo(fabLeft, fabBottom)
+      ..lineTo(fabRight, fabBottom)
+      ..lineTo(fabRight, 0.0)
+      ..lineTo(babSize.width, 0.0)
+      ..lineTo(babSize.width, babSize.height)
+      ..lineTo(0.0, babSize.height)
+      ..close();
 
     final Path actualPath = shapeListenerState.cache.value;
 
@@ -699,7 +700,7 @@ void main() {
   testWidgets('Material3 - BottomAppBar adds bottom padding to height', (
     WidgetTester tester,
   ) async {
-    const double bottomPadding = 35.0;
+    const bottomPadding = 35.0;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -731,6 +732,18 @@ void main() {
     final double barCenter = bottomAppBar.topLeft.dy + (bottomAppBar.height - bottomPadding) / 2;
     expect(iconButton.center.dy, barCenter);
     expect(fab.center.dy, barCenter);
+  });
+
+  testWidgets('BottomAppBar renders at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: SizedBox.shrink(child: BottomAppBar(child: Text('X'))),
+        ),
+      ),
+    );
+    final Finder bottomAppBarChild = find.text('X');
+    expect(tester.getSize(bottomAppBarChild).isEmpty, isTrue);
   });
 }
 

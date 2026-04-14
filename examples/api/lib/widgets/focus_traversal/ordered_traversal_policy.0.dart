@@ -23,7 +23,12 @@ class OrderedTraversalPolicyExampleApp extends StatelessWidget {
 }
 
 class DemoButton extends StatelessWidget {
-  const DemoButton({super.key, required this.name, this.autofocus = false, required this.order});
+  const DemoButton({
+    super.key,
+    required this.name,
+    this.autofocus = false,
+    required this.order,
+  });
 
   final String name;
   final bool autofocus;
@@ -55,21 +60,21 @@ class OrderedTraversalPolicyExample extends StatelessWidget {
     return FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
       child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[DemoButton(name: 'Six', order: 6)],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               DemoButton(name: 'Five', order: 5),
               DemoButton(name: 'Four', order: 4),
             ],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               DemoButton(name: 'Three', order: 3),
               DemoButton(name: 'Two', order: 2),

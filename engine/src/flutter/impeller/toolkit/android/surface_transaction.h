@@ -31,10 +31,6 @@ struct WrappedSurfaceTransaction {
   constexpr bool operator==(const WrappedSurfaceTransaction& other) const {
     return other.tx == tx;
   }
-
-  constexpr bool operator!=(const WrappedSurfaceTransaction& other) const {
-    return !(*this == other);
-  }
 };
 
 //------------------------------------------------------------------------------

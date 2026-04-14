@@ -25,25 +25,29 @@ namespace flutter {
 class WrappedTextureSourceVK : public impeller::TextureSourceVK {
  public:
   explicit WrappedTextureSourceVK(impeller::vk::Image image,
-                                  impeller::vk::ImageView image_view,
+                                  impeller::vk::UniqueImageView image_view,
                                   impeller::TextureDescriptor desc)
-      : TextureSourceVK(desc), image_(image), image_view_(image_view) {}
+      : TextureSourceVK(desc),
+        image_(image),
+        image_view_(std::move(image_view)) {}
 
-  ~WrappedTextureSourceVK() {}
+  ~WrappedTextureSourceVK() override = default;
 
  private:
   impeller::vk::Image GetImage() const override { return image_; }
 
-  impeller::vk::ImageView GetImageView() const override { return image_view_; }
+  impeller::vk::ImageView GetImageView() const override {
+    return image_view_.get();
+  }
 
   impeller::vk::ImageView GetRenderTargetView() const override {
-    return image_view_;
+    return image_view_.get();
   }
 
   bool IsSwapchainImage() const override { return true; }
 
   impeller::vk::Image image_;
-  impeller::vk::ImageView image_view_;
+  impeller::vk::UniqueImageView image_view_;
 };
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
@@ -75,13 +79,13 @@ bool GPUSurfaceVulkanImpeller::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
-    const SkISize& size) {
+    const DlISize& size) {
   if (!IsValid()) {
     FML_LOG(ERROR) << "Vulkan surface was invalid.";
     return nullptr;
   }
 
-  if (size.isEmpty()) {
+  if (size.IsEmpty()) {
     FML_LOG(ERROR) << "Vulkan surface was asked for an empty frame.";
     return nullptr;
   }
@@ -97,7 +101,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     }
 
     impeller::RenderTarget render_target = surface->GetRenderTarget();
-    auto cull_rect = render_target.GetRenderTargetSize();
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
                                                         aiks_context_,  //
@@ -114,12 +119,11 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
       return impeller::RenderToTarget(
           aiks_context->GetContentContext(),                                //
           render_target,                                                    //
           display_list,                                                     //
-          sk_cull_rect,                                                     //
+          cull_rect,                                                        //
           /*reset_host_buffer=*/surface_frame.submit_info().frame_boundary  //
       );
     };
@@ -151,19 +155,21 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       return nullptr;
     }
 
+    impeller::ContextVK& context_vk =
+        impeller::ContextVK::Cast(*impeller_context_);
+
+    context_vk.DisposeThreadLocalCachedResources();
+
     impeller::vk::Image vk_image =
         impeller::vk::Image(reinterpret_cast<VkImage>(flutter_image.image));
 
     impeller::TextureDescriptor desc;
     desc.format = format.value();
-    desc.size = impeller::ISize{size.width(), size.height()};
+    desc.size = impeller::ISize{size.width, size.height};
     desc.storage_mode = impeller::StorageMode::kDevicePrivate;
     desc.mip_count = 1;
     desc.compression_type = impeller::CompressionType::kLossless;
     desc.usage = impeller::TextureUsage::kRenderTarget;
-
-    impeller::ContextVK& context_vk =
-        impeller::ContextVK::Cast(*impeller_context_);
 
     impeller::vk::ImageViewCreateInfo view_info = {};
     view_info.viewType = impeller::vk::ImageViewType::e2D;
@@ -177,7 +183,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     view_info.image = vk_image;
 
     auto [result, image_view] =
-        context_vk.GetDevice().createImageView(view_info);
+        context_vk.GetDevice().createImageViewUnique(view_info);
     if (result != impeller::vk::Result::eSuccess) {
       FML_LOG(ERROR) << "Failed to create image view for provided image: "
                      << impeller::vk::to_string(result);
@@ -190,12 +196,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
           /*enable_msaa=*/true);
     }
 
-    auto wrapped_onscreen =
-        std::make_shared<WrappedTextureSourceVK>(vk_image, image_view, desc);
+    auto wrapped_onscreen = std::make_shared<WrappedTextureSourceVK>(
+        vk_image, std::move(image_view), desc);
     auto surface = impeller::SurfaceVK::WrapSwapchainImage(
         transients_, wrapped_onscreen, [&]() -> bool { return true; });
     impeller::RenderTarget render_target = surface->GetRenderTarget();
-    auto cull_rect = render_target.GetRenderTargetSize();
+    auto cull_rect =
+        impeller::Rect::MakeSize(render_target.GetRenderTargetSize());
 
     SurfaceFrame::EncodeCallback encode_callback = [aiks_context =
                                                         aiks_context_,  //
@@ -212,11 +219,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.width, cull_rect.height);
       return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
                                       render_target,                      //
                                       display_list,                       //
-                                      sk_cull_rect,                       //
+                                      cull_rect,                          //
                                       /*reset_host_buffer=*/true          //
       );
     };
@@ -277,7 +283,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 }
 
 // |Surface|
-SkMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
+DlMatrix GPUSurfaceVulkanImpeller::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
   return {};

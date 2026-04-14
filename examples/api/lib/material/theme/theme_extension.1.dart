@@ -16,7 +16,10 @@ class MyColors extends ThemeExtension<MyColors> {
 
   @override
   MyColors copyWith({Color? brandColor, Color? danger}) {
-    return MyColors(brandColor: brandColor ?? this.brandColor, danger: danger ?? this.danger);
+    return MyColors(
+      brandColor: brandColor ?? this.brandColor,
+      danger: danger ?? this.danger,
+    );
   }
 
   @override
@@ -45,7 +48,8 @@ class ThemeExtensionExampleApp extends StatefulWidget {
   const ThemeExtensionExampleApp({super.key});
 
   @override
-  State<ThemeExtensionExampleApp> createState() => _ThemeExtensionExampleAppState();
+  State<ThemeExtensionExampleApp> createState() =>
+      _ThemeExtensionExampleAppState();
 }
 
 class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
@@ -65,17 +69,24 @@ class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
       ),
       darkTheme: ThemeData.dark().copyWith(
         extensions: <ThemeExtension<dynamic>>[
-          const MyColors(brandColor: Color(0xFF90CAF9), danger: Color(0xFFEF9A9A)),
+          const MyColors(
+            brandColor: Color(0xFF90CAF9),
+            danger: Color(0xFFEF9A9A),
+          ),
         ],
       ),
-      themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
+      themeMode: isLightTheme ? .light : .dark,
       home: Home(isLightTheme: isLightTheme, toggleTheme: toggleTheme),
     );
   }
 }
 
 class Home extends StatelessWidget {
-  const Home({super.key, required this.isLightTheme, required this.toggleTheme});
+  const Home({
+    super.key,
+    required this.isLightTheme,
+    required this.toggleTheme,
+  });
 
   final bool isLightTheme;
   final void Function() toggleTheme;
@@ -86,7 +97,7 @@ class Home extends StatelessWidget {
     return Material(
       child: Center(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Container(width: 100, height: 100, color: myColors.brandColor),
             const SizedBox(width: 10),

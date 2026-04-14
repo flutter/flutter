@@ -128,7 +128,7 @@ class Pipeline {
   /// resolves.
   Future<void> run() async {
     _status = PipelineStatus.started;
-    final List<_PipelineStepFailure> failures = <_PipelineStepFailure>[];
+    final failures = <_PipelineStepFailure>[];
     for (final PipelineStep step in steps) {
       _currentStep = step;
       _currentStepFuture = step.run();
@@ -145,7 +145,7 @@ class Pipeline {
     } else {
       _status = PipelineStatus.error;
       print('Pipeline experienced the following failures:');
-      for (final _PipelineStepFailure failure in failures) {
+      for (final failure in failures) {
         print('  "${failure.step.description}": ${failure.error}\n${failure.stackTrace}');
       }
       throw ToolExit('Test pipeline failed.');
@@ -221,7 +221,7 @@ class PipelineWatcher {
     });
 
     await io.stdin.firstWhere((List<int> event) {
-      const int qKeyCode = 113;
+      const qKeyCode = 113;
       final bool qEntered = event.isNotEmpty && event.first == qKeyCode;
       return qEntered;
     });

@@ -18,7 +18,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
   String get _webLogicalKeyCodeMap {
-    final OutputLines<String> lines = OutputLines<String>('Web logical map');
+    final lines = OutputLines<String>('Web logical map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       final int plane = getPlane(entry.value);
       if (plane == kUnprintablePlane.value) {
@@ -32,7 +32,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web KeyboardEvent codes to physical key USB HID codes.
   String get _webPhysicalKeyCodeMap {
-    final OutputLines<String> lines = OutputLines<String>('Web physical map');
+    final lines = OutputLines<String>('Web physical map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       for (final String webCode in entry.webCodes()) {
         lines.add(webCode, "  '$webCode': ${toHex(entry.usbHidCode)}, // ${entry.constantName}");
@@ -43,7 +43,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of Web number pad codes to logical key ids.
   String get _webLogicalLocationMap {
-    final OutputLines<String> lines = OutputLines<String>('Web logical location map');
+    final lines = OutputLines<String>('Web logical location map');
     _logicalLocationMap.forEach((String webKey, List<String?> locations) {
       final String valuesString = locations
           .map((String? value) {

@@ -68,8 +68,8 @@ void main() {
   });
 
   testWidgets('ListView reverse', (WidgetTester tester) async {
-    int first = 0;
-    int second = 0;
+    var first = 0;
+    var second = 0;
 
     Widget buildBlock({bool reverse = false}) {
       return Directionality(
@@ -103,7 +103,7 @@ void main() {
 
     await tester.pumpWidget(buildBlock(reverse: true));
 
-    const Offset target = Offset(200.0, 200.0);
+    const target = Offset(200.0, 200.0);
     await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));
@@ -116,7 +116,7 @@ void main() {
   });
 
   testWidgets('ListView controller', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     Widget buildBlock() {
@@ -136,7 +136,7 @@ void main() {
   testWidgets('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (
     WidgetTester tester,
   ) async {
-    final SliverChildListDelegate delegate = SliverChildListDelegate(<Widget>[
+    final delegate = SliverChildListDelegate(<Widget>[
       Container(),
       Container(),
       Container(),
@@ -167,7 +167,7 @@ void main() {
 
   testWidgets('Resizing a ListView child restores scroll offset', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9221
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 200),
     );

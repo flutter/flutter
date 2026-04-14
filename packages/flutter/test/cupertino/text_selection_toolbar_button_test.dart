@@ -9,7 +9,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('can press', (WidgetTester tester) async {
-    bool pressed = false;
+    var pressed = false;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -42,8 +42,8 @@ void main() {
     DecoratedBox decoratedBox = tester.widget(
       find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
     );
-    BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color, CupertinoColors.transparent);
+    var decoration = decoratedBox.decoration as ShapeDecoration;
+    expect(decoration.color, CupertinoColors.transparent);
 
     // Make a "down" gesture on the button.
     final Offset center = tester.getCenter(find.byType(CupertinoTextSelectionToolbarButton));
@@ -57,8 +57,8 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     );
-    boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color!.value, const Color(0x10000000).value);
+    decoration = decoratedBox.decoration as ShapeDecoration;
+    expect(decoration.color!.value, const Color(0x10000000).value);
 
     // Release the down gesture.
     await gesture.up();
@@ -71,8 +71,8 @@ void main() {
         matching: find.byType(DecoratedBox),
       ),
     );
-    boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color, CupertinoColors.transparent);
+    decoration = decoratedBox.decoration as ShapeDecoration;
+    expect(decoration.color, CupertinoColors.transparent);
   });
 
   testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
@@ -85,5 +85,18 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
     expect(button.enabled, isFalse);
+  });
+
+  testWidgets('CupertinoTextSelectionToolbarButton does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoTextSelectionToolbarButton(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTextSelectionToolbarButton)), Size.zero);
   });
 }

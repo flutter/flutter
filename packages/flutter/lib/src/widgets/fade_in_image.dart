@@ -228,18 +228,17 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
-  }) : placeholder =
-           placeholderScale != null
-               ? ResizeImage.resizeIfNeeded(
-                 placeholderCacheWidth,
-                 placeholderCacheHeight,
-                 ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale),
-               )
-               : ResizeImage.resizeIfNeeded(
-                 placeholderCacheWidth,
-                 placeholderCacheHeight,
-                 AssetImage(placeholder, bundle: bundle),
-               ),
+  }) : placeholder = placeholderScale != null
+           ? ResizeImage.resizeIfNeeded(
+               placeholderCacheWidth,
+               placeholderCacheHeight,
+               ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale),
+             )
+           : ResizeImage.resizeIfNeeded(
+               placeholderCacheWidth,
+               placeholderCacheHeight,
+               AssetImage(placeholder, bundle: bundle),
+             ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
@@ -569,23 +568,24 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       return;
     }
 
-    _placeholderOpacityAnimation = animation.drive(
-      TweenSequence<double>(<TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(
-          tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
-          weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
-        ),
-        TweenSequenceItem<double>(
-          tween: ConstantTween<double>(0),
-          weight: widget.fadeInDuration.inMilliseconds.toDouble(),
-        ),
-      ]),
-    )..addStatusListener((AnimationStatus status) {
-      if (_placeholderOpacityAnimation!.isCompleted) {
-        // Need to rebuild to remove placeholder now that it is invisible.
-        setState(() {});
-      }
-    });
+    _placeholderOpacityAnimation =
+        animation.drive(
+          TweenSequence<double>(<TweenSequenceItem<double>>[
+            TweenSequenceItem<double>(
+              tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
+              weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
+            ),
+            TweenSequenceItem<double>(
+              tween: ConstantTween<double>(0),
+              weight: widget.fadeInDuration.inMilliseconds.toDouble(),
+            ),
+          ]),
+        )..addStatusListener((AnimationStatus status) {
+          if (_placeholderOpacityAnimation!.isCompleted) {
+            // Need to rebuild to remove placeholder now that it is invisible.
+            setState(() {});
+          }
+        });
 
     _targetOpacityAnimation = animation.drive(
       TweenSequence<double>(<TweenSequenceItem<double>>[

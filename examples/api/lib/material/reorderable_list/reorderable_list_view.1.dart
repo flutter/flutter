@@ -37,11 +37,15 @@ class _ReorderableExampleState extends State<ReorderableExample> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.secondary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.secondary.withOpacity(0.15);
+    final Color oddItemColor = colorScheme.secondary.withValues(alpha: 0.05);
+    final Color evenItemColor = colorScheme.secondary.withValues(alpha: 0.15);
     final Color draggableItemColor = colorScheme.secondary;
 
-    Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    Widget proxyDecorator(
+      Widget child,
+      int index,
+      Animation<double> animation,
+    ) {
       return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
@@ -59,7 +63,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
     }
 
     return ReorderableListView(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const .symmetric(horizontal: 40),
       proxyDecorator: proxyDecorator,
       children: <Widget>[
         for (int index = 0; index < _items.length; index += 1)
@@ -69,11 +73,8 @@ class _ReorderableExampleState extends State<ReorderableExample> {
             title: Text('Item ${_items[index]}'),
           ),
       ],
-      onReorder: (int oldIndex, int newIndex) {
+      onReorderItem: (int oldIndex, int newIndex) {
         setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
           final int item = _items.removeAt(oldIndex);
           _items.insert(newIndex, item);
         });

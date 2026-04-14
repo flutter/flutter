@@ -264,6 +264,16 @@ TEST(DisplayListColor, ColorSpaceExtendedSRGBtoExtendedSRGB) {
             xsrgb.withColorSpace(DlColorSpace::kExtendedSRGB));
 }
 
+TEST(DisplayListColor, ColorSpaceExtendedSRGBtoSRGB) {
+  DlColor xsrgb1(0.9, 0.8, 0.7, 0.6, DlColorSpace::kExtendedSRGB);
+  EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kSRGB),
+            xsrgb1.withColorSpace(DlColorSpace::kSRGB));
+
+  DlColor xsrgb2(0.9, 1.1, -0.1, 0.6, DlColorSpace::kExtendedSRGB);
+  EXPECT_EQ(DlColor(0.9, 1.0, 0.0, 0.6, DlColorSpace::kSRGB),
+            xsrgb2.withColorSpace(DlColorSpace::kSRGB));
+}
+
 TEST(DisplayListColor, ColorSpaceP3ToP3) {
   DlColor p3(0.9, 0.8, 0.7, 0.6, DlColorSpace::kDisplayP3);
   EXPECT_EQ(DlColor(0.9, 0.8, 0.7, 0.6, DlColorSpace::kDisplayP3),
@@ -289,12 +299,66 @@ TEST(DisplayListColor, ColorSpaceP3ToExtendedSRGB) {
       << blue.withColorSpace(DlColorSpace::kExtendedSRGB);
 }
 
+// Verifies that P3-to-sRGB conversion operates in linear light.
+// Mid-range values (not 0 or 1) expose the gamma nonlinearity:
+// the correct pipeline is EOTF(decode) -> 3x3 matrix -> OETF(encode),
+// which produces significantly different results than applying a matrix
+// directly to gamma-encoded values.
+TEST(DisplayListColor, ColorSpaceP3ToExtendedSRGBLinearLight) {
+  // P3 #1ECAD3 (30/255, 202/255, 211/255)
+  // Correct extended sRGB: (-0.3764, 0.8065, 0.8372)
+  // Wrong (gamma-encoded matrix): (-0.1195, 0.8609, 0.8675)
+  // Red channel diff: 0.2569 — well above isClose tolerance of 1/256.
+  DlColor p3_teal(1.0, 30.0f / 255.0f, 202.0f / 255.0f, 211.0f / 255.0f,
+                  DlColorSpace::kDisplayP3);
+  DlColor expected_teal(1.0, -0.3764f, 0.8065f, 0.8372f,
+                        DlColorSpace::kExtendedSRGB);
+  EXPECT_TRUE(expected_teal.isClose(
+      p3_teal.withColorSpace(DlColorSpace::kExtendedSRGB)))
+      << p3_teal.withColorSpace(DlColorSpace::kExtendedSRGB);
+
+  // P3 (0, 1, 1) — max teal
+  // Correct extended sRGB: (-0.5116, 1.0183, 1.0086)
+  // Wrong (gamma-encoded matrix): (-0.2984, 1.1280, 1.0963)
+  DlColor p3_max_teal(1.0, 0.0, 1.0, 1.0, DlColorSpace::kDisplayP3);
+  DlColor expected_max_teal(1.0, -0.5116f, 1.0183f, 1.0086f,
+                            DlColorSpace::kExtendedSRGB);
+  EXPECT_TRUE(expected_max_teal.isClose(
+      p3_max_teal.withColorSpace(DlColorSpace::kExtendedSRGB)))
+      << p3_max_teal.withColorSpace(DlColorSpace::kExtendedSRGB);
+}
+
+TEST(DisplayListColor, ColorSpaceP3ToSRGB) {
+  DlColor red(0.9, 1.0, 0.0, 0.0, DlColorSpace::kDisplayP3);
+  EXPECT_TRUE(DlColor(0.9, 1.0, 0.0, 0.0, DlColorSpace::kSRGB)
+                  .isClose(red.withColorSpace(DlColorSpace::kSRGB)))
+      << red.withColorSpace(DlColorSpace::kSRGB);
+
+  DlColor green(0.9, 0.0, 1.0, 0.0, DlColorSpace::kDisplayP3);
+  EXPECT_TRUE(DlColor(0.9, 0.0, 1.0, 0.0, DlColorSpace::kSRGB)
+                  .isClose(green.withColorSpace(DlColorSpace::kSRGB)))
+      << green.withColorSpace(DlColorSpace::kSRGB);
+
+  DlColor blue(0.9, 0.0, 0.0, 1.0, DlColorSpace::kDisplayP3);
+  EXPECT_TRUE(DlColor(0.9, 0.0, 0.0003, 1.0, DlColorSpace::kSRGB)
+                  .isClose(blue.withColorSpace(DlColorSpace::kSRGB)))
+      << blue.withColorSpace(DlColorSpace::kSRGB);
+}
+
 TEST(DisplayListColor, isClose) {
   EXPECT_TRUE(DlColor(0xffaabbcc).isClose(DlColor(0xffaabbcc)));
 }
 
 TEST(DisplayListColor, isNotClose) {
   EXPECT_FALSE(DlColor(0xffaabbcc).isClose(DlColor(0xffaabbcd)));
+}
+
+TEST(DisplayListColor, ClampAlpha) {
+  EXPECT_EQ(DlColor::ARGB(2.0, 0.0, 0.0, 0.0),
+            DlColor::ARGB(1.0, 0.0, 0.0, 0.0));
+
+  EXPECT_EQ(DlColor::ARGB(-1.0, 0.0, 0.0, 0.0),
+            DlColor::ARGB(0.0, 0.0, 0.0, 0.0));
 }
 
 }  // namespace testing

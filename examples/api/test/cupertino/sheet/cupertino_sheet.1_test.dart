@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/cupertino/sheet/cupertino_sheet.1.dart' as example;
+import 'package:flutter_api_samples/cupertino/sheet/cupertino_sheet.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tap on button displays cupertino sheet', (WidgetTester tester) async {
+  testWidgets('Tap on button displays cupertino sheet', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoSheetApp());
 
     final Finder dialogTitle = find.text('CupertinoSheetRoute');
@@ -40,5 +43,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(dialogTitle, findsNothing);
     expect(nextPageTitle, findsNothing);
+  });
+
+  testWidgets('Go Back button uses maybePop and handles edge cases', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.CupertinoSheetApp());
+
+    await tester.tap(find.byType(CupertinoButton));
+    await tester.pumpAndSettle();
+    expect(find.text('CupertinoSheetRoute'), findsOneWidget);
+
+    await tester.tap(find.text('Go Back'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('CupertinoSheetRoute'), findsNothing);
+    expect(find.text('Open Bottom Sheet'), findsOneWidget);
   });
 }

@@ -20,7 +20,12 @@ class InheritedModelApp extends StatelessWidget {
 }
 
 class LogoModel extends InheritedModel<LogoAspect> {
-  const LogoModel({super.key, this.backgroundColor, this.large, required super.child});
+  const LogoModel({
+    super.key,
+    this.backgroundColor,
+    this.large,
+    required super.child,
+  });
 
   final Color? backgroundColor;
   final bool? large;
@@ -33,16 +38,24 @@ class LogoModel extends InheritedModel<LogoAspect> {
   }
 
   static bool sizeOf(BuildContext context) {
-    return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.large)?.large ?? false;
+    return InheritedModel.inheritFrom<LogoModel>(
+          context,
+          aspect: LogoAspect.large,
+        )?.large ??
+        false;
   }
 
   @override
   bool updateShouldNotify(LogoModel oldWidget) {
-    return backgroundColor != oldWidget.backgroundColor || large != oldWidget.large;
+    return backgroundColor != oldWidget.backgroundColor ||
+        large != oldWidget.large;
   }
 
   @override
-  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<LogoAspect> dependencies) {
+  bool updateShouldNotifyDependent(
+    LogoModel oldWidget,
+    Set<LogoAspect> dependencies,
+  ) {
     if (backgroundColor != oldWidget.backgroundColor &&
         dependencies.contains(LogoAspect.backgroundColor)) {
       return true;
@@ -70,7 +83,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
     return Scaffold(
       appBar: AppBar(title: const Text('InheritedModel Sample')),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: .spaceEvenly,
         children: <Widget>[
           Center(
             child: LogoModel(
@@ -80,7 +93,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: .spaceEvenly,
             children: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -132,7 +145,7 @@ class BackgroundWidget extends StatelessWidget {
     final Color color = LogoModel.backgroundColorOf(context)!;
 
     return AnimatedContainer(
-      padding: const EdgeInsets.all(12.0),
+      padding: const .all(12.0),
       color: color,
       duration: const Duration(seconds: 2),
       curve: Curves.fastOutSlowIn,
@@ -149,10 +162,10 @@ class LogoWidget extends StatelessWidget {
     final bool largeLogo = LogoModel.sizeOf(context);
 
     return AnimatedContainer(
-      padding: const EdgeInsets.all(20.0),
+      padding: const .all(20.0),
       duration: const Duration(seconds: 2),
       curve: Curves.fastLinearToSlowEaseIn,
-      alignment: Alignment.center,
+      alignment: .center,
       child: FlutterLogo(size: largeLogo ? 200.0 : 100.0),
     );
   }

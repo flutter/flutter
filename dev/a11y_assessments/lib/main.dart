@@ -20,13 +20,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData lightTheme = ThemeData(
+    final lightTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xff6750a4),
         contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
       ),
     );
-    final ThemeData darkTheme = ThemeData(
+    final darkTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(
         brightness: Brightness.dark,
         seedColor: const Color(0xff6750a4),
@@ -34,7 +34,7 @@ class App extends StatelessWidget {
       ),
     );
 
-    final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
+    final routes = Map<String, WidgetBuilder>.fromEntries(
       useCases.map(
         (UseCase useCase) => MapEntry<String, WidgetBuilder>(
           useCase.route,
@@ -62,6 +62,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final ScrollController scrollController = ScrollController();
 
+  bool _showAdditionalUseCases = false;
+
   @override
   void dispose() {
     scrollController.dispose();
@@ -75,8 +77,8 @@ class HomePageState extends State<HomePage> {
         builder: (BuildContext context) {
           return TextButton(
             key: Key(useCase.name),
-            onPressed:
-                () => Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
             child: Text(useCase.name),
           );
         },
@@ -86,16 +88,34 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<UseCase> effectiveUseCases = useCases.where((UseCase useCase) {
+      return _showAdditionalUseCases || useCase.useCaseCategory == UseCaseCategory.core;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
+        actions: <Widget>[
+          Tooltip(
+            message: 'Show additional use cases',
+            waitDuration: const Duration(milliseconds: 500),
+            child: Switch(
+              value: _showAdditionalUseCases,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _showAdditionalUseCases = newValue;
+                });
+              },
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: ListView(
           controller: scrollController,
           children: List<Widget>.generate(
-            useCases.length,
-            (int index) => _buildUseCaseItem(index, useCases[index]),
+            effectiveUseCases.length,
+            (int index) => _buildUseCaseItem(index, effectiveUseCases[index]),
           ),
         ),
       ),

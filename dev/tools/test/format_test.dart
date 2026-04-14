@@ -24,7 +24,7 @@ final FileContentPair dartContentPair = FileContentPair(
 class TestFileFixture {
   TestFileFixture(this.filePairs, this.baseDir) {
     for (final FileContentPair filePair in filePairs) {
-      final io.File file = io.File(path.join(baseDir.path, filePair.name));
+      final file = io.File(path.join(baseDir.path, filePair.name));
       file.writeAsStringSync(filePair.original);
       files.add(file);
     }
@@ -35,7 +35,7 @@ class TestFileFixture {
   final List<FileContentPair> filePairs;
 
   void gitAdd() {
-    final List<String> args = <String>['add'];
+    final args = <String>['add'];
     for (final io.File file in files) {
       args.add(file.path);
     }
@@ -44,7 +44,7 @@ class TestFileFixture {
   }
 
   void gitRemove() {
-    final List<String> args = <String>['rm', '-f'];
+    final args = <String>['rm', '-f'];
     for (final io.File file in files) {
       args.add(file.path);
     }
@@ -52,8 +52,8 @@ class TestFileFixture {
   }
 
   Iterable<FileContentPair> getFileContents() {
-    final List<FileContentPair> results = <FileContentPair>[];
-    for (int i = 0; i < files.length; i++) {
+    final results = <FileContentPair>[];
+    for (var i = 0; i < files.length; i++) {
       final io.File file = files[i];
       final FileContentPair filePair = filePairs[i];
       final String content = file.readAsStringSync().replaceAll('\r\n', '\n');
@@ -78,15 +78,13 @@ void main() {
   test(
     'Can fix Dart formatting errors',
     () {
-      final TestFileFixture fixture = TestFileFixture(<FileContentPair>[
-        dartContentPair,
-      ], flutterRoot);
+      final fixture = TestFileFixture(<FileContentPair>[dartContentPair], flutterRoot);
       try {
         fixture.gitAdd();
         io.Process.runSync(formatterPath, <String>['--fix'], workingDirectory: flutterRoot.path);
 
         final Iterable<FileContentPair> files = fixture.getFileContents();
-        for (final FileContentPair pair in files) {
+        for (final pair in files) {
           expect(pair.original, equals(pair.formatted));
         }
       } finally {
@@ -100,8 +98,8 @@ void main() {
   test(
     'Prints error if dart formatter fails',
     () {
-      final TestFileFixture fixture = TestFileFixture(<FileContentPair>[], flutterRoot);
-      final io.File dartFile = io.File('${flutterRoot.path}/format_test2.dart');
+      final fixture = TestFileFixture(<FileContentPair>[], flutterRoot);
+      final dartFile = io.File('${flutterRoot.path}/format_test2.dart');
       dartFile.writeAsStringSync('P\n');
       fixture.files.add(dartFile);
 

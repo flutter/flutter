@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart' as example;
+import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('should update magnifier position on drag', (WidgetTester tester) async {
+  testWidgets('should update magnifier position on drag', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
     Matcher isPositionedAt(Offset at) {
@@ -21,12 +24,15 @@ void main() {
     // Make sure magnifier is present.
     final Finder positionedWidget = find.byType(Positioned);
     final Widget positionedWidgetInTree = tester.widget(positionedWidget);
-    final Positioned oldConcretePositioned = positionedWidgetInTree as Positioned;
+    final Positioned oldConcretePositioned =
+        positionedWidgetInTree as Positioned;
     expect(positionedWidget, findsOneWidget);
 
     // Confirm if magnifier is in the center of the FlutterLogo.
     final Offset centerOfPositioned = tester.getCenter(positionedWidget);
-    final Offset centerOfFlutterLogo = tester.getCenter(find.byType(FlutterLogo));
+    final Offset centerOfFlutterLogo = tester.getCenter(
+      find.byType(FlutterLogo),
+    );
     expect(centerOfPositioned, equals(centerOfFlutterLogo));
 
     // Drag the magnifier and confirm its new position is expected.
@@ -49,6 +55,9 @@ void main() {
     await tester.dragFrom(centerOfPositioned, dragDistance);
     await tester.pump();
 
-    await expectLater(find.byType(RepaintBoundary).last, matchesGoldenFile('magnifier.0_test.png'));
+    await expectLater(
+      find.byType(RepaintBoundary).last,
+      matchesGoldenFile('magnifier.0_test.png'),
+    );
   });
 }

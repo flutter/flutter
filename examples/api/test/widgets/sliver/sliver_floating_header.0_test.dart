@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/sliver/sliver_floating_header.0.dart' as example;
+import 'package:flutter_api_samples/widgets/sliver/sliver_floating_header.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,15 +16,24 @@ void main() {
     );
     final double headerHeight = tester.getSize(headerText).height;
 
-    await tester.drag(find.byType(CustomScrollView), Offset(0, -2 * headerHeight));
+    await tester.drag(
+      find.byType(CustomScrollView),
+      Offset(0, -2 * headerHeight),
+    );
     await tester.pumpAndSettle();
     expect(headerText, findsNothing);
 
-    await tester.drag(find.byType(CustomScrollView), Offset(0, 0.5 * headerHeight));
+    await tester.drag(
+      find.byType(CustomScrollView),
+      Offset(0, 0.5 * headerHeight),
+    );
     await tester.pumpAndSettle();
     expect(headerText, findsOneWidget);
 
-    await tester.drag(find.byType(CustomScrollView), Offset(0, -0.5 * headerHeight));
+    await tester.drag(
+      find.byType(CustomScrollView),
+      Offset(0, -0.5 * headerHeight),
+    );
     await tester.pumpAndSettle();
     expect(headerText, findsNothing);
   });

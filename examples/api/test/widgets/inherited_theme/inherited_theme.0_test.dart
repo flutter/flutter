@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/inherited_theme/inherited_theme.0.dart' as example;
+import 'package:flutter_api_samples/widgets/inherited_theme/inherited_theme.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('StreamBuilder listens to internal stream', (WidgetTester tester) async {
+  testWidgets('StreamBuilder listens to internal stream', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.InheritedThemeExampleApp());
 
     expect(find.byType(GestureDetector), findsOne);
@@ -16,7 +19,10 @@ void main() {
     final DefaultTextStyle bodyDefaultTextStyle = DefaultTextStyle.of(
       tester.element(find.text('Tap Here')),
     );
-    expect(bodyDefaultTextStyle.style, const TextStyle(fontSize: 48, color: Colors.blue));
+    expect(
+      bodyDefaultTextStyle.style,
+      const TextStyle(fontSize: 48, color: Colors.blue),
+    );
 
     await tester.tap(find.text('Tap Here'));
     await tester.pumpAndSettle();
@@ -26,6 +32,9 @@ void main() {
     final DefaultTextStyle routeDefaultTextStyle = DefaultTextStyle.of(
       tester.element(find.text('Hello World')),
     );
-    expect(routeDefaultTextStyle.style, const TextStyle(fontSize: 48, color: Colors.blue));
+    expect(
+      routeDefaultTextStyle.style,
+      const TextStyle(fontSize: 48, color: Colors.blue),
+    );
   });
 }

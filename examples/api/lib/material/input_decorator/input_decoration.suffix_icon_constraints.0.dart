@@ -28,9 +28,9 @@ class SuffixIconConstraintsExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
+      padding: .symmetric(horizontal: 8.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           TextField(
             decoration: InputDecoration(
@@ -44,7 +44,10 @@ class SuffixIconConstraintsExample extends StatelessWidget {
               isDense: true,
               hintText: 'Smaller Icon Constraints',
               suffixIcon: Icon(Icons.search),
-              suffixIconConstraints: BoxConstraints(minHeight: 32, minWidth: 32),
+              suffixIconConstraints: BoxConstraints(
+                minHeight: 32,
+                minWidth: 32,
+              ),
             ),
           ),
         ],

@@ -60,7 +60,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
       builder: (BuildContext context, _) {
         final int totalLength = widget.rowCount * widget.columnCount;
         final int widgetCounter = counter * totalLength;
-        final double height = MediaQuery.of(context).size.height / widget.rowCount;
+        final double height = MediaQuery.heightOf(context) / widget.rowCount;
         final double colorPosition = _controller.value;
         final int c1Position = colorPosition.floor();
         final Color c1 = colorList[c1Position % colorList.length][900]!;
@@ -79,19 +79,19 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                   // for benchmark purposes.
                   return counter.isEven
                       ? Container(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(Colors.white, baseColor, label / totalLength),
-                        constraints: BoxConstraints.expand(height: height),
-                        child: Text('${widgetCounter + label}'),
-                      )
+                          // This key forces rebuilding the element
+                          key: ValueKey<int>(widgetCounter + label),
+                          color: Color.lerp(Colors.white, baseColor, label / totalLength),
+                          constraints: BoxConstraints.expand(height: height),
+                          child: Text('${widgetCounter + label}'),
+                        )
                       : MyContainer(
-                        // This key forces rebuilding the element
-                        key: ValueKey<int>(widgetCounter + label),
-                        color: Color.lerp(Colors.white, baseColor, label / totalLength)!,
-                        constraints: BoxConstraints.expand(height: height),
-                        child: Text('${widgetCounter + label}'),
-                      );
+                          // This key forces rebuilding the element
+                          key: ValueKey<int>(widgetCounter + label),
+                          color: Color.lerp(Colors.white, baseColor, label / totalLength)!,
+                          constraints: BoxConstraints.expand(height: height),
+                          child: Text('${widgetCounter + label}'),
+                        );
                 }),
               ),
             ),

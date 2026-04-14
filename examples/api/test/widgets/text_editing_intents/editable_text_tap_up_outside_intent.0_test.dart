@@ -28,7 +28,9 @@ void main() {
     expect(textField.focusNode!.hasFocus, false);
   });
 
-  testWidgets('Does not unfocus TextField on scroll', (WidgetTester tester) async {
+  testWidgets('Does not unfocus TextField on scroll', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SampleApp());
 
     final Finder finder = find.byType(TextField);

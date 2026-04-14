@@ -8,16 +8,23 @@
 @TestOn('!chrome')
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
+  const debugRed = Color(0xFFFF0000);
+  const debugGreen = Color(0xFF00FF00);
+  const debugBlue = Color(0xFF0000FF);
+  const debugWhite = Color(0xFFFFFFFF);
+
   testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RepaintBoundary(
         child: ColorFiltered(
-          colorFilter: ColorFilter.mode(Colors.red, BlendMode.color),
+          colorFilter: ColorFilter.mode(debugRed, BlendMode.color),
           child: Placeholder(),
         ),
       ),
@@ -26,27 +33,48 @@ void main() {
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
-    const ColorFilter sepia = ColorFilter.matrix(<double>[
+    // A lighter blue so the sepia matrix
+    // produces a visible warm brown instead of near-black.
+    const debugLightBlue = Color(0xFF2196F3);
+    const sepia = ColorFilter.matrix(<double>[
       0.39, 0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
       0.272, 0.534, 0.131, 0, 0, //
       0, 0, 0, 1, 0, //
     ]);
     await tester.pumpWidget(
-      RepaintBoundary(
+      const RepaintBoundary(
         child: ColorFiltered(
           colorFilter: sepia,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
-            title: 'Flutter Demo',
-            theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
-            home: Scaffold(
-              appBar: AppBar(title: const Text('Sepia ColorFilter Test')),
-              body: const Center(child: Text('Hooray!')),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {},
-                tooltip: 'Increment',
-                child: const Icon(Icons.add),
+          child: TestWidgetsApp(
+            home: ColoredBox(
+              color: debugWhite,
+              child: Column(
+                children: <Widget>[
+                  ColoredBox(
+                    color: debugLightBlue,
+                    child: SizedBox(
+                      height: 56,
+                      width: double.infinity,
+                      child: Center(child: Text('Sepia ColorFilter Test')),
+                    ),
+                  ),
+                  Expanded(child: Center(child: Text('Hooray!'))),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: debugLightBlue, shape: BoxShape.circle),
+                          child: Center(child: Text('+')),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -54,6 +82,18 @@ void main() {
       ),
     );
     await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_sepia.png'));
+  });
+
+  testWidgets('ColorFilter.saturation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: ColorFiltered(
+          colorFilter: ColorFilter.saturation(0),
+          child: const ColoredBox(color: debugWhite, child: FlutterLogo()),
+        ),
+      ),
+    );
+    await expectLater(find.byType(ColorFiltered), matchesGoldenFile('color_filter_saturation.png'));
   });
 
   testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
@@ -68,13 +108,27 @@ void main() {
       );
     }
 
-    await pumpWithColor(Colors.red);
+    await pumpWithColor(debugRed);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
-    final ColorFilterLayer originalLayer = renderObject.debugLayer! as ColorFilterLayer;
+    final originalLayer = renderObject.debugLayer! as ColorFilterLayer;
     expect(originalLayer, isNotNull);
 
     // Change color to force a repaint.
-    await pumpWithColor(Colors.green);
+    await pumpWithColor(debugGreen);
     expect(renderObject.debugLayer, same(originalLayer));
+  });
+
+  testWidgets('ColorFiltered does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: ColorFiltered(colorFilter: ColorFilter.mode(debugBlue, BlendMode.color)),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ColorFiltered)), Size.zero);
   });
 }

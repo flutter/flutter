@@ -13,15 +13,19 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/testing/ios/IosUnitTests/App/AppDelegate.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
 FLUTTER_ASSERT_ARC
@@ -118,6 +122,10 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, copy, readonly) FlutterSendKeyEvent sendEvent;
 @end
 
+@interface NSObject (Tests)
+@property(nonatomic, strong) FlutterEngine* mockLaunchEngine;
+@end
+
 @interface FlutterViewController (Tests)
 
 @property(nonatomic, assign) double targetViewInsetBottom;
@@ -125,6 +133,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
 @property(nonatomic, strong) VSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
+@property(nonatomic, assign) BOOL awokenFromNib;
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
 - (void)surfaceUpdated:(BOOL)appeared;
@@ -133,6 +142,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
               nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
+- (void)updateAutoResizeConstraints;
+- (void)checkAndUpdateAutoResizeConstraints;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
@@ -165,6 +176,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
+- (void)onAccessibilityStatusChanged:(NSNotification*)notification;
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -988,6 +1000,44 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockEngine);
 }
 
+- (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMExpect([mockVC updateAutoResizeConstraints]);
+
+  [mockVC setAutoResizable:YES];
+
+  [mockVC viewDidLayoutSubviews];
+
+  OCMVerifyAll(mockVC);
+}
+
+- (void)testUpdatedViewportMetricsDoesNotResizeFlutterViewWhenNotAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMReject([mockVC updateAutoResizeConstraints]);
+
+  [mockVC setAutoResizable:NO];
+
+  [mockVC viewDidLayoutSubviews];
+
+  OCMVerifyAll(mockVC);
+}
+
 - (void)testUpdateViewportMetricsIfNeeded_DoesNotInvokeEngineWhenShouldBeIgnoredDuringRotation {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
@@ -1270,6 +1320,36 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return mockTraitCollection;
 }
 
+- (void)testTraitCollectionDidChangeCallsResetIntrinsicContentSizeWhenAutoResizable {
+  // Setup test.
+  id mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id partialMockVC = OCMPartialMock(realVC);
+
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([partialMockVC flutterView]).andReturn(mockFlutterView);
+
+  // Ensure isAutoResizable is YES
+  OCMStub([partialMockVC isAutoResizable]).andReturn(YES);
+
+  // Expect resetIntrinsicContentSize to be called on mockFlutterView
+  OCMExpect([mockFlutterView resetIntrinsicContentSize]);
+
+  // Exercise behavior under test.
+  [partialMockVC traitCollectionDidChange:nil];
+
+  // Verify behavior.
+  OCMVerifyAll(mockFlutterView);
+
+  // Clean up mocks
+  [partialMockVC stopMocking];
+  [mockFlutterView stopMocking];
+}
+
 #pragma mark - Platform Contrast
 
 - (void)testItReportsNormalPlatformContrastByDefault {
@@ -1375,32 +1455,36 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [settingsChannel stopMocking];
 }
 
-- (void)testItReportsAccessibilityOnOffSwitchLabelsFlagNotSet {
-  // Setup test.
+- (void)testOnAccessibilityStatusChangedCallsEnableSemanticsWithFlags {
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
-  id partialMockViewController = OCMPartialMock(viewController);
-  OCMStub([partialMockViewController accessibilityIsOnOffSwitchLabelsEnabled]).andReturn(NO);
+  id mockAccessibilityFeatures = OCMClassMock([FlutterAccessibilityFeatures class]);
+  OCMStub([mockAccessibilityFeatures flags]).andReturn(333);
+  id mockViewController = OCMPartialMock(viewController);
+  OCMStub([mockViewController accessibilityFeatures]).andReturn(mockAccessibilityFeatures);
 
-  // Exercise behavior under test.
-  int32_t flags = [partialMockViewController accessibilityFlags];
-
-  // Verify behavior.
-  XCTAssert((flags & (int32_t)flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels) == 0);
+  [mockViewController onAccessibilityStatusChanged:nil];
+  OCMVerify([self.mockEngine enableSemantics:[OCMArg any] withFlags:333]);
 }
 
-- (void)testItReportsAccessibilityOnOffSwitchLabelsFlagSet {
-  // Setup test.
+- (void)testHandleAccessibilityNotifications {
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
-  id partialMockViewController = OCMPartialMock(viewController);
-  OCMStub([partialMockViewController accessibilityIsOnOffSwitchLabelsEnabled]).andReturn(YES);
+  id mockViewController = OCMPartialMock(viewController);
+  __block NSUInteger callsCount = 0;
+  OCMStub([mockViewController onAccessibilityStatusChanged:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        callsCount++;
+      });
 
-  // Exercise behavior under test.
-  int32_t flags = [partialMockViewController accessibilityFlags];
+  FlutterAccessibilityFeatures* accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
+  NSArray<NSString*>* accessibilityNotification = [accessibilityFeatures observedNotificationNames];
 
-  // Verify behavior.
-  XCTAssert((flags & (int32_t)flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels) != 0);
+  for (NSUInteger i = 0; i < [accessibilityNotification count]; i++) {
+    NSString* notificationName = [accessibilityNotification objectAtIndex:i];
+    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:nil];
+    XCTAssertEqual(callsCount, i + 1);
+  }
 }
 
 - (void)testAccessibilityPerformEscapePopsRoute {
@@ -2469,6 +2553,127 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   [mockBundle stopMocking];
   [mockVC stopMocking];
+}
+
+- (void)testPerformImplicitEngineCallbacks {
+  id mockRegistrant = OCMProtocolMock(@protocol(FlutterPluginRegistrant));
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setPluginRegistrant:)]);
+  [appDelegate setPluginRegistrant:mockRegistrant];
+  FlutterViewController* viewController =
+      (FlutterViewController*)[storyboard instantiateInitialViewController];
+  [appDelegate setPluginRegistrant:nil];
+  OCMVerify([mockRegistrant registerWithRegistry:viewController]);
+  OCMVerify([self.mockEngine performImplicitEngineCallback]);
+  [appDelegate setMockLaunchEngine:nil];
+}
+
+- (void)testPerformImplicitEngineCallbacksUsesAppLaunchEventFallbacks {
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
+  OCMStub([viewControllerMock awokenFromNib]).andReturn(YES);
+
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
+
+  id mockScene = OCMClassMock([UIScene class]);
+  id mockSceneDelegate = OCMProtocolMock(@protocol(UISceneDelegate));
+  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
+  OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
+
+  FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
+  OCMVerify([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
+  OCMVerify([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
+}
+
+- (void)testPerformImplicitEngineCallbacksNoAppLaunchEventFallbacksWhenNoStoryboard {
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
+  OCMStub([viewControllerMock awokenFromNib]).andReturn(NO);
+
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
+
+  id mockScene = OCMClassMock([UIScene class]);
+  id mockSceneDelegate = OCMProtocolMock(@protocol(UISceneDelegate));
+  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
+  OCMStub([mockApplication connectedScenes]).andReturn([NSSet setWithObject:mockScene]);
+
+  FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
+  OCMReject([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
+  OCMReject([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
+}
+
+- (void)testPerformImplicitEngineCallbacksNoAppLaunchEventFallbacksWhenNoScenes {
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([mockEngine performImplicitEngineCallback]).andReturn(YES);
+  OCMStub([viewControllerMock awokenFromNib]).andReturn(YES);
+
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  FlutterAppDelegate* mockApplicationDelegate = OCMClassMock([FlutterAppDelegate class]);
+  OCMStub([mockApplication delegate]).andReturn(mockApplicationDelegate);
+  OCMStub([mockApplicationDelegate takeLaunchEngine]).andReturn(mockEngine);
+
+  FlutterPluginAppLifeCycleDelegate* mockLifecycleDelegate =
+      OCMClassMock([FlutterPluginAppLifeCycleDelegate class]);
+  OCMStub([mockApplicationDelegate lifeCycleDelegate]).andReturn(mockLifecycleDelegate);
+
+  [viewControllerMock sharedSetupWithProject:nil initialRoute:nil];
+  OCMReject([mockLifecycleDelegate sceneFallbackWillFinishLaunchingApplication:mockApplication]);
+  OCMReject([mockLifecycleDelegate sceneFallbackDidFinishLaunchingApplication:mockApplication]);
+}
+
+- (void)testGrabLaunchEngine {
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Flutter" bundle:nil];
+  XCTAssertTrue(storyboard);
+  FlutterViewController* viewController =
+      (FlutterViewController*)[storyboard instantiateInitialViewController];
+  XCTAssertTrue(viewController);
+  XCTAssertTrue([viewController isKindOfClass:[FlutterViewController class]]);
+  XCTAssertEqual(viewController.engine, self.mockEngine);
+  [appDelegate setMockLaunchEngine:nil];
+}
+
+- (void)testDoesntGrabLaunchEngine {
+  id appDelegate = [[UIApplication sharedApplication] delegate];
+  XCTAssertTrue([appDelegate respondsToSelector:@selector(setMockLaunchEngine:)]);
+  [appDelegate setMockLaunchEngine:self.mockEngine];
+  FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
+  XCTAssertNotNil(flutterViewController.engine);
+  XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
+  [appDelegate setMockLaunchEngine:nil];
 }
 
 @end

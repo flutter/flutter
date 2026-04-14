@@ -41,12 +41,12 @@ class BuildBundleCommand extends BuildSubCommand {
         allowed: const <String>[
           'android-arm',
           'android-arm64',
-          'android-x86',
           'android-x64',
           'ios',
           'darwin',
           'linux-x64',
           'linux-arm64',
+          'linux-riscv64',
           'windows-x64',
           'windows-arm64',
         ],
@@ -71,13 +71,13 @@ class BuildBundleCommand extends BuildSubCommand {
   final BundleBuilder _bundleBuilder;
 
   @override
-  final String name = 'bundle';
+  final name = 'bundle';
 
   @override
-  final String description = 'Build the Flutter assets directory from your app.';
+  final description = 'Build the Flutter assets directory from your app.';
 
   @override
-  final String usageFooter =
+  final usageFooter =
       'The Flutter assets directory contains your '
       'application code and resources; they are used by some Flutter Android and'
       ' iOS runtimes.';
@@ -123,6 +123,7 @@ class BuildBundleCommand extends BuildSubCommand {
         }
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
         if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
@@ -130,13 +131,14 @@ class BuildBundleCommand extends BuildSubCommand {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         break;
+      case TargetPlatform.unsupported:
+        TargetPlatform.throwUnsupportedTarget();
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
@@ -147,7 +149,6 @@ class BuildBundleCommand extends BuildSubCommand {
       mainPath: targetFile,
       depfilePath: stringArg('depfile'),
       assetDirPath: stringArg('asset-dir'),
-      buildNativeAssets: false,
     );
     return FlutterCommandResult.success();
   }

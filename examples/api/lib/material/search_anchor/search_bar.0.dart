@@ -20,14 +20,14 @@ class _SearchBarAppState extends State<SearchBarApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = ThemeData(brightness: isDark ? Brightness.dark : Brightness.light);
+    final ThemeData themeData = ThemeData(brightness: isDark ? .dark : .light);
 
     return MaterialApp(
       theme: themeData,
       home: Scaffold(
         appBar: AppBar(title: const Text('Search Bar Sample')),
         body: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const .all(8.0),
           child: SearchAnchor(
             builder: (BuildContext context, SearchController controller) {
               return SearchBar(
@@ -59,19 +59,20 @@ class _SearchBarAppState extends State<SearchBarApp> {
                 ],
               );
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(5, (int index) {
-                final String item = 'item $index';
-                return ListTile(
-                  title: Text(item),
-                  onTap: () {
-                    setState(() {
-                      controller.closeView(item);
-                    });
-                  },
-                );
-              });
-            },
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) {
+                  return List<ListTile>.generate(5, (int index) {
+                    final String item = 'item $index';
+                    return ListTile(
+                      title: Text(item),
+                      onTap: () {
+                        setState(() {
+                          controller.closeView(item);
+                        });
+                      },
+                    );
+                  });
+                },
           ),
         ),
       ),

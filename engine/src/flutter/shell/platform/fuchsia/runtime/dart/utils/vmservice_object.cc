@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "vmservice_object.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h"
 
 #include <dirent.h>
 #include <fuchsia/io/cpp/fidl.h>
+#include <sys/stat.h>
 #include <zircon/status.h>
 
 #include <cerrno>
@@ -47,8 +48,7 @@ void VMServiceObject::GetContents(LazyEntryVector* out_vector) const {
     if ((file == ".") || (file == "..")) {
       continue;
     }
-    out_vector->push_back({std::stoul(file) + GetStartingId(), file,
-                           fuchsia::io::MODE_TYPE_FILE});
+    out_vector->push_back({std::stoul(file) + GetStartingId(), file, S_IFREG});
   }
 }
 

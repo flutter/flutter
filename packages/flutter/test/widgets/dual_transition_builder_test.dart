@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('runs animations', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
@@ -26,7 +26,7 @@ void main() {
               child: child,
             );
           },
-          child: Container(color: Colors.green, height: 100, width: 100),
+          child: Container(color: const Color(0xFF00FF00), height: 100, width: 100),
         ),
       ),
     );
@@ -63,7 +63,7 @@ void main() {
   });
 
   testWidgets('keeps state', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
@@ -118,7 +118,7 @@ void main() {
   });
 
   testWidgets('does not jump when interrupted - forward', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
@@ -137,7 +137,7 @@ void main() {
               child: child,
             );
           },
-          child: Container(color: Colors.green, height: 100, width: 100),
+          child: Container(color: const Color(0xFF00FF00), height: 100, width: 100),
         ),
       ),
     );
@@ -171,7 +171,7 @@ void main() {
   });
 
   testWidgets('does not jump when interrupted - reverse', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       value: 1.0,
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
@@ -191,7 +191,7 @@ void main() {
               child: child,
             );
           },
-          child: Container(color: Colors.green, height: 100, width: 100),
+          child: Container(color: const Color(0xFF00FF00), height: 100, width: 100),
         ),
       ),
     );

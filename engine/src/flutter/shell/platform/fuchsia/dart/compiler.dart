@@ -11,14 +11,11 @@ import 'package:crypto/crypto.dart';
 import 'package:vm/kernel_front_end.dart'
     show createCompilerArgParser, runCompiler, successExitCode;
 
-final ArgParser _argParser =
-    createCompilerArgParser()..addFlag(
-      'train',
-      help: 'Run through sample command line to produce snapshot',
-      negatable: false,
-    );
+final ArgParser _argParser = createCompilerArgParser()
+  ..addFlag('train', help: 'Run through sample command line to produce snapshot', negatable: false);
 
-String _usage = '''
+String _usage =
+    '''
 Usage: compiler [options] input.dart
 
 Options:

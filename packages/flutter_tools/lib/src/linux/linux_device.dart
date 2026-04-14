@@ -20,27 +20,19 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
-       super(
-         'linux',
-         platformType: PlatformType.linux,
-         ephemeral: false,
-         logger: logger,
-         processManager: processManager,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+       super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'Linux';
@@ -49,6 +41,8 @@ class LinuxDevice extends DesktopDevice {
   late final Future<TargetPlatform> targetPlatform = () async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
       return TargetPlatform.linux_x64;
+    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
+      return TargetPlatform.linux_riscv64;
     }
     return TargetPlatform.linux_arm64;
   }();
@@ -109,7 +103,10 @@ class LinuxDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _linuxWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

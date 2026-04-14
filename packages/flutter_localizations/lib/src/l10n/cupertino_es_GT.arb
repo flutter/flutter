@@ -1,4 +1,10 @@
 {
+  "expansionTileExpandedHint": "presiona dos veces para contraer",
+  "collapsedHint": "Expandido",
+  "expandedHint": "Contraído",
+  "expansionTileCollapsedTapHint": "Expandir para ver más detalles",
+  "expansionTileExpandedTapHint": "Contraer",
+  "expansionTileCollapsedHint": "presiona dos veces para expandir",
   "cancelButtonLabel": "Cancelar",
   "backButtonLabel": "Atrás",
   "clearButtonLabel": "Borrar",

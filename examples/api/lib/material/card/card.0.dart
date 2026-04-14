@@ -14,7 +14,10 @@ class CardExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(appBar: AppBar(title: const Text('Card Sample')), body: const CardExample()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Card Sample')),
+        body: const CardExample(),
+      ),
     );
   }
 }
@@ -27,7 +30,7 @@ class CardExample extends StatelessWidget {
     return Center(
       child: Card(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             const ListTile(
               leading: Icon(Icons.album),
@@ -35,7 +38,7 @@ class CardExample extends StatelessWidget {
               subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: .end,
               children: <Widget>[
                 TextButton(
                   child: const Text('BUY TICKETS'),

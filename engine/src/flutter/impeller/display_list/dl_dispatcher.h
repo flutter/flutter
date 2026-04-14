@@ -28,6 +28,35 @@ using DlRoundRect = flutter::DlRoundRect;
 using DlRoundSuperellipse = flutter::DlRoundSuperellipse;
 using DlPath = flutter::DlPath;
 
+//////////////////////////////////////////////////////////////////////////
+/// Important implementation note.
+///
+/// The Impeller DisplayList Dispatcher implementation is divided into
+/// two parts and conducted in two passes.
+///
+/// The first pass is conducted using the FirstPassDispatcher which
+/// examines the rendering ops for important conditions needed by the
+/// rendering pass and computes some needed information for them.
+///
+/// The second pass is conducted using CanvasDlDispatcher to perform the
+/// actual rendering using a Canvas and data provided by the first pass.
+///
+/// @important It is important to note that the 2 passes perform slightly
+/// different DisplayList culling and may process different subsets of the
+/// frame's operations.
+/// See https://github.com/flutter/flutter/issues/182639
+///
+/// Given the above issue any data precomputed by the first pass should
+/// be presented in a way that doesn't assume a 1:1 correlation of the
+/// rendering operations in both passes (perhaps provide it in a map
+/// instead of a vector). While we have not yet observed and cases where
+/// an operation is missed during the first pass but still processed in
+/// the rendering pass, it would be wise to include a backup plan in
+/// the canvas dispatcher for when the data was not forwarded.
+//////////////////////////////////////////////////////////////////////////
+
+/// Base (virtual) dispatcher utility class to implement most DlOpReceiver
+/// operations for other specific classes.
 class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
   // |flutter::DlOpReceiver|
@@ -238,14 +267,9 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                        DlScalar opacity) override;
 
   // |flutter::DlOpReceiver|
-  void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                    DlScalar x,
-                    DlScalar y) override;
-
-  // |flutter::DlOpReceiver|
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
 
   // |flutter::DlOpReceiver|
   void drawShadow(const DlPath& path,
@@ -265,6 +289,10 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
                                  const Paint& paint);
 };
 
+/// Specific non-virtual dispatcher utility class that uses DlDispatcherBase
+/// to implement most operations but provides additional implementation of
+/// operations that are specific to the rendering pass of the Impeller
+/// 2-pass rendering procedure.
 class CanvasDlDispatcher : public DlDispatcherBase {
  public:
   CanvasDlDispatcher(ContentContext& renderer,
@@ -272,7 +300,7 @@ class CanvasDlDispatcher : public DlDispatcherBase {
                      bool is_onscreen,
                      bool has_root_backdrop_filter,
                      flutter::DlBlendMode max_root_blend_mode,
-                     IRect cull_rect);
+                     IRect32 cull_rect);
 
   ~CanvasDlDispatcher() = default;
 
@@ -311,8 +339,9 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   Canvas& GetCanvas() override;
 };
 
-/// Performs a first pass over the display list to collect infomation.
-/// Collects things like text frames and backdrop filters.
+/// Performs a first pass over the display list to collect information
+/// that will be useful in a second pass by the CanvasDlDispatcher.
+/// This class collects things like text frames and backdrop filters.
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                             public flutter::IgnoreClipDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {
@@ -344,19 +373,22 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // 2x3 2D affine subset of a 4x4 transform in row major order
   void transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
                          DlScalar myx, DlScalar myy, DlScalar myt) override;
+  // clang-format on
 
+  // clang-format off
   // full 4x4 transform in row major order
   void transformFullPerspective(
       DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
       DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
       DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
       DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) override;
+  // clang-format on
 
   void transformReset() override;
 
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     DlScalar x,
-                     DlScalar y) override;
+  void drawText(const std::shared_ptr<flutter::DlText>& text,
+                DlScalar x,
+                DlScalar y) override;
 
   void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
                        DlScalar opacity) override;
@@ -382,7 +414,8 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-  std::pair<std::unordered_map<int64_t, BackdropData>, size_t> TakeBackdropData();
+  std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
+  TakeBackdropData();
 
  private:
   const Rect GetCurrentLocalCullingBounds() const;
@@ -404,17 +437,19 @@ std::shared_ptr<Texture> DisplayListToTexture(
     ISize size,
     AiksContext& context,
     bool reset_host_buffer = true,
-    bool generate_mips = false);
+    bool generate_mips = false,
+    std::optional<PixelFormat> target_pixel_format = std::nullopt);
 
 /// @brief Render the provided display list to the render target.
 ///
 /// If [is_onscreen] is true, then the onscreen command buffer will be
 /// submitted via Context::SubmitOnscreen.
-bool RenderToTarget(ContentContext& context, RenderTarget render_target,
-                         const sk_sp<flutter::DisplayList>& display_list,
-                         SkIRect cull_rect,
-                         bool reset_host_buffer,
-                         bool is_onscreen = true);
+bool RenderToTarget(ContentContext& context,
+                    RenderTarget render_target,
+                    const sk_sp<flutter::DisplayList>& display_list,
+                    Rect cull_rect,
+                    bool reset_host_buffer,
+                    bool is_onscreen = true);
 
 }  // namespace impeller
 

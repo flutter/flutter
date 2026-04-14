@@ -21,7 +21,8 @@ class ProgressIndicatorExample extends StatefulWidget {
   const ProgressIndicatorExample({super.key});
 
   @override
-  State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
+  State<ProgressIndicatorExample> createState() =>
+      _ProgressIndicatorExampleState();
 }
 
 class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
@@ -52,24 +53,28 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
       body: Center(
         child: Column(
           spacing: 16.0,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Determinate CircularProgressIndicator'),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: CircularProgressIndicator(year2023: year2023, value: controller.value),
+              padding: const .symmetric(horizontal: 16),
+              child: CircularProgressIndicator(
+                // ignore: deprecated_member_use
+                year2023: year2023,
+                value: controller.value,
+              ),
             ),
             const Text('Indeterminate CircularProgressIndicator'),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const .symmetric(horizontal: 16),
+              // ignore: deprecated_member_use
               child: CircularProgressIndicator(year2023: year2023),
             ),
             SwitchListTile(
               value: year2023,
-              title:
-                  year2023
-                      ? const Text('Switch to latest M3 style')
-                      : const Text('Switch to year2023 M3 style'),
+              title: year2023
+                  ? const Text('Switch to latest M3 style')
+                  : const Text('Switch to year2023 M3 style'),
               onChanged: (bool value) {
                 setState(() {
                   year2023 = !year2023;

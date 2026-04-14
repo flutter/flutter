@@ -37,6 +37,21 @@
 @property(nonatomic, readonly) BOOL enableImpeller;
 
 /**
+ * Whether Flutter GPU is enabled
+ */
+@property(nonatomic, readonly) BOOL enableFlutterGPU;
+
+/**
+ * Whether the Signed Distance Fields are enabled for rendering.
+ */
+@property(nonatomic, readonly) BOOL enableSDFs;
+
+/**
+ * Whether wide gamut color support is enabled
+ */
+@property(nonatomic, readonly) BOOL enableWideGamut;
+
+/**
  * Instead of looking up the assets and ICU data path in the application bundle, this initializer
  * allows callers to create a Dart project with custom locations specified for the both.
  */

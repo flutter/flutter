@@ -22,7 +22,7 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
   @override
   Future<void> setUpAll() async {
     FlutterTimeline.debugCollectionEnabled = true;
-    super.setUpAll();
+    await super.setUpAll();
     SemanticsBinding.instance.ensureSemantics();
   }
 
@@ -79,7 +79,7 @@ class BenchMaterial3ScrollSemantics extends WidgetRecorder {
   @override
   Future<void> setUpAll() async {
     FlutterTimeline.debugCollectionEnabled = true;
-    super.setUpAll();
+    await super.setUpAll();
     SemanticsBinding.instance.ensureSemantics();
   }
 
@@ -125,7 +125,7 @@ class _ScrollTestState extends State<_ScrollTest> with SingleTickerProviderState
 
     scrollController = ScrollController();
 
-    bool forward = true;
+    var forward = true;
 
     // A one-off timer is necessary to allow the framework to measure the
     // available scroll extents before the scroll controller can be exercised

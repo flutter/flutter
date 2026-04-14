@@ -101,17 +101,16 @@ class TimelineEvent {
 }
 
 List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
-  final List<dynamic>? jsonEvents = json['traceEvents'] as List<dynamic>?;
+  final jsonEvents = json['traceEvents'] as List<dynamic>?;
 
   if (jsonEvents == null) {
     return null;
   }
 
-  final List<TimelineEvent> timelineEvents =
-      jsonEvents
-          .cast<Map<String, dynamic>>()
-          .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
-          .toList();
+  final List<TimelineEvent> timelineEvents = jsonEvents
+      .cast<Map<String, dynamic>>()
+      .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+      .toList();
 
   timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
     return switch ((e1.timestampMicros, e2.timestampMicros)) {

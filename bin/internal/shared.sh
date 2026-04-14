@@ -20,7 +20,7 @@ function pub_upgrade_with_retry {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics >&2) && break
     >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
@@ -30,12 +30,17 @@ function pub_upgrade_with_retry {
     >&2 echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
     return 1
   fi
+
+  # Touch the pubspec.lock to ensure, even if this was a NOP, it is newer than pubspec.yaml.
+  # See https://github.com/flutter/flutter/issues/171024.
+  touch "$FLUTTER_TOOLS_DIR/pubspec.lock" >&2
+
   return 0
 }
 
 # Trap function for removing any remaining lock file at exit.
 function _rmlock () {
-  [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -rf "$FLUTTER_UPGRADE_LOCK"
+  [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -rf -- "$FLUTTER_UPGRADE_LOCK"
 }
 
 # Determines which lock method to use, based on what is available on the system.
@@ -116,7 +121,7 @@ function upgrade_flutter () (
   # Ensure the engine.version is populated
   "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
 
-  local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
+  local revision="$(git -C "$FLUTTER_ROOT" rev-parse HEAD)"
   local compilekey="$revision:$FLUTTER_TOOL_ARGS"
 
   # Invalidate cache if:
@@ -127,7 +132,7 @@ function upgrade_flutter () (
   #  * pubspec.yaml last modified after pubspec.lock
   if [[ ! -f "$SNAPSHOT_PATH" || \
         ! -s "$STAMP_PATH" || \
-        "$(cat "$STAMP_PATH")" != "$compilekey" || \
+        "$(< "$STAMP_PATH")" != "$compilekey" || \
         "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
@@ -136,7 +141,7 @@ function upgrade_flutter () (
     _wait_for_lock
 
     # A different shell process might have updated the tool/SDK.
-    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(cat "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+    if [[ -f "$SNAPSHOT_PATH" && -s "$STAMP_PATH" && "$(< "$STAMP_PATH")" == "$compilekey" && "$FLUTTER_TOOLS_DIR/pubspec.yaml" -ot "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
       exit $?
     fi
 
@@ -232,7 +237,7 @@ function shared::execute() {
     >&2 echo "Error: The Flutter directory is not a clone of the GitHub project."
     >&2 echo "       The flutter tool requires Git in order to operate properly;"
     >&2 echo "       to install Flutter, see the instructions at:"
-    >&2 echo "       https://flutter.dev/get-started"
+    >&2 echo "       https://docs.flutter.dev/get-started"
     exit 1
   fi
 

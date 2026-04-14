@@ -14,7 +14,8 @@ class FABTemplate extends TokenTemplate {
   });
 
   @override
-  String generate() => '''
+  String generate() =>
+      '''
 class _${blockName}DefaultsM3 extends FloatingActionButtonThemeData {
   _${blockName}DefaultsM3(this.context, this.type, this.hasChild)
     : super(

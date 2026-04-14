@@ -1,8 +1,8 @@
 {
   "datePickerHourSemanticsLabelOne": "$hour বাজিছে",
   "datePickerHourSemanticsLabelOther": "$hour বাজিছে",
-  "datePickerMinuteSemanticsLabelOne": "১মিনিট",
-  "datePickerMinuteSemanticsLabelOther": "$minuteমিনিট",
+  "datePickerMinuteSemanticsLabelOne": "১ মিনিট",
+  "datePickerMinuteSemanticsLabelOther": "$minute মিনিট",
   "datePickerDateOrder": "mdy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "পূৰ্বাহ্ন",
@@ -19,7 +19,7 @@
   "copyButtonLabel": "প্ৰতিলিপি কৰক",
   "pasteButtonLabel": "পে'ষ্ট কৰক",
   "clearButtonLabel": "মচক",
-  "selectAllButtonLabel": "সকলো বাছনি কৰক",
+  "selectAllButtonLabel": "আটাইবোৰ বাছনি কৰক",
   "tabSemanticsLabel": "$tabCount টা টেবৰ $tabIndex নম্বৰটো",
   "modalBarrierDismissLabel": "অগ্ৰাহ্য কৰক",
   "searchTextFieldPlaceholderLabel": "সন্ধান কৰক",
@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "ৱেবত সন্ধান কৰক",
   "shareButtonLabel": "শ্বেয়াৰ কৰক…",
   "cancelButtonLabel": "বাতিল কৰক",
-  "backButtonLabel": "উভতি যাওক"
+  "backButtonLabel": "উভতি যাওক",
+  "expansionTileExpandedHint": "সংকোচন কৰিবলৈ দুবাৰ টিপক",
+  "expansionTileCollapsedHint": "বিস্তাৰ কৰিবলৈ দুবাৰ টিপক",
+  "expansionTileExpandedTapHint": "সংকোচন কৰক",
+  "expansionTileCollapsedTapHint": "অধিক সবিশেষ জানিবলৈ বিস্তাৰ কৰক",
+  "expandedHint": "সংকোচন কৰা আছে",
+  "collapsedHint": "বিস্তাৰ কৰা আছে"
 }

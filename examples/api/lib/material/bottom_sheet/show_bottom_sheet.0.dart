@@ -24,11 +24,12 @@ class BottomSheetExampleApp extends StatelessWidget {
 
 enum AnimationStyles { defaultStyle, custom, none }
 
-const List<(AnimationStyles, String)> animationStyleSegments = <(AnimationStyles, String)>[
-  (AnimationStyles.defaultStyle, 'Default'),
-  (AnimationStyles.custom, 'Custom'),
-  (AnimationStyles.none, 'None'),
-];
+const List<(AnimationStyles, String)> animationStyleSegments =
+    <(AnimationStyles, String)>[
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
+    ];
 
 class BottomSheetExample extends StatefulWidget {
   const BottomSheetExample({super.key});
@@ -38,14 +39,16 @@ class BottomSheetExample extends StatefulWidget {
 }
 
 class _BottomSheetExampleState extends State<BottomSheetExample> {
-  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{AnimationStyles.defaultStyle};
+  Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
+    AnimationStyles.defaultStyle,
+  };
   AnimationStyle? _animationStyle;
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           SegmentedButton<AnimationStyles>(
             selected: _animationStyleSelection,
@@ -62,12 +65,16 @@ class _BottomSheetExampleState extends State<BottomSheetExample> {
                 _animationStyleSelection = styles;
               });
             },
-            segments:
-                animationStyleSegments.map<ButtonSegment<AnimationStyles>>((
+            segments: animationStyleSegments
+                .map<ButtonSegment<AnimationStyles>>((
                   (AnimationStyles, String) shirt,
                 ) {
-                  return ButtonSegment<AnimationStyles>(value: shirt.$1, label: Text(shirt.$2));
-                }).toList(),
+                  return ButtonSegment<AnimationStyles>(
+                    value: shirt.$1,
+                    label: Text(shirt.$2),
+                  );
+                })
+                .toList(),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
@@ -80,8 +87,8 @@ class _BottomSheetExampleState extends State<BottomSheetExample> {
                   return SizedBox.expand(
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: .center,
+                        mainAxisSize: .min,
                         children: <Widget>[
                           const Text('Bottom sheet'),
                           ElevatedButton(

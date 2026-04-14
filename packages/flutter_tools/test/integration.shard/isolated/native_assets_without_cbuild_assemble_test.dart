@@ -36,12 +36,8 @@ void main() {
   const ProcessManager processManager = LocalProcessManager();
   final String constraint = _getPackageFfiTemplatePubspecVersion();
 
-  setUpAll(() {
-    processManager.runSync(<String>[flutterBin, 'config', '--enable-native-assets']);
-  });
-
   // Test building a host, iOS, and APK (Android) target where possible.
-  for (final String buildCommand in <String>[
+  for (final buildCommand in <String>[
     // Current (Host) OS.
     platform.operatingSystem,
 
@@ -68,7 +64,7 @@ void _testBuildCommand({
 }) {
   testWithoutContext('flutter build "$buildCommand" succeeds without libraries', () async {
     await inTempDir((Directory tempDirectory) async {
-      const String packageName = 'uses_package_hooks';
+      const packageName = 'uses_package_hooks';
 
       // Create a new (plain Dart SDK) project.
       await expectLater(
@@ -109,7 +105,7 @@ void main(List<String> args) async {
       // Try building.
       //
       // TODO(matanlurey): Stream the app so that we can see partial output.
-      final List<String> args = <String>[
+      final args = <String>[
         flutterBin,
         'build',
         buildCommand,
@@ -149,8 +145,8 @@ String _getPackageFfiTemplatePubspecVersion() {
     io.File(path).readAsStringSync(),
     sourceUrl: Uri.parse(path),
   );
-  final YamlMap rootNode = yaml.contents as YamlMap;
-  final YamlMap dependencies = rootNode.nodes['dependencies']! as YamlMap;
-  final String version = dependencies['hooks']! as String;
+  final rootNode = yaml.contents as YamlMap;
+  final dependencies = rootNode.nodes['dependencies']! as YamlMap;
+  final version = dependencies['hooks']! as String;
   return version;
 }

@@ -18,7 +18,7 @@ body:
       value: |
         Before filling the form fields, please consider the following:
         - Ensure that you have searched the [existing package issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Apackage)
-        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+        - Read the [guide to filing a bug](https://docs.flutter.dev/resources/bug-reports)
   - type: dropdown
     id: packages
     attributes:
@@ -31,14 +31,10 @@ body:
         - animations
         - camera
         - cross_file
-        - css_colors
         - espresso
         - extension_google_sign_in_as_googleapis_auth
         - file_selector
-        - flutter_adaptive_scaffold
-        - flutter_image
         - flutter_lints
-        - flutter_markdown
         - flutter_migrate
         - flutter_plugin_android_lifecycle
         - flutter_svg
@@ -46,17 +42,16 @@ body:
         - go_router
         - go_router_builder
         - google_adsense
+        - google_fonts
         - google_identity_services_web
         - google_maps_flutter
         - google_sign_in
         - image_picker
         - in_app_purchase
         - interactive_media_ads
-        - ios_platform_images
         - local_auth
         - metrics_center
         - multicast_dns
-        - palette_generator
         - path_parsing
         - path_provider
         - pigeon

@@ -73,6 +73,37 @@ external DomObjectConstructor get objectConstructor;
 
 extension type DomObjectConstructor._(JSObject _) implements JSObject {
   external JSObject assign(JSAny? target, JSAny? source1, JSAny? source2);
+
+  external void defineProperty(
+    JSObject object,
+    String property,
+    DomPropertyDataDescriptor descriptor,
+  );
+}
+
+extension type DomPropertyDataDescriptor._primary(JSObject _) implements JSObject {
+  factory DomPropertyDataDescriptor({
+    Object? value,
+    bool configurable = false,
+    bool enumerable = false,
+    bool writable = false,
+  }) => DomPropertyDataDescriptor._(
+    value: value?.toJSAnyDeep,
+    configurable: configurable,
+    enumerable: enumerable,
+    writable: writable,
+  );
+  external factory DomPropertyDataDescriptor._({
+    required JSAny? value,
+    required bool configurable,
+    required bool enumerable,
+    required bool writable,
+  });
+
+  external JSAny? get value;
+  external bool get configurable;
+  external bool get enumerable;
+  external bool get writable;
 }
 
 @JS('Window')
@@ -87,6 +118,11 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomNavigator get navigator;
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
+
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
 
   @visibleForTesting
   Future<Object?> fetch(String url) {
@@ -147,12 +183,6 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
-
-  @JS('createImageBitmap')
-  external JSPromise<JSAny?> _createImageBitmap(DomImageData source);
-  Future<DomImageBitmap> createImageBitmap(DomImageData source) {
-    return _createImageBitmap(source).toDart.then((JSAny? value) => value! as DomImageBitmap);
-  }
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(JSNumber highResTime);
@@ -177,6 +207,51 @@ external double parseFloatImpl(String value);
 @JS('window')
 external DomWindow get domWindow;
 
+/// Cached result of iframe detection for [isEmbeddedInIframe].
+bool? _cachedIsEmbeddedInIframe;
+
+/// Resets the iframe detection cache. Used for testing.
+@visibleForTesting
+void debugResetIframeDetectionCache() {
+  _cachedIsEmbeddedInIframe = null;
+}
+
+/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetIframeEmbeddingForTests(bool? isInIframe) {
+  _cachedIsEmbeddedInIframe = isInIframe;
+}
+
+/// Returns true if the current window is inside an iframe.
+///
+/// This is a shared utility used by multiple engine components that need
+/// to detect iframe embedding (e.g., pointer binding, text editing).
+///
+/// The result is cached since iframe status doesn't change during the app's
+/// lifetime. Handles cross-origin iframes gracefully by assuming embedded
+/// context when security exceptions occur.
+bool isEmbeddedInIframe() {
+  if (_cachedIsEmbeddedInIframe != null) {
+    return _cachedIsEmbeddedInIframe!;
+  }
+
+  try {
+    final DomWindow? parent = domWindow.parent;
+    if (parent == null) {
+      _cachedIsEmbeddedInIframe = false;
+      return false;
+    }
+    // If window.parent is the same object as window, we're not in an iframe.
+    // If they're different, we're in an iframe.
+    _cachedIsEmbeddedInIframe = !identical(parent, domWindow);
+    return _cachedIsEmbeddedInIframe!;
+  } catch (e) {
+    // Cross-origin iframe - assume embedded
+    _cachedIsEmbeddedInIframe = true;
+    return true;
+  }
+}
+
 @JS('Intl')
 external DomIntl get domIntl;
 
@@ -189,6 +264,9 @@ Future<DomImageBitmap> createImageBitmap(
   JSAny source, [
   ({int x, int y, int width, int height})? bounds,
 ]) {
+  if (debugThrowOnCreateImageBitmapIfDisabled && !browserSupportsCreateImageBitmap) {
+    throw UnsupportedError('createImageBitmap is not supported in this browser');
+  }
   JSPromise<JSAny?> jsPromise;
   if (bounds != null) {
     jsPromise = _createImageBitmap(source, bounds.x, bounds.y, bounds.width, bounds.height);
@@ -235,7 +313,6 @@ extension type DomDocument._(JSObject _) implements DomNode {
     }
   }
 
-  external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(String namespaceURI, String qualifiedName);
   external DomText createTextNode(String data);
@@ -403,6 +480,7 @@ extension type DomElement._(JSObject _) implements DomNode {
   external String? getAttribute(String attributeName);
   external DomRect getBoundingClientRect();
   external void prepend(DomNode node);
+  external void replaceWith(DomNode node);
   external DomElement? querySelector(String selectors);
   external DomElement? closest(String selectors);
   external bool matches(String selectors);
@@ -449,6 +527,25 @@ extension type DomElement._(JSObject _) implements DomNode {
   external double scrollTop;
   external double scrollLeft;
   external DomTokenList get classList;
+
+  /// Scrolls the element into the visible area of the browser window.
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+  @JS('scrollIntoView')
+  external void _scrollIntoView([JSAny? options]);
+
+  /// Scrolls the element into view with optional configuration.
+  ///
+  /// If [options] is null, scrolls with default behavior.
+  /// Common options: {'block': 'center', 'inline': 'nearest', 'behavior': 'smooth'}
+  void scrollIntoView([Map<String, dynamic>? options]) {
+    if (options == null) {
+      _scrollIntoView();
+    } else {
+      _scrollIntoView(options.toJSAnyDeep);
+    }
+  }
+
   external String className;
 
   external void blur();
@@ -714,7 +811,7 @@ extension type DomHTMLScriptElement._(JSObject _) implements DomHTMLElement {
 }
 
 DomHTMLScriptElement createDomHTMLScriptElement(String? nonce) {
-  final DomHTMLScriptElement script = domDocument.createElement('script') as DomHTMLScriptElement;
+  final script = domDocument.createElement('script') as DomHTMLScriptElement;
   if (nonce != null) {
     script.nonce = nonce;
   }
@@ -753,7 +850,7 @@ extension type DomHTMLStyleElement._(JSObject _) implements DomHTMLElement {
 }
 
 DomHTMLStyleElement createDomHTMLStyleElement(String? nonce) {
-  final DomHTMLStyleElement style = domDocument.createElement('style') as DomHTMLStyleElement;
+  final style = domDocument.createElement('style') as DomHTMLStyleElement;
   if (nonce != null) {
     style.nonce = nonce;
   }
@@ -774,7 +871,7 @@ extension type DomPerformanceEntry._(JSObject _) implements JSObject {}
 extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntry {}
 
 @JS('HTMLCanvasElement')
-extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement {
+extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
   external double? width;
   external double? height;
 
@@ -815,8 +912,7 @@ void debugResetCanvasCount() {
 
 DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   debugCanvasCount++;
-  final DomHTMLCanvasElement canvas =
-      domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
+  final canvas = domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
   if (width != null) {
     canvas.width = width.toDouble();
   }
@@ -826,6 +922,7 @@ DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   return canvas;
 }
 
+@JS('WebGLRenderingContext')
 extension type WebGLContext._(JSObject _) implements JSObject {
   external int getParameter(int value);
 
@@ -834,6 +931,20 @@ extension type WebGLContext._(JSObject _) implements JSObject {
 
   @JS('STENCIL_BITS')
   external int get stencilBits;
+
+  external JSAny? getExtension(String name);
+
+  WebGLLoseContextExtension get loseContextExtension {
+    return getExtension('WEBGL_lose_context')! as WebGLLoseContextExtension;
+  }
+
+  external bool isContextLost();
+}
+
+extension type WebGLLoseContextExtension._(JSObject _) implements JSObject {
+  external void loseContext();
+
+  external void restoreContext();
 }
 
 extension type DomCanvasImageSource._(JSObject _) implements JSObject {}
@@ -851,8 +962,18 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   set fillStyle(Object? style) => _fillStyle = style?.toJSAnyShallow;
 
   external String font;
+  external String fontWeight;
   external String direction;
+  external String letterSpacing;
+  external String wordSpacing;
+  external String textRendering;
+  external String fontKerning;
+  external String fontVariantCaps;
   external set lineWidth(num? value);
+
+  @JS('setLineDash')
+  external void _setLineDash(JSFloat32Array? value);
+  void setLineDash(Float32List? value) => _setLineDash(value?.toJS);
 
   @JS('strokeStyle')
   external set _strokeStyle(JSAny? value);
@@ -948,6 +1069,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void rect(num x, num y, num width, num height);
   external void resetTransform();
   external void restore();
+  external void reset();
   external void setTransform(num a, num b, num c, num d, num e, num f);
   external void transform(num a, num b, num c, num d, num e, num f);
 
@@ -993,11 +1115,17 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   );
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
-}
 
-@JS('WebGLRenderingContext')
-extension type DomWebGLRenderingContext._(JSObject _) implements JSObject {
-  external bool isContextLost();
+  @JS('fillTextCluster')
+  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
+
+  void fillTextCluster(DomTextCluster textCluster, double x, double y, [Object? options]) {
+    if (options == null) {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+    } else {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
+    }
+  }
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -1202,8 +1330,8 @@ class HttpFetchResponseImpl implements HttpFetchResponse {
   @override
   bool get hasPayload {
     final bool accepted = status >= 200 && status < 300;
-    final bool fileUri = status == 0;
-    final bool notModified = status == 304;
+    final fileUri = status == 0;
+    final notModified = status == 304;
     final bool unknownRedirect = status > 307 && status < 400;
     return accepted || fileUri || notModified || unknownRedirect;
   }
@@ -1309,10 +1437,10 @@ class MockHttpFetchPayload implements HttpFetchPayload {
   @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final int totalLength = _byteBuffer.lengthInBytes;
-    int currentIndex = 0;
+    var currentIndex = 0;
     while (currentIndex < totalLength) {
       final int chunkSize = math.min(_chunkSize, totalLength - currentIndex);
-      final Uint8List chunk = Uint8List.sublistView(
+      final chunk = Uint8List.sublistView(
         _byteBuffer.asByteData(),
         currentIndex,
         currentIndex + chunkSize,
@@ -1437,6 +1565,21 @@ DomText createDomText(String data) => domDocument.createTextNode(data);
 @JS('TextMetrics')
 extension type DomTextMetrics._(JSObject _) implements JSObject {
   external double? get width;
+
+  @JS('getTextClusters')
+  external JSArray<JSAny?> _getTextClusters();
+  List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
+
+  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+
+  external double get fontBoundingBoxAscent;
+
+  external double get fontBoundingBoxDescent;
+
+  @JS('getSelectionRects')
+  external JSArray<JSAny> _getSelectionRects(int begin, int end);
+  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
+      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -1680,10 +1823,10 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
   @JS('observe')
   external void _observe(DomNode target, JSAny options);
   void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
-    final Map<String, dynamic> options = <String, dynamic>{
-      if (childList != null) 'childList': childList,
-      if (attributes != null) 'attributes': attributes,
-      if (attributeFilter != null) 'attributeFilter': attributeFilter,
+    final options = <String, dynamic>{
+      'childList': ?childList,
+      'attributes': ?attributes,
+      'attributeFilter': ?attributeFilter,
     };
     return _observe(target, options.toJSAnyDeep);
   }
@@ -1727,7 +1870,15 @@ extension type DomMediaQueryList._(JSObject _) implements DomEventTarget {
 
 @JS('MediaQueryListEvent')
 extension type DomMediaQueryListEvent._(JSObject _) implements DomEvent {
+  /// https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryListEvent/MediaQueryListEvent
+  @visibleForTesting
+  external DomMediaQueryListEvent(String type, [JSAny initDict]);
   external bool? get matches;
+}
+
+@visibleForTesting
+DomMediaQueryListEvent createDomMediaQueryListEvent(String type, Map<dynamic, dynamic> init) {
+  return DomMediaQueryListEvent(type, init.toJSAnyDeep);
 }
 
 @JS('Path2D')
@@ -1946,7 +2097,7 @@ DomHTMLLabelElement createDomHTMLLabelElement() =>
     domDocument.createElement('label') as DomHTMLLabelElement;
 
 @JS('OffscreenCanvas')
-extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget {
+extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCanvasImageSource {
   external DomOffscreenCanvas(int width, int height);
 
   external double? height;
@@ -2271,19 +2422,18 @@ final DomTrustedTypePolicy _ttPolicy = domWindow.trustedTypes!.createPolicy(
   'flutter-engine',
   DomTrustedTypePolicyOptions(
     // Validates the given [url].
-    createScriptURL:
-        (String url) {
-          final Uri uri = Uri.parse(url);
-          if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
-            return uri.toString().toJS;
-          }
-          domWindow.console.error(
-            'URL rejected by TrustedTypes policy flutter-engine: $url'
-            '(download prevented)',
-          );
+    createScriptURL: (String url) {
+      final Uri uri = Uri.parse(url);
+      if (_expectedFilesForTT.contains(uri.pathSegments.last)) {
+        return uri.toString().toJS;
+      }
+      domWindow.console.error(
+        'URL rejected by TrustedTypes policy flutter-engine: $url'
+        '(download prevented)',
+      );
 
-          return null;
-        }.toJS,
+      return null;
+    }.toJS,
   ),
 );
 
@@ -2388,6 +2538,50 @@ extension type DomSegments._(JSObject _) implements JSObject {
   }
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale
+@JS('Intl.Locale')
+extension type DomLocale._(JSObject _) implements JSObject {
+  external DomLocale(String tag, [DomLocaleOptions? options]);
+
+  external String get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+
+  @JS('toString')
+  external String toJSString();
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#options
+extension type DomLocaleOptions._(JSObject _) implements JSObject {
+  external DomLocaleOptions({
+    String? language,
+    String? script,
+    String? region,
+    String? calendar,
+    String? caseFirst,
+    String? collation,
+    String? hourCycle,
+    String? numberingSystem,
+    bool? numeric,
+  });
+
+  external String? get language;
+  external String? get script;
+  external String? get region;
+  external String? get calendar;
+  external String? get caseFirst;
+  external String? get collation;
+  external String? get hourCycle;
+  external String? get numberingSystem;
+  external bool? get numeric;
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
 @JS('Iterator')
 extension type DomIterator._(JSObject _) implements JSObject {
@@ -2488,14 +2682,16 @@ external JSAny? get _offscreenCanvasConstructor;
 
 bool browserSupportsOffscreenCanvas = _offscreenCanvasConstructor != null;
 
-@JS('window.createImageBitmap')
-external JSAny? get _createImageBitmapFunction;
-
 /// Set to `true` to disable `createImageBitmap` support. Used in tests.
+@visibleForTesting
 bool debugDisableCreateImageBitmapSupport = false;
 
+/// Set to `true` to throw an error if `createImageBitmap` is disabled. Used in tests.
+@visibleForTesting
+bool debugThrowOnCreateImageBitmapIfDisabled = false;
+
 bool get browserSupportsCreateImageBitmap =>
-    _createImageBitmapFunction != null &&
+    domWindow.has('createImageBitmap') &&
     !isChrome110OrOlder &&
     !debugDisableCreateImageBitmapSupport;
 
@@ -2503,4 +2699,21 @@ extension JSArrayExtension on JSArray<JSAny?> {
   external void push(JSAny value);
   // TODO(srujzs): Delete this when we add `JSArray.length` in the SDK.
   external int get length;
+}
+
+@JS('TextCluster')
+extension type DomTextCluster._(JSObject _) implements JSObject {
+  @JS('begin')
+  external int? _begin;
+  @JS('start')
+  external int _start;
+  // The proposal had this `begin` then renamed it to `start`. Some versions of Chrome still have
+  // the old name.
+  //
+  // `_begin` can be removed once this feature is launched in a stable Chrome release.
+  int get start => _begin ?? _start;
+
+  external int get end;
+  external double get x;
+  external double get y;
 }

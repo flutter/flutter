@@ -7,6 +7,7 @@ package io.flutter.embedding.engine;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.view.Surface;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -43,6 +44,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
+import io.flutter.plugin.platform.PlatformViewsControllerDelegator;
 import io.flutter.plugin.text.ProcessTextPlugin;
 import io.flutter.util.ViewUtils;
 import java.util.HashMap;
@@ -78,7 +80,7 @@ import java.util.Set;
  * {@link FlutterRenderer} and then attach a {@link RenderSurface}. Consider using a {@link
  * io.flutter.embedding.android.FlutterView} as a {@link RenderSurface}.
  *
- * <p>Instatiating the first {@code FlutterEngine} per process will also load the Flutter engine's
+ * <p>Instantiating the first {@code FlutterEngine} per process will also load the Flutter engine's
  * native library and start the Dart VM. Subsequent {@code FlutterEngine}s will run on the same VM
  * instance but will have their own Dart <a
  * href="https://api.dartlang.org/stable/dart-isolate/Isolate-class.html">Isolate</a> when the
@@ -115,6 +117,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   // Platform Views.
   @NonNull private final PlatformViewsController platformViewsController;
   @NonNull private final PlatformViewsController2 platformViewsController2;
+  @NonNull private final PlatformViewsControllerDelegator platformViewsControllerDelegator;
 
   // Engine Lifecycle.
   @NonNull private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
@@ -174,8 +177,8 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
    * native library and start a Dart VM.
    *
    * <p>In order to pass Dart VM initialization arguments (see {@link
-   * io.flutter.embedding.engine.FlutterShellArgs}) when creating the VM, manually set the
-   * initialization arguments by calling {@link
+   * io.flutter.embedding.engine.FlutterEngineFlags} for all available flags) when creating the VM,
+   * manually set the initialization arguments by calling {@link
    * io.flutter.embedding.engine.loader.FlutterLoader#startInitialization(Context)} and {@link
    * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context,
    * String[])} before constructing the engine.
@@ -397,6 +400,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     flutterJNI.setPlatformViewsController2(platformViewsController2);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
     flutterJNI.setDeferredComponentManager(injector.deferredComponentManager());
+    flutterJNI.setSettingsChannel(settingsChannel);
 
     // It should typically be a fresh, unattached JNI. But on a spawned engine, the JNI instance
     // is already attached to a native shell. In that case, the Java FlutterEngine is created around
@@ -408,6 +412,9 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     this.renderer = new FlutterRenderer(flutterJNI);
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
+
+    this.platformViewsControllerDelegator =
+        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
 
     this.pluginRegistry =
         new FlutterEngineConnectionRegistry(
@@ -690,6 +697,11 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public PlatformViewsController2 getPlatformViewsController2() {
     return platformViewsController2;
+  }
+
+  @NonNull
+  public PlatformViewsControllerDelegator getPlatformViewsControllerDelegator() {
+    return platformViewsControllerDelegator;
   }
 
   @NonNull

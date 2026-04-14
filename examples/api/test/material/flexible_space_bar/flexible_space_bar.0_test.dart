@@ -16,26 +16,30 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('The app bar stretches when over-scrolled', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.FlexibleSpaceBarExampleApp());
+  testWidgets(
+    'The app bar stretches when over-scrolled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.FlexibleSpaceBarExampleApp());
 
-    expect(find.text('Flight Report'), findsOne);
+      expect(find.text('Flight Report'), findsOne);
 
-    expect(find.widgetWithText(ListTile, 'Sunday'), findsOne);
-    expect(find.widgetWithText(ListTile, 'Monday'), findsOne);
-    expect(find.text('sunny, h: 80, l: 65'), findsExactly(2));
-    expect(find.byIcon(Icons.wb_sunny), findsExactly(2));
+      expect(find.widgetWithText(ListTile, 'Sunday'), findsOne);
+      expect(find.widgetWithText(ListTile, 'Monday'), findsOne);
+      expect(find.text('sunny, h: 80, l: 65'), findsExactly(2));
+      expect(find.byIcon(Icons.wb_sunny), findsExactly(2));
 
-    final Finder appBarContainer = find.byType(Image);
-    final Size sizeBeforeScroll = tester.getSize(appBarContainer);
-    final Offset target = tester.getCenter(find.byType(ListTile).first);
-    final TestGesture gesture = await tester.startGesture(target);
-    await gesture.moveBy(const Offset(0.0, 100.0));
-    await tester.pump(const Duration(milliseconds: 10));
-    await gesture.up();
-    final Size sizeAfterScroll = tester.getSize(appBarContainer);
+      final Finder appBarContainer = find.byType(Image);
+      final Size sizeBeforeScroll = tester.getSize(appBarContainer);
+      final Offset target = tester.getCenter(find.byType(ListTile).first);
+      final TestGesture gesture = await tester.startGesture(target);
+      await gesture.moveBy(const Offset(0.0, 100.0));
+      await tester.pump(const Duration(milliseconds: 10));
+      await gesture.up();
+      final Size sizeAfterScroll = tester.getSize(appBarContainer);
 
-    expect(sizeBeforeScroll.height, lessThan(sizeAfterScroll.height));
-    // Verifies ScrollBehavior.dragDevices is correctly set.
-  }, variant: TargetPlatformVariant.all());
+      expect(sizeBeforeScroll.height, lessThan(sizeAfterScroll.height));
+      // Verifies ScrollBehavior.dragDevices is correctly set.
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 }

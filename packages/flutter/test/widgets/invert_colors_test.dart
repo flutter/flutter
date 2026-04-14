@@ -15,9 +15,8 @@ void main() {
   testWidgets('InvertColors', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RepaintBoundary(
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: InvertColorTestWidget(color: Color.fromRGBO(255, 0, 0, 1.0)),
         ),
       ),
@@ -29,9 +28,8 @@ void main() {
   testWidgets('InvertColors and ColorFilter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const RepaintBoundary(
-        child: SizedBox(
-          width: 200.0,
-          height: 200.0,
+        child: SizedBox.square(
+          dimension: 200.0,
           child: InvertColorTestWidget(
             color: Color.fromRGBO(255, 0, 0, 1.0),
             filter: ColorFilter.mode(Color.fromRGBO(0, 255, 0, 0.5), BlendMode.plus),
@@ -90,12 +88,11 @@ class RenderInvertColorTest extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Paint paint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = color
-          ..colorFilter = filter
-          ..invertColors = true;
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = color
+      ..colorFilter = filter
+      ..invertColors = true;
     context.canvas.drawRect(offset & size, paint);
   }
 }

@@ -25,7 +25,7 @@ void main() {
 
     // Close the connection to the driver after the tests have completed.
     tearDownAll(() async {
-      driver.close();
+      await driver.close();
     });
 
     test('title is correct', () async {
@@ -38,7 +38,7 @@ void main() {
       // TODO(ianh): this delay violates our style guide. We should instead wait for a triggering event.
       await Future<void>.delayed(const Duration(seconds: 2));
 
-      final WebElement? fltSemantics =
+      final fltSemantics =
           await driver.webDriver.execute(
                 'return document.querySelector("flt-semantics")',
                 <dynamic>[],

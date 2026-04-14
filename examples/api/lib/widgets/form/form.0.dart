@@ -14,7 +14,10 @@ class FormExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(appBar: AppBar(title: const Text('Form Sample')), body: const FormExample()),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Form Sample')),
+        body: const FormExample(),
+      ),
     );
   }
 }
@@ -34,7 +37,7 @@ class _FormExampleState extends State<FormExample> {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: <Widget>[
           TextFormField(
             decoration: const InputDecoration(hintText: 'Enter your email'),
@@ -46,7 +49,7 @@ class _FormExampleState extends State<FormExample> {
             },
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            padding: const .symmetric(vertical: 16.0),
             child: ElevatedButton(
               onPressed: () {
                 // Validate will return true if the form is valid, or false if

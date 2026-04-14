@@ -512,7 +512,7 @@ class RenderWrap extends RenderBox
   double computeMinIntrinsicWidth(double height) {
     switch (direction) {
       case Axis.horizontal:
-        double width = 0.0;
+        var width = 0.0;
         RenderBox? child = firstChild;
         while (child != null) {
           width = math.max(width, child.getMinIntrinsicWidth(double.infinity));
@@ -528,7 +528,7 @@ class RenderWrap extends RenderBox
   double computeMaxIntrinsicWidth(double height) {
     switch (direction) {
       case Axis.horizontal:
-        double width = 0.0;
+        var width = 0.0;
         RenderBox? child = firstChild;
         while (child != null) {
           width += child.getMaxIntrinsicWidth(double.infinity);
@@ -546,7 +546,7 @@ class RenderWrap extends RenderBox
       case Axis.horizontal:
         return getDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
-        double height = 0.0;
+        var height = 0.0;
         RenderBox? child = firstChild;
         while (child != null) {
           height = math.max(height, child.getMinIntrinsicHeight(double.infinity));
@@ -562,7 +562,7 @@ class RenderWrap extends RenderBox
       case Axis.horizontal:
         return getDryLayout(BoxConstraints(maxWidth: width)).height;
       case Axis.vertical:
-        double height = 0.0;
+        var height = 0.0;
         RenderBox? child = firstChild;
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
@@ -662,11 +662,11 @@ class RenderWrap extends RenderBox
       Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
     };
 
-    double mainAxisExtent = 0.0;
-    double crossAxisExtent = 0.0;
-    double runMainAxisExtent = 0.0;
-    double runCrossAxisExtent = 0.0;
-    int childCount = 0;
+    var mainAxisExtent = 0.0;
+    var crossAxisExtent = 0.0;
+    var runMainAxisExtent = 0.0;
+    var runCrossAxisExtent = 0.0;
+    var childCount = 0;
     RenderBox? child = firstChild;
     while (child != null) {
       final Size childSize = layoutChild(child, childConstraints);
@@ -743,25 +743,18 @@ class RenderWrap extends RenderBox
 
     final (bool flipMainAxis, _) = _areAxesFlipped;
     final double spacing = this.spacing;
-    final List<_RunMetrics> runMetrics = <_RunMetrics>[];
+    final runMetrics = <_RunMetrics>[];
 
     _RunMetrics? currentRun;
     _AxisSize childrenAxisSize = _AxisSize.empty;
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-      final _AxisSize childSize = _AxisSize.fromSize(
+      final childSize = _AxisSize.fromSize(
         size: layoutChild(child, childConstraints),
         direction: direction,
       );
-      final _RunMetrics? newRun =
-          currentRun == null
-              ? _RunMetrics(child, childSize)
-              : currentRun.tryAddingNewChild(
-                child,
-                childSize,
-                flipMainAxis,
-                spacing,
-                mainAxisLimit,
-              );
+      final _RunMetrics? newRun = currentRun == null
+          ? _RunMetrics(child, childSize)
+          : currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
       if (newRun != null) {
         runMetrics.add(newRun);
         childrenAxisSize += currentRun?.axisSize.flipped ?? _AxisSize.empty;
@@ -790,8 +783,9 @@ class RenderWrap extends RenderBox
     final double crossAxisFreeSpace = math.max(0.0, freeAxisSize.crossAxisExtent);
 
     final (bool flipMainAxis, bool flipCrossAxis) = _areAxesFlipped;
-    final WrapCrossAlignment effectiveCrossAlignment =
-        flipCrossAxis ? crossAxisAlignment._flipped : crossAxisAlignment;
+    final WrapCrossAlignment effectiveCrossAlignment = flipCrossAxis
+        ? crossAxisAlignment._flipped
+        : crossAxisAlignment;
     final (double runLeadingSpace, double runBetweenSpace) = runAlignment._distributeSpace(
       crossAxisFreeSpace,
       runSpacing,
@@ -800,9 +794,9 @@ class RenderWrap extends RenderBox
     );
     final _NextChild nextChild = flipMainAxis ? childBefore : childAfter;
 
-    double runCrossAxisOffset = runLeadingSpace;
+    var runCrossAxisOffset = runLeadingSpace;
     final Iterable<_RunMetrics> runs = flipCrossAxis ? runMetrics.reversed : runMetrics;
-    for (final _RunMetrics run in runs) {
+    for (final run in runs) {
       final double runCrossAxisExtent = run.axisSize.crossAxisExtent;
       final int childCount = run.childCount;
 
@@ -817,7 +811,7 @@ class RenderWrap extends RenderBox
         flipMainAxis,
       );
 
-      double childMainAxisOffset = childLeadingSpace;
+      var childMainAxisOffset = childLeadingSpace;
 
       int remainingChildCount = run.childCount;
       for (
@@ -828,7 +822,10 @@ class RenderWrap extends RenderBox
         final _AxisSize(
           mainAxisExtent: double childMainAxisExtent,
           crossAxisExtent: double childCrossAxisExtent,
-        ) = _AxisSize.fromSize(size: getChildSize(child), direction: direction);
+        ) = _AxisSize.fromSize(
+          size: getChildSize(child),
+          direction: direction,
+        );
         final double childCrossAxisOffset =
             effectiveCrossAlignment._alignment * (runCrossAxisExtent - childCrossAxisExtent);
         positionChild(

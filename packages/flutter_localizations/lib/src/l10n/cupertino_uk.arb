@@ -39,5 +39,11 @@
   "shareButtonLabel": "Поділитися…",
   "clearButtonLabel": "Очистити",
   "cancelButtonLabel": "Скасувати",
-  "backButtonLabel": "Назад"
+  "backButtonLabel": "Назад",
+  "expansionTileExpandedHint": "двічі торкніться, щоб згорнути",
+  "expansionTileCollapsedHint": "двічі торкніться, щоб розгорнути",
+  "expansionTileExpandedTapHint": "Згорнути",
+  "expansionTileCollapsedTapHint": "Розгорнути й дізнатися більше",
+  "expandedHint": "Згорнуто",
+  "collapsedHint": "Розгорнуто"
 }

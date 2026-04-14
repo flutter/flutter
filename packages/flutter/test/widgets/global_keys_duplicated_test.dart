@@ -55,7 +55,10 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           DummyWidget(child: DummyWidget(key: GlobalObjectKey(0))),
-          DummyWidget(key: Key('x'), child: DummyWidget(key: GlobalObjectKey(0))),
+          DummyWidget(
+            key: Key('x'),
+            child: DummyWidget(key: GlobalObjectKey(0)),
+          ),
         ],
       ),
     );
@@ -77,7 +80,7 @@ void main() {
 
   testWidgets('GlobalKey children of two nodes - C', (WidgetTester tester) async {
     late StateSetter nestedSetState;
-    bool flag = false;
+    var flag = false;
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,

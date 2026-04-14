@@ -2,34 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SliverFloatingHeader basics', (WidgetTester tester) async {
     Widget buildFrame({required Axis axis, required bool reverse}) {
-      return MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            scrollDirection: axis,
-            reverse: reverse,
-            slivers: <Widget>[
-              SliverFloatingHeader(
-                child: switch (axis) {
-                  Axis.vertical => const SizedBox(height: 200, child: Text('header')),
-                  Axis.horizontal => const SizedBox(width: 200, child: Text('header')),
-                },
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return switch (axis) {
-                    Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
-                    Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
-                  };
-                }, childCount: 100),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          scrollDirection: axis,
+          reverse: reverse,
+          slivers: <Widget>[
+            SliverFloatingHeader(
+              child: switch (axis) {
+                Axis.vertical => const SizedBox(height: 200, child: Text('header')),
+                Axis.horizontal => const SizedBox(width: 200, child: Text('header')),
+              },
+            ),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return switch (axis) {
+                  Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
+                  Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
+                };
+              },
+            ),
+          ],
         ),
       );
     }
@@ -57,7 +58,7 @@ void main() {
       expect(getHeaderRect().height, 200);
 
       // First and last visible items, each item has height=100
-      const int visibleItemCount = 4; // viewport height - header height = 400
+      const visibleItemCount = 4; // viewport height - header height = 400
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -88,7 +89,7 @@ void main() {
       expect(getHeaderRect().height, 600);
 
       // First and last visible items. Each item has width=100
-      const int visibleItemCount = 6; // 600 = viewport width - header width
+      const visibleItemCount = 6; // 600 = viewport width - header width
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -119,7 +120,7 @@ void main() {
       expect(getHeaderRect().height, 200);
 
       // First and last visible items, each item has height=100
-      const int visibleItemCount = 4; // viewport height - header height = 400
+      const visibleItemCount = 4; // viewport height - header height = 400
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -150,7 +151,7 @@ void main() {
       expect(getHeaderRect().height, 600);
 
       // First and last visible items. Each item has width=100
-      const int visibleItemCount = 6; // 600 = viewport width - header width
+      const visibleItemCount = 6; // 600 = viewport width - header width
       expect(find.text('item 0'), findsOneWidget);
       expect(find.text('item ${visibleItemCount - 1}'), findsOneWidget);
 
@@ -174,26 +175,25 @@ void main() {
 
   testWidgets('SliverFloatingHeader override default AnimationStyle', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              const SliverFloatingHeader(
-                animationStyle: AnimationStyle(
-                  curve: Curves.linear,
-                  reverseCurve: Curves.linear,
-                  duration: Duration(seconds: 1),
-                  reverseDuration: Duration(seconds: 1),
-                ),
-                child: SizedBox(height: 200, child: Text('header')),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            const SliverFloatingHeader(
+              animationStyle: AnimationStyle(
+                curve: Curves.linear,
+                reverseCurve: Curves.linear,
+                duration: Duration(seconds: 1),
+                reverseDuration: Duration(seconds: 1),
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return SizedBox(height: 100, child: Text('item $index'));
-                }, childCount: 100),
-              ),
-            ],
-          ),
+              child: SizedBox(height: 200, child: Text('header')),
+            ),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: 100, child: Text('item $index'));
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -238,21 +238,20 @@ void main() {
 
   testWidgets('SliverFloatingHeader snapMode parameter', (WidgetTester tester) async {
     Widget buildFrame(FloatingHeaderSnapMode snapMode) {
-      return MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverFloatingHeader(
-                snapMode: snapMode,
-                child: const SizedBox(height: 200, child: Text('header')),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return SizedBox(height: 100, child: Text('item $index'));
-                }, childCount: 100),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverFloatingHeader(
+              snapMode: snapMode,
+              child: const SizedBox(height: 200, child: Text('header')),
+            ),
+            SliverList.builder(
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: 100, child: Text('item $index'));
+              },
+            ),
+          ],
         ),
       );
     }

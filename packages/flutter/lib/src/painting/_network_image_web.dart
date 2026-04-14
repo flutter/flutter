@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../web.dart' as web;
@@ -113,11 +114,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
-      collector =
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-            DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
-          ];
+      collector = () => <DiagnosticsNode>[
+        DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
+        DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
+      ];
       return true;
     }());
     return collector;
@@ -187,7 +187,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
     final bool containsNetworkImageHeaders = headers?.isNotEmpty ?? false;
 
-    final Completer<web.XMLHttpRequest> completer = Completer<web.XMLHttpRequest>();
+    final completer = Completer<web.XMLHttpRequest>();
     final web.XMLHttpRequest request = httpRequestFactory();
 
     request.open('GET', url, true);
@@ -203,8 +203,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       (web.Event e) {
         final int status = request.status;
         final bool accepted = status >= 200 && status < 300;
-        final bool fileUri = status == 0; // file:// URIs have status of 0.
-        final bool notModified = status == 304;
+        final fileUri = status == 0; // file:// URIs have status of 0.
+        final notModified = status == 304;
         final bool unknownRedirect = status > 307 && status < 400;
         final bool success = accepted || fileUri || notModified || unknownRedirect;
 
@@ -221,9 +221,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     request.addEventListener(
       'error',
       ((JSObject e) => completer.completeError(
-            image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
-          ))
-          .toJS,
+        image_provider.NetworkImageLoadException(statusCode: request.status, uri: resolved),
+      )).toJS,
     );
 
     request.send();
@@ -244,15 +243,24 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is NetworkImage && other.url == url && other.scale == scale;
+    return other is NetworkImage &&
+        other.url == url &&
+        other.scale == scale &&
+        other.webHtmlElementStrategy == webHtmlElementStrategy &&
+        mapEquals(other.headers, headers);
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    webHtmlElementStrategy,
+    const MapEquality<String, String>().hash(headers),
+  );
 
   @override
   String toString() =>
-      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
+      '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)}, webHtmlElementStrategy: ${webHtmlElementStrategy.name}, headers: $headers)';
 }
 
 /// An [ImageStreamCompleter] that delegates to another [ImageStreamCompleter]

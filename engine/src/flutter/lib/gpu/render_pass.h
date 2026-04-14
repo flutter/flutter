@@ -80,7 +80,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   size_t element_count = 0;
 
   uint32_t stencil_reference = 0;
-  std::optional<impeller::TRect<int64_t>> scissor;
+  std::optional<impeller::IRect32> scissor;
   std::optional<impeller::Viewport> viewport;
 
   // Helper flag to determine whether the vertex_count should override the

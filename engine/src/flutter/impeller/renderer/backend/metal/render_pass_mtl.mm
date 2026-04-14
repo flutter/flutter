@@ -20,6 +20,8 @@
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/command.h"
+#include "impeller/renderer/pipeline_descriptor.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
@@ -155,7 +157,7 @@ RenderPassMTL::RenderPassMTL(std::shared_ptr<const Context> context,
   pass_bindings_.SetEncoder(encoder_);
   pass_bindings_.SetViewport(
       Viewport{.rect = Rect::MakeSize(GetRenderTargetSize())});
-  pass_bindings_.SetScissor(IRect::MakeSize(GetRenderTargetSize()));
+  pass_bindings_.SetScissor(IRect32::MakeSize(GetRenderTargetSize()));
   is_valid_ = true;
 }
 
@@ -235,6 +237,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
+  context_->GetPipelineLibrary()->LogPipelineUsage(pipeline_desc);
   primitive_type_ = pipeline_desc.GetPrimitiveType();
   pass_bindings_.SetRenderPipelineState(
       PipelineMTL::Cast(*pipeline).GetMTLRenderPipelineState());
@@ -278,7 +281,7 @@ void RenderPassMTL::SetViewport(Viewport viewport) {
 }
 
 // |RenderPass|
-void RenderPassMTL::SetScissor(IRect scissor) {
+void RenderPassMTL::SetScissor(IRect32 scissor) {
   pass_bindings_.SetScissor(scissor);
 }
 

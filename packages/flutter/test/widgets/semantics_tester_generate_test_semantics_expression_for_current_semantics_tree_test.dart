@@ -7,11 +7,12 @@ library;
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   group('generateTestSemanticsExpressionForCurrentSemanticsTree', () {
@@ -26,7 +27,7 @@ void _tests() {
 
   Future<void> pumpTestWidget(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           children: <Widget>[
             const Text('Plain text'),
@@ -55,17 +56,16 @@ void _tests() {
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
   testWidgets('generates code', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
-    final String code =
-        semantics
-            .generateTestSemanticsExpressionForCurrentSemanticsTree(
-              DebugSemanticsDumpOrder.inverseHitTest,
-            )
-            .split('\n')
-            .map<String>((String line) => line.trim())
-            .join('\n')
-            .trim();
+    final String code = semantics
+        .generateTestSemanticsExpressionForCurrentSemanticsTree(
+          DebugSemanticsDumpOrder.inverseHitTest,
+        )
+        .split('\n')
+        .map<String>((String line) => line.trim())
+        .join('\n')
+        .trim();
 
     File? findThisTestFile(Directory directory) {
       for (final FileSystemEntity entity in directory.listSync()) {
@@ -87,19 +87,18 @@ void _tests() {
     final File thisTestFile = findThisTestFile(Directory.current)!;
     expect(thisTestFile, isNotNull);
     String expectedCode = thisTestFile.readAsStringSync();
-    expectedCode =
-        expectedCode
-            .substring(expectedCode.indexOf('v' * 12) + 12, expectedCode.indexOf('^' * 12) - 3)
-            .split('\n')
-            .map<String>((String line) => line.trim())
-            .join('\n')
-            .trim();
+    expectedCode = expectedCode
+        .substring(expectedCode.indexOf('v' * 12) + 12, expectedCode.indexOf('^' * 12) - 3)
+        .split('\n')
+        .map<String>((String line) => line.trim())
+        .join('\n')
+        .trim();
     semantics.dispose();
     expect('$code,', expectedCode);
   });
 
   testWidgets('generated code is correct', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     expect(
       semantics,
@@ -122,34 +121,28 @@ void _tests() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 4,
+                          id: 6,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 7,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 5,
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  label: 'Plain text',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 6,
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
-                                  label: '\u202aInteractive text\u202c',
-                                  value: 'test-value',
-                                  increasedValue: 'test-increasedValue',
-                                  decreasedValue: 'test-decreasedValue',
-                                  hint: 'test-hint',
-                                  textDirection: TextDirection.rtl,
-                                ),
-                              ],
+                              id: 4,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'Plain text',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 5,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
+                              label: '\u202aInteractive text\u202c',
+                              value: 'test-value',
+                              increasedValue: 'test-increasedValue',
+                              decreasedValue: 'test-decreasedValue',
+                              hint: 'test-hint',
+                              textDirection: TextDirection.rtl,
                             ),
                           ],
                         ),

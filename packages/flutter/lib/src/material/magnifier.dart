@@ -38,23 +38,24 @@ class TextMagnifier extends StatefulWidget {
   /// shows the editing handles only on iOS.
   static TextMagnifierConfiguration adaptiveMagnifierConfiguration = TextMagnifierConfiguration(
     shouldDisplayHandlesInMagnifier: defaultTargetPlatform == TargetPlatform.iOS,
-    magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    ) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
-        case TargetPlatform.android:
-          return TextMagnifier(magnifierInfo: magnifierInfo);
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          return null;
-      }
-    },
+    magnifierBuilder:
+        (
+          BuildContext context,
+          MagnifierController controller,
+          ValueNotifier<MagnifierInfo> magnifierInfo,
+        ) {
+          switch (defaultTargetPlatform) {
+            case TargetPlatform.iOS:
+              return CupertinoTextMagnifier(controller: controller, magnifierInfo: magnifierInfo);
+            case TargetPlatform.android:
+              return TextMagnifier(magnifierInfo: magnifierInfo);
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.macOS:
+            case TargetPlatform.windows:
+              return null;
+          }
+        },
   );
 
   /// The duration that the position is animated if [TextMagnifier] just switched
@@ -125,7 +126,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // Since by default we draw at the top left corner, this offset
     // shifts the magnifier so we draw at the center, and then also includes
     // the "above touch point" shift.
-    final Offset basicMagnifierOffset = Offset(
+    final basicMagnifierOffset = Offset(
       Magnifier.kDefaultMagnifierSize.width / 2,
       Magnifier.kDefaultMagnifierSize.height + Magnifier.kStandardVerticalFocalPointShift,
     );
@@ -189,7 +190,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // the magnifier. screenBoundsAdjustedMagnifierRect.top == unadjustedMagnifierRect.top for most cases,
     // but when pressed up against the top of the screen, we adjust the focal point by
     // the amount that we shifted from our "natural" position.
-    final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
+    final focalPointAdjustmentForScreenBoundsAdjustment = Offset(
       newRelativeFocalPointX,
       unadjustedMagnifierRect.top - screenBoundsAdjustedMagnifierRect.top,
     );
@@ -230,10 +231,9 @@ class _TextMagnifierState extends State<TextMagnifier> {
       left: _magnifierPosition!.dx,
       // Material magnifier typically does not animate, unless we jump between lines,
       // in which case we animate between lines.
-      duration:
-          _positionShouldBeAnimated
-              ? TextMagnifier.jumpBetweenLinesAnimationDuration
-              : Duration.zero,
+      duration: _positionShouldBeAnimated
+          ? TextMagnifier.jumpBetweenLinesAnimationDuration
+          : Duration.zero,
       child: Magnifier(additionalFocalPointOffset: _extraFocalPointOffset),
     );
   }

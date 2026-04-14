@@ -26,8 +26,8 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
-#include "flatland_connection.h"
-#include "surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/flatland_connection.h"
+#include "flutter/shell/platform/fuchsia/flutter/surface_producer.h"
 
 namespace flutter_runner {
 
@@ -77,7 +77,7 @@ class ExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(SkISize frame_size,
+  void PrepareFlutterView(flutter::DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|

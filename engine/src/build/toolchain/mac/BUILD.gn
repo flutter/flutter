@@ -6,10 +6,10 @@ assert(host_os == "mac")
 
 import("//build/config/darwin/darwin_sdk.gni")
 import("//build/config/sysroot.gni")
+import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
 import("//build/toolchain/rbe.gni")
-import("//build/toolchain/ccache.gni")
 import("//build/toolchain/toolchain.gni")
 
 declare_args() {
@@ -45,7 +45,7 @@ if (swift_whole_module_optimization == -1) {
 # would be to have inputs to tools (https://crbug.com/621119).
 get_tool_mtime = rebase_path("//build/toolchain/darwin/get_tool_mtime.py")
 tool_versions = exec_script(
-        get_tool_mtime, # "get_tool_mtime.py",
+        get_tool_mtime,  # "get_tool_mtime.py",
         rebase_path(
             [
               "//build/toolchain/darwin/swift_const_gather_protocols.json",
@@ -73,13 +73,15 @@ if (use_ccache) {
   local_wrapper =
       rebase_path("//flutter/build/rbe/local_wrapper.sh", root_build_dir)
   compiler_args = rewrapper_command + [
-    "--remote_wrapper=$remote_wrapper",
-    "--local_wrapper=$local_wrapper",
-    "--labels=type=compile,compiler=clang,lang=cpp ",
-  ]
+                    "--remote_wrapper=$remote_wrapper",
+                    "--local_wrapper=$local_wrapper",
+                    "--labels=type=compile,compiler=clang,lang=cpp ",
+                  ]
   cxx_prefix = string_join(" ", compiler_args)
+
   # RBE does not support objc out of the box.
   objc_prefix = ""
+
   # Remote links time out without reporting an actionable error.
   link_prefix = ""
 } else {
@@ -95,7 +97,8 @@ template("mac_toolchain") {
     assert(defined(invoker.asm), "mac_toolchain() must specify a \"asm\" value")
     assert(defined(invoker.cc), "mac_toolchain() must specify a \"cc\" value")
     assert(defined(invoker.cxx), "mac_toolchain() must specify a \"cxx\" value")
-    assert(defined(invoker.objc), "mac_toolchain() must specify a \"objc\" value")
+    assert(defined(invoker.objc),
+           "mac_toolchain() must specify a \"objc\" value")
     assert(defined(invoker.ld), "mac_toolchain() must specify a \"ld\" value")
     assert(defined(invoker.ar), "mac_toolchain() must specify a \"ar\" value")
     assert(defined(invoker.toolchain_cpu),
@@ -160,7 +163,9 @@ template("mac_toolchain") {
       command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} {{module_deps_no_self}} -fmodule-name={{label_name}} -c -x c++ -Xclang -emit-module {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX_MODULE {{output}}"
-      outputs = [ "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.pcm" ]
+      outputs = [
+        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.pcm",
+      ]
     }
 
     tool("asm") {
@@ -199,7 +204,8 @@ template("mac_toolchain") {
       depfile = "{{target_out_dir}}/{{module_name}}.d"
       depsformat = "gcc"
 
-      _header_path = "{{target_gen_dir}}/{{target_output_name}}/{{target_output_name}}.h"
+      _header_path =
+          "{{target_gen_dir}}/{{target_output_name}}/{{target_output_name}}.h"
       _output_dir = "{{target_out_dir}}/{{label_name}}"
 
       outputs = [
@@ -221,7 +227,6 @@ template("mac_toolchain") {
       if (swift_whole_module_optimization) {
         outputs += [
           "$_output_dir/{{module_name}}.swiftconstvalues",
-          "$_output_dir/{{module_name}}.swiftdeps",
         ]
       } else {
         outputs += [ "$_output_dir/{{module_name}}.priors" ]
@@ -275,6 +280,11 @@ template("mac_toolchain") {
       if (swift_toolchain_path != "") {
         _extra_flags += " --swift-toolchain-path " +
                         rebase_path(swift_toolchain_path, root_build_dir)
+      }
+
+      if (mac_host_toolchain_path != "") {
+        _extra_flags += " --mac-host-toolchain-path " +
+                        rebase_path(mac_host_toolchain_path, root_build_dir)
       }
 
       if (swift_whole_module_optimization) {
@@ -433,7 +443,8 @@ if (is_ios) {
     is_clang = true
 
     sysroot_rel = rebase_path(ios_sdk_path, root_build_dir)
-    sysroot_flags = "-isysroot $sysroot_rel -miphoneos-version-min=$ios_deployment_target"
+    sysroot_flags =
+        "-isysroot $sysroot_rel -miphoneos-version-min=$ios_deployment_target"
   }
 
   # Toolchain used for iOS simulator targets (arm64).

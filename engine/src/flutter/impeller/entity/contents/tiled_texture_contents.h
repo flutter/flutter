@@ -18,9 +18,11 @@ namespace impeller {
 
 class TiledTextureContents final : public ColorSourceContents {
  public:
-  TiledTextureContents();
+  explicit TiledTextureContents(const Geometry* geometry);
 
   ~TiledTextureContents() override;
+
+  const Geometry* GetGeometry() const override;
 
   using ColorFilterProc =
       std::function<std::shared_ptr<ColorFilterContents>(FilterInput::Ref)>;
@@ -55,11 +57,7 @@ class TiledTextureContents final : public ColorSourceContents {
   std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity,
-      std::optional<Rect> coverage_limit = std::nullopt,
-      const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
-      bool msaa_enabled = true,
-      int32_t mip_count = 1,
-      std::string_view label = "Tiled Texture Snapshot") const override;
+      const SnapshotOptions& options) const override;
 
  private:
   std::shared_ptr<Texture> CreateFilterTexture(
@@ -70,6 +68,7 @@ class TiledTextureContents final : public ColorSourceContents {
 
   bool UsesEmulatedTileMode(const Capabilities& capabilities) const;
 
+  const Geometry* geometry_ = nullptr;
   std::shared_ptr<Texture> texture_;
   SamplerDescriptor sampler_descriptor_ = {};
   Entity::TileMode x_tile_mode_ = Entity::TileMode::kClamp;

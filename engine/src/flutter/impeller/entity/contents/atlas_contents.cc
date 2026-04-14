@@ -23,13 +23,15 @@ DrawImageRectAtlasGeometry::DrawImageRectAtlasGeometry(
     const Rect& destination,
     const Color& color,
     BlendMode blend_mode,
-    const SamplerDescriptor& desc)
+    const SamplerDescriptor& desc,
+    bool use_strict_src_rect)
     : texture_(std::move(texture)),
       source_(source),
       destination_(destination),
       color_(color),
       blend_mode_(blend_mode),
-      desc_(desc) {}
+      desc_(desc),
+      use_strict_src_rect_(use_strict_src_rect) {}
 
 DrawImageRectAtlasGeometry::~DrawImageRectAtlasGeometry() = default;
 
@@ -42,11 +44,11 @@ bool DrawImageRectAtlasGeometry::ShouldSkip() const {
 }
 
 VertexBuffer DrawImageRectAtlasGeometry::CreateSimpleVertexBuffer(
-    HostBuffer& host_buffer) const {
+    HostBuffer& data_host_buffer) const {
   using VS = TextureFillVertexShader;
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
 
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       sizeof(VS::PerVertexData) * 6, alignof(VS::PerVertexData),
       [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
@@ -72,11 +74,11 @@ VertexBuffer DrawImageRectAtlasGeometry::CreateSimpleVertexBuffer(
 }
 
 VertexBuffer DrawImageRectAtlasGeometry::CreateBlendVertexBuffer(
-    HostBuffer& host_buffer) const {
+    HostBuffer& data_host_buffer) const {
   using VS = PorterDuffBlendVertexShader;
   constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
 
-  BufferView buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = data_host_buffer.Emplace(
       sizeof(VS::PerVertexData) * 6, alignof(VS::PerVertexData),
       [&](uint8_t* raw_data) {
         VS::PerVertexData* data =
@@ -123,6 +125,16 @@ bool DrawImageRectAtlasGeometry::ShouldInvertBlendMode() const {
   return false;
 }
 
+std::optional<Rect> DrawImageRectAtlasGeometry::GetStrictSrcRect() const {
+  if (use_strict_src_rect_) {
+    // For a strict source rect, shrink the texture coordinate range by half a
+    // texel to ensure that linear filtering does not sample anything outside
+    // the source rect bounds.
+    return Rect::MakeSize(texture_->GetSize()).Project(source_.Expand(-0.5));
+  }
+  return std::nullopt;
+}
+
 ////
 
 AtlasContents::AtlasContents() = default;
@@ -157,7 +169,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
       renderer.GetContext()->GetSamplerLibrary()->GetSampler(
           dst_sampler_descriptor);
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   if (!geometry_->ShouldUseBlend()) {
     using VS = TextureFillVertexShader;
     using FS = TextureFillFragmentShader;
@@ -172,7 +184,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
         pipeline_options.blend_mode == BlendMode::kSrc;
 
     pass.SetPipeline(renderer.GetTexturePipeline(pipeline_options));
-    pass.SetVertexBuffer(geometry_->CreateSimpleVertexBuffer(host_buffer));
+    pass.SetVertexBuffer(geometry_->CreateSimpleVertexBuffer(data_host_buffer));
 #ifdef IMPELLER_DEBUG
     pass.SetCommandLabel("DrawAtlas");
 #endif  // IMPELLER_DEBUG
@@ -182,11 +194,11 @@ bool AtlasContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale =
         geometry_->GetAtlas()->GetYCoordScale();
 
-    VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+    VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
     FS::FragInfo frag_info;
     frag_info.alpha = alpha_;
-    FS::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
+    FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
     return pass.Draw().ok();
   }
@@ -200,7 +212,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
 #ifdef IMPELLER_DEBUG
     pass.SetCommandLabel("DrawAtlas Blend");
 #endif  // IMPELLER_DEBUG
-    pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
+    pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(data_host_buffer));
     BlendMode inverted_blend_mode =
         geometry_->ShouldInvertBlendMode()
             ? (InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc))
@@ -215,18 +227,24 @@ bool AtlasContents::Render(const ContentContext& renderer,
     frame_info.texture_sampler_y_coord_scale =
         geometry_->GetAtlas()->GetYCoordScale();
 
-    frag_info.output_alpha = alpha_;
-    frag_info.input_alpha = 1.0;
+    frag_info.input_alpha_output_alpha_tmx_tmy =
+        Vector4(1.0, alpha_, static_cast<int>(Entity::TileMode::kDecal),
+                static_cast<int>(Entity::TileMode::kDecal));
+    if (auto rect = geometry_->GetStrictSrcRect(); rect.has_value()) {
+      Rect src_rect = rect.value();
+      frag_info.source_rect =
+          Vector4(src_rect.GetX(), src_rect.GetY(), src_rect.GetRight(),
+                  src_rect.GetBottom());
+      frag_info.use_strict_source_rect = 1.0;
+    } else {
+      frag_info.use_strict_source_rect = 0.0;
+    }
 
-    // These values are ignored on platforms that natively support decal.
-    frag_info.tmx = static_cast<int>(Entity::TileMode::kDecal);
-    frag_info.tmy = static_cast<int>(Entity::TileMode::kDecal);
-
-    FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+    FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
     frame_info.mvp = entity.GetShaderTransform(pass);
 
-    auto uniform_view = host_buffer.EmplaceUniform(frame_info);
+    auto uniform_view = data_host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(pass, uniform_view);
 
     return pass.Draw().ok();
@@ -238,10 +256,10 @@ bool AtlasContents::Render(const ContentContext& renderer,
 #ifdef IMPELLER_DEBUG
   pass.SetCommandLabel("DrawAtlas Advanced Blend");
 #endif  // IMPELLER_DEBUG
-  pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
+  pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(data_host_buffer));
 
-  renderer.GetDrawVerticesUberPipeline(blend_mode,
-                                       OptionsFromPassAndEntity(pass, entity));
+  pass.SetPipeline(renderer.GetDrawVerticesUberPipeline(
+      blend_mode, OptionsFromPassAndEntity(pass, entity)));
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;
@@ -258,8 +276,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
   frag_info.tmx = static_cast<int>(Entity::TileMode::kDecal);
   frag_info.tmy = static_cast<int>(Entity::TileMode::kDecal);
 
-  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
-  VUS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+  FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
+  VUS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
   return pass.Draw().ok();
 }
@@ -304,7 +322,7 @@ bool ColorFilterAtlasContents::Render(const ContentContext& renderer,
       renderer.GetContext()->GetSamplerLibrary()->GetSampler(
           dst_sampler_descriptor);
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   using VS = ColorMatrixColorFilterPipeline::VertexShader;
   using FS = ColorMatrixColorFilterPipeline::FragmentShader;
@@ -312,7 +330,7 @@ bool ColorFilterAtlasContents::Render(const ContentContext& renderer,
 #ifdef IMPELLER_DEBUG
   pass.SetCommandLabel("Atlas ColorFilter");
 #endif  // IMPELLER_DEBUG
-  pass.SetVertexBuffer(geometry_->CreateSimpleVertexBuffer(host_buffer));
+  pass.SetVertexBuffer(geometry_->CreateSimpleVertexBuffer(data_host_buffer));
   pass.SetPipeline(
       renderer.GetColorMatrixColorFilterPipeline(OptionsFromPass(pass)));
 
@@ -333,11 +351,11 @@ bool ColorFilterAtlasContents::Render(const ContentContext& renderer,
                              matrix[3], matrix[8], matrix[13], matrix[18]   //
   );
 
-  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+  FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
   frame_info.mvp = entity.GetShaderTransform(pass);
 
-  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
+  auto uniform_view = data_host_buffer.EmplaceUniform(frame_info);
   VS::BindFrameInfo(pass, uniform_view);
 
   return pass.Draw().ok();

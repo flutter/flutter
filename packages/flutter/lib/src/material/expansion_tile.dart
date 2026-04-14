@@ -94,11 +94,19 @@ typedef ExpansionTileController = ExpansibleController;
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example demonstrates how an [ExpansionTileController] can be used to
+/// This example demonstrates how an [ExpansibleController] can be used to
 /// programmatically expand or collapse an [ExpansionTile].
 ///
 /// ** See code in examples/api/lib/material/expansion_tile/expansion_tile.1.dart **
 /// {@end-tool}
+///
+/// ## Accessibility
+///
+/// The accessibility behavior of [ExpansionTile] is platform adaptive, based on
+/// the device's actual platform rather than the theme's platform setting. This
+/// ensures that assistive technologies like VoiceOver on iOS and macOS receive
+/// the correct platform-specific semantics hints, even when the app's theme is
+/// configured to mimic a different platform's appearance.
 ///
 /// See also:
 ///
@@ -137,12 +145,14 @@ class ExpansionTile extends StatefulWidget {
     this.controlAffinity,
     this.controller,
     this.dense,
+    this.splashColor,
     this.visualDensity,
     this.minTileHeight,
     this.enableFeedback = true,
     this.enabled = true,
     this.expansionAnimationStyle,
     this.internalAddSemanticForOnTap = false,
+    this.statesController,
   }) : assert(
          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
          'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -263,7 +273,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
-  final Alignment? expandedAlignment;
+  final AlignmentGeometry? expandedAlignment;
 
   /// Specifies the alignment of each child within [children] when the tile is expanded.
   ///
@@ -397,10 +407,29 @@ class ExpansionTile extends StatefulWidget {
   /// In cases where control over the tile's state is needed from a callback
   /// triggered by a widget within the tile, [ExpansibleController.of] may be
   /// more convenient than supplying a controller.
-  final ExpansionTileController? controller;
+  final ExpansibleController? controller;
 
   /// {@macro flutter.material.ListTile.dense}
   final bool? dense;
+
+  /// The splash color of the ink response when the tile is tapped.
+  ///
+  /// This color is passed directly to the underlying [ListTile]'s
+  /// `splashColor` property, which controls the ink ripple (splash)
+  /// animation when the tile is tapped. Internally, [ListTile] uses
+  /// an [InkWell] (which handles the actual splash effect), and so the
+  /// provided color will apply to that ripple.
+  ///
+  /// If null, the splash color will default to the current theme’s
+  /// `ThemeData.splashColor`.
+  ///
+  /// See also:
+  ///
+  /// * [ListTile.splashColor], which sets the ink splash for the tile.
+  /// * [InkWell.splashColor], which determines the color of the ripple
+  ///   effect in Material widgets.
+  /// * [ThemeData.splashColor], which provides a fallback color.
+  final Color? splashColor;
 
   /// Defines how compact the expansion tile's layout will be.
   ///
@@ -456,6 +485,16 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// The controller that notifies when the widget's [WidgetState]s change.
+  ///
+  /// This allows listening to and controlling states such as
+  /// [WidgetState.hovered], [WidgetState.focused], [WidgetState.pressed],
+  /// and [WidgetState.disabled] for the tile's header.
+  ///
+  /// If null, the backing [ListTile] will create and manage its own
+  /// [WidgetStatesController].
+  final WidgetStatesController? statesController;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -477,7 +516,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
   late Animation<Color?> _backgroundColor;
 
   late ExpansionTileThemeData _expansionTileTheme;
-  late ExpansionTileController _tileController;
+  late ExpansibleController _tileController;
   Timer? _timer;
   late Curve _curve;
   late Curve? _reverseCurve;
@@ -488,7 +527,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
     super.initState();
     _curve = Curves.easeIn;
     _duration = _kExpand;
-    _tileController = widget.controller ?? ExpansionTileController();
+    _tileController = widget.controller ?? ExpansibleController();
     if (widget.initiallyExpanded) {
       _tileController.expand();
     }
@@ -509,20 +548,48 @@ class _ExpansionTileState extends State<ExpansionTile> {
   void _onExpansionChanged() {
     final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint =
-        _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint;
+    final String stateHint = _tileController.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // TODO(tahatesser): This is a workaround for VoiceOver interrupting
       // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
       _timer?.cancel();
       _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.announce(stateHint, textDirection);
+        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+          Object exception,
+          StackTrace stack,
+        ) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'material library',
+              context: ErrorDescription('while sending semantics announcement'),
+            ),
+          );
+        });
         _timer?.cancel();
         _timer = null;
       });
-    } else {
-      SemanticsService.announce(stateHint, textDirection);
+    }
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
+    else if (defaultTargetPlatform != TargetPlatform.android) {
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+        Object exception,
+        StackTrace stack,
+      ) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'material library',
+            context: ErrorDescription('while sending semantics announcement'),
+          ),
+        );
+      });
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
@@ -563,52 +630,53 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final ThemeData theme = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint =
+    final String onTapHint = _tileController.isExpanded
+        ? localizations.expansionTileExpandedTapHint
+        : localizations.expansionTileCollapsedTapHint;
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
         _tileController.isExpanded
-            ? localizations.expansionTileExpandedTapHint
-            : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (theme.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint =
-            _tileController.isExpanded
-                ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-                : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
-    return Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
-      child: ListTileTheme.merge(
-        iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
-        textColor: _headerColor.value,
-        child: ListTile(
-          enabled: widget.enabled,
-          onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
-          dense: widget.dense,
-          visualDensity: widget.visualDensity,
-          enableFeedback: widget.enableFeedback,
-          contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-          leading: widget.leading ?? _buildLeadingIcon(context, animation),
-          title: widget.title,
-          subtitle: widget.subtitle,
-          trailing:
-              widget.showTrailingIcon
-                  ? widget.trailing ?? _buildTrailingIcon(context, animation)
-                  : null,
-          minTileHeight: widget.minTileHeight,
-          internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-        ),
+    final Widget child = ListTileTheme.merge(
+      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+      textColor: _headerColor.value,
+      child: ListTile(
+        enabled: widget.enabled,
+        onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
+        dense: widget.dense,
+        splashColor: widget.splashColor,
+        visualDensity: widget.visualDensity,
+        enableFeedback: widget.enableFeedback,
+        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+        leading: widget.leading ?? _buildLeadingIcon(context, animation),
+        title: widget.title,
+        subtitle: widget.subtitle,
+        trailing: widget.showTrailingIcon
+            ? widget.trailing ?? _buildTrailingIcon(context, animation)
+            : null,
+        minTileHeight: widget.minTileHeight,
+        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        statesController: widget.statesController,
       ),
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
+        // without taking focus.
+        // blockNode prevents this node from being part of the focus traversal.
+        label: semanticsHint,
+        liveRegion: true,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
+      );
+    }
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {
@@ -649,7 +717,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
       shape: expansionTileBorder,
     );
 
-    final Widget tile = Padding(
+    Widget tile = Padding(
       padding: decoration.padding,
       child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]),
     );
@@ -669,6 +737,14 @@ class _ExpansionTileState extends State<ExpansionTile> {
       );
     }
 
+    // If the background color is not transparent, wrap the tile in a Material widget.
+    // This is needed to ensure that the ListTile background color or ink splashes
+    // are visible. A DecoratedBox with a non-transparent color will hide the
+    // background color or ink splashes of the ListTile.
+    if (backgroundColor.a > 0) {
+      tile = Material(type: MaterialType.transparency, child: tile);
+    }
+
     return DecoratedBox(decoration: decoration, child: tile);
   }
 
@@ -677,8 +753,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
     super.didUpdateWidget(oldWidget);
     final ThemeData theme = Theme.of(context);
     _expansionTileTheme = ExpansionTileTheme.of(context);
-    final ExpansionTileThemeData defaults =
-        theme.useMaterial3 ? _ExpansionTileDefaultsM3(context) : _ExpansionTileDefaultsM2(context);
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+        ? _ExpansionTileDefaultsM3(context)
+        : _ExpansionTileDefaultsM2(context);
     if (widget.collapsedShape != oldWidget.collapsedShape || widget.shape != oldWidget.shape) {
       _updateShapeBorder(theme);
     }
@@ -698,14 +775,24 @@ class _ExpansionTileState extends State<ExpansionTile> {
       _updateAnimationDuration();
       _updateHeightFactorCurve();
     }
+    if (widget.controller != oldWidget.controller) {
+      _tileController.removeListener(_onExpansionChanged);
+      if (oldWidget.controller == null) {
+        _tileController.dispose();
+      }
+
+      _tileController = widget.controller ?? ExpansibleController();
+      _tileController.addListener(_onExpansionChanged);
+    }
   }
 
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _expansionTileTheme = ExpansionTileTheme.of(context);
-    final ExpansionTileThemeData defaults =
-        theme.useMaterial3 ? _ExpansionTileDefaultsM3(context) : _ExpansionTileDefaultsM2(context);
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+        ? _ExpansionTileDefaultsM3(context)
+        : _ExpansionTileDefaultsM2(context);
     _updateAnimationDuration();
     _updateShapeBorder(theme);
     _updateHeaderColor(defaults);

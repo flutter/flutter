@@ -61,7 +61,17 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
     this.verticalDetails = const ScrollableDetails.vertical(),
     this.horizontalDetails = const ScrollableDetails.horizontal(),
     required this.delegate,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.41.0-0.0.pre.',
+    )
     this.cacheExtent,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.41.0-0.0.pre.',
+    )
+    this.cacheExtentStyle,
+    this.scrollCacheExtent,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior,
@@ -73,7 +83,21 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
   final TwoDimensionalChildDelegate delegate;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
   final double? cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
+  final CacheExtentStyle? cacheExtentStyle;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
 
   /// Whether scrolling gestures should lock to one axes, allow free movement
   /// in both axes, or be evaluated on a weighted scale.
@@ -170,7 +194,7 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       mainAxisDetails = mainAxisDetails.copyWith(controller: PrimaryScrollController.of(context));
     }
 
-    final TwoDimensionalScrollable scrollable = TwoDimensionalScrollable(
+    final scrollable = TwoDimensionalScrollable(
       horizontalDetails: switch (mainAxis) {
         Axis.horizontal => mainAxisDetails,
         Axis.vertical => horizontalDetails,
@@ -185,11 +209,10 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
       hitTestBehavior: hitTestBehavior,
     );
 
-    final Widget scrollableResult =
-        effectivePrimary
-            // Further descendant ScrollViews will not inherit the same PrimaryScrollController
-            ? PrimaryScrollController.none(child: scrollable)
-            : scrollable;
+    final Widget scrollableResult = effectivePrimary
+        // Further descendant ScrollViews will not inherit the same PrimaryScrollController
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
 
     final ScrollViewKeyboardDismissBehavior effectiveKeyboardDismissBehavior =
         keyboardDismissBehavior ??

@@ -34,5 +34,11 @@
   "shareButtonLabel": "Kopīgot…",
   "clearButtonLabel": "Notīrīt",
   "cancelButtonLabel": "Atcelt",
-  "backButtonLabel": "Atpakaļ"
+  "backButtonLabel": "Atpakaļ",
+  "expansionTileExpandedHint": "dubultskāriens, lai sakļautu",
+  "expansionTileCollapsedHint": "dubultskāriens, lai izvērstu",
+  "expansionTileExpandedTapHint": "Sakļaut",
+  "expansionTileCollapsedTapHint": "Izvērst, lai iegūtu plašāku informāciju",
+  "expandedHint": "Sakļauts",
+  "collapsedHint": "Izvērsts"
 }

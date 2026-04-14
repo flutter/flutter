@@ -48,9 +48,9 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final String description = item.toString();
-    const String prefix = 'TextStyle(';
-    const String suffix = ')';
+    final description = item.toString();
+    const prefix = 'TextStyle(';
+    const suffix = ')';
     if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
       return false;
     }
@@ -59,7 +59,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
       prefix.length,
       description.length - suffix.length,
     );
-    int startIndex = 0;
+    var startIndex = 0;
     for (final String property in propertiesInOrder) {
       startIndex = propertyDescription.indexOf(property, startIndex);
       if (startIndex < 0) {
@@ -84,8 +84,8 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
       matchState,
       verbose,
     );
-    final String itemAsString = item.toString();
-    final String? property = matchState['missingProperty'] as String?;
+    final itemAsString = item.toString();
+    final property = matchState['missingProperty'] as String?;
     if (property != null) {
       description.add("expect property: '$property'");
       final int propertyIndex = propertiesInOrder.indexOf(property);
@@ -110,7 +110,7 @@ void main() {
     );
     expect(const TextStyle().toString(), equals('TextStyle(<all styles inherited>)'));
 
-    const TextStyle s1 = TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, height: 123.0);
+    const s1 = TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, height: 123.0);
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);
@@ -315,23 +315,23 @@ void main() {
   });
 
   test('TextStyle using package font', () {
-    const TextStyle s6 = TextStyle(fontFamily: 'test');
+    const s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
     expect(s6.getTextStyle(), matchesToStringOf(s6));
 
-    const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
+    const s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle(), matchesToStringOf(s7));
 
-    const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
+    const s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
     expect(s8.fontFamilyFallback![0], 'packages/p/test');
     expect(s8.fontFamilyFallback![1], 'packages/p/test2');
     expect(s8.fontFamilyFallback!.length, 2);
 
-    const TextStyle s9 = TextStyle(package: 'p');
+    const s9 = TextStyle(package: 'p');
     expect(s9.fontFamilyFallback, null);
 
-    const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
+    const s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
 
     // Ensure that package prefix is not duplicated after copying.
@@ -350,12 +350,12 @@ void main() {
   });
 
   test('TextStyle package font merge', () {
-    const TextStyle s1 = TextStyle(
+    const s1 = TextStyle(
       package: 'p',
       fontFamily: 'font1',
       fontFamilyFallback: <String>['fallback1'],
     );
-    const TextStyle s2 = TextStyle(
+    const s2 = TextStyle(
       package: 'p',
       fontFamily: 'font2',
       fontFamilyFallback: <String>['fallback2'],
@@ -375,25 +375,22 @@ void main() {
   });
 
   test('TextStyle font family fallback', () {
-    const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
+    const s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
     expect(s1.fontFamilyFallback![0], 'Roboto');
     expect(s1.fontFamilyFallback![1], 'test');
     expect(s1.fontFamilyFallback!.length, 2);
 
-    const TextStyle s2 = TextStyle(
-      fontFamily: 'foo',
-      fontFamilyFallback: <String>['Roboto', 'test'],
-    );
+    const s2 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>['Roboto', 'test']);
     expect(s2.fontFamilyFallback![0], 'Roboto');
     expect(s2.fontFamilyFallback![1], 'test');
     expect(s2.fontFamily, 'foo');
     expect(s2.fontFamilyFallback!.length, 2);
 
-    const TextStyle s3 = TextStyle(fontFamily: 'foo');
+    const s3 = TextStyle(fontFamily: 'foo');
     expect(s3.fontFamily, 'foo');
     expect(s3.fontFamilyFallback, null);
 
-    const TextStyle s4 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>[]);
+    const s4 = TextStyle(fontFamily: 'foo', fontFamilyFallback: <String>[]);
     expect(s4.fontFamily, 'foo');
     expect(s4.fontFamilyFallback, <String>[]);
     expect(s4.fontFamilyFallback!.isEmpty, true);
@@ -411,10 +408,10 @@ void main() {
   });
 
   test('TextStyle.debugLabel', () {
-    const TextStyle unknown = TextStyle();
-    const TextStyle foo = TextStyle(debugLabel: 'foo', fontSize: 1.0);
-    const TextStyle bar = TextStyle(debugLabel: 'bar', fontSize: 2.0);
-    const TextStyle baz = TextStyle(debugLabel: 'baz', fontSize: 3.0);
+    const unknown = TextStyle();
+    const foo = TextStyle(debugLabel: 'foo', fontSize: 1.0);
+    const bar = TextStyle(debugLabel: 'bar', fontSize: 2.0);
+    const baz = TextStyle(debugLabel: 'baz', fontSize: 3.0);
 
     expect(unknown.debugLabel, null);
     expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
@@ -436,13 +433,13 @@ void main() {
   });
 
   test('TextStyle.hashCode', () {
-    const TextStyle a = TextStyle(
+    const a = TextStyle(
       fontFamilyFallback: <String>['Roboto'],
       shadows: <ui.Shadow>[ui.Shadow()],
       fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
       fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 123.0)],
     );
-    const TextStyle b = TextStyle(
+    const b = TextStyle(
       fontFamilyFallback: <String>['Noto'],
       shadows: <ui.Shadow>[ui.Shadow()],
       fontFeatures: <ui.FontFeature>[ui.FontFeature('abcd')],
@@ -451,32 +448,20 @@ void main() {
     expect(a.hashCode, a.hashCode);
     expect(a.hashCode, isNot(equals(b.hashCode)));
 
-    const TextStyle c = TextStyle(leadingDistribution: TextLeadingDistribution.even);
-    const TextStyle d = TextStyle(leadingDistribution: TextLeadingDistribution.proportional);
+    const c = TextStyle(leadingDistribution: TextLeadingDistribution.even);
+    const d = TextStyle(leadingDistribution: TextLeadingDistribution.proportional);
     expect(c.hashCode, c.hashCode);
     expect(c.hashCode, isNot(d.hashCode));
   });
 
   test('TextStyle shadows', () {
-    const ui.Shadow shadow1 = ui.Shadow(blurRadius: 1.0, offset: Offset(1.0, 1.0));
-    const ui.Shadow shadow2 = ui.Shadow(
-      blurRadius: 2.0,
-      color: Color(0xFF111111),
-      offset: Offset(2.0, 2.0),
-    );
-    const ui.Shadow shadow3 = ui.Shadow(
-      blurRadius: 3.0,
-      color: Color(0xFF222222),
-      offset: Offset(3.0, 3.0),
-    );
-    const ui.Shadow shadow4 = ui.Shadow(
-      blurRadius: 4.0,
-      color: Color(0xFF333333),
-      offset: Offset(4.0, 4.0),
-    );
+    const shadow1 = ui.Shadow(blurRadius: 1.0, offset: Offset(1.0, 1.0));
+    const shadow2 = ui.Shadow(blurRadius: 2.0, color: Color(0xFF111111), offset: Offset(2.0, 2.0));
+    const shadow3 = ui.Shadow(blurRadius: 3.0, color: Color(0xFF222222), offset: Offset(3.0, 3.0));
+    const shadow4 = ui.Shadow(blurRadius: 4.0, color: Color(0xFF333333), offset: Offset(4.0, 4.0));
 
-    const TextStyle s1 = TextStyle(shadows: <ui.Shadow>[shadow1, shadow2]);
-    const TextStyle s2 = TextStyle(shadows: <ui.Shadow>[shadow3, shadow4]);
+    const s1 = TextStyle(shadows: <ui.Shadow>[shadow1, shadow2]);
+    const s2 = TextStyle(shadows: <ui.Shadow>[shadow3, shadow4]);
 
     final TextStyle lerp12 = TextStyle.lerp(s1, s2, 0.5)!;
 
@@ -496,12 +481,12 @@ void main() {
   });
 
   test('TextStyle foreground and color combos', () {
-    const Color red = Color.fromARGB(255, 255, 0, 0);
-    const Color blue = Color.fromARGB(255, 0, 0, 255);
-    const TextStyle redTextStyle = TextStyle(color: red);
-    const TextStyle blueTextStyle = TextStyle(color: blue);
-    final TextStyle redPaintTextStyle = TextStyle(foreground: Paint()..color = red);
-    final TextStyle bluePaintTextStyle = TextStyle(foreground: Paint()..color = blue);
+    const red = Color.fromARGB(255, 255, 0, 0);
+    const blue = Color.fromARGB(255, 0, 0, 255);
+    const redTextStyle = TextStyle(color: red);
+    const blueTextStyle = TextStyle(color: blue);
+    final redPaintTextStyle = TextStyle(foreground: Paint()..color = red);
+    final bluePaintTextStyle = TextStyle(foreground: Paint()..color = blue);
 
     // merge/copyWith
     final TextStyle redBlueBothForegroundMerged = redTextStyle.merge(blueTextStyle);
@@ -537,11 +522,11 @@ void main() {
   });
 
   test('backgroundColor', () {
-    const TextStyle s1 = TextStyle();
+    const s1 = TextStyle();
     expect(s1.backgroundColor, isNull);
     expect(s1.toString(), 'TextStyle(<all styles inherited>)');
 
-    const TextStyle s2 = TextStyle(backgroundColor: Color(0xFF00FF00));
+    const s2 = TextStyle(backgroundColor: Color(0xFF00FF00));
     expect(s2.backgroundColor, const Color(0xFF00FF00));
     expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: ${const Color(0xff00ff00)})');
 
@@ -555,12 +540,12 @@ void main() {
   });
 
   test('TextStyle background and backgroundColor combos', () {
-    const Color red = Color.fromARGB(255, 255, 0, 0);
-    const Color blue = Color.fromARGB(255, 0, 0, 255);
-    const TextStyle redTextStyle = TextStyle(backgroundColor: red);
-    const TextStyle blueTextStyle = TextStyle(backgroundColor: blue);
-    final TextStyle redPaintTextStyle = TextStyle(background: Paint()..color = red);
-    final TextStyle bluePaintTextStyle = TextStyle(background: Paint()..color = blue);
+    const red = Color.fromARGB(255, 255, 0, 0);
+    const blue = Color.fromARGB(255, 0, 0, 255);
+    const redTextStyle = TextStyle(backgroundColor: red);
+    const blueTextStyle = TextStyle(backgroundColor: blue);
+    final redPaintTextStyle = TextStyle(background: Paint()..color = red);
+    final bluePaintTextStyle = TextStyle(background: Paint()..color = blue);
 
     // merge/copyWith
     final TextStyle redBlueBothForegroundMerged = redTextStyle.merge(blueTextStyle);
@@ -599,19 +584,19 @@ void main() {
   });
 
   test('TextStyle strut textScaler', () {
-    const TextStyle style0 = TextStyle(fontSize: 10);
+    const style0 = TextStyle(fontSize: 10);
     final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(
       textScaler: const TextScaler.linear(2.5),
     );
 
-    const TextStyle style1 = TextStyle(fontSize: 25);
+    const style1 = TextStyle(fontSize: 25);
     final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle();
 
     expect(paragraphStyle0 == paragraphStyle1, true);
   });
 
   test('TextStyle apply', () {
-    const TextStyle style = TextStyle(
+    const style = TextStyle(
       fontSize: 10,
       shadows: <ui.Shadow>[],
       fontStyle: FontStyle.normal,
@@ -705,13 +690,13 @@ void main() {
 
   test('TextStyle.lerp identical a,b', () {
     expect(TextStyle.lerp(null, null, 0), null);
-    const TextStyle style = TextStyle();
+    const style = TextStyle();
     expect(identical(TextStyle.lerp(style, style, 0.5), style), true);
   });
 
   test('Throws when lerping between inherit:true and inherit:false with unspecified fields', () {
-    const TextStyle fromStyle = TextStyle();
-    const TextStyle toStyle = TextStyle(inherit: false);
+    const fromStyle = TextStyle();
+    const toStyle = TextStyle(inherit: false);
     expect(() => TextStyle.lerp(fromStyle, toStyle, 0.5), throwsFlutterError);
     expect(TextStyle.lerp(fromStyle, fromStyle, 0.5), fromStyle);
   });
@@ -719,8 +704,8 @@ void main() {
   test(
     'Does not throw when lerping between inherit:true and inherit:false but fully specified styles',
     () {
-      const TextStyle fromStyle = TextStyle();
-      const TextStyle toStyle = TextStyle(
+      const fromStyle = TextStyle();
+      const toStyle = TextStyle(
         inherit: false,
         color: Color(0x87654321),
         backgroundColor: Color(0x12345678),
@@ -759,12 +744,12 @@ void main() {
     expect(lerpFontVariations(const <FontVariation>[], null, 1.0), null);
     expect(lerpFontVariations(null, null, 1.0), null);
 
-    const FontVariation w100 = FontVariation.weight(100.0);
-    const FontVariation w120 = FontVariation.weight(120.0);
-    const FontVariation w150 = FontVariation.weight(150.0);
-    const FontVariation w200 = FontVariation.weight(200.0);
-    const FontVariation w300 = FontVariation.weight(300.0);
-    const FontVariation w1000 = FontVariation.weight(1000.0);
+    const w100 = FontVariation.weight(100.0);
+    const w120 = FontVariation.weight(120.0);
+    const w150 = FontVariation.weight(150.0);
+    const w200 = FontVariation.weight(200.0);
+    const w300 = FontVariation.weight(300.0);
+    const w1000 = FontVariation.weight(1000.0);
 
     // one axis
     expect(
@@ -802,11 +787,11 @@ void main() {
       const <FontVariation>[],
     );
 
-    const FontVariation sn80 = FontVariation.slant(-80.0);
-    const FontVariation sn40 = FontVariation.slant(-40.0);
-    const FontVariation s0 = FontVariation.slant(0.0);
-    const FontVariation sp40 = FontVariation.slant(40.0);
-    const FontVariation sp80 = FontVariation.slant(80.0);
+    const sn80 = FontVariation.slant(-80.0);
+    const sn40 = FontVariation.slant(-40.0);
+    const s0 = FontVariation.slant(0.0);
+    const sp40 = FontVariation.slant(40.0);
+    const sp80 = FontVariation.slant(80.0);
 
     // two axis matched order
     expect(

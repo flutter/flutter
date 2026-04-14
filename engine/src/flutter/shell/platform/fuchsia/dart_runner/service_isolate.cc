@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "service_isolate.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/service_isolate.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/typed_data/typed_list.h"
-
-#include "builtin_libraries.h"
-#include "dart_component_controller.h"
 
 namespace dart_runner {
 namespace {
@@ -196,19 +195,5 @@ Dart_Isolate CreateServiceIsolate(
   }
   return isolate;
 }  // namespace dart_runner
-
-Dart_Handle GetVMServiceAssetsArchiveCallback() {
-  dart_utils::MappedResource vm_service_tar;
-  if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "/pkg/data/observatory.tar", vm_service_tar)) {
-    FML_LOG(ERROR) << "Failed to load Observatory assets";
-    return nullptr;
-  }
-  // TODO(rmacnak): Should we avoid copying the tar? Or does the service
-  // library not hold onto it anyway?
-  return tonic::DartConverter<tonic::Uint8List>::ToDart(
-      reinterpret_cast<const uint8_t*>(vm_service_tar.address()),
-      vm_service_tar.size());
-}
 
 }  // namespace dart_runner

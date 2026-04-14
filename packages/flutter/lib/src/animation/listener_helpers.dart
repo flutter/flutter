@@ -143,17 +143,16 @@ mixin AnimationLocalListenersMixin {
   @pragma('vm:notify-debugger-on-exception')
   void notifyListeners() {
     final List<VoidCallback> localListeners = _listeners.toList(growable: false);
-    for (final VoidCallback listener in localListeners) {
+    for (final listener in localListeners) {
       InformationCollector? collector;
       assert(() {
-        collector =
-            () => <DiagnosticsNode>[
-              DiagnosticsProperty<AnimationLocalListenersMixin>(
-                'The $runtimeType notifying listeners was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ];
+        collector = () => <DiagnosticsNode>[
+          DiagnosticsProperty<AnimationLocalListenersMixin>(
+            'The $runtimeType notifying listeners was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ];
         return true;
       }());
       try {
@@ -237,7 +236,7 @@ mixin AnimationLocalStatusListenersMixin {
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(AnimationStatus status) {
     final List<AnimationStatusListener> localListeners = _statusListeners.toList(growable: false);
-    for (final AnimationStatusListener listener in localListeners) {
+    for (final listener in localListeners) {
       try {
         if (_statusListeners.contains(listener)) {
           listener(status);
@@ -245,14 +244,13 @@ mixin AnimationLocalStatusListenersMixin {
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {
-          collector =
-              () => <DiagnosticsNode>[
-                DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
-                  'The $runtimeType notifying status listeners was',
-                  this,
-                  style: DiagnosticsTreeStyle.errorProperty,
-                ),
-              ];
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
           return true;
         }());
         FlutterError.reportError(

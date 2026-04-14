@@ -36,10 +36,9 @@ void main() {
   TextStyle floatingLabelStyle = MaterialStateTextStyle.resolveWith((
     Set<MaterialState> states,
   ) {
-    final Color color =
-        states.contains(MaterialState.error)
-            ? Theme.of(context).colorScheme.error
-            : Colors.orange;
+    final Color color = states.contains(MaterialState.error)
+        ? Theme.of(context).colorScheme.error
+        : Colors.orange;
     return TextStyle(color: color, letterSpacing: 1.3);
   });
 
@@ -52,7 +51,7 @@ void main() {
       });
 
   final Color backgroundColor = MaterialStatePropertyAll<Color>(
-    Colors.blue.withOpacity(0.12),
+    Colors.blue.withValues(alpha: 0.12),
   );
 
   final MaterialStatesController statesController = MaterialStatesController(

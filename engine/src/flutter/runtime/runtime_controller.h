@@ -445,17 +445,6 @@ class RuntimeController : public PlatformConfigurationClient,
   virtual bool NotifyIdle(fml::TimeDelta deadline);
 
   //----------------------------------------------------------------------------
-  /// @brief      Notify the Dart VM that the attached flutter view has been
-  ///             destroyed. This gives the Dart VM to perform some cleanup
-  ///             activities e.g: perform garbage collection to free up any
-  ///             unused memory.
-  ///
-  /// NotifyDestroyed is advisory. The VM may or may not perform any clean up
-  /// activities.
-  ///
-  virtual bool NotifyDestroyed();
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be
   ///             transitioned to the running phase manually. The isolate can
   ///             stop running if it terminates execution on its own.
@@ -644,6 +633,15 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override;
 
+  // |PlatformConfigurationClient|
+  void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override;
+
+  // |PlatformConfigurationClient|
+  void SetApplicationLocale(std::string locale) override;
+
+  // |PlatformConfigurationClient|
+  void SetSemanticsTreeEnabled(bool enabled) override;
+
   const fml::WeakPtr<IOManager>& GetIOManager() const {
     return context_.io_manager;
   }
@@ -770,9 +768,6 @@ class RuntimeController : public PlatformConfigurationClient,
               Scene* scene,
               double width,
               double height) override;
-
-  // |PlatformConfigurationClient|
-  void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override;
 
   // |PlatformConfigurationClient|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

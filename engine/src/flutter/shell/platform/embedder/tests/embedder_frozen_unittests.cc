@@ -106,6 +106,8 @@ TEST(EmbedderFrozen, FlutterSemanticsNodeIsFrozen) {
   ASSERT_EQ_OFFSET(FlutterSemanticsNode, FrozenFlutterSemanticsNode,
                    platform_view_id);
   ASSERT_EQ_OFFSET(FlutterSemanticsNode, FrozenFlutterSemanticsNode, tooltip);
+  ASSERT_EQ_OFFSET(FlutterSemanticsNode, FrozenFlutterSemanticsNode,
+                   heading_level);
 }
 
 // New members must not be added to `FlutterSemanticsCustomAction`

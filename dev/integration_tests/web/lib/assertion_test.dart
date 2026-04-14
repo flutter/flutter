@@ -8,13 +8,13 @@ import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
 Future<void> main() async {
-  bool executedAssert = false;
+  var executedAssert = false;
   assert(() {
     executedAssert = true;
     return true;
   }());
 
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
   if (executedAssert == kDebugMode) {
     output.write('--- TEST SUCCEEDED ---');
   } else {

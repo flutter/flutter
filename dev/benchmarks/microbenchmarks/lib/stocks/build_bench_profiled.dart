@@ -10,7 +10,7 @@ import 'build_bench.dart';
 
 Future<void> execute() async {
   debugProfileBuildsEnabledUserWidgets = true;
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResultStatistics(
     description: 'Stock build User Widgets Profiled',
     values: await runBuildBenchmark(),

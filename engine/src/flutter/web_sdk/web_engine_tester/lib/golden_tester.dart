@@ -51,24 +51,23 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
   // visible to the user, so we pump 15 frames to make sure that the content is
   // has reached the screen. This is at the recommendation of the Chrome team,
   // and they use this same thing in their screenshot unit tests.
-  for (int i = 0; i < 15; i++) {
+  for (var i = 0; i < 15; i++) {
     await awaitNextFrame();
   }
 
   if (!filename.endsWith('.png')) {
     throw ArgumentError('Filename must end in .png or SkiaGold will ignore it.');
   }
-  final Map<String, dynamic> serverParams = <String, dynamic>{
+  final serverParams = <String, dynamic>{
     'filename': filename,
-    'region':
-        region == null
-            ? null
-            : <String, dynamic>{
-              'x': region.left,
-              'y': region.top,
-              'width': region.width,
-              'height': region.height,
-            },
+    'region': region == null
+        ? null
+        : <String, dynamic>{
+            'x': region.left,
+            'y': region.top,
+            'width': region.width,
+            'height': region.height,
+          },
     // We use the renderer tag here rather than `renderer is CanvasKitRenderer`
     // because these unit tests operate on the post-transformed (sdk_rewriter)
     // sdk where the internal classes like `CanvasKitRenderer` are no longer
@@ -76,7 +75,7 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
     'isCanvaskitTest': renderer.rendererTag == 'canvaskit',
   };
 
-  final String response = await _callScreenshotServer(serverParams) as String;
+  final response = await _callScreenshotServer(serverParams) as String;
   if (response == 'OK') {
     // Pass
     return;
@@ -86,7 +85,7 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
 
 /// Waits for one frame to complete rendering
 Future<void> awaitNextFrame() {
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   domWindow.requestAnimationFrame((JSNumber time) => completer.complete());
   return completer.future;
 }

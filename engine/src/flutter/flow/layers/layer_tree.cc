@@ -13,7 +13,7 @@
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/trace_event.h"
-#include "include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 
 namespace flutter {
 
@@ -37,8 +37,8 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 
   SkColorSpace* color_space = GetColorSpace(frame.canvas());
   LayerStateStack state_stack;
-  state_stack.set_preroll_delegate(
-      cull_rect, ToDlMatrix(frame.root_surface_transformation()));
+  state_stack.set_preroll_delegate(cull_rect,
+                                   frame.root_surface_transformation());
 
   raster_cache_items_.clear();
 

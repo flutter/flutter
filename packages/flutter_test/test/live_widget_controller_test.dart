@@ -115,7 +115,7 @@ void main() {
   });
 
   test('Input event array on LiveWidgetController', () async {
-    final List<String> logs = <String>[];
+    final logs = <String>[];
     runApp(
       MaterialApp(
         home: Listener(
@@ -130,7 +130,7 @@ void main() {
     final WidgetController controller = LiveWidgetController(WidgetsBinding.instance);
 
     final Offset location = controller.getCenter(find.text('test'));
-    final List<PointerEventRecord> records = <PointerEventRecord>[
+    final records = <PointerEventRecord>[
       PointerEventRecord(Duration.zero, <PointerEvent>[
         // Typically PointerAddedEvent is not used in testers, but for records
         // captured on a device it is usually what starts a gesture.
@@ -164,7 +164,7 @@ void main() {
     final List<Duration> timeDiffs = await controller.handlePointerEventRecord(records);
 
     expect(timeDiffs.length, records.length);
-    for (final Duration diff in timeDiffs) {
+    for (final diff in timeDiffs) {
       // Allow some freedom of time delay in real world.
       // TODO(pdblasi-google): The expected wiggle room should be -1, but occasional
       // results were reaching -6. This assert has been adjusted to reduce flakiness,
@@ -175,9 +175,9 @@ void main() {
       );
     }
 
-    const String b = '$kSecondaryMouseButton';
+    const b = '$kSecondaryMouseButton';
     expect(logs.first, 'down $b');
-    for (int i = 1; i < logs.length - 1; i++) {
+    for (var i = 1; i < logs.length - 1; i++) {
       expect(logs[i], 'move $b');
     }
     expect(logs.last, 'up $b');

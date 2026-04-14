@@ -88,7 +88,7 @@ class AzureDetector {
   AzureDetector({required HttpClientFactory httpClientFactory})
     : _httpClientFactory = httpClientFactory;
 
-  static const String _serviceUrl = 'http://169.254.169.254/metadata/instance';
+  static const _serviceUrl = 'http://169.254.169.254/metadata/instance';
 
   final HttpClientFactory _httpClientFactory;
 
@@ -98,8 +98,8 @@ class AzureDetector {
     if (_isRunningOnAzure != null) {
       return _isRunningOnAzure!;
     }
-    const Duration connectionTimeout = Duration(milliseconds: 250);
-    const Duration requestTimeout = Duration(seconds: 1);
+    const connectionTimeout = Duration(milliseconds: 250);
+    const requestTimeout = Duration(seconds: 1);
     final HttpClient client = _httpClientFactory()..connectionTimeout = connectionTimeout;
     try {
       final HttpClientRequest request = await client

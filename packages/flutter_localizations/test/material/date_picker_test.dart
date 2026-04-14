@@ -19,8 +19,8 @@ void main() {
   });
 
   group(CalendarDatePicker, () {
-    final intl.NumberFormat arabicNumbers = intl.NumberFormat('0', 'ar');
-    final Map<Locale, Map<String, dynamic>> testLocales = <Locale, Map<String, dynamic>>{
+    final arabicNumbers = intl.NumberFormat('0', 'ar');
+    final testLocales = <Locale, Map<String, dynamic>>{
       // Tests the default.
       const Locale('en', 'US'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
@@ -33,7 +33,7 @@ void main() {
         'textDirection': TextDirection.ltr,
         'expectedDaysOfWeek': <String>['В', 'П', 'В', 'С', 'Ч', 'П', 'С'],
         'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${i + 1}'),
-        'expectedMonthYearHeader': 'сентябрь 2017 г.',
+        'expectedMonthYearHeader': 'сентябрь 2017\u202fг.',
       },
       const Locale('ro', 'RO'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
@@ -46,20 +46,17 @@ void main() {
         'textDirection': TextDirection.rtl,
         'expectedDaysOfWeek': <String>['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
         'expectedDaysOfMonth': List<String>.generate(30, (int i) => arabicNumbers.format(i + 1)),
-        'expectedMonthYearHeader': 'سبتمبر ٢٠١٧',
+        'expectedMonthYearHeader': 'سبتمبر 2017',
       },
     };
 
     for (final Locale locale in testLocales.keys) {
       testWidgets('shows dates for $locale', (WidgetTester tester) async {
-        final List<String> expectedDaysOfWeek =
-            testLocales[locale]!['expectedDaysOfWeek'] as List<String>;
-        final List<String> expectedDaysOfMonth =
-            testLocales[locale]!['expectedDaysOfMonth'] as List<String>;
-        final String expectedMonthYearHeader =
-            testLocales[locale]!['expectedMonthYearHeader'] as String;
-        final TextDirection textDirection = testLocales[locale]!['textDirection'] as TextDirection;
-        final DateTime baseDate = DateTime(2017, 9, 27);
+        final expectedDaysOfWeek = testLocales[locale]!['expectedDaysOfWeek'] as List<String>;
+        final expectedDaysOfMonth = testLocales[locale]!['expectedDaysOfMonth'] as List<String>;
+        final expectedMonthYearHeader = testLocales[locale]!['expectedMonthYearHeader'] as String;
+        final textDirection = testLocales[locale]!['textDirection'] as TextDirection;
+        final baseDate = DateTime(2017, 9, 27);
 
         await _pumpBoilerplate(
           tester,
@@ -72,15 +69,14 @@ void main() {
           locale: locale,
           textDirection: textDirection,
         );
-
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
-        for (final String dayOfWeek in expectedDaysOfWeek) {
+        for (final dayOfWeek in expectedDaysOfWeek) {
           expect(find.text(dayOfWeek), findsWidgets);
         }
 
         Offset? previousCellOffset;
-        for (final String dayOfMonth in expectedDaysOfMonth) {
+        for (final dayOfMonth in expectedDaysOfMonth) {
           final Finder dayCell = find.descendant(
             of: find.byType(GridView),
             matching: find.text(dayOfMonth),
@@ -359,8 +355,8 @@ void main() {
     // don't overflow the layout
 
     // Common screen size roughly based on a Pixel 1
-    const Size kCommonScreenSizePortrait = Size(1070, 1770);
-    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+    const kCommonScreenSizePortrait = Size(1070, 1770);
+    const kCommonScreenSizeLandscape = Size(1770, 1070);
 
     Future<void> showPicker(WidgetTester tester, Locale locale, Size size) async {
       tester.view.physicalSize = size;
@@ -425,7 +421,7 @@ Future<void> _pumpBoilerplate(
   await tester.pumpWidget(
     MaterialApp(
       home: Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: textDirection,
         child: Localizations(
           locale: locale,
           delegates: GlobalMaterialLocalizations.delegates,

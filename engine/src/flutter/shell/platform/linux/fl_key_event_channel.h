@@ -70,7 +70,9 @@ void fl_key_event_channel_send(FlKeyEventChannel* channel,
  * @object:
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Completes request started with fl_key_event_channel_send().
  *

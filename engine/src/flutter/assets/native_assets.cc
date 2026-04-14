@@ -17,6 +17,10 @@ namespace flutter {
 #define kTargetArchitectureName "ia32"
 #elif defined(FML_ARCH_CPU_X86_64)
 #define kTargetArchitectureName "x64"
+#elif defined(FML_ARCH_CPU_RISCV32)
+#define kTargetArchitectureName "riscv32"
+#elif defined(FML_ARCH_CPU_RISCV64)
+#define kTargetArchitectureName "riscv64"
 #else
 #error Target architecture detection failed.
 #endif
@@ -41,6 +45,8 @@ namespace flutter {
 
 void NativeAssetsManager::RegisterNativeAssets(const uint8_t* manifest,
                                                size_t manifest_size) {
+  // Note that this format is also expected by build tools for Apple
+  // platforms in packages/flutter_tools/bin/xcode_backend.dart.
   parsed_mapping_.clear();
 
   rapidjson::Document document;

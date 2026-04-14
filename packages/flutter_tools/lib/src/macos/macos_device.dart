@@ -20,29 +20,21 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
-       super(
-         'macos',
-         platformType: PlatformType.macos,
-         ephemeral: false,
-         processManager: processManager,
-         logger: logger,
-         fileSystem: fileSystem,
-         operatingSystemUtils: operatingSystemUtils,
-       );
+       super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool isSupported() => true;
+  Future<bool> isSupported() async => true;
 
   @override
   String get name => 'macOS';
@@ -135,7 +127,10 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

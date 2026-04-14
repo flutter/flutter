@@ -22,10 +22,14 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Autocomplete - async, debouncing, and network errors')),
+        appBar: AppBar(
+          title: const Text(
+            'Autocomplete - async, debouncing, and network errors',
+          ),
+        ),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Text(
                 'Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.',
@@ -98,7 +102,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[
         Text(
           _networkEnabled
@@ -107,7 +111,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
         ),
         Switch(
           value: _networkEnabled,
-          onChanged: (bool? value) {
+          onChanged: (bool value) {
             setState(() {
               _networkEnabled = !_networkEnabled;
             });
@@ -115,28 +119,33 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
         ),
         const SizedBox(height: 32.0),
         Autocomplete<String>(
-          fieldViewBuilder: (
-            BuildContext context,
-            TextEditingController controller,
-            FocusNode focusNode,
-            VoidCallback onFieldSubmitted,
-          ) {
-            return TextFormField(
-              decoration: InputDecoration(
-                errorText: _networkError ? 'Network error, please try again.' : null,
-              ),
-              controller: controller,
-              focusNode: focusNode,
-              onFieldSubmitted: (String value) {
-                onFieldSubmitted();
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController controller,
+                FocusNode focusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                return TextFormField(
+                  decoration: InputDecoration(
+                    errorText: _networkError
+                        ? 'Network error, please try again.'
+                        : null,
+                  ),
+                  controller: controller,
+                  focusNode: focusNode,
+                  onFieldSubmitted: (String value) {
+                    onFieldSubmitted();
+                  },
+                );
               },
-            );
-          },
           optionsBuilder: (TextEditingValue textEditingValue) async {
             setState(() {
               _networkError = false;
             });
-            final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
+            final Iterable<String>? options = await _debouncedSearch(
+              textEditingValue.text,
+            );
             if (options == null) {
               return _lastOptions;
             }
@@ -154,10 +163,17 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
 
 // Mimics a remote API.
 class _FakeAPI {
-  static const List<String> _kOptions = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _kOptions = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   // Searches the options, but injects a fake "network" delay.
-  static Future<Iterable<String>> search(String query, bool networkEnabled) async {
+  static Future<Iterable<String>> search(
+    String query,
+    bool networkEnabled,
+  ) async {
     await Future<void>.delayed(fakeAPIDuration); // Fake 1 second delay.
     if (!networkEnabled) {
       throw const _NetworkException();

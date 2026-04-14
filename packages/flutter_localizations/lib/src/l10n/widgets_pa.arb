@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
   "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ",
   "pasteButtonLabel": "ਪੇਸਟ ਕਰੋ",
-  "selectAllButtonLabel": "ਸਭ ਚੁਣੋ"
+  "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
+  "searchResultsFound": "ਖੋਜ ਨਤੀਜੇ ਮਿਲੇ",
+  "noResultsFound": "ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ",
+  "radioButtonUnselectedLabel": "ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ"
 }

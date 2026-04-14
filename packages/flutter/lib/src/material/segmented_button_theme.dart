@@ -18,10 +18,10 @@ import 'theme.dart';
 /// [SegmentedButton] widgets.
 ///
 /// Descendant widgets obtain the current [SegmentedButtonThemeData] object with
-/// [SegmentedButtonTheme.of]. Instances of [SegmentedButtonTheme] can
+/// [SegmentedButtonTheme.of]. Instances of [SegmentedButtonThemeData] can
 /// be customized with [SegmentedButtonThemeData.copyWith].
 ///
-/// Typically a [SegmentedButtonTheme] is specified as part of the overall
+/// Typically a [SegmentedButtonThemeData] is specified as part of the overall
 /// [Theme] with [ThemeData.segmentedButtonTheme].
 ///
 /// All [SegmentedButtonThemeData] properties are null by default. When null,
@@ -40,6 +40,14 @@ class SegmentedButtonThemeData with Diagnosticable {
   /// values override the default values used by [SegmentedButton].
   ///
   /// If [style] is null, then this theme doesn't override anything.
+  ///
+  /// If [ButtonStyle.side] is provided, [WidgetStateProperty.resolve] is used
+  /// for the following [WidgetState]s:
+  ///
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.disabled].
+  ///  * [WidgetState.selected].
   final ButtonStyle? style;
 
   /// Override for [SegmentedButton.selectedIcon] property.

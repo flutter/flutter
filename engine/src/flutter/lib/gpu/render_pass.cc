@@ -166,8 +166,9 @@ RenderPass::GetOrCreatePipeline() {
         dart_state->GetTaskRunners().GetRasterTaskRunner(),
         fml::MakeCopyable([promise = std::move(pipeline_promise),
                            context = GetContext(), pipeline_desc]() mutable {
-          promise.set_value(
-              context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get());
+          promise.set_value(context->GetPipelineLibrary()
+                                ->GetPipeline(pipeline_desc, true, true)
+                                .Get());
         }));
     pipeline = pipeline_future.get();
   } else {
@@ -269,7 +270,7 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
 
     // If the backend doesn't support normal MSAA, gracefully fallback to
     // rendering without MSAA.
-    if (!flutter::gpu::SupportsNormalOffscreenMSAA(*context->GetContext())) {
+    if (!flutter::gpu::SupportsNormalOffscreenMSAA(context->GetContext())) {
       desc.texture = desc.resolve_texture;
       desc.resolve_texture = nullptr;
       desc.store_action = impeller::StoreAction::kStore;
@@ -560,7 +561,7 @@ void InternalFlutterGpu_RenderPass_SetScissor(flutter::gpu::RenderPass* wrapper,
                                               int y,
                                               int width,
                                               int height) {
-  wrapper->scissor = impeller::TRect<int64_t>::MakeXYWH(x, y, width, height);
+  wrapper->scissor = impeller::IRect32::MakeXYWH(x, y, width, height);
 }
 
 void InternalFlutterGpu_RenderPass_SetViewport(

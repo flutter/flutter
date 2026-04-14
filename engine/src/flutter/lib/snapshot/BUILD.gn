@@ -41,13 +41,14 @@ group("generate_snapshot_bins") {
     # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
     public_deps += [ ":create_arm_gen_snapshot" ]
   } else if (target_cpu == "arm" || target_cpu == "arm64" ||
-             target_cpu == "x64") {
+             target_cpu == "x64" || target_cpu == "riscv64") {
     # For other host OSes, build gen_snapshot directly.
     public_deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
   }
 
   # Build analyze_snapshot for 64-bit target CPUs.
-  if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
+  if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64" ||
+                             target_cpu == "riscv64")) {
     public_deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
   }
 }

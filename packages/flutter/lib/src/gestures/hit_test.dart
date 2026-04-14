@@ -103,7 +103,7 @@ class _OffsetTransformPart extends _TransformPart {
 
   @override
   Matrix4 multiply(Matrix4 rhs) {
-    return rhs.clone()..leftTranslate(offset.dx, offset.dy);
+    return rhs.clone()..leftTranslateByDouble(offset.dx, offset.dy, 0, 1);
   }
 }
 
@@ -280,7 +280,7 @@ class HitTestResult {
     Vector4 b, {
     double epsilon = precisionErrorTolerance,
   }) {
-    bool result = true;
+    var result = true;
     assert(() {
       final Vector4 difference = a - b;
       result = difference.storage.every((double component) => component.abs() < epsilon);

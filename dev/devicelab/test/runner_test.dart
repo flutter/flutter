@@ -8,10 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import 'common.dart';
 
 void main() {
-  final Map<String, String> isolateParams = <String, String>{
-    'runFlutterConfig': 'false',
-    'timeoutInMinutes': '1',
-  };
+  final isolateParams = <String, String>{'runFlutterConfig': 'false', 'timeoutInMinutes': '1'};
   late List<String> printLog;
   void print(String s) => printLog.add(s);
 
@@ -55,7 +52,7 @@ void main() {
         // Obviously this isn't foolproof, but this test becoming flaky or failing
         // consistently should signal that we're encountering a shutdown race
         // somewhere.
-        const int runs = 30;
+        const runs = 30;
         try {
           await Future.wait(<Future<void>>[
             for (int i = 0; i < runs; ++i)

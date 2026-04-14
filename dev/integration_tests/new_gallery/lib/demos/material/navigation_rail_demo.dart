@@ -37,11 +37,7 @@ class _NavRailDemoState extends State<NavRailDemo> with RestorationMixin {
     final String destinationFirst = localization.demoNavigationRailFirst;
     final String destinationSecond = localization.demoNavigationRailSecond;
     final String destinationThird = localization.demoNavigationRailThird;
-    final List<String> selectedItem = <String>[
-      destinationFirst,
-      destinationSecond,
-      destinationThird,
-    ];
+    final selectedItem = <String>[destinationFirst, destinationSecond, destinationThird];
     return Scaffold(
       appBar: AppBar(title: Text(localization.demoNavigationRailTitle)),
       body: Row(

@@ -55,36 +55,34 @@ void main() {
   }
 
   test('MenuThemeData defaults', () {
-    const MenuThemeData menuThemeData = MenuThemeData();
+    const menuThemeData = MenuThemeData();
     expect(menuThemeData.style, isNull);
     expect(menuThemeData.submenuIcon, isNull);
   });
 
   testWidgets('Default MenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const MenuThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('MenuThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const MenuThemeData(
       style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color?>(Color(0xfffffff1))),
       submenuIcon: WidgetStatePropertyAll<Widget?>(Icon(Icons.add)),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -97,7 +95,7 @@ void main() {
 
   test('MenuThemeData lerp special cases', () {
     expect(MenuThemeData.lerp(null, null, 0), null);
-    const MenuThemeData data = MenuThemeData();
+    const data = MenuThemeData();
     expect(identical(MenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
@@ -249,25 +247,21 @@ void main() {
     expect(menuItemMaterial.elevation, equals(0.0));
     expect(menuItemMaterial.shape, equals(const StadiumBorder()));
     expect(getLabelStyle(tester, TestMenu.subMenu10.label).style.color, equals(Colors.grey));
-    final ButtonStyle? textButtonStyle =
-        tester
-            .widget<TextButton>(
-              find
-                  .ancestor(
-                    of: find.text(TestMenu.subMenu10.label),
-                    matching: find.byType(TextButton),
-                  )
-                  .first,
-            )
-            .style;
+    final ButtonStyle? textButtonStyle = tester
+        .widget<TextButton>(
+          find
+              .ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(TextButton))
+              .first,
+        )
+        .style;
     expect(
-      textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      textButtonStyle?.overlayColor?.resolve(<WidgetState>{WidgetState.hovered}),
       equals(Colors.blueGrey),
     );
   });
 
   testWidgets('SubmenuButton.submenuIcon updates default arrow icon', (WidgetTester tester) async {
-    final MenuController controller = MenuController();
+    final controller = MenuController();
     const IconData disabledIcon = Icons.close_fullscreen;
     const IconData hoveredIcon = Icons.ac_unit;
     const IconData focusedIcon = Icons.zoom_out;
@@ -297,10 +291,9 @@ void main() {
               SubmenuButton(
                 menuChildren: <Widget>[
                   SubmenuButton(
-                    menuChildren:
-                        enabled
-                            ? <Widget>[MenuItemButton(child: Text(TestMenu.mainMenu0.label))]
-                            : <Widget>[],
+                    menuChildren: enabled
+                        ? <Widget>[MenuItemButton(child: Text(TestMenu.mainMenu0.label))]
+                        : <Widget>[],
                     child: Text(TestMenu.subSubMenu110.label),
                   ),
                 ],
@@ -367,23 +360,26 @@ List<Widget> createTestMenus({
   double? menuElevation,
   OutlinedBorder? itemShape,
 }) {
-  final MenuStyle menuStyle = MenuStyle(
+  final menuStyle = MenuStyle(
     padding: menuPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,
-    backgroundColor:
-        menuBackground != null ? MaterialStatePropertyAll<Color>(menuBackground) : null,
+    backgroundColor: menuBackground != null
+        ? MaterialStatePropertyAll<Color>(menuBackground)
+        : null,
     elevation: menuElevation != null ? MaterialStatePropertyAll<double>(menuElevation) : null,
     shape: menuShape != null ? MaterialStatePropertyAll<OutlinedBorder>(menuShape) : null,
   );
-  final ButtonStyle itemStyle = ButtonStyle(
+  final itemStyle = ButtonStyle(
     padding: itemPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(itemPadding) : null,
     shape: itemShape != null ? MaterialStatePropertyAll<OutlinedBorder>(itemShape) : null,
-    foregroundColor:
-        itemForeground != null ? MaterialStatePropertyAll<Color>(itemForeground) : null,
-    backgroundColor:
-        itemBackground != null ? MaterialStatePropertyAll<Color>(itemBackground) : null,
+    foregroundColor: itemForeground != null
+        ? MaterialStatePropertyAll<Color>(itemForeground)
+        : null,
+    backgroundColor: itemBackground != null
+        ? MaterialStatePropertyAll<Color>(itemBackground)
+        : null,
     overlayColor: itemOverlay != null ? MaterialStatePropertyAll<Color>(itemOverlay) : null,
   );
-  final List<Widget> result = <Widget>[
+  final result = <Widget>[
     SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,

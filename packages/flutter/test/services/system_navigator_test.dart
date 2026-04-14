@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final List<MethodCall> log = <MethodCall>[];
+  final log = <MethodCall>[];
 
   Future<void> verify(AsyncCallback test, List<Object> expectations) async {
     log.clear();

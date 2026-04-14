@@ -61,7 +61,7 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.displayMedium!,
-      textAlign: TextAlign.center,
+      textAlign: .center,
       child: Container(
         alignment: FractionalOffset.center,
         color: Colors.white,
@@ -86,15 +86,15 @@ class BidsStatus extends StatelessWidget {
           children = <Widget>[
             const Icon(Icons.error_outline, color: Colors.red, size: 60),
             Padding(
-              padding: const EdgeInsets.only(top: 16),
+              padding: const .only(top: 16),
               child: Text('Error: ${snapshot.error}'),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const .only(top: 8),
               child: Text(
                 'Stack trace: ${snapshot.stackTrace}',
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
               ),
             ),
           ];
@@ -103,30 +103,47 @@ class BidsStatus extends StatelessWidget {
             case ConnectionState.none:
               children = const <Widget>[
                 Icon(Icons.info, color: Colors.blue, size: 60),
-                Padding(padding: EdgeInsets.only(top: 16), child: Text('Select a lot')),
+                Padding(padding: .only(top: 16), child: Text('Select a lot')),
               ];
             case ConnectionState.waiting:
               children = const <Widget>[
-                SizedBox(width: 60, height: 60, child: CircularProgressIndicator()),
-                Padding(padding: EdgeInsets.only(top: 16), child: Text('Awaiting bids...')),
+                SizedBox.square(
+                  dimension: 60,
+                  child: CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: .only(top: 16),
+                  child: Text('Awaiting bids...'),
+                ),
               ];
             case ConnectionState.active:
               children = <Widget>[
-                const Icon(Icons.check_circle_outline, color: Colors.green, size: 60),
-                Padding(padding: const EdgeInsets.only(top: 16), child: Text('\$${snapshot.data}')),
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const .only(top: 16),
+                  child: Text('\$${snapshot.data}'),
+                ),
               ];
             case ConnectionState.done:
               children = <Widget>[
                 const Icon(Icons.info, color: Colors.blue, size: 60),
                 Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(snapshot.hasData ? '\$${snapshot.data} (closed)' : '(closed)'),
+                  padding: const .only(top: 16),
+                  child: Text(
+                    snapshot.hasData
+                        ? '\$${snapshot.data} (closed)'
+                        : '(closed)',
+                  ),
                 ),
               ];
           }
         }
 
-        return Column(mainAxisAlignment: MainAxisAlignment.center, children: children);
+        return Column(mainAxisAlignment: .center, children: children);
       },
     );
   }

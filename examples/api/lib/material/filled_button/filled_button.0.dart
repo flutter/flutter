@@ -21,7 +21,7 @@ class FilledButtonApp extends StatelessWidget {
         appBar: AppBar(title: const Text('FilledButton Sample')),
         body: Center(
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: <Widget>[
               Column(
                 children: <Widget>[
@@ -39,9 +39,15 @@ class FilledButtonApp extends StatelessWidget {
                   const SizedBox(height: 30),
                   const Text('Filled tonal'),
                   const SizedBox(height: 15),
-                  FilledButton.tonal(onPressed: () {}, child: const Text('Enabled')),
+                  FilledButton.tonal(
+                    onPressed: () {},
+                    child: const Text('Enabled'),
+                  ),
                   const SizedBox(height: 30),
-                  const FilledButton.tonal(onPressed: null, child: Text('Disabled')),
+                  const FilledButton.tonal(
+                    onPressed: null,
+                    child: Text('Disabled'),
+                  ),
                 ],
               ),
             ],

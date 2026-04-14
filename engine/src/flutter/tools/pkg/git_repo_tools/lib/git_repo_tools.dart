@@ -53,7 +53,7 @@ final class GitRepo {
   }
 
   Future<List<io.File>> _changedFiles() async {
-    final ProcessRunner processRunner = ProcessRunner(
+    final processRunner = ProcessRunner(
       defaultWorkingDirectory: root,
       processManager: _processManager,
     );
@@ -101,7 +101,7 @@ final class GitRepo {
   late final Future<List<io.File>> changedFilesAtHead = _changedFilesAtHead();
 
   Future<List<io.File>> _changedFilesAtHead() async {
-    final ProcessRunner processRunner = ProcessRunner(
+    final processRunner = ProcessRunner(
       defaultWorkingDirectory: root,
       processManager: _processManager,
     );
@@ -140,7 +140,7 @@ final class GitRepo {
     if (verbose) {
       logSink.writeln('git diff output:\n$diffOutput');
     }
-    final Set<String> resultMap = <String>{};
+    final resultMap = <String>{};
     resultMap.addAll(diffOutput.split('\n').where((String str) => str.isNotEmpty));
     return resultMap
         .map<io.File>((String filePath) => io.File(path.join(root.path, filePath)))

@@ -61,7 +61,7 @@ void main() {
       darkColor: Color(0xEE333333),
     );
 
-    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFFFFFFF),
       darkColor: Color(0xFF000000),
     );
@@ -205,7 +205,7 @@ void main() {
   );
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    const Center page1Center = Center();
+    const page1Center = Center();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -226,12 +226,12 @@ void main() {
           tabBuilder: (BuildContext context, int index) {
             return index == 0
                 ? const CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(
-                    backgroundColor: CupertinoColors.white,
-                    middle: Text('Title'),
-                  ),
-                  child: page1Center,
-                )
+                    navigationBar: CupertinoNavigationBar(
+                      backgroundColor: CupertinoColors.white,
+                      middle: Text('Title'),
+                    ),
+                    child: page1Center,
+                  )
                 : const Stack();
           },
         ),
@@ -244,7 +244,7 @@ void main() {
   testWidgets('Contents have automatic sliver padding between translucent bars', (
     WidgetTester tester,
   ) async {
-    const SizedBox content = SizedBox(height: 600.0, width: 600.0);
+    const content = SizedBox(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -266,9 +266,9 @@ void main() {
             tabBuilder: (BuildContext context, int index) {
               return index == 0
                   ? CupertinoPageScaffold(
-                    navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
-                    child: ListView(children: const <Widget>[content]),
-                  )
+                      navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
+                      child: ListView(children: const <Widget>[content]),
+                    )
                   : const Stack();
             },
           ),
@@ -403,11 +403,10 @@ void main() {
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Center())));
 
-    final DecoratedBox decoratedBox =
-        tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
@@ -418,70 +417,11 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
-        tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, const Color(0xFF010203));
-  });
-
-  testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        builder: (BuildContext context, Widget? child) {
-          // Acts as a 20px status bar at the root of the app.
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
-            child: child!,
-          );
-        },
-        home: CupertinoPageScaffold(
-          // Default nav bar is translucent.
-          navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
-          child: ListView.builder(
-            itemExtent: 50,
-            itemBuilder: (BuildContext context, int index) => Text(index.toString()),
-          ),
-        ),
-      ),
-    );
-    // Top media query padding 20 + translucent nav bar 44.
-    expect(tester.getTopLeft(find.text('0')).dy, 64);
-    expect(tester.getTopLeft(find.text('6')).dy, 364);
-
-    await tester.fling(
-      find.text('5'), // Find some random text on the screen.
-      const Offset(0, -200),
-      20,
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
-    expect(
-      tester.getTopLeft(find.text('12')).dy,
-      moreOrLessEquals(466.8333333333334, epsilon: 0.1),
-    );
-
-    // The media query top padding is 20. Tapping at 20 should do nothing.
-    await tester.tapAt(const Offset(400, 20));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
-    expect(
-      tester.getTopLeft(find.text('12')).dy,
-      moreOrLessEquals(466.8333333333334, epsilon: 0.1),
-    );
-
-    // Tap 1 pixel higher.
-    await tester.tapAt(const Offset(400, 19));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(tester.getTopLeft(find.text('0')).dy, 64);
-    expect(tester.getTopLeft(find.text('6')).dy, 364);
-    expect(find.text('12'), findsNothing);
   });
 
   testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (
@@ -495,15 +435,13 @@ void main() {
             viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
           ),
           child: CupertinoPageScaffold(
-            navigationBar:
-                showNavigationBar ? const CupertinoNavigationBar(middle: Text('Title')) : null,
+            navigationBar: showNavigationBar
+                ? const CupertinoNavigationBar(middle: Text('Title'))
+                : null,
             child: Builder(
-              builder:
-                  (BuildContext context) => Center(
-                    child: CupertinoTextField(
-                      placeholder: MediaQuery.viewInsetsOf(context).toString(),
-                    ),
-                  ),
+              builder: (BuildContext context) => Center(
+                child: CupertinoTextField(placeholder: MediaQuery.viewInsetsOf(context).toString()),
+              ),
             ),
           ),
         ),
@@ -511,7 +449,7 @@ void main() {
     }
 
     // CupertinoPageScaffold should consume the viewInsets in all cases
-    final String expectedViewInsets = EdgeInsets.zero.toString();
+    final expectedViewInsets = EdgeInsets.zero.toString();
 
     // When there is a nav bar and no keyboard.
     await tester.pumpWidget(buildFrame(true, false));
@@ -591,4 +529,97 @@ void main() {
       const TextScaler.linear(99.0),
     );
   });
+
+  testWidgets('Tap the status bar scrolls to top', (WidgetTester tester) async {
+    final scrollController = ScrollController(initialScrollOffset: 1000);
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+          child: Builder(
+            builder: (BuildContext context) {
+              return PrimaryScrollController(
+                controller: scrollController,
+                child: const CupertinoPageScaffold(
+                  child: SingleChildScrollView(primary: true, child: SizedBox(height: 12345)),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    tester.simulateStatusBarTap();
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+  });
+
+  testWidgets('status bar tap only scrolls the foregrounded primary controller', (
+    WidgetTester tester,
+  ) async {
+    final app = CupertinoApp(
+      initialRoute: 'a',
+      onGenerateInitialRoutes: (initialRoute) {
+        return [
+          CupertinoPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+          CupertinoPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+        ];
+      },
+      onGenerateRoute: (_) => throw UnimplementedError(),
+    );
+    await tester.pumpWidget(app);
+
+    final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
+      find.descendant(
+        of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
+        matching: find.byType(Scrollable, skipOffstage: false),
+        skipOffstage: false,
+      ),
+    );
+
+    final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
+    expect(scrollable1.position.pixels, 1000);
+    expect(scrollable2.position.pixels, 1000);
+
+    tester.simulateStatusBarTap();
+    await tester.pumpAndSettle();
+
+    expect(scrollable1.position.pixels, 1000);
+    expect(scrollable2.position.pixels, 0);
+  });
+
+  testWidgets('CupertinoPageScaffold does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoPageScaffold(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPageScaffold)), Size.zero);
+  });
+}
+
+class _ScaffoldWithPrimaryScrollView extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ScaffoldWithPrimaryScrollViewState();
+}
+
+class _ScaffoldWithPrimaryScrollViewState extends State<_ScaffoldWithPrimaryScrollView> {
+  final ScrollController controller = ScrollController(initialScrollOffset: 1000);
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.only(top: 25.0)), // status bar
+      child: PrimaryScrollController(
+        controller: controller,
+        child: const CupertinoPageScaffold(
+          child: SingleChildScrollView(primary: true, child: SizedBox(height: 2000)),
+        ),
+      ),
+    );
+  }
 }

@@ -21,6 +21,10 @@ Color _scaleAlpha(Color x, double factor) {
   return x.withValues(alpha: (x.a * factor).clamp(0, 1));
 }
 
+ColorSpace _widerColorSpace(ColorSpace a, ColorSpace b) {
+  return a == ColorSpace.displayP3 || b == ColorSpace.displayP3 ? ColorSpace.displayP3 : a;
+}
+
 class Color {
   const Color(int value)
     : this._fromARGBC(value >> 24, value >> 16, value >> 8, value, ColorSpace.sRGB);
@@ -158,13 +162,24 @@ class Color {
       if (x == null) {
         return _scaleAlpha(y, t);
       } else {
-        assert(x.colorSpace == y.colorSpace);
+        final Color a;
+        final Color b;
+        final ColorSpace resultColorSpace;
+        if (x.colorSpace == y.colorSpace) {
+          a = x;
+          b = y;
+          resultColorSpace = x.colorSpace;
+        } else {
+          resultColorSpace = _widerColorSpace(x.colorSpace, y.colorSpace);
+          a = x.withValues(colorSpace: resultColorSpace);
+          b = y.withValues(colorSpace: resultColorSpace);
+        }
         return Color.from(
-          alpha: _lerpDouble(x.a, y.a, t).clamp(0, 1),
-          red: _lerpDouble(x.r, y.r, t).clamp(0, 1),
-          green: _lerpDouble(x.g, y.g, t).clamp(0, 1),
-          blue: _lerpDouble(x.b, y.b, t).clamp(0, 1),
-          colorSpace: x.colorSpace,
+          alpha: _lerpDouble(a.a, b.a, t).clamp(0, 1),
+          red: _lerpDouble(a.r, b.r, t).clamp(0, 1),
+          green: _lerpDouble(a.g, b.g, t).clamp(0, 1),
+          blue: _lerpDouble(a.b, b.b, t).clamp(0, 1),
+          colorSpace: resultColorSpace,
         );
       }
     }
@@ -282,7 +297,7 @@ abstract class Paint {
   factory Paint() => engine.renderer.createPaint();
 
   factory Paint.from(Paint other) {
-    final Paint paint = Paint();
+    final paint = Paint();
     paint
       ..blendMode = other.blendMode
       ..color = other.color
@@ -443,6 +458,10 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.matrix(List<double> matrix) = engine.EngineColorFilter.matrix;
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
+  factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
+
+  @override
+  String get debugShortDescription => toString();
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -499,75 +518,158 @@ class _ClampTransform implements _ColorTransform {
   }
 }
 
-class _MatrixColorTransform implements _ColorTransform {
-  const _MatrixColorTransform(this.values);
+// sRGB standard constants for transfer functions.
+// See https://en.wikipedia.org/wiki/SRGB.
+const double _kSrgbGamma = 2.4;
+const double _kSrgbLinearThreshold = 0.04045;
+const double _kSrgbLinearSlope = 12.92;
+const double _kSrgbEncodedOffset = 0.055;
+const double _kSrgbEncodedDivisor = 1.055;
+const double _kSrgbLinearToEncodedThreshold = 0.0031308;
 
-  final List<double> values;
+/// sRGB electro-optical transfer function (gamma decode to linear).
+double _srgbEOTF(double v) {
+  if (v <= _kSrgbLinearThreshold) {
+    return v / _kSrgbLinearSlope;
+  }
+  return math.pow((v + _kSrgbEncodedOffset) / _kSrgbEncodedDivisor, _kSrgbGamma).toDouble();
+}
+
+/// sRGB opto-electronic transfer function (linear to gamma encode).
+double _srgbOETF(double v) {
+  if (v <= _kSrgbLinearToEncodedThreshold) {
+    return v * _kSrgbLinearSlope;
+  }
+  return _kSrgbEncodedDivisor * math.pow(v, 1.0 / _kSrgbGamma).toDouble() - _kSrgbEncodedOffset;
+}
+
+/// Extended versions that handle negative values by mirroring.
+double _srgbEOTFExtended(double v) {
+  return v < 0.0 ? -_srgbEOTF(-v) : _srgbEOTF(v);
+}
+
+double _srgbOETFExtended(double v) {
+  return v < 0.0 ? -_srgbOETF(-v) : _srgbOETF(v);
+}
+
+/// Display P3 to sRGB 3x3 matrix in linear space.
+/// M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
+const List<double> _kP3ToSrgbLinear = <double>[
+  1.2249401,
+  -0.2249402,
+  0.0,
+  -0.0420569,
+  1.0420571,
+  0.0,
+  -0.0196376,
+  -0.0786507,
+  1.0982884,
+];
+
+/// sRGB to Display P3 3x3 matrix in linear space (inverse of [_kP3ToSrgbLinear]).
+const List<double> _kSrgbToP3Linear = <double>[
+  0.8224622,
+  0.1775380,
+  0.0,
+  0.0331942,
+  0.9668058,
+  0.0,
+  0.0170806,
+  0.0723974,
+  0.9105220,
+];
+
+/// Converts Display P3 (gamma-encoded) to extended sRGB (gamma-encoded).
+/// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+class _P3ToSrgbTransform implements _ColorTransform {
+  const _P3ToSrgbTransform();
 
   @override
   Color transform(Color color, ColorSpace resultColorSpace) {
+    final double rLin = _srgbEOTFExtended(color.r);
+    final double gLin = _srgbEOTFExtended(color.g);
+    final double bLin = _srgbEOTFExtended(color.b);
+
+    final double rOut =
+        _kP3ToSrgbLinear[0] * rLin + _kP3ToSrgbLinear[1] * gLin + _kP3ToSrgbLinear[2] * bLin;
+    final double gOut =
+        _kP3ToSrgbLinear[3] * rLin + _kP3ToSrgbLinear[4] * gLin + _kP3ToSrgbLinear[5] * bLin;
+    final double bOut =
+        _kP3ToSrgbLinear[6] * rLin + _kP3ToSrgbLinear[7] * gLin + _kP3ToSrgbLinear[8] * bLin;
+
     return Color.from(
       alpha: color.a,
-      red: values[0] * color.r + values[1] * color.g + values[2] * color.b + values[3],
-      green: values[4] * color.r + values[5] * color.g + values[6] * color.b + values[7],
-      blue: values[8] * color.r + values[9] * color.g + values[10] * color.b + values[11],
+      red: _srgbOETFExtended(rOut),
+      green: _srgbOETFExtended(gOut),
+      blue: _srgbOETFExtended(bOut),
+      colorSpace: resultColorSpace,
+    );
+  }
+}
+
+// Converts sRGB (gamma-encoded) to Display P3 (gamma-encoded).
+// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+class _SrgbToP3Transform implements _ColorTransform {
+  const _SrgbToP3Transform();
+
+  @override
+  Color transform(Color color, ColorSpace resultColorSpace) {
+    final double rLin = _srgbEOTFExtended(color.r);
+    final double gLin = _srgbEOTFExtended(color.g);
+    final double bLin = _srgbEOTFExtended(color.b);
+
+    final double rOut =
+        _kSrgbToP3Linear[0] * rLin + _kSrgbToP3Linear[1] * gLin + _kSrgbToP3Linear[2] * bLin;
+    final double gOut =
+        _kSrgbToP3Linear[3] * rLin + _kSrgbToP3Linear[4] * gLin + _kSrgbToP3Linear[5] * bLin;
+    final double bOut =
+        _kSrgbToP3Linear[6] * rLin + _kSrgbToP3Linear[7] * gLin + _kSrgbToP3Linear[8] * bLin;
+
+    return Color.from(
+      alpha: color.a,
+      red: _srgbOETFExtended(rOut),
+      green: _srgbOETFExtended(gOut),
+      blue: _srgbOETFExtended(bOut),
       colorSpace: resultColorSpace,
     );
   }
 }
 
 _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
-  const _MatrixColorTransform srgbToP3 = _MatrixColorTransform(<double>[
-    0.808052267214446, 0.220292047628890, -0.139648846160100,
-    0.145738111193222, //
-    0.096480880462996, 0.916386732581291, -0.086093928394828,
-    0.089490172325882, //
-    -0.127099563510240, -0.068983484963878, 0.735426667591299, 0.233655661600230,
-  ]);
-  const _ColorTransform p3ToSrgb = _MatrixColorTransform(<double>[
-    1.306671048092539, -0.298061942172353, 0.213228303487995,
-    -0.213580156254466, //
-    -0.117390025596251, 1.127722006101976, 0.109727644608938,
-    -0.109450321455370, //
-    0.214813187718391, 0.054268702864647, 1.406898424029350, -0.364892765879631,
-  ]);
-  switch (source) {
-    case ColorSpace.sRGB:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.extendedSRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.displayP3:
-          return srgbToP3;
-      }
-    case ColorSpace.extendedSRGB:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _ClampTransform(_IdentityColorTransform());
-        case ColorSpace.extendedSRGB:
-          return const _IdentityColorTransform();
-        case ColorSpace.displayP3:
-          return const _ClampTransform(srgbToP3);
-      }
-    case ColorSpace.displayP3:
-      switch (destination) {
-        case ColorSpace.sRGB:
-          return const _ClampTransform(p3ToSrgb);
-        case ColorSpace.extendedSRGB:
-          return p3ToSrgb;
-        case ColorSpace.displayP3:
-          return const _IdentityColorTransform();
-      }
-  }
+  return switch (source) {
+    ColorSpace.sRGB => switch (destination) {
+      ColorSpace.sRGB => const _IdentityColorTransform(),
+      ColorSpace.extendedSRGB => const _IdentityColorTransform(),
+      ColorSpace.displayP3 => const _SrgbToP3Transform(),
+    },
+    ColorSpace.extendedSRGB => switch (destination) {
+      ColorSpace.sRGB => const _ClampTransform(_IdentityColorTransform()),
+      ColorSpace.extendedSRGB => const _IdentityColorTransform(),
+      ColorSpace.displayP3 => const _ClampTransform(_SrgbToP3Transform()),
+    },
+    ColorSpace.displayP3 => switch (destination) {
+      ColorSpace.sRGB => const _ClampTransform(_P3ToSrgbTransform()),
+      ColorSpace.extendedSRGB => const _P3ToSrgbTransform(),
+      ColorSpace.displayP3 => const _IdentityColorTransform(),
+    },
+  };
 }
 
 // This needs to be kept in sync with the "_FilterQuality" enum in skwasm's canvas.cpp
 enum FilterQuality { none, low, medium, high }
 
 class ImageFilter {
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) =>
-      engine.renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) => engine.renderer.createBlurImageFilter(
+    sigmaX: sigmaX,
+    sigmaY: sigmaY,
+    tileMode: tileMode,
+    bounds: bounds,
+  );
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
       engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
@@ -594,6 +696,8 @@ class ImageFilter {
   }
 
   static bool get isShaderFilterSupported => false;
+
+  String get debugShortDescription => toString();
 }
 
 enum ColorSpace { sRGB, extendedSRGB, displayP3 }
@@ -604,24 +708,19 @@ enum ImageByteFormat { rawRgba, rawStraightRgba, rawUnmodified, png }
 // This must be kept in sync with the `PixelFormat` enum in Skwasm's image.cpp.
 enum PixelFormat { rgba8888, bgra8888, rgbaFloat32 }
 
+enum TargetPixelFormat { dontCare, rgbaFloat32 }
+
 typedef ImageDecoderCallback = void Function(Image result);
 
 abstract class FrameInfo {
-  FrameInfo._();
-  Duration get duration => Duration(milliseconds: _durationMillis);
-  int get _durationMillis => 0;
+  Duration get duration;
   Image get image;
 }
 
-class Codec {
-  Codec._();
-  int get frameCount => 0;
-  int get repetitionCount => 0;
-  Future<FrameInfo> getNextFrame() {
-    return engine.futurize<FrameInfo>(_getNextFrame);
-  }
-
-  String? _getNextFrame(engine.Callback<FrameInfo> callback) => null;
+abstract class Codec {
+  int get frameCount;
+  int get repetitionCount;
+  Future<FrameInfo> getNextFrame();
   void dispose() {}
 }
 
@@ -642,39 +741,45 @@ Future<Codec> instantiateImageCodecFromBuffer(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) => engine.renderer.instantiateImageCodec(
-  buffer._list!,
-  targetWidth: targetWidth,
-  targetHeight: targetHeight,
-  allowUpscaling: allowUpscaling,
-);
+}) {
+  try {
+    return engine.renderer.instantiateImageCodec(
+      buffer._list!,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+      allowUpscaling: allowUpscaling,
+    );
+  } finally {
+    buffer.dispose();
+  }
+}
 
 Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
   TargetImageSizeCallback? getTargetSize,
 }) async {
-  if (getTargetSize == null) {
-    return engine.renderer.instantiateImageCodec(buffer._list!);
-  } else {
-    final Codec codec = await engine.renderer.instantiateImageCodec(buffer._list!);
-    try {
-      final FrameInfo info = await codec.getNextFrame();
-      try {
-        final int width = info.image.width;
-        final int height = info.image.height;
-        final TargetImageSize targetSize = getTargetSize(width, height);
-        return engine.renderer.instantiateImageCodec(
-          buffer._list!,
-          targetWidth: targetSize.width,
-          targetHeight: targetSize.height,
-          allowUpscaling: false,
-        );
-      } finally {
-        info.image.dispose();
-      }
-    } finally {
-      codec.dispose();
+  Codec? codec;
+  FrameInfo? info;
+  try {
+    if (getTargetSize == null) {
+      return await engine.renderer.instantiateImageCodec(buffer._list!);
+    } else {
+      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      info = await codec.getNextFrame();
+      final int width = info.image.width;
+      final int height = info.image.height;
+      final TargetImageSize targetSize = getTargetSize(width, height);
+      return await engine.renderer.instantiateImageCodec(
+        buffer._list!,
+        targetWidth: targetSize.width,
+        targetHeight: targetSize.height,
+        allowUpscaling: false,
+      );
     }
+  } finally {
+    info?.image.dispose();
+    codec?.dispose();
+    buffer.dispose();
   }
 }
 
@@ -713,18 +818,19 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   final bool swapRedBlue = switch (format) {
     PixelFormat.bgra8888 => true,
     PixelFormat.rgba8888 => false,
-    PixelFormat.rgbaFloat32 =>
-      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented'),
+    PixelFormat.rgbaFloat32 => throw UnimplementedError(
+      'RGB conversion from rgbaFloat32 data is not implemented',
+    ),
   };
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
   // The header is in the 108-byte BITMAPV4HEADER format, or as called by
   // Chromium, WindowsV4. Do not use the 56-byte or 52-byte Adobe formats, since
   // they're not supported.
-  const int dibSize = 0x6C /* 108: BITMAPV4HEADER */;
+  const dibSize = 0x6C /* 108: BITMAPV4HEADER */;
   const int headerSize = dibSize + 0x0E;
   final int bufferSize = headerSize + (width * height * 4);
-  final ByteData bmpData = ByteData(bufferSize);
+  final bmpData = ByteData(bufferSize);
   // 'BM' header
   bmpData.setUint16(0x00, 0x424D);
   // Size of data
@@ -762,12 +868,12 @@ Future<Codec> createBmp(Uint8List pixels, int width, int height, int rowBytes, P
   // Bitmask A
   bmpData.setUint32(0x42, 0xFF000000, Endian.little);
 
-  int destinationByte = headerSize;
-  final Uint32List combinedPixels = Uint32List.sublistView(pixels);
+  var destinationByte = headerSize;
+  final combinedPixels = Uint32List.sublistView(pixels);
   // BMP is scanlined from bottom to top. Rearrange here.
   for (int rowCount = height - 1; rowCount >= 0; rowCount -= 1) {
     int sourcePixel = rowCount * rowBytes;
-    for (int colCount = 0; colCount < width; colCount += 1) {
+    for (var colCount = 0; colCount < width; colCount += 1) {
       bmpData.setUint32(destinationByte, combinedPixels[sourcePixel], Endian.little);
       destinationByte += 4;
       sourcePixel += 1;
@@ -787,6 +893,7 @@ void decodeImageFromPixels(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
+  TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
 }) => engine.renderer.decodeImageFromPixels(
   pixels,
   width,
@@ -798,6 +905,9 @@ void decodeImageFromPixels(
   targetHeight: targetHeight,
   allowUpscaling: allowUpscaling,
 );
+
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) =>
+    throw UnimplementedError('`decodeImageFromPixelsSync` is not implemented for web targets.');
 
 class Shadow {
   const Shadow({
@@ -853,15 +963,15 @@ class Shadow {
     }
     a ??= <Shadow>[];
     b ??= <Shadow>[];
-    final List<Shadow> result = <Shadow>[];
+    final result = <Shadow>[];
     final int commonLength = math.min(a.length, b.length);
-    for (int i = 0; i < commonLength; i += 1) {
+    for (var i = 0; i < commonLength; i += 1) {
       result.add(Shadow.lerp(a[i], b[i], t)!);
     }
-    for (int i = commonLength; i < a.length; i += 1) {
+    for (var i = commonLength; i < a.length; i += 1) {
       result.add(a[i].scale(1.0 - t));
     }
-    for (int i = commonLength; i < b.length; i += 1) {
+    for (var i = commonLength; i < b.length; i += 1) {
       result.add(b[i].scale(t));
     }
     return result;
@@ -904,7 +1014,7 @@ abstract class ImageShader implements Shader {
 class ImmutableBuffer {
   ImmutableBuffer._(this._length);
   static Future<ImmutableBuffer> fromUint8List(Uint8List list) async {
-    final ImmutableBuffer instance = ImmutableBuffer._(list.length);
+    final instance = ImmutableBuffer._(list.length);
     instance._list = list;
     return instance;
   }
@@ -952,7 +1062,7 @@ class ImageDescriptor {
   ImageDescriptor._() : _width = null, _height = null, _rowBytes = null, _format = null;
 
   static Future<ImageDescriptor> encoded(ImmutableBuffer buffer) async {
-    final ImageDescriptor descriptor = ImageDescriptor._();
+    final descriptor = ImageDescriptor._();
     descriptor._data = buffer._list;
     return descriptor;
   }
@@ -972,7 +1082,11 @@ class ImageDescriptor {
   int get bytesPerPixel =>
       throw UnsupportedError('ImageDescriptor.bytesPerPixel is not supported on web.');
   void dispose() => _data = null;
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) async {
+  Future<Codec> instantiateCodec({
+    int? targetWidth,
+    int? targetHeight,
+    TargetPixelFormat targetFormat = TargetPixelFormat.dontCare,
+  }) async {
     if (_data == null) {
       throw StateError('Object is disposed');
     }
@@ -991,20 +1105,131 @@ class ImageDescriptor {
 
 abstract class FragmentProgram {
   static Future<FragmentProgram> fromAsset(String assetKey) {
-    return engine.renderer.createFragmentProgram(assetKey);
+    // The flutter tool converts all asset keys with spaces into URI
+    // encoded paths (replacing ' ' with '%20', for example). We perform
+    // the same encoding here so that users can load assets with the same
+    // key they have written in the pubspec.
+    final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
+    return engine.renderer.createFragmentProgram(encodedKey);
   }
 
   FragmentShader fragmentShader();
 }
 
+sealed class UniformType {}
+
+abstract class UniformFloatSlot extends UniformType {
+  UniformFloatSlot(this.name, this.index);
+
+  void set(double val);
+
+  int get shaderIndex;
+
+  final String name;
+
+  final int index;
+}
+
+abstract class UniformVec2Slot extends UniformType {
+  void set(double x, double y);
+}
+
+abstract class UniformVec3Slot extends UniformType {
+  void set(double x, double y, double z);
+}
+
+abstract class UniformVec4Slot extends UniformType {
+  void set(double x, double y, double z, double w);
+}
+
+abstract class UniformMat2Slot extends UniformType {
+  void set(double m00, double m01, double m10, double m11);
+}
+
+abstract class UniformMat3Slot extends UniformType {
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m10,
+    double m11,
+    double m12,
+    double m20,
+    double m21,
+    double m22,
+  );
+}
+
+abstract class UniformMat4Slot extends UniformType {
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m03,
+    double m10,
+    double m11,
+    double m12,
+    double m13,
+    double m20,
+    double m21,
+    double m22,
+    double m23,
+    double m30,
+    double m31,
+    double m32,
+    double m33,
+  );
+}
+
+abstract class UniformArray<T extends UniformType> {
+  T operator [](int index);
+  int get length;
+}
+
+abstract class ImageSamplerSlot {
+  void set(Image val);
+  int get shaderIndex;
+  String get name;
+}
+
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
-  void setImageSampler(int index, Image image);
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none});
 
   @override
   void dispose();
 
   @override
   bool get debugDisposed;
+
+  UniformFloatSlot getUniformFloat(String name, [int? index]);
+
+  UniformVec2Slot getUniformVec2(String name);
+
+  UniformVec3Slot getUniformVec3(String name);
+
+  UniformVec4Slot getUniformVec4(String name);
+
+  UniformMat2Slot getUniformMat2(String name);
+
+  UniformMat3Slot getUniformMat3(String name);
+
+  UniformMat4Slot getUniformMat4(String name);
+
+  UniformArray<UniformFloatSlot> getUniformFloatArray(String name);
+
+  UniformArray<UniformVec2Slot> getUniformVec2Array(String name);
+
+  UniformArray<UniformVec3Slot> getUniformVec3Array(String name);
+
+  UniformArray<UniformVec4Slot> getUniformVec4Array(String name);
+
+  UniformArray<UniformMat2Slot> getUniformMat2Array(String name);
+
+  UniformArray<UniformMat3Slot> getUniformMat3Array(String name);
+
+  UniformArray<UniformMat4Slot> getUniformMat4Array(String name);
+
+  ImageSamplerSlot getImageSampler(String name);
 }

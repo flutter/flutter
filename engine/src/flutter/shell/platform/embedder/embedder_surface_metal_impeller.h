@@ -14,6 +14,8 @@
 #include "fml/concurrent_message_loop.h"
 #include "impeller/display_list/aiks_context.h"
 
+#include "impeller/base/flags.h"
+
 namespace impeller {
 class Context;
 }
@@ -25,7 +27,7 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
  public:
   struct MetalDispatchTable {
     std::function<bool(GPUMTLTextureInfo texture)> present;  // required
-    std::function<GPUMTLTextureInfo(const SkISize& frame_size)>
+    std::function<GPUMTLTextureInfo(const DlISize& frame_size)>
         get_texture;  // required
   };
 
@@ -33,7 +35,8 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
       GPUMTLDeviceHandle device,
       GPUMTLCommandQueueHandle command_queue,
       MetalDispatchTable dispatch_table,
-      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
+      impeller::Flags impeller_flags);
 
   ~EmbedderSurfaceMetalImpeller() override;
 
@@ -52,13 +55,13 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
 
   // |GPUSurfaceMetalDelegate|
   GPUCAMetalLayerHandle GetCAMetalLayer(
-      const SkISize& frame_size) const override;
+      const DlISize& frame_size) const override;
 
   // |GPUSurfaceMetalDelegate|
   bool PresentDrawable(GrMTLHandle drawable) const override;
 
   // |GPUSurfaceMetalDelegate|
-  GPUMTLTextureInfo GetMTLTexture(const SkISize& frame_size) const override;
+  GPUMTLTextureInfo GetMTLTexture(const DlISize& frame_size) const override;
 
   // |GPUSurfaceMetalDelegate|
   bool PresentTexture(GPUMTLTextureInfo texture) const override;

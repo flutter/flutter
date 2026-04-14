@@ -5,11 +5,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-// Flutter code sample for [DropdownMenu]s. The first dropdown menu
-// has the default outlined border and demos using the
-// [DropdownMenuEntry] style parameter to customize its appearance.
-// The second dropdown menu customizes the appearance of the dropdown
-// menu's text field with its [InputDecorationTheme] parameter.
+/// Flutter code sample for [DropdownMenu]s. The first dropdown menu
+/// has the default outlined border and demos using the
+/// [DropdownMenuEntry] style parameter to customize its appearance.
+/// The second dropdown menu customizes the appearance of the dropdown
+/// menu's text field with its [DropdownMenu.inputDecorationTheme] parameter.
 
 void main() {
   runApp(const DropdownMenuExample());
@@ -56,7 +56,11 @@ enum IconLabel {
 
   static final List<IconEntry> entries = UnmodifiableListView<IconEntry>(
     values.map<IconEntry>(
-      (IconLabel icon) => IconEntry(value: icon, label: icon.label, leadingIcon: Icon(icon.icon)),
+      (IconLabel icon) => IconEntry(
+        value: icon,
+        label: icon.label,
+        leadingIcon: Icon(icon.icon),
+      ),
     ),
   );
 }
@@ -83,12 +87,12 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding: const .symmetric(vertical: 20),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: .min,
+                    mainAxisAlignment: .center,
                     children: <Widget>[
                       DropdownMenu<ColorLabel>(
                         initialSelection: ColorLabel.green,
@@ -132,13 +136,18 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: .min,
+                    mainAxisAlignment: .center,
                     children: <Widget>[
-                      Text('You selected a ${selectedColor?.label} ${selectedIcon?.label}'),
+                      Text(
+                        'You selected a ${selectedColor?.label} ${selectedIcon?.label}',
+                      ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: Icon(selectedIcon?.icon, color: selectedColor?.color),
+                        padding: const .symmetric(horizontal: 5),
+                        child: Icon(
+                          selectedIcon?.icon,
+                          color: selectedColor?.color,
+                        ),
                       ),
                     ],
                   ),

@@ -47,12 +47,12 @@ void main() {
 
   test('ChipThemeData lerp special cases', () {
     expect(ChipThemeData.lerp(null, null, 0), null);
-    const ChipThemeData data = ChipThemeData();
+    const data = ChipThemeData();
     expect(identical(ChipThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('ChipThemeData defaults', () {
-    const ChipThemeData themeData = ChipThemeData();
+    const themeData = ChipThemeData();
     expect(themeData.color, null);
     expect(themeData.backgroundColor, null);
     expect(themeData.deleteIconColor, null);
@@ -79,20 +79,19 @@ void main() {
   });
 
   testWidgets('Default ChipThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ChipThemeData().debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('ChipThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const ChipThemeData(
       color: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
       backgroundColor: Color(0xfffffff1),
@@ -119,11 +118,10 @@ void main() {
       deleteIconBoxConstraints: BoxConstraints.tightForFinite(),
     ).debugFillProperties(builder);
 
-    final List<String> description =
-        builder.properties
-            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-            .map((DiagnosticsNode node) => node.toString())
-            .toList();
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
     expect(
       description,
@@ -156,7 +154,7 @@ void main() {
   });
 
   testWidgets('Material3 - Chip uses ThemeData chip theme', (WidgetTester tester) async {
-    const ChipThemeData chipTheme = ChipThemeData(
+    const chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
       padding: EdgeInsets.all(50),
@@ -165,7 +163,7 @@ void main() {
       labelStyle: TextStyle(fontSize: 32),
       iconTheme: IconThemeData(color: Color(0xff332211)),
     );
-    final ThemeData theme = ThemeData(chipTheme: chipTheme);
+    final theme = ThemeData(chipTheme: chipTheme);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -201,7 +199,7 @@ void main() {
   });
 
   testWidgets('Material2 - Chip uses ThemeData chip theme', (WidgetTester tester) async {
-    const ChipThemeData chipTheme = ChipThemeData(
+    const chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
       padding: EdgeInsets.all(50),
@@ -242,7 +240,7 @@ void main() {
   });
 
   testWidgets('Material3 - Chip uses local ChipTheme', (WidgetTester tester) async {
-    const ChipThemeData chipTheme = ChipThemeData(
+    const chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
       padding: EdgeInsets.all(50),
@@ -251,7 +249,7 @@ void main() {
       shape: RoundedRectangleBorder(),
       iconTheme: IconThemeData(color: Color(0xff332211)),
     );
-    final ThemeData theme = ThemeData(chipTheme: const ChipThemeData());
+    final theme = ThemeData(chipTheme: const ChipThemeData());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -294,7 +292,7 @@ void main() {
   });
 
   testWidgets('Material2 - Chip uses local ChipTheme', (WidgetTester tester) async {
-    const ChipThemeData chipTheme = ChipThemeData(
+    const chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
       padding: EdgeInsets.all(50),
@@ -342,7 +340,7 @@ void main() {
   });
 
   testWidgets('Chip properties overrides ChipTheme', (WidgetTester tester) async {
-    const ChipThemeData chipTheme = ChipThemeData(
+    const chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
       padding: EdgeInsets.all(50),
@@ -352,15 +350,13 @@ void main() {
       iconTheme: IconThemeData(color: Color(0xff332211)),
     );
 
-    const Color backgroundColor = Color(0xff000000);
-    const double elevation = 6.0;
-    const EdgeInsets padding = EdgeInsets.all(10);
-    const EdgeInsets labelPadding = EdgeInsets.all(5);
-    const TextStyle labelStyle = TextStyle(fontSize: 20);
-    const RoundedRectangleBorder shape = RoundedRectangleBorder(
-      side: BorderSide(color: Color(0xff0000ff)),
-    );
-    const IconThemeData iconTheme = IconThemeData(color: Color(0xff00ff00));
+    const backgroundColor = Color(0xff000000);
+    const elevation = 6.0;
+    const padding = EdgeInsets.all(10);
+    const labelPadding = EdgeInsets.all(5);
+    const labelStyle = TextStyle(fontSize: 20);
+    const shape = RoundedRectangleBorder(side: BorderSide(color: Color(0xff0000ff)));
+    const iconTheme = IconThemeData(color: Color(0xff00ff00));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -404,11 +400,11 @@ void main() {
   });
 
   testWidgets('Material3 - Chip uses constructor parameters', (WidgetTester tester) async {
-    const Color backgroundColor = Color(0xff332211);
+    const backgroundColor = Color(0xff332211);
     const double elevation = 3;
     const double fontSize = 32;
     const OutlinedBorder shape = CircleBorder(side: BorderSide(color: Color(0xff0000ff)));
-    const IconThemeData iconTheme = IconThemeData(color: Color(0xff443322));
+    const iconTheme = IconThemeData(color: Color(0xff443322));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -451,11 +447,11 @@ void main() {
   });
 
   testWidgets('Material2 - Chip uses constructor parameters', (WidgetTester tester) async {
-    const Color backgroundColor = Color(0xff332211);
+    const backgroundColor = Color(0xff332211);
     const double elevation = 3;
     const double fontSize = 32;
     const OutlinedBorder shape = CircleBorder();
-    const IconThemeData iconTheme = IconThemeData(color: Color(0xff443322));
+    const iconTheme = IconThemeData(color: Color(0xff443322));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -499,8 +495,8 @@ void main() {
   });
 
   testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {
-    const TextStyle labelStyle = TextStyle();
-    ChipThemeData chipTheme = ChipThemeData.fromDefaults(
+    const labelStyle = TextStyle();
+    var chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.light,
       secondaryColor: Colors.red,
       labelStyle: labelStyle,
@@ -556,13 +552,13 @@ void main() {
   testWidgets('ChipThemeData generates correct opacities for defaults', (
     WidgetTester tester,
   ) async {
-    const Color customColor1 = Color(0xcafefeed);
-    const Color customColor2 = Color(0xdeadbeef);
+    const customColor1 = Color(0xcafefeed);
+    const customColor2 = Color(0xdeadbeef);
     final TextStyle customStyle = ThemeData.fallback().textTheme.bodyLarge!.copyWith(
       color: customColor2,
     );
 
-    final ChipThemeData lightTheme = ChipThemeData.fromDefaults(
+    final lightTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
       brightness: Brightness.light,
       labelStyle: customStyle,
@@ -581,7 +577,7 @@ void main() {
     expect(lightTheme.secondaryLabelStyle?.color, equals(customColor1.withAlpha(0xde)));
     expect(lightTheme.brightness, equals(Brightness.light));
 
-    final ChipThemeData darkTheme = ChipThemeData.fromDefaults(
+    final darkTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
       brightness: Brightness.dark,
       labelStyle: customStyle,
@@ -600,7 +596,7 @@ void main() {
     expect(darkTheme.secondaryLabelStyle?.color, equals(customColor1.withAlpha(0xde)));
     expect(darkTheme.brightness, equals(Brightness.dark));
 
-    final ChipThemeData customTheme = ChipThemeData.fromDefaults(
+    final customTheme = ChipThemeData.fromDefaults(
       primaryColor: customColor1,
       secondaryColor: customColor2,
       labelStyle: customStyle,
@@ -621,44 +617,46 @@ void main() {
   });
 
   testWidgets('ChipThemeData lerps correctly', (WidgetTester tester) async {
-    final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
-      secondaryColor: Colors.black,
-      brightness: Brightness.dark,
-      labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.black),
-    ).copyWith(
-      elevation: 1.0,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-      shape: const StadiumBorder(),
-      side: const BorderSide(),
-      pressElevation: 4.0,
-      shadowColor: Colors.black,
-      surfaceTintColor: Colors.black,
-      selectedShadowColor: Colors.black,
-      showCheckmark: false,
-      checkmarkColor: Colors.black,
-      iconTheme: const IconThemeData(size: 26.0),
-    );
-    final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
-      secondaryColor: Colors.white,
-      brightness: Brightness.light,
-      labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.white),
-    ).copyWith(
-      padding: const EdgeInsets.all(2.0),
-      labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      shape: const BeveledRectangleBorder(),
-      side: const BorderSide(color: Colors.white),
-      elevation: 5.0,
-      pressElevation: 10.0,
-      shadowColor: Colors.white,
-      surfaceTintColor: Colors.white,
-      selectedShadowColor: Colors.white,
-      showCheckmark: true,
-      checkmarkColor: Colors.white,
-      iconTheme: const IconThemeData(size: 22.0),
-    );
+    final ChipThemeData chipThemeBlack =
+        ChipThemeData.fromDefaults(
+          secondaryColor: Colors.black,
+          brightness: Brightness.dark,
+          labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.black),
+        ).copyWith(
+          elevation: 1.0,
+          labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+          shape: const StadiumBorder(),
+          side: const BorderSide(),
+          pressElevation: 4.0,
+          shadowColor: Colors.black,
+          surfaceTintColor: Colors.black,
+          selectedShadowColor: Colors.black,
+          showCheckmark: false,
+          checkmarkColor: Colors.black,
+          iconTheme: const IconThemeData(size: 26.0),
+        );
+    final ChipThemeData chipThemeWhite =
+        ChipThemeData.fromDefaults(
+          secondaryColor: Colors.white,
+          brightness: Brightness.light,
+          labelStyle: ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: Colors.white),
+        ).copyWith(
+          padding: const EdgeInsets.all(2.0),
+          labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          shape: const BeveledRectangleBorder(),
+          side: const BorderSide(color: Colors.white),
+          elevation: 5.0,
+          pressElevation: 10.0,
+          shadowColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          selectedShadowColor: Colors.white,
+          showCheckmark: true,
+          checkmarkColor: Colors.white,
+          iconTheme: const IconThemeData(size: 22.0),
+        );
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5)!;
-    const Color middleGrey = Color(0xff7f7f7f);
+    const middleGrey = Color(0xff7f7f7f);
     expect(lerp.backgroundColor, isSameColorAs(middleGrey.withAlpha(0x1f)));
     expect(lerp.deleteIconColor, isSameColorAs(middleGrey.withAlpha(0xde)));
     expect(lerp.disabledColor, isSameColorAs(middleGrey.withAlpha(0x0c)));
@@ -738,7 +736,7 @@ void main() {
     expect(lerpBNull25.showCheckmark, equals(false));
     expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, right: 6.0)));
     expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
-    expect(lerpBNull25.side!.color, isSameColorAs(Colors.black.withAlpha(0x3f)));
+    expect(lerpBNull25.side!.color, isSameColorAs(Colors.black.withAlpha(0xbf)));
     expect(lerpBNull25.shape, isA<StadiumBorder>());
     expect(lerpBNull25.labelStyle?.color, isSameColorAs(Colors.white.withAlpha(0xa7)));
     expect(lerpBNull25.secondaryLabelStyle?.color, isSameColorAs(Colors.black.withAlpha(0xa7)));
@@ -760,7 +758,7 @@ void main() {
     expect(lerpBNull75.showCheckmark, equals(true));
     expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, right: 2.0)));
     expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
-    expect(lerpBNull75.side!.color, isSameColorAs(Colors.black.withAlpha(0xbf)));
+    expect(lerpBNull75.side!.color, isSameColorAs(Colors.black.withAlpha(0x3f)));
     expect(lerpBNull75.shape, isA<StadiumBorder>());
     expect(lerpBNull75.labelStyle?.color, isSameColorAs(Colors.white.withAlpha(0x38)));
     expect(lerpBNull75.secondaryLabelStyle?.color, isSameColorAs(Colors.black.withAlpha(0x38)));
@@ -772,40 +770,40 @@ void main() {
   });
 
   testWidgets('Chip uses stateful color from chip theme', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
 
-    const Color pressedColor = Color(0x00000001);
-    const Color hoverColor = Color(0x00000002);
-    const Color focusedColor = Color(0x00000003);
-    const Color defaultColor = Color(0x00000004);
-    const Color selectedColor = Color(0x00000005);
-    const Color disabledColor = Color(0x00000006);
+    const pressedColor = Color(0x00000001);
+    const hoverColor = Color(0x00000002);
+    const focusedColor = Color(0x00000003);
+    const defaultColor = Color(0x00000004);
+    const selectedColor = Color(0x00000005);
+    const disabledColor = Color(0x00000006);
 
-    Color getTextColor(Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+    Color getTextColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return disabledColor;
       }
 
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return pressedColor;
       }
 
-      if (states.contains(MaterialState.hovered)) {
+      if (states.contains(WidgetState.hovered)) {
         return hoverColor;
       }
 
-      if (states.contains(MaterialState.focused)) {
+      if (states.contains(WidgetState.focused)) {
         return focusedColor;
       }
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return selectedColor;
       }
 
       return defaultColor;
     }
 
-    final TextStyle labelStyle = TextStyle(color: MaterialStateColor.resolveWith(getTextColor));
+    final labelStyle = TextStyle(color: WidgetStateColor.resolveWith(getTextColor));
     Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
@@ -869,13 +867,13 @@ void main() {
   testWidgets('Material2 - Chip uses stateful border side from resolveWith pattern', (
     WidgetTester tester,
   ) async {
-    const Color selectedColor = Color(0x00000001);
-    const Color defaultColor = Color(0x00000002);
+    const selectedColor = Color(0x00000001);
+    const defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
-      Color color = defaultColor;
+    BorderSide getBorderSide(Set<WidgetState> states) {
+      var color = defaultColor;
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
 
@@ -887,7 +885,7 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           chipTheme: ThemeData().chipTheme.copyWith(
-            side: MaterialStateBorderSide.resolveWith(getBorderSide),
+            side: WidgetStateBorderSide.resolveWith(getBorderSide),
           ),
         ),
         home: Scaffold(
@@ -918,13 +916,13 @@ void main() {
   testWidgets('Material3 - Chip uses stateful border side from resolveWith pattern', (
     WidgetTester tester,
   ) async {
-    const Color selectedColor = Color(0x00000001);
-    const Color defaultColor = Color(0x00000002);
+    const selectedColor = Color(0x00000001);
+    const defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
-      Color color = defaultColor;
+    BorderSide getBorderSide(Set<WidgetState> states) {
+      var color = defaultColor;
 
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
 
@@ -934,7 +932,7 @@ void main() {
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
-          chipTheme: ChipThemeData(side: MaterialStateBorderSide.resolveWith(getBorderSide)),
+          chipTheme: ChipThemeData(side: WidgetStateBorderSide.resolveWith(getBorderSide)),
         ),
         home: Scaffold(
           body: ChoiceChip(label: const Text('Chip'), selected: selected, onSelected: (_) {}),
@@ -954,12 +952,12 @@ void main() {
   testWidgets('Material2 - Chip uses stateful border side from chip theme', (
     WidgetTester tester,
   ) async {
-    const Color selectedColor = Color(0x00000001);
-    const Color defaultColor = Color(0x00000002);
+    const selectedColor = Color(0x00000001);
+    const defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
-      Color color = defaultColor;
-      if (states.contains(MaterialState.selected)) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
+      var color = defaultColor;
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
       return BorderSide(color: color);
@@ -969,7 +967,7 @@ void main() {
       brightness: Brightness.light,
       secondaryColor: Colors.blue,
       labelStyle: const TextStyle(),
-    ).copyWith(side: _MaterialStateBorderSide(getBorderSide));
+    ).copyWith(side: _TestWidgetStateBorderSide(getBorderSide));
 
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
@@ -1002,18 +1000,18 @@ void main() {
   testWidgets('Material3 - Chip uses stateful border side from chip theme', (
     WidgetTester tester,
   ) async {
-    const Color selectedColor = Color(0x00000001);
-    const Color defaultColor = Color(0x00000002);
+    const selectedColor = Color(0x00000001);
+    const defaultColor = Color(0x00000002);
 
-    BorderSide getBorderSide(Set<MaterialState> states) {
-      Color color = defaultColor;
-      if (states.contains(MaterialState.selected)) {
+    BorderSide getBorderSide(Set<WidgetState> states) {
+      var color = defaultColor;
+      if (states.contains(WidgetState.selected)) {
         color = selectedColor;
       }
       return BorderSide(color: color);
     }
 
-    final ChipThemeData chipTheme = ChipThemeData(side: _MaterialStateBorderSide(getBorderSide));
+    final chipTheme = ChipThemeData(side: _TestWidgetStateBorderSide(getBorderSide));
 
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
@@ -1034,8 +1032,8 @@ void main() {
   });
 
   testWidgets('Material2 - Chip uses stateful shape from chip theme', (WidgetTester tester) async {
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return const RoundedRectangleBorder();
       }
       return null;
@@ -1045,7 +1043,7 @@ void main() {
       brightness: Brightness.light,
       secondaryColor: Colors.blue,
       labelStyle: const TextStyle(),
-    ).copyWith(shape: _MaterialStateOutlinedBorder(getShape));
+    ).copyWith(shape: _TestWidgetStateOutlinedBorder(getShape));
 
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
@@ -1066,14 +1064,14 @@ void main() {
   });
 
   testWidgets('Material3 - Chip uses stateful shape from chip theme', (WidgetTester tester) async {
-    OutlinedBorder? getShape(Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    OutlinedBorder? getShape(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return const StadiumBorder();
       }
       return null;
     }
 
-    final ChipThemeData chipTheme = ChipThemeData(shape: _MaterialStateOutlinedBorder(getShape));
+    final chipTheme = ChipThemeData(shape: _TestWidgetStateOutlinedBorder(getShape));
 
     Widget chipWidget({bool selected = false}) {
       return MaterialApp(
@@ -1094,23 +1092,22 @@ void main() {
   });
 
   testWidgets('RawChip uses material state color from ChipTheme', (WidgetTester tester) async {
-    const Color disabledSelectedColor = Color(0xffffff00);
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
+    const disabledSelectedColor = Color(0xffffff00);
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
     Widget buildApp({required bool enabled, required bool selected}) {
       return MaterialApp(
         theme: ThemeData(
           chipTheme: ChipThemeData(
-            color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-              if (states.contains(MaterialState.disabled) &&
-                  states.contains(MaterialState.selected)) {
+            color: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+              if (states.contains(WidgetState.disabled) && states.contains(WidgetState.selected)) {
                 return disabledSelectedColor;
               }
-              if (states.contains(MaterialState.disabled)) {
+              if (states.contains(WidgetState.disabled)) {
                 return disabledColor;
               }
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return selectedColor;
               }
               return backgroundColor;
@@ -1153,7 +1150,7 @@ void main() {
   });
 
   testWidgets('RawChip uses state colors from ChipTheme', (WidgetTester tester) async {
-    const ChipThemeData chipTheme = ChipThemeData(
+    const chipTheme = ChipThemeData(
       disabledColor: Color(0xadfefafe),
       backgroundColor: Color(0xcafefeed),
       selectedColor: Color(0xbeefcafe),
@@ -1237,8 +1234,12 @@ void main() {
   ) async {
     Widget buildChip({OutlinedBorder? shape, BorderSide? side}) {
       return MaterialApp(
-        theme: ThemeData(chipTheme: ChipThemeData(shape: shape, side: side)),
-        home: const Material(child: Center(child: RawChip(label: Text('RawChip')))),
+        theme: ThemeData(
+          chipTheme: ChipThemeData(shape: shape, side: side),
+        ),
+        home: const Material(
+          child: Center(child: RawChip(label: Text('RawChip'))),
+        ),
       );
     }
 
@@ -1324,11 +1325,11 @@ void main() {
   testWidgets('ChipThemeData.avatarBoxConstraints updates avatar size constraints', (
     WidgetTester tester,
   ) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(75, 75);
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(75, 75);
 
     // Test default avatar layout constraints.
     await tester.pumpWidget(
@@ -1368,11 +1369,11 @@ void main() {
   testWidgets('ChipThemeData.deleteIconBoxConstraints updates delete icon size constraints', (
     WidgetTester tester,
   ) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(75, 75);
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(75, 75);
 
     // Test custom delete layout constraints.
     await tester.pumpWidget(
@@ -1412,8 +1413,8 @@ void main() {
   testWidgets('ChipThemeData.iconTheme updates avatar and delete icons', (
     WidgetTester tester,
   ) async {
-    const Color iconColor = Color(0xffff0000);
-    const double iconSize = 32.0;
+    const iconColor = Color(0xffff0000);
+    const iconSize = 32.0;
     const IconData avatarIcon = Icons.favorite;
     const IconData deleteIcon = Icons.delete;
 
@@ -1451,8 +1452,8 @@ void main() {
   testWidgets('ChipThemeData.deleteIconColor overrides ChipThemeData.iconTheme color', (
     WidgetTester tester,
   ) async {
-    const Color iconColor = Color(0xffff00ff);
-    const Color deleteIconColor = Color(0xffff00ff);
+    const iconColor = Color(0xffff00ff);
+    const deleteIconColor = Color(0xffff00ff);
     const IconData deleteIcon = Icons.delete;
 
     Widget buildChip({Color? deleteIconColor, Color? iconColor}) {
@@ -1487,7 +1488,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/135136.
-  testWidgets('MaterialStateBorderSide properly lerp in ChipThemeData.side', (
+  testWidgets('WidgetStateBorderSide properly lerp in ChipThemeData.side', (
     WidgetTester tester,
   ) async {
     late ColorScheme colorScheme;
@@ -1498,7 +1499,7 @@ void main() {
         theme: ThemeData(
           colorScheme: colorScheme,
           chipTheme: ChipThemeData(
-            side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+            side: WidgetStateBorderSide.resolveWith((Set<WidgetState> states) {
               return BorderSide(color: colorScheme.primary, width: 4.0);
             }),
           ),
@@ -1523,20 +1524,20 @@ void main() {
   });
 }
 
-class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
-  const _MaterialStateOutlinedBorder(this.resolver);
+class _TestWidgetStateOutlinedBorder extends StadiumBorder implements WidgetStateOutlinedBorder {
+  const _TestWidgetStateOutlinedBorder(this.resolver);
 
-  final MaterialPropertyResolver<OutlinedBorder?> resolver;
+  final WidgetPropertyResolver<OutlinedBorder?> resolver;
 
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states) => resolver(states);
+  OutlinedBorder? resolve(Set<WidgetState> states) => resolver(states);
 }
 
-class _MaterialStateBorderSide extends MaterialStateBorderSide {
-  const _MaterialStateBorderSide(this.resolver);
+class _TestWidgetStateBorderSide extends WidgetStateBorderSide {
+  const _TestWidgetStateBorderSide(this.resolver);
 
-  final MaterialPropertyResolver<BorderSide?> resolver;
+  final WidgetPropertyResolver<BorderSide?> resolver;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+  BorderSide? resolve(Set<WidgetState> states) => resolver(states);
 }

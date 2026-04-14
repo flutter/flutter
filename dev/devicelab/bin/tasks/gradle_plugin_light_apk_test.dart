@@ -35,31 +35,6 @@ Future<void> main() async {
         checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
-        ], apkFiles);
-
-        section('APK content for task assembleDebug with target platform = android-x86');
-        // This is used by `flutter run`
-        await inDirectory(pluginProject.exampleAndroidPath, () {
-          return flutter(
-            'build',
-            options: <String>['apk', '--debug', '--target-platform=android-x86'],
-          );
-        });
-
-        apkFiles = await getFilesInApk(pluginProject.debugApkPath);
-
-        checkCollectionContains<String>(<String>[
-          ...flutterAssets,
-          ...debugAssets,
-          ...baseApkFiles,
-          'lib/x86/libflutter.so',
-        ], apkFiles);
-
-        checkCollectionDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
@@ -84,7 +59,6 @@ Future<void> main() async {
 
         checkCollectionDoesNotContain<String>(<String>[
           'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
           'lib/x86_64/libapp.so',
         ], apkFiles);
 
@@ -161,7 +135,7 @@ Future<void> main() async {
         section('gradlew assembleLocal with plugin (custom debug build)');
 
         final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin.');
-        final Directory pluginDir = Directory(path.join(tempDir.path, 'plugin_under_test'));
+        final pluginDir = Directory(path.join(tempDir.path, 'plugin_under_test'));
 
         section('Create plugin');
         await inDirectory(tempDir, () async {
@@ -218,7 +192,7 @@ Future<void> main() async {
         if (result.exitCode == 0) {
           throw failure('Gradle did not exit with error as expected', result);
         }
-        String output = '${result.stdout}\n${result.stderr}';
+        var output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle')) {
@@ -257,7 +231,7 @@ Future<void> main() async {
         if (result.exitCode == 0) {
           throw failure('Gradle did not exit with error as expected', result);
         }
-        final String output = '${result.stdout}\n${result.stderr}';
+        final output = '${result.stdout}\n${result.stderr}';
         if (!output.contains(
           'No file or variants found for asset: lib/gallery/example_code.dart.',
         )) {
@@ -268,7 +242,8 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
       return TaskResult.failure(e.toString());
     }
   });

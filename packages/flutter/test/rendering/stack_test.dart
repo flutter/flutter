@@ -11,8 +11,8 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('StackParentData basic test', () {
-    final StackParentData parentData = StackParentData();
-    const Size stackSize = Size(800.0, 600.0);
+    final parentData = StackParentData();
+    const stackSize = Size(800.0, 600.0);
     expect(parentData.isPositioned, isFalse);
 
     parentData.width = -100.0;
@@ -79,7 +79,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[red, green],
     );
-    final StackParentData greenParentData = green.parentData! as StackParentData;
+    final greenParentData = green.parentData! as StackParentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0
@@ -108,10 +108,10 @@ void main() {
   });
 
   test('Stack has correct clipBehavior', () {
-    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
 
-    for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
-      final TestClipPaintingContext context = TestClipPaintingContext();
+    for (final clip in <Clip?>[null, ...Clip.values]) {
+      final context = TestClipPaintingContext();
       final RenderBox child = box200x200;
       final RenderStack stack;
       switch (clip) {
@@ -129,7 +129,7 @@ void main() {
       }
       {
         // Make sure that the child is positioned so the stack will consider it as overflowed.
-        final StackParentData parentData = child.parentData! as StackParentData;
+        final parentData = child.parentData! as StackParentData;
         parentData.left = parentData.right = 0;
       }
       layout(
@@ -161,7 +161,7 @@ void main() {
         children: <RenderBox>[child1, child2, child3],
       );
 
-      final List<RenderObject> visitedChildren = <RenderObject>[];
+      final visitedChildren = <RenderObject>[];
       void visitor(RenderObject child) {
         visitedChildren.add(child);
       }
@@ -232,13 +232,13 @@ void main() {
 
   test('Stack in Flex can layout with no children', () {
     // Render an empty Stack in a Flex
-    final RenderFlex flex = RenderFlex(
+    final flex = RenderFlex(
       textDirection: TextDirection.ltr,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <RenderBox>[RenderStack(textDirection: TextDirection.ltr, children: <RenderBox>[])],
     );
 
-    bool stackFlutterErrorThrown = false;
+    var stackFlutterErrorThrown = false;
     layout(
       flex,
       constraints: BoxConstraints.tight(const Size(100.0, 100.0)),

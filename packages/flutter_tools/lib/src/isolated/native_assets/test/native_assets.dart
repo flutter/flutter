@@ -12,6 +12,7 @@ import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
+import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
@@ -21,8 +22,10 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   Future<Uri?> build(BuildInfo buildInfo) => testCompilerBuildNativeAssets(buildInfo);
 
   @override
-  String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, OS.windows).toFilePath();
+  String windowsBuildDirectory(FlutterProject project) {
+    final String buildDir = getBuildDirectory();
+    return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
+  }
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
@@ -30,16 +33,19 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     return null;
   }
   final Uri projectUri = FlutterProject.current().directory.uri;
-  final String runPackageName =
-      buildInfo.packageConfig.packages.firstWhere((Package p) => p.root == projectUri).name;
-  final String pubspecPath =
-      Uri.file(buildInfo.packageConfigPath).resolve('../pubspec.yaml').toFilePath();
+  final String runPackageName = buildInfo.packageConfig.packages
+      .firstWhere((Package p) => p.root == projectUri)
+      .name;
+  final String pubspecPath = Uri.file(
+    buildInfo.packageConfigPath,
+  ).resolve('../pubspec.yaml').toFilePath();
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     buildInfo.packageConfigPath,
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
     runPackageName,
+    includeDevDependencies: true,
     pubspecPath,
   );
 
@@ -57,32 +63,39 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
+  final String buildDir = getBuildDirectory();
+  final String osName = targetOS.name;
+  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
-  final Map<String, String> environmentDefines = <String, String>{
-    kBuildMode: buildInfo.mode.cliName,
-  };
+  final environmentDefines = <String, String>{kBuildMode: buildInfo.mode.cliName};
 
   // First perform the dart build.
-  final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+  final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
+    buildCodeAssets: const BuildCodeAssetsOptions(
+      // We're in tests, so there is no app build directory
+      appBuildDirectory: null,
+    ),
+    buildDataAssets: true,
+    recordedUsesFile: null,
   );
 
   // Then "install" the code assets so they can be used at runtime.
   await installCodeAssets(
-    dartBuildResult: dartBuildResult,
+    dartHookResult: dartHookResult,
     environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
     nativeAssetsFileUri: nativeAssetsFileUri,
+    targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
   );
-  assert(await globals.fs.file(nativeAssetsFileUri).exists());
+  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 
   return nativeAssetsFileUri;
 }

@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
-    final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return ColoredBox(color: Colors.green, child: Text('$i', textDirection: TextDirection.ltr));
+    final children = List<Widget>.generate(20, (int i) {
+      return ColoredBox(
+        color: const Color(0xff00ff00),
+        child: Text('$i', textDirection: TextDirection.ltr),
+      );
     });
 
     await tester.pumpWidget(
@@ -165,7 +170,7 @@ void main() {
   });
 
   testWidgets('SliverFillViewport padding test', (WidgetTester tester) async {
-    final SliverChildListDelegate delegate = SliverChildListDelegate(
+    final delegate = SliverChildListDelegate(
       <Widget>[const Text('0')],
       addAutomaticKeepAlives: false,
       addSemanticIndexes: false,
@@ -200,5 +205,54 @@ void main() {
       find.byType(SliverFillViewport),
     );
     expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
+  });
+
+  testWidgets('SliverFillViewport semantics respects allowImplicitScrolling', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              delegate: SliverChildListDelegate(
+                const <Widget>[Text('Page 1'), Text('Page 2')],
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+              allowImplicitScrolling: false,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page 2')));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              delegate: SliverChildListDelegate(
+                const <Widget>[Text('Page 1'), Text('Page 2')],
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
   });
 }

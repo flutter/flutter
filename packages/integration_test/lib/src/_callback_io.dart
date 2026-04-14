@@ -36,13 +36,12 @@ class _IOCallbackManager implements CallbackManager {
       case 'request_data':
         final bool allTestsPassed = await testRunner.allTestsPassed.future;
         response = <String, String>{
-          'message':
-              allTestsPassed
-                  ? Response.allTestsPassed(data: testRunner.reportData).toJson()
-                  : Response.someTestsFailed(
-                    testRunner.failureMethodsDetails,
-                    data: testRunner.reportData,
-                  ).toJson(),
+          'message': allTestsPassed
+              ? Response.allTestsPassed(data: testRunner.reportData).toJson()
+              : Response.someTestsFailed(
+                  testRunner.failureMethodsDetails,
+                  data: testRunner.reportData,
+                ).toJson(),
         };
       case 'get_health':
         response = <String, String>{'status': 'ok'};

@@ -142,7 +142,7 @@ class _StringStream {
   }
 
   String readEventKey() {
-    final String char = String.fromCharCode(readIntAsChar());
+    final char = String.fromCharCode(readIntAsChar());
     if (char == _kUseDead) {
       return _kEventKeyDead;
     } else {
@@ -166,7 +166,7 @@ Map<String, int> _unmarshallCodeMap(_StringStream stream) {
 
 /// Decode a key mapping data out of the string.
 Map<String, Map<String, int>> unmarshallMappingData(String compressed) {
-  final _StringStream stream = _StringStream(compressed);
+  final stream = _StringStream(compressed);
   final int eventCodeNum = stream.readIntAsVerbatim();
   return <String, Map<String, int>>{
     for (int i = 0; i < eventCodeNum; i++) stream.readEventCode(): _unmarshallCodeMap(stream),
@@ -241,7 +241,7 @@ void _marshallEventKey(StringBuffer builder, String value) {
 /// string can be multi-byte, which means the decoder should parse the string
 /// using substr instead of as a binary stream.
 List<String> marshallMappingData(Map<String, Map<String, int>> mappingData) {
-  final StringBuffer builder = StringBuffer();
+  final builder = StringBuffer();
   _marshallIntAsVerbatim(builder, mappingData.length);
   _sortedForEach(mappingData, (String eventCode, Map<String, int> codeMap) {
     builder.write('\n');

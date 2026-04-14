@@ -202,7 +202,7 @@ class _SharedAppModel extends InheritedModel<Object> {
 
   @override
   bool updateShouldNotifyDependent(_SharedAppModel old, Set<Object> keys) {
-    for (final Object key in keys) {
+    for (final key in keys) {
       if (data[key] != old.data[key]) {
         return true;
       }

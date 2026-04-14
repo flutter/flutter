@@ -44,5 +44,11 @@
   "modalBarrierDismissLabel": "Ruaig",
   "menuDismissLabel": "Ruaig an roghchlár",
   "cancelButtonLabel": "Cealaigh",
-  "backButtonLabel": "Siar"
+  "backButtonLabel": "Siar",
+  "expansionTileExpandedHint": "tapáil faoi dhó chun laghdú",
+  "expansionTileCollapsedHint": "tapáil faoi dhó chun leathnú",
+  "expansionTileExpandedTapHint": "Laghdaigh",
+  "expansionTileCollapsedTapHint": "Leathnaigh chun tuilleadh sonraí a fháil",
+  "expandedHint": "Laghdaithe",
+  "collapsedHint": "Leathnaithe"
 }

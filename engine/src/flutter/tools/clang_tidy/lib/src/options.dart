@@ -92,19 +92,18 @@ class Options {
     // to engine_repo_tools instead of path manipulation inlined below.
     final ArgResults argResults = _argParser(defaultEngine: engine).parse(arguments);
 
-    String? buildCommandsPath = argResults['compile-commands'] as String?;
+    var buildCommandsPath = argResults['compile-commands'] as String?;
 
     String variantToBuildCommandsFilePath(String variant) =>
         path.join(argResults['src-dir'] as String, 'out', variant, 'compile_commands.json');
     // path/to/engine/src/out/variant/compile_commands.json
     buildCommandsPath ??= variantToBuildCommandsFilePath(argResults['target-variant'] as String);
-    final io.File buildCommands = io.File(buildCommandsPath);
-    final List<io.File> shardCommands =
-        (argResults['shard-variants'] as String? ?? '')
-            .split(',')
-            .where((String element) => element.isNotEmpty)
-            .map((String variant) => io.File(variantToBuildCommandsFilePath(variant)))
-            .toList();
+    final buildCommands = io.File(buildCommandsPath);
+    final List<io.File> shardCommands = (argResults['shard-variants'] as String? ?? '')
+        .split(',')
+        .where((String element) => element.isNotEmpty)
+        .map((String variant) => io.File(variantToBuildCommandsFilePath(variant)))
+        .toList();
     final String? message = _checkArguments(argResults, buildCommands);
     if (message != null) {
       return Options._error(message, errSink: errSink);
@@ -112,14 +111,13 @@ class Options {
     if (argResults['help'] as bool) {
       return Options._help(errSink: errSink);
     }
-    final String? shardIdString = argResults['shard-id'] as String?;
+    final shardIdString = argResults['shard-id'] as String?;
     final int? shardId = shardIdString == null ? null : int.parse(shardIdString);
     if (shardId != null && (shardId > shardCommands.length || shardId < 0)) {
       return Options._error('Invalid shard-id value: $shardId.', errSink: errSink);
     }
-    final io.File? clangTidyPath = ((String? path) => path == null ? null : io.File(path))(
-      argResults['clang-tidy'] as String?,
-    );
+    final io.File? clangTidyPath = ((String? path) =>
+        path == null ? null : io.File(path))(argResults['clang-tidy'] as String?);
     return Options._fromArgResults(
       argResults,
       buildCommandsPath: buildCommands,

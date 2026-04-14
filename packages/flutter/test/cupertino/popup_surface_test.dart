@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FilterTest extends StatelessWidget {
@@ -37,18 +38,20 @@ class _FilterTest extends StatelessWidget {
                     height: tileHeight,
                     width: tileWidth,
                     child: ColoredBox(
-                      color:
-                          HSVColor.fromAHSV(
-                            0.5 + a / 8,
-                            h * 45,
-                            0.5 + s / 8,
-                            0.5 + b / 8,
-                          ).toColor(),
+                      color: HSVColor.fromAHSV(
+                        0.5 + a / 8,
+                        h * 45,
+                        0.5 + s / 8,
+                        0.5 + b / 8,
+                      ).toColor(),
                     ),
                   ),
           Padding(
             padding: const EdgeInsets.all(32),
-            child: CupertinoTheme(data: CupertinoThemeData(brightness: brightness), child: _child),
+            child: CupertinoTheme(
+              data: CupertinoThemeData(brightness: brightness),
+              child: _child,
+            ),
           ),
         ],
       ),
@@ -266,7 +269,7 @@ void main() {
   testWidgets(
     "Applying a FadeTransition to the CupertinoPopupSurface doesn't cause transparency",
     (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(
+      final controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         vsync: const TestVSync(),
       );
@@ -335,5 +338,28 @@ void main() {
       find.byType(CupertinoApp),
       matchesGoldenFile('cupertinoPopupSurface.composition.png'),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/182066.
+  testWidgets('CupertinoPopupSurface uses unbounded blur', (WidgetTester tester) async {
+    void expectContainsUnboundedBlur() {
+      var foundBlur = false;
+      for (final Layer layer in tester.layers) {
+        if (layer is BackdropFilterLayer) {
+          if (layer.toString().contains('blur')) {
+            expect(layer.toString(), isNot(contains('bounds: ')));
+            foundBlur = true;
+          }
+        }
+      }
+      expect(foundBlur, isTrue);
+    }
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoPopupSurface(child: Text('X'))),
+      ),
+    );
+    expectContainsUnboundedBlur();
   });
 }

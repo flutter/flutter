@@ -21,7 +21,8 @@ class AnimatedSwitcherExample extends StatefulWidget {
   const AnimatedSwitcherExample({super.key});
 
   @override
-  State<AnimatedSwitcherExample> createState() => _AnimatedSwitcherExampleState();
+  State<AnimatedSwitcherExample> createState() =>
+      _AnimatedSwitcherExampleState();
 }
 
 class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
@@ -32,7 +33,7 @@ class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
     return ColoredBox(
       color: Colors.white,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),

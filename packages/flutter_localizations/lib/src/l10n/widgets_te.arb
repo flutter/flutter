@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "వెబ్‌లో సెర్చ్ చేయండి",
   "shareButtonLabel": "షేర్ చేయండి",
   "pasteButtonLabel": "పేస్ట్ చేయండి",
-  "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి"
+  "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
+  "searchResultsFound": "సెర్చ్ ఫలితాలు కనుగొనబడ్డాయి",
+  "noResultsFound": "ఫలితాలు ఏవీ కనుగొనబడలేదు",
+  "radioButtonUnselectedLabel": "ఎంచుకోబడలేదు"
 }

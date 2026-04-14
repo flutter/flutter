@@ -6,6 +6,6 @@
 # set anything.
 
 if (is_linux) {
-  vulkan_use_x11 = true
+  vulkan_use_x11 = !is_minimal_linux
   vulkan_use_wayland = true
 }

@@ -78,8 +78,8 @@ class _HomeState extends State<Home> {
       // An AnimatedContainer makes the decoration changes entertaining.
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
-        margin: const EdgeInsets.all(32),
-        alignment: Alignment.center,
+        margin: const .all(32),
+        alignment: .center,
         decoration: ShapeDecoration(
           color: colorScheme.tertiaryContainer,
           shape: StarBorder(
@@ -91,7 +91,9 @@ class _HomeState extends State<Home> {
         ),
         child: Text(
           '${pointCount.toInt()} Points',
-          style: theme.textTheme.headlineMedium!.copyWith(color: colorScheme.onPrimaryContainer),
+          style: theme.textTheme.headlineMedium!.copyWith(
+            color: colorScheme.onPrimaryContainer,
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

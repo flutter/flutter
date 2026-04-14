@@ -38,7 +38,7 @@ Future<void> main() async {
     });
 
     testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
-      int invocations = 0;
+      var invocations = 0;
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -108,7 +108,7 @@ Future<void> main() async {
       });
 
       test('can be configured', () {
-        const Timeout newTimeout = Timeout(Duration(seconds: 17));
+        const newTimeout = Timeout(Duration(seconds: 17));
         binding.defaultTestTimeout = newTimeout;
         expect(binding.defaultTestTimeout, newTimeout);
       });
@@ -130,8 +130,8 @@ Future<void> main() async {
     // This part is outside the group so that `request` has been completed as
     // part of the `tearDownAll` registered in the group during
     // `IntegrationTestWidgetsFlutterBinding` initialization.
-    final Map<String, dynamic> response = (await request)!['response'] as Map<String, dynamic>;
-    final String message = response['message'] as String;
+    final response = (await request)!['response'] as Map<String, dynamic>;
+    final message = response['message'] as String;
     final Response result = Response.fromJson(message);
     assert(result.data!['answer'] == 42);
   });

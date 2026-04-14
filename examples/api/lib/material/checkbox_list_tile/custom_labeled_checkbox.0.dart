@@ -47,11 +47,10 @@ class LinkedLabelCheckbox extends StatelessWidget {
                   color: Colors.blueAccent,
                   decoration: TextDecoration.underline,
                 ),
-                recognizer:
-                    TapGestureRecognizer()
-                      ..onTap = () {
-                        debugPrint('Label has been tapped.');
-                      },
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    debugPrint('Label has been tapped.');
+                  },
               ),
             ),
           ),
@@ -84,7 +83,7 @@ class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
       body: Center(
         child: LinkedLabelCheckbox(
           label: 'Linked, tappable label text',
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const .symmetric(horizontal: 20.0),
           value: _isSelected,
           onChanged: (bool newValue) {
             setState(() {

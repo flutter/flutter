@@ -20,6 +20,11 @@ void EntityPlayground::SetTypographerContext(
   typographer_context_ = std::move(typographer_context);
 }
 
+std::shared_ptr<TypographerContext> EntityPlayground::GetTypographerContext()
+    const {
+  return typographer_context_;
+}
+
 std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
   return std::make_shared<ContentContext>(GetContext(), typographer_context_);
 }
@@ -37,7 +42,8 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
     content_context->GetRenderTargetCache()->Start();
     bool result = entity.Render(*content_context, pass);
     content_context->GetRenderTargetCache()->End();
-    content_context->GetTransientsBuffer().Reset();
+    content_context->GetTransientsDataBuffer().Reset();
+    content_context->GetTransientsIndexesBuffer().Reset();
     return result;
   };
   return Playground::OpenPlaygroundHere(callback);
@@ -56,7 +62,8 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
     content_context.GetRenderTargetCache()->Start();
     bool result = callback(content_context, pass);
     content_context.GetRenderTargetCache()->End();
-    content_context.GetTransientsBuffer().Reset();
+    content_context.GetTransientsDataBuffer().Reset();
+    content_context.GetTransientsIndexesBuffer().Reset();
     return result;
   };
   return Playground::OpenPlaygroundHere(pass_callback);

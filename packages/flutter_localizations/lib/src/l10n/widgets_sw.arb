@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Tafuta kwenye Wavuti",
   "shareButtonLabel": "Tuma",
   "pasteButtonLabel": "Bandika",
-  "selectAllButtonLabel": "Chagua vyote"
+  "selectAllButtonLabel": "Chagua vyote",
+  "searchResultsFound": "Matokeo ya utafutaji yamepatikana",
+  "noResultsFound": "Hakuna matokeo yaliyopatikana",
+  "radioButtonUnselectedLabel": "Hayajachaguliwa"
 }

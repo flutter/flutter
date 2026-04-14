@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 // fit the container, we should see a significant drop in
 // the amount of memory consumed by this benchmark.
 Future<void> main() async {
-  const int numItems = 10;
+  const numItems = 10;
 
   runApp(
     Directionality(
@@ -21,9 +21,8 @@ Future<void> main() async {
         key: const Key('ImageList'),
         itemCount: numItems,
         itemBuilder: (BuildContext context, int position) {
-          return SizedBox(
-            width: 200,
-            height: 200,
+          return SizedBox.square(
+            dimension: 200.0,
             child: Center(
               child: Image.asset(
                 'monochrome/red-square-1024x1024.png',
