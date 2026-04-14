@@ -53,16 +53,16 @@ SkSerialReturnType SerializeImageWithoutData(SkImage* image, void* ctx) {
   return stream.detachAsData();
 };
 
-sk_sp<SkImage> DeserializeImageWithoutData(const void* data,
-                                           size_t length,
-                                           void* ctx) {
-  FML_CHECK(length >= sizeof(ImageMetaData));
-  auto metadata = static_cast<const ImageMetaData*>(data);
+sk_sp<SkImage> DeserializeImageWithoutData(sk_sp<SkData> data,
+                                           std::optional<SkAlphaType>,
+                                           void*) {
+  FML_CHECK(data->size() >= sizeof(ImageMetaData));
+  auto metadata = static_cast<const ImageMetaData*>(data->data());
   sk_sp<SkColorSpace> color_space = nullptr;
   if (metadata->has_color_space) {
-    color_space = SkColorSpace::Deserialize(
-        static_cast<const uint8_t*>(data) + sizeof(ImageMetaData),
-        length - sizeof(ImageMetaData));
+    color_space =
+        SkColorSpace::Deserialize(data->bytes() + sizeof(ImageMetaData),
+                                  data->size() - sizeof(ImageMetaData));
   }
 
   auto image_size = SkISize::Make(metadata->width, metadata->height);
