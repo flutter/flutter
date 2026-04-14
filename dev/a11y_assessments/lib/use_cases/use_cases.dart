@@ -40,6 +40,8 @@ enum UseCaseCategory {
   additional,
 }
 
+enum Tag { batch1 }
+
 abstract class UseCase {
   UseCase({required this.useCaseCategory});
 
@@ -47,6 +49,7 @@ abstract class UseCase {
 
   String get name;
   String get route;
+  List<Tag> get tags;
 
   Widget buildWithTitle(BuildContext context) {
     return DynamicTitle(title: name, child: build(context));

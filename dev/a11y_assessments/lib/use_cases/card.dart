@@ -16,6 +16,9 @@ class CardUseCase extends UseCase {
   String get route => '/card';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const MainWidget();
 }
 

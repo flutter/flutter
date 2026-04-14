@@ -16,6 +16,9 @@ class TextFieldPasswordUseCase extends UseCase {
   String get route => '/text-field-password';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => _MainWidget();
 }
 

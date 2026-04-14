@@ -16,6 +16,9 @@ class DialogUseCase extends UseCase {
   String get route => '/dialog';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => _MainWidget();
 }
 

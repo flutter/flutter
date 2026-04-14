@@ -16,6 +16,9 @@ class TabBarViewUseCase extends UseCase {
   String get route => '/tab-bar-view';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const TabBarViewExample();
 }
 

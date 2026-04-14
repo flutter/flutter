@@ -16,6 +16,9 @@ class MaterialBannerUseCase extends UseCase {
   String get route => '/material_banner';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const MainWidget();
 }
 

@@ -16,6 +16,9 @@ class DatePickerUseCase extends UseCase {
   String get route => '/date-picker';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const _MainWidget();
 }
 

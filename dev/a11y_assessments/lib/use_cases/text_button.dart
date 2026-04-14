@@ -16,6 +16,9 @@ class TextButtonUseCase extends UseCase {
   String get route => '/text-button';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const MainWidget();
 }
 

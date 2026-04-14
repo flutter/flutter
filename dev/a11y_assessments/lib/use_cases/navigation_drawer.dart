@@ -30,6 +30,9 @@ class NavigationDrawerUseCase extends UseCase {
   String get route => '/navigation-drawer';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const NavigationDrawerExample();
 }
 

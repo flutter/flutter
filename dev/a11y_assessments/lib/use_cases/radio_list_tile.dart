@@ -16,6 +16,9 @@ class RadioListTileUseCase extends UseCase {
   String get route => '/radio-list-tile';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => _MainWidget();
 }
 

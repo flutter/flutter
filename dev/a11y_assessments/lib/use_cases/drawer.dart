@@ -16,6 +16,9 @@ class DrawerUseCase extends UseCase {
   String get route => '/drawer';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const DrawerExample();
 }
 

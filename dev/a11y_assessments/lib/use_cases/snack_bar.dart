@@ -16,6 +16,9 @@ class SnackBarUseCase extends UseCase {
   String get route => '/snack-bar';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const MainWidget();
 }
 

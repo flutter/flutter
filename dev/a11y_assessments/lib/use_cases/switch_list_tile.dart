@@ -16,6 +16,9 @@ class SwitchListTileUseCase extends UseCase {
   String get route => '/switch-list-tile';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const SwitchListTileExample();
 }
 

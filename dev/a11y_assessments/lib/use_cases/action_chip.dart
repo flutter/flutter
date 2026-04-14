@@ -16,6 +16,9 @@ class ActionChipUseCase extends UseCase {
   String get route => '/action-chip';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const MainWidget();
 }
 

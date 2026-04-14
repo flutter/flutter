@@ -16,6 +16,9 @@ class SliderUseCase extends UseCase {
   String get route => '/slider';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const MainWidget();
 }
 

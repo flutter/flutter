@@ -16,6 +16,9 @@ class CheckBoxListTile extends UseCase {
   String get route => '/check-box-list-tile';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => _MainWidget();
 }
 

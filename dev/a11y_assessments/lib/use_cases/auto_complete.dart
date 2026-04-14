@@ -16,6 +16,9 @@ class AutoCompleteUseCase extends UseCase {
   String get route => '/auto-complete';
 
   @override
+  List<Tag> get tags => <Tag>[Tag.batch1];
+
+  @override
   Widget build(BuildContext context) => const _MainWidget();
 }
 
