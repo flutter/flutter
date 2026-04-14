@@ -92,6 +92,8 @@ class GoldenPlaygroundTest
 
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
+  static bool IsGoldenTest() { return true; }
+
  protected:
   void SetWindowSize(ISize size);
 
