@@ -8,19 +8,28 @@ import '../common/dynamic_title.dart';
 import 'action_chip.dart';
 import 'app_bar.dart';
 import 'auto_complete.dart';
+import 'back_button.dart';
 import 'badge.dart';
 import 'card.dart';
 import 'check_box_list_tile.dart';
+import 'close_button.dart';
 import 'date_picker.dart';
 import 'dialog.dart';
 import 'drawer.dart';
+import 'elevated_button.dart';
 import 'expansion_tile.dart';
+import 'filled_button.dart';
+import 'floating_action_button.dart';
+import 'icon_button.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
 import 'navigation_drawer.dart';
 import 'navigation_rail.dart';
+import 'outlined_button.dart';
+import 'popup_menu_button.dart';
 import 'radio_list_tile.dart';
 import 'range_slider.dart';
+import 'segmented_button.dart';
 import 'slider.dart';
 import 'snack_bar.dart';
 import 'switch_list_tile.dart';
@@ -28,6 +37,7 @@ import 'tab_bar_view.dart';
 import 'text_button.dart';
 import 'text_field.dart';
 import 'text_field_password.dart';
+import 'toggle_buttons.dart';
 
 /// The category a use-case falls under.
 enum UseCaseCategory {
@@ -40,7 +50,7 @@ enum UseCaseCategory {
   additional,
 }
 
-enum Tag { batch1 }
+enum Tag { batch1, batch2 }
 
 abstract class UseCase {
   UseCase({required this.useCaseCategory});
@@ -82,4 +92,14 @@ final List<UseCase> useCases = <UseCase>[
   NavigationRailUseCase(),
   AppBarUseCase(),
   TabBarViewUseCase(),
+  ElevatedButtonUseCase(),
+  FilledButtonUseCase(),
+  OutlinedButtonUseCase(),
+  IconButtonUseCase(),
+  FloatingActionButtonUseCase(),
+  PopupMenuButtonUseCase(),
+  SegmentedButtonUseCase(),
+  ToggleButtonsUseCase(),
+  BackButtonUseCase(),
+  CloseButtonUseCase(),
 ];

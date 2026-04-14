@@ -1,0 +1,52 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+import '../utils.dart';
+import 'use_cases.dart';
+
+class FloatingActionButtonUseCase extends UseCase {
+  FloatingActionButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+
+  @override
+  String get name => 'FloatingActionButton';
+
+  @override
+  String get route => '/floating-action-button';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch2];
+
+  @override
+  Widget build(BuildContext context) => const MainWidget();
+}
+
+class MainWidget extends StatefulWidget {
+  const MainWidget({super.key});
+
+  @override
+  State<MainWidget> createState() => MainWidgetState();
+}
+
+class MainWidgetState extends State<MainWidget> {
+  String pageTitle = getUseCaseName(FloatingActionButtonUseCase());
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+      ),
+      body: const Center(
+        child: Text('Press the FAB'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
