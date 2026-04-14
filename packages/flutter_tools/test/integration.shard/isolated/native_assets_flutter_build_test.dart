@@ -190,9 +190,3 @@ void _expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
     expect(dylib, exists);
   }
 }
-
-extension on String {
-  String upperCaseFirst() {
-    return replaceFirst(this[0], this[0].toUpperCase());
-  }
-}

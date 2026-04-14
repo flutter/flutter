@@ -337,7 +337,7 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
   _expectXCFrameworkCodesigned(xcFrameworkDirectory);
 }
 
-extension on String {
+extension StringUpperCaseFirst on String {
   String upperCaseFirst() {
     return replaceFirst(this[0], this[0].toUpperCase());
   }
