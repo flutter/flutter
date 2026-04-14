@@ -963,6 +963,9 @@ Directory _getIosFlutterFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".',
     );
   }
+
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
   for (final Directory platformDirectory
       in xcframeworkDirectory.listSync().whereType<Directory>()) {
     if (!platformDirectory.basename.startsWith('ios-')) {
@@ -1035,6 +1038,8 @@ Directory _getMacOSFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --macos".',
     );
   }
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
   final Directory? platformDirectory = xcframeworkDirectory
       .listSync()
       .whereType<Directory>()

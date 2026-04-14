@@ -37,7 +37,7 @@ class _ExpansibleWidgetExampleState extends State<ExpansibleWidgetExample> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const .all(16.0),
       child: Expansible(
         controller: _controller,
         headerBuilder: (context, animation) => ListTile(
@@ -59,8 +59,8 @@ class _ExpansibleWidgetExampleState extends State<ExpansibleWidgetExample> {
           child: const Text('Hidden content revealed!'),
         ),
         expansibleBuilder: (context, header, body, animation) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
           children: [header, body],
         ),
       ),

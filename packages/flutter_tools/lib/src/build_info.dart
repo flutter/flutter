@@ -951,13 +951,23 @@ String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
 }
 
 /// Returns the iOS build output directory.
-String getIosBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.ios.name);
+String getIosBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  return localFilesystem.path.join(
+    getBuildDirectory(localConfig, localFilesystem),
+    FlutterDarwinPlatform.ios.name,
+  );
 }
 
 /// Returns the macOS build output directory.
-String getMacOSBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), FlutterDarwinPlatform.macos.name);
+String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  return localFilesystem.path.join(
+    getBuildDirectory(localConfig, localFilesystem),
+    FlutterDarwinPlatform.macos.name,
+  );
 }
 
 /// Returns the web build output directory.
@@ -1139,6 +1149,10 @@ const kXcodeBuildScriptValueBuild = 'build';
 /// by the second Run Script in the Xcode build process that happens after compiling, linking, and
 /// embedding.
 const kXcodeBuildScriptValueEmbed = 'embed';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by a Run Script in the Xcode build process in a native app (add-to-app).
+const kXcodeBuildScriptValueAddToAppBuild = 'build-add-to-app';
 
 /// Whether the build is originating from the `flutter build swift-package` command.
 ///

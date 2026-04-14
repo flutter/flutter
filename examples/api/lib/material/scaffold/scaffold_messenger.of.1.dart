@@ -39,7 +39,7 @@ class _OfExampleAppState extends State<OfExampleApp> {
         appBar: AppBar(title: const Text('ScaffoldMessenger Demo')),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               const Text('You have pushed the button this many times:'),
               Text(

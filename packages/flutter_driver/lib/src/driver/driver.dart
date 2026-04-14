@@ -75,7 +75,6 @@ enum TimelineStream {
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-@internal
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// A convenient accessor to frequently used finders.
@@ -468,6 +467,7 @@ abstract class FlutterDriver {
     var isVisible = false;
     Object? waitForError;
     StackTrace? waitForStack;
+    // ignore: unawaited_futures
     waitFor(item, timeout: timeout).then<void>(
       (_) {
         isVisible = true;
