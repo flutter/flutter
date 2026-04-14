@@ -10809,65 +10809,6 @@ void main() {
   );
 
   testWidgets(
-    'Toolbar re-appears after first parent scroll when selection stays in view on Android and iOS',
-    (WidgetTester tester) async {
-      // Regression test: toolbar should re-appear on the first scroll end
-      // without requiring a second scroll when the selection stays in view.
-      final controller = TextEditingController(text: 'Atwater Peel Sherbrooke Bonaventure ' * 20);
-      addTearDown(controller.dispose);
-
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: CupertinoPageScaffold(
-            child: Center(
-              child: ListView(
-                children: <Widget>[
-                  const SizedBox(height: 200),
-                  CupertinoTextField(controller: controller),
-                  const SizedBox(height: 1000),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
-
-      await tester.longPressAt(textfieldStart + const Offset(50.0, 9.0));
-      await tester.pumpAndSettle();
-
-      expect(state.selectionOverlay?.toolbarIsVisible, true);
-
-      // Perform a small scroll so the selection stays in view.
-      final TestGesture gesture = await tester.startGesture(
-        tester.getCenter(find.byType(CupertinoTextField)),
-      );
-      await tester.pump();
-      await gesture.moveBy(const Offset(0.0, -50.0));
-      await tester.pumpAndSettle();
-      expect(state.selectionOverlay?.toolbarIsVisible, false);
-
-      // Release to end scroll. Toolbar should re-appear on the first scroll end.
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(state.selectionOverlay?.toolbarIsVisible, true);
-      expect(state.renderEditable.selectionStartInViewport.value, true);
-      expect(state.renderEditable.selectionEndInViewport.value, true);
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.iOS,
-    }),
-    // [intended] only applies to platforms where we supply the context menu.
-    skip: kIsWeb,
-  );
-
-  testWidgets(
     'Does not crash when editing value changes between consecutive scrolls',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/179164.

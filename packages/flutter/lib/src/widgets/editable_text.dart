@@ -4315,13 +4315,6 @@ class EditableTextState extends State<EditableText>
         return;
       }
       _showToolbarOnScreenScheduled = true;
-      // Schedule the toolbar to show at the beginning of the next frame
-      // rather than at the end of the current frame (addPostFrameCallback).
-      // ScrollEndNotification and the subsequent ScrollStartNotification
-      // (from a ballistic animation) can arrive in the same build phase.
-      // A post-frame callback would run after both, showing the toolbar
-      // mid-scroll. A frame callback runs at the start of the next frame,
-      // before the next build phase dispatches any new scroll notifications.
       SchedulerBinding.instance.scheduleFrameCallback((Duration _) {
         _showToolbarOnScreenScheduled = false;
         if (!mounted || _dataWhenToolbarShowScheduled == null) {
