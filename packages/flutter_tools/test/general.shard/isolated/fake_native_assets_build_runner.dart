@@ -4,6 +4,7 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:hooks/hooks.dart';
@@ -65,6 +66,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
+    required File? recordedUsesFile,
   }) async {
     LinkResult? result = linkResult;
     for (final String package in packagesWithNativeAssetsResult) {
@@ -77,7 +79,7 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
         )
         ..setupLink(
           assets: buildResult.encodedAssets,
-          recordedUsesFile: null,
+          recordedUsesFile: recordedUsesFile?.uri,
           assetsFromLinking: [],
         );
       for (final extension in extensions) {
