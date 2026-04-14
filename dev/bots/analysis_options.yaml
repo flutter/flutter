@@ -1,5 +1,0 @@
-include: ../analysis_options.yaml
-
-linter:
-  rules:
-    avoid_js_rounded_ints: false # CLI code doesn't need to worry about JS issues

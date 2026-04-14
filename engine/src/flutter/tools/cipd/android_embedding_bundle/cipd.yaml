@@ -1,4 +1,0 @@
-package: flutter/android/embedding_bundle
-description: Dependencies used by the Android embedding.
-data:
-  - dir: lib

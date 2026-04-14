@@ -1,3 +1,0 @@
-crypt_h
-(?s)Copyright \(C\) [\d-]+ Gilles Vollant.*This code is a modified version of crypting code in Infozip distribution
-Copyright \(C\) [\d-]+ Gilles Vollant

@@ -1,4 +1,0 @@
-// This xcconfig used for both the paid and free flavor, but the plugins are not different between
-// them. Pick one.
-#include? "Pods/Target Support Files/Pods-Free App/Pods-Free App.debug free.xcconfig"
-#include "Generated.xcconfig"
