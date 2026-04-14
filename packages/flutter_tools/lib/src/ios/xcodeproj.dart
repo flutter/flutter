@@ -408,7 +408,12 @@ class XcodeProjectInterpreter {
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
         // one to error. The new process will pick up where the old one left off.
-        final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
+        final RunResult result = await _processUtils.run([
+          'pgrep',
+          '-n', // Select only the newest
+          '-f', // Match against full argument lists
+          ...command,
+        ]);
         if (result.exitCode == 0) {
           final int? pid = int.tryParse(result.stdout.trim());
           if (pid != null) {
