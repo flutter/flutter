@@ -15,6 +15,10 @@ namespace impeller {
 
 class PipelineLibraryGLES;
 
+namespace testing {
+class RenderPassGLESViewportTest;
+}  // namespace testing
+
 class PipelineGLES final
     : public Pipeline<PipelineDescriptor>,
       public BackendCast<PipelineGLES, Pipeline<PipelineDescriptor>> {
@@ -37,6 +41,7 @@ class PipelineGLES final
 
  private:
   friend PipelineLibraryGLES;
+  friend class testing::RenderPassGLESViewportTest;
 
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<UniqueHandleGLES> handle_;

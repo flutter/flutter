@@ -116,6 +116,18 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockCoreProjectFiles();
 
@@ -145,8 +157,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
 
@@ -171,8 +194,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
 
@@ -200,8 +234,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeCommand('release'),
@@ -230,8 +275,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
 
@@ -275,8 +331,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.empty()..excludedExecutables.add('cmake');
@@ -303,8 +370,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -339,8 +417,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -373,8 +462,19 @@ void main() {
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
 
@@ -434,8 +534,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -473,8 +584,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('debug'), ninjaCommand('debug')]);
@@ -501,8 +623,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -530,8 +663,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -559,8 +703,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('profile'), ninjaCommand('profile')]);
@@ -586,8 +741,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -615,8 +781,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -644,8 +821,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       expect(
@@ -669,8 +857,19 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
@@ -776,8 +975,19 @@ set(BINARY_NAME "fizz_bar")
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
           logger: logger,
-
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -828,8 +1038,19 @@ set(BINARY_NAME "fizz_bar")
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -888,8 +1109,19 @@ set(BINARY_NAME "fizz_bar")
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -947,8 +1179,19 @@ set(BINARY_NAME "fizz_bar")
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
-
         osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[

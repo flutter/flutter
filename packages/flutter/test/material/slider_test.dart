@@ -1337,22 +1337,27 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.isSlider,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.increase,
+                                  SemanticsAction.decrease,
+                                  SemanticsAction.focus,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.focus,
-                              SemanticsAction.increase,
-                              SemanticsAction.decrease,
-                            ],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1394,19 +1399,22 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              // isFocusable is delayed by 1 frame.
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.isSlider,
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.focus],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1439,16 +1447,22 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isSlider,
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1508,23 +1522,27 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.isSlider,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.increase,
+                                  SemanticsAction.decrease,
+                                  SemanticsAction.focus,
+                                ],
+                                value: '50%',
+                                increasedValue: '60%',
+                                decreasedValue: '40%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[
-                              if (defaultTargetPlatform != TargetPlatform.iOS)
-                                SemanticsAction.focus,
-                              SemanticsAction.increase,
-                              SemanticsAction.decrease,
-                            ],
-                            value: '50%',
-                            increasedValue: '60%',
-                            decreasedValue: '40%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1566,16 +1584,22 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 6,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isSlider,
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 9),
+                              TestSemantics(
+                                id: 8,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                value: '50%',
+                                increasedValue: '60%',
+                                decreasedValue: '40%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            value: '50%',
-                            increasedValue: '60%',
-                            decreasedValue: '40%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 7)],
                           ),
                         ],
                       ),
@@ -1632,23 +1656,28 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.isSlider,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.increase,
+                                  SemanticsAction.decrease,
+                                  SemanticsAction.didGainAccessibilityFocus,
+                                  SemanticsAction.focus,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.focus,
-                              SemanticsAction.increase,
-                              SemanticsAction.decrease,
-                              SemanticsAction.didGainAccessibilityFocus,
-                            ],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1690,22 +1719,25 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              // isFocusable is delayed by 1 frame.
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.isSlider,
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.didGainAccessibilityFocus,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.focus,
-                              SemanticsAction.didGainAccessibilityFocus,
-                            ],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1715,6 +1747,7 @@ void main() {
               ),
             ],
           ),
+
           ignoreRect: true,
           ignoreTransform: true,
         ),
@@ -1738,17 +1771,25 @@ void main() {
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isSlider,
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.didGainAccessibilityFocus,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.didGainAccessibilityFocus],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -1807,22 +1848,27 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                                SemanticsFlag.isSlider,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.increase,
+                                SemanticsAction.decrease,
+                                SemanticsAction.focus,
+                              ],
+                              value: '40',
+                              increasedValue: '60',
+                              decreasedValue: '20',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(id: 6),
                           ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.focus,
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                          ],
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
-                          children: <TestSemantics>[TestSemantics(id: 5)],
                         ),
                       ],
                     ),
@@ -1880,23 +1926,28 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          flags: <SemanticsFlag>[
-                            SemanticsFlag.hasEnabledState,
-                            SemanticsFlag.isEnabled,
-                            SemanticsFlag.isFocusable,
-                            SemanticsFlag.isSlider,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                                SemanticsFlag.isSlider,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.increase,
+                                SemanticsAction.decrease,
+                                SemanticsAction.focus,
+                              ],
+                              label: 'Bingo',
+                              value: '40',
+                              increasedValue: '60',
+                              decreasedValue: '20',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(id: 6),
                           ],
-                          actions: <SemanticsAction>[
-                            SemanticsAction.focus,
-                            SemanticsAction.increase,
-                            SemanticsAction.decrease,
-                          ],
-                          value: '40',
-                          increasedValue: '60',
-                          decreasedValue: '20',
-                          textDirection: TextDirection.ltr,
-                          label: label,
-                          children: <TestSemantics>[TestSemantics(id: 5)],
                         ),
                       ],
                     ),
@@ -2829,23 +2880,28 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.isSlider,
+                            children: <TestSemantics>[
+                              TestSemantics(id: 6),
+                              TestSemantics(
+                                id: 5,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                  SemanticsFlag.isSlider,
+                                ],
+                                actions: <SemanticsAction>[
+                                  SemanticsAction.focus,
+                                  SemanticsAction.increase,
+                                  SemanticsAction.decrease,
+                                  SemanticsAction.didGainAccessibilityFocus,
+                                ],
+                                value: '50%',
+                                increasedValue: '55%',
+                                decreasedValue: '45%',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.focus,
-                              SemanticsAction.increase,
-                              SemanticsAction.decrease,
-                              SemanticsAction.didGainAccessibilityFocus,
-                            ],
-                            value: '50%',
-                            increasedValue: '55%',
-                            decreasedValue: '45%',
-                            textDirection: TextDirection.ltr,
-                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
@@ -2861,7 +2917,7 @@ void main() {
       );
 
       expect(focusNode.hasFocus, isFalse);
-      semanticsOwner.performAction(4, SemanticsAction.didGainAccessibilityFocus);
+      semanticsOwner.performAction(5, SemanticsAction.didGainAccessibilityFocus);
       await tester.pumpAndSettle();
       expect(focusNode.hasFocus, isTrue);
       semantics.dispose();
@@ -2870,9 +2926,13 @@ void main() {
     skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.
   );
 
-  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
+  // Regression test for https://github.com/flutter/flutter/issues/180767
+  group('Value indicator appears and disappears when it should:', () {
     final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
-    SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
+    final SliderThemeData baseSliderTheme = baseTheme.sliderTheme.copyWith(
+      valueIndicatorColor: Colors.red,
+      valueIndicatorShape: const _FixedSizeCircle(),
+    );
     var value = 0.45;
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
@@ -2899,125 +2959,215 @@ void main() {
       );
     }
 
-    Future<void> expectValueIndicator({
-      required bool isVisible,
+    Future<void> expectValueIndicator(
+      WidgetTester tester, {
+      required bool visibleWhenDragged,
+      required bool visibleWhenReleased,
       required SliderThemeData theme,
       int? divisions,
       bool enabled = true,
-      bool dragged = true,
     }) async {
-      // Discrete enabled widget.
-      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
-      final Offset center = tester.getCenter(find.byType(Slider));
-      TestGesture? gesture;
-      if (dragged) {
-        gesture = await tester.startGesture(center);
+      void expectIndicatorVisible(bool isVisible) {
+        // _RenderValueIndicator is the last render object in the tree.
+        final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
+        expect(
+          valueIndicatorBox,
+          isVisible
+              ? (paints
+                  ..circle(color: theme.valueIndicatorColor)
+                  ..paragraph())
+              : isNot(
+                  paints
+                    ..circle(color: theme.valueIndicatorColor)
+                    ..paragraph(),
+                ),
+        );
       }
-      // Wait for value indicator animation to finish.
-      await tester.pumpAndSettle();
 
-      // _RenderValueIndicator is the last render object in the tree.
-      final RenderObject valueIndicatorBox = tester.allRenderObjects.last;
-      expect(
-        valueIndicatorBox,
-        isVisible
-            ? (paints
-                ..path(color: theme.valueIndicatorColor)
-                ..paragraph())
-            : isNot(
-                paints
-                  ..path(color: theme.valueIndicatorColor)
-                  ..paragraph(),
-              ),
-      );
-      if (dragged) {
-        await gesture!.up();
-      }
+      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
+      expectIndicatorVisible(visibleWhenReleased);
+
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pumpAndSettle();
+      expectIndicatorVisible(visibleWhenDragged);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expectIndicatorVisible(visibleWhenReleased);
+
+      // Reset state to avoid state leak.
+      await tester.pumpWidget(Container());
     }
 
-    // Default (showValueIndicator set to onlyForDiscrete).
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to onlyForDiscrete', (WidgetTester tester) async {
+      // The default value is onlyForDiscrete. No modification is needed.
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith();
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+    });
 
-    // With showValueIndicator set to onlyForContinuous.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to onlyForContinuous', (WidgetTester tester) async {
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.onlyForContinuous,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+    });
 
-    // discrete enabled widget with showValueIndicator set to onDrag.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onDrag);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to onDrag', (WidgetTester tester) async {
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.onDrag,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        visibleWhenDragged: true,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+    });
 
-    // discrete enabled widget with showValueIndicator set to never.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: false,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: false, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: false, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to never', (WidgetTester tester) async {
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.never,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+    });
 
-    // discrete enabled widget with showValueIndicator set to alwaysVisible.
-    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.alwaysVisible);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme);
-    await expectValueIndicator(isVisible: true, theme: theme, enabled: false);
-    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, dragged: false);
-    await expectValueIndicator(
-      isVisible: true,
-      theme: theme,
-      divisions: 3,
-      enabled: false,
-      dragged: false,
-    );
-    await expectValueIndicator(isVisible: true, theme: theme, dragged: false);
-    await expectValueIndicator(isVisible: true, theme: theme, enabled: false, dragged: false);
+    testWidgets('showValueIndicator set to alwaysVisible', (WidgetTester tester) async {
+      final SliderThemeData sliderTheme = baseSliderTheme.copyWith(
+        showValueIndicator: ShowValueIndicator.alwaysVisible,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        visibleWhenDragged: true,
+        visibleWhenReleased: true,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        divisions: 3,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        visibleWhenDragged: true,
+        visibleWhenReleased: true,
+      );
+      await expectValueIndicator(
+        tester,
+        theme: sliderTheme,
+        enabled: false,
+        visibleWhenDragged: false,
+        visibleWhenReleased: false,
+      );
+    });
   });
 
   testWidgets("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
@@ -5529,4 +5679,49 @@ void main() {
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
+}
+
+// A slider value indicator that's a circle with a fixed size and
+// does not animate at all.
+//
+// This allows test cases to verify whether a `Slider` removes the value
+// indicator painter after the animation is dismissed (a more strict requirement
+// than "painting nothing"). The default value indicator shape is not suitable
+// for this job since it does not paint anything when animation is dismissed.
+class _FixedSizeCircle extends SliderComponentShape {
+  const _FixedSizeCircle();
+
+  static const circleDiameter = 40.0;
+
+  @override
+  Size getPreferredSize(
+    bool isEnabled,
+    bool isDiscrete, {
+    TextPainter? labelPainter,
+    double? textScaleFactor,
+  }) => const Size.square(circleDiameter);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final paint = Paint()
+      ..color = sliderTheme.valueIndicatorColor ?? Colors.purple
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, circleDiameter / 2, paint);
+    labelPainter.paint(canvas, center);
+  }
 }

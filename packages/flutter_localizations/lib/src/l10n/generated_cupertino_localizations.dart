@@ -5332,7 +5332,7 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get collapsedHint => 'ازهم بازشده';
 
   @override
-  String get copyButtonLabel => 'کپی';
+  String get copyButtonLabel => 'کپی کردن';
 
   @override
   String get cutButtonLabel => 'برش';

@@ -5122,7 +5122,7 @@ void main() {
       final ByteData? fakeMessage = SystemChannels.accessibility.codec.encodeMessage(
         <String, dynamic>{'type': 'didGainFocus', 'nodeId': 5},
       );
-      tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.accessibility.name,
         fakeMessage,
         (ByteData? data) {},

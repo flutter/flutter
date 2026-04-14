@@ -1750,7 +1750,7 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationFa() : super(TextDirection.rtl);
 
   @override
-  String get copyButtonLabel => 'کپی';
+  String get copyButtonLabel => 'کپی کردن';
 
   @override
   String get cutButtonLabel => 'برش';

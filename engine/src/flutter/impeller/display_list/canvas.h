@@ -374,10 +374,18 @@ class Canvas {
 
   void Reset();
 
-  void AddRenderEntityWithFiltersToCurrentPass(Entity& entity,
-                                               const Geometry* geometry,
-                                               const Paint& paint,
-                                               bool reuse_depth = false);
+  void AddRenderEntityWithFiltersToCurrentPass(
+      Entity& entity,
+      const Geometry* geometry,
+      const Paint& paint,
+      bool reuse_depth = false,
+      std::shared_ptr<Contents> override_contents = nullptr);
+
+  void AddRenderSDFEntityToCurrentPass(
+      Entity& entity,
+      const Geometry* geom,
+      const Paint& paint,
+      std::shared_ptr<ColorSourceContents> contents);
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 

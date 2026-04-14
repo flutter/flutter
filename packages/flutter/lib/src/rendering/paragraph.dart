@@ -3493,7 +3493,7 @@ class _SelectableFragment
     if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
-        boxHeightStyle: ui.BoxHeightStyle.max,
+        boxHeightStyle: .max,
       );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
@@ -3518,6 +3518,7 @@ class _SelectableFragment
     if (_cachedRect == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
+        boxHeightStyle: .max,
       );
       if (boxes.isNotEmpty) {
         Rect result = boxes.first.toRect();

@@ -289,20 +289,12 @@ class Chrome extends Browser {
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const String _kGlibcError = 'Inconsistency detected by ld.so';
 
-Future<Process> _spawnChromiumProcess(
-  String executable,
-  List<String> args, {
-  String? workingDirectory,
-}) async {
+Future<Process> _spawnChromiumProcess(String executable, List<String> args) async {
   // Keep attempting to launch the browser until one of:
   // - Chrome launched successfully, in which case we just return from the loop.
   // - The tool detected an unretriable Chrome error, in which case we throw ToolExit.
   while (true) {
-    final Process process = await Process.start(
-      executable,
-      args,
-      workingDirectory: workingDirectory,
-    );
+    final Process process = await Process.start(executable, args);
 
     process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
       print('[CHROME STDOUT]: $line');

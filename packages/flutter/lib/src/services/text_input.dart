@@ -531,6 +531,7 @@ class TextInputConfiguration {
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
     this.hintLocales = const <Locale>[],
+    this.enableInlinePrediction,
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -702,6 +703,18 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final List<Locale>? hintLocales;
 
+  /// {@template flutter.services.TextInputConfiguration.enableInlinePrediction}
+  /// Whether to enable inline predictive text.
+  ///
+  /// This feature is specific to iOS 17 and later. It has no effect on other
+  /// platforms.
+  ///
+  /// By default, this property is null, which means inline prediction is
+  /// disabled on iOS. Setting this flag overrides the platform behavior:
+  /// when true, inline prediction is enabled; when false, it is disabled.
+  /// {@endtemplate}
+  final bool? enableInlinePrediction;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -723,6 +736,7 @@ class TextInputConfiguration {
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
     List<Locale>? hintLocales,
+    bool? enableInlinePrediction,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -744,6 +758,7 @@ class TextInputConfiguration {
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
       hintLocales: hintLocales ?? this.hintLocales,
+      enableInlinePrediction: enableInlinePrediction ?? this.enableInlinePrediction,
     );
   }
 
@@ -794,6 +809,7 @@ class TextInputConfiguration {
       'autofill': ?autofill,
       'enableDeltaModel': enableDeltaModel,
       'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
+      'enableInlinePrediction': enableInlinePrediction,
     };
   }
 
@@ -823,7 +839,8 @@ class TextInputConfiguration {
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
         other.enableDeltaModel == enableDeltaModel &&
-        other.hintLocales == hintLocales;
+        other.hintLocales == hintLocales &&
+        other.enableInlinePrediction == enableInlinePrediction;
   }
 
   @override
@@ -847,6 +864,7 @@ class TextInputConfiguration {
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
       hintLocales,
+      enableInlinePrediction,
     );
   }
 
@@ -871,6 +889,7 @@ class TextInputConfiguration {
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
       if (hintLocales != null) 'hintLocales: $hintLocales',
+      if (enableInlinePrediction != null) 'enableInlinePrediction: $enableInlinePrediction',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }
@@ -1013,6 +1032,10 @@ class TextEditingValue {
   /// iOS, the default software keyboards do not have a dedicated view to show
   /// the unfinished Latin sequence, so it's displayed directly in the text
   /// field, inside of a composing region.
+  ///
+  /// On iOS 17 and later, the composing region can also be used
+  /// to display inline text predictions. The user can accept the
+  /// predicted text by tapping the Space bar.
   ///
   /// The composing region should typically only be changed by the IME, or the
   /// user via interacting with the IME.
@@ -1368,6 +1391,14 @@ mixin TextInputClient {
   ///
   /// This method will only be called on iOS.
   void showAutocorrectionPromptRect(int start, int end);
+
+  /// Notifies the client that the platform moved focus back to this input.
+  ///
+  /// This is necessary to support autofill on some browsers (e.g. iOS Safari) that blur the text
+  /// field and refocus it before autofilling.
+  ///
+  /// Returns true if the client acquired focus, false otherwise.
+  bool onFocusReceived() => false;
 
   /// Platform notified framework of closed connection.
   ///
@@ -1862,6 +1893,23 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
+void _reportError(
+  Object exception,
+  StackTrace stack,
+  String context, [
+  InformationCollector? informationCollector,
+]) {
+  FlutterError.reportError(
+    FlutterErrorDetails(
+      exception: exception,
+      stack: stack,
+      library: 'services library',
+      context: ErrorDescription(context),
+      informationCollector: informationCollector,
+    ),
+  );
+}
+
 /// An low-level interface to the system's text input control.
 ///
 /// To start interacting with the system's text input control, call [attach] to
@@ -2050,6 +2098,7 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
+    _lastConnection = connection;
     _setClient(connection._client, configuration);
   }
 
@@ -2079,6 +2128,7 @@ class TextInput {
 
   TextInputConnection? _currentConnection;
   late TextInputConfiguration _currentConfiguration;
+  TextInputConnection? _lastConnection;
 
   final Map<String, ScribbleClient> _scribbleClients = <String, ScribbleClient>{};
   bool _scribbleInProgress = false;
@@ -2094,20 +2144,13 @@ class TextInput {
     try {
       return await _handleTextInputInvocation(call);
     } catch (exception, stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: ErrorDescription('during method call ${call.method}'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<MethodCall>(
-              'call',
-              call,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
-        ),
+      _reportError(
+        exception,
+        stack,
+        'during method call ${call.method}',
+        () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
       );
       rethrow;
     }
@@ -2150,6 +2193,13 @@ class TextInput {
       case 'TextInputClient.scribbleInteractionFinished':
         _scribbleInProgress = false;
         return;
+      case 'TextInputClient.onFocusReceived':
+        final args = methodCall.arguments as List<dynamic>;
+        final clientId = args[0] as int;
+        if (_lastConnection != null && _lastConnection!._id == clientId) {
+          return _lastConnection!._client.onFocusReceived();
+        }
+        return false;
     }
     if (_currentConnection == null) {
       return;
@@ -2592,81 +2642,141 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.setClient', <Object>[
-      TextInput._instance._currentConnection!._id,
-      _configurationToJson(configuration),
-    ]);
+    _channel
+        .invokeMethod<void>('TextInput.setClient', <Object>[
+          TextInput._instance._currentConnection!._id,
+          _configurationToJson(configuration),
+        ])
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while attaching the text input client'),
+        );
   }
 
   @override
   void detach(TextInputClient client) {
-    _channel.invokeMethod<void>('TextInput.clearClient');
+    _channel
+        .invokeMethod<void>('TextInput.clearClient')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while detaching the text input client'),
+        );
   }
 
   @override
   void updateConfig(TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration));
+    _channel
+        .invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration))
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while updating text input configuration'),
+        );
   }
 
   @override
   void setEditingState(TextEditingValue value) {
-    _channel.invokeMethod<void>('TextInput.setEditingState', value.toJSON());
+    _channel
+        .invokeMethod<void>('TextInput.setEditingState', value.toJSON())
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input editing state'),
+        );
   }
 
   @override
   void show() {
-    _channel.invokeMethod<void>('TextInput.show');
+    _channel
+        .invokeMethod<void>('TextInput.show')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while showing the text input client'),
+        );
   }
 
   @override
   void hide() {
-    _channel.invokeMethod<void>('TextInput.hide');
+    _channel
+        .invokeMethod<void>('TextInput.hide')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while hiding the text input client'),
+        );
   }
 
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    _channel.invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
-      'width': editableBoxSize.width,
-      'height': editableBoxSize.height,
-      'transform': transform.storage,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
+          'width': editableBoxSize.width,
+          'height': editableBoxSize.height,
+          'transform': transform.storage,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input size and transform'),
+        );
   }
 
   @override
   void setComposingRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
-      'width': rect.width,
-      'height': rect.height,
-      'x': rect.left,
-      'y': rect.top,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
+          'width': rect.width,
+          'height': rect.height,
+          'x': rect.left,
+          'y': rect.top,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input composing rect'),
+        );
   }
 
   @override
   void setCaretRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
-      'width': rect.width,
-      'height': rect.height,
-      'x': rect.left,
-      'y': rect.top,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
+          'width': rect.width,
+          'height': rect.height,
+          'x': rect.left,
+          'y': rect.top,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input caret rect'),
+        );
   }
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {
-    _channel.invokeMethod<void>(
-      'TextInput.setSelectionRects',
-      selectionRects.map((SelectionRect rect) {
-        return <num>[
-          rect.bounds.left,
-          rect.bounds.top,
-          rect.bounds.width,
-          rect.bounds.height,
-          rect.position,
-          rect.direction.index,
-        ];
-      }).toList(),
-    );
+    _channel
+        .invokeMethod<void>(
+          'TextInput.setSelectionRects',
+          selectionRects.map((SelectionRect rect) {
+            return <num>[
+              rect.bounds.left,
+              rect.bounds.top,
+              rect.bounds.width,
+              rect.bounds.height,
+              rect.position,
+              rect.direction.index,
+            ];
+          }).toList(),
+        )
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input selection rects'),
+        );
   }
 
   @override
@@ -2690,17 +2800,35 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void updateStyle(TextInputStyle style) {
-    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
+    _channel
+        .invokeMethod<void>('TextInput.setStyle', style.toJson())
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while updating text input style'),
+        );
   }
 
   @override
   void requestAutofill() {
-    _channel.invokeMethod<void>('TextInput.requestAutofill');
+    _channel
+        .invokeMethod<void>('TextInput.requestAutofill')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while requesting autofill'),
+        );
   }
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {
-    _channel.invokeMethod<void>('TextInput.finishAutofillContext', shouldSave);
+    _channel
+        .invokeMethod<void>('TextInput.finishAutofillContext', shouldSave)
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while finishing autofill context'),
+        );
   }
 }
 
