@@ -93,15 +93,10 @@ Set the `--enable-flutter-gpu` flag:
 />
 ```
 
-For flags that take boolean values, if you omit a value entirely, it
-will be assumed to be true. For example, this is the same as the
-example above:
-
-```xml
-<meta-data
-    android:name="io.flutter.embedding.android.EnableFlutterGPU"
-/>
-```
+For flags that take boolean values, you must explicitly set
+`android:value="true"` to enable the flag. Omitting the value or
+providing a non-boolean value (e.g., a typo like `"Fasle"`) will
+default to `false` (disabled).
 
 ## Release-mode restrictions
 
