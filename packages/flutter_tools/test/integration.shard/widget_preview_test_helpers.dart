@@ -71,6 +71,11 @@ Future<Stream<String>> startWidgetPreview({
     }
   });
 
+  process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
+    // ignore: avoid_print
+    print('[stderr] $msg');
+  });
+
   unawaited(
     process.exitCode.then((int exitCode) {
       if (!controller.isClosed) {
