@@ -20,7 +20,7 @@ namespace {
 using RenderFunction = std::function<void(flutter::DisplayListBuilder& builder,
                                           flutter::DlPoint center,
                                           flutter::DlScalar radius,
-                                          flutter::DlPaint& paint)>;
+                                          const flutter::DlPaint& paint)>;
 
 flutter::DlRect MakeRect(flutter::DlPoint center,
                          flutter::DlScalar width,
@@ -29,38 +29,38 @@ flutter::DlRect MakeRect(flutter::DlPoint center,
                                    center.x + width, center.y + height);
 }
 
-RenderFunction RenderSquare = [](flutter::DisplayListBuilder& builder,
-                                 flutter::DlPoint center,
-                                 flutter::DlScalar radius,
-                                 flutter::DlPaint& paint) {
+const RenderFunction kRenderSquare = [](flutter::DisplayListBuilder& builder,
+                                        flutter::DlPoint center,
+                                        flutter::DlScalar radius,
+                                        const flutter::DlPaint& paint) {
   builder.DrawRect(MakeRect(center, radius, radius), paint);
 };
 
-RenderFunction RenderRectangle = [](flutter::DisplayListBuilder& builder,
-                                    flutter::DlPoint center,
-                                    flutter::DlScalar radius,
-                                    flutter::DlPaint& paint) {
+const RenderFunction kRenderRectangle = [](flutter::DisplayListBuilder& builder,
+                                           flutter::DlPoint center,
+                                           flutter::DlScalar radius,
+                                           const flutter::DlPaint& paint) {
   builder.DrawRect(MakeRect(center, radius, radius * 0.9f), paint);
 };
 
-RenderFunction RenderCircle = [](flutter::DisplayListBuilder& builder,
-                                 flutter::DlPoint center,
-                                 flutter::DlScalar radius,
-                                 flutter::DlPaint& paint) {
+const RenderFunction kRenderCircle = [](flutter::DisplayListBuilder& builder,
+                                        flutter::DlPoint center,
+                                        flutter::DlScalar radius,
+                                        const flutter::DlPaint& paint) {
   builder.DrawCircle(center, radius, paint);
 };
 
-RenderFunction RenderOval = [](flutter::DisplayListBuilder& builder,
-                               flutter::DlPoint center,
-                               flutter::DlScalar radius,
-                               flutter::DlPaint& paint) {
+const RenderFunction kRenderOval = [](flutter::DisplayListBuilder& builder,
+                                      flutter::DlPoint center,
+                                      flutter::DlScalar radius,
+                                      const flutter::DlPaint& paint) {
   builder.DrawOval(MakeRect(center, radius, radius * 0.9f), paint);
 };
 
-RenderFunction RenderLine = [](flutter::DisplayListBuilder& builder,
-                               flutter::DlPoint center,
-                               flutter::DlScalar radius,
-                               flutter::DlPaint& paint) {
+const RenderFunction kRenderLine = [](flutter::DisplayListBuilder& builder,
+                                      flutter::DlPoint center,
+                                      flutter::DlScalar radius,
+                                      const flutter::DlPaint& paint) {
   flutter::DlVector2 offset(radius, 0);
   builder.DrawLine(center - offset, center + offset, paint);
 };
@@ -94,15 +94,15 @@ const char* ToName(RenderType type) {
 const RenderFunction& ToFunction(RenderType type) {
   switch (type) {
     case RenderType::kSquare:
-      return RenderSquare;
+      return kRenderSquare;
     case RenderType::kRectangle:
-      return RenderRectangle;
+      return kRenderRectangle;
     case RenderType::kCircle:
-      return RenderCircle;
+      return kRenderCircle;
     case RenderType::kOval:
-      return RenderOval;
+      return kRenderOval;
     case RenderType::kLine:
-      return RenderLine;
+      return kRenderLine;
     case RenderType::kCount:
       FML_UNREACHABLE();
   }
