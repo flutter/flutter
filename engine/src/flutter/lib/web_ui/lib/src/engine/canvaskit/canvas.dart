@@ -12,6 +12,11 @@ import 'package:ui/ui.dart' as ui;
 /// every time we need it.
 final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;
 
+SkPaint? _sharedDownscalingPaint;
+SkPaint _getDownscalingPaint() {
+  return _sharedDownscalingPaint ??= CkPaint().toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
+}
+
 /// A Dart wrapper around Skia's [SkCanvas].
 ///
 /// This is intentionally not memory-managing the underlying [SkCanvas]. See
@@ -148,10 +153,12 @@ class CkCanvas implements LayerCanvas {
     assert(rectIsValid(dst));
 
     if (shouldIterativelyDownscale(src, dst, paint)) {
+      // Use iterative downscaling to avoid aliasing artifacts when downscaling
+      // by a large factor (scale < 0.5). This is a workaround for a Skia bug
+      // where mipmaps are not used for downscaling on the web.
+      // See: https://g-issues.skia.org/issues/500117356
       final int targetWidth = dst.width.toInt();
       final int targetHeight = dst.height.toInt();
-
-      SkPaint? downscalingPaint;
 
       final ui.Image downscaledImage = getOrCreateDownscaledImage(
         box: (image as CkImage).box,
@@ -160,7 +167,6 @@ class CkCanvas implements LayerCanvas {
         targetWidth: targetWidth,
         targetHeight: targetHeight,
         rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
-          downscalingPaint ??= CkPaint().toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
           final SkCanvas tempSkCanvas = (canvas as CkCanvas).skCanvas;
           tempSkCanvas.drawImageRectOptions(
             (img as CkImage).skImage,
@@ -168,12 +174,10 @@ class CkCanvas implements LayerCanvas {
             toSkRect(d),
             canvasKit.FilterMode.Linear,
             canvasKit.MipmapMode.None,
-            downscalingPaint!,
+            _getDownscalingPaint(),
           );
         },
       );
-
-      downscalingPaint?.delete();
 
       final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
       skCanvas.drawImageRectOptions(

@@ -9,6 +9,17 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
+PaintHandle? _sharedDownscalingPaintHandle;
+PaintHandle _getDownscalingPaintHandle() {
+  if (_sharedDownscalingPaintHandle == null) {
+    final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
+    _sharedDownscalingPaintHandle = (tempPaint as SkwasmPaint).toRawPaint(
+      defaultBlurTileMode: ui.TileMode.clamp,
+    );
+  }
+  return _sharedDownscalingPaintHandle!;
+}
+
 class SkwasmCanvas implements LayerCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) => SkwasmCanvas.fromHandle(
     withStackScope(
@@ -244,10 +255,12 @@ class SkwasmCanvas implements LayerCanvas {
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
     if (shouldIterativelyDownscale(src, dst, paint)) {
+      // Use iterative downscaling to avoid aliasing artifacts when downscaling
+      // by a large factor (scale < 0.5). This is a workaround for a Skia bug
+      // where mipmaps are not used for downscaling on the web.
+      // See: https://g-issues.skia.org/issues/500117356
       final int targetWidth = dst.width.toInt();
       final int targetHeight = dst.height.toInt();
-
-      PaintHandle? downscalingPaintHandle;
 
       final ui.Image downscaledImage = getOrCreateDownscaledImage(
         box: (image as SkwasmImage).box,
@@ -257,12 +270,6 @@ class SkwasmCanvas implements LayerCanvas {
         targetHeight: targetHeight,
         rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
           final CanvasHandle tempCanvasHandle = (canvas as SkwasmCanvas)._handle;
-          if (downscalingPaintHandle == null) {
-            final tempPaint = ui.Paint()..filterQuality = ui.FilterQuality.low;
-            downscalingPaintHandle = (tempPaint as SkwasmPaint).toRawPaint(
-              defaultBlurTileMode: ui.TileMode.clamp,
-            );
-          }
           withStackScope((StackScope scope) {
             final Pointer<Float> sourceRect = scope.convertRectToNative(s);
             final Pointer<Float> destRect = scope.convertRectToNative(d);
@@ -271,16 +278,12 @@ class SkwasmCanvas implements LayerCanvas {
               (img as SkwasmImage).handle,
               sourceRect,
               destRect,
-              downscalingPaintHandle!,
+              _getDownscalingPaintHandle(),
               ui.FilterQuality.low.index,
             );
           });
         },
       );
-
-      if (downscalingPaintHandle != null) {
-        paintDispose(downscalingPaintHandle!);
-      }
 
       withStackScope((StackScope scope) {
         final Pointer<Float> sourceRect = scope.convertRectToNative(

@@ -128,6 +128,7 @@ ui.Image getOrCreateDownscaledImage({
 ///
 /// This avoids aliasing artifacts that occur when downscaling an image by a
 /// large factor in a single step due to Skia not using mipmaps on the web.
+/// See also: https://g-issues.skia.org/issues/500117356
 @visibleForTesting
 ui.Image createSteppedDownscaledImage({
   required ui.Image originalImage,
