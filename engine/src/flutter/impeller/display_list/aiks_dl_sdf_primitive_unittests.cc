@@ -32,7 +32,7 @@ enum class RenderType {
   kCount,
 };
 
-struct RenderParams {
+struct RenderParameters {
   flutter::DlPoint center;
   flutter::DlScalar stroke_width = 0.0f;
   flutter::DlScalar scale_x = 1.0f;
@@ -44,7 +44,7 @@ struct RenderParams {
 };
 
 void RenderPrimitiveWithHairline(flutter::DisplayListBuilder& builder,
-                                 const RenderParams& params) {
+                                 const RenderParameters& params) {
   builder.Save();
 
   builder.Translate(params.center.x, params.center.y);
@@ -154,7 +154,7 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
     GTEST_SKIP() << "SdfPrimitivePlayground does not produce a golden image";
   }
 
-  RenderParams params{
+  RenderParameters params{
       .center = flutter::DlPoint(GetWindowSize().width * 0.5f,
                                  GetWindowSize().height * 0.5f),
       .render_type = RenderType::kRectangle,
@@ -213,7 +213,7 @@ TEST_P(AiksTest, CanRenderSkewedHairlineSdfCircle) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawColor(flutter::DlColor::kBlack(), flutter::DlBlendMode::kSrc);
 
-  RenderParams params = {
+  RenderParameters params{
       .center = flutter::DlPoint(GetWindowSize().width * 0.5f,
                                  GetWindowSize().height * 0.5f),
       .skew_x = 0.75f,
