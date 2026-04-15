@@ -212,7 +212,7 @@ felt generate-builder-json
 
 The script has the following command-line options:
 
-- `--dry-run` - The script will stop before uploading artifacts to CIPD. The location of the data will be reported at the end of the script, if the script finishes successfullyThe output of the script will be visible in /tmp/browser-roll-RANDOM_STRING
+- `--dry-run` - The script will stop before uploading artifacts to CIPD. The location of the data will be reported at the end of the script, if the script finishes successfully. The output of the script will be visible in /tmp/browser-roll-RANDOM_STRING
 - `--verbose` - Greatly increase the amount of information printed to `stdout` by the script.
 
 > Try the following!
