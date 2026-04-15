@@ -93,11 +93,30 @@ void main() {
   // Gradient vector of the SDF at point p. Points in the direction of steepest
   // increase away from SDF's shape. At the edges of the shape, this is
   // perpendicular to the edge.
+  //
+  // The gradient is based on dFdx and dFdy, which are computed in terms of the
+  // screen-space pixel grid. As a result, this gradient vector is in terms of
+  // physical pixels, rather than local-space coordinates.
   vec2 gradient = vec2(dFdx(dist), dFdy(dist));
 
-  // The length of the gradient vector is how fast the SDF changes per unit
-  // distance. This is equal to the width of a pixel when measuring in the
-  // direction of the gradient vector.
+  // The length of the gradient vector is how fast the SDF changes per
+  // screen-space pixel distance. This is equal to the width of a pixel when
+  // measuring in the direction of the gradient vector.
+  //
+  // In local space, the SDF always increases by 1 in the gradient's direction
+  // per unit distance. That's the definition of an SDF - it is the distance to
+  // the closest point of the shape. But in terms of screen-space, the SDF may
+  // increase a non-1 number of units per physical pixel due to
+  // scales/skews/rotations.
+  //
+  // As an example, if the SDF is a plain unscaled/unskewed circle, the gradient
+  // is vec2(1.0, 0.0) for points along the x axis: For every one pixel we move
+  // along the x axis, the SDF value increases by 1.0. Now consider a circle
+  // with a transformation that scales it by 2 in the horizontal direction.
+  // In screen-space this circle is stretched to be twice as wide as the
+  // original circle. The gradient for this will be vec2(0.5, 0.0) along the x
+  // axis, because now for every physical pixel we move along the x axis, the
+  // stretched SDF increases by only 0.5.
   float pixel_size = length(gradient);
 
   // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
