@@ -2194,7 +2194,9 @@ Stream<File> _allFiles(
     'Extension argument should not start with a period.',
   );
 
-  final List<File> gitFiles = await _gitFiles(workingDirectory);
+  final List<File> gitFiles = (await _gitFiles(workingDirectory))
+      .map((File f) => File(path.canonicalize(f.path)))
+      .toList();
 
   final Set<String> dartIgnoreDirectories = gitFiles
       .where((File f) => path.basename(f.path) == '.dartignore')
