@@ -31,7 +31,8 @@ final class RunCommand extends CommandBase {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
     argParser.addOption(
       'flutter-flags',
-      help: 'A string of arguments to pass to the "flutter run" command, separated by commas or spaces.',
+      help:
+          'A string of arguments to pass to the "flutter run" command, separated by commas or spaces.',
       defaultsTo: '',
     );
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
