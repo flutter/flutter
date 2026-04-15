@@ -4073,13 +4073,57 @@ void main() {
     expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
     expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
   });
+  testWidgets('RangeSlider labels respect horizontal buffer and avoid screen overflow', (
+    WidgetTester tester,
+  ) async {
+    final logPainters = <TextPainter>[];
+    final shape = LoggingRangeSliderValueIndicatorShape(<InlineSpan>[], logPainters);
+
+    const String longLabelStart =
+        'A very long start label string that exceeds standard screen widths';
+    const String longLabelEnd = 'A very long end label string that exceeds standard screen widths';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SliderTheme(
+            data: SliderThemeData(
+              showValueIndicator: ShowValueIndicator.always,
+              rangeValueIndicatorShape: shape,
+            ),
+            child: RangeSlider(
+              values: const RangeValues(0.2, 0.8),
+              divisions: 10,
+              labels: const RangeLabels(longLabelStart, longLabelEnd),
+              onChanged: (RangeValues values) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Press the range slider to trigger the value indicators
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(RangeSlider)),
+    );
+    await tester.pumpAndSettle();
+
+    final double screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+
+    // Directly check the width of the TextPainter to ensure the constraint worked
+    expect(logPainters, isNotEmpty);
+    expect(logPainters.last.width, lessThanOrEqualTo(screenWidth - 64.0));
+
+    await gesture.up();
+  });
 }
 
 // A value indicator shape to log labelPainter text.
 class LoggingRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShape {
-  LoggingRangeSliderValueIndicatorShape(this.logLabel);
+  LoggingRangeSliderValueIndicatorShape(this.logLabel, [this.logPainter]);
 
   final List<InlineSpan> logLabel;
+  final List<TextPainter>? logPainter; // Added to capture the layout width
 
   @override
   Size getPreferredSize(
@@ -4109,5 +4153,6 @@ class LoggingRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorSha
     Thumb? thumb,
   }) {
     logLabel.add(labelPainter.text!);
+    logPainter?.add(labelPainter); // Captures the exact layout you modified!
   }
 }

@@ -1230,6 +1230,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   // Buffer to account for the internal padding of standard Material value indicator shapes,
   // preventing them from bleeding off the screen edges.
+  //
+  // The value 64.0 is a heuristic that covers the minimum size of the shape
+  // (padding + minimum label width) at a text scale factor of roughly 2.0.
   static const double _kValueIndicatorHorizontalBuffer = 64.0;
 
   // Compute the largest width and height needed to paint the slider shapes,
