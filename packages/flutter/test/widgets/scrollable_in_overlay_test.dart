@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   test('Can dispose ScrollPosition when hasPixels is false', () {
@@ -22,17 +24,13 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/44269.
-    final controller = TabController(vsync: const TestVSync(), length: 1);
-    addTearDown(controller.dispose);
-
     final entry1 = OverlayEntry(
       maintainState: true,
       opaque: true,
       builder: (BuildContext context) {
-        return TabBar(
-          isScrollable: true,
-          controller: controller,
-          tabs: const <Tab>[Tab(text: 'Main')],
+        return ListView(
+          scrollDirection: Axis.horizontal,
+          children: const <Widget>[Text('Main')],
         );
       },
     );
@@ -53,8 +51,8 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(child: Overlay(initialEntries: <OverlayEntry>[entry1, entry2])),
+      TestWidgetsApp(
+        home: Overlay(initialEntries: <OverlayEntry>[entry1, entry2]),
       ),
     );
 

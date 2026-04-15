@@ -107,13 +107,10 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
-    'packages/flutter/test/widgets/restoration_scopes_moving_test.dart',
-    'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/routes_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
     'packages/flutter/test/widgets/navigator_replacement_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',
-    'packages/flutter/test/widgets/default_text_editing_shortcuts_test.dart',
     'packages/flutter/test/widgets/sliver_main_axis_group_test.dart',
     'packages/flutter/test/widgets/sliver_semantics_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
@@ -124,11 +121,8 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/inherited_test.dart',
     'packages/flutter/test/widgets/heroes_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
-    'packages/flutter/test/widgets/framework_test.dart',
-    'packages/flutter/test/widgets/semantics_role_checks_test.dart',
     'packages/flutter/test/widgets/editable_text_cursor_test.dart',
     'packages/flutter/test/widgets/sliver_fill_remaining_test.dart',
-    'packages/flutter/test/widgets/scrollable_in_overlay_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/toggleable_test.dart',
