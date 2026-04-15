@@ -160,6 +160,14 @@ class _TestDraggableSelectionControlsWithToolbar extends _TestDraggableSelection
 final TextSelectionControls _testDraggableSelectionControlsWithToolbar =
     _TestDraggableSelectionControlsWithToolbar();
 
+/// Like [_TestDraggableSelectionControls] but mixes in [TextSelectionHandleControls]
+/// so the toolbar goes through the [SelectableRegion.contextMenuBuilder] path.
+class _TestDraggableSelectionHandleControls extends _TestDraggableSelectionControls
+    with TextSelectionHandleControls {}
+
+final TextSelectionControls _testDraggableSelectionHandleControls =
+    _TestDraggableSelectionHandleControls();
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final mockClipboard = MockClipboard();
@@ -841,8 +849,9 @@ void main() {
         final toolbarKey = UniqueKey();
         await tester.pumpWidget(
           TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
             home: SelectableRegion(
-              selectionControls: testTextSelectionHandleControls,
+              selectionControls: _testDraggableSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     return SizedBox(key: toolbarKey);
@@ -910,7 +919,10 @@ void main() {
         expect(paragraph.selections.length, 1);
         expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 20));
       },
-      variant: TargetPlatformVariant.mobile(),
+      // Fuchsia is the only mobile platform where the browser context menu is
+      // enabled by default on web, so it is the only mobile platform where this
+      // scenario applies. See: https://github.com/flutter/flutter/pull/177122.
+      variant: TargetPlatformVariant.only(TargetPlatform.fuchsia),
       skip: !kIsWeb, // [intended] This test verifies mobile web behavior.
     );
 
@@ -1707,6 +1719,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
             home: SelectableRegion(
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
@@ -6906,12 +6919,8 @@ void main() {
         await tester.pumpWidget(
           TestWidgetsApp(
             home: SelectableRegion(
-              contextMenuBuilder:
-                  (BuildContext context, SelectableRegionState selectableRegionState) {
-                    return const SizedBox.shrink();
-                  },
               onSelectionChanged: (SelectedContent? selectedContent) {},
-              selectionControls: testTextSelectionHandleControls,
+              selectionControls: _testDraggableSelectionControlsWithToolbar,
               child: const Center(child: Text('How are you')),
             ),
           ),
