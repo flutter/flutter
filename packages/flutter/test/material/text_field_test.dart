@@ -19416,6 +19416,63 @@ void main() {
     },
     skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
   );
+
+  testWidgets(
+    'right-click on readOnly TextField suppresses platform selection update',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/181833
+      //
+      // On web/macOS, a readOnly TextField keeps an input connection open.
+      // The platform can send an unsolicited word-selection via
+      // updateEditingValue after a right-click. The base class onSecondaryTap
+      // in TextSelectionGestureDetectorBuilder calls
+      // suppressNextPlatformSelectionUpdate() to prevent this from overriding
+      // the Flutter-managed selection.
+      final controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller, readOnly: true),
+          ),
+        ),
+      );
+
+      // Tap to establish the input connection and place the cursor.
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+
+      // Right-click on the TextField. This triggers the base class
+      // onSecondaryTap which calls suppressNextPlatformSelectionUpdate().
+      final Offset center = tester.getCenter(find.byType(TextField));
+      final TestGesture gesture = await tester.startGesture(
+        center,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      final TextSelection selectionAfterRightClick = state.currentTextEditingValue.selection;
+
+      // Simulate the platform sending a word-selection update ('def': 4..7).
+      // This must be suppressed because onSecondaryTap already set the flag.
+      state.updateEditingValue(
+        const TextEditingValue(
+          text: 'abc def ghi',
+          selection: TextSelection(baseOffset: 4, extentOffset: 7),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Selection must remain what onSecondaryTap set, not the platform update.
+      expect(state.currentTextEditingValue.selection, selectionAfterRightClick);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
+  );
 }
 
 /// A Simple widget for testing the obscure text.

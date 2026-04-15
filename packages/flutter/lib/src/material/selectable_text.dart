@@ -74,18 +74,6 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     _state.widget.onTap?.call();
   }
 
-  @override
-  void onSecondaryTap() {
-    super.onSecondaryTap();
-    // On platforms that maintain an input connection for readOnly text (web,
-    // macOS), the platform can send an unsolicited word-selection via
-    // updateEditingValue after a right-click, even when interactive selection
-    // is disabled. The base class has already applied the correct selection
-    // (selectWord on macOS/iOS, selectPosition elsewhere), so schedule
-    // suppression of the next platform update to prevent it from overriding
-    // the Flutter-managed selection.
-    editableText.suppressNextPlatformSelectionUpdate();
-  }
 }
 
 /// A run of selectable text with a single style.

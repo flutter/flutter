@@ -5802,8 +5802,8 @@ void main() {
   testWidgets(
     'right-click on SelectableText triggers suppression of next platform selection update',
     (WidgetTester tester) async {
-      // End-to-end test: verifies that the onSecondaryTap override in
-      // _SelectableTextSelectionGestureDetectorBuilder correctly calls
+      // End-to-end test: verifies that the base class onSecondaryTap in
+      // TextSelectionGestureDetectorBuilder correctly calls
       // suppressNextPlatformSelectionUpdate(), so a subsequent platform
       // word-selection update is discarded.
       const String text = 'abc def ghi';

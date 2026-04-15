@@ -3582,9 +3582,11 @@ class EditableTextState extends State<EditableText>
   /// Schedules suppression of the next platform-driven selection update on a
   /// [readOnly] [EditableText].
   ///
-  /// Call this immediately after a gesture handler has applied the desired
-  /// selection, to prevent an asynchronous platform update (e.g. the browser's
-  /// hidden textarea word-selecting on right-click) from overriding it.
+  /// Called by [TextSelectionGestureDetectorBuilder.onSecondaryTap] after
+  /// applying the desired selection, to prevent an asynchronous platform
+  /// update (e.g. the browser's hidden textarea word-selecting on right-click)
+  /// from overriding it. This applies to all text widgets that use the base
+  /// gesture builder ([SelectableText], [TextField], [EditableText]).
   ///
   /// The flag is always consumed by the very next [updateEditingValue] call
   /// that reaches an active input connection, regardless of whether the
@@ -3596,10 +3598,8 @@ class EditableTextState extends State<EditableText>
   /// (i.e. non-web, non-macOS), [updateEditingValue] returns early before
   /// reaching the flag, so suppression has no observable effect there.
   ///
-  /// This method is intended for use by [SelectableText]'s gesture handler
-  /// and in tests. It should not be called from arbitrary call sites.
-  /// Note: [TextField] with [readOnly] set to true may exhibit the same
-  /// platform word-selection issue on web; that is tracked separately.
+  /// This method is framework-internal. It is called by the base gesture
+  /// handler and should not be called from application code.
   void suppressNextPlatformSelectionUpdate() {
     _suppressNextPlatformSelectionUpdate = true;
   }
@@ -3635,11 +3635,11 @@ class EditableTextState extends State<EditableText>
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
       if (suppressUpdate) {
-        // A gesture handler (e.g. onSecondaryTap in SelectableText) has already
-        // applied the correct selection and requested that the next platform
-        // update be discarded. This prevents an unsolicited platform
-        // word-selection (e.g. the browser's hidden textarea word-selecting on
-        // right-click) from overriding the Flutter-managed selection.
+        // The base class onSecondaryTap has already applied the correct
+        // selection and requested that the next platform update be discarded.
+        // This prevents an unsolicited platform word-selection (e.g. the
+        // browser's hidden textarea word-selecting on right-click) from
+        // overriding the Flutter-managed selection.
         _lastKnownRemoteTextEditingValue = _value;
         return;
       }

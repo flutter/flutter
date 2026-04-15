@@ -2892,6 +2892,13 @@ class TextSelectionGestureDetectorBuilder {
         }
         editableText.toggleToolbar();
     }
+    // On platforms that maintain an input connection for readOnly text (web,
+    // macOS), the platform can send an unsolicited word-selection via
+    // updateEditingValue after a right-click. The selection logic above has
+    // already applied the correct selection, so suppress the next platform
+    // update to prevent it from overriding the Flutter-managed selection.
+    // This covers all text widgets (SelectableText, TextField, EditableText).
+    editableText.suppressNextPlatformSelectionUpdate();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTapDown].
