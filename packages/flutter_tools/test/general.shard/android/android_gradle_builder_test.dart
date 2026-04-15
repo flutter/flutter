@@ -1992,7 +1992,7 @@ void main() {
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
         );
-        final Set<String> androidShellArguments = <String>{
+        final androidShellArguments = <String>{
           '--flag-1',
           '--flag=2',
           '--flag=3,4,5',

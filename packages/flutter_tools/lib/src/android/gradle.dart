@@ -32,7 +32,6 @@ import '../project.dart';
 import 'android_builder.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
-import 'application_package.dart' show AndroidApk;
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'gradle_utils.dart' as gradle;
