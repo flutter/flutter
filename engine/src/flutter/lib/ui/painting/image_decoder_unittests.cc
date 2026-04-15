@@ -8,6 +8,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/core/device_buffer.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
@@ -802,14 +803,15 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
           std::move(data), std::move(generator));
 
-      [&](const sk_sp<DlImage>& image, const std::string& decode_error) {
-        ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-        auto skia_image = image ? image->asSkiaImage() : nullptr;
-        ASSERT_TRUE(skia_image && skia_image->skia_image());
-        final_size = skia_image->skia_image()->dimensions();
+      ImageDecoder::ImageResult callback =
+          [&](const sk_sp<DlImage>& image, const std::string& decode_error) {
+            ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
+            auto skia_image = image ? image->asSkiaImage() : nullptr;
+            ASSERT_TRUE(skia_image && skia_image->skia_image());
+            final_size = skia_image->skia_image()->dimensions();
 
-        latch.Signal();
-      };
+            latch.Signal();
+          };
       image_decoder->Decode(
           descriptor,
           {.target_width = target_width, .target_height = target_height},
