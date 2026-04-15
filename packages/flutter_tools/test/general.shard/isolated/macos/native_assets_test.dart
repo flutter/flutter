@@ -346,6 +346,7 @@ void main() {
               appBuildDirectory: fileSystem.directory(projectUri),
             ),
             buildDataAssets: true,
+            recordedUsesFile: null,
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(

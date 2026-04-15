@@ -408,7 +408,12 @@ class XcodeProjectInterpreter {
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
         // one to error. The new process will pick up where the old one left off.
-        final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
+        final RunResult result = await _processUtils.run([
+          'pgrep',
+          '-n', // Select only the newest
+          '-f', // Match against full argument lists
+          ...command,
+        ]);
         if (result.exitCode == 0) {
           final int? pid = int.tryParse(result.stdout.trim());
           if (pid != null) {
@@ -654,13 +659,13 @@ class XcodeProjectInfo {
     return '$baseConfiguration-$scheme';
   }
 
-  /// Checks whether the [buildConfigurations] contains the specified string, without
-  /// regard to case.
-  String? _existingBuildConfigurationForBuildMode(String buildMode) {
-    buildMode = buildMode.toLowerCase();
-    for (final String name in buildConfigurations) {
-      if (name.toLowerCase() == buildMode) {
-        return name;
+  /// Finds a build configuration matching [name], ignoring case,
+  /// and returns it, or null if there is no match.
+  String? _existingBuildConfigurationWithName(String name) {
+    name = name.toLowerCase();
+    for (final String configName in buildConfigurations) {
+      if (configName.toLowerCase() == name) {
+        return configName;
       }
     }
     return null;
@@ -690,28 +695,34 @@ class XcodeProjectInfo {
     }
   }
 
-  /// Returns unique build configuration matching [buildInfo] and [scheme], or
-  /// null, if there is no unique best match.
+  /// Returns unique build configuration matching [buildInfo] and [scheme],
+  /// falling back to the base configuration, or null, if there is no unique best match.
   String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) {
     if (buildInfo == null) {
       return null;
     }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    final String? buildConfigurationForBuildMode = _existingBuildConfigurationForBuildMode(
-      expectedConfiguration,
-    );
-    if (buildConfigurationForBuildMode != null) {
-      return buildConfigurationForBuildMode;
+    // Check for an exact match, e.g. "Debug-MyFlavor" if using a flavor or "Debug" if not.
+    final String? exactMatch = _existingBuildConfigurationWithName(expectedConfiguration);
+    if (exactMatch != null || buildInfo.flavor == null) {
+      return exactMatch;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    return _uniqueMatch(buildConfigurations, (String candidate) {
+    // Check for fuzzy matches for build mode and flavor, e.g. "debug myflavor".
+    final List<String> matchesForBuildModeAndFlavor = buildConfigurations.where((String candidate) {
       candidate = candidate.toLowerCase();
-      if (buildInfo.flavor == null) {
-        return candidate == expectedConfiguration.toLowerCase();
-      }
       return candidate.contains(baseConfiguration.toLowerCase()) &&
           candidate.contains(scheme.toLowerCase());
-    });
+    }).toList();
+    // If there is exactly one match for build mode and flavor, return it.
+    // If there are multiple, the user most likely has a misconfigured project.
+    if (matchesForBuildModeAndFlavor.length == 1) {
+      return matchesForBuildModeAndFlavor.first;
+    } else if (matchesForBuildModeAndFlavor.length > 1) {
+      return null;
+    }
+    // Fall back to the base configuration if no match is found.
+    return _existingBuildConfigurationWithName(baseConfiguration);
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {
