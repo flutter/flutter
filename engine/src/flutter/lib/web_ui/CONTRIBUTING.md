@@ -225,7 +225,7 @@ The script has the following command-line options:
 
 In general, the manual process goes like this:
 
-1. Dowload the binaries for the new browser/driver for each operating system
+1. Download the binaries for the new browser/driver for each operating system
    (macOS, linux, windows).
 2. Create CIPD packages for these packages (more documentation is available for
    Googlers at go/cipd-flutter-web)
