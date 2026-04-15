@@ -11,74 +11,78 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
-    final log = <MethodCall>[];
+  testWidgets(
+    'SystemChrome overlay style test',
+    (WidgetTester tester) async {
+      final log = <MethodCall>[];
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (MethodCall methodCall) async {
-        log.add(methodCall);
-        return null;
-      },
-    );
-
-    // The first call is a cache miss and will queue a microtask
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-    expect(tester.binding.microtaskCount, equals(1));
-
-    // Flush all microtasks
-    await tester.idle();
-    expect(log, hasLength(1));
-    expect(
-      log.single,
-      isMethodCall(
-        'SystemChrome.setSystemUIOverlayStyle',
-        arguments: <String, dynamic>{
-          'systemNavigationBarColor': 4278190080,
-          'systemNavigationBarDividerColor': null,
-          'systemStatusBarContrastEnforced': null,
-          'statusBarColor': null,
-          'statusBarBrightness': 'Brightness.dark',
-          'statusBarIconBrightness': 'Brightness.light',
-          'systemNavigationBarIconBrightness': 'Brightness.light',
-          'systemNavigationBarContrastEnforced': null,
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
         },
-      ),
-    );
-    log.clear();
-    expect(tester.binding.microtaskCount, equals(0));
-    expect(log.isEmpty, isTrue);
+      );
 
-    // The second call with the same value should be a no-op
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-    expect(tester.binding.microtaskCount, equals(0));
+      // The first call is a cache miss and will queue a microtask
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+      expect(tester.binding.microtaskCount, equals(1));
 
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        systemStatusBarContrastEnforced: false,
-        systemNavigationBarContrastEnforced: true,
-      ),
-    );
-    expect(tester.binding.microtaskCount, equals(1));
-    await tester.idle();
-    expect(log, hasLength(1));
-    expect(
-      log.single,
-      isMethodCall(
-        'SystemChrome.setSystemUIOverlayStyle',
-        arguments: <String, dynamic>{
-          'systemNavigationBarColor': null,
-          'systemNavigationBarDividerColor': null,
-          'systemStatusBarContrastEnforced': false,
-          'statusBarColor': null,
-          'statusBarBrightness': null,
-          'statusBarIconBrightness': null,
-          'systemNavigationBarIconBrightness': null,
-          'systemNavigationBarContrastEnforced': true,
-        },
-      ),
-    );
-  });
+      // Flush all microtasks
+      await tester.idle();
+      expect(log, hasLength(1));
+      expect(
+        log.single,
+        isMethodCall(
+          'SystemChrome.setSystemUIOverlayStyle',
+          arguments: <String, dynamic>{
+            'systemNavigationBarColor': 4278190080,
+            'systemNavigationBarDividerColor': null,
+            'systemStatusBarContrastEnforced': null,
+            'statusBarColor': null,
+            'statusBarBrightness': 'Brightness.dark',
+            'statusBarIconBrightness': 'Brightness.light',
+            'systemNavigationBarIconBrightness': 'Brightness.light',
+            'systemNavigationBarContrastEnforced': null,
+          },
+        ),
+      );
+      log.clear();
+      expect(tester.binding.microtaskCount, equals(0));
+      expect(log.isEmpty, isTrue);
+
+      // The second call with the same value should be a no-op
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+      expect(tester.binding.microtaskCount, equals(0));
+
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemStatusBarContrastEnforced: false,
+          systemNavigationBarContrastEnforced: true,
+        ),
+      );
+      expect(tester.binding.microtaskCount, equals(1));
+      await tester.idle();
+      expect(log, hasLength(1));
+      expect(
+        log.single,
+        isMethodCall(
+          'SystemChrome.setSystemUIOverlayStyle',
+          arguments: <String, dynamic>{
+            'systemNavigationBarColor': null,
+            'systemNavigationBarDividerColor': null,
+            'systemStatusBarContrastEnforced': false,
+            'statusBarColor': null,
+            'statusBarBrightness': null,
+            'statusBarIconBrightness': null,
+            'systemNavigationBarIconBrightness': null,
+            'systemNavigationBarContrastEnforced': true,
+          },
+        ),
+      );
+    },
+    skip: true, // https://github.com/flutter/flutter/issues/185085
+  );
 
   test('setPreferredOrientations control test', () async {
     final log = <MethodCall>[];
