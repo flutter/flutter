@@ -65,18 +65,26 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testWithoutContext('no dependency on KernelSnapshot', () async {
-    const target = DartBuildForNative();
-    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
-  });
+  testUsingContext(
+    'no dependency on KernelSnapshot',
+    () async {
+      const target = DartBuildForNative();
+      expect(target.dependencies, isNot(isA<KernelSnapshot>()));
+    },
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
+  );
 
-  testWithoutContext('NativeAssets throws error if missing target platform', () async {
-    iosEnvironment.defines.remove(kTargetPlatform);
-    expect(
-      const DartBuildForNative().build(iosEnvironment),
-      throwsA(isA<MissingDefineException>()),
-    );
-  });
+  testUsingContext(
+    'NativeAssets throws error if missing target platform',
+    () async {
+      iosEnvironment.defines.remove(kTargetPlatform);
+      expect(
+        const DartBuildForNative().build(iosEnvironment),
+        throwsA(isA<MissingDefineException>()),
+      );
+    },
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
+  );
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');

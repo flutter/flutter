@@ -165,4 +165,5 @@ app.*.symbols
 .gclient_previous_sync_commits
 
 # AI related
+.agents/rules/personal-*
 .agents/skills/personal-*

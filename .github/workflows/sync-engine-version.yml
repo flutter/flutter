@@ -52,9 +52,8 @@ jobs:
       - name: Check for Changes
         id: git-check
         run: |
-          # -N (intent-to-add) treats untracked files as existing but empty
           # -f adds even if it's in the .gitignore (which it usually is)
-          git add -N -f bin/internal/engine.version
+          git add -f bin/internal/engine.version
 
           if git diff --cached --exit-code bin/internal/engine.version; then
             echo "changed=false" >> $GITHUB_OUTPUT
