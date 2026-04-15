@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/common/task_runners.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/impeller/core/allocator.h"
@@ -398,7 +399,8 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
   EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
-  EXPECT_EQ(result.first->GetImpellerTexture(no_gpu_access_context)
+  EXPECT_EQ(result.first->asImpellerImage()
+                ->GetImpellerTexture(no_gpu_access_context)
                 ->GetTextureDescriptor()
                 .storage_mode,
             impeller::StorageMode::kHostVisible);
