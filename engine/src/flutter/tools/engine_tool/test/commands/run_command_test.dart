@@ -369,6 +369,29 @@ void main() {
       );
     });
 
+    test('delegates to `flutter run` with --flutter-flags', () async {
+      await et.run(['run', '--config=android_debug_arm64', '--flutter-flags=--foo --bar,baz']);
+
+      expect(
+        commandsRun,
+        containsAllInOrder([
+          containsAllInOrder([
+            'flutter',
+            'run',
+            '--local-engine-src-path',
+            testEngine.srcDir.path,
+            '--local-engine',
+            'android_debug_arm64',
+            '--local-engine-host',
+            'host_debug',
+            '--foo',
+            '--bar',
+            'baz',
+          ]),
+        ]),
+      );
+    });
+
     group('delegates to `flutter run` in mode', () {
       for (final mode in const ['debug', 'profile', 'release']) {
         test('$mode mode', () async {
@@ -377,7 +400,17 @@ void main() {
           expect(
             commandsRun,
             containsAllInOrder([
-              containsAllInOrder([endsWith('flutter'), contains('run'), contains('--$mode')]),
+              containsAllInOrder([
+                'flutter',
+                'run',
+                '--local-engine-src-path',
+                testEngine.srcDir.path,
+                '--local-engine',
+                'android_debug_arm64',
+                '--local-engine-host',
+                'host_debug',
+                '--$mode',
+              ]),
             ]),
           );
         });
