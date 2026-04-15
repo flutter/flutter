@@ -40,6 +40,7 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   std::shared_ptr<impeller::Context> impeller_context_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
+  /// The size of the textures in [transients_]
   impeller::ISize transients_size_ = {};
   bool is_valid_ = false;
 
