@@ -848,7 +848,8 @@ public class FlutterLoaderTest {
 
       for (File unsafeFile : unsafeFiles) {
         // Simulate a symlink since some filesystems do not support symlinks.
-        when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
+        when(flutterLoader.getFileFromPath(spySymlinkFile.getAbsolutePath()))
+            .thenReturn(spySymlinkFile);
         doReturn(unsafeFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
         flutterLoader.ensureInitializationComplete(ctx, null);
