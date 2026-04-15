@@ -29,6 +29,11 @@ final class RunCommand extends CommandBase {
     @visibleForTesting FlutterTool? flutterTool,
   }) {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
+    argParser.addOption(
+      'flutter-flags',
+      help: 'A string of arguments to pass to the "flutter run" command, separated by commas or spaces.',
+      defaultsTo: '',
+    );
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
   }
 
@@ -169,8 +174,18 @@ See `flutter run --help` for a listing
       mangledBuildName,
       '--local-engine-host',
       mangledHostBuildName,
-      ...argResults!.rest,
     ];
+
+    // Add flags passed to --flutter-flags.
+    final flutterFlags = argResults!['flutter-flags'] as String;
+    if (flutterFlags.isNotEmpty) {
+      // Replace commas with spaces, then split by any amount of whitespace.
+      final List<String> flags = flutterFlags.replaceAll(',', ' ').split(RegExp(r'\s+'));
+      // Filter out any empty strings that might result from multiple spaces.
+      command.addAll(flags.where((String f) => f.isNotEmpty));
+    }
+
+    command.addAll(argResults!.rest);
 
     // TODO(johnmccutchan): Be smart and if the user requested a profile
     // config, add the '--profile' flag when invoking flutter run.
