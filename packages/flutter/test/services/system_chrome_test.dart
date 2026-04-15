@@ -22,6 +22,11 @@ void main() {
       },
     );
 
+    // Start with the overlay style set to dark mode.
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+    await tester.idle();
+    log.clear();
+
     // The first call is a cache miss and will queue a microtask
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     expect(tester.binding.microtaskCount, equals(1));
