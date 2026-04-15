@@ -287,7 +287,7 @@ Future<int> _handleToolErrorImpl(
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter!.informUser(details, file);
 
-      return exitWithHooks(1, shutdownHooks: shutdownHooks);
+      return await exitWithHooks(1, shutdownHooks: shutdownHooks);
       // This catch catches all exceptions to ensure the message below is printed.
       // ignore: avoid_catches_without_on_clauses
     } catch (error, st) {
