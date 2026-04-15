@@ -2207,18 +2207,15 @@ Stream<File> _allFiles(
 
   var matches = 0;
   for (final file in gitFiles) {
-    final FileStat stat = file.statSync();
-    if (stat.type != FileSystemEntityType.file) {
+    if (extension != null && path.extension(file.path) != '.$extension') {
       continue;
     }
     if (dartIgnoreDirectories.any((String d) => path.isWithin(d, file.path))) {
       continue;
     }
-    final List<String> components = path.split(path.relative(file.path, from: workingDirectory));
-    if (components.any((String c) => skipDirectories.contains(c))) {
-      continue;
-    }
-    if (components.any((String c) => c.endsWith('.tmpl'))) {
+    final String relativePath = path.relative(file.path, from: workingDirectory);
+    final List<String> components = path.split(relativePath);
+    if (components.any((String c) => skipDirectories.contains(c) || c.endsWith('.tmpl'))) {
       continue;
     }
     if (_isGeneratedPluginRegistrant(file)) {
@@ -2228,10 +2225,12 @@ Stream<File> _allFiles(
       case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
         continue;
     }
-    if (extension == null || path.extension(file.path) == '.$extension') {
-      matches += 1;
-      yield file;
+    final FileStat stat = file.statSync();
+    if (stat.type != FileSystemEntityType.file) {
+      continue;
     }
+    matches += 1;
+    yield file;
   }
 
   assert(
