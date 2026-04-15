@@ -42,6 +42,7 @@ void main() {
           r8DexingBugInAgp73Handler,
           minSdkVersionHandler,
           transformInputIssueHandler,
+          javaHeapSpaceHandler,
           lockFileDepMissingHandler,
           minCompileSdkVersionHandler,
           incompatibleJavaAndAgpVersionsHandler,
@@ -806,6 +807,37 @@ assembleProfile
             '└───────────────────────────────────────────────────────────────────────────────┘\n',
           ),
         );
+      },
+      overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
+
+  group('java heap space', () {
+    testWithoutContext('pattern', () {
+      expect(javaHeapSpaceHandler.test('> Java heap space'), isTrue);
+      expect(
+        javaHeapSpaceHandler.test('java.lang.OutOfMemoryError: Java heap space'),
+        isTrue,
+      );
+    });
+
+    testUsingContext(
+      'suggestion',
+      () async {
+        final GradleBuildStatus status = await javaHeapSpaceHandler.handler(
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+          line: '> Java heap space',
+        );
+
+        expect(status, GradleBuildStatus.exit);
+        expect(testLogger.statusText, contains('org.gradle.jvmargs'));
+        expect(testLogger.statusText, contains('gradle.properties'));
       },
       overrides: <Type, Generator>{
         GradleUtils: () => FakeGradleUtils(),

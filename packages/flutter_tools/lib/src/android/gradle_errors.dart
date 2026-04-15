@@ -70,6 +70,7 @@ final gradleErrors = <GradleHandledError>[
   r8DexingBugInAgp73Handler,
   minSdkVersionHandler,
   transformInputIssueHandler,
+  javaHeapSpaceHandler,
   lockFileDepMissingHandler,
   minCompileSdkVersionHandler,
   incompatibleJavaAndAgpVersionsHandler,
@@ -344,6 +345,27 @@ final transformInputIssueHandler = GradleHandledError(
         return GradleBuildStatus.exit;
       },
   eventLabel: 'transform-input-issue',
+);
+
+/// Handler when a Gradle task fails due to Java heap space exhaustion.
+@visibleForTesting
+final javaHeapSpaceHandler = GradleHandledError(
+  test: _lineMatcher(const <String>['Java heap space']),
+  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+    final File gradlePropertiesFile = project.android.hostAppGradleRoot.childFile('gradle.properties');
+    final String textInBold = globals.logger.terminal.bolden(
+      'Open ${gradlePropertiesFile.path} and update (or add) this line:\n'
+      'org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G',
+    );
+    globals.printBox(
+      '${globals.logger.terminal.warningMark} The Gradle build ran out of Java heap space.\n'
+      '$textInBold\n\n'
+      'If this error continues, increase these values further based on your machine resources.',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'java-heap-space',
 );
 
 /// Handler when a dependency is missing in the lockfile.
