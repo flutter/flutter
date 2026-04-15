@@ -44,7 +44,7 @@ class _DecoratedSliverClipExampleState
       body: Column(
         children: <Widget>[
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: .spaceEvenly,
             children: <Widget>[
               Switch(
                 inactiveTrackColor: Colors.cyan,
@@ -74,7 +74,7 @@ class _DecoratedSliverClipExampleState
           Stack(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const .all(24.0),
                 child: SizedBox(
                   width: 400,
                   height: _height,
@@ -86,7 +86,7 @@ class _DecoratedSliverClipExampleState
                 left: 0,
                 right: 0,
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height - _height,
+                  height: MediaQuery.heightOf(context) - _height,
                   width: double.infinity,
                 ),
               ),
@@ -107,13 +107,13 @@ class ResizableCustomScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       // The clip behavior defaults to Clip.hardEdge if no argument is provided.
-      clipBehavior: isClipped ? Clip.hardEdge : Clip.none,
+      clipBehavior: isClipped ? .hardEdge : .none,
       slivers: <Widget>[
         DecoratedSliver(
           decoration: const ShapeDecoration(
             color: Color(0xFF2C2C2C),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(6)),
+              borderRadius: .all(Radius.circular(6)),
             ),
             shadows: <BoxShadow>[
               BoxShadow(
@@ -126,7 +126,7 @@ class ResizableCustomScrollView extends StatelessWidget {
           sliver: SliverList.builder(
             itemCount: 5,
             itemBuilder: (_, int index) => Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const .all(8.0),
               child: Row(
                 children: <Widget>[
                   const Icon(Icons.add_box, color: Color(0xFFA8A8A8)),

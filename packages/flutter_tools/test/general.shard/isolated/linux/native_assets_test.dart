@@ -63,6 +63,7 @@ void main() {
         buildRunner: _BuildRunnerWithoutClang(),
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
