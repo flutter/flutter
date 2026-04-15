@@ -67,7 +67,34 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-41-302ec140e632), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.41.0) for a detailed list of all the new changes.
 
+
 ## Flutter 3.38 Changes
+
+### [3.38.10](https://github.com/flutter/flutter/releases/tag/3.38.10)
+
+- [flutter/181607](https://github.com/flutter/flutter/pull/181607) When using an ffi plugin on macOS, generated frameworks have the wrong structure.
+
+### [3.38.9](https://github.com/flutter/flutter/releases/tag/3.38.9)
+
+- [flutter/181568](https://github.com/flutter/flutter/pull/181568) Update Dart to 3.10.8.
+
+### [3.38.8](https://github.com/flutter/flutter/releases/tag/3.38.8)
+
+- [flutter/178151](https://github.com/flutter/flutter/issues/178151) - `flutter run -d chrome` may crash with a `DartDevelopmentServiceException` when the application shuts down during the startup sequence.
+
+### [3.38.7](https://github.com/flutter/flutter/releases/tag/3.38.7)
+
+- [flutter/179857](https://github.com/flutter/flutter/issues/179857) - `flutter run -d all` crashes if multiple devices are available.
+
+### [3.38.6](https://github.com/flutter/flutter/releases/tag/3.38.6)
+
+- [flutter/179139](https://github.com/flutter/flutter/issues/179139) - `flutter widget-preview start` creates new cached build artifacts on each run, resulting in increasing disk usage after each run.
+- [flutter/178896](https://github.com/flutter/flutter/issues/178896) - Apps crash during launch on Windows when run from paths containing non-ASCII characters.
+- [flutter/176943](https://github.com/flutter/flutter/issues/176943) - Configuration changes to run tests on macOS 15 or 15.7.2 for Flutter's CI.
+- [flutter/179914](https://github.com/flutter/flutter/issues/179914) - Flutter Android apps that upgrade to AGP 9.0.0 require migration steps.
+- [flutter/175099](https://github.com/flutter/flutter/issues/175099) - When WebViews are scrolled on iOS 26, they become unclickable.
+- [flutter/175074](https://github.com/flutter/flutter/issues/175074) - When the virtual keyboard is closed on Android web, the area behind it remains blank and the app only draws in the area that used to be above the keyboard.
+- [flutter/180381](https://github.com/flutter/flutter/issues/180381) - Apps crash on Android when enabling accessibility, hiding a platform view, and pulling out the top curtain.
 
 ### [3.38.5](https://github.com/flutter/flutter/releases/tag/3.38.5)
 
