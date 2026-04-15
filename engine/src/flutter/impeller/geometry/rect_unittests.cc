@@ -175,6 +175,60 @@ TEST(RectTest, RectFromIRect) {
   // IRect irect2 = IRect::Make(irect);
 }
 
+TEST(RectTest, RectCenterRadius) {
+  Rect rect = Rect::MakeCenterRadius(Point(100.0f, 200.0f), 20.0f);
+
+  EXPECT_EQ(rect.GetLeft(), 80.0f);
+  EXPECT_EQ(rect.GetRight(), 120.0f);
+  EXPECT_EQ(rect.GetTop(), 180.0f);
+  EXPECT_EQ(rect.GetBottom(), 220.0f);
+}
+
+TEST(RectTest, IRectCenterRadius) {
+  IRect rect = IRect::MakeCenterRadius(IPoint(100, 200), 20);
+
+  EXPECT_EQ(rect.GetLeft(), 80);
+  EXPECT_EQ(rect.GetRight(), 120);
+  EXPECT_EQ(rect.GetTop(), 180);
+  EXPECT_EQ(rect.GetBottom(), 220);
+}
+
+TEST(RectTest, RectCenterRadiiSize) {
+  Rect rect = Rect::MakeCenterRadii(Point(100.0f, 200.0f), Size(20.0f, 30.0f));
+
+  EXPECT_EQ(rect.GetLeft(), 80.0f);
+  EXPECT_EQ(rect.GetRight(), 120.0f);
+  EXPECT_EQ(rect.GetTop(), 170.0f);
+  EXPECT_EQ(rect.GetBottom(), 230.0f);
+}
+
+TEST(RectTest, RectCenterRadiiPoint) {
+  Rect rect = Rect::MakeCenterRadii(Point(100.0f, 200.0f), Point(20.0f, 30.0f));
+
+  EXPECT_EQ(rect.GetLeft(), 80.0f);
+  EXPECT_EQ(rect.GetRight(), 120.0f);
+  EXPECT_EQ(rect.GetTop(), 170.0f);
+  EXPECT_EQ(rect.GetBottom(), 230.0f);
+}
+
+TEST(RectTest, IRectCenterRadiiSize) {
+  IRect rect = IRect::MakeCenterRadii(IPoint(100, 200), ISize(20, 30));
+
+  EXPECT_EQ(rect.GetLeft(), 80);
+  EXPECT_EQ(rect.GetRight(), 120);
+  EXPECT_EQ(rect.GetTop(), 170);
+  EXPECT_EQ(rect.GetBottom(), 230);
+}
+
+TEST(RectTest, IRectCenterRadiiPoint) {
+  IRect rect = IRect::MakeCenterRadii(IPoint(100, 200), IPoint(20, 30));
+
+  EXPECT_EQ(rect.GetLeft(), 80);
+  EXPECT_EQ(rect.GetRight(), 120);
+  EXPECT_EQ(rect.GetTop(), 170);
+  EXPECT_EQ(rect.GetBottom(), 230);
+}
+
 TEST(RectTest, RectOverflowXYWH) {
   auto min = std::numeric_limits<Scalar>::lowest();
   auto max = std::numeric_limits<Scalar>::max();

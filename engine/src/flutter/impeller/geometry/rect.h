@@ -151,6 +151,24 @@ struct TRect {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 
+  constexpr static TRect MakeCenterRadius(const TPoint<Type>& center,
+                                          Scalar radius) {
+    return MakeLTRB(center.x - radius, center.y - radius,  //
+                    center.x + radius, center.y + radius);
+  }
+
+  constexpr static TRect MakeCenterRadii(const TPoint<Type>& center,
+                                         const TSize<Type>& radii) {
+    return MakeLTRB(center.x - radii.width, center.y - radii.height,  //
+                    center.x + radii.width, center.y + radii.height);
+  }
+
+  constexpr static TRect MakeCenterRadii(const TPoint<Type>& center,
+                                         const TPoint<Type>& radii) {
+    return MakeLTRB(center.x - radii.x, center.y - radii.y,  //
+                    center.x + radii.x, center.y + radii.y);
+  }
+
   /// Construct a floating point rect |Rect| from another Rect of a
   /// potentially different storage type (eg. |IRect|).
   template <class U, class FT = T>
