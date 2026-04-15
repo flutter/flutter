@@ -227,6 +227,7 @@ the Xcode project in [`testing/ios/IosUnitTests`](../../testing/ios/IosUnitTests
 Instead, the engine provides the script:
 
 ```sh
+# from the engine/src/flutter directory
 testing/run_tests.py --type=objc
 ```
 
@@ -295,6 +296,7 @@ than using the real Flutter framework at `flutter/flutter`.
 The end-to-end test can be executed by running:
 
 ```sh
+# from the engine/src/flutter directory
 testing/ios_scenario_app/run_ios_tests.sh
 ```
 

@@ -86,6 +86,7 @@ variable. This second variable is not necessary if the `flutter` and `engine`
 checkouts are in adjacent directories.
 
 ```shell
+# from the packages/flutter_tools directory
 export FLUTTER_LOCAL_ENGINE=android_debug_unopt
 export FLUTTER_LOCAL_ENGINE_HOST=host_debug_unopt
 flutter test test/integration.shard/some_test_case
@@ -95,7 +96,11 @@ flutter test test/integration.shard/some_test_case
 
 To run all of the unit tests:
 
+> [!IMPORTANT]
+> You must run all `flutter test` commands from the `packages/flutter_tools` directory.
+
 ```shell
+# from the packages/flutter_tools directory
 $ flutter test test/general.shard
 ```
 
@@ -110,6 +115,7 @@ variable to be set. The full invocation to run everything might
 therefore look something like:
 
 ```shell
+# from the packages/flutter_tools directory
 $ export FLUTTER_ROOT=~/path/to/flutter-sdk
 $ flutter test --concurrency 1
 ```
@@ -120,6 +126,7 @@ alone take much less time (on the order of a minute).
 You can run the tests in a specific file, e.g.:
 
 ```shell
+# from the packages/flutter_tools directory
 $ flutter test test/general.shard/utils_test.dart
 ```
 
