@@ -14,6 +14,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
 import 'framework.dart';
 
 /// A sliver that keeps its Widget child at the top of the a [CustomScrollView].
@@ -53,10 +54,26 @@ import 'framework.dart';
 ///    in response to downward and upwards scrolls.
 ///  * [SliverPersistentHeader] - a general purpose header that can be
 ///    configured as a pinned, resizing, or floating header.
-class PinnedHeaderSliver extends SingleChildRenderObjectWidget {
+class PinnedHeaderSliver extends StatelessWidget {
   /// Creates a sliver whose [Widget] child appears at the top of a
   /// [CustomScrollView].
-  const PinnedHeaderSliver({super.key, super.child});
+  const PinnedHeaderSliver({super.key, this.child});
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) => _PinnedHeaderSliver(
+    child: Semantics(container: true, explicitChildNodes: true, child: child),
+  );
+}
+
+class _PinnedHeaderSliver extends SingleChildRenderObjectWidget {
+  /// Creates a sliver whose [Widget] child appears at the top of a
+  /// [CustomScrollView].
+  const _PinnedHeaderSliver({super.child});
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -105,5 +122,14 @@ class _RenderPinnedHeaderSliver extends RenderSliverSingleBoxAdapter {
       cacheExtent: calculateCacheOffset(constraints, from: 0.0, to: childExtent),
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    if (geometry != null && geometry!.layoutExtent < childExtent) {
+      config.addTagForChildren(RenderViewport.excludeFromScrolling);
+    }
   }
 }

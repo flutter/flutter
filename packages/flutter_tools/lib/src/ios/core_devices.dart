@@ -120,12 +120,18 @@ class IOSCoreDeviceLauncher {
     }
 
     // Find the process that was launched using the installationURL.
+    // Filter out app extension processes (.appex) to avoid attaching the
+    // debugger to a widget extension or other extension instead of the
+    // main app process.
+    // See https://github.com/flutter/flutter/issues/183263.
     final List<IOSCoreDeviceRunningProcess> processes = await _coreDeviceControl
         .getRunningProcesses(deviceId: deviceId);
     final IOSCoreDeviceRunningProcess? launchedProcess = processes
         .where(
           (IOSCoreDeviceRunningProcess process) =>
-              process.executable != null && process.executable!.contains(installationURL),
+              process.executable != null &&
+              process.executable!.contains(installationURL) &&
+              !process.executable!.contains('.appex'),
         )
         .firstOrNull;
 
@@ -825,7 +831,7 @@ class IOSCoreDeviceControl {
       // Signal script child jobs to exit and exit the shell.
       // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
       shutdownHooks.addShutdownHook(() => launchProcess.kill());
-      return launchCompleter.future;
+      return await launchCompleter.future;
     } on ProcessException catch (err) {
       _logger.printTrace('Error executing devicectl: $err');
       return false;

@@ -48,6 +48,8 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
       return "Metal";
+    case PlaygroundBackend::kMetalSDF:
+      return "MetalSDF";
     case PlaygroundBackend::kOpenGLES:
       return "OpenGLES";
     case PlaygroundBackend::kVulkan:
@@ -102,6 +104,7 @@ std::shared_ptr<Context> Playground::MakeContext() const {
 bool Playground::SupportsBackend(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
 #if IMPELLER_ENABLE_METAL
       return true;
 #else   // IMPELLER_ENABLE_METAL

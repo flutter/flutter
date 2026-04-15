@@ -6,6 +6,8 @@ import 'dart:io';
 
 bool get impellerEnabled => Platform.executableArguments.contains('--enable-impeller');
 
+bool get flutterGpuEnabled => Platform.executableArguments.contains('--enable-flutter-gpu');
+
 String? get impellerBackend {
   if (!impellerEnabled) {
     return null;
