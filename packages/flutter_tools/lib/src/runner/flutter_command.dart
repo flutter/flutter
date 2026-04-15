@@ -1330,6 +1330,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addTestFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'test-flag',
+      hide: !verboseHelp,
+      help: 'No-op flag for testing purposes; use for testing flag priorities only.',
+    );
+  }
+
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject get project => FlutterProject.current();
