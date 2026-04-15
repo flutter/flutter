@@ -2969,9 +2969,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       for (final Rect rect in selectable.boundingBoxes) {
         final Rect globalRect = MatrixUtils.transformRect(transform, rect);
         final double dx =
-            globalPosition.dx - globalPosition.dx.clamp(globalRect.left, globalRect.right);
+            globalPosition.dx - clampDouble(globalPosition.dx, globalRect.left, globalRect.right);
         final double dy =
-            globalPosition.dy - globalPosition.dy.clamp(globalRect.top, globalRect.bottom);
+            globalPosition.dy - clampDouble(globalPosition.dy, globalRect.top, globalRect.bottom);
         final double distanceSquared = dx * dx + dy * dy;
         if (distanceSquared < minDistanceSquared) {
           minDistanceSquared = distanceSquared;
