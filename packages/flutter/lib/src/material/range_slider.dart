@@ -962,6 +962,13 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   // This value is the touch target, 48, multiplied by 3.
   static const double _minPreferredTrackWidth = 144.0;
 
+  // Buffer to account for the internal padding of standard Material value indicator shapes,
+  // preventing them from bleeding off the screen edges.
+  //
+  // The value 64.0 is a heuristic that covers the minimum size of the shape
+  // (padding + minimum label width) at a text scale factor of roughly 2.0.
+  static const double _kValueIndicatorHorizontalBuffer = 64.0;
+
   // Compute the largest width and height needed to paint the slider shapes,
   // other than the track shape. It is assumed that these shapes are vertically
   // centered on the track.
@@ -1253,11 +1260,18 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       Thumb.end => (labels.end, _endLabelPainter),
     };
 
+    // Reserve space for the bubble's internal padding and screen margins.
+    final double safeMaxWidth = math.max(0.0, screenSize.width - _kValueIndicatorHorizontalBuffer);
+
     labelPainter
       ..text = TextSpan(style: _sliderTheme.valueIndicatorTextStyle, text: text)
       ..textDirection = textDirection
       ..textScaleFactor = textScaleFactor
-      ..layout();
+      ..maxLines = 1
+      ..ellipsis =
+          '\u2026' // Standard Unicode ellipsis
+      ..layout(maxWidth: safeMaxWidth);
+
     // Changing the textDirection can result in the layout changing, because the
     // bidi algorithm might line up the glyphs differently which can result in
     // different ligatures, different shapes, etc. So we always markNeedsLayout.
