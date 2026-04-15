@@ -9,8 +9,10 @@
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "gmock/gmock.h"
-#include "impeller/core/texture.h"
-#include "impeller/display_list/dl_image_impeller.h"
+#if IMPELLER_SUPPORTS_RENDERING
+#include "impeller/core/texture.h"                    // nogncheck
+#include "impeller/display_list/dl_image_impeller.h"  // nogncheck
+#endif
 
 namespace flutter {
 namespace testing {
@@ -90,6 +92,7 @@ class MockSnapshotDelegate : public SnapshotDelegate {
   std::shared_ptr<MockTextureRegistry> texture_registry_;
 };
 
+#if IMPELLER_SUPPORTS_RENDERING
 class MockDlImage : public impeller::DlImageImpeller {
  public:
   MOCK_METHOD(DlISize, GetSize, (), (const, override));
@@ -103,6 +106,7 @@ class MockDlImage : public impeller::DlImageImpeller {
               (const std::shared_ptr<impeller::Context>&),
               (const, override));
 };
+#endif
 
 }  // namespace testing
 }  // namespace flutter
