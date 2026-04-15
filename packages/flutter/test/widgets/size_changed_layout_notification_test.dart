@@ -39,11 +39,11 @@ void main() {
   });
 
   testWidgets('SizeChangedLayoutNotifier does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: Center(
-          child: SizedBox.shrink(child: SizeChangedLayoutNotifier(child: Placeholder())),
-        ),
+        home: Center(child: SizeChangedLayoutNotifier(child: Placeholder())),
       ),
     );
     expect(tester.getSize(find.byType(SizeChangedLayoutNotifier)), Size.zero);

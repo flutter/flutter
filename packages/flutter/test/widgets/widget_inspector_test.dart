@@ -285,16 +285,16 @@ void main() {
   _TestWidgetInspectorService.runTests();
 
   testWidgets('WidgetInspector does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       const TestWidgetsApp(
         home: Center(
-          child: SizedBox.shrink(
-            child: WidgetInspector(
-              tapBehaviorButtonBuilder: null,
-              exitWidgetSelectionButtonBuilder: null,
-              moveExitWidgetSelectionButtonBuilder: null,
-              child: Placeholder(),
-            ),
+          child: WidgetInspector(
+            tapBehaviorButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            child: Placeholder(),
           ),
         ),
       ),

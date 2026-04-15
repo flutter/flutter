@@ -119,14 +119,14 @@ void main() {
   });
 
   testWidgets('ValueListenableBuilder does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       TestWidgetsApp(
         home: Center(
-          child: SizedBox.shrink(
-            child: ValueListenableBuilder<String?>(
-              valueListenable: valueListenable,
-              builder: (BuildContext context, String? value, Widget? child) => const Placeholder(),
-            ),
+          child: ValueListenableBuilder<String?>(
+            valueListenable: valueListenable,
+            builder: (BuildContext context, String? value, Widget? child) => const Placeholder(),
           ),
         ),
       ),

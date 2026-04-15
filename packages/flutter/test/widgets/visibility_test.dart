@@ -624,11 +624,11 @@ void main() {
   });
 
   testWidgets('Visibility does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: Center(
-          child: SizedBox.shrink(child: Visibility(child: Placeholder())),
-        ),
+        home: Center(child: Visibility(child: Placeholder())),
       ),
     );
     expect(tester.getSize(find.byType(Visibility)), Size.zero);

@@ -1088,11 +1088,11 @@ void main() {
   });
 
   testWidgets('SingleChildScrollView does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: Center(
-          child: SizedBox.shrink(child: SingleChildScrollView(child: Placeholder())),
-        ),
+        home: Center(child: SingleChildScrollView(child: Placeholder())),
       ),
     );
     expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
