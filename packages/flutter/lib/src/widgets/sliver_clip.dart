@@ -421,14 +421,12 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
         clipper?.getClip(maxPaintRect.size) ??
         borderRadius.resolve(textDirection).toRRect(maxPaintRect);
 
-    if (clipOverlap != ClipOverlapBehavior.none) {
+    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0) {
       final double insideClipExtent = switch ((constraints.axis, clipOverlap)) {
-        (Axis.horizontal, ClipOverlapBehavior.none) ||
-        (Axis.horizontal, ClipOverlapBehavior.followEdge) => newClip.outerRect.width,
-        (Axis.vertical, ClipOverlapBehavior.none) ||
-        (Axis.vertical, ClipOverlapBehavior.followEdge) => newClip.outerRect.height,
         (Axis.horizontal, ClipOverlapBehavior.preserveShape) => newClip.middleRect.width,
         (Axis.vertical, ClipOverlapBehavior.preserveShape) => newClip.middleRect.height,
+        (Axis.horizontal, _) => newClip.width,
+        (Axis.vertical, _) => newClip.height,
       };
       final double clipOrigin = getClipOriginForOverlap(insideClipExtent);
 
@@ -587,11 +585,9 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
 
   @override
   void performLayout() {
-    final SliverGeometry? oldGeometry = geometry;
     super.performLayout();
-    if (oldGeometry != geometry) {
-      _clip = null;
-    }
+
+    _clip = null;
   }
 
   @override
