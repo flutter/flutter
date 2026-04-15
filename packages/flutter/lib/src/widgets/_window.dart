@@ -256,7 +256,9 @@ abstract class RegularWindowController extends BaseWindowController {
   /// Creates a [RegularWindowController] that sizes the window to its content.
   ///
   /// Upon construction, the window is created by the platform and initially
-  /// sized to fit its content.
+  /// sized to fit its content. If [resizable]  is `true`, the user may resize
+  /// the window after it is initially sized. if [resizable] is `false`, the
+  /// window will always be resized to the current size of its content.
   ///
   /// {@template flutter.widgets.windowing.sizedToContentConstructor}
   /// The [preferredConstraints] field enforces the minimum and maximum size of
@@ -272,7 +274,8 @@ abstract class RegularWindowController extends BaseWindowController {
   /// resized by the platform. If `false`, the window will be fixed to its
   /// content size within its [preferredConstraints].
   /// If `true`, the user will be able to resize the window within its
-  /// [preferredConstraints].
+  /// [preferredConstraints], but the window will not be sized to its contents
+  /// after its initial sizing.
   /// {@endtemplate}
   ///
   /// To create a window with a specific size instead, use the default
