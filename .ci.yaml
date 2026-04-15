@@ -5513,7 +5513,7 @@ targets:
 
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
