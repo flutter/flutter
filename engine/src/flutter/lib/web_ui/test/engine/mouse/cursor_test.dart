@@ -16,36 +16,28 @@ void testMain() {
       final DomElement rootViewElement = createDomElement('div');
       final mouseCursor = MouseCursor(rootViewElement);
 
-      // TODO(mdebbar): This should be `rootViewElement`.
-      //                https://github.com/flutter/flutter/issues/140226
-      final DomElement cursorTarget = domDocument.body!;
-
       mouseCursor.activateSystemCursor('alias');
-      expect(cursorTarget.style.cursor, 'alias');
+      expect(rootViewElement.style.cursor, 'alias');
 
       mouseCursor.activateSystemCursor('move');
-      expect(cursorTarget.style.cursor, 'move');
+      expect(rootViewElement.style.cursor, 'move');
 
       mouseCursor.activateSystemCursor('precise');
-      expect(cursorTarget.style.cursor, 'crosshair');
+      expect(rootViewElement.style.cursor, 'crosshair');
 
       mouseCursor.activateSystemCursor('resizeDownRight');
-      expect(cursorTarget.style.cursor, 'se-resize');
+      expect(rootViewElement.style.cursor, 'se-resize');
 
       mouseCursor.activateSystemCursor('basic');
-      expect(cursorTarget.style.cursor, isEmpty);
+      expect(rootViewElement.style.cursor, isEmpty);
     });
 
     test('handles unknown cursor type', () {
       final DomElement rootViewElement = createDomElement('div');
       final mouseCursor = MouseCursor(rootViewElement);
 
-      // TODO(mdebbar): This should be `rootViewElement`.
-      //                https://github.com/flutter/flutter/issues/140226
-      final DomElement cursorTarget = domDocument.body!;
-
       mouseCursor.activateSystemCursor('unknown');
-      expect(cursorTarget.style.cursor, isEmpty);
+      expect(rootViewElement.style.cursor, isEmpty);
 
       mouseCursor.activateSystemCursor(null);
     });

@@ -60,13 +60,10 @@ class MouseCursor {
 
   void activateSystemCursor(String? kind) {
     final String cssValue = _mapKindToCssValue(kind);
-    // TODO(mdebbar): This should be set on the element, not the body. In order
-    //                to do that, we need the framework to send us the view ID.
-    //                https://github.com/flutter/flutter/issues/140226
     if (cssValue == _kDefaultCursor) {
-      domDocument.body!.style.removeProperty('cursor');
+      element.style.removeProperty('cursor');
     } else {
-      domDocument.body!.style.cursor = cssValue;
+      element.style.cursor = cssValue;
     }
   }
 }
