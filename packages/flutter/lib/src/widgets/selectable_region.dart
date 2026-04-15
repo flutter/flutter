@@ -2964,19 +2964,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     double minDistanceSquared = double.infinity;
     var closestIndex = 0;
     for (var index = 0; index < selectables.length; index += 1) {
-      for (final Rect rect in selectables[index].boundingBoxes) {
-        final Rect globalRect = MatrixUtils.transformRect(
-          selectables[index].getTransformTo(null),
-          rect,
-        );
-        final double dx = max(
-          0.0,
-          max(globalRect.left - globalPosition.dx, globalPosition.dx - globalRect.right),
-        );
-        final double dy = max(
-          0.0,
-          max(globalRect.top - globalPosition.dy, globalPosition.dy - globalRect.bottom),
-        );
+      final Selectable selectable = selectables[index];
+      final Matrix4 transform = selectable.getTransformTo(null);
+      for (final Rect rect in selectable.boundingBoxes) {
+        final Rect globalRect = MatrixUtils.transformRect(transform, rect);
+        final double dx =
+            globalPosition.dx - globalPosition.dx.clamp(globalRect.left, globalRect.right);
+        final double dy =
+            globalPosition.dy - globalPosition.dy.clamp(globalRect.top, globalRect.bottom);
         final double distanceSquared = dx * dx + dy * dy;
         if (distanceSquared < minDistanceSquared) {
           minDistanceSquared = distanceSquared;
@@ -3055,6 +3050,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final SelectionGeometry existingGeometry = selectables[nearestIndex].value;
       dispatchSelectionEventToChild(selectables[nearestIndex], event);
       if (selectables[nearestIndex].value != existingGeometry) {
+        // Geometry has changed as a result of select word, need to clear the
+        // selection of other selectables to keep selection in sync.
         selectables
             .where((Selectable target) => target != selectables[nearestIndex])
             .forEach(
