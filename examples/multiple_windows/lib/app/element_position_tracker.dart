@@ -16,7 +16,7 @@ class ElementPositionTracker {
 
   /// Returns current global rect for the tracked element, or `null` if not available.
   Rect? getGlobalRect() {
-    final rect = _getGlobalRect();
+    final Rect? rect = _getGlobalRect();
     _lastReportedRect = rect;
     return rect;
   }
@@ -32,19 +32,19 @@ class ElementPositionTracker {
     if (!element.mounted) {
       return null;
     }
-    final renderBox = element.findRenderObject();
+    final RenderObject? renderBox = element.findRenderObject();
     if (renderBox is! RenderBox) {
       return null;
     }
 
-    final transform = renderBox.getTransformTo(null);
-    final rect = Offset.zero & renderBox.size;
-    final globalRect = MatrixUtils.transformRect(transform, rect);
+    final Matrix4 transform = renderBox.getTransformTo(null);
+    final Rect rect = Offset.zero & renderBox.size;
+    final Rect globalRect = MatrixUtils.transformRect(transform, rect);
     return globalRect;
   }
 
   void _updateSelf() {
-    final rect = _getGlobalRect();
+    final Rect? rect = _getGlobalRect();
     if (rect == null) {
       _ElementPositionTrackerManager.instance.remove(this);
       return;
@@ -64,10 +64,7 @@ class ElementPositionTracker {
 class _ElementPositionTrackerManager {
   _ElementPositionTrackerManager._() {
     WidgetsBinding.instance.addPersistentFrameCallback((_) {
-      final trackersCopy = List<ElementPositionTracker>.from(
-        _trackers,
-        growable: false,
-      );
+      final trackersCopy = List<ElementPositionTracker>.from(_trackers, growable: false);
       for (final tracker in trackersCopy) {
         tracker._updateSelf();
       }
