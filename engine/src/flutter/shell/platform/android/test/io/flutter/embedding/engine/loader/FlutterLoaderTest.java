@@ -51,6 +51,9 @@ import org.mockito.Mockito;
 public class FlutterLoaderTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
 
+  // Default value for flags to test if they are successfully loaded.
+  private static final boolean defaultFlagTestValue = true;
+
   @Test
   public void itReportsUninitializedAfterCreating() {
     FlutterLoader flutterLoader = new FlutterLoader();
@@ -902,7 +905,7 @@ public class FlutterLoaderTest {
   public void itSetsEnableSoftwareRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.EnableSoftwareRendering",
-        true,
+        defaultFlagTestValue,
         "--enable-software-rendering");
   }
 
@@ -929,7 +932,7 @@ public class FlutterLoaderTest {
   public void itSetsSkiaDeterministicRenderingFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.SkiaDeterministicRendering",
-        true,
+        defaultFlagTestValue,
         "--skia-deterministic-rendering");
   }
 
@@ -998,7 +1001,9 @@ public class FlutterLoaderTest {
   public void itSetsEnableImpellerFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableImpeller", true, "--enable-impeller=true");
+        "io.flutter.embedding.android.EnableImpeller",
+        defaultFlagTestValue,
+        "--enable-impeller=true");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
@@ -1059,7 +1064,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsUseTestFontsFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.UseTestFonts", true, "--use-test-fonts");
+        "io.flutter.embedding.android.UseTestFonts", defaultFlagTestValue, "--use-test-fonts");
   }
 
   @Test
@@ -1074,7 +1079,9 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsEnableVulkanValidationFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanValidation", true, "--enable-vulkan-validation");
+        "io.flutter.embedding.android.EnableVulkanValidation",
+        defaultFlagTestValue,
+        "--enable-vulkan-validation");
   }
 
   @Test
@@ -1089,64 +1096,76 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsTraceStartupFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceStartup", true, "--trace-startup");
+        "io.flutter.embedding.android.TraceStartup", defaultFlagTestValue, "--trace-startup");
   }
 
   @Test
   public void itSetsStartPausedFromMetadata() {
-    testFlagFromMetadataPresent("io.flutter.embedding.android.StartPaused", true, "--start-paused");
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.StartPaused", defaultFlagTestValue, "--start-paused");
   }
 
   @Test
   public void itSetsDisableServiceAuthCodesFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.DisableServiceAuthCodes",
-        true,
+        defaultFlagTestValue,
         "--disable-service-auth-codes");
   }
 
   @Test
   public void itSetsEndlessTraceBufferFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EndlessTraceBuffer", true, "--endless-trace-buffer");
+        "io.flutter.embedding.android.EndlessTraceBuffer",
+        defaultFlagTestValue,
+        "--endless-trace-buffer");
   }
 
   @Test
   public void itSetsEnableDartProfilingFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
+        "io.flutter.embedding.android.EnableDartProfiling",
+        defaultFlagTestValue,
+        "--enable-dart-profiling");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
+        "io.flutter.embedding.android.EnableDartProfiling",
+        defaultFlagTestValue,
+        "--enable-dart-profiling");
   }
 
   @Test
   public void itSetsProfileStartupFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ProfileStartup", true, "--profile-startup");
+        "io.flutter.embedding.android.ProfileStartup", defaultFlagTestValue, "--profile-startup");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ProfileStartup", true, "--profile-startup");
+        "io.flutter.embedding.android.ProfileStartup", defaultFlagTestValue, "--profile-startup");
   }
 
   @Test
   public void itSetsMergedPlatformUiThread() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.MergedPlatformUIThread", true, "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread",
+        defaultFlagTestValue,
+        "--merged-platform-ui-thread");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.MergedPlatformUIThread", true, "--merged-platform-ui-thread");
+        "io.flutter.embedding.android.MergedPlatformUIThread",
+        defaultFlagTestValue,
+        "--merged-platform-ui-thread");
   }
 
   @Test
   public void itSetsTraceSkiaFromMetadata() {
-    testFlagFromMetadataPresent("io.flutter.embedding.android.TraceSkia", true, "--trace-skia");
+    testFlagFromMetadataPresent(
+        "io.flutter.embedding.android.TraceSkia", defaultFlagTestValue, "--trace-skia");
   }
 
   @Test
@@ -1161,7 +1180,7 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsTraceSystraceFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.TraceSystrace", true, "--trace-systrace");
+        "io.flutter.embedding.android.TraceSystrace", defaultFlagTestValue, "--trace-systrace");
   }
 
   @Test
@@ -1188,27 +1207,31 @@ public class FlutterLoaderTest {
   @Test
   public void itSetsProfileMicrotasksFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ProfileMicrotasks", true, "--profile-microtasks");
+        "io.flutter.embedding.android.ProfileMicrotasks",
+        defaultFlagTestValue,
+        "--profile-microtasks");
   }
 
   @Test
   public void itSetsDumpSkpOnShaderCompilationFromMetadata() {
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.DumpSkpOnShaderCompilation",
-        true,
+        defaultFlagTestValue,
         "--dump-skp-on-shader-compilation");
   }
 
   @Test
   public void itSetsPurgePersistentCacheFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.PurgePersistentCache", true, "--purge-persistent-cache");
+        "io.flutter.embedding.android.PurgePersistentCache",
+        defaultFlagTestValue,
+        "--purge-persistent-cache");
   }
 
   @Test
   public void itSetsVerboseLoggingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.VerboseLogging", true, "--verbose-logging");
+        "io.flutter.embedding.android.VerboseLogging", defaultFlagTestValue, "--verbose-logging");
   }
 
   @Test
@@ -1224,11 +1247,15 @@ public class FlutterLoaderTest {
   public void itSetsEnableFlutterGPUFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU",
+        defaultFlagTestValue,
+        "--enable-flutter-gpu");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
+        "io.flutter.embedding.android.EnableFlutterGPU",
+        defaultFlagTestValue,
+        "--enable-flutter-gpu");
   }
 
   @Test
@@ -1236,13 +1263,13 @@ public class FlutterLoaderTest {
     // Test debug mode.
     testFlagFromMetadataPresent(
         "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
-        true,
+        defaultFlagTestValue,
         "--impeller-lazy-shader-mode");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
         "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
-        true,
+        defaultFlagTestValue,
         "--impeller-lazy-shader-mode");
   }
 
@@ -1250,23 +1277,31 @@ public class FlutterLoaderTest {
   public void itSetsImpellerAntiAliasLinesFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
+        "io.flutter.embedding.android.ImpellerAntialiasLines",
+        defaultFlagTestValue,
+        "--impeller-antialias-lines");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
+        "io.flutter.embedding.android.ImpellerAntialiasLines",
+        defaultFlagTestValue,
+        "--impeller-antialias-lines");
   }
 
   @Test
   public void itSetsEnableOpenGLGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableOpenGLGPUTracing", true, "--enable-opengl-gpu-tracing");
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing",
+        defaultFlagTestValue,
+        "--enable-opengl-gpu-tracing");
   }
 
   @Test
   public void itSetsEnableVulkanGPUTracingFromMetadata() {
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableVulkanGPUTracing", true, "--enable-vulkan-gpu-tracing");
+        "io.flutter.embedding.android.EnableVulkanGPUTracing",
+        defaultFlagTestValue,
+        "--enable-vulkan-gpu-tracing");
   }
 
   @Test
@@ -1284,13 +1319,14 @@ public class FlutterLoaderTest {
 
   @Test
   public void itDoesNotSetTestFlagFromMetadata() {
-    testFlagFromMetadataNotPresent("io.flutter.embedding.android.TestFlag", true, "--test-flag");
+    testFlagFromMetadataNotPresent(
+        "io.flutter.embedding.android.TestFlag", defaultFlagTestValue, "--test-flag");
   }
 
   @Test
   public void itDoesNotSetFlagDisallowedinReleaseMode() {
     testFlagFromMetadataNotPresentInReleaseMode(
-        "io.flutter.embedding.android.TraceSkia", true, "--test-flag");
+        "io.flutter.embedding.android.TraceSkia", defaultFlagTestValue, "--test-flag");
   }
 
   @Test

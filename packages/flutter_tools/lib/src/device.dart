@@ -994,6 +994,7 @@ class DebuggingOptions {
     this.google3WorkspaceRoot,
     this.printDtd = false,
     this.webDevServerConfig,
+    this.testFlag = false,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1025,6 +1026,7 @@ class DebuggingOptions {
     this.usingCISystem = false,
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
+    this.testFlag = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1113,7 +1115,7 @@ class DebuggingOptions {
     required this.google3WorkspaceRoot,
     required this.printDtd,
     this.webDevServerConfig,
-  });
+  }) : testFlag = false;
 
   final bool debuggingEnabled;
 
@@ -1159,6 +1161,7 @@ class DebuggingOptions {
   final String? google3WorkspaceRoot;
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
+  final bool testFlag;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///

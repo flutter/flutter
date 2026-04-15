@@ -82,6 +82,7 @@ void main() {
         ),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
       await installCodeAssets(
         dartHookResult: dartHookResult,
@@ -118,6 +119,7 @@ void main() {
           ),
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         ),
         throwsToolExit(message: 'Enable code assets using `flutter config --enable-native-assets`'),
       );
@@ -146,6 +148,7 @@ void main() {
         ),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
       final Directory targetDirectory = environment.buildDir.childDirectory('native_assets');
       await installCodeAssets(
@@ -184,6 +187,7 @@ void main() {
           ),
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         ),
         throwsToolExit(message: 'Building native assets failed. See the logs for more details.'),
       );
@@ -236,6 +240,7 @@ void main() {
         ),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
       expect(
         result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList()
@@ -290,6 +295,7 @@ void main() {
           appBuildDirectory: fileSystem.directory(projectUri),
         ),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
 
       expect(target.didSetCCompilerConfig, isTrue);
@@ -330,6 +336,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         buildRunner: target,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
         buildDataAssets: false,
+        recordedUsesFile: null,
       );
 
       expect(target.didSetCCompilerConfig, isTrue);

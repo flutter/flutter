@@ -250,6 +250,18 @@ Future<XcodeBuildResult> buildXcodeProject({
       '4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.',
     );
     return XcodeBuildResult(success: false);
+  } else if (buildInfo.flavor != null &&
+      !configuration.toLowerCase().contains(buildInfo.flavor!.toLowerCase())) {
+    final String expectedConfiguration = XcodeProjectInfo.expectedBuildConfigurationFor(
+      buildInfo,
+      scheme,
+    );
+    globals.printWarning(
+      'Unable to find "$expectedConfiguration" build configuration for flavor "${buildInfo.flavor}".\n'
+      'Using "$configuration" configuration instead.\n'
+      '  To optionally support custom build settings for this flavor, consider adding the "$expectedConfiguration" build configuration to your Xcode project.\n'
+      '  Visit https://docs.flutter.dev/deployment/flavors-ios for instructions.',
+    );
   }
 
   final FlutterManifest manifest = app.project.parent.manifest;
