@@ -122,7 +122,8 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       if (!isSwiftSymbol) {
         return false;
       }
-      // This assumes `swift` is in `PATH`.
+      // This assumes `swift` is in `PATH`, which should be true for all bots
+      // building Flutter.framework.
       final ProcessResult demangledResult = Process.runSync('swift', <String>[
         'demangle',
         '--tree-only',
