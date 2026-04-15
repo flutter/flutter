@@ -5,7 +5,6 @@
 plugins {
     id "com.android.application"
     id "dev.flutter.flutter-gradle-plugin"
-    id "kotlin-android"
 }
 
 def localProperties = new Properties()
@@ -66,6 +65,12 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.release
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
     }
 }
 
