@@ -6804,6 +6804,103 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('triple-click-drag backwards involving WidgetSpans', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: ListView(
+            children: const <Widget>[
+              Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    WidgetSpan(child: Text('Text A.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text B.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text C.')),
+                  ],
+                ),
+                key: Key('rich1'),
+              ),
+              Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    WidgetSpan(child: Text('Text D.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text E.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text F.')),
+                  ],
+                ),
+                key: Key('rich2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraphE = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text E.'), matching: find.byType(RichText)),
+    );
+    final RenderParagraph paragraphB = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text B.'), matching: find.byType(RichText)),
+    );
+
+    // Triple-click on Text E.
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraphE, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(textOffsetToPosition(paragraphE, 2));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(textOffsetToPosition(paragraphE, 2));
+    await tester.pumpAndSettle();
+
+    // Text E should be selected after triple-click.
+    expect(paragraphE.selections.isNotEmpty, isTrue);
+    expect(paragraphE.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+
+    // Drag backward to Text B.
+    await gesture.moveTo(textOffsetToPosition(paragraphB, 3));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraphC = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text C.'), matching: find.byType(RichText)),
+    );
+    final RenderParagraph paragraphD = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text D.'), matching: find.byType(RichText)),
+    );
+
+    final RenderParagraph outerParagraph1 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byKey(const Key('rich1')), matching: find.byType(RichText)).first,
+    );
+    final RenderParagraph outerParagraph2 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byKey(const Key('rich2')), matching: find.byType(RichText)).first,
+    );
+
+    // When dragging backward from Text E to Text B, all paragraphs between
+    // B and E should be fully selected in reverse.
+    expect(paragraphB.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(paragraphC.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(paragraphD.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(paragraphE.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(outerParagraph1.selections, isNotEmpty);
+    expect(outerParagraph2.selections, isNotEmpty);
+
+    await gesture.up();
+  });
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
