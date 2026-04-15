@@ -19,7 +19,7 @@ Widget _buildOverlapScenario({
   double childExtent = 100,
 }) {
   final isHorizontal = scrollDirection == Axis.horizontal;
-  
+
   return TestWidgetsApp(
     home: CustomScrollView(
       controller: controller,
@@ -125,6 +125,51 @@ void main() {
 
       expect(renderObject.clipOverlap, ClipOverlapBehavior.none);
       expect(renderObject.clipBehavior, Clip.antiAlias);
+    });
+
+    testWidgets('updates clip when overlap changes even if geometry is same', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const SliverPersistentHeader(
+                delegate: _SliverPersistentHeaderDelegate(),
+                pinned: true,
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)), // Spacer
+              SliverClipRect(
+                sliver: SliverToBoxAdapter(
+                  child: Container(height: 100, color: const Color(0xFF2196F3)),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
+
+      // Initial state: no overlap
+      // Header 0..100, Spacer 100..200, ClipRect 200..300.
+      expect(renderSliver.constraints.overlap, 0.0);
+      expect(renderSliver.getClip()!.top, 0.0);
+
+      // Scroll by 150.
+      // Spacer is scrolled off. ClipRect starts at y=50.
+      // Since Header is pinned at 0..100, it overlaps ClipRect by 50px.
+      controller.jumpTo(150);
+      await tester.pump();
+
+      expect(renderSliver.constraints.overlap, 50.0);
+      // This should fail if the bug exists because the ClipRect is still fully visible (paintExtent=100),
+      // so its geometry didn't change, and _clip was not nulled.
+      expect(renderSliver.getClip()!.top, 50.0);
     });
 
     // ---- Overlap hit testing: (clipOverlap × axis × reverse) matrix ----
