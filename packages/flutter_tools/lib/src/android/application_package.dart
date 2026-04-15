@@ -123,7 +123,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// The version code of the APK.
   final int? versionCode;
 
-  /// The engine shell arguments, read from the generated engine shell arguments manifest in the APK.
+  /// The engine shell arguments read from the APK's manifest file.
   final Set<String>? engineShellArgs;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.

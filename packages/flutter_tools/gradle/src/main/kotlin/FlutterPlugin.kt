@@ -302,7 +302,7 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
 
-            // Add task that Flutter apps need to allow command line flags to be loaded by the Flutter Android embedding.
+            // Task required to pass command line flags for apps to the Flutter Android embedding.
             if (projectToAddTasksTo.hasProperty("androidShellArguments")) {
                 val androidShellArguments: String = projectToAddTasksTo.properties["androidShellArguments"].toString()
                 FlutterPluginUtils.addTaskForGeneratingEngineShellArgumentManifest(projectToAddTasksTo, androidShellArguments)

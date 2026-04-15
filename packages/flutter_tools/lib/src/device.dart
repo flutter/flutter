@@ -1258,7 +1258,7 @@ class DebuggingOptions {
   }
 
   /// Retrieves Android engine shell arguments from the debugging options based on the
-  /// specified command line flags.
+  /// command line flags that are passed to the engine via the manifest.
   Set<String> getAndroidLaunchArguments() {
     final androidShellArguments = <String>{
       if (enableDartProfiling) ...<String>['--enable-dart-profiling'],

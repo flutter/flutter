@@ -319,8 +319,7 @@ public class FlutterLoader {
       // Add all flags specified in the application manifest manually or via Flutter tool injection.
       if (applicationMetaData != null) {
         // 1/2: Add engine flags provided by metadata in the application manifest. These settings
-        // will
-        // be overridden if additionally set by the command line or via Intent.
+        // will be overridden if additionally set by the command line or via Intent.
         for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
           String metadataKey = flag.metadataKey;
           if (!applicationMetaData.containsKey(metadataKey)) {
@@ -424,14 +423,19 @@ public class FlutterLoader {
               shellArgs.add(arg);
             }
           } catch (JSONException j) {
-            Log.e(TAG, "Exception parsing shell arguments from manifest: " + j);
+            Log.e(
+                TAG,
+                "Exception parsing shell arguments "
+                    + androidEngineShellArgsValue
+                    + " from manifest: "
+                    + j);
           }
         }
       }
 
-      // Add any engine flags specified via Intent extras. These settings will take
-      // precedent over any flag settings specified by application manifest
-      // metadata.
+      // Add any engine flags specified via Intent extras or passed directly to the engine.
+      // These settings will take precedent over any flag settings specified by
+      // application manifest metadata.
       // TODO(camsim99): Remove support for setting engine flags via Intent extras:
       // https://github.com/flutter/flutter/issues/180686.
       if (args != null) {

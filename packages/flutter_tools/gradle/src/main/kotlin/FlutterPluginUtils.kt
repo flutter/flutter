@@ -664,9 +664,9 @@ object FlutterPluginUtils {
                 project.logger.error(
                     """
                     WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
-                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
+                    applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                     Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
-                    
+
                     """.trimIndent()
                 )
             }
@@ -675,11 +675,11 @@ object FlutterPluginUtils {
                 """
                 WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
                 Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
-                
+
                 Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
-                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
+                If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
                 an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
-                
+
                 If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                 """.trimIndent()
             )
@@ -1070,7 +1070,7 @@ object FlutterPluginUtils {
         androidComponents.onVariants { variant ->
             val genTask =
                 project.tasks.register("${variant.name}GenerateEngineFlagsManifestTask", GenerateEngineFlagsManifestTask::class.java) {
-                    description = "Generates extra manifest containing command line flags intended to be loaded by the Flutter Android embedding"
+                    description = "Generates an extra manifest for the given variant containing engine command line flags."
                     shellArgs.set(androidEngineShellArgs)
                     manifestOutputFile.set(
                         project.layout.buildDirectory.file(

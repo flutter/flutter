@@ -533,7 +533,6 @@ void main() {
         );
 
         expect(launchResult.started, false);
-        expect(launchResult.started, false);
         expect(processManager, hasNoRemainingExpectations);
 
         // We expected AndroidBuilder.buildApk to never be called, since we are
@@ -659,7 +658,6 @@ void main() {
           route: testRoute,
         );
 
-        expect(launchResult.started, false);
         expect(launchResult.started, false);
         expect(fakeAndroidBuilder.capturedAndroidShellArgs, expectedShellArgs);
         expect(processManager, hasNoRemainingExpectations);

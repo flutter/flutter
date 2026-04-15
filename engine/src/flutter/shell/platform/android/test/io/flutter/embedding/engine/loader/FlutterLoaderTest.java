@@ -1462,7 +1462,7 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
 
-    // Verify that the Intent extras argument takes precedence over the manifest metadata.
+    // Verify that the command line argument takes precedence over the manifest metadata.
     assertTrue(
         arguments.indexOf(expectedImpellerArgFromMetadata)
             < arguments.indexOf(expectedImpellerArgFromCommandLine));
@@ -1502,7 +1502,7 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
 
-    // Verify that the Intent extras argument takes precedence over the manifest metadata.
+    // Verify that the Intent extras argument takes precedence over the command line argument.
     assertTrue(
         arguments.indexOf(expectedImpellerArgFromCommandLine)
             < arguments.indexOf(expectedImpellerArgFromIntentExtra));
@@ -1625,12 +1625,12 @@ public class FlutterLoaderTest {
             anyInt());
     List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
 
-    // Verify that the Intent extras takes precedence over the manifest metadata.
+    // Verify that the command line argument takes precedence over the manifest metadata.
     assertTrue(
         arguments.indexOf(expectedAotSharedLibraryNameFromCommandLine)
             < arguments.indexOf(expectedAotSharedLibraryNameFromMetadata));
 
-    // Verify other Intent extras are still passed through.
+    // Verify Intent extras are still passed through.
     assertTrue(
         "Expected argument --enable-opengl-gpu-tracing was not found in the arguments passed to FlutterJNI.init",
         arguments.contains("--enable-opengl-gpu-tracing"));

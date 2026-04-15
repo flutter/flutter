@@ -391,7 +391,7 @@ void main() {
     });
 
     testWithoutContext('Parses manifest with engine shell arguments specified', () async {
-      const testFlags = '--test-flag=1;--test-flag-2;--testflag3=4';
+      const testFlags = r'[\"--foo\",\"--bar\"]';
       final String testManifest =
           _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
             testFlags,
@@ -406,7 +406,7 @@ void main() {
     });
 
     testWithoutContext('Parses manifest with JSON engine shell arguments specified', () async {
-      const testFlags = r'[\"--foo\",\"--bar\"]';
+      const testFlags = r'[\"--foo2\",\"--bar2\"]';
       final String testManifest =
           _getAaptDataWithDefaultEnabledAndMainLauncherActivityAndEngineShellArgumentsSpecified(
             testFlags,

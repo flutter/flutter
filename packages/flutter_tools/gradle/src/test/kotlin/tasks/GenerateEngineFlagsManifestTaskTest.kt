@@ -55,7 +55,7 @@ class GenerateEngineFlagsManifestTaskTest {
 
     @Test
     fun generateHandlesOneArgCorrectly() {
-        val shellArg = """["--verbose-logging"]"""
+        val shellArg = "[\"--verbose-logging\"]"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
         val expectedContent =
             """
@@ -80,7 +80,7 @@ class GenerateEngineFlagsManifestTaskTest {
 
     @Test
     fun generateHandlesMultipleArgsCorrectly() {
-        val shellArgs = """["--enable-dart-profiling","--trace-to-file=path/to/some/file"]"""
+        val shellArgs = "[\"--enable-dart-profiling\",\"--trace-to-file=path/to/some/file\"]"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
         val expectedContent =
             """
@@ -105,7 +105,7 @@ class GenerateEngineFlagsManifestTaskTest {
 
     @Test
     fun generateHandlesArgsWithSpecialCharacters() {
-        val shellArgs = """["--trace-to-file=\"path/to/a file\""]"""
+        val shellArgs = "[\"--trace-to-file=\"path/to/a file\""]"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
         val expectedContent =
             """
