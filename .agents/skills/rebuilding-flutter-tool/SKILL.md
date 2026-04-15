@@ -10,7 +10,7 @@ You must strictly follow this workflow to rebuild the Flutter tool.
 ## Step 1: Navigate and Execute
 You must execute the rebuild script strictly from within its own directory.
 * **Action:** Change your directory to `.agents/skills/rebuilding-flutter-tool/scripts/`
-* **Action:** Run the rebuild script: `sh rebuild.sh`
+* **Action:** Run the rebuild script: `dart rebuild.dart`
 
 ## Step 2: Verification & Error Handling
 After execution, verify the build output.
