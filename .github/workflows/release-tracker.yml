@@ -1,0 +1,138 @@
+name: 🚀 Create Release Tracker
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (format X.Y.Z for stable or X.Y.0-0.Z.pre for beta)'
+        required: true
+        type: string
+      release_channel:
+        description: 'Release Channel'
+        required: true
+        type: choice
+        options:
+          - stable
+          - beta
+      hotfix:
+        description: 'Hotfix Release'
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Tracking Issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const version = "${{ inputs.version }}";
+            const channel = "${{ inputs.release_channel }}";
+            const hotfix = "${{ inputs.hotfix }}";
+            const releaseType = hotfix === "true" ? "hotfix" : "initial";
+
+            let versionValidator;
+            if (channel === 'stable') {
+              if (hotfix === 'true') {
+                versionValidator = /^\d+\.\d+\.[1-9]\d*$/;
+              } else {
+                versionValidator = /^\d+\.\d+\.0$/;
+              }
+            } else if (channel === 'beta') {
+              if (hotfix === 'true') {
+                versionValidator = /^\d+\.\d+\.0-0\.[1-9]\d*\.pre$/;
+              } else {
+                versionValidator = /^\d+\.\d+\.0-0\.1\.pre$/;
+              }
+            } else {
+              core.setFailed(`Validation Error: Invalid channel name: ${channel}`);
+            }
+
+            if (!versionValidator.test(version)) {
+              core.setFailed(`Validation Error: The version "${version}" is not a valid format for a ${channel} ${releaseType} release.`);
+              return;
+            }
+
+            const majorMinorVersion = version.match(/^(\d+\.\d+)/)[1];
+            const branchName = `flutter-${majorMinorVersion}-candidate.0`;
+
+            // Build the dynamic checklist
+            let body = `## Flutter Release\n`;
+            body += `Candidate Branch: [${branchName}](https://github.com/${context.repo.owner}/${context.repo.repo}/tree/${branchName})\n`;
+            body += `Tag: [${version}](https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/${version})\n`;
+
+            body += `### 📋 Release Checklist\n\n`;
+
+            // Add link to branches etc
+
+            if (channel === 'beta' && hotfix !== 'true') {
+              body += '#### Branch Alignment\n';
+              body += '  - [ ] Stop the [Dart Auto Roller](https://autoroll.skia.org/r/dart-sdk-flutter)\n';
+              body += '  - [ ] Update Dart version if necessary ([GH Workflow](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/roll-dart-dependencies.yml))\n';
+              body += '    - Dart Hash: [Paste the Dart hash here]\n';
+              body += '  - [ ] Wait for Google3 Roll to complete.\n';
+              body += '  - [ ] Restart the [Dart Auto Roller](https://autoroll.skia.org/r/dart-sdk-flutter)\n';
+
+              body += '#### Cut release branches\n';
+              body += '  - [ ] Cut new flutter branch: `' + branchName + '` ' + `([GH Workflow](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/cut-release-branch.yml))\n`;
+              body += '  - [ ] Cut new recipes branch: `' + branchName + '` [Gerrit UI](https://flutter-review.googlesource.com/admin/repos/recipes,branches)\n';
+            }
+
+            body += '#### Update release branch\n';
+
+            if (channel === 'beta' && hotfix !== 'true') {
+              body += '  - [ ] Create `release-candidate-branch.version` file on candidate branch\n';
+            } else {
+              body += `- [ ] Merge outstanding [cherry-picks](https://github.com/${context.repo.owner}/${context.repo.repo}/pulls?q=is%3Apr+is%3Aopen+label%3A"cp%3A+review")\n`;
+              body += `- [ ] Update Dart version if necessary ([GH Workflow](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/roll-dart-dependencies.yml))\n`;
+              body += '  - Dart Hash: [Paste the Dart hash here]\n';
+            }
+
+            body += '- [ ] Pin engine hash in `engine.version` if necessary' + `([GH Workflow](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/sync-engine-version.yml))\n`
+
+            if (channel === 'stable' && hotfix === 'true') {
+              body += '- [ ] Add changelog for stable release\n';
+            }
+
+            body += '#### Validate and publish release\n'
+            body += `- [ ] Run postsubmits and validate they are all passing on the [Flutter Dashboard](https://flutter-dashboard.appspot.com/#/build?repo=flutter&branch=${branchName})\n`;
+            body += '- [ ] Push release with MPA\n';
+            body += '- [ ] Check for the new versions on the [Flutter SDK Archive](https://docs.flutter.dev/install/archive)\n';
+
+            body += '- [ ] Announce the release on Discord\n';
+            body += '- [ ] Announce the release on Google internal channels\n';
+
+            if (channel === 'stable') {
+              body += '- [ ] Announce the release on flutter-announce mailing list\n';
+            }
+
+            if (channel === 'stable' && hotfix === 'true') {
+              body += '- [ ] Merge the changelog back to the `master` branch\n';
+            }
+
+            const issueResponse = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[${channel}] [${releaseType}] Flutter Release Version ${version}`,
+              body: body,
+              labels: ['release-tracker'],
+              assignees: [context.actor],
+            });
+
+            const issueUrl = issueResponse.data.html_url;
+            const issueNumber = issueResponse.data.number;
+
+            // Write a big, friendly button to the Job Summary
+            await core.summary
+              .addRaw(`# 🚀 Release Tracker Created!`)
+              .addBreak()
+              .addRaw(`The release tracking issue for **${version}** has been successfully generated.`)
+              .addBreak()
+              .addRaw(`### [Click here to view Issue #${issueResponse.data.number}](${issueResponse.data.html_url})`)
+              .addBreak()
+              .addRaw(`**Assignee:** @${context.actor}`)
+              .write();

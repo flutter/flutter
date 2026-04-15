@@ -31,7 +31,6 @@ import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
-import '../mdns_device_discovery.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -154,7 +153,6 @@ class ResidentWebRunner extends ResidentRunner {
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
   Directory? _generatedEntrypointDirectory;
-  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
 
   // Only non-wasm debug builds of the web support the service protocol.
   @override
@@ -216,7 +214,6 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   Future<void> cleanupAtFinish() async {
     await _cleanup();
-    await super.cleanupAtFinish();
   }
 
   Future<void> _cleanup() async {
@@ -227,10 +224,6 @@ class ResidentWebRunner extends ResidentRunner {
     await _stdErrSub?.cancel();
     await _serviceSub?.cancel();
     await _extensionEventSub?.cancel();
-    for (final MDNSDeviceDiscovery discovery in _mdnsDiscoveries) {
-      await discovery.stop();
-    }
-    _mdnsDiscoveries.clear();
 
     if (stopAppDuringCleanup) {
       await flutterDevice!.device!.stopApp(null);
@@ -919,25 +912,6 @@ class ResidentWebRunner extends ResidentRunner {
             vmService: _vmService.service,
           );
 
-          // Start mDNS server
-          final discovery = MDNSDeviceDiscovery(
-            device: flutterDevice!.device!,
-            vmService: _vmService.service,
-            debuggingOptions: debuggingOptions,
-            logger: logger,
-            platform: _platform,
-            flutterVersion: globals.flutterVersion,
-            systemClock: _systemClock,
-            botDetector: globals.botDetector,
-          );
-          _mdnsDiscoveries.add(discovery);
-          unawaited(
-            discovery.advertise(
-              appName: flutterProject.manifest.appName,
-              vmServiceUri: _vmService.httpAddress,
-            ),
-          );
-
           final Uri websocketUri = Uri.parse(debugConnection.uri);
           flutterDevice!.vmService = _vmService;
           if (debugConnection.devToolsUri != null) {
@@ -969,14 +943,13 @@ class ResidentWebRunner extends ResidentRunner {
           // TODO(bkonyi): consider removing this log message and using only the standard VM
           // service message instead.
           _logger.printStatus('Debug service listening on $websocketUri');
-          printDebuggerList();
-          connectionInfoCompleter?.complete(
-            DebugConnectionInfo(
-              wsUri: websocketUri,
-              devToolsUri: debugConnection.devToolsUri?.toUri(),
-              dtdUri: debugConnection.dtdUri?.toUri(),
-            ),
+          final connectionInfo = DebugConnectionInfo(
+            wsUri: websocketUri,
+            devToolsUri: debugConnection.devToolsUri?.toUri(),
+            dtdUri: debugConnection.dtdUri?.toUri(),
           );
+          printDebuggerList(connectionInfo: connectionInfo);
+          connectionInfoCompleter?.complete(connectionInfo);
         }),
       );
     } else {

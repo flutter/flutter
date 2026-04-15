@@ -13,17 +13,23 @@
     },
     program: {
         // TODO(fxbug.dev/80338): Switch to gtest_runner after the filters in
-        // `gtest_filters.yaml` are supported by `--test-filter` and
-        // deprecated-ambient-replace-as-executable is available.
-        // Equivalent to the "deprecated-ambient-replace-as-executable" sandbox
-        // feature in cfv1.
-        runner: "elf_test_ambient_exec_runner",
+        // `gtest_filters.yaml` are supported by `--test-filter`.
+        runner: "elf_test_runner",
         binary: "bin/app",
 
         // Part of //sdk/lib/diagnostics/syslog/elf_stdio.shard.cml.
         forward_stderr_to: "log",
         forward_stdout_to: "log",
     },
+    offer: [
+        {
+            protocol: [
+                "fuchsia.kernel.VmexResource",
+            ],
+            from: "parent",
+            to: "#realm_builder",
+        },
+    ],
     capabilities: [
         { protocol: "fuchsia.test.Suite" },
     ],
@@ -36,6 +42,7 @@
     use: [
         {
             protocol: [
+                "fuchsia.kernel.VmexResource",
                 "fuchsia.process.Launcher",
                 "fuchsia.tracing.provider.Registry",
                 "fuchsia.vulkan.loader.Loader",

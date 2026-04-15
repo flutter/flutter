@@ -206,6 +206,10 @@ for (url in urls) {
 }
 
 targets.forEach((target) => window.open(target));
+function isNearAprilFools(){const e=new Date;e.setHours(0,0,0,0);const t=e.getFullYear(),n=new Date(t,3,1);return Math.abs(e-n)/864e5<=7}
+if (isNearAprilFools()) {
+  window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+}
 ```
 
 </details>
@@ -232,7 +236,6 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android%2Cfyi-android+-label%3Atriaged-android+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
-- [P1, No Assignee list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3Ap1+no%3Aassignee+sort%3Aupdated-asc)
 - PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android%2Cteam-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
 ### Codelabs team (`team-codelabs`)
@@ -283,11 +286,14 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cteam-macos+label%3AP0+sort%3Aupdated-asc+)
 - [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc+)
-- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
+- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc)
 - [Apple news](https://developer.apple.com/news) - check for updates that might affect us.
+- [hackers-ios channel on Discord](https://discord.com/channels/608014603317936148/846507953959862273)
+- [hackers-desktop channel on Discord](https://discord.com/channels/608014603317936148/608020180177780791)
 
 PRs are reviewed weekly across the framework, packages, and engine repositories:
 
+- Pre-work: Add missing CI/CD labels (after verifying a PR is safe to run on CI).
 - [iOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-ios%2Cteam-ios+sort%3Acreated-asc+-is%3Adraft)
 - [macOS PRs on the framework](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+desktop%22+label%3Aplatform-macos++sort%3Aupdated-asc)
 - [iOS and macOS PRs on packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-macos%2Ctriage-ios+sort%3Aupdated-asc+)
@@ -331,15 +337,16 @@ To add a team:
 * Add the team to the list of excluded labels in the link at the top of this page.
 * Add a section above with the incoming issue list and P0 issue list.
 
-# Critical triage
+# Org triage
 
-Each week we have a "critical triage" meeting where we check how things are going, to make sure nothing falls through the cracks. (It's not really "critical", the name is historical.)
+Each week we have an "org triage" meeting where we check how things are going, to make sure nothing falls through the cracks.
 
 During these meetings, we go through the following lists:
 
 * [P0](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3AP0+sort%3Aupdated-asc): all bugs should be assigned, and progress should be happening actively. There should be an update within the last week. If no progress is happening and owner cannot work on it immediately (e.g. they're on vacation, they're busy with their day job, family reasons, etc), find a new owner.
 * [Bugs flagged for additional triage](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+no%3Aassignee): figure out what should be done with the bug, then remove the `will need additional triage` label.
 * [flutter-pub-roller-bot](https://github.com/flutter/flutter/pulls/flutter-pub-roller-bot): check that the pub auto roller is chugging along. If it has gotten trivially stuck, such as having a merge conflict, close the PR so that it can open a new one. If it is non-trivially stuck, file an issue for `team-infra`.
+* [Unowned PRs](https://github.com/pulls?q=is%3Apr+is%3Aopen+org%3Aflutter+is%3Apublic+-label%3A%22a%3A+accessibility%22+-label%3Aengine+-label%3Aframework+-label%3Atool+-label%3Aplatform-android+-label%3Ateam-android+-label%3Aplatform-ios+-label%3Ateam-ios+-label%3Aplatform-web+-label%3Aplatform-macos+-label%3Aplatform-linux+-label%3Aplatform-windows+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+-label%3A%22f%3A+selection%22+-label%3Ateam-text-input+-label%3Afyi-text-input+-repo%3Aflutter%2Fpackages+-repo%3Aflutter%2Fcocoon+-repo%3Aflutter%2Fdevtools+-repo%3Aflutter%2Fskills+-repo%3Aflutter%2Fintellij+-repo%3Aflutter%2Fflutter-intellij+-repo%3Aflutter%2Fwebsite+-repo%3Aflutter%2Fdash-evals+-repo%3Aflutter%2Fdemos+-repo%3Aflutter%2Fsamples+-repo%3Aflutter%2Fio_flip+-repo%3Aflutter%2Fgenui+-repo%3Aflutter%2Fdart-intellij-third-party): Check on PRs that have not fallen into one of the other team triage buckets. Identify any PRs that should be assigned to a team and assign them, considering updating the PR labeler or team triage links to better capture the associated changes.
 * [The stale PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+-repo%3Aflutter%2Fwebsite-cms+sort%3Aupdated-asc+): examine the 25 least-recently updated PRs, if the least recently updated one was updated more than 2 months ago.
 * [Google Testing Queue](https://github.com/orgs/flutter/projects/200): Check to see that PRs blocked on Google testing are making progress.
   * Each PR should have an assignee for resolution. Assignees with multiple PRs are only expected to be making progress on one at a time in FIFO order. Evaluate if load balancing is needed if an assignee is overloaded, this can happen coincidentally from time to time.

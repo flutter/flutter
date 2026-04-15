@@ -28,6 +28,7 @@
 #include "impeller/playground/imgui/imgui_impl_impeller.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/playground_impl.h"
+#include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
@@ -47,6 +48,8 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
       return "Metal";
+    case PlaygroundBackend::kMetalSDF:
+      return "MetalSDF";
     case PlaygroundBackend::kOpenGLES:
       return "OpenGLES";
     case PlaygroundBackend::kVulkan:
@@ -101,6 +104,7 @@ std::shared_ptr<Context> Playground::MakeContext() const {
 bool Playground::SupportsBackend(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
 #if IMPELLER_ENABLE_METAL
       return true;
 #else   // IMPELLER_ENABLE_METAL
@@ -529,6 +533,10 @@ Playground::VKProcAddressResolver Playground::CreateVKProcAddressResolver()
 
 void Playground::SetGPUDisabled(bool value) const {
   impl_->SetGPUDisabled(value);
+}
+
+RuntimeStageBackend Playground::GetRuntimeStageBackend() const {
+  return impl_->GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

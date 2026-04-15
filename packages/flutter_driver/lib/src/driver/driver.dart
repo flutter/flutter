@@ -75,7 +75,6 @@ enum TimelineStream {
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-@internal
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// A convenient accessor to frequently used finders.
@@ -466,13 +465,26 @@ abstract class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     var isVisible = false;
-    waitFor(item, timeout: timeout).then<void>((_) {
-      isVisible = true;
-    });
+    Object? waitForError;
+    StackTrace? waitForStack;
+    // ignore: unawaited_futures
+    waitFor(item, timeout: timeout).then<void>(
+      (_) {
+        isVisible = true;
+      },
+      onError: (Object error, StackTrace stack) {
+        waitForError = error;
+        waitForStack = stack;
+      },
+    );
+
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    while (!isVisible) {
+    while (!isVisible && waitForError == null) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
       await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+    if (waitForError != null) {
+      Error.throwWithStackTrace(waitForError!, waitForStack!);
     }
 
     return scrollIntoView(item, alignment: alignment);

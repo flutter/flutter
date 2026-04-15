@@ -1074,6 +1074,8 @@ class WidgetPreviewControls extends StatelessWidget {
             },
           ),
           HorizontalSpacer(),
+          Expanded(child: PreviewSearchControls(controller: controller)),
+          HorizontalSpacer(),
           WidgetInspectorToggle(controller: controller),
           Spacer(),
           WidgetPreviewerRestartButton(controller: controller),

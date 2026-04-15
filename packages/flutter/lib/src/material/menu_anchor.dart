@@ -362,10 +362,14 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool consumeOutsideTap;
 
-  /// A callback that is invoked when the menu is opened.
+  /// A callback that is invoked when the menu begins opening.
+  ///
+  /// Defaults to null.
   final VoidCallback? onOpen;
 
-  /// A callback that is invoked when the menu is closed.
+  /// A callback that is invoked when the menu finishes closing.
+  ///
+  /// Defaults to null.
   final VoidCallback? onClose;
 
   /// Determine if the menu panel can be wrapped by a [UnconstrainedBox] which allows
@@ -656,7 +660,6 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
       return;
     }
 
-    _menuController.closeChildren();
     _animationController.reverse().whenComplete(hideOverlay);
   }
 
@@ -3414,6 +3417,11 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     final double childHeightEstimate = math.min(unconstrainedHeight, size.height);
     final childSizeEstimate = Size(childSize.width, childHeightEstimate);
     final ui.Offset finalPosition = _positionChild(childSizeEstimate, overlayRect);
+
+    if (menuPosition != null) {
+      return finalPosition;
+    }
+
     // If the menu sits above the anchor when fully open, grow upward.
     // Keep the bottom (attachment) fixed by shifting the top-left during animation.
     final bool growsUp = finalPosition.dy + childSizeEstimate.height <= anchorRect.center.dy;

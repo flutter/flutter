@@ -93,6 +93,7 @@ void main() {
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         );
         await installCodeAssets(
           dartHookResult: result,
@@ -137,6 +138,7 @@ void main() {
         buildRunner: _BuildRunnerWithoutNdk(),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -164,6 +166,7 @@ void main() {
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
+          recordedUsesFile: null,
         ),
         isA<DartHooksResult>(),
       );

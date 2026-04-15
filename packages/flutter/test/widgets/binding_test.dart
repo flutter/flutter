@@ -389,9 +389,9 @@ void main() {
     WidgetsBinding.instance.handlePlatformBrightnessChanged();
     WidgetsBinding.instance.handleTextScaleFactorChanged();
     WidgetsBinding.instance.handleMemoryPressure();
-    WidgetsBinding.instance.handlePopRoute();
-    WidgetsBinding.instance.handlePushRoute('/');
-    WidgetsBinding.instance.handleRequestAppExit();
+    await WidgetsBinding.instance.handlePopRoute();
+    await WidgetsBinding.instance.handlePushRoute('/');
+    await WidgetsBinding.instance.handleRequestAppExit();
     WidgetsBinding.instance.handleViewFocusChanged(
       const ViewFocusEvent(
         viewId: 0,
@@ -676,6 +676,22 @@ void main() {
   testWidgets('popRoute not handled by observer returns false', (WidgetTester tester) async {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
 
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'SystemNavigator.pop') {
+          return null; // Success
+        }
+        return null;
+      },
+    );
+    addTearDown(() {
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
+    });
+
     final ByteData result = (await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/navigation',
       message,
@@ -685,6 +701,7 @@ void main() {
 
     expect(decodedResult, false);
   });
+
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
@@ -867,6 +884,37 @@ void main() {
       await WidgetsBinding.instance.handlePopRoute();
       expect(log, contains('didPopRoute'));
       expect(errors, hasLength(1));
+    });
+
+    testWidgets('handlePopRoute reports error when SystemNavigator.pop fails', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+      addTearDown(() {
+        FlutterError.onError = originalOnError;
+      });
+
+      TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemNavigator.pop') {
+            throw Exception('Platform error');
+          }
+          return null;
+        },
+      );
+
+      await WidgetsBinding.instance.handlePopRoute();
+
+      await tester.idle();
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception.toString(), contains('Platform error'));
+      expect(errors.first.context.toString(), contains('while popping route'));
     });
 
     testWidgets('didChangeMetrics', (WidgetTester tester) async {
