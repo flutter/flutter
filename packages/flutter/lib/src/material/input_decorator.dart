@@ -610,7 +610,7 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-    this.errorPadding,
+    this.supportingTextPadding,
   });
 
   final EdgeInsetsDirectional contentPadding;
@@ -638,7 +638,7 @@ class _Decoration {
   final Widget? helperError;
   final Widget? counter;
   final Widget? container;
-  final EdgeInsetsDirectional? errorPadding;
+  final EdgeInsetsDirectional? supportingTextPadding;
 
   @override
   bool operator ==(Object other) {
@@ -674,7 +674,7 @@ class _Decoration {
         other.helperError == helperError &&
         other.counter == counter &&
         other.container == container &&
-        other.errorPadding == errorPadding;
+        other.supportingTextPadding == supportingTextPadding;
   }
 
   @override
@@ -698,7 +698,7 @@ class _Decoration {
     hint,
     prefix,
     suffix,
-    Object.hash(prefixIcon, suffixIcon, helperError, counter, container, errorPadding),
+    Object.hash(prefixIcon, suffixIcon, helperError, counter, container, supportingTextPadding),
   );
 }
 
@@ -924,7 +924,7 @@ class _RenderDecoration extends RenderBox
 
   EdgeInsetsDirectional get contentPadding => decoration.contentPadding;
 
-  EdgeInsetsDirectional? get errorPadding => decoration.errorPadding;
+  EdgeInsetsDirectional? get supportingTextPadding => decoration.supportingTextPadding;
 
   _SubtextSize? _computeSubtextSizes({
     required BoxConstraints constraints,
@@ -950,10 +950,15 @@ class _RenderDecoration extends RenderBox
     // TODO(LongCatIsLooong): the bottomHeight expression doesn't make much sense.
     // Use the real descent and make sure the subtext line box is tall enough for both children.
     // See https://github.com/flutter/flutter/issues/13715
+
+    // topPadding and bottomPadding control the vertical padding of the row containing [helper, error, counter] widgets
+    // in case of null values it will fallback to the legacy code to avoid breaking any established codebase
+    final double topPadding = supportingTextPadding?.top ?? subtextGap;
+    final double bottomPadding = supportingTextPadding?.bottom ?? 0.0;
     final double ascent =
-        math.max(counterAscent, getBaseline(helperError, helperErrorConstraints)) + subtextGap;
-    final double bottomHeight = math.max(counterAscent, helperErrorHeight) + subtextGap;
-    final double subtextHeight = math.max(counterSize.height, helperErrorHeight) + subtextGap;
+        math.max(counterAscent, getBaseline(helperError, helperErrorConstraints)) + topPadding;
+    final double bottomHeight = math.max(counterAscent, helperErrorHeight) + bottomPadding;
+    final double subtextHeight = math.max(counterSize.height, helperErrorHeight) + (topPadding+bottomPadding);
     return (ascent: ascent, bottomHeight: bottomHeight, subtextHeight: subtextHeight);
   }
 
@@ -1436,34 +1441,39 @@ class _RenderDecoration extends RenderBox
     final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
 
-    double start, end, startError;
+    double start, end, startSupporting , endSupporting;
+    // double start, end, startError, endError;
     switch (textDirection) {
       case TextDirection.ltr:
         start = contentPadding.start + _boxSize(icon).width;
-        startError = (errorPadding?.start ?? contentPadding.start) + _boxSize(icon).width;
         end = overallWidth - contentPadding.end;
+        startSupporting = (supportingTextPadding?.start ?? contentPadding.start) + _boxSize(icon).width;
+        endSupporting = overallWidth - (supportingTextPadding?.end ?? contentPadding.end);
         _boxParentData(helperError).offset = Offset(
-          startError + decoration.inputGap,
+          startSupporting + decoration.inputGap,
           subtextBaseline - helperErrorBaseline,
         );
         if (counter != null) {
           _boxParentData(counter).offset = Offset(
-            end - counter.size.width - decoration.inputGap,
+            endSupporting - counter.size.width - decoration.inputGap,
+            // endSupporting - counter.size.width - decoration.inputGap,
             subtextBaseline - counterBaseline,
           );
         }
       case TextDirection.rtl:
         start = overallWidth - contentPadding.start - _boxSize(icon).width;
-        startError =
-            overallWidth - (errorPadding?.start ?? contentPadding.start) - _boxSize(icon).width;
         end = contentPadding.end;
+        startSupporting =
+            overallWidth - (supportingTextPadding?.start ?? contentPadding.start) - _boxSize(icon).width;
+        endSupporting = supportingTextPadding?.end ?? contentPadding.end;
         _boxParentData(helperError).offset = Offset(
-          startError - helperError.size.width - decoration.inputGap,
+          startSupporting - helperError.size.width - decoration.inputGap,
           subtextBaseline - helperErrorBaseline,
         );
         if (counter != null) {
           _boxParentData(counter).offset = Offset(
-            end + decoration.inputGap,
+            // end + decoration.inputGap,
+            endSupporting + decoration.inputGap,
             subtextBaseline - counterBaseline,
           );
         }
@@ -2596,14 +2606,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             resolvedPadding.bottom,
           );
 
-    final EdgeInsets? resolvedErrorPadding = decoration.errorPadding?.resolve(textDirection);
-    final EdgeInsetsDirectional? decorationErrorPadding = resolvedErrorPadding == null
+    final EdgeInsets? resolvedSupportingTextPadding = decoration.supportingTextPadding?.resolve(textDirection);
+    final EdgeInsetsDirectional? decorationSupportingTextPadding = resolvedSupportingTextPadding == null
         ? null
         : EdgeInsetsDirectional.fromSTEB(
-            flipHorizontal ? resolvedErrorPadding.right : resolvedErrorPadding.left,
-            resolvedErrorPadding.top,
-            flipHorizontal ? resolvedErrorPadding.left : resolvedErrorPadding.right,
-            resolvedErrorPadding.bottom,
+            flipHorizontal ? resolvedSupportingTextPadding.right : resolvedSupportingTextPadding.left,
+            resolvedSupportingTextPadding.top,
+            flipHorizontal ? resolvedSupportingTextPadding.left : resolvedSupportingTextPadding.right,
+            resolvedSupportingTextPadding.bottom,
           );
 
     final EdgeInsetsDirectional contentPadding;
@@ -2690,7 +2700,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         helperError: helperError,
         counter: counter,
         container: container,
-        errorPadding: decorationErrorPadding,
+        supportingTextPadding: decorationSupportingTextPadding,
       ),
       textDirection: textDirection,
       textBaseline: textBaseline,
@@ -2869,7 +2879,7 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
     this.visualDensity,
-    this.errorPadding,
+    this.supportingTextPadding,
   }) : assert(
          !(label != null && labelText != null),
          'Declaring both label and labelText is not supported.',
@@ -2980,7 +2990,7 @@ class InputDecoration {
        floatingLabelAlignment = floatingLabelAlignment,
        alignLabelWithHint = false,
        visualDensity = null,
-       errorPadding = null;
+       supportingTextPadding = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3927,11 +3937,12 @@ class InputDecoration {
   ///    given decorator.
   final VisualDensity? visualDensity;
 
-  /// The padding applied to the error text.
+  /// The padding applied to the supporting text row.
   ///
-  /// This padding is applied specifically to error text and is independent of [contentPadding].
-  ///  if [errorPadding] is null, the value of [contentPadding] will be used for both error and input text padding.
-  final EdgeInsetsGeometry? errorPadding;
+  /// This padding is applied specifically to supporting text and is independent of [contentPadding].
+  ///  if [supportingTextPadding] is null, the value of [contentPadding] will be used for both supporting text widgets [InputDecoration.helper] , [InputDecoration.counter]
+  ///  and [InputDecoration.error].
+  final EdgeInsetsGeometry? supportingTextPadding;
 
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
@@ -3995,7 +4006,7 @@ class InputDecoration {
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
     SemanticsService? semanticsService,
-    EdgeInsetsGeometry? errorPadding,
+    EdgeInsetsGeometry? supportingTextPadding,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -4056,7 +4067,7 @@ class InputDecoration {
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
       visualDensity: visualDensity ?? this.visualDensity,
-      errorPadding: errorPadding ?? this.errorPadding,
+      supportingTextPadding: supportingTextPadding ?? this.supportingTextPadding,
     );
   }
 
@@ -4112,7 +4123,7 @@ class InputDecoration {
       alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
       constraints: constraints ?? theme.constraints,
       visualDensity: visualDensity ?? theme.visualDensity,
-      errorPadding: errorPadding ?? theme.errorPadding,
+      supportingTextPadding: supportingTextPadding ?? theme.supportingTextPadding,
     );
   }
 
@@ -4183,7 +4194,7 @@ class InputDecoration {
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints &&
         other.visualDensity == visualDensity &&
-        other.errorPadding == errorPadding;
+        other.supportingTextPadding == supportingTextPadding;
   }
 
   @override
@@ -4247,7 +4258,7 @@ class InputDecoration {
       alignLabelWithHint,
       constraints,
       visualDensity,
-      errorPadding,
+      supportingTextPadding,
     ];
     return Object.hashAll(values);
   }
@@ -4309,7 +4320,7 @@ class InputDecoration {
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
       if (visualDensity != null) 'visualDensity: $visualDensity',
-      if (errorPadding != null) 'errorPadding: $errorPadding',
+      if (supportingTextPadding != null) 'supportingTextPadding: $supportingTextPadding',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
@@ -4976,7 +4987,7 @@ class InputDecorationThemeData with Diagnosticable {
     this.alignLabelWithHint = false,
     this.constraints,
     this.visualDensity,
-    this.errorPadding,
+    this.supportingTextPadding,
   });
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
@@ -5416,10 +5427,10 @@ class InputDecorationThemeData with Diagnosticable {
   /// {@macro flutter.material.inputDecoration.visualDensity}
   final VisualDensity? visualDensity;
 
-  /// The padding for the [InputDecoration.errorText].
+  /// The padding for the supporting text row which contains [InputDecoration.errorText] , [InputDecoration.counter] and [InputDecoration.helper].
   ///
-  /// If [errorPadding] is null, [contentPadding] will be used for padding for both error and input text.
-  final EdgeInsetsGeometry? errorPadding;
+  /// If [supportingTextPadding] is null, [contentPadding] will be used for padding for both supporting text row and input text.
+  final EdgeInsetsGeometry? supportingTextPadding;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -5461,7 +5472,7 @@ class InputDecorationThemeData with Diagnosticable {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
-    EdgeInsetsGeometry? errorPadding,
+    EdgeInsetsGeometry? supportingTextPadding,
   }) {
     return InputDecorationThemeData(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -5501,7 +5512,7 @@ class InputDecorationThemeData with Diagnosticable {
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
       visualDensity: visualDensity ?? this.visualDensity,
-      errorPadding: errorPadding ?? this.errorPadding,
+      supportingTextPadding: supportingTextPadding ?? this.supportingTextPadding,
     );
   }
 
@@ -5552,7 +5563,7 @@ class InputDecorationThemeData with Diagnosticable {
       border: border ?? other.border,
       constraints: constraints ?? other.constraints,
       visualDensity: visualDensity ?? other.visualDensity,
-      errorPadding: errorPadding ?? other.errorPadding,
+      supportingTextPadding: supportingTextPadding ?? other.supportingTextPadding,
     );
   }
 
@@ -5596,7 +5607,7 @@ class InputDecorationThemeData with Diagnosticable {
       constraints,
       hintFadeDuration,
       visualDensity,
-      errorPadding,
+      supportingTextPadding,
     ),
   );
 
@@ -5647,7 +5658,7 @@ class InputDecorationThemeData with Diagnosticable {
         other.constraints == constraints &&
         other.disabledBorder == disabledBorder &&
         other.visualDensity == visualDensity &&
-        other.errorPadding == errorPadding;
+        other.supportingTextPadding == supportingTextPadding;
   }
 
   @override
@@ -5727,9 +5738,9 @@ class InputDecorationThemeData with Diagnosticable {
     );
     properties.add(
       DiagnosticsProperty<EdgeInsetsGeometry>(
-        'errorPadding',
-        errorPadding,
-        defaultValue: defaultTheme.errorPadding,
+        'supportingTextPadding',
+        supportingTextPadding,
+        defaultValue: defaultTheme.supportingTextPadding,
       ),
     );
     properties.add(
