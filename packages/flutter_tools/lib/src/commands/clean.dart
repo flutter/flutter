@@ -22,6 +22,13 @@ class CleanCommand extends FlutterCommand {
       'scheme',
       help: 'When cleaning Xcode schemes, clean only the specified scheme.',
     );
+    argParser.addFlag(
+      'include-example',
+      negatable: false,
+      help:
+          'Also clean the example directory, if one exists. '
+          'Useful when developing in a package project.',
+    );
   }
 
   final bool _verbose;
@@ -40,16 +47,34 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Clean Xcode to remove intermediate DerivedData artifacts.
-    // Do this before removing ephemeral directory, which would delete the xcworkspace.
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
-    if (xcode != null && xcode.isInstalledAndMeetsVersionCheck) {
+    final bool cleanXcode = xcode != null && xcode.isInstalledAndMeetsVersionCheck;
+
+    await _cleanProject(flutterProject, cleanXcode: cleanXcode);
+    if (boolArg('include-example')) {
+      if (flutterProject.hasExampleApp) {
+        await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
+      } else {
+        globals.printStatus('No example app found, skipping example cleaning.');
+      }
+    }
+
+    return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  /// Cleans all build artifacts, Xcode workspaces, and ephemeral files for
+  /// the given [flutterProject]. When [cleanXcode] is true, also cleans
+  /// Xcode's DerivedData for iOS and macOS workspaces.
+  Future<void> _cleanProject(FlutterProject flutterProject, {required bool cleanXcode}) async {
+    // Clean Xcode's intermediate DerivedData artifacts before removing
+    // ephemeral directory, which would delete the xcworkspace.
+    if (cleanXcode) {
       await _cleanXcode(flutterProject.ios);
       await _cleanXcode(flutterProject.macos);
     }
 
-    final Directory buildDir = globals.fs.directory(getBuildDirectory());
+    final Directory buildDir = flutterProject.directory.childDirectory(getBuildDirectory());
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
@@ -68,8 +93,6 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.macos.ephemeralDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
     deleteFile(flutterProject.flutterPluginsDependenciesFile);
-
-    return const FlutterCommandResult(ExitStatus.success);
   }
 
   Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {

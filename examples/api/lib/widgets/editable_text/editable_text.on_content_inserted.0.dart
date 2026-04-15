@@ -43,7 +43,7 @@ class _KeyboardInsertedContentDemoState
     return Scaffold(
       appBar: AppBar(title: const Text('Keyboard Inserted Content Sample')),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text(
             "Here's a text field that supports inserting only png or gif content:",

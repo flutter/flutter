@@ -40,6 +40,8 @@ workspace:
   - dev/integration_tests/link_hook
   - dev/integration_tests/new_gallery
   - dev/integration_tests/platform_interaction
+  - dev/integration_tests/record_use_test_app
+  - dev/integration_tests/record_use_test_package
   - dev/integration_tests/release_smoke_test
   - dev/integration_tests/spell_check
   - dev/integration_tests/ui
@@ -47,6 +49,7 @@ workspace:
   - dev/integration_tests/web_compile_tests
   - dev/integration_tests/web_e2e_tests
   - dev/integration_tests/wide_gamut_test
+  - dev/integration_tests/widget_preview_scaffold
   - dev/integration_tests/windows_startup_test
   - dev/manual_tests
   - dev/packages_autoroller
@@ -120,6 +123,7 @@ dependencies:
   googleapis_auth: 2.0.0
   hooks: 1.0.2
   data_assets: 0.19.6
+  record_use: 0.6.0
   html: 0.15.6
   http: 1.6.0
   http_multi_server: 3.2.2
@@ -144,7 +148,7 @@ dependencies:
   package_config: 2.2.0
   path: 1.9.1
   path_provider: 2.1.5
-  path_provider_android: 2.3.0
+  path_provider_android: 2.3.1
   path_provider_foundation: 2.6.0
   path_provider_linux: 2.2.1
   path_provider_platform_interface: 2.1.2
@@ -220,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: iaoh3m
+# PUBSPEC CHECKSUM: vd5srp

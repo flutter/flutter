@@ -4,6 +4,7 @@
 
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart';
+import 'package:pool/pool.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
@@ -342,31 +343,36 @@ class PackagesGetCommand extends FlutterCommand {
         logger: globals.logger,
       );
       final PackageGraph graph = PackageGraph.load(rootProject);
-      // Iterate all root packages in the pub workspace to do Flutter specific
-      // generation.
-      for (final String workspaceRootName in graph.roots) {
+
+      // Build a cache of all pubspec.yaml contents once, keyed by package root
+      // URI. This avoids re-reading the same files for every workspace package
+      // during post-processing.
+      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig);
+      // Process workspace root packages concurrently, capped to 64 to
+      // saturate I/O without exhausting file descriptors or system resources.
+      await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {
         final Package? rootPackage = packageConfig[workspaceRootName];
         assert(rootPackage != null);
         final Uri rootUri = rootPackage!.root;
 
         final FlutterProject project = FlutterProject.fromDirectory(globals.fs.directory(rootUri));
 
-        final environment = Environment(
-          artifacts: globals.artifacts!,
-          logger: globals.logger,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.flutterVersion.engineRevision,
-          fileSystem: globals.fs,
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-          outputDir: globals.fs.directory(getBuildDirectory()),
-          processManager: globals.processManager,
-          platform: globals.platform,
-          analytics: analytics,
-          projectDir: project.directory,
-          packageConfigPath: packageConfigPath(),
-          generateDartPluginRegistry: true,
-        );
         if (project.manifest.generateLocalizations) {
+          final environment = Environment(
+            artifacts: globals.artifacts!,
+            logger: globals.logger,
+            cacheDir: globals.cache.getRoot(),
+            engineVersion: globals.flutterVersion.engineRevision,
+            fileSystem: globals.fs,
+            flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+            outputDir: globals.fs.directory(getBuildDirectory()),
+            processManager: globals.processManager,
+            platform: globals.platform,
+            analytics: analytics,
+            projectDir: project.directory,
+            packageConfigPath: packageConfigPath(),
+            generateDartPluginRegistry: true,
+          );
           // If localizations were enabled, but we are not using synthetic packages.
           final BuildResult result = await globals.buildSystem.build(
             const GenerateLocalizationsTarget(),
@@ -389,19 +395,29 @@ class PackagesGetCommand extends FlutterCommand {
         //
         // It won't be if they do `flutter build --no-pub`, though.
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
-
-        // We need to regenerate the platform specific tooling for both the project
-        // itself and example(if present).
+        // We need to regenerate the platform specific tooling for both the
+        // project itself and example (if present).
         await project.regeneratePlatformSpecificTooling(
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          pubspecCache: pubspecCache,
+          packageGraph: graph,
+          packageConfig: packageConfig,
         );
         if (example && project.hasExampleApp && project.example.pubspecFile.existsSync()) {
           final FlutterProject exampleProject = project.example;
-          await exampleProject.regeneratePlatformSpecificTooling(
-            releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-          );
+          // Skip if the example is already a workspace root — it will be
+          // (or has already been) processed in the main loop, avoiding
+          // double post-processing.
+          if (!graph.roots.contains(exampleProject.manifest.appName)) {
+            await exampleProject.regeneratePlatformSpecificTooling(
+              releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+              pubspecCache: pubspecCache,
+              packageGraph: graph,
+              packageConfig: packageConfig,
+            );
+          }
         }
-      }
+      }).drain<void>();
     }
 
     return FlutterCommandResult.success();
