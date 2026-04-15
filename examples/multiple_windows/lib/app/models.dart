@@ -5,9 +5,9 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter/src/widgets/_window_positioner.dart';
+import 'package:flutter/widgets.dart';
 
 class TooltipSettings {}
 
@@ -42,11 +42,7 @@ class WindowSettings {
 
 /// Provides access to the [WindowSettings] from the widget tree.
 class WindowSettingsAccessor extends InheritedWidget {
-  const WindowSettingsAccessor({
-    super.key,
-    required super.child,
-    required this.windowSettings,
-  });
+  const WindowSettingsAccessor({super.key, required super.child, required this.windowSettings});
 
   final WindowSettings windowSettings;
 
@@ -63,8 +59,7 @@ class WindowSettingsAccessor extends InheritedWidget {
   }
 }
 
-class CallbackDialogWindowControllerDelegate
-    with DialogWindowControllerDelegate {
+class CallbackDialogWindowControllerDelegate with DialogWindowControllerDelegate {
   CallbackDialogWindowControllerDelegate({required this.onDestroyed});
 
   @override

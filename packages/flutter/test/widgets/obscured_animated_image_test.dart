@@ -5,13 +5,14 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 import '../painting/fake_codec.dart';
 import '../painting/fake_image_provider.dart';
+import 'widgets_app_tester.dart';
 
 Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
@@ -20,7 +21,7 @@ Future<void> main() async {
   testWidgets('Obscured image does not animate', (WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
         routes: <String, WidgetBuilder>{'/page': (BuildContext context) => Container()},
       ),
