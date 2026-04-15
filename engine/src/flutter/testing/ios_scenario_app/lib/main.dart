@@ -18,7 +18,6 @@ void main() {
     ..onDrawFrame = _onDrawFrame
     ..onMetricsChanged = _onMetricsChanged
     ..onPointerDataPacket = _onPointerDataPacket
-    ..onHitTest = _onHitTest
     ..scheduleFrame();
   channelBuffers.setListener('driver', _handleDriverMessage);
 
@@ -70,8 +69,4 @@ void _onMetricsChanged() {
 
 void _onPointerDataPacket(PointerDataPacket packet) {
   currentScenario?.onPointerDataPacket(packet);
-}
-
-HitTestResponse _onHitTest(HitTestRequest request) {
-  return currentScenario?.onHitTest(request) ?? HitTestResponse.empty;
 }
