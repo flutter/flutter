@@ -88,8 +88,9 @@ List<Replacer> generatePartsPatterns(String libraryName, bool isPublic) {
     AllReplacer(RegExp(r'\n@JS(.*)\nlibrary .+;'), ''),
     // Remove library directives.
     AllReplacer(RegExp(r'\nlibrary .+;'), ''),
-    // Remove imports/exports from all part files.
-    AllReplacer(RegExp(r"\nimport '.+'\n\s*if \(dart\.library\..*\) '.*';"), ''),
+    // Remove imports/exports from all part files. Handles only `//` comments
+    // before the conditional import.
+    AllReplacer(RegExp(r"\nimport '.+'\n(\s*\/\/.*\n)?\s*if \(dart\.library\..*\) '.*';"), ''),
     AllReplacer(RegExp(r'\nimport\s*.*'), ''),
     AllReplacer(RegExp(r'\nexport\s*.*'), ''),
     AllReplacer(RegExp(r'\n@DefaultAsset(.*)'), ''),
