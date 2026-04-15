@@ -299,8 +299,7 @@ FLUTTER_ASSERT_ARC
   // Calling sceneWillConnectFallback for a second time, didFinishLaunching
   // should be called again.
   OCMStub([mockPlugin application:UIApplication.sharedApplication
-              performActionForShortcutItem:mockShortcutItem
-                         completionHandler:OCMArg.any])
+              didFinishLaunchingWithOptions:expectedApplicationOptions])
       .andReturn(YES);
 
   [delegate sceneWillConnectFallback:mockOptions];
