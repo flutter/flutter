@@ -195,12 +195,7 @@ class FlutterConfiguration {
 
   static const bool flutterWebUseSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
 
-  /// Enable the Skia-based rendering backend.
-  ///
-  /// Using flutter tools option "--web-renderer=canvaskit" would set the value to
-  /// true.
-  ///
-  /// Using flutter tools option "--web-renderer=html" would set the value to false.
+  /// Whether the Skia-based rendering backend (CanvasKit) is enabled.
   static const bool useSkia = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
   // Runtime parameters.

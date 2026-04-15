@@ -26,9 +26,8 @@ abstract class LayerVisitor<R> {
 
 /// Pre-process the layer tree before painting.
 ///
-/// In this step, we compute the estimated [paintBounds] as well as
-/// apply heuristics to prepare the render cache for pictures that
-/// should be cached.
+/// In this step, we compute the estimated [paintBounds] and notify the
+/// [viewEmbedder] of any platform views.
 class PrerollVisitor extends LayerVisitor<void> {
   PrerollVisitor(this.viewEmbedder);
 

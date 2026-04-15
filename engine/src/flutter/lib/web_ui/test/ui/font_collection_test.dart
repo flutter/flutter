@@ -29,14 +29,11 @@ Future<void> testMain() async {
     fakeAssetManager.popAssetScope(testScope);
   });
 
-  test(
-    'Loading valid font from data succeeds without family name (except in HTML renderer)',
-    () async {
-      final FlutterFontCollection collection = renderer.fontCollection;
-      final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
-      expect(await collection.loadFontFromList(ahemData.asUint8List()), isTrue);
-    },
-  );
+  test('Loading valid font from data succeeds without family name', () async {
+    final FlutterFontCollection collection = renderer.fontCollection;
+    final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
+    expect(await collection.loadFontFromList(ahemData.asUint8List()), isTrue);
+  });
 
   test('Loading valid font from data succeeds with family name', () async {
     final FlutterFontCollection collection = renderer.fontCollection;

@@ -17,10 +17,7 @@ class LayerTree {
 
   /// Performs a preroll phase before painting the layer tree.
   ///
-  /// In this phase, the paint boundary for each layer is computed and
-  /// pictures are registered with the raster cache as potential candidates
-  /// to raster. If [ignoreRasterCache] is `true`, then there will be no
-  /// attempt to register pictures to cache.
+  /// In this phase, the paint boundary for each layer is computed.
   void preroll(Frame frame) {
     final prerollVisitor = PrerollVisitor(frame.viewEmbedder);
     rootLayer.accept(prerollVisitor);

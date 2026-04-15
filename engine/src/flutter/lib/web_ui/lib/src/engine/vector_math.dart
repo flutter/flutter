@@ -1128,15 +1128,8 @@ Float64List toMatrix64(Float32List matrix32) {
   return matrix64;
 }
 
-// Stores matrix in a form that allows zero allocation transforms.
 // TODO(yjbanov): re-evaluate the need for this class. It may be an
-//                over-optimization. It is only used by `GradientLinear` in the
-//                HTML renderer. However that class creates a whole new WebGL
-//                context to render the gradient, then copies the resulting
-//                bitmap back into the destination canvas. This is multiple
-//                orders of magnitude more computation and data copying. Saving
-//                an allocation of one point is unlikely to save anything, but
-//                is guaranteed to add complexity (e.g. it's stateful).
+//                over-optimization.
 class FastMatrix32 {
   FastMatrix32(this.matrix);
 

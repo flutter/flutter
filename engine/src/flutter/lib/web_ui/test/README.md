@@ -1,50 +1,20 @@
-...............................................................................
-# Flutter Web Engine Test Suites
-The flutter engine unit tests can be run with a number of different
-configuration options that affect both compile time and run time. The
-permutations of these options are specified in the `felt_config.yaml` file that
-is colocated with this README. Here is an overview of the way the test suite
-configurations are structured:
+# Flutter Web Engine Tests
 
-## `compile-configs`
-Specifies how the tests should be compiled. Each compile config specifies the
-following:
-  * `name` - The name of the compile configuration.
-  * `compiler` - What compiler is used to compile the tests. Currently we support
-    `dart2js` and `dart2wasm` as values.
-  * `renderer` - Which renderer to use when compiling the tests. Currently we
-    support `canvaskit`, and `skwasm`.
+This directory is the central location for the Flutter Web Engine's test suite. It contains unit tests, golden (screenshot) tests, and performance benchmarks designed to verify the correctness and performance of the engine across various browsers, renderers, and compilation targets.
 
-## `test-sets`
-A group of files that contain unit tests. Each test set specifies the following:
-  * `name` - The name of the test set.
-  * `directory` - The name of the directory under `flutter/lib/web_ui/test` that
-    contains all the test files.
+Tests in this directory are typically managed and executed using the `felt` (Flutter Engine Local Tester) tool, which uses the configurations defined in `felt_config.yaml` to handle complex test permutations (e.g., combinations of `dart2js`/`dart2wasm` compilers and `canvaskit`/`skwasm` renderers).
 
-## `test-bundles`
-Specifies a group of tests and a compile configuration of those tests. The output
-of the test bundles appears in `flutter/lib/web_ui/build/test_bundles/<name>`
-where `<name>` is replaced by the name of the bundle. Each test bundle may be used
-by multiple test suites. Each test bundle specifies the following:
-  * `name` - The name of the test bundle.
-  * `test-set` - The name of the test set that contains the tests to be compiled.
-  * `compile-config` - The name of the compile configuration to use.
+## Subdirectories
 
-## `run-configs`
-Specifies the test environment that should be provided to a unit test. Each run
-config specifies the following:
-  * `name` - Name of the run configuration.
-  * `browser` - The browser with which to run the tests. Valid values for this are
-    `chrome`, `firefox`, `safari` or `edge`.
-  * `canvaskit-variant` - An optionally supplied argument that forces the tests to
-    use a particular variant of CanvasKit, either `full` or `chromium`. If none
-    is specified, the engine will select the variant based on its normal selection
-    logic.
+- **`canvaskit/`**: Contains tests specifically for the CanvasKit-based implementation of the engine, including Skia bindings, native memory management, and rendering correctness.
+- **`common/`**: Provides shared testing infrastructure, such as mock asset managers, keyboard simulators, and custom matchers used across the entire test suite.
+- **`engine/`**: Focuses on core engine logic, including browser detection, platform channels, initialization, semantics (accessibility), and pointer event handling.
+- **`fallbacks/`**: Verifies the logic for falling back between different renderers (e.g., Wasm/Skwasm to CanvasKit) depending on browser capabilities.
+- **`skwasm/`**: Contains low-level tests for the Skwasm renderer, specifically focusing on the interface between Dart and the underlying WebAssembly/Skia implementation.
+- **`ui/`**: Contains renderer-agnostic tests for the `dart:ui` and `dart:ui_web` APIs, covering graphics, text, and basic platform integration.
+- **`webparagraph/`**: Tests for the experimental browser-native text layout engine that leverages native browser APIs (like `measureText`) instead of Skia.
 
-## `test-suites`
-This is a fully specified run of a group of unit tests. They specify the following:
-  * `name` - Name of the test suite.
-  * `test-bundle` - Which compiled test bundle to use when running the suite.
-  * `run-config` - Which run configuration to use when runnin the tests.
-  * `artifact-deps` - Which gn/ninja build artifacts are needed to run the suite.
-    Valid values are `canvaskit`, `canvaskit_chromium` or `skwasm`.
+## Files
+
+- **`felt_config.yaml`**: The main configuration file for the `felt` tool. It specifies compile configurations, test sets, test bundles, and run configurations for the test suite.
+- **`FELT_CONFIG.md`**: Documentation explaining the structure and usage of the `felt_config.yaml` file.
