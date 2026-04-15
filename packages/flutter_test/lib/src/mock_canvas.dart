@@ -2127,7 +2127,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
   String toString() {
     final adjectives = <String>[
       for (int index = 0; index < arguments.length; index += 1)
-        arguments[index] != null ? _valueName(arguments[index]) : '...',
+        if (arguments[index] != null) _valueName(arguments[index]) else '...',
     ];
     return '${_symbolName(symbol)}(${adjectives.join(", ")})';
   }
