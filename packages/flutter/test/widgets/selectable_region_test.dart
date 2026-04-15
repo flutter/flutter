@@ -6889,17 +6889,23 @@ void main() {
     final RenderParagraph outerParagraph2 = tester.renderObject<RenderParagraph>(
       find.descendant(of: find.byKey(const Key('rich2')), matching: find.byType(RichText)).first,
     );
+    await gesture.up();
+    await tester.pumpAndSettle();
 
     // When dragging backward from Text E to Text B, all paragraphs between
     // B and E should be fully selected in reverse.
+    expect(paragraphB.selections, isNotEmpty);
+    expect(paragraphC.selections, isNotEmpty);
+    expect(paragraphD.selections, isNotEmpty);
+    expect(paragraphE.selections, isNotEmpty);
+    expect(outerParagraph1.selections, isNotEmpty);
+    expect(outerParagraph2.selections, isNotEmpty);
     expect(paragraphB.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
     expect(paragraphC.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
     expect(paragraphD.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
     expect(paragraphE.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
-    expect(outerParagraph1.selections, isNotEmpty);
-    expect(outerParagraph2.selections, isNotEmpty);
-
-    await gesture.up();
+    expect(outerParagraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 3));
+    expect(outerParagraph2.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
   });
 }
 
