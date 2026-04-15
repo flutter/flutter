@@ -175,8 +175,8 @@ TEST(RectTest, RectFromIRect) {
   // IRect irect2 = IRect::Make(irect);
 }
 
-TEST(RectTest, RectCenterRadius) {
-  Rect rect = Rect::MakeCenterRadius(Point(100.0f, 200.0f), 20.0f);
+TEST(RectTest, RectMakeCircleBounds) {
+  Rect rect = Rect::MakeCircleBounds(Point(100.0f, 200.0f), 20.0f);
 
   EXPECT_EQ(rect.GetLeft(), 80.0f);
   EXPECT_EQ(rect.GetRight(), 120.0f);
@@ -184,8 +184,8 @@ TEST(RectTest, RectCenterRadius) {
   EXPECT_EQ(rect.GetBottom(), 220.0f);
 }
 
-TEST(RectTest, IRectCenterRadius) {
-  IRect rect = IRect::MakeCenterRadius(IPoint(100, 200), 20);
+TEST(RectTest, IRectMakeCircleBounds) {
+  IRect rect = IRect::MakeCircleBounds(IPoint(100, 200), 20);
 
   EXPECT_EQ(rect.GetLeft(), 80);
   EXPECT_EQ(rect.GetRight(), 120);
@@ -193,8 +193,9 @@ TEST(RectTest, IRectCenterRadius) {
   EXPECT_EQ(rect.GetBottom(), 220);
 }
 
-TEST(RectTest, RectCenterRadiiSize) {
-  Rect rect = Rect::MakeCenterRadii(Point(100.0f, 200.0f), Size(20.0f, 30.0f));
+TEST(RectTest, RectMakeEllipseBoundsSize) {
+  Rect rect =
+      Rect::MakeEllipseBounds(Point(100.0f, 200.0f), Size(20.0f, 30.0f));
 
   EXPECT_EQ(rect.GetLeft(), 80.0f);
   EXPECT_EQ(rect.GetRight(), 120.0f);
@@ -202,8 +203,9 @@ TEST(RectTest, RectCenterRadiiSize) {
   EXPECT_EQ(rect.GetBottom(), 230.0f);
 }
 
-TEST(RectTest, RectCenterRadiiPoint) {
-  Rect rect = Rect::MakeCenterRadii(Point(100.0f, 200.0f), Point(20.0f, 30.0f));
+TEST(RectTest, RectMakeEllipseBoundsPoint) {
+  Rect rect =
+      Rect::MakeEllipseBounds(Point(100.0f, 200.0f), Point(20.0f, 30.0f));
 
   EXPECT_EQ(rect.GetLeft(), 80.0f);
   EXPECT_EQ(rect.GetRight(), 120.0f);
@@ -211,8 +213,8 @@ TEST(RectTest, RectCenterRadiiPoint) {
   EXPECT_EQ(rect.GetBottom(), 230.0f);
 }
 
-TEST(RectTest, IRectCenterRadiiSize) {
-  IRect rect = IRect::MakeCenterRadii(IPoint(100, 200), ISize(20, 30));
+TEST(RectTest, IRectMakeEllipseBoundsSize) {
+  IRect rect = IRect::MakeEllipseBounds(IPoint(100, 200), ISize(20, 30));
 
   EXPECT_EQ(rect.GetLeft(), 80);
   EXPECT_EQ(rect.GetRight(), 120);
@@ -220,8 +222,8 @@ TEST(RectTest, IRectCenterRadiiSize) {
   EXPECT_EQ(rect.GetBottom(), 230);
 }
 
-TEST(RectTest, IRectCenterRadiiPoint) {
-  IRect rect = IRect::MakeCenterRadii(IPoint(100, 200), IPoint(20, 30));
+TEST(RectTest, IRectMakeEllipseBoundsPoint) {
+  IRect rect = IRect::MakeEllipseBounds(IPoint(100, 200), IPoint(20, 30));
 
   EXPECT_EQ(rect.GetLeft(), 80);
   EXPECT_EQ(rect.GetRight(), 120);

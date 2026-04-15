@@ -151,20 +151,26 @@ struct TRect {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 
-  constexpr static TRect MakeCenterRadius(const TPoint<Type>& center,
+  /// Construct the rectangular bounds of a circle with the supplied
+  /// center point and uniform radius.
+  constexpr static TRect MakeCircleBounds(const TPoint<Type>& center,
                                           Scalar radius) {
     return MakeLTRB(center.x - radius, center.y - radius,  //
                     center.x + radius, center.y + radius);
   }
 
-  constexpr static TRect MakeCenterRadii(const TPoint<Type>& center,
-                                         const TSize<Type>& radii) {
+  /// Construct the rectangular bounds of a circle with the supplied
+  /// center point and non-uniform horizontal and vertical radii.
+  constexpr static TRect MakeEllipseBounds(const TPoint<Type>& center,
+                                           const TSize<Type>& radii) {
     return MakeLTRB(center.x - radii.width, center.y - radii.height,  //
                     center.x + radii.width, center.y + radii.height);
   }
 
-  constexpr static TRect MakeCenterRadii(const TPoint<Type>& center,
-                                         const TPoint<Type>& radii) {
+  /// Construct the rectangular bounds of a circle with the supplied
+  /// center point and non-uniform horizontal and vertical radii.
+  constexpr static TRect MakeEllipseBounds(const TPoint<Type>& center,
+                                           const TPoint<Type>& radii) {
     return MakeLTRB(center.x - radii.x, center.y - radii.y,  //
                     center.x + radii.x, center.y + radii.y);
   }

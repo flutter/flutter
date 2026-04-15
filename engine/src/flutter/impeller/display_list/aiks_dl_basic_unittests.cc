@@ -917,10 +917,10 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   while (long_radius > 0 && short_radius > 0) {
     paint.setColor(colors[(c_index++) % color_count]);
     builder.DrawOval(
-        DlRect::MakeCenterRadii({10, 10}, Size(long_radius, short_radius)),
+        DlRect::MakeEllipseBounds({10, 10}, Size(long_radius, short_radius)),
         paint);
     builder.DrawOval(
-        DlRect::MakeCenterRadii({1000, 750}, Size(short_radius, long_radius)),
+        DlRect::MakeEllipseBounds({1000, 750}, Size(short_radius, long_radius)),
         paint);
     if (short_radius > 30) {
       short_radius -= 10;

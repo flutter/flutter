@@ -1019,7 +1019,7 @@ void Canvas::DrawCircle(const Point& center,
                         Scalar radius,
                         const Paint& paint) {
   if (IsShadowBlurDrawOperation(paint)) {
-    Rect bounds = Rect::MakeCenterRadius(center, radius);
+    Rect bounds = Rect::MakeCircleBounds(center, radius);
     RRectBlurShape shape(bounds, radius);
     if (AttemptDrawBlur(shape, paint)) {
       return;

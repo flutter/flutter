@@ -98,7 +98,7 @@ GeometryResult SuperellipseGeometry::GetPositionBuffer(
 
 std::optional<Rect> SuperellipseGeometry::GetCoverage(
     const Matrix& transform) const {
-  return Rect::MakeCenterRadius(center_, radius_);
+  return Rect::MakeCircleBounds(center_, radius_);
 }
 
 bool SuperellipseGeometry::CoversArea(const Matrix& transform,
