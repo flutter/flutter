@@ -44,8 +44,10 @@ float distanceFromRect(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-// Newton-Raphson method minimizing the dot product
-// between the tangent of the ellipse and p minus the closest point.
+// Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
+// plane. Let q(w0) be the closest point on q to p, then q(w0) - p is tangent to
+// q(w0), and (q(w0) - p) dot q'(w0) = 0. This function uses the Newton-Raphson
+// method to find q(w0).
 //
 // `p` is the coordinate of the point relative to the center of the oval
 // `ab` is the extent of the oval from the center to the x and y axis
@@ -72,29 +74,34 @@ float distanceFromRect(vec2 p, vec2 b) {
 // https://iquilezles.org
 
 float distanceFromOval(vec2 p, vec2 ab) {
-  // symmetry
+  // The ellipse is symmetric along both axes, do the calculation in the upper
+  // right quadrant.
   p = abs(p);
 
-  // initial value
+  // Initial guess for w0. Determine whether q is closer to the top of the
+  // ellipse or closer to the righthand side. Use the top (0) or righthand side
+  // (pi/2) as the initial guess for w0.
   vec2 q = ab * (p - ab);
-  vec2 cs = normalize((q.x < q.y) ? vec2(0.01, 1) : vec2(1, 0.01));
-
-  // find root with Newton solver (see https://www.shadertoy.com/view/4lsXDN)
+  float w = (q.x < q.y) ? 1.570796327 : 0.0;
   for (int i = 0; i < 5; i++) {
+    vec2 cs = vec2(cos(w), sin(w));
+
+    // u = q(w) = (a*cos(w), b*sin(w))
     vec2 u = ab * vec2(cs.x, cs.y);
+
+    // v = q'(w) = (a*-sin(w), b*cos(w))
     vec2 v = ab * vec2(-cs.y, cs.x);
 
-    float a = dot(p - u, v);
-    float c = dot(p - u, u) + dot(v, v);
-    float b = sqrt(c * c - a * a);
-
-    cs = vec2(cs.x * b - cs.y * a, cs.y * b + cs.x * a) / c;
+    // Newton-Raphson update step, w_n = w_n-1 + f(w_n-1)/f'(w_n-1)
+    // In this case f(w) = (p - q(w)) dot q'(w) = (p - u) dot v
+    w = w + dot(p - u, v) / (dot(p - u, u) + dot(v, v));
   }
 
-  // compute final point and distance
-  float d = length(p - ab * cs);
+  // Compute final point and distance
+  float d = length(p - ab * vec2(cos(w), sin(w)));
 
-  // return signed distance
+  // Return signed distance.
+  // p is outside the ellipse if (p.x/a)^2 + (p.y/b)^2 > 0
   return (dot(p / ab, p / ab) > 1.0) ? d : -d;
 }
 
