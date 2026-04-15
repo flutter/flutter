@@ -371,6 +371,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  hooks_runner:
+    dependency: transitive
+    description:
+      name: hooks_runner
+      sha256: "132d5ae53e6f1e313f5877ff9664ed8a333e8f4807de0717a00d8a6f1f37ddaa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   html:
     dependency: "direct main"
     description:
