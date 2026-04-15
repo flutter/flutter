@@ -50,11 +50,4 @@ abstract class Scenario {
   ///
   /// See [PlatformDispatcher.onPointerDataPacket].
   void onPointerDataPacket(PointerDataPacket packet) {}
-
-  /// Called by the program when a hit test is requested.
-  ///
-  /// See [PlatformDispatcher.onHitTest].
-  HitTestResponse onHitTest(HitTestRequest request) {
-    return HitTestResponse.empty;
-  }
 }

@@ -424,8 +424,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 ///
 ///  * [UiKitView], which is a widget that is used to show a UIView.
 ///  * [PlatformViewsService], which is a service for controlling platform views.
-class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController>
-    with NativeHitTestTarget {
+class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   /// Creates a render object for an iOS UIView.
   RenderUiKitView({
     required super.viewController,
