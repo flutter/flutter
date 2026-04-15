@@ -1290,7 +1290,7 @@ mixin TextSelectionDelegate {
   /// Whether share is enabled.
   bool get shareEnabled => true;
 
-  /// Whether translate is enabled
+  /// Whether translate is enabled.
   bool get translateEnabled => true;
 
   /// Whether Live Text input is enabled.
@@ -3338,7 +3338,7 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
   }
 }
 
-/// A [IOSSystemContextMenuItemData] for the system's built-in translate
+/// An [IOSSystemContextMenuItemData] for the system's built-in translate
 /// button.
 ///
 /// Must specify a [title], typically

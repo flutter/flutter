@@ -3002,10 +3002,8 @@ class EditableTextState extends State<EditableText>
   ///
   /// Currently this is only implemented for iOS.
   ///
-  /// When 'obscureText' is true or the selection is empty,
-  /// this function will not do anything
+  /// When 'obscureText' is true or the selection is empty, this function will not do anything.
   Future<void> translateSelection(SelectionChangedCause cause) async {
-    assert(!widget.obscureText);
     if (widget.obscureText) {
       return;
     }

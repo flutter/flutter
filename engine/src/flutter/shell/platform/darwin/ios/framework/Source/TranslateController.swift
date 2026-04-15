@@ -60,9 +60,7 @@ class TranslateViewController: UIViewController {
     swiftUIViewController.didMove(toParent: self)
   }
 
-  @objc func makeTranslateHostingController(termToTranslate: String)
-  -> UIViewController
-  {
+  @objc func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
     var contentView = ContentView(
       termToTranslate: termToTranslate,
       ipadBounds: ipadBounds
@@ -91,7 +89,8 @@ struct ContentView: View {
 
   private var anchorSource: Anchor<CGRect>.Source {
     // On iPad, the translate screen is presented in a popover view
-    // anchored to the textbox rather than a sheet
+    // anchored to the text selection. On iPhone, it is presented as a sheet
+    // and uses the entire view bounds.
     if let rect = ipadBounds {
       return .rect(rect)
     }
@@ -99,23 +98,23 @@ struct ContentView: View {
   }
 
   var body: some View {
-      Color.clear
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .translationPresentation(
-          isPresented: Binding(
-            get: { isPresented },
-            set: { newValue in
-              isPresented = newValue
-              if !newValue {
-                onDismiss?()
-              }
+    Color.clear
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .translationPresentation(
+        isPresented: Binding(
+          get: { isPresented },
+          set: { newValue in
+            isPresented = newValue
+            if !newValue {
+              onDismiss?()
             }
-          ),
-          text: termToTranslate,
-          attachmentAnchor: .rect(anchorSource)
-        )
-        .onAppear {
-          isPresented = true
+          }
+        ),
+        text: termToTranslate,
+        attachmentAnchor: .rect(anchorSource)
+      )
+      .onAppear {
+        isPresented = true
       }
   }
 }

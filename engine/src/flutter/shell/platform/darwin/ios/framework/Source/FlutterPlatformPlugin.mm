@@ -206,7 +206,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
     UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
 
-    // firstRectForRange cannot be used here as it's current implementation does
+    // firstRectForRange cannot be used here as its current implementation does
     // not always return the full rect of the range.
     CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
         caretRectForPosition:(FlutterTextPosition*)range.start];
@@ -464,7 +464,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
     UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
 
-    // firstRectForRange cannot be used here as it's current implementation does
+    // firstRectForRange cannot be used here as its current implementation does
     // not always return the full rect of the range.
     CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
         caretRectForPosition:(FlutterTextPosition*)range.start];
