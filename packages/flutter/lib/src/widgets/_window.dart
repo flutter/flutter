@@ -270,7 +270,7 @@ abstract class RegularWindowController extends BaseWindowController {
   ///
   /// The [resizable] argument configures whether or not the window may be
   /// resized by the platform. If `false`, the window will be fixed to its
-  /// initial content size within its [preferredConstraints].
+  /// content size within its [preferredConstraints].
   /// If `true`, the user will be able to resize the window within its
   /// [preferredConstraints].
   /// {@endtemplate}
