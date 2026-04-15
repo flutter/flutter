@@ -189,42 +189,31 @@ mixin class RegularWindowControllerDelegate {
 /// {@macro flutter.widgets.windowing.experimental}
 @internal
 abstract class RegularWindowController extends BaseWindowController {
-  /// Creates a [RegularWindowController] with the provided properties.
+  /// Creates a [RegularWindowController] with a specific size.
   ///
-  /// Upon construction, the window is created by the platform.
+  /// Upon construction, the window is created by the platform with the
+  /// given [preferredSize].
   ///
-  /// {@template flutter.widgets.windowing.constraints}
+  /// {@template flutter.widgets.windowing.sizedConstructor}
   /// The [preferredSize] is the preferred content size of the window.
   /// This might not be honored by the platform. This is the size that
   /// the platform will try to apply to the window when it is created.
-  /// When `null`, the window will be sized to its content.
   ///
-  /// In contrast, the [preferredConstraints] field enforces the minimum and maximum size of
-  /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
-  /// or the [preferredSize] is null, then the platform will attempt to use an
-  /// initial size that does satisfy the [preferredConstraints] instead.
-  ///
-  /// The [preferredConstraints] are the constraints placed upon the size
-  /// of the window. This might not be honored by the platform.
+  /// The [preferredConstraints] field enforces the minimum and maximum size of
+  /// the window. The [preferredSize] must satisfy the [preferredConstraints].
+  /// This might not be honored by the platform.
   /// This field enforces a minimum and maximum size on the window. If the
   /// user attempts to resize the window beyond these constraints, the platform
   /// will enforce the constraints according to its own policy. For example, the
   /// platform might clip the content to fit within the resized window, or it might
   /// prevent the window from being resized altogether. If null, the window will
   /// be unconstrained.
-  ///
-  /// If both [preferredSize] and [preferredConstraints] are null,
-  /// then the platform will size the window to its content exactly.
-  ///
-  /// The [resizable] argument configures whether or not the window may be
-  /// resized by the platform. If `false`, the window will be fixed to its
-  /// initial size as decided by [preferredSize] and [preferredConstraints].
-  /// If `true`, the user will be able to resize the window within its
-  /// [preferredConstraints]. If [resizable] is `true` and no explicit size
-  /// is provided, the window is initially sized to its content but may be
-  /// freely resized afterwards within its [preferredConstraints].
   /// {@endtemplate}
   ///
+  /// To create a window that is sized to its content instead, use
+  /// [RegularWindowController.sizedToContent].
+  ///
+  /// {@template flutter.widgets.windowing.shared}
   /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
@@ -235,13 +224,13 @@ abstract class RegularWindowController extends BaseWindowController {
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
   /// a window is closed.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   factory RegularWindowController({
-    Size? preferredSize,
+    required Size preferredSize,
     BoxConstraints? preferredConstraints,
-    bool resizable = true,
     String? title,
     bool decorated = true,
     RegularWindowControllerDelegate? delegate,
@@ -250,7 +239,7 @@ abstract class RegularWindowController extends BaseWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
-    if (preferredSize != null && preferredConstraints != null) {
+    if (preferredConstraints != null) {
       assert(preferredConstraints.isSatisfiedBy(preferredSize));
     }
 
@@ -258,6 +247,55 @@ abstract class RegularWindowController extends BaseWindowController {
     return owner.createRegularWindowController(
       delegate: delegate ?? RegularWindowControllerDelegate(),
       preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+      decorated: decorated,
+    );
+  }
+
+  /// Creates a [RegularWindowController] that sizes the window to its content.
+  ///
+  /// Upon construction, the window is created by the platform and initially
+  /// sized to fit its content.
+  ///
+  /// {@template flutter.widgets.windowing.sizedToContentConstructor}
+  /// The [preferredConstraints] field enforces the minimum and maximum size of
+  /// the window. This might not be honored by the platform.
+  /// This field enforces a minimum and maximum size on the window. If the
+  /// user attempts to resize the window beyond these constraints, the platform
+  /// will enforce the constraints according to its own policy. For example, the
+  /// platform might clip the content to fit within the resized window, or it might
+  /// prevent the window from being resized altogether. If null, the window will
+  /// be unconstrained.
+  ///
+  /// The [resizable] argument configures whether or not the window may be
+  /// resized by the platform. If `false`, the window will be fixed to its
+  /// initial content size within its [preferredConstraints].
+  /// If `true`, the user will be able to resize the window within its
+  /// [preferredConstraints].
+  /// {@endtemplate}
+  ///
+  /// To create a window with a specific size instead, use the default
+  /// [RegularWindowController] constructor.
+  ///
+  /// {@macro flutter.widgets.windowing.shared}
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  factory RegularWindowController.sizedToContent({
+    bool resizable = true,
+    BoxConstraints? preferredConstraints,
+    String? title,
+    bool decorated = true,
+    RegularWindowControllerDelegate? delegate,
+  }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
+    return owner.createRegularWindowController(
+      delegate: delegate ?? RegularWindowControllerDelegate(),
       preferredConstraints: preferredConstraints,
       resizable: resizable,
       title: title,
@@ -506,12 +544,17 @@ mixin class DialogWindowControllerDelegate {
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 abstract class DialogWindowController extends BaseWindowController {
-  /// Creates a [DialogWindowController] with the provided properties.
+  /// Creates a [DialogWindowController] with a specific size.
   ///
-  /// Upon construction, the window is created by the platform.
+  /// Upon construction, the window is created by the platform with the
+  /// given [preferredSize].
   ///
-  /// {@macro flutter.widgets.windowing.constraints}
+  /// {@macro flutter.widgets.windowing.sizedConstructor}
   ///
+  /// To create a dialog that is sized to its content instead, use
+  /// [DialogWindowController.sizedToContent].
+  ///
+  /// {@template flutter.widgets.windowing.dialogParent}
   /// The [parent] argument specifies the parent window of this dialog.
   ///
   /// If the [parent] is null, then the dialog is modeless. Such dialogs can
@@ -520,21 +563,53 @@ abstract class DialogWindowController extends BaseWindowController {
   /// If the [parent] is non-null, then the dialog is modal to the parent.
   /// Such dialogs do not have a system menu. They are also not selectable
   /// from the window switcher and they are closed when the parent is closed.
+  /// {@endtemplate}
   ///
-  /// The [title] argument configures the window's title.
-  /// If omitted, some platforms might fall back to the app's name.
-  ///
-  /// The [decorated] argument configures whether the window has decorations
-  /// such as title bar, borders, etc. If false, the user should provide their
-  /// own decorations.
-  ///
-  /// The [delegate] argument can be used to listen to the window's
-  /// lifecycle. For example, it can be used to save state before
-  /// a window is closed.
+  /// {@macro flutter.widgets.windowing.shared}
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   factory DialogWindowController({
-    Size? preferredSize,
+    required Size preferredSize,
+    BoxConstraints? preferredConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool decorated = true,
+    DialogWindowControllerDelegate? delegate,
+  }) {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    if (preferredConstraints != null) {
+      assert(preferredConstraints.isSatisfiedBy(preferredSize));
+    }
+
+    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
+    return owner.createDialogWindowController(
+      delegate: delegate ?? DialogWindowControllerDelegate(),
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+      decorated: decorated,
+      parent: parent,
+    );
+  }
+
+  /// Creates a [DialogWindowController] that sizes the window to its content.
+  ///
+  /// Upon construction, the window is created by the platform and initially
+  /// sized to fit its content.
+  ///
+  /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
+  ///
+  /// To create a dialog with a specific size instead, use the default
+  /// [DialogWindowController] constructor.
+  ///
+  /// {@macro flutter.widgets.windowing.dialogParent}
+  ///
+  /// {@macro flutter.widgets.windowing.shared}
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  factory DialogWindowController.sizedToContent({
+    bool resizable = true,
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
@@ -545,8 +620,8 @@ abstract class DialogWindowController extends BaseWindowController {
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createDialogWindowController(
       delegate: delegate ?? DialogWindowControllerDelegate(),
-      preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
+      resizable: resizable,
       title: title,
       decorated: decorated,
       parent: parent,
@@ -1081,7 +1156,29 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// space to which the tooltip is anchored. If it is `null`, then the satellite
   /// is position relative to the parent window, including its decorations.
   ///
-  /// {@macro flutter.widgets.windowing.constraints}
+  /// {@template flutter.widgets.windowing.constraints}
+  /// The [preferredSize] is the preferred content size of the window.
+  /// This might not be honored by the platform. This is the size that
+  /// the platform will try to apply to the window when it is created.
+  /// When `null`, the window will be sized to its content.
+  ///
+  /// In contrast, the [preferredConstraints] field enforces the minimum and maximum size of
+  /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
+  /// or the [preferredSize] is null, then the platform will attempt to use an
+  /// initial size that does satisfy the [preferredConstraints] instead.
+  ///
+  /// The [preferredConstraints] are the constraints placed upon the size
+  /// of the window. This might not be honored by the platform.
+  /// This field enforces a minimum and maximum size on the window. If the
+  /// user attempts to resize the window beyond these constraints, the platform
+  /// will enforce the constraints according to its own policy. For example, the
+  /// platform might clip the content to fit within the resized window, or it might
+  /// prevent the window from being resized altogether. If null, the window will
+  /// be unconstrained.
+  ///
+  /// If both [preferredSize] and [preferredConstraints] are null,
+  /// then the platform will size the window to its content exactly.
+  /// {@endtemplate}
   ///
   /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
