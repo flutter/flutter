@@ -69,6 +69,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required FileSystem fileSystem,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
+  required File? recordedUsesFile,
 }) async {
   if (!await _hookRunRequired(buildRunner)) {
     return DartHooksResult.empty();
@@ -109,6 +110,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     projectUri: projectUri,
     linkingEnabled: linkingEnabled,
     targets: targets,
+    recordedUsesFile: recordedUsesFile,
   );
 }
 
@@ -167,6 +169,7 @@ abstract interface class FlutterNativeAssetsBuildRunner {
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
+    required File? recordedUsesFile,
   });
 
   Future<void> setCCompilerConfig(CodeAssetTarget target);
@@ -263,10 +266,12 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   Future<LinkResult?> link({
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
+    required File? recordedUsesFile,
   }) async {
     final Result<LinkResult, HooksRunnerFailure> result = await _buildRunner.link(
       extensions: extensions,
       buildResult: buildResult,
+      resourceIdentifiers: recordedUsesFile?.uri,
     );
     if (result.isSuccess) {
       return result.success;
@@ -534,6 +539,7 @@ Future<DartHooksResult> _runDartHooks({
   required List<AssetBuildTarget> targets,
   required Uri projectUri,
   required bool linkingEnabled,
+  required File? recordedUsesFile,
 }) async {
   final buildStart = DateTime.now();
 
@@ -559,7 +565,7 @@ Future<DartHooksResult> _runDartHooks({
 
     LinkResult? linkResult;
     if (linkingEnabled) {
-      linkResult = await _link(buildRunner, extensions, buildResult);
+      linkResult = await _link(buildRunner, extensions, buildResult, recordedUsesFile);
       if (target is CodeAssetTarget) {
         codeAssets.addAll(
           _filterCodeAssets(
@@ -635,10 +641,12 @@ Future<LinkResult> _link(
   FlutterNativeAssetsBuildRunner buildRunner,
   List<ProtocolExtension> extensions,
   BuildResult buildResult,
+  File? recordedUsesFile,
 ) async {
   final LinkResult? linkResult = await buildRunner.link(
     extensions: extensions,
     buildResult: buildResult,
+    recordedUsesFile: recordedUsesFile,
   );
   if (linkResult == null) {
     _throwNativeAssetsLinkFailed();
