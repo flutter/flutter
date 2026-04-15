@@ -16,6 +16,11 @@
 
 namespace flutter {
 
+namespace testing {
+FML_TEST_CLASS(GPUSurfaceVulkanImpeller,
+               RecreatesTransientsWhenFrameSizeChanges);
+}  // namespace testing
+
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
   explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
@@ -28,6 +33,9 @@ class GPUSurfaceVulkanImpeller final : public Surface {
   bool IsValid() override;
 
  private:
+  FML_FRIEND_TEST(testing::GPUSurfaceVulkanImpeller,
+                  RecreatesTransientsWhenFrameSizeChanges);
+
   GPUSurfaceVulkanDelegate* delegate_;
   std::shared_ptr<impeller::Context> impeller_context_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
