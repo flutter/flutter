@@ -589,8 +589,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
+            final String? kind = arguments.tryString('kind');
             for (final EngineFlutterView view in views) {
-              view.mouseCursor.activateSystemCursor(arguments.tryString('kind'));
+              view.mouseCursor.activateSystemCursor(kind);
             }
         }
         return;
