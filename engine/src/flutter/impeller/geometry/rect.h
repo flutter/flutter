@@ -154,7 +154,7 @@ struct TRect {
   /// Construct the rectangular bounds of a circle with the supplied
   /// center point and uniform radius.
   constexpr static TRect MakeCircleBounds(const TPoint<Type>& center,
-                                          Scalar radius) {
+                                          Type radius) {
     return MakeLTRB(center.x - radius, center.y - radius,  //
                     center.x + radius, center.y + radius);
   }
