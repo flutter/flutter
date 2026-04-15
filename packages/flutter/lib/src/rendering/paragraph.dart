@@ -1164,14 +1164,14 @@ class RenderParagraph extends RenderBox
     return _textPainter.size;
   }
 
-  /// Returns a list of [ui.LineMetrics] objects describing the
-  /// metrics of each line in the paragraph.
+  /// {@macro flutter.painting.TextPainter.computeLineMetrics}
   ///
-  /// This method must be called after [layout].
+  /// {@tool dartpad}
+  /// This example shows how to use [RenderParagraph.computeLineMetrics]
+  /// to access per-line layout metrics.
   ///
-  /// See also:
-  ///
-  ///  * [TextPainter.computeLineMetrics], which this method delegates to.
+  /// ** See code in `examples/api/lib/painting/line_metrics_example.dart` **
+  /// {@end-tool}
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);

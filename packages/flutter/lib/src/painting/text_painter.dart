@@ -1772,6 +1772,7 @@ class TextPainter {
     );
   }
 
+  /// {@template flutter.painting.TextPainter.computeLineMetrics}
   /// Returns the full list of [LineMetrics] that describe in detail the various
   /// metrics of each laid out line.
   ///
@@ -1783,6 +1784,7 @@ class TextPainter {
   /// widgets to a particular line.
   ///
   /// Valid only after [layout] has been called.
+  /// {@endtemplate}
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
