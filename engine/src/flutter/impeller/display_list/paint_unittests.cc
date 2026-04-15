@@ -22,7 +22,7 @@ TEST(PaintTest, OptionalStrokeWithFill) {
   paint.stroke.width = 20.0f;
   paint.stroke.miter_limit = 100.0f;
 
-  EXPECT_FALSE(paint.GetOptionalStroke().has_value());
+  EXPECT_FALSE(paint.GetStroke().has_value());
   // Even though optional stroke wasn't returned, the underlying values
   // are still in the Paint.
   EXPECT_EQ(paint.stroke.cap, Cap::kRound);
@@ -39,7 +39,7 @@ TEST(PaintTest, OptionalStrokeWithStroke) {
   paint.stroke.width = 20.0f;
   paint.stroke.miter_limit = 100.0f;
 
-  std::optional<StrokeParameters> optional_stroke = paint.GetOptionalStroke();
+  std::optional<StrokeParameters> optional_stroke = paint.GetStroke();
   EXPECT_TRUE(optional_stroke.has_value());
   if (optional_stroke.has_value()) {  // Test to keep clang-tidy happy.
     EXPECT_EQ(optional_stroke->cap, Cap::kRound);

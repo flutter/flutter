@@ -88,14 +88,9 @@ struct Paint {
   /// @brief   Return an optional StrokeParameters if this Paint is a stroked
   ///          Paint, otherwise return a nullopt.
   /// @return  An optional set of StrokeParameters
-  std::optional<StrokeParameters> GetOptionalStroke() const {
-    switch (style) {
-      case Style::kFill:
-        return std::nullopt;
-      case Style::kStroke:
-        return stroke;
-    }
-  };
+  std::optional<StrokeParameters> GetStroke() const {
+    return (style == Style::kStroke) ? std::optional(stroke) : std::nullopt;
+  }
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
