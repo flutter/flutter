@@ -56,7 +56,6 @@ struct RenderParameters {
   DlScalar skew_x = 0.0f;
   DlScalar skew_y = 0.0f;
   DlScalar degrees = 0.0f;
-  bool show_contours = false;
 };
 
 void RenderPrimitiveWithHairline(DisplayListBuilder& builder,
@@ -69,9 +68,9 @@ void RenderPrimitiveWithHairline(DisplayListBuilder& builder,
   builder.Skew(params.skew_x, params.skew_y);
   builder.Translate(-params.center.x, -params.center.y);
 
-  constexpr DlScalar fill_radius = 100.0f;
-  constexpr DlScalar stroke_inset = 10.0f;
-  constexpr DlScalar stroke_radius = fill_radius - stroke_inset;
+  const DlScalar base_radius = 100.0f;
+  const DlScalar fill_radius = base_radius + params.stroke_width;
+  const DlScalar stroke_radius = base_radius - 10.0f;
 
   auto make_square_bounds = [&params](DlScalar radius) -> DlRect {
     return DlRect::MakeLTRB(params.center.x - radius, params.center.y - radius,
@@ -128,28 +127,9 @@ void RenderPrimitiveWithHairline(DisplayListBuilder& builder,
     }
   };
 
-  if (params.show_contours) {
-    DlColor colors[2][2] = {
-        {
-            DlColor::ARGB(1.0f, 0.3f, 0.2f, 0.0f),
-            DlColor::ARGB(1.0f, 0.5f, 0.4f, 0.2f),
-        },
-        {
-            DlColor::ARGB(1.0f, 0.2f, 0.2f, 0.5f),
-            DlColor::ARGB(1.0f, 0.4f, 0.4f, 0.5f),
-        },
-    };
-    int parity = 0;
-    for (DlScalar radius = stroke_radius + 500; radius > 0; radius -= 5) {
-      draw_shape(radius, colors[radius > stroke_radius ? 0 : 1][parity]);
-      parity = 1 - parity;
-    }
-    draw_shape(stroke_radius, DlColor::kWhite(), params.stroke_width);
-  } else {
-    draw_shape(fill_radius, DlColor::kBlue());
-    draw_shape(stroke_radius, DlColor::ARGB(1.0f, 0.0f, 0.0f, 0.5f));
-    draw_shape(stroke_radius, DlColor::kWhite(), params.stroke_width);
-  }
+  draw_shape(fill_radius, DlColor::kBlue());
+  draw_shape(stroke_radius, DlColor::ARGB(1.0f, 0.0f, 0.0f, 0.5f));
+  draw_shape(stroke_radius, DlColor::kWhite(), params.stroke_width);
 
   builder.Restore();
 }
@@ -186,7 +166,6 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
       ImGui::SliderFloat("X Skew", &params.skew_x, 0.0f, 1.0f);
       ImGui::SliderFloat("Y Skew", &params.skew_y, 0.0f, 1.0f);
       ImGui::SliderFloat("Rotation", &params.degrees, 0.0f, 360.0f);
-      ImGui::Checkbox("Show SDF contours", &params.show_contours);
       ImGui::ListBox(
           "Shape Type", &render_type_index,
           [](void* data, int index) {
