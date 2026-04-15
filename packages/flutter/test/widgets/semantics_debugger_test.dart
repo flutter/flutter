@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'button_tester.dart';
 import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
+import 'slider_tester.dart';
 import 'widgets_app_tester.dart';
 
 const Color _green = Color(0xFF4CAF50);
@@ -327,7 +328,7 @@ void main() {
             child: MediaQuery(
               data: MediaQueryData.fromView(tester.view),
               child: Center(
-                child: _TestSlider(
+                child: TestSlider(
                   value: value,
                   onChanged: (double newValue) {
                     value = newValue;
@@ -346,7 +347,7 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(
-      find.byType(_TestSlider),
+      find.byType(TestSlider),
       const Offset(-100.0, 0.0),
       2000.0,
       warnIfMissed: false,
@@ -589,27 +590,6 @@ String _getMessageShownInSemanticsDebugger({
         tester.renderObject(find.byKey(widgetKey)).debugSemantics,
       )
       as String;
-}
-
-/// A minimal slider widget for testing SemanticsDebugger interactions without
-/// depending on the Material library.
-class _TestSlider extends StatelessWidget {
-  const _TestSlider({required this.value, required this.onChanged});
-
-  final double value;
-  final ValueChanged<double> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      value: '${(value * 100).round()}%',
-      increasedValue: '${((value + 0.1).clamp(0.0, 1.0) * 100).round()}%',
-      decreasedValue: '${((value - 0.1).clamp(0.0, 1.0) * 100).round()}%',
-      onIncrease: () => onChanged((value + 0.1).clamp(0.0, 1.0)),
-      onDecrease: () => onChanged((value - 0.1).clamp(0.0, 1.0)),
-      child: const SizedBox(width: 200, height: 36),
-    );
-  }
 }
 
 dynamic _getSemanticsDebuggerPainter({required Key debuggerKey, required WidgetTester tester}) {

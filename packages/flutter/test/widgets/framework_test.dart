@@ -1178,8 +1178,8 @@ void main() {
       expect(pageController.page, 0.0);
 
       // switch pages 0 -> 1
-      pageController.jumpToPage(1);
-      await tester.pump(const Duration(seconds: 1)); // finish the animation
+      pageController.animateToPage(1, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+      await tester.pumpAndSettle(); // finish the animation
 
       expect(pageController.page, 1.0);
 
