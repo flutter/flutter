@@ -26,21 +26,33 @@ class PlatformViewAndroidJNIImplTest : public ::testing::Test {
     std::call_once(jvm_init_flag, SetUpJVM);
   }
 
- protected:
-  static void SetJNIEnv(JNIEnv* env) { jvm_.SetJNIEnv(env); }
-
  private:
+  friend class MockJNIEnvProvider;
   static MockJavaVM jvm_;
   static void SetUpJVM();
 };
 
 MockJavaVM PlatformViewAndroidJNIImplTest::jvm_;
 
+class MockJNIEnvProvider {
+ public:
+  MockJNIEnvProvider() {
+    PlatformViewAndroidJNIImplTest::jvm_.SetJNIEnv(&env_);
+  }
+  ~MockJNIEnvProvider() {
+    PlatformViewAndroidJNIImplTest::jvm_.SetJNIEnv(nullptr);
+  }
+  MockJNIEnv& env() { return env_; }
+
+ private:
+  MockJNIEnv env_;
+};
+
 void PlatformViewAndroidJNIImplTest::SetUpJVM() {
   fml::jni::InitJavaVM(&jvm_);
 
-  MockJNIEnv mock_env;
-  SetJNIEnv(&mock_env);
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
 
   const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
   const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
@@ -68,8 +80,8 @@ void PlatformViewAndroidJNIImplTest::SetUpJVM() {
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
-  MockJNIEnv mock_env;
-  SetJNIEnv(&mock_env);
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
 
   // Call ImageGetHardwareBuffer and simulate throwing an exception.
   // Verify that it clears the exception and does not abort the process.
