@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../common/dynamic_title.dart';
+import 'about_list_tile.dart';
 import 'action_chip.dart';
 import 'app_bar.dart';
 import 'auto_complete.dart';
@@ -67,6 +68,7 @@ abstract class UseCase {
 }
 
 final List<UseCase> useCases = <UseCase>[
+  AboutListTileUseCase(),
   CheckBoxListTile(),
   DialogUseCase(),
   SliderUseCase(),
