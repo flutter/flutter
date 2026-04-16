@@ -15,7 +15,6 @@ If you are still working on this, please feel free to reopen it or file a new pu
 
 Thanks for your contribution.`;
 
-  // Scheduled job
   const now = new Date();
   const closeDate = new Date(now.getTime() - (daysUntilClose * 24 * 60 * 60 * 1000));
 
