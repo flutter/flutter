@@ -33,6 +33,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) : skParagraphStyle = toSkParagraphStyle(
          textAlign,
          textDirection,
@@ -59,7 +60,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
        _textHeightBehavior = textHeightBehavior,
        _strutStyle = strutStyle,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _hyphens = hyphens;
 
   final SkParagraphStyle skParagraphStyle;
 
@@ -76,6 +78,11 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
+  // TODO(dbebawy): honor hyphens once the configurable-soft-hyphen-string Skia
+  // change (https://skia-review.googlesource.com/c/skia/+/1205922) lands and its
+  // binding is exposed on SkParagraphStyleProperties. Accepted and stored for now.
+  // https://github.com/flutter/flutter/issues/18443
+  final ui.Hyphens? _hyphens;
 
   static SkTextStyleProperties toSkTextStyleProperties(
     String? fontFamily,
@@ -263,7 +270,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         other._textHeightBehavior == _textHeightBehavior &&
         other._strutStyle == _strutStyle &&
         other._ellipsis == _ellipsis &&
-        other._locale == _locale;
+        other._locale == _locale &&
+        other._hyphens == _hyphens;
   }
 
   @override
@@ -282,6 +290,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       _strutStyle,
       _ellipsis,
       _locale,
+      _hyphens,
     );
   }
 
@@ -304,6 +313,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
           'strutStyle: ${_strutStyle ?? "unspecified"}, '
           'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
+          'hyphens: ${_hyphens ?? "unspecified"}, '
           'locale: ${_locale ?? "unspecified"}'
           ')';
       return true;

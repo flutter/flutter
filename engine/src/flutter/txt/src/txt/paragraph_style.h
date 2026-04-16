@@ -87,6 +87,11 @@ class ParagraphStyle {
   std::u16string ellipsis;
   std::string locale;
 
+  // Whether to render the soft hyphen (U+00AD) glyph at a line-break
+  // opportunity. Defaults to true, which renders the hyphen (Hyphens.manual);
+  // false suppresses it (Hyphens.hidden).
+  bool render_soft_hyphens = true;
+
   TextStyle GetTextStyle() const;
 
   bool unlimited_lines() const;
