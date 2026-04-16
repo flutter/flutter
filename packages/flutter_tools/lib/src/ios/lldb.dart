@@ -150,13 +150,14 @@ return False
       final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
           .transform(utf8LineDecoder)
           .listen((String line) {
+            _logger.printTrace('[lldb]: $line');
             if (_isAttached && !_ignoreLog(line)) {
               // Only forwards logs after LLDB is attached. All logs before then are part of the
               // attach process.
 
               lldbLogForwarder.addLog(line);
             } else {
-              _logger.printTrace('[lldb]: $line');
+              // _logger.printTrace('[lldb]: $line');
               _logCompleter?.checkForMatch(line);
             }
           });
@@ -165,12 +166,13 @@ return False
           .transform(utf8LineDecoder)
           .listen((String line) {
             _monitorError(line);
+            _logger.printTrace('[lldb]: $line');
             if (_isAttached && !_ignoreLog(line)) {
               // Only forwards logs after LLDB is attached. All logs before then are part of the
               // attach process.
               lldbLogForwarder.addLog(line);
             } else {
-              _logger.printTrace('[lldb]: $line');
+              // _logger.printTrace('[lldb]: $line');
             }
           });
 
@@ -249,12 +251,12 @@ return False
 
   /// Resume the stopped process.
   Future<void> _resumeProcess() async {
-    final Future<String> futureLog = _startWaitingForLog(
-      _lldbProcessResuming,
-    ).then((value) => value, onError: _handleAsyncError);
+    // final Future<String> futureLog = _startWaitingForLog(
+    //   _lldbProcessResuming,
+    // ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('process continue');
-    await futureLog;
+    // await futureLog;
   }
 
   /// Creates a completer and returns its future. Methods that utilize this should

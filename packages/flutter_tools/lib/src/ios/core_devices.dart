@@ -785,6 +785,7 @@ class IOSCoreDeviceControl {
       final StreamSubscription<String> stdoutSubscription = launchProcess.stdout
           .transform(utf8LineDecoder)
           .listen((String line) {
+            _logger.printTrace('[devicectl]: $line');
             if (line.trim().isEmpty) {
               return;
             }
@@ -802,6 +803,7 @@ class IOSCoreDeviceControl {
       final StreamSubscription<String> stderrSubscription = launchProcess.stderr
           .transform(utf8LineDecoder)
           .listen((String line) {
+            _logger.printTrace('[devicectl]: $line');
             if (line.trim().isEmpty) {
               return;
             }
