@@ -1,7 +1,7 @@
 module.exports = async ({ github, context }) => {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
-  const labelName = 'waiting for customer response';
+  const labelName = 'waiting for response';
   const daysUntilClose = 21;
   const issueCloseComment = `Without additional information, we are unfortunately not sure how to resolve this issue. We are therefore reluctantly going to close this bug for now.
 
