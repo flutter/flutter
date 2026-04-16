@@ -105,7 +105,7 @@ class GenerateEngineFlagsManifestTaskTest {
 
     @Test
     fun generateHandlesArgsWithSpecialCharacters() {
-        val shellArgs = "[\"--trace-to-file=\"path/to/a file\""]"
+        val shellArgs = "[\"--trace-to-file=\\\"path/to/a file\\\"\"]"
         val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
         val expectedContent =
             """
