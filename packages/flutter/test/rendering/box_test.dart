@@ -746,7 +746,7 @@ void main() {
     expect(errorMessage, contains('RenderObject.debugCheckingIntrinsics'));
     expect(errorMessage, contains('true.'));
     expect(errorMessage, contains('consistent'));
-    expect(errorMessage, contains('fault'));
+    expect(errorMessage, contains('framework'));
   });
 
   test('UnconstrainedBox.toStringDeep returns useful information', () {

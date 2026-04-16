@@ -2076,8 +2076,8 @@ abstract class RenderBox extends RenderObject {
             'The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryLayout".',
           ),
           ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+            'If you are not writing your own RenderBox subclass, then this is an\n'
+            'issue in the framework.',
           ),
         ]),
       ),
@@ -2187,8 +2187,8 @@ abstract class RenderBox extends RenderObject {
             'The ${objectRuntimeType(this, 'RenderBox')} class does not implement "computeDryBaseline".',
           ),
           ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+            'If you are not writing your own RenderBox subclass, then this is an\n'
+            'issue in the framework.',
           ),
         ]),
       ),
@@ -2644,8 +2644,7 @@ abstract class RenderBox extends RenderObject {
           ),
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+            'If you are not writing your own RenderBox subclass, then this is an issue in the framework.',
           ),
         ]);
       }
@@ -2677,7 +2676,7 @@ abstract class RenderBox extends RenderObject {
                 'These methods are called in debug mode to ensure they are consistent.',
               ),
               ErrorHint(
-                'If you are not writing your own RenderBox subclass, then this is not your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+                'If you are not writing your own RenderBox subclass, then this is an issue in the framework.',
               ),
               DiagnosticsStackTrace('Stack trace', stack),
             ]);
@@ -2757,8 +2756,8 @@ abstract class RenderBox extends RenderObject {
             ), // should this be tagged as an error or not?
             ...failures,
             ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+              'If you are not writing your own RenderBox subclass, then this is an\n'
+              'issue in the framework.',
             ),
           ]);
         }
@@ -2781,7 +2780,7 @@ abstract class RenderBox extends RenderObject {
               'The getDryLayout method is called in debug mode to ensure it is consistent with the performLayout method.',
             ),
             ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+              'If you are not writing your own RenderBox subclass, then this is an issue in the framework.',
             ),
             DiagnosticsStackTrace('Stack trace', stack),
           ]);
@@ -2799,8 +2798,8 @@ abstract class RenderBox extends RenderObject {
             ),
             ErrorDescription('The constraints used were $constraints.'),
             ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+              'If you are not writing your own RenderBox subclass, then this is an\n'
+              'issue in the framework.',
             ),
           ]);
         }
@@ -2814,8 +2813,8 @@ abstract class RenderBox extends RenderObject {
       final messages = <DiagnosticsNode>[
         ErrorDescription('The constraints used were $constraints.'),
         ErrorHint(
-          'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+          'If you are not writing your own RenderBox subclass, then this is an\n'
+          'issue in the framework.',
         ),
       ];
 
@@ -2840,7 +2839,7 @@ abstract class RenderBox extends RenderObject {
               'The getDryBaseline method is called in debug mode to ensure it is consistent with the getDistanceToBaseline method.',
             ),
             ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+              'If you are not writing your own RenderBox subclass, then this is an issue in the framework.',
             ),
             DiagnosticsStackTrace('Stack trace', stack),
           ]);
