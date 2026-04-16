@@ -116,9 +116,9 @@ void main() {
   // increases by 1.0. Now consider a the same circle with a transformation that
   // scales it by 2 along the x axis. In screen-space the circle is stretched to
   // be twice as wide as the original circle in the postive and negative x
-  // diretion. The gradient for this will be vec2(0.5, 0.0) along the positive x
-  // axis, because now for every physical pixel we move along the this axis, the
-  // stretched SDF increases by only 0.5.
+  // directions. The gradient for this will be vec2(0.5, 0.0) along the positive
+  // x axis, because now for every physical pixel we move along the this axis,
+  // the stretched SDF increases by only 0.5.
   float pixel_size = length(gradient);
 
   // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
