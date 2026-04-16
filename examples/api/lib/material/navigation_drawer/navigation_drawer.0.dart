@@ -175,7 +175,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    showNavigationDrawer = MediaQuery.of(context).size.width >= 450;
+    showNavigationDrawer = MediaQuery.widthOf(context) >= 450;
   }
 
   @override

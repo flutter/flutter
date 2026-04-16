@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -25,6 +26,7 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -364,6 +366,9 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -376,6 +381,9 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
     );
   }
 
@@ -394,11 +402,21 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
@@ -425,6 +443,9 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
     );
   }
 
@@ -1016,8 +1037,19 @@ See the link below for more information:
   ///
   /// If there is no manifest file, or the key is not present, returns [_impellerEnabledByDefault].
   bool computeImpellerEnabled() {
+    return _computeManifestMetadataBoolValue(
+      'io.flutter.embedding.android.EnableImpeller',
+      _impellerEnabledByDefault,
+    );
+  }
+
+  bool computeHcppEnabled() {
+    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  }
+
+  bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
     if (!appManifestFile.existsSync()) {
-      return _impellerEnabledByDefault;
+      return defaultValue;
     }
     final XmlDocument document;
     try {
@@ -1035,17 +1067,20 @@ See the link below for more information:
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      if (name == 'io.flutter.embedding.android.EnableImpeller') {
+      if (name == metadataKey) {
         final String? value = metaData.getAttribute('android:value');
-        if (value == 'true') {
+        if (value == null) {
+          continue;
+        }
+        if (value.toLowerCase() == 'true') {
           return true;
         }
-        if (value == 'false') {
+        if (value.toLowerCase() == 'false') {
           return false;
         }
       }
     }
-    return _impellerEnabledByDefault;
+    return defaultValue;
   }
 }
 

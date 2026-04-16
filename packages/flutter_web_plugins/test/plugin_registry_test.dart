@@ -39,11 +39,11 @@ void main() {
       TestPlugin.registerWith(registrar);
     });
 
-    test('can register a plugin', () {
+    test('can register a plugin', () async {
       TestPlugin.calledMethods.clear();
 
       const frameworkChannel = MethodChannel('test_plugin');
-      frameworkChannel.invokeMethod<void>('test1');
+      await frameworkChannel.invokeMethod<void>('test1');
 
       expect(TestPlugin.calledMethods, equals(<String>['test1']));
     });

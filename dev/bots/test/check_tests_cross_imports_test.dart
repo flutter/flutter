@@ -127,6 +127,9 @@ void main() {
   });
 
   test('when not all cupertino knowns have cross imports', () async {
+    if (TestsCrossImportChecker.knownCupertinoCrossImports.isEmpty) {
+      return;
+    }
     final String excluded = TestsCrossImportChecker.knownCupertinoCrossImports.first;
     buildTestFiles(excludes: <String>{excluded});
     bool? success;

@@ -35,7 +35,7 @@ class _DraggableExampleState extends State<DraggableExample> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: .spaceEvenly,
       children: <Widget>[
         Draggable<int>(
           // Data is the value this Draggable stores.

@@ -261,8 +261,8 @@ class AssembleCommand extends FlutterCommand {
       }, 'dart-define');
     } on FormatException {
       throwToolExit(
-        'Error parsing assemble command: your generated configuration may be out of date. '
-        "Try re-running 'flutter build ios' or the appropriate build command.",
+        'Error parsing assemble command: The -Pdart-defines argument contains non-base64 encoded data. '
+        'Check your build command and try again.',
       );
     }
 

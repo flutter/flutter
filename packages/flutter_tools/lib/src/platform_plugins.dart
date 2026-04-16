@@ -441,7 +441,12 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
     this.defaultPackage,
     this.variants = const <PluginPlatformVariant>{},
   }) : ffiPlugin = ffiPlugin ?? false,
-       assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
+       assert(
+         pluginClass != null ||
+             dartPluginClass != null ||
+             defaultPackage != null ||
+             (ffiPlugin ?? false),
+       );
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));

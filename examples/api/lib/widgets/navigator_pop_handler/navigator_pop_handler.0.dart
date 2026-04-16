@@ -51,7 +51,7 @@ class _HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text('Nested Navigators Example')),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Home Page'),
             const Text('A system back gesture here will exit the app.'),
@@ -133,7 +133,7 @@ class _NestedNavigatorsPageOne extends StatelessWidget {
       backgroundColor: Colors.grey,
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Nested Navigators Page One'),
             const Text('A system back here returns to the home page.'),
@@ -168,7 +168,7 @@ class _NestedNavigatorsPageTwo extends StatelessWidget {
       backgroundColor: Colors.grey.withBlue(180),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Nested Navigators Page Two'),
             const Text(
@@ -196,7 +196,7 @@ class _UnknownPage extends StatelessWidget {
       backgroundColor: Colors.grey.withBlue(180),
       body: const Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[Text('404')],
         ),
       ),
