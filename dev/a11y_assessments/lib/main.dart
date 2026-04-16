@@ -115,6 +115,7 @@ class HomePageState extends State<HomePage> {
             },
             menuChildren: Tag.values.map((Tag tag) {
               return CheckboxMenuButton(
+                closeOnActivate: false,
                 value: _selectedTags.contains(tag),
                 onChanged: (bool? value) {
                   setState(() {

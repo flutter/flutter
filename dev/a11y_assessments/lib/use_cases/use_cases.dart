@@ -40,6 +40,7 @@ import 'text_field.dart';
 import 'text_field_password.dart';
 import 'toggle_buttons.dart';
 
+/// Tags for accessibility assessment use cases.
 enum Tag {
   batch1('First batch of widgets for VPAT assessment'),
   batch2('Second batch of widgets for VPAT assessment, Q2 2026'),
