@@ -15,11 +15,9 @@
 #include "imgui.h"
 #include "impeller/playground/widgets.h"
 
-// File for tests that check conditions that complicate the SDF shaders,
-// such as making sure our hairline (and other) strokes are consistent
-// under various transforms. These same issues can also affect non-SDF
-// shaders, though the math on tessellated primitives is likely to be
-// less complicated.
+// The tests in this file check the primitive rendering operations to make
+// sure that they produce correct output, particularly for strokes and
+// especially for hairline strokes, under a variety of transforms.
 
 namespace {
 
@@ -58,8 +56,8 @@ struct RenderParameters {
   DlScalar degrees = 0.0f;
 };
 
-void RenderPrimitiveWithHairline(DisplayListBuilder& builder,
-                                 const RenderParameters& params) {
+void RenderPrimitiveWithStroke(DisplayListBuilder& builder,
+                               const RenderParameters& params) {
   builder.Save();
 
   builder.Translate(params.center.x, params.center.y);
@@ -68,17 +66,11 @@ void RenderPrimitiveWithHairline(DisplayListBuilder& builder,
   builder.Skew(params.skew_x, params.skew_y);
   builder.Translate(-params.center.x, -params.center.y);
 
+  // We describe the base size of the shape to draw in terms of the radius
+  // of a circle that would fill the space.
   const DlScalar base_radius = 100.0f;
   const DlScalar fill_radius = base_radius + params.stroke_width;
   const DlScalar stroke_radius = base_radius - 10.0f;
-
-  auto make_square_bounds = [&params](DlScalar radius) -> DlRect {
-    return DlRect::MakeLTRB(params.center.x - radius, params.center.y - radius,
-                            params.center.x + radius, params.center.y + radius);
-  };
-  auto make_rect_bounds = [&](DlScalar radius) -> DlRect {
-    return make_square_bounds(radius).Expand(20.0f, 0.0f);
-  };
 
   auto draw_shape = [&](DlScalar radius, DlColor color,
                         DlScalar stroke_width = -1) -> void {
@@ -90,31 +82,42 @@ void RenderPrimitiveWithHairline(DisplayListBuilder& builder,
       paint.setDrawStyle(DlDrawStyle::kStroke);
       paint.setStrokeWidth(stroke_width);
     }
+
+    // Square bounds to match the overall size of the circle described.
+    DlRect square_bounds =
+        DlRect::MakeLTRB(params.center.x - radius, params.center.y - radius,
+                         params.center.x + radius, params.center.y + radius);
+    // Rectangular bounds slightly elongated from the square bounds.
+    DlRect rect_bounds = square_bounds.Expand(20.0f, 0.0f);
+
     switch (params.render_type) {
       case RenderType::kSquare:
-        builder.DrawRect(make_square_bounds(radius), paint);
+        builder.DrawRect(square_bounds, paint);
         break;
       case RenderType::kRectangle:
-        builder.DrawRect(make_rect_bounds(radius), paint);
+        builder.DrawRect(rect_bounds, paint);
         break;
       case RenderType::kCircle:
         builder.DrawCircle(params.center, radius, paint);
         break;
       case RenderType::kOval:
-        builder.DrawOval(make_rect_bounds(radius), paint);
+        builder.DrawOval(rect_bounds, paint);
         break;
       case RenderType::kLine: {
         // Drawline can't "fill" the outer shape since it is just a line and
         // has no fillable interior. So, instead we reinterpret the radius as
         // a larger line width, but only accepting a radius outside of the
-        // typical stroke_width.
+        // typical stroke_radius. The length of the line always extends across
+        // the diameter of what would have been a circle of that radius.
         if (stroke_width < 0) {
           if (radius <= stroke_radius) {
+            // This must be an interior fill, but the line has no interior.
             break;
           }
           paint.setDrawStyle(DlDrawStyle::kStroke);
           paint.setStrokeWidth((radius - stroke_radius) * 2.0f);
         }
+        // Extend the line by the radius amount in both directions.
         DlPoint fill_offset(radius, 0.0f);
         builder.DrawLine(params.center - fill_offset,  //
                          params.center + fill_offset,  //
@@ -143,9 +146,9 @@ namespace testing {
 // on the consistency of a stroke (particularly hairlines). The math used to
 // estimate the pixel size can get complicated in a shader that is performing
 // some of its operations on local space values and some in device space.
-TEST_P(AiksTest, SdfPrimitivePlayground) {
+TEST_P(AiksTest, PrimitiveShapePlayground) {
   if (IsGoldenTest()) {
-    GTEST_SKIP() << "SdfPrimitivePlayground does not produce a golden image";
+    GTEST_SKIP() << "PrimitiveShapePlayground does not produce a golden image";
   }
 
   RenderParameters params{
@@ -195,14 +198,14 @@ TEST_P(AiksTest, SdfPrimitivePlayground) {
     DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
-    RenderPrimitiveWithHairline(builder, params);
+    RenderPrimitiveWithStroke(builder, params);
     return builder.Build();
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-TEST_P(AiksTest, CanRenderSkewedHairlineSdfCircle) {
+TEST_P(AiksTest, CanRenderSkewedCircleHairline) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
@@ -213,7 +216,7 @@ TEST_P(AiksTest, CanRenderSkewedHairlineSdfCircle) {
       .skew_x = 0.75f,
       .skew_y = 0.75f,
   };
-  RenderPrimitiveWithHairline(builder, params);
+  RenderPrimitiveWithStroke(builder, params);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
