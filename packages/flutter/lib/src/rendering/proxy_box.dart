@@ -682,17 +682,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     final double width = child!.getMaxIntrinsicWidth(height);
     assert(() {
       if (!width.isFinite) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The child of a RenderIntrinsicWidth returned an infinite intrinsic width.'),
-          ErrorDescription(
-            'The ${child!.runtimeType} class returned an infinite value for getMaxIntrinsicWidth, '
-            'which is a violation of the intrinsic layout protocol.',
-          ),
-          ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-          ),
-        ]);
+        RenderBox.debugReportInfiniteIntrinsic(
+          'RenderIntrinsicWidth',
+          child!,
+          'width',
+          'getMaxIntrinsicWidth',
+        );
       }
       return true;
     }());
@@ -711,17 +706,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     final double height = child!.getMinIntrinsicHeight(width);
     assert(() {
       if (!height.isFinite) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The child of a RenderIntrinsicWidth returned an infinite intrinsic height.'),
-          ErrorDescription(
-            'The ${child!.runtimeType} class returned an infinite value for getMinIntrinsicHeight, '
-            'which is a violation of the intrinsic layout protocol.',
-          ),
-          ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-          ),
-        ]);
+        RenderBox.debugReportInfiniteIntrinsic(
+          'RenderIntrinsicWidth',
+          child!,
+          'height',
+          'getMinIntrinsicHeight',
+        );
       }
       return true;
     }());
@@ -740,17 +730,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     final double height = child!.getMaxIntrinsicHeight(width);
     assert(() {
       if (!height.isFinite) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The child of a RenderIntrinsicWidth returned an infinite intrinsic height.'),
-          ErrorDescription(
-            'The ${child!.runtimeType} class returned an infinite value for getMaxIntrinsicHeight, '
-            'which is a violation of the intrinsic layout protocol.',
-          ),
-          ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-          ),
-        ]);
+        RenderBox.debugReportInfiniteIntrinsic(
+          'RenderIntrinsicWidth',
+          child!,
+          'height',
+          'getMaxIntrinsicHeight',
+        );
       }
       return true;
     }());
@@ -763,17 +748,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       width = child.getMaxIntrinsicWidth(constraints.maxHeight);
       assert(() {
         if (!width!.isFinite) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('The child of a RenderIntrinsicWidth returned an infinite intrinsic width.'),
-            ErrorDescription(
-              'The ${child.runtimeType} class returned an infinite value for getMaxIntrinsicWidth, '
-              'which is a violation of the intrinsic layout protocol.',
-            ),
-            ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-            ),
-          ]);
+          RenderBox.debugReportInfiniteIntrinsic(
+            'RenderIntrinsicWidth',
+            child,
+            'width',
+            'getMaxIntrinsicWidth',
+          );
         }
         return true;
       }());
@@ -784,17 +764,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       height = child.getMaxIntrinsicHeight(constraints.maxWidth);
       assert(() {
         if (!height!.isFinite) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('The child of a RenderIntrinsicWidth returned an infinite intrinsic height.'),
-            ErrorDescription(
-              'The ${child.runtimeType} class returned an infinite value for getMaxIntrinsicHeight, '
-              'which is a violation of the intrinsic layout protocol.',
-            ),
-            ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-            ),
-          ]);
+          RenderBox.debugReportInfiniteIntrinsic(
+            'RenderIntrinsicWidth',
+            child,
+            'height',
+            'getMaxIntrinsicHeight',
+          );
         }
         return true;
       }());
@@ -876,17 +851,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       height = child!.getMaxIntrinsicHeight(double.infinity);
       assert(() {
         if (!height.isFinite) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('The child of a RenderIntrinsicHeight returned an infinite intrinsic height.'),
-            ErrorDescription(
-              'The ${child!.runtimeType} class returned an infinite value for getMaxIntrinsicHeight, '
-              'which is a violation of the intrinsic layout protocol.',
-            ),
-            ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-            ),
-          ]);
+          RenderBox.debugReportInfiniteIntrinsic(
+            'RenderIntrinsicHeight',
+            child!,
+            'height',
+            'getMaxIntrinsicHeight',
+          );
         }
         return true;
       }());
@@ -903,17 +873,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       height = child!.getMaxIntrinsicHeight(double.infinity);
       assert(() {
         if (!height.isFinite) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('The child of a RenderIntrinsicHeight returned an infinite intrinsic height.'),
-            ErrorDescription(
-              'The ${child!.runtimeType} class returned an infinite value for getMaxIntrinsicHeight, '
-              'which is a violation of the intrinsic layout protocol.',
-            ),
-            ErrorHint(
-              'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-            ),
-          ]);
+          RenderBox.debugReportInfiniteIntrinsic(
+            'RenderIntrinsicHeight',
+            child!,
+            'height',
+            'getMaxIntrinsicHeight',
+          );
         }
         return true;
       }());
@@ -933,17 +898,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     final double height = child.getMaxIntrinsicHeight(constraints.maxWidth);
     assert(() {
       if (!height.isFinite) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The child of a RenderIntrinsicHeight returned an infinite intrinsic height.'),
-          ErrorDescription(
-            'The ${child.runtimeType} class returned an infinite value for getMaxIntrinsicHeight, '
-            'which is a violation of the intrinsic layout protocol.',
-          ),
-          ErrorHint(
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
-          ),
-        ]);
+        RenderBox.debugReportInfiniteIntrinsic(
+          'RenderIntrinsicHeight',
+          child,
+          'height',
+          'getMaxIntrinsicHeight',
+        );
       }
       return true;
     }());

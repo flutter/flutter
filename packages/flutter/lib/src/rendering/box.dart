@@ -2882,6 +2882,28 @@ abstract class RenderBox extends RenderObject {
     ]);
   }
 
+  /// Reports that a child returned an infinite intrinsic dimension.
+  ///
+  /// This is a violation of the intrinsic layout protocol.
+  static Never debugReportInfiniteIntrinsic(
+    String parentType,
+    RenderBox child,
+    String dimension,
+    String methodName,
+  ) {
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('The child of a $parentType returned an infinite intrinsic $dimension.'),
+      ErrorDescription(
+        'The ${child.runtimeType} class returned an infinite value for $methodName, '
+        'which is a violation of the intrinsic layout protocol.',
+      ),
+      ErrorHint(
+        'If you are not writing your own RenderBox subclass, then this is an issue in the framework. '
+        'Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+      ),
+    ]);
+  }
+
   @override
   void markNeedsLayout() {
     // If `_layoutCacheStorage.clear` returns true, then this [RenderBox]'s layout

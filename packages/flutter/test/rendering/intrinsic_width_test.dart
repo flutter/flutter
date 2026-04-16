@@ -609,7 +609,7 @@ void main() {
   test('RenderIntrinsicHeight - infinite intrinsic height child', () {
     final RenderBox child = _RenderInfiniteIntrinsic(maxHeight: double.infinity);
     final RenderBox parent = RenderIntrinsicHeight(child: child);
-    
+
     final errors = <FlutterErrorDetails>[];
     layout(
       parent,
@@ -634,7 +634,7 @@ void main() {
   test('RenderIntrinsicWidth - infinite intrinsic width child', () {
     final RenderBox child = _RenderInfiniteIntrinsic(maxWidth: double.infinity);
     final RenderBox parent = RenderIntrinsicWidth(child: child);
-    
+
     final errors = <FlutterErrorDetails>[];
     layout(
       parent,
@@ -658,10 +658,7 @@ void main() {
 }
 
 class _RenderInfiniteIntrinsic extends RenderBox {
-  _RenderInfiniteIntrinsic({
-    this.maxWidth = 0.0,
-    this.maxHeight = 0.0,
-  });
+  _RenderInfiniteIntrinsic({this.maxWidth = 0.0, this.maxHeight = 0.0});
 
   final double maxWidth;
   final double maxHeight;
