@@ -71,5 +71,34 @@ TEST(UberSDFParametersTest, MakeStrokeCircle) {
   EXPECT_EQ(params.stroke, stroke);
 }
 
+TEST(UberSDFParametersTest, MakeFillOval) {
+  Point center = {25, 25};
+  Size size = Size(50, 50);
+  Rect bounds = Rect::MakeOriginSize(Point(), size);
+
+  auto params = UberSDFParameters::MakeOval(Color::Red(), bounds, std::nullopt);
+
+  EXPECT_EQ(params.type, UberSDFParameters::Type::kOval);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, center);
+  EXPECT_EQ(params.size, Point(size) * 0.5f);
+  EXPECT_FALSE(params.stroke.has_value());
+}
+
+TEST(UberSDFParametersTest, MakeStrokeOval) {
+  Point center = {25, 25};
+  Size size = Size(50, 50);
+  Rect bounds = Rect::MakeOriginSize(Point(), size);
+  StrokeParameters stroke = {.width = 4.0f};
+
+  auto params = UberSDFParameters::MakeOval(Color::Red(), bounds, stroke);
+
+  EXPECT_EQ(params.type, UberSDFParameters::Type::kOval);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, center);
+  EXPECT_EQ(params.size, Point(size) * 0.5f);
+  EXPECT_EQ(params.stroke, stroke);
+}
+
 }  // namespace testing
 }  // namespace impeller

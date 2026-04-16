@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -395,4 +397,62 @@ void main() {
     await tester.pumpAndSettle();
     expect(getHeaderHeight(), 100);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/179687.
+  testWidgets(
+    'SliverResizingHeader: presence of RenderViewport.excludeFromScrolling tag when pinned',
+    (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: SizedBox(height: 100, child: Text('First child'))),
+              const SliverResizingHeader(
+                minExtentPrototype: SizedBox(height: 300),
+                child: SizedBox(height: 300, child: Text('header')),
+              ),
+              SliverList.builder(
+                itemCount: 50,
+                itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        semantics,
+        isNot(
+          includesNodeWith(
+            tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+          ),
+        ),
+      );
+      expect(tester.getRect(find.text('header')), const Rect.fromLTWH(0, 100, 800, 300));
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+      await tester.pumpAndSettle();
+
+      expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
+      expect(
+        semantics,
+        isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.excludeFromScrolling})),
+      );
+      expect(tester.getRect(find.text('header')), const Rect.fromLTWH(0, 0, 800, 300));
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      final SemanticsNode? semanticNode = semantics.nodesWith(label: 'header').firstOrNull;
+      expect(semanticNode?.parent?.tags, {
+        RenderViewport.excludeFromScrolling,
+        RenderViewport.useTwoPaneSemantics,
+      });
+      expect(tester.getRect(find.text('header')), const Rect.fromLTWH(0, 0, 800, 300));
+
+      semantics.dispose();
+    },
+  );
 }

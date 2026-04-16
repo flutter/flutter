@@ -9,15 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
 import 'dialog_window_content.dart';
+import 'dialog_window_edit_dialog.dart';
+import 'models.dart';
 import 'popup_button.dart';
 import 'popup_window_edit_dialog.dart';
 import 'regular_window_content.dart';
-import 'window_settings_dialog.dart';
-import 'models.dart';
 import 'regular_window_edit_dialog.dart';
-import 'dialog_window_edit_dialog.dart';
-import 'tooltip_window_edit_dialog.dart';
 import 'tooltip_button.dart';
+import 'tooltip_window_edit_dialog.dart';
+import 'window_settings_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key, required this.controller});
@@ -37,10 +37,7 @@ class MainWindow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: _WindowsTable(mainWindow: controller),
-                  ),
+                  child: SingleChildScrollView(child: _WindowsTable(mainWindow: controller)),
                 ),
               ],
             ),
@@ -96,12 +93,9 @@ class _WindowsTable extends StatelessWidget {
     );
   }
 
-  List<DataRow> _buildRows(
-    WindowRegistry windowRegistry,
-    BuildContext context,
-  ) {
-    List<DataRow> rows = [_buildRow(mainWindow, context)];
-    for (WindowEntry entry in windowRegistry.windows) {
+  List<DataRow> _buildRows(WindowRegistry windowRegistry, BuildContext context) {
+    final List<DataRow> rows = [_buildRow(mainWindow, context)];
+    for (final WindowEntry entry in windowRegistry.windows) {
       final BaseWindowController controller = entry.controller;
       rows.add(_buildRow(controller, context));
     }
@@ -109,10 +103,7 @@ class _WindowsTable extends StatelessWidget {
     return rows;
   }
 
-  void _showWindowEditDialog(
-    BaseWindowController controller,
-    BuildContext context,
-  ) {
+  void _showWindowEditDialog(BaseWindowController controller, BuildContext context) {
     return switch (controller) {
       final RegularWindowController regular => showRegularWindowEditDialog(
         context: context,
@@ -154,21 +145,12 @@ class _WindowsTable extends StatelessWidget {
           showBottomBorder: true,
           columns: const [
             DataColumn(
-              label: SizedBox(
-                width: 20,
-                child: Text('ID', style: TextStyle(fontSize: 16)),
-              ),
+              label: SizedBox(width: 20, child: Text('ID', style: TextStyle(fontSize: 16))),
             ),
             DataColumn(
-              label: SizedBox(
-                width: 120,
-                child: Text('Type', style: TextStyle(fontSize: 16)),
-              ),
+              label: SizedBox(width: 120, child: Text('Type', style: TextStyle(fontSize: 16))),
             ),
-            DataColumn(
-              label: SizedBox(width: 20, child: Text('')),
-              numeric: true,
-            ),
+            DataColumn(label: SizedBox(width: 20, child: Text('')), numeric: true),
           ],
           rows: _buildRows(windowRegistry, context),
         );
@@ -189,7 +171,6 @@ class _WindowCreatorCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(25, 0, 25, 5),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Padding(
               padding: EdgeInsets.only(top: 10, bottom: 10),
@@ -217,9 +198,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              RegularWindowContent(
-                                regularWindowController: controller,
-                              ),
+                              RegularWindowContent(regularWindowController: controller),
                         );
                         windowRegistry.register(entry);
                       },
@@ -243,9 +222,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              DialogWindowContent(
-                                dialogWindowController: controller,
-                              ),
+                              DialogWindowContent(dialogWindowController: controller),
                         );
                         windowRegistry.register(entry);
                       },
@@ -268,9 +245,7 @@ class _WindowCreatorCard extends StatelessWidget {
                         entry = WindowEntry(
                           controller: controller,
                           builder: (BuildContext context) =>
-                              DialogWindowContent(
-                                dialogWindowController: controller,
-                              ),
+                              DialogWindowContent(dialogWindowController: controller),
                         );
                         windowRegistry.register(entry);
                       },
