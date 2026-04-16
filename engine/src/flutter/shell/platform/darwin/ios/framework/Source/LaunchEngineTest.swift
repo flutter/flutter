@@ -13,19 +13,19 @@ class LaunchEngineTest: XCTestCase {
     let launchEngine = LaunchEngine()
 
     // The engine should be created on first access.
-    let firstAccessEngine = launchEngine.engine
+    let firstAccessEngine = launchEngine.acquireEngine()
     XCTAssertNotNil(firstAccessEngine)
 
     // Subsequent accesses should return the same cached instance.
     XCTAssertTrue(
-      launchEngine.engine === firstAccessEngine, "Should return the cached engine instance.")
+      launchEngine.acquireEngine() === firstAccessEngine, "Should return the cached engine instance.")
 
     // The taken engine should be the same instance that was created.
     let takenEngine = launchEngine.takeEngine()
     XCTAssertTrue(takenEngine === firstAccessEngine, "Should return the original engine instance.")
 
     // The container should be empty after the engine is taken.
-    XCTAssertNil(launchEngine.engine, "Engine should be nil after being taken.")
+    XCTAssertNil(launchEngine.acquireEngine(), "Engine should be nil after being taken.")
     XCTAssertNil(launchEngine.takeEngine(), "Subsequent takes should return nil.")
   }
 
@@ -39,6 +39,6 @@ class LaunchEngineTest: XCTestCase {
     XCTAssertNil(takenEngine, "Taking before access should return nil.")
 
     // Accessing the engine after it was taken should return nil without allocating a new one.
-    XCTAssertNil(launchEngine.engine, "Accessing engine after take should return nil.")
+    XCTAssertNil(launchEngine.acquireEngine(), "Accessing engine after take should return nil.")
   }
 }
