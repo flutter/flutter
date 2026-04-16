@@ -605,4 +605,78 @@ void main() {
       ),
     );
   });
+
+  test('RenderIntrinsicHeight - infinite intrinsic height child', () {
+    final RenderBox child = _RenderInfiniteIntrinsic(maxHeight: double.infinity);
+    final RenderBox parent = RenderIntrinsicHeight(child: child);
+    
+    final errors = <FlutterErrorDetails>[];
+    layout(
+      parent,
+      constraints: const BoxConstraints(maxWidth: 800.0, maxHeight: 600.0),
+      onErrors: () {
+        errors.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
+      },
+    );
+
+    expect(errors, isNotEmpty);
+    final error = errors.first.exception as FlutterError;
+    final String message = error.toStringDeep();
+    expect(message, contains('RenderIntrinsicHeight'));
+    expect(message, contains('infinite'));
+    expect(message, contains('intrinsic'));
+    expect(message, contains('height'));
+    expect(message, contains('_RenderInfiniteIntrinsic'));
+    expect(message, contains('getMaxIntrinsicHeight'));
+    expect(message, contains('violation'));
+  });
+
+  test('RenderIntrinsicWidth - infinite intrinsic width child', () {
+    final RenderBox child = _RenderInfiniteIntrinsic(maxWidth: double.infinity);
+    final RenderBox parent = RenderIntrinsicWidth(child: child);
+    
+    final errors = <FlutterErrorDetails>[];
+    layout(
+      parent,
+      constraints: const BoxConstraints(maxWidth: 800.0, maxHeight: 600.0),
+      onErrors: () {
+        errors.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails());
+      },
+    );
+
+    expect(errors, isNotEmpty);
+    final error = errors.first.exception as FlutterError;
+    final String message = error.toStringDeep();
+    expect(message, contains('RenderIntrinsicWidth'));
+    expect(message, contains('infinite'));
+    expect(message, contains('intrinsic'));
+    expect(message, contains('width'));
+    expect(message, contains('_RenderInfiniteIntrinsic'));
+    expect(message, contains('getMaxIntrinsicWidth'));
+    expect(message, contains('violation'));
+  });
+}
+
+class _RenderInfiniteIntrinsic extends RenderBox {
+  _RenderInfiniteIntrinsic({
+    this.maxWidth = 0.0,
+    this.maxHeight = 0.0,
+  });
+
+  final double maxWidth;
+  final double maxHeight;
+
+  @override
+  double computeMinIntrinsicWidth(double height) => 0.0;
+  @override
+  double computeMaxIntrinsicWidth(double height) => maxWidth;
+  @override
+  double computeMinIntrinsicHeight(double width) => 0.0;
+  @override
+  double computeMaxIntrinsicHeight(double width) => maxHeight;
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
 }
