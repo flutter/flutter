@@ -12,7 +12,7 @@ import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
 
-const Color _green = Color(0xFF4CAF50);
+const Color _green = Color(0xFF00FF00);
 
 class TestState extends State<StatefulWidget> {
   @override
@@ -1178,7 +1178,11 @@ void main() {
       expect(pageController.page, 0.0);
 
       // switch pages 0 -> 1
-      pageController.animateToPage(1, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+      pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
       await tester.pumpAndSettle(); // finish the animation
 
       expect(pageController.page, 1.0);
