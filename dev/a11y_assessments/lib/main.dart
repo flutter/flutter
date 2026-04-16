@@ -44,6 +44,7 @@ class App extends StatelessWidget {
     );
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
@@ -61,7 +62,6 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final ScrollController scrollController = ScrollController();
-
 
   final Set<Tag> _selectedTags = <Tag>{Tag.batch2};
 
@@ -90,7 +90,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<UseCase> effectiveUseCases = useCases.where((UseCase useCase) {
-      return _selectedTags.isEmpty || useCase.tags.any((Tag tag) => _selectedTags.contains(tag));
+      return _selectedTags.isEmpty || _selectedTags.every((Tag tag) => useCase.tags.contains(tag));
     }).toList();
 
     return Scaffold(
@@ -125,7 +125,7 @@ class HomePageState extends State<HomePage> {
                     }
                   });
                 },
-                child: Text(tag.name),
+                child: Tooltip(message: tag.description, child: Text(tag.name)),
               );
             }).toList(),
           ),
