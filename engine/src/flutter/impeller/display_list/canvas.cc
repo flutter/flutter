@@ -884,6 +884,24 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
+    UberSDFParameters params;
+
+    if (paint.style == Paint::Style::kStroke) {
+      params = UberSDFParameters::MakeOval(paint.color, rect, paint.stroke);
+    } else {
+      params = UberSDFParameters::MakeOval(paint.color, rect, std::nullopt);
+    }
+    auto geom = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geom));
+
+    auto g = contents->GetGeometry();
+
+    AddRenderSDFEntityToCurrentPass(entity, g, paint, std::move(contents));
+    return;
+  }
+
   if (paint.style == Paint::Style::kStroke) {
     StrokeEllipseGeometry geom(rect, paint.stroke);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
