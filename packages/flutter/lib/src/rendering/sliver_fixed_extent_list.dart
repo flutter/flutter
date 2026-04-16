@@ -301,9 +301,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (itemExtentBuilder == null && geometry!.scrollExtent.isFinite) {
         final double itemExtent = this.itemExtent!;
         final double scrollExtent = geometry!.scrollExtent;
-        final double remainder = scrollExtent % itemExtent;
-        final double diff = remainder > itemExtent / 2 ? itemExtent - remainder : remainder;
-        if (diff > precisionErrorTolerance) {
+        final double count = scrollExtent / itemExtent;
+        final double diff = (count.roundToDouble() - count).abs();
+        if (diff * itemExtent > precisionErrorTolerance && diff > precisionErrorTolerance) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'RenderSliverFixedExtentBoxAdaptor.computeMaxScrollOffset() returned a value that is not an even multiple of its itemExtent.',
