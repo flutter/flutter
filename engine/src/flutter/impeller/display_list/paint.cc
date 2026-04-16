@@ -147,12 +147,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetEffectTransform(effect_transform);
       contents->SetFocus(focus_center, focus_radius);
 
-      auto radius_pt = Point(radius, radius);
-      std::array<Point, 2> bounds{center + radius_pt, center - radius_pt};
-      auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
-      if (intrinsic_size.has_value()) {
-        contents->SetColorSourceSize(intrinsic_size->GetSize().Max({1, 1}));
-      }
+      auto intrinsic_size = Rect::MakeCircleBounds(center, radius);
+      contents->SetColorSourceSize(intrinsic_size.GetSize().Max({1, 1}));
       return contents;
     }
     case flutter::DlColorSourceType::kSweepGradient: {
