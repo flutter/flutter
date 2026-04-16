@@ -161,14 +161,13 @@ float filledSDF(vec2 p) {
 
 float strokedSDF(vec2 p) {
   float half_stroke = max(frag_info.stroke_width, 0.0) * 0.5;
-  float outer;
-  float inner;
 
   if (frag_info.type < 0.5) {  // Circle
-    outer = distanceFromCircle(p, frag_info.size.x + half_stroke);
-    inner = distanceFromCircle(p, frag_info.size.x - half_stroke);
+    float d = distanceFromCircle(p, frag_info.size.x);
+    return abs(d) - half_stroke;
   } else if (frag_info.type < 1.5) {  // Rect
-
+    float outer;
+    float inner;
     if (frag_info.stroke_join < 0.5) {  // Miter
       // Rectangle expanded by half_stroke
       outer = distanceFromRect(p, frag_info.size + half_stroke);
@@ -182,16 +181,14 @@ float strokedSDF(vec2 p) {
       outer = distanceFromRect(p, frag_info.size) - half_stroke;
     }
     inner = distanceFromRect(p, frag_info.size - half_stroke);
+    return max(outer, -inner);
   } else if (frag_info.type < 2.5) {  // Oval
-    outer = distanceFromOval(p, frag_info.size) - half_stroke;
-    inner = distanceFromOval(p, frag_info.size) + half_stroke;
+    float d = distanceFromOval(p, frag_info.size);
+    return abs(d) - half_stroke;
   } else {  // Rounded Rect
     float d = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
-    outer = d - half_stroke;
-    inner = d + half_stroke;
+    return abs(d) - half_stroke;
   }
-
-  return max(outer, -inner);
 }
 
 void main() {
