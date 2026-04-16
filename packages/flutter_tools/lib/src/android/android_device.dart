@@ -694,6 +694,7 @@ class AndroidDevice extends Device {
         ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
+        if (debuggingOptions.testFlag) ...<String>['--ez', 'test-flag', 'true'],
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
       ],
       builtPackage.launchActivity,

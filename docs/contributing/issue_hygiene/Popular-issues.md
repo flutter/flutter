@@ -26,6 +26,24 @@ There are three main areas that people are referring to here:
 
   * There is currently no out-of-the-box open source hosting solution for patching applications, so we would either have to rely on people configuring their Web servers accordingly, or we would have to create integrations for proprietary third-party services, or we would have to create our own bespoke solution. Hosting patches is a space we are not eager to enter. Having people configure their own server leaves them open to making mistakes with potentially serious implications as explained in the previous point about security. Depending on third-party services puts Flutter in an awkward position of having to pick winners and exposes us to the risk of those projects themselves making policy changes that would affect this feature.
 
+## [Move the material and cupertino packages outside of Flutter](https://github.com/flutter/flutter/issues/101479) (#101479)
+
+Flutter’s team and community contributors are actively advancing this architectural refactor. The objective is to decouple the Material and Cupertino libraries from the core framework by migrating them into independent packages. This change enables faster iteration of design systems without requiring full SDK or engine updates.
+
+## [Bring Material 3 Expressive to Flutter](https://github.com/flutter/flutter/issues/168813) (#168813)
+
+Work on Material 3 Expressive will begin after completion of the package decoupling effort (#101479). All new development related to Material 3 Expressive will take place in the newly created packages under flutter/packages.
+
+## [Support for iOS 26 “Liquid Glass” Design in Cupertino Widgets](https://github.com/flutter/flutter/issues/170310) (#170310)
+
+Support for the iOS 26 “Liquid Glass” visual style will follow completion of the Cupertino package decoupling (#101479). All new iOS 26 related updates in Cupertino will be implemented within the new packages under flutter/packages.
+
+## [Support multiple windows for desktop shells](https://github.com/flutter/flutter/issues/30701) (#30701)
+
+Canonical is currently actively working on this initiative to enhance desktop parity and enable more advanced workflows for Flutter apps on desktop platforms.
+
+Track progress at https://github.com/flutter/flutter/issues/142845.
+
 ## [Let flutter be installable via homebrew](https://github.com/flutter/flutter/issues/14050) (#14050)
 
 <!-- https://github.com/flutter/flutter/issues/14050#issuecomment-1012647917 -->
@@ -34,26 +52,11 @@ Currently, we see this as a lower priority than our other release-related work (
 
 If anyone would be interested in implementing an official homebrew installation path, the best thing to do would be to reach out on the #hackers-releases channel of our Discord (see [Chat](../Chat.md)). Implementing it would require integrating into our release pipeline, so familiarity with that would be extremely helpful. It would also require carefully negotiating how Flutter's primary distribution mechanism (shipping the `git` repo directly) should interact with Homebrew's mechanisms, so familiarity with both of those would also be needed.
 
-## [Design a new vector file format](https://github.com/flutter/flutter/issues/1831) (#1831)
-
-A [design document](https://flutter.dev/go/vector-graphics) containing both a detailed study of the problem and a strawman proposal have been published (comments welcome). The primary goal of the strawman proposal is to see if it is possible to create a format that is implemented entirely on the GPU (the thought being that creating yet another CPU-bound format doesn't really bring the industry forward). The next step is to experiment with implementing the proposal. Unfortunately all our shader experts are currently busy on higher-priority problems (like improving rendering performance and reducing jank), so this work has stalled.
-
-As usual, contributions are welcome. Reach out to Hixie directly (either by e-mail, ian@hixie.ch, or on our [Chat](../Chat.md) channels) if you are interested in helping out.
-
-## [Enable "hot reload" (not just "hot restart") for Flutter Web](https://github.com/flutter/flutter/issues/53041) (#53041)
-
-Nobody has currently volunteered to work on this. Long term web efforts are primarily focused on Wasm, so we don't expect
-to see progress soon. It is a technically extremely difficult and subtle problem.
-
 ## [Improve the indexability (SEO) of Flutter apps on the web](https://github.com/flutter/flutter/issues/46789) (#46789)
 
 This feature is one that is recognized as important. There are some prerequisites, like improving Flutter's deep linking and accessibility features, which we have to deal with first. There are also other issues, like those around performance, plugins, and embedding, that are currently higher on the list for people who are currently contributing to Flutter's web support.
 
 Fixing this issue is non-trivial, as Flutter's architecture is one that is fundamentally different than what the web usually expects. If you are interested in contributing, the best place to begin would be to discuss potential approaches on our #hackers-web [Chat](../Chat.md) channel, followed by writing up a design doc (the process for which is also on the [Chat](../Chat.md) page).
-
-## [Bring Material 3 to Flutter](https://github.com/flutter/flutter/issues/91605) (#91605)
-
-Work continues to implement the latest version of Material Design in Flutter's framework, we are making great progress here!
 
 ## [Apple CarPlay / Android Auto support?](https://github.com/flutter/flutter/issues/26801) (#26801)
 
@@ -68,15 +71,3 @@ Currently, it does not seem that we can provide substantially more value here th
 Fundamentally, rendering Flutter web apps to HTML is incompatible with Flutter's current architecture, and therefore this is not something we are likely to ever attempt. It's also not something we think is particularly useful. We see Flutter as the first of a new breed of frameworks that target WebGL and Wasm and leave HTML behind. For more detailed thoughts, see [the status update on the issue](https://github.com/flutter/flutter/issues/47600#issuecomment-1016920547).
 
 We believe indexability (SEO) can be addressed without server-side rendering; see the issue above for a discussion of that topic.
-
-## [Automatic/scalable shader warm-up](https://github.com/flutter/flutter/issues/32170) (#32170)
-
-Shader warm-up is available on every platform. To automate the generation of shader warm-up files currently requires first manually writing automated tests, and then running these in CI.
-
-Our medium-term efforts are around removing the need for shader warm-up entirely, and therefore we are not currently planning on working on further automating the creation of shader warm-up files (no point working on something that we want to make irrelevant).
-
-If we manage to remove the need for shader warm-up entirely, we will close issue #32170. If not, we will reconsider whether additional efforts to automate shader warm-up file generation are warranted.
-
-## [OpenContainer jank due to multiple frames of shader compilation](https://github.com/flutter/flutter/issues/76180) (#76180)
-
-A huge area of focus for us right now is our new graphics backend, [Impeller](https://docs.flutter.dev/perf/impeller), which should remove all runtime shader compilation, thus entirely removing this source of jank.

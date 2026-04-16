@@ -103,6 +103,7 @@ void main() {
             buildRunner: buildRunner,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
+            recordedUsesFile: null,
           );
           final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
           final Uri nativeAssetsFileUri = flutterTester
