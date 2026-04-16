@@ -183,9 +183,8 @@ float strokedSDF(vec2 p) {
     }
     inner = distanceFromRect(p, frag_info.size - half_stroke);
   } else if (frag_info.type < 2.5) {  // Oval
-    float outer = distanceFromOval(p, frag_info.size) - half_stroke;
-    float inner = distanceFromOval(p, frag_info.size) + half_stroke;
-    return max(outer, -inner);
+    outer = distanceFromOval(p, frag_info.size) - half_stroke;
+    inner = distanceFromOval(p, frag_info.size) + half_stroke;
   } else {  // Rounded Rect
     float d = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
     outer = d - half_stroke;
