@@ -827,35 +827,39 @@ public class FlutterLoaderTest {
     Files.deleteIfExists(spySymlinkFile.toPath());
 
     for (TestFlagType flagType : TestFlagType.values()) {
-      String path = spySymlinkFile.getAbsolutePath();
-      String commandLineArg = "--aot-shared-library-name=" + path;
-      String[] paramArgs = null;
-      Bundle metadata = new Bundle();
-
-      switch (flagType) {
-        case MANIFEST:
-          metadata.putString(
-              "io.flutter.embedding.engine.loader.FlutterLoader.aot-shared-library-name", path);
-          break;
-        case COMMANDLINE:
-          metadata.putString("androidEngineShellArgs", commandLineArg);
-          break;
-        case RUNTIME:
-          // Set flag via ensureInitializationComplete parameter.
-          paramArgs = new String[] {commandLineArg};
-          break;
-      }
-
-      ctx.getApplicationInfo().metaData = metadata;
-      flutterLoader.ensureInitializationComplete(ctx, paramArgs);
-
       for (File unsafeFile : unsafeFiles) {
+        // Reset FlutterLoader and mockFlutterJNI to make more calls to
+        // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
+        flutterLoader.initialized = false;
+        clearInvocations(mockFlutterJNI);
+
+        String path = spySymlinkFile.getAbsolutePath();
+        String commandLineArg = "--aot-shared-library-name=" + path;
+        String[] paramArgs = null;
+        Bundle metadata = new Bundle();
+
+        switch (flagType) {
+          case MANIFEST:
+            metadata.putString(
+                "io.flutter.embedding.engine.loader.FlutterLoader.aot-shared-library-name", path);
+            break;
+          case COMMANDLINE:
+            metadata.putString("androidEngineShellArgs", commandLineArg);
+            break;
+          case RUNTIME:
+            // Set flag via ensureInitializationComplete parameter.
+            paramArgs = new String[] {commandLineArg};
+            break;
+        }
+
+        ctx.getApplicationInfo().metaData = metadata;
+
         // Simulate a symlink since some filesystems do not support symlinks.
         when(flutterLoader.getFileFromPath(spySymlinkFile.getAbsolutePath()))
             .thenReturn(spySymlinkFile);
         doReturn(unsafeFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-        flutterLoader.ensureInitializationComplete(ctx, null);
+        flutterLoader.ensureInitializationComplete(ctx, paramArgs);
 
         ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
         verify(mockFlutterJNI)
@@ -892,11 +896,6 @@ public class FlutterLoaderTest {
         // Clean up created files.
         spySymlinkFile.delete();
         unsafeFile.delete();
-
-        // Reset FlutterLoader and mockFlutterJNI to make more calls to
-        // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
-        flutterLoader.initialized = false;
-        clearInvocations(mockFlutterJNI);
       }
     }
   }
