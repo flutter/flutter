@@ -119,7 +119,7 @@ dependencies:
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 5.1.0
   googleapis: 14.0.0
-  googleapis_auth: 2.0.0
+  googleapis_auth: 2.3.0
   hooks: 1.0.2
   data_assets: 0.19.6
   record_use: 0.6.0
@@ -196,7 +196,7 @@ dependencies:
   video_player_avfoundation: 2.9.4
   video_player_platform_interface: 6.6.0
   video_player_web: 2.4.0
-  vm_service: 15.0.2
+  vm_service: 15.1.0
   vm_snapshot_analysis: 0.7.6
   watcher: 1.2.1
   web: 1.1.1
@@ -207,7 +207,7 @@ dependencies:
   webview_flutter: 4.9.0
   webview_flutter_android: 3.16.9
   webview_flutter_platform_interface: 2.15.1
-  webview_flutter_wkwebview: 3.24.2
+  webview_flutter_wkwebview: 3.24.3
   xdg_directories: 1.1.0
   xml: 6.6.1
   yaml: 3.1.3
@@ -223,4 +223,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: vd5srp
+# PUBSPEC CHECKSUM: fbj64t
