@@ -253,6 +253,50 @@ FLUTTER_ASSERT_ARC
                             restorationHandler:OCMArg.any]);
 }
 
+- (void)testSceneWillConnectFallbackRunsIfDidFinishLaunchingReturnsTrue {
+  FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  FakePlugin* plugin = [[FakePlugin alloc] init];
+  FakePlugin* mockPlugin = OCMPartialMock(plugin);
+  [delegate addDelegate:mockPlugin];
+
+  id mockOptions = OCMClassMock([UISceneConnectionOptions class]);
+  id mockShortcutItem = OCMClassMock([UIApplicationShortcutItem class]);
+  id mockUserActivity = OCMClassMock([NSUserActivity class]);
+  OCMStub([mockOptions shortcutItem]).andReturn(mockShortcutItem);
+  OCMStub([mockOptions sourceApplication]).andReturn(@"bundle_id");
+  id urlContext = OCMClassMock([UIOpenURLContext class]);
+  NSURL* url = [NSURL URLWithString:@"http://example.com"];
+  OCMStub([urlContext URL]).andReturn(url);
+  NSSet<UIOpenURLContext*>* urlContexts = [NSSet setWithObjects:urlContext, nil];
+  OCMStub([mockOptions URLContexts]).andReturn(urlContexts);
+  OCMStub([mockOptions userActivities]).andReturn([NSSet setWithObject:mockUserActivity]);
+
+  NSDictionary<UIApplicationOpenURLOptionsKey, id>* expectedApplicationOptions = @{
+    UIApplicationLaunchOptionsShortcutItemKey : mockShortcutItem,
+    UIApplicationLaunchOptionsSourceApplicationKey : @"bundle_id",
+    UIApplicationLaunchOptionsURLKey : url,
+  };
+
+  OCMStub([mockPlugin application:UIApplication.sharedApplication
+              didFinishLaunchingWithOptions:expectedApplicationOptions])
+      .andReturn(YES);
+  OCMStub([mockPlugin application:UIApplication.sharedApplication
+              performActionForShortcutItem:mockShortcutItem
+                         completionHandler:OCMArg.any])
+      .andReturn(NO);
+
+  [delegate sceneWillConnectFallback:mockOptions];
+  OCMVerify(times(1), [mockPlugin application:UIApplication.sharedApplication
+                          didFinishLaunchingWithOptions:expectedApplicationOptions]);
+
+  OCMVerify(times(1), [mockPlugin application:UIApplication.sharedApplication
+                          continueUserActivity:mockUserActivity
+                            restorationHandler:OCMArg.any]);
+  OCMVerify(times(1), [mockPlugin application:UIApplication.sharedApplication
+                          performActionForShortcutItem:mockShortcutItem
+                                     completionHandler:OCMArg.any]);
+}
+
 - (void)testSceneWillConnectFallbackSkipIfDidFinishLaunchingReturnsFalse {
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
   FakePlugin* plugin = [[FakePlugin alloc] init];
@@ -295,23 +339,6 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(0), [mockPlugin application:UIApplication.sharedApplication
                           performActionForShortcutItem:mockShortcutItem
                                      completionHandler:OCMArg.any]);
-
-  // Calling sceneWillConnectFallback for a second time, didFinishLaunching
-  // should be called again.
-  OCMStub([mockPlugin application:UIApplication.sharedApplication
-              didFinishLaunchingWithOptions:expectedApplicationOptions])
-      .andReturn(YES);
-
-  [delegate sceneWillConnectFallback:mockOptions];
-  OCMVerify(times(2), [mockPlugin application:[UIApplication sharedApplication]
-                          didFinishLaunchingWithOptions:expectedApplicationOptions]);
-  // User activities & shortcuts should be sent.
-  OCMVerify(times(1), [mockPlugin application:[UIApplication sharedApplication]
-                          performActionForShortcutItem:mockShortcutItem
-                                     completionHandler:OCMArg.any]);
-  OCMVerify(times(1), [mockPlugin application:UIApplication.sharedApplication
-                          continueUserActivity:OCMArg.any
-                            restorationHandler:OCMArg.any]);
 }
 
 - (void)testDidEnterBackground {
