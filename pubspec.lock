@@ -178,6 +178,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  dart_skills_lint:
+    dependency: transitive
+    description:
+      path: "tool/dart_skills_lint"
+      ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      resolved-ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      url: "https://github.com/flutter/skills"
+    source: git
+    version: "0.2.0"
   dart_style:
     dependency: "direct main"
     description:
