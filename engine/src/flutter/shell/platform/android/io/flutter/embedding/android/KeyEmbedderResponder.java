@@ -194,13 +194,11 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
       }
     }
 
-    boolean isVirtualUpForThisGoal = false;
-    if (event.getScanCode() == 0 && getEventType(event) == KeyData.Type.kUp) {
-      for (final KeyboardMap.KeyPair key : goal.keys) {
-        if (key.logicalKey == eventLogicalKey) {
-          isVirtualUpForThisGoal = true;
-          break;
-        }
+    boolean isGoalKey = false;
+    for (int keyIdx = 0; keyIdx < goal.keys.length; keyIdx += 1) {
+      if (goal.keys[keyIdx].logicalKey == eventLogicalKey) {
+        isGoalKey = true;
+        break;
       }
     }
 
@@ -211,17 +209,16 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
         if (preEventStates[keyIdx] != null) {
           continue;
         }
-        if (isVirtualUpForThisGoal) {
-          // Force release other keys in the goal for virtual UP events with persistent meta bit.
-          preEventStates[keyIdx] = false;
-        } else if (postEventAnyPressed) {
+        if (postEventAnyPressed) {
+          preEventStates[keyIdx] = nowStates[keyIdx];
+        } else if (isGoalKey) {
           preEventStates[keyIdx] = nowStates[keyIdx];
         } else {
           preEventStates[keyIdx] = true;
           postEventAnyPressed = true;
         }
       }
-      if (!postEventAnyPressed && !isVirtualUpForThisGoal) {
+      if (!postEventAnyPressed && !isGoalKey) {
         preEventStates[0] = true;
       }
     } else {
