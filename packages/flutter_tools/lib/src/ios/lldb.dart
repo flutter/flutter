@@ -148,10 +148,11 @@ return False
         appProcessId: appProcessId,
         logger: _logger,
       );
-
+      print("VICTORIA DEBUG 2");
       final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
           .transform(utf8LineDecoder)
           .listen((String line) {
+            _logger.printTrace('[lldb]: $line');
             if (_isAttached && !_ignoreLog(line)) {
               // Only forwards logs after LLDB is attached. All logs before then are part of the
               // attach process.
@@ -166,6 +167,7 @@ return False
       final StreamSubscription<String> stderrSubscription = _lldbProcess!.stderr
           .transform(utf8LineDecoder)
           .listen((String line) {
+            _logger.printTrace('[lldb]: $line');
             _monitorError(line);
             if (_isAttached && !_ignoreLog(line)) {
               // Only forwards logs after LLDB is attached. All logs before then are part of the
