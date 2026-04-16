@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 /// widgets from material.dart.
 ///
 /// This provides semantics (checked/unchecked state, enabled/disabled) and
-/// tap interaction, matching the behavior tests expect from a checkbox.
+/// tap interaction, matching the behavior that tests expect from a checkbox.
 ///
 /// See https://github.com/flutter/flutter/issues/177415.
 class TestCheckbox extends StatelessWidget {

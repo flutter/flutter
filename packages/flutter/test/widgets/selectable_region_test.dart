@@ -46,8 +46,10 @@ const TextStyle _materialDefaultTextStyle = TextStyle(
 const double _kTestHandleSize = 22.0;
 
 /// Selection controls with non-zero handle size for tests that need handle
-/// dragging. Does NOT mix in [TextSelectionHandleControls], so the toolbar
-/// goes through the deprecated [buildToolbar] path (matching how
+/// dragging.
+///
+/// Does NOT mix in [TextSelectionHandleControls], so the toolbar goes through
+/// the deprecated [buildToolbar] path (matching how
 /// [materialTextSelectionControls] worked).
 class _TestDraggableSelectionControls extends TextSelectionControls {
   @override
@@ -6143,6 +6145,7 @@ void main() {
     'builds the correct button items',
     (WidgetTester tester) async {
       var buttonItems = <ContextMenuButtonItem>[];
+      final toolbarKey = UniqueKey();
 
       await tester.pumpWidget(
         TestWidgetsApp(
@@ -6151,13 +6154,15 @@ void main() {
             contextMenuBuilder:
                 (BuildContext context, SelectableRegionState selectableRegionState) {
                   buttonItems = selectableRegionState.contextMenuButtonItems;
-                  return const SizedBox.shrink();
+                  return SizedBox.shrink(key: toolbarKey);
                 },
             child: const Text('How are you?'),
           ),
         ),
       );
       await tester.pumpAndSettle();
+
+      expect(find.byKey(toolbarKey), findsNothing);
 
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
         find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
