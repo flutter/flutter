@@ -232,11 +232,13 @@ void main(List<String> arguments) {
     final String flutterPath = repoRoot.childDirectory('bin').childFile('flutter').path;
     exec(flutterPath, <String>['pub', 'get'], workingDirectory: appDirectory);
 
+    // Generate Gradle wrapper
+    exec(flutterPath, <String>['build', 'apk', '--config-only'], workingDirectory: appDirectory);
+
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
-    // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
-      exec(flutterPath, <String>['build', 'apk', '--config-only'], workingDirectory: appDirectory);
+      throw Exception('Gradle wrapper failed to generate for $appDirectory');
     }
 
     // Generate lock files.
@@ -331,7 +333,7 @@ buildscript {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "9.1.0" apply false
+    id "com.android.application" version "9.0.0" apply false
     id "org.jetbrains.kotlin.android" version "2.2.20" apply false
 }
 
@@ -428,7 +430,7 @@ buildscript {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.1.0" apply false
+    id("com.android.application") version "9.0.0" apply false
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
 }
 
@@ -440,7 +442,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-all.zip
 ''';
 
 Iterable<Directory> discoverAndroidDirectories(Directory repoRoot) {

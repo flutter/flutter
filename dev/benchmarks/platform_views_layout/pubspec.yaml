@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
-  google_mobile_ads: any
+  google_mobile_ads: 6.0.0
   # To change the version of the gallery assets, edit
   #   //packages/flutter_tools/lib/src/commands/update_packages.dart
   # and run
@@ -23,6 +23,10 @@ dev_dependencies:
     sdk: flutter
   test: any
 
+dependency_overrides:
+  google_mobile_ads: 7.0.0
+  webview_flutter_android: ^3.16.9
+  webview_flutter: ^4.10.0
 
 flutter:
   uses-material-design: true
