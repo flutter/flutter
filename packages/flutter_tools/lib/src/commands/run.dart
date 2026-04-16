@@ -788,6 +788,7 @@ class RunCommand extends RunCommandBase {
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
+        hotMode: hotMode,
         fileSystem: globals.fs,
         analytics: globals.analytics,
         logger: globals.logger,

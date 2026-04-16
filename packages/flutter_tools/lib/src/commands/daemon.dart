@@ -704,6 +704,7 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         stayResident: true,
+        hotMode: enableHotReload,
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         analytics: globals.analytics,

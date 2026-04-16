@@ -1730,7 +1730,19 @@ class TerminalHandler {
         return true;
       case 'r':
         if (!residentRunner.canHotReload) {
-          return false;
+          // If hot reload is disabled (e.g., --no-hot flag), still allow
+          // hot restart via 'r' key since that's the expected behavior.
+          if (!residentRunner.supportsRestart) {
+            return false;
+          }
+          final OperationResult result = await residentRunner.restart(fullRestart: true);
+          if (result.fatal) {
+            throwToolExit(result.message);
+          }
+          if (!result.isOk) {
+            _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          }
+          return true;
         }
         final OperationResult result = await residentRunner.restart();
         if (result.fatal) {

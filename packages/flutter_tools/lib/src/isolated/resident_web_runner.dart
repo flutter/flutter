@@ -53,6 +53,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     FlutterDevice device, {
     String? target,
     required bool stayResident,
+    required bool hotMode,
     required FlutterProject flutterProject,
     required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
@@ -72,6 +73,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       flutterProject: flutterProject,
       debuggingOptions: debuggingOptions,
       stayResident: stayResident,
+      hotMode: hotMode,
       urlTunneller: urlTunneller,
       machine: machine,
       analytics: analytics,
@@ -100,6 +102,7 @@ class ResidentWebRunner extends ResidentRunner {
     super.stayResident = true,
     super.machine = false,
     super.projectRootPath,
+    super.hotMode = true,
     required this.flutterProject,
     required super.debuggingOptions,
     required FileSystem fileSystem,
@@ -121,6 +124,7 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
+         hotMode: hotMode,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,

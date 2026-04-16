@@ -97,6 +97,7 @@ class WebDriverService extends DriverService {
               webUseWasm: debuggingOptions.webUseWasm,
             ),
       stayResident: true,
+      hotMode: !buildInfo.isRelease,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       analytics: globals.analytics,
