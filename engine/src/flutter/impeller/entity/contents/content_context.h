@@ -285,7 +285,7 @@ class ContentContext {
   std::shared_ptr<Texture> GetCachedTexture(
       const flutter::DlImage* image) const;
   void SetCachedTexture(const flutter::DlImage* image,
-                        std::shared_ptr<Texture> texture) const;
+                        const std::shared_ptr<Texture>& texture) const;
   void RemoveCachedTexture(const flutter::DlImage* image) const;
   void ClearCachedTextures() const;
 

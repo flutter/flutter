@@ -1580,8 +1580,9 @@ std::shared_ptr<Texture> ContentContext::GetCachedTexture(
   return nullptr;
 }
 
-void ContentContext::SetCachedTexture(const flutter::DlImage* image,
-                                      std::shared_ptr<Texture> texture) const {
+void ContentContext::SetCachedTexture(
+    const flutter::DlImage* image,
+    const std::shared_ptr<Texture>& texture) const {
   if (!image || !texture) {
     return;
   }
