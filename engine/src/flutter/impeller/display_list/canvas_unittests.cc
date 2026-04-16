@@ -475,7 +475,7 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
   auto dl_image = impeller::DlImageImpeller::Make(texture);
 
   context.SetTextureCachingEnabled(true);
-  auto cached_tex1 = context.GetCachedTexture(dl_image.get());
+  auto cached_tex1 = dl_image->GetCachedTexture(context);
   ASSERT_EQ(cached_tex1, texture);
 
   auto cached_tex2 = context.GetCachedTexture(dl_image.get());
@@ -483,11 +483,14 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
 
   context.RemoveCachedTexture(dl_image.get());
   auto cached_tex3 = context.GetCachedTexture(dl_image.get());
-  ASSERT_EQ(cached_tex3, texture);
+  ASSERT_EQ(cached_tex3, nullptr);
+
+  auto cached_tex4 = dl_image->GetCachedTexture(context);
+  ASSERT_EQ(cached_tex4, texture);
 
   context.ClearCachedTextures();
-  auto cached_tex4 = context.GetCachedTexture(dl_image.get());
-  ASSERT_EQ(cached_tex4, texture);
+  auto cached_tex5 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex5, nullptr);
 
   context.SetTextureCachingEnabled(false);
 }
