@@ -40,7 +40,7 @@ final class PredictiveBackEvent {
           ? null
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
-      swipeEdge: SwipeEdge.values[(map['swipeEdge']! as int).clamp(0, SwipeEdge.values.length - 1)],
+      swipeEdge: SwipeEdge.values[(map['swipeEdge']! as num).toInt().clamp(0, SwipeEdge.values.length - 1)],
     );
   }
 
