@@ -118,7 +118,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetTileMode(tile_mode);
       contents->SetEffectTransform(effect_transform);
 
-      auto intrinsic_size = Rect::MakeCircleBounds(center, radius);
+      auto intrinsic_size = Rect::MakeCircleBounds(center, std::abs(radius));
       contents->SetColorSourceSize(intrinsic_size.GetSize().Max({1, 1}));
       return contents;
     }
@@ -147,7 +147,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetEffectTransform(effect_transform);
       contents->SetFocus(focus_center, focus_radius);
 
-      auto intrinsic_size = Rect::MakeCircleBounds(center, radius);
+      auto intrinsic_size = Rect::MakeCircleBounds(center, std::abs(radius));
       contents->SetColorSourceSize(intrinsic_size.GetSize().Max({1, 1}));
       return contents;
     }
