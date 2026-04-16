@@ -2660,7 +2660,28 @@ abstract class RenderBox extends RenderObject {
           String name,
           double constraint,
         ) {
-          final double result = function(constraint);
+          final double result;
+          try {
+            result = function(constraint);
+          } catch (e, stack) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary(
+                'The $name method of the $runtimeType class threw an exception during verification.',
+              ),
+              ErrorDescription('The following exception was raised:'),
+              ErrorDescription('$e'),
+              ErrorDescription(
+                'This happened while RenderObject.debugCheckingIntrinsics was true.',
+              ),
+              ErrorDescription(
+                'These methods are called in debug mode to ensure they are consistent.',
+              ),
+              ErrorHint(
+                'If you are not writing your own RenderBox subclass, then this is not your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+              ),
+              DiagnosticsStackTrace('Stack trace', stack),
+            ]);
+          }
           if (result < 0) {
             failures.add(
               ErrorDescription(' * $name($constraint) returned a negative value: $result'),
@@ -2748,6 +2769,22 @@ abstract class RenderBox extends RenderObject {
         final Size dryLayoutSize;
         try {
           dryLayoutSize = getDryLayout(constraints);
+        } catch (e, stack) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The getDryLayout method of the $runtimeType class threw an exception during verification.',
+            ),
+            ErrorDescription('The following exception was raised:'),
+            ErrorDescription('$e'),
+            ErrorDescription('This happened while RenderObject.debugCheckingIntrinsics was true.'),
+            ErrorDescription(
+              'The getDryLayout method is called in debug mode to ensure it is consistent with the performLayout method.',
+            ),
+            ErrorHint(
+              'If you are not writing your own RenderBox subclass, then this is not your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+            ),
+            DiagnosticsStackTrace('Stack trace', stack),
+          ]);
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
@@ -2791,6 +2828,22 @@ abstract class RenderBox extends RenderObject {
         try {
           dryBaseline = getDryBaseline(constraints, baseline);
           realBaseline = getDistanceToBaseline(baseline, onlyReal: true);
+        } catch (e, stack) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The getDryBaseline or getDistanceToBaseline method of the $runtimeType class threw an exception during verification.',
+            ),
+            ErrorDescription('The following exception was raised:'),
+            ErrorDescription('$e'),
+            ErrorDescription('This happened while RenderObject.debugCheckingIntrinsics was true.'),
+            ErrorDescription(
+              'The getDryBaseline method is called in debug mode to ensure it is consistent with the getDistanceToBaseline method.',
+            ),
+            ErrorHint(
+              'If you are not writing your own RenderBox subclass, then this is not your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+            ),
+            DiagnosticsStackTrace('Stack trace', stack),
+          ]);
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
