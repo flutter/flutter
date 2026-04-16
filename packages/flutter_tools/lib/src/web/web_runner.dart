@@ -26,6 +26,7 @@ abstract class WebRunnerFactory {
     FlutterDevice device, {
     String? target,
     required bool stayResident,
+    required bool hotMode,
     required FlutterProject flutterProject,
     required DebuggingOptions debuggingOptions,
     UrlTunneller? urlTunneller,
