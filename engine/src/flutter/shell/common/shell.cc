@@ -1234,7 +1234,7 @@ HitTestResponse Shell::OnPlatformViewHitTest(int64_t view_id,
   if (engine_) {
     return engine_->HitTest(view_id, offset);
   }
-  return {.is_platform_view = false};
+  return {.has_platform_view = false};
 }
 
 // |PlatformView::Delegate|

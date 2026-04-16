@@ -407,7 +407,7 @@ HitTestResponse PlatformConfiguration::HitTest(
     const flutter::PointData offset) {
   std::shared_ptr<tonic::DartState> dart_state = hit_test_.dart_state().lock();
   if (!dart_state) {
-    return {.is_platform_view = false};
+    return {.has_platform_view = false};
   }
   tonic::DartState::Scope scope(dart_state);
 
@@ -415,16 +415,16 @@ HitTestResponse PlatformConfiguration::HitTest(
       hit_test_.Get(), {tonic::ToDart(view_id), tonic::ToDart(offset.x),
                         tonic::ToDart(offset.y)});
   if (tonic::CheckAndHandleError(dart_result)) {
-    return {.is_platform_view = false};
+    return {.has_platform_view = false};
   }
 
-  Dart_Handle is_platform_view_handle =
-      Dart_GetField(dart_result, tonic::ToDart("isPlatformView"));
-  if (tonic::CheckAndHandleError(is_platform_view_handle)) {
-    return {.is_platform_view = false};
+  Dart_Handle has_platform_view_handle =
+      Dart_GetField(dart_result, tonic::ToDart("hasPlatformView"));
+  if (tonic::CheckAndHandleError(has_platform_view_handle)) {
+    return {.has_platform_view = false};
   }
-  return {.is_platform_view =
-              tonic::DartConverter<bool>::FromDart(is_platform_view_handle)};
+  return {.has_platform_view =
+              tonic::DartConverter<bool>::FromDart(has_platform_view_handle)};
 }
 
 void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,

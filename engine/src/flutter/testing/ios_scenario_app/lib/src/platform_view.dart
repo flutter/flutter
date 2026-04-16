@@ -1588,8 +1588,8 @@ class PlatformViewForTouchIOSScenario extends Scenario with _BasePlatformViewSce
   HitTestResponse onHitTest(HitTestRequest request) {
     const Rect rect1 = .fromLTWH(0, 0, 500, 500);
     const Rect rect2 = .fromLTWH(5, 5, 500, 500);
-    final bool isPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
-    return HitTestResponse(isPlatformView: isPlatformView);
+    final bool hasPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
+    return HitTestResponse(hasPlatformView: hasPlatformView);
   }
 }
 
@@ -1721,8 +1721,8 @@ class PlatformViewForOverlappingPlatformViewsScenario extends Scenario
     // rect1 and rect2 will overlap, but explicitly check them in case we introduce more platform views.
     const Rect rect1 = .fromLTWH(100, 100, 100, 100);
     const Rect rect2 = .fromLTWH(0, 0, 300, 300);
-    final bool isPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
-    return HitTestResponse(isPlatformView: isPlatformView);
+    final bool hasPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
+    return HitTestResponse(hasPlatformView: hasPlatformView);
   }
 }
 

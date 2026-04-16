@@ -284,7 +284,7 @@ class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::De
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
   HitTestResponse OnPlatformViewHitTest(int64_t view_id, const flutter::PointData offset) override {
-    return {.is_platform_view = false};
+    return {.has_platform_view = false};
   }
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,

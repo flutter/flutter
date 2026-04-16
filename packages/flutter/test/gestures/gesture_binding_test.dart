@@ -108,7 +108,7 @@ void main() {
     final ui.HitTestResponse response =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
         ui.HitTestResponse.empty;
-    expect(response.isPlatformView, isFalse);
+    expect(response.hasPlatformView, isFalse);
   });
 
   test('Platform view hit test should not accept gesture if no platform view', () {
@@ -121,7 +121,7 @@ void main() {
     final ui.HitTestResponse response =
         GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
         ui.HitTestResponse.empty;
-    expect(response.isPlatformView, isFalse);
+    expect(response.hasPlatformView, isFalse);
   });
 
   test(
@@ -139,7 +139,7 @@ void main() {
           GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
           ui.HitTestResponse.empty;
 
-      expect(response.isPlatformView, isTrue);
+      expect(response.hasPlatformView, isTrue);
     },
   );
 
@@ -158,7 +158,7 @@ void main() {
           GestureBinding.instance.platformDispatcher.onHitTest?.call(request) ??
           ui.HitTestResponse.empty;
 
-      expect(response.isPlatformView, isTrue);
+      expect(response.hasPlatformView, isTrue);
     },
   );
 

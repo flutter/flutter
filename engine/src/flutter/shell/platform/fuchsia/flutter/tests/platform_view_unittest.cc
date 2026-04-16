@@ -120,7 +120,7 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   flutter::HitTestResponse OnPlatformViewHitTest(
       int64_t view_id,
       const flutter::PointData offset) {
-    return {.is_platform_view = false};
+    return {.has_platform_view = false};
   }
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchKeyDataPacket(

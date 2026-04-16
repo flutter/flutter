@@ -380,7 +380,7 @@ HitTestResponse RuntimeController::HitTest(int64_t view_id,
     TRACE_EVENT0("flutter", "RuntimeController::HitTest");
     return platform_configuration->HitTest(view_id, offset);
   }
-  return {.is_platform_view = false};
+  return {.has_platform_view = false};
 }
 
 bool RuntimeController::DispatchSemanticsAction(int64_t view_id,

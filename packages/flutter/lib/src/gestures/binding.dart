@@ -325,8 +325,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     final result = HitTestResult();
     hitTestInView(result, request.offset, request.view.viewId);
     // All targets in the path should receive hitTest.
-    final bool isPlatformView = result.path.any((entry) => entry.target is NativeHitTestTarget);
-    return ui.HitTestResponse(isPlatformView: isPlatformView);
+    final bool hasPlatformView = result.path.any((entry) => entry.target is NativeHitTestTarget);
+    return ui.HitTestResponse(hasPlatformView: hasPlatformView);
   }
 
   double? _devicePixelRatioForView(int viewId) {

@@ -624,7 +624,7 @@ TEST_F(ShellTest, HitTestInsidePlatformViewIsFunctional) {
     shell->GetEngine()->SetViewportMetrics(0, metrics);
 
     HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
-    EXPECT_TRUE(response.is_platform_view);
+    EXPECT_TRUE(response.has_platform_view);
     latch.Signal();
   });
 
@@ -658,7 +658,7 @@ TEST_F(ShellTest, HitTestOutsidePlatformViewIsFunctional) {
     shell->GetEngine()->SetViewportMetrics(0, metrics);
 
     HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
-    EXPECT_FALSE(response.is_platform_view);
+    EXPECT_FALSE(response.has_platform_view);
     latch.Signal();
   });
 
