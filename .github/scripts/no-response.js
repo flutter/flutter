@@ -29,8 +29,8 @@ Thanks for your contribution.`;
 
   for (const issue of issues) {
     const isPr = issue.pull_request !== undefined;
-    let shouldClose = false;
 
+    // Fetch timeline events to find label date
     const events = await github.paginate(github.rest.issues.listEvents, {
       owner,
       repo,
@@ -39,31 +39,78 @@ Thanks for your contribution.`;
 
     const labelEvent = events.reverse().find(event => event.event === 'labeled' && event.label.name === labelName);
 
-    if (labelEvent) {
-      const labeledAt = new Date(labelEvent.created_at);
-      if (labeledAt < closeDate) {
-        shouldClose = true;
-        console.log(`#${issue.number} has label added since 21 days.`);
+    if (!labelEvent) {
+      continue; // Skip if label not found in events
+    }
+
+    const labeledAt = new Date(labelEvent.created_at);
+    let isResponse = false;
+
+    // Check for author comments after label
+    const comments = await github.paginate(github.rest.issues.listComments, {
+      owner,
+      repo,
+      issue_number: issue.number,
+      since: labeledAt.toISOString(),
+    });
+
+    for (const comment of comments) {
+      if (comment.user.id === issue.user.id && new Date(comment.created_at) > labeledAt) {
+        isResponse = true;
+        break;
       }
     }
 
-    if (shouldClose) {
-      console.log(`Closing #${issue.number} due to no response.`);
-      const body = isPr ? prCloseComment : issueCloseComment;
-      if (body) {
-        await github.rest.issues.createComment({
-          owner,
-          repo,
-          issue_number: issue.number,
-          body: body,
-        });
+    // Check for author commits after label if it's a PR
+    if (!isResponse && isPr) {
+      const commits = await github.paginate(github.rest.pulls.listCommits, {
+        owner,
+        repo,
+        pull_number: issue.number,
+      });
+
+      for (const commit of commits) {
+        const commitDate = new Date(commit.commit.committer.date);
+        if (commit.author && commit.author.id === issue.user.id && commitDate > labeledAt) {
+          isResponse = true;
+          break;
+        }
       }
-      await github.rest.issues.update({
+    }
+
+    if (isResponse) {
+      console.log(`Removing label from #${issue.number} as author responded.`);
+      await github.rest.issues.removeLabel({
         owner,
         repo,
         issue_number: issue.number,
-        state: 'closed',
+        name: labelName,
       });
+
+
+      continue; // Skip stale check
+    }
+
+    // Stale check
+    if (issue.state === 'open') {
+      if (labeledAt < closeDate) {
+        console.log(`Closing #${issue.number} due to no response.`);
+        const body = isPr ? prCloseComment : issueCloseComment;
+        if (body) {
+          await github.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: issue.number,
+            body: body,
+          });
+        }
+        await github.rest.issues.update({
+          owner,
+          repo,
+          issue_number: issue.number,
+          state: 'closed',
+        });
+      }
     }
   }
 };

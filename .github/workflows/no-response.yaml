@@ -4,12 +4,10 @@
 
 name: No Response
 
-# Both `issue_comment` and `scheduled` event types are required for this Action
-# to work properly.
 on:
   schedule:
-    # Schedule for five minutes after the hour, every hour
-    - cron: '5 * * * *'
+    # Schedule for every 15 minutes.
+    - cron: '*/15 * * * *'
 
 # By specifying the access of one of the scopes, all of those that are not
 # specified are set to 'none'.
