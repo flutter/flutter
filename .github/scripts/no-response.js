@@ -31,27 +31,19 @@ Thanks for your contribution.`;
     const isPr = issue.pull_request !== undefined;
     let shouldClose = false;
 
-    if (isPr) {
-      const updatedAt = new Date(issue.updated_at);
-      if (updatedAt < closeDate) {
+    const events = await github.paginate(github.rest.issues.listEvents, {
+      owner,
+      repo,
+      issue_number: issue.number,
+    });
+
+    const labelEvent = events.reverse().find(event => event.event === 'labeled' && event.label.name === labelName);
+
+    if (labelEvent) {
+      const labeledAt = new Date(labelEvent.created_at);
+      if (labeledAt < closeDate) {
         shouldClose = true;
-        console.log(`PR #${issue.number} hasn't been updated since 21 days.`);
-      }
-    } else {
-      const events = await github.paginate(github.rest.issues.listEvents, {
-        owner,
-        repo,
-        issue_number: issue.number,
-      });
-
-      const labelEvent = events.reverse().find(event => event.event === 'labeled' && event.label.name === labelName);
-
-      if (labelEvent) {
-        const labeledAt = new Date(labelEvent.created_at);
-        if (labeledAt < closeDate) {
-          shouldClose = true;
-          console.log(`Issue #${issue.number} has label added since 21 days.`);
-        }
+        console.log(`#${issue.number} has label added since 21 days.`);
       }
     }
 
