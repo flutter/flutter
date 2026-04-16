@@ -1340,9 +1340,8 @@ class FakeIosProject extends Fake implements IosProject {
   FakeIosProject({
     required MemoryFileSystem fileSystem,
     required this.usesSwiftPackageManager,
-    bool? compatibleWithSwiftPackageManager,
-  }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
-       hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
+    this._compatibleWithSwiftPackageManager,
+  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
   Directory hostAppRoot;
@@ -1385,9 +1384,8 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   FakeMacOSProject({
     required MemoryFileSystem fileSystem,
     required this.usesSwiftPackageManager,
-    bool? compatibleWithSwiftPackageManager,
-  }) : _compatibleWithSwiftPackageManager = compatibleWithSwiftPackageManager,
-       hostAppRoot = fileSystem.directory('app_name').childDirectory('macos');
+    this._compatibleWithSwiftPackageManager,
+  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('macos');
 
   @override
   Directory hostAppRoot;
@@ -1524,10 +1522,9 @@ class FakePlugin extends Fake implements Plugin {
   FakePlugin({
     required this.name,
     required this.platforms,
-    String? pluginSwiftPackageManifestPath,
-    String? pluginPodspecPath,
-  }) : _pluginSwiftPackageManifestPath = pluginSwiftPackageManifestPath,
-       _pluginPodspecPath = pluginPodspecPath;
+    this._pluginSwiftPackageManifestPath,
+    this._pluginPodspecPath,
+  });
 
   final String? _pluginSwiftPackageManifestPath;
 

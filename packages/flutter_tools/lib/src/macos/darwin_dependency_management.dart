@@ -24,28 +24,18 @@ import 'swift_package_manager.dart';
 /// project settings for the dependency manager(s) being used.
 class DarwinDependencyManagement {
   DarwinDependencyManagement({
-    required FlutterProject project,
-    required List<Plugin> plugins,
-    required CocoaPods cocoapods,
-    required SwiftPackageManager swiftPackageManager,
-    required FileSystem fileSystem,
-    required FeatureFlags featureFlags,
-    required Logger logger,
-    required Analytics analytics,
+    required this._project,
+    required this._plugins,
+    required this._cocoapods,
+    required this._swiftPackageManager,
+    required this._fileSystem,
+    required this._featureFlags,
+    required this._logger,
+    required this._analytics,
     required Platform platform,
-    required XcodeProjectInterpreter? xcodeProjectInterpreter,
-    required Config? config,
-  }) : _config = config,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _project = project,
-       _plugins = plugins,
-       _cocoapods = cocoapods,
-       _swiftPackageManager = swiftPackageManager,
-       _fileSystem = fileSystem,
-       _featureFlags = featureFlags,
-       _logger = logger,
-       _analytics = analytics,
-       _hostPlatform = platform;
+    required this._xcodeProjectInterpreter,
+    required this._config,
+  }) : _hostPlatform = platform;
 
   final FlutterProject _project;
   final List<Plugin> _plugins;

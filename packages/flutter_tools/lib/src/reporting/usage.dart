@@ -113,13 +113,11 @@ Analytics _defaultAnalyticsIOFactory(
 
 class _DefaultUsage implements Usage {
   _DefaultUsage._({
-    required bool suppressAnalytics,
-    required Analytics analytics,
+    required this._suppressAnalytics,
+    required this._analytics,
     required this.firstRunMessenger,
-    required SystemClock clock,
-  }) : _suppressAnalytics = suppressAnalytics,
-       _analytics = analytics,
-       _clock = clock;
+    required this._clock,
+  });
 
   static _DefaultUsage initialize({
     String settingsName = 'flutter',

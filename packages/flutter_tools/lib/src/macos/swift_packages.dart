@@ -56,22 +56,15 @@ const _doubleIndent = '$_singleIndent$_singleIndent';
 /// for more information about Swift Packages and Package.swift.
 class SwiftPackage {
   SwiftPackage({
-    required File manifest,
-    required String name,
-    required List<SwiftPackageSupportedPlatform> platforms,
-    required List<SwiftPackageProduct> products,
-    required List<SwiftPackagePackageDependency> dependencies,
-    required List<SwiftPackageTarget> targets,
-    required TemplateRenderer templateRenderer,
-    String? swiftCodeBeforePackageDefinition,
-  }) : _manifest = manifest,
-       _name = name,
-       _platforms = platforms,
-       _products = products,
-       _dependencies = dependencies,
-       _targets = targets,
-       _templateRenderer = templateRenderer,
-       _swiftCodeBeforePackageDefinition = swiftCodeBeforePackageDefinition;
+    required this._manifest,
+    required this._name,
+    required this._platforms,
+    required this._products,
+    required this._dependencies,
+    required this._targets,
+    required this._templateRenderer,
+    this._swiftCodeBeforePackageDefinition,
+  });
 
   /// [File] for Package.swift.
   final File _manifest;

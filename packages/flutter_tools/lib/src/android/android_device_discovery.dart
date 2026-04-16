@@ -26,21 +26,16 @@ import 'android_workflow.dart';
 ///   * [AndroidDevice], the type of discovered device.
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices({
-    required AndroidWorkflow androidWorkflow,
+    required this._androidWorkflow,
     required ProcessManager processManager,
     required Logger logger,
-    AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required UserMessages userMessages,
-  }) : _androidWorkflow = androidWorkflow,
-       _androidSdk = androidSdk,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+    this._androidSdk,
+    required this._fileSystem,
+    required this._platform,
+    required this._userMessages,
+  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _userMessages = userMessages,
        super('Android devices');
 
   final AndroidWorkflow _androidWorkflow;

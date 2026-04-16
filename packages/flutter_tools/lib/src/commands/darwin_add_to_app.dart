@@ -21,11 +21,7 @@ import '../xcode_project.dart';
 /// codesign files/directories [codesign]. It also has special logic for codesigning
 /// Flutter XCFrameworks [codesignFlutterXCFramework].
 class DarwinAddToAppCodesigning {
-  DarwinAddToAppCodesigning({
-    required XcodeCodeSigningSettings xcodeCodeSigningSettings,
-    required Logger logger,
-  }) : _logger = logger,
-       _xcodeCodeSigningSettings = xcodeCodeSigningSettings;
+  DarwinAddToAppCodesigning({required this._xcodeCodeSigningSettings, required this._logger});
 
   final XcodeCodeSigningSettings _xcodeCodeSigningSettings;
   final Logger _logger;

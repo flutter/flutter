@@ -85,9 +85,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
-    required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem,
-       ffiPlugin = ffiPlugin ?? false;
+    required this._fileSystem,
+  }) : ffiPlugin = ffiPlugin ?? false;
 
   factory AndroidPlugin.fromYaml(
     String name,

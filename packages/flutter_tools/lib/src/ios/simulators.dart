@@ -36,9 +36,7 @@ import 'plist_parser.dart';
 const iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators({required IOSSimulatorUtils iosSimulatorUtils})
-    : _iosSimulatorUtils = iosSimulatorUtils,
-      super('iOS simulators');
+  IOSSimulators({required this._iosSimulatorUtils}) : super('iOS simulators');
 
   final IOSSimulatorUtils _iosSimulatorUtils;
 
@@ -110,9 +108,8 @@ class IOSSimulatorUtils {
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
-  SimControl({required Logger logger, required ProcessManager processManager, required Xcode xcode})
+  SimControl({required Logger logger, required ProcessManager processManager, required this._xcode})
     : _logger = logger,
-      _xcode = xcode,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Logger _logger;
@@ -346,10 +343,9 @@ class IOSSimulator extends Device {
     super.id, {
     required this.name,
     required this.simulatorCategory,
-    required SimControl simControl,
+    required this._simControl,
     required super.logger,
-  }) : _simControl = simControl,
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
+  }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
   final String name;

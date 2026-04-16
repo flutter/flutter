@@ -42,15 +42,11 @@ T _cast<T>(Object? object) {
 class ProxiedDevices extends PollingDeviceDiscovery {
   ProxiedDevices(
     this.connection, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
-    required Logger logger,
-    FileTransfer fileTransfer = const FileTransfer(),
-  }) : _deltaFileTransfer = deltaFileTransfer,
-       _enableDdsProxy = enableDdsProxy,
-       _logger = logger,
-       _fileTransfer = fileTransfer,
-       super('Proxied devices');
+    this._deltaFileTransfer = true,
+    this._enableDdsProxy = false,
+    required this._logger,
+    this._fileTransfer = const FileTransfer(),
+  }) : super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -172,34 +168,26 @@ class ProxiedDevice extends Device {
   ProxiedDevice(
     this.connection,
     String id, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
+    this._deltaFileTransfer = true,
+    this._enableDdsProxy = false,
     required super.category,
     required super.platformType,
-    required TargetPlatform targetPlatform,
+    required this._targetPlatform,
     required super.ephemeral,
     required this.isConnected,
     required this.connectionInterface,
     required this.name,
-    required bool isLocalEmulator,
-    required String? emulatorId,
-    required String sdkNameAndVersion,
+    required this._isLocalEmulator,
+    required this._emulatorId,
+    required this._sdkNameAndVersion,
     required this.supportsHotReload,
     required this.supportsHotRestart,
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
-    required bool supportsHardwareRendering,
+    required this._supportsHardwareRendering,
     required super.logger,
-    FileTransfer fileTransfer = const FileTransfer(),
-  }) : _deltaFileTransfer = deltaFileTransfer,
-       _enableDdsProxy = enableDdsProxy,
-       _isLocalEmulator = isLocalEmulator,
-       _emulatorId = emulatorId,
-       _sdkNameAndVersion = sdkNameAndVersion,
-       _supportsHardwareRendering = supportsHardwareRendering,
-       _targetPlatform = targetPlatform,
-       _logger = logger,
-       _fileTransfer = fileTransfer,
+    this._fileTransfer = const FileTransfer(),
+  }) : _logger = logger,
        super(id);
 
   /// [DaemonConnection] used to communicate with the daemon.
@@ -600,12 +588,10 @@ typedef CreateSocketServer =
 class ProxiedPortForwarder extends DevicePortForwarder {
   ProxiedPortForwarder(
     this.connection, {
-    String? deviceId,
-    required Logger logger,
-    @visibleForTesting CreateSocketServer createSocketServer = _defaultCreateServerSocket,
-  }) : _logger = logger,
-       _deviceId = deviceId,
-       _createSocketServer = createSocketServer;
+    this._deviceId,
+    required this._logger,
+    @visibleForTesting this._createSocketServer = _defaultCreateServerSocket,
+  });
 
   final String? _deviceId;
 
@@ -806,12 +792,10 @@ class ProxiedDartDevelopmentService
     this.connection,
     this.deviceId, {
     required Logger logger,
-    required ProxiedPortForwarder proxiedPortForwarder,
-    required ProxiedPortForwarder devicePortForwarder,
+    required this._proxiedPortForwarder,
+    required this._devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
   }) : _logger = logger,
-       _proxiedPortForwarder = proxiedPortForwarder,
-       _devicePortForwarder = devicePortForwarder,
        _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;

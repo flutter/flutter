@@ -265,15 +265,12 @@ class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
     FlutterVmService serviceProtocol, {
-    required OperatingSystemUtils osUtils,
+    required this._osUtils,
     required HttpClient httpClient,
-    required Logger logger,
-    Duration? uploadRetryThrottle,
+    required this._logger,
+    this._uploadRetryThrottle,
   }) : httpAddress = serviceProtocol.httpAddress,
-       _client = httpClient,
-       _osUtils = osUtils,
-       _uploadRetryThrottle = uploadRetryThrottle,
-       _logger = logger;
+       _client = httpClient;
 
   final HttpClient _client;
   final OperatingSystemUtils _osUtils;
@@ -373,22 +370,15 @@ class _DevFSHttpWriter implements DevFSWriter {
 // Basic statistics for DevFS update operation.
 class UpdateFSReport {
   UpdateFSReport({
-    bool success = false,
-    int invalidatedSourcesCount = 0,
-    int syncedBytes = 0,
-    int scannedSourcesCount = 0,
-    Duration compileDuration = Duration.zero,
-    Duration transferDuration = Duration.zero,
-    Duration findInvalidatedDuration = Duration.zero,
-    bool hotReloadRejected = false,
-  }) : _success = success,
-       _invalidatedSourcesCount = invalidatedSourcesCount,
-       _syncedBytes = syncedBytes,
-       _scannedSourcesCount = scannedSourcesCount,
-       _compileDuration = compileDuration,
-       _transferDuration = transferDuration,
-       _findInvalidatedDuration = findInvalidatedDuration,
-       _hotReloadRejected = hotReloadRejected;
+    this._success = false,
+    this._invalidatedSourcesCount = 0,
+    this._syncedBytes = 0,
+    this._scannedSourcesCount = 0,
+    this._compileDuration = Duration.zero,
+    this._transferDuration = Duration.zero,
+    this._findInvalidatedDuration = Duration.zero,
+    this._hotReloadRejected = false,
+  });
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
@@ -445,8 +435,8 @@ class DevFS {
     required BuildMode buildMode,
     HttpClient? httpClient,
     Duration? uploadRetryThrottle,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    Config? config,
+    this._stopwatchFactory = const StopwatchFactory(),
+    this._config,
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -462,8 +452,6 @@ class DevFS {
                  ? HttpClient()
                  : context.get<HttpClientFactory>()!()),
        ),
-       _stopwatchFactory = stopwatchFactory,
-       _config = config,
        _assetTransformer = DevelopmentAssetTransformer(
          transformer: AssetTransformer(
            processManager: processManager,
@@ -770,7 +758,7 @@ class DevFS {
 ///
 /// Requires that the file system is the same for both the tool and application.
 class LocalDevFSWriter implements DevFSWriter {
-  LocalDevFSWriter({required FileSystem fileSystem}) : _fileSystem = fileSystem;
+  LocalDevFSWriter({required this._fileSystem});
 
   final FileSystem _fileSystem;
 

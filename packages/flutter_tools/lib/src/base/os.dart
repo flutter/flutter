@@ -55,13 +55,11 @@ abstract class OperatingSystemUtils {
   }
 
   OperatingSystemUtils._private({
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required Logger logger,
-    required Platform platform,
+    required this._platform,
     required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
+  }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 

@@ -108,9 +108,8 @@ class DaemonServer {
     this.port,
     required this.logger,
     this.notifyingLogger,
-    @visibleForTesting
-    Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
-  }) : _bind = bind;
+    @visibleForTesting this._bind = ServerSocket.bind,
+  });
 
   final int? port;
 
@@ -1571,12 +1570,7 @@ class NotifyingLogger extends DelegatingLogger {
 
 /// A running application, started by this daemon.
 class AppInstance {
-  AppInstance(
-    this.id, {
-    required this.runner,
-    this.logToStdout = false,
-    required MachineOutputLogger logger,
-  }) : _logger = logger;
+  AppInstance(this.id, {required this.runner, this.logToStdout = false, required this._logger});
 
   final String id;
   final ResidentRunner runner;
@@ -1646,9 +1640,7 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(Daemon daemon, {required FileTransfer fileTransfer})
-    : _fileTransfer = fileTransfer,
-      super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {required this._fileTransfer}) : super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);

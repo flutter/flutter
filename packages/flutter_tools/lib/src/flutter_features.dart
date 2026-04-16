@@ -79,11 +79,10 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
   FlutterFeatureFlags({
-    required FlutterVersion flutterVersion,
-    required FlutterFeaturesConfig featuresConfig,
+    required this._flutterVersion,
+    required this._featuresConfig,
     required this.platform,
-  }) : _flutterVersion = flutterVersion,
-       _featuresConfig = featuresConfig;
+  });
 
   final FlutterVersion _flutterVersion;
   final FlutterFeaturesConfig _featuresConfig;

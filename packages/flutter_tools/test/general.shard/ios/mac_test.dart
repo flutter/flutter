@@ -1106,9 +1106,8 @@ class FakeIosProject extends Fake implements IosProject {
   FakeIosProject({
     required MemoryFileSystem fileSystem,
     this.usesSwiftPackageManager = false,
-    List<Plugin> plugins = const <Plugin>[],
-  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios'),
-       _plugins = plugins;
+    this._plugins = const <Plugin>[],
+  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
   Directory hostAppRoot;
@@ -1141,8 +1140,8 @@ class FakeFlutterProject extends Fake implements FlutterProject {
     required this.fileSystem,
     this.usesSwiftPackageManager = false,
     this.isModule = false,
-    List<Plugin> plugins = const <Plugin>[],
-  }) : _plugins = plugins;
+    this._plugins = const <Plugin>[],
+  });
 
   final MemoryFileSystem fileSystem;
   final bool usesSwiftPackageManager;

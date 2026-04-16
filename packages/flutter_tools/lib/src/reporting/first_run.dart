@@ -44,8 +44,7 @@ const _kFlutterFirstRunMessage = '''
 /// The first run messenger determines whether the first run license terms
 /// need to be displayed.
 class FirstRunMessenger {
-  FirstRunMessenger({required PersistentToolState persistentToolState})
-    : _persistentToolState = persistentToolState;
+  FirstRunMessenger({required this._persistentToolState});
 
   final PersistentToolState _persistentToolState;
 

@@ -142,15 +142,12 @@ class PubResultEvent extends UsageEvent {
 class BuildEvent extends UsageEvent {
   BuildEvent(
     String label, {
-    String? command,
-    String? settings,
-    String? eventError,
+    this._command,
+    this._settings,
+    this._eventError,
     required super.flutterUsage,
     required String type,
-  }) : _command = command,
-       _settings = settings,
-       _eventError = eventError,
-       super(
+  }) : super(
          // category
          'build',
          // parameter

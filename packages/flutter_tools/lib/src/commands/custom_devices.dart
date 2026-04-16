@@ -291,17 +291,14 @@ If a file already exists at the backup location, it will be overwritten.
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   CustomDevicesAddCommand({
     required super.customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
+    required this._operatingSystemUtils,
+    required this._terminal,
+    required this._platform,
     required super.featureFlags,
-    required ProcessManager processManager,
+    required this._processManager,
     required FileSystem super.fileSystem,
     required super.logger,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _terminal = terminal,
-       _platform = platform,
-       _processManager = processManager {
+  }) {
     argParser.addFlag(
       _kCheck,
       help:

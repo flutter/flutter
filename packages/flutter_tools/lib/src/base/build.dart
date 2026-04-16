@@ -27,11 +27,10 @@ class SnapshotType {
 /// Interface to the gen_snapshot command-line tool.
 class GenSnapshot {
   GenSnapshot({
-    required Artifacts artifacts,
+    required this._artifacts,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _artifacts = artifacts,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Artifacts _artifacts;
   final ProcessUtils _processUtils;
@@ -89,13 +88,11 @@ class GenSnapshot {
 class AOTSnapshotter {
   AOTSnapshotter({
     required Logger logger,
-    required FileSystem fileSystem,
-    required Xcode xcode,
+    required this._fileSystem,
+    required this._xcode,
     required ProcessManager processManager,
     required Artifacts artifacts,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _xcode = xcode,
        _genSnapshot = GenSnapshot(
          artifacts: artifacts,
          processManager: processManager,

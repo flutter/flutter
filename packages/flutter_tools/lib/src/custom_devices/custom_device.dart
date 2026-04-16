@@ -120,19 +120,15 @@ class CustomDeviceLogReader extends DeviceLogReader {
 /// A [DevicePortForwarder] that uses commands to forward / unforward a port.
 class CustomDevicePortForwarder extends DevicePortForwarder {
   CustomDevicePortForwarder({
-    required String deviceName,
-    required List<String> forwardPortCommand,
-    required RegExp forwardPortSuccessRegex,
+    required this._deviceName,
+    required this._forwardPortCommand,
+    required this._forwardPortSuccessRegex,
     this.numTries,
     required ProcessManager processManager,
     required Logger logger,
-    Map<String, String> additionalReplacementValues = const <String, String>{},
-  }) : _deviceName = deviceName,
-       _forwardPortCommand = forwardPortCommand,
-       _forwardPortSuccessRegex = forwardPortSuccessRegex,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _additionalReplacementValues = additionalReplacementValues;
+    this._additionalReplacementValues = const <String, String>{},
+  }) : _processManager = processManager,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final String _deviceName;
   final List<String> _forwardPortCommand;
@@ -245,13 +241,11 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
 class CustomDeviceAppSession {
   CustomDeviceAppSession({
     required this.name,
-    required CustomDevice device,
-    required ApplicationPackage appPackage,
+    required this._device,
+    required this._appPackage,
     required Logger logger,
     required ProcessManager processManager,
-  }) : _appPackage = appPackage,
-       _device = device,
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        logReader = CustomDeviceLogReader(name);
@@ -794,13 +788,10 @@ class CustomDevices extends PollingDeviceDiscovery {
   /// given [CustomDevicesConfig].
   CustomDevices({
     required FeatureFlags featureFlags,
-    required ProcessManager processManager,
-    required Logger logger,
-    required CustomDevicesConfig config,
+    required this._processManager,
+    required this._logger,
+    required this._config,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
-       _logger = logger,
-       _processManager = processManager,
-       _config = config,
        super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;

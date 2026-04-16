@@ -44,7 +44,7 @@ final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory, {Java? java, FileSystem? fileSystem}) : _java = java {
+  AndroidSdk(this.directory, {this._java, FileSystem? fileSystem}) {
     reinitialize(fileSystem: fileSystem);
   }
 
@@ -600,8 +600,8 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     required this.sdkLevel,
     required this.platformName,
     required this.buildToolsVersion,
-    required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+    required this._fileSystem,
+  });
 
   final AndroidSdk sdk;
   final int sdkLevel;

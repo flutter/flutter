@@ -415,14 +415,11 @@ abstract class Artifacts {
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts implements Artifacts {
   CachedArtifacts({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._fileSystem,
+    required this._platform,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -1092,7 +1089,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
     required String engineOutPath,
     required FileSystem fileSystem,
     required Cache cache,
-    required ProcessManager processManager,
+    required this._processManager,
     required Platform platform,
     required OperatingSystemUtils operatingSystemUtils,
     Artifacts? parent,
@@ -1102,7 +1099,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
          hostOutPath: _hostEngineOutPath,
        ),
        _cache = cache,
-       _processManager = processManager,
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
        _backupCache =
@@ -1423,16 +1419,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
 class CachedLocalWebSdkArtifacts implements Artifacts {
   CachedLocalWebSdkArtifacts({
-    required Artifacts parent,
-    required String webSdkPath,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _parent = parent,
-       _webSdkPath = webSdkPath,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._parent,
+    required this._webSdkPath,
+    required this._fileSystem,
+    required this._platform,
+    required this._operatingSystemUtils,
+  });
 
   final Artifacts _parent;
   final String _webSdkPath;

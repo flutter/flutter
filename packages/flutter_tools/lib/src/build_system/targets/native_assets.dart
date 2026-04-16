@@ -30,10 +30,7 @@ import 'common.dart';
 
 /// Runs the dart build of the app.
 class DartBuild extends Target {
-  const DartBuild({
-    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
-    this.specifiedTargetPlatform,
-  }) : _buildRunner = buildRunner;
+  const DartBuild({@visibleForTesting this._buildRunner, this.specifiedTargetPlatform});
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 

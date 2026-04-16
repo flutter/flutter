@@ -17,12 +17,8 @@ import '../web_template.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand({
-    required super.logger,
-    required FileSystem fileSystem,
-    required bool verboseHelp,
-  }) : _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
+  BuildWebCommand({required super.logger, required this._fileSystem, required bool verboseHelp})
+    : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesOutputDir();

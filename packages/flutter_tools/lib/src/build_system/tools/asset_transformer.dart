@@ -19,14 +19,11 @@ import '../build_system.dart';
 /// Applies a series of user-specified asset-transforming packages to an asset file.
 final class AssetTransformer {
   AssetTransformer({
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required String dartBinaryPath,
-    required BuildMode buildMode,
-  }) : _processManager = processManager,
-       _fileSystem = fileSystem,
-       _dartBinaryPath = dartBinaryPath,
-       _buildMode = buildMode;
+    required this._processManager,
+    required this._fileSystem,
+    required this._dartBinaryPath,
+    required this._buildMode,
+  });
 
   static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
 
@@ -161,12 +158,10 @@ final class AssetTransformer {
 // A wrapper around [AssetTransformer] to support hot reload of transformed assets.
 final class DevelopmentAssetTransformer {
   DevelopmentAssetTransformer({
-    required FileSystem fileSystem,
-    required AssetTransformer transformer,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _transformer = transformer,
-       _logger = logger;
+    required this._fileSystem,
+    required this._transformer,
+    required this._logger,
+  });
 
   final AssetTransformer _transformer;
   final FileSystem _fileSystem;

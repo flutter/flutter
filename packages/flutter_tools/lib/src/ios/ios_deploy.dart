@@ -28,13 +28,11 @@ const unknownAppLaunchError = 'Error 0xe8000022';
 class IOSDeploy {
   IOSDeploy({
     required Artifacts artifacts,
-    required Cache cache,
+    required this._cache,
     required Logger logger,
-    required Platform platform,
+    required this._platform,
     required ProcessManager processManager,
-  }) : _platform = platform,
-       _cache = cache,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger,
        _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
@@ -214,15 +212,11 @@ enum _IOSDeployDebuggerState { detached, launching, attached }
 /// Wrapper to launch app and attach the debugger with ios-deploy.
 class IOSDeployDebugger {
   IOSDeployDebugger({
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required List<String> launchCommand,
-    required Map<String, String> iosDeployEnv,
-  }) : _processUtils = processUtils,
-       _logger = logger,
-       _launchCommand = launchCommand,
-       _iosDeployEnv = iosDeployEnv,
-       _debuggerState = _IOSDeployDebuggerState.detached;
+    required this._logger,
+    required this._processUtils,
+    required this._launchCommand,
+    required this._iosDeployEnv,
+  }) : _debuggerState = _IOSDeployDebuggerState.detached;
 
   /// Create a [IOSDeployDebugger] for testing.
   ///

@@ -156,14 +156,12 @@ abstract class Terminal {
 
 class AnsiTerminal implements Terminal {
   AnsiTerminal({
-    required io.Stdio stdio,
-    required Platform platform,
+    required this._stdio,
+    required this._platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
     bool defaultCliAnimationEnabled = true,
     ShutdownHooks? shutdownHooks,
-  }) : _stdio = stdio,
-       _platform = platform,
-       _now = now ?? DateTime(1),
+  }) : _now = now ?? DateTime(1),
        _isCliAnimationEnabled = defaultCliAnimationEnabled {
     shutdownHooks?.addShutdownHook(() {
       singleCharMode = false;

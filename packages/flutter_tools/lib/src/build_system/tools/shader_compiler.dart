@@ -22,12 +22,10 @@ import '../build_system.dart';
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
   DevelopmentShaderCompiler({
-    required ShaderCompiler shaderCompiler,
-    required FileSystem fileSystem,
+    required this._shaderCompiler,
+    required this._fileSystem,
     @visibleForTesting math.Random? random,
-  }) : _shaderCompiler = shaderCompiler,
-       _fileSystem = fileSystem,
-       _random = random ?? math.Random();
+  }) : _random = random ?? math.Random();
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
@@ -90,14 +88,11 @@ class DevelopmentShaderCompiler {
 /// impellerc.
 class ShaderCompiler {
   ShaderCompiler({
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._processManager,
+    required this._logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _fs = fileSystem,
-       _artifacts = artifacts;
+    required this._artifacts,
+  }) : _fs = fileSystem;
 
   final ProcessManager _processManager;
   final Logger _logger;

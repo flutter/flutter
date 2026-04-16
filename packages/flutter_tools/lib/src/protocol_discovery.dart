@@ -21,10 +21,9 @@ class ProtocolDiscovery {
     required this.throttleDuration,
     this.hostPort,
     this.devicePort,
-    required bool ipv6,
-    required Logger logger,
-  }) : _logger = logger,
-       _ipv6 = ipv6 {
+    required this._ipv6,
+    required this._logger,
+  }) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine, onDone: _stopScrapingLogs);
   }
 

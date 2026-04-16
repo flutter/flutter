@@ -29,13 +29,10 @@ abstract class DesktopDevice extends Device {
     required PlatformType super.platformType,
     required super.ephemeral,
     required super.logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required this._processManager,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
   }) : _logger = logger,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
        super(category: Category.desktop);
 
   final Logger _logger;

@@ -26,19 +26,15 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     XcodeBasedProject project,
     FlutterDarwinPlatform platform,
     BuildInfo buildInfo, {
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._xcodeProjectInterpreter,
     required Logger logger,
-    required FileSystem fileSystem,
-    required PlistParser plistParser,
-    required Config config,
+    required this._fileSystem,
+    required this._plistParser,
+    required this._config,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _fileSystem = fileSystem,
-       _plistParser = plistParser,
-       _config = config,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;

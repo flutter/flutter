@@ -63,12 +63,10 @@ sealed class ProxyRule {
 /// If a [_replacement] string is provided, it replaces parts of the matched
 /// path based on regex group capturing.
 class RegexProxyRule extends ProxyRule {
-  /// Creates a [RegexProxyRule] with the given regular expression [pattern],
-  /// [target] URI base, and optional [replacement] string.
-  RegexProxyRule({required RegExp pattern, required String target, String? replacement})
-    : targetUri = Uri.parse(target),
-      _pattern = pattern,
-      _replacement = replacement;
+  /// Creates a [RegexProxyRule] with the given regular expression [_pattern],
+  /// [target] URI base, and optional [_replacement] string.
+  RegexProxyRule({required this._pattern, required String target, this._replacement})
+    : targetUri = Uri.parse(target);
 
   final RegExp _pattern;
   final String? _replacement;

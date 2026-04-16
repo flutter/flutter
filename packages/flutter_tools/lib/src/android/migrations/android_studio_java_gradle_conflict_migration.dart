@@ -74,11 +74,9 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
   AndroidStudioJavaGradleConflictMigration(
     super.logger, {
     required AndroidProject project,
-    AndroidStudio? androidStudio,
-    required Java? java,
-  }) : _gradleWrapperPropertiesFile = getGradleWrapperFile(project.hostAppGradleRoot),
-       _androidStudio = androidStudio,
-       _java = java;
+    this._androidStudio,
+    required this._java,
+  }) : _gradleWrapperPropertiesFile = getGradleWrapperFile(project.hostAppGradleRoot);
 
   final File _gradleWrapperPropertiesFile;
   final AndroidStudio? _androidStudio;

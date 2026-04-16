@@ -124,10 +124,7 @@ export 'dart:io'
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
   @visibleForTesting
-  const ProcessSignal(
-    this._delegate, {
-    @visibleForTesting Platform platform = const LocalPlatform(),
-  }) : _platform = platform;
+  const ProcessSignal(this._delegate, {@visibleForTesting this._platform = const LocalPlatform()});
 
   static const ProcessSignal sighup = PosixProcessSignal(io.ProcessSignal.sighup);
   static const ProcessSignal sigwinch = PosixProcessSignal(io.ProcessSignal.sigwinch);
