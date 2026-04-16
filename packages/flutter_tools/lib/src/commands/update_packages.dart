@@ -206,6 +206,8 @@ class UpdatePackagesCommand extends FlutterCommand {
         final List<_ProjectDeps> toolDeps = await _upgrade(
           forceUpgrade: forceUpgrade,
           cherryPicks: cherryPicks,
+          // Ensure that flutter_tools uses the same versions for packages that are also
+          // used by the Flutter SDK.
           pinned: deps.toVersions(),
           projects: <FlutterProject>[toolProject],
           relaxToAny: relaxToAny,
