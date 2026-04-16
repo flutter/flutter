@@ -25,12 +25,6 @@ class HostWindowPopup : public HostWindow,
   // of the popup.
   void UpdatePosition();
 
- protected:
-  LRESULT HandleMessage(HWND hwnd,
-                        UINT message,
-                        WPARAM wparam,
-                        LPARAM lparam) override;
-
  private:
   void DidUpdateViewSize(int32_t width, int32_t height) override;
   WindowRect GetWorkArea() const override;

@@ -119,31 +119,4 @@ void HostWindowPopup::UpdatePosition() {
   }
 }
 
-LRESULT HostWindowPopup::HandleMessage(HWND hwnd,
-                                       UINT message,
-                                       WPARAM wparam,
-                                       LPARAM lparam) {
-  switch (message) {
-    case WM_MOUSEACTIVATE:
-      // Prevent activation when clicked
-      SetForegroundWindow(parent_);
-      SetFocus(parent_);
-      return MA_NOACTIVATE;
-
-    case WM_NCACTIVATE:
-      // Return TRUE to prevent visual activation changes
-      return TRUE;
-
-    case WM_ACTIVATE:
-      // Immediately deactivate if somehow activated
-      if (LOWORD(wparam) != WA_INACTIVE) {
-        SetForegroundWindow(parent_);
-        SetFocus(parent_);
-      }
-      break;
-  }
-
-  return HostWindow::HandleMessage(hwnd, message, wparam, lparam);
-}
-
 }  // namespace flutter
