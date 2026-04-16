@@ -64,9 +64,13 @@ final class PredictiveBackEvent {
   /// back gesture. When `null`, it indicates the gesture was not started by a
   /// touch event, such as a back button press in devices with hardware buttons.
   ///
-  /// The Android API specifies that [getTouchX](https://developer.android.com/reference/android/window/BackEvent#getTouchX())
-  /// and `getTouchY` return `NaN` for button-triggered events. The engine
-  /// maps those `NaN` values to `null` here.
+  /// The Android API specifies that `getTouchX` and `getTouchY` return `NaN`
+  /// for button-triggered events. The engine maps those `NaN` values to
+  /// `null` here.
+  ///
+  /// See also:
+  ///
+  ///  * https://developer.android.com/reference/android/window/BackEvent#getTouchX()
   final Offset? touchOffset;
 
   /// Returns a value between 0.0 and 1.0 representing how far along the back
