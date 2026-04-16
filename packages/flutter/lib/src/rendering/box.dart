@@ -2664,7 +2664,7 @@ abstract class RenderBox extends RenderObject {
           try {
             result = function(constraint);
           } catch (e, stack) {
-            _debugReportExceptionDuringIntrinsicsCheck(
+            _reportIntrinsicException(
               name,
               'These methods are called in debug mode to ensure they are consistent.',
               e,
@@ -2759,7 +2759,7 @@ abstract class RenderBox extends RenderObject {
         try {
           dryLayoutSize = getDryLayout(constraints);
         } catch (e, stack) {
-          _debugReportExceptionDuringIntrinsicsCheck(
+          _reportIntrinsicException(
             'getDryLayout',
             'The getDryLayout method is called in debug mode to ensure it is consistent with the performLayout method.',
             e,
@@ -2809,7 +2809,7 @@ abstract class RenderBox extends RenderObject {
           dryBaseline = getDryBaseline(constraints, baseline);
           realBaseline = getDistanceToBaseline(baseline, onlyReal: true);
         } catch (e, stack) {
-          _debugReportExceptionDuringIntrinsicsCheck(
+          _reportIntrinsicException(
             'getDryBaseline or getDistanceToBaseline',
             'The getDryBaseline method is called in debug mode to ensure it is consistent with the getDistanceToBaseline method.',
             e,
@@ -2860,7 +2860,7 @@ abstract class RenderBox extends RenderObject {
     }());
   }
 
-  Never _debugReportExceptionDuringIntrinsicsCheck(
+  Never _reportIntrinsicException(
     String methodName,
     String explanation,
     Object exception,
@@ -2885,7 +2885,7 @@ abstract class RenderBox extends RenderObject {
   /// Reports that a child returned an infinite intrinsic dimension.
   ///
   /// This is a violation of the intrinsic layout protocol.
-  static Never debugReportInfiniteIntrinsic(
+  static Never reportInfiniteIntrinsic(
     String parentType,
     RenderBox child,
     String dimension,

@@ -682,7 +682,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     final double width = child!.getMaxIntrinsicWidth(height);
     assert(() {
       if (!width.isFinite) {
-        RenderBox.debugReportInfiniteIntrinsic(
+        RenderBox.reportInfiniteIntrinsic(
           'RenderIntrinsicWidth',
           child!,
           'width',
@@ -706,7 +706,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     final double height = child!.getMinIntrinsicHeight(width);
     assert(() {
       if (!height.isFinite) {
-        RenderBox.debugReportInfiniteIntrinsic(
+        RenderBox.reportInfiniteIntrinsic(
           'RenderIntrinsicWidth',
           child!,
           'height',
@@ -730,7 +730,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     final double height = child!.getMaxIntrinsicHeight(width);
     assert(() {
       if (!height.isFinite) {
-        RenderBox.debugReportInfiniteIntrinsic(
+        RenderBox.reportInfiniteIntrinsic(
           'RenderIntrinsicWidth',
           child!,
           'height',
@@ -748,7 +748,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       width = child.getMaxIntrinsicWidth(constraints.maxHeight);
       assert(() {
         if (!width!.isFinite) {
-          RenderBox.debugReportInfiniteIntrinsic(
+          RenderBox.reportInfiniteIntrinsic(
             'RenderIntrinsicWidth',
             child,
             'width',
@@ -764,7 +764,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       height = child.getMaxIntrinsicHeight(constraints.maxWidth);
       assert(() {
         if (!height!.isFinite) {
-          RenderBox.debugReportInfiniteIntrinsic(
+          RenderBox.reportInfiniteIntrinsic(
             'RenderIntrinsicWidth',
             child,
             'height',
@@ -851,7 +851,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       height = child!.getMaxIntrinsicHeight(double.infinity);
       assert(() {
         if (!height.isFinite) {
-          RenderBox.debugReportInfiniteIntrinsic(
+          RenderBox.reportInfiniteIntrinsic(
             'RenderIntrinsicHeight',
             child!,
             'height',
@@ -873,7 +873,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       height = child!.getMaxIntrinsicHeight(double.infinity);
       assert(() {
         if (!height.isFinite) {
-          RenderBox.debugReportInfiniteIntrinsic(
+          RenderBox.reportInfiniteIntrinsic(
             'RenderIntrinsicHeight',
             child!,
             'height',
@@ -898,7 +898,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     final double height = child.getMaxIntrinsicHeight(constraints.maxWidth);
     assert(() {
       if (!height.isFinite) {
-        RenderBox.debugReportInfiniteIntrinsic(
+        RenderBox.reportInfiniteIntrinsic(
           'RenderIntrinsicHeight',
           child,
           'height',
