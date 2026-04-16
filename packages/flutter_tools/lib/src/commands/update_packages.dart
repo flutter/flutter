@@ -172,14 +172,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
 
-    // This package is intentionally not part of the workspace as it's a rehydrated template.
-    final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
-      rootProject.directory
-          .childDirectory('dev')
-          .childDirectory('integration_tests')
-          .childDirectory('widget_preview_scaffold'),
-    );
-
     // This package is intentionally not part of the workspace to test
     // user-defines in its local pubspec.
     final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
@@ -237,7 +229,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
-    await _pubGet(widgetPreviewScaffoldProject, false);
     await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
 
     await _downloadCoverageData();
