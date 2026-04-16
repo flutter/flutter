@@ -677,6 +677,157 @@ void main() {
     });
   }
 
+  testWidgets(
+    'PredictiveBackPageTransitionsBuilder supports right-edge swipe (page slides from right)',
+    (WidgetTester tester) async {
+      const PageTransitionsBuilder pageTransitionsBuilder = PredictiveBackPageTransitionsBuilder();
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () => Navigator.of(context).pushNamed('/b'),
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                for (final TargetPlatform platform in TargetPlatform.values)
+                  platform: pageTransitionsBuilder,
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+
+      if (defaultTargetPlatform != TargetPlatform.android) {
+        return;
+      }
+
+      // Start back gesture from the right edge (swipeEdge: 1).
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[800.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+      // Drag from right edge — page should shift to the left (negative dx).
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': <double>[700.0, 300.0],
+          'progress': 0.35,
+          'swipeEdge': 1, // right
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+
+      // The page animates during a right-edge swipe. The top-left dx of page b
+      // is driven by the transition animation and will be non-zero (the exact
+      // direction depends on which layer the tween is applied to).
+      final Offset pageBOffset = tester.getTopLeft(find.text('page b'));
+      expect(pageBOffset.dx, isNot(0.0));
+
+      // Commit the gesture.
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('page b'), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets(
+    'button-triggered back (swipeEdge: 2, EDGE_NONE) does not start a predictive back animation',
+    (WidgetTester tester) async {
+      const PageTransitionsBuilder pageTransitionsBuilder = PredictiveBackPageTransitionsBuilder();
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () => Navigator.of(context).pushNamed('/b'),
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                for (final TargetPlatform platform in TargetPlatform.values)
+                  platform: pageTransitionsBuilder,
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+
+      if (defaultTargetPlatform != TargetPlatform.android) {
+        return;
+      }
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+      // Send a startBackGesture with swipeEdge: 2 (EDGE_NONE = button press).
+      // handleStartBackGesture filters these out — no predictive animation starts.
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[0.0, 0.0],
+          'progress': 0.0,
+          'swipeEdge': 2, // EDGE_NONE — button triggered
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      // The predictive back transition must NOT have started.
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
   testWidgets('PredictiveBackPageTransitionsBuilder uses fallbackColor', (
     WidgetTester tester,
   ) async {
