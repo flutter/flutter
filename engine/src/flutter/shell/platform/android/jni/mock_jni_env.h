@@ -51,6 +51,7 @@ class MockableJNIEnv : public JNIEnv {
     // Replace the JNIEnv's function table with wrappers that invoke the
     // mockable virtual methods in this class.
     functions = &jni_;
+    jni_.CallObjectMethod = WrapCallObjectMethod;
     jni_.CallObjectMethodV = WrapCallObjectMethodV;
     jni_.DeleteGlobalRef = WrapDeleteGlobalRef;
     jni_.DeleteLocalRef = WrapDeleteLocalRef;
