@@ -49,9 +49,9 @@ final class PredictiveBackEvent {
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
       swipeEdge: switch (map['swipeEdge']) {
-        0 || 0.0 => SwipeEdge.left,
-        1 || 1.0 => SwipeEdge.right,
-        2 || 2.0 => SwipeEdge.none,
+        0 => SwipeEdge.left,
+        1 => SwipeEdge.right,
+        2 => SwipeEdge.none,
         _ => SwipeEdge.none,
       },
     );
@@ -63,6 +63,10 @@ final class PredictiveBackEvent {
   /// This represents the touch location that initiates or interacts with the
   /// back gesture. When `null`, it indicates the gesture was not started by a
   /// touch event, such as a back button press in devices with hardware buttons.
+  ///
+  /// The Android API specifies that [getTouchX](https://developer.android.com/reference/android/window/BackEvent#getTouchX())
+  /// and `getTouchY` return `NaN` for button-triggered events. The engine
+  /// maps those `NaN` values to `null` here.
   final Offset? touchOffset;
 
   /// Returns a value between 0.0 and 1.0 representing how far along the back
