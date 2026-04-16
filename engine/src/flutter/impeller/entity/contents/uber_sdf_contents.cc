@@ -26,6 +26,8 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 0.0f;
     case UberSDFParameters::Type::kRect:
       return 1.0f;
+    case UberSDFParameters::Type::kOval:
+      return 2.0f;
   }
 }
 
