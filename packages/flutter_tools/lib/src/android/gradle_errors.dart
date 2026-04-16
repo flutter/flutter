@@ -354,13 +354,17 @@ final javaHeapSpaceHandler = GradleHandledError(
   handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
     final File gradlePropertiesFile = project.android.hostAppGradleRoot.childFile('gradle.properties');
     final String textInBold = globals.logger.terminal.bolden(
-      'Open ${gradlePropertiesFile.path} and update (or add) this line:\n'
+      'Open ${gradlePropertiesFile.path} and ensure org.gradle.jvmargs includes enough heap.\n'
+      'If org.gradle.jvmargs is already set, append these flags to the existing value '
+      '(keep your other JVM arguments, such as file encoding):\n'
+      '-Xmx4G -XX:MaxMetaspaceSize=2G\n'
+      'If org.gradle.jvmargs is not set, add a line such as:\n'
       'org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=2G',
     );
     globals.printBox(
       '${globals.logger.terminal.warningMark} The Gradle build ran out of Java heap space.\n'
       '$textInBold\n\n'
-      'If this error continues, increase these values further based on your machine resources.',
+      'If this error continues, increase the -Xmx and -XX:MaxMetaspaceSize values based on your machine resources.',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
