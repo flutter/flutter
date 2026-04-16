@@ -726,6 +726,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) : _textAlign = textAlign,
        _textDirection = textDirection,
        _maxLines = maxLines,
@@ -737,7 +738,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
        _fontStyle = fontStyle,
        _strutStyle = strutStyle,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _hyphens = hyphens;
 
   (ParagraphStyleHandle, SkwasmNativeTextStyle) createNative() {
     final ParagraphStyleHandle handle = paragraphStyleCreate();
@@ -835,6 +837,11 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
+  // TODO(dbebawy): honor hyphens once the configurable-soft-hyphen-string Skia
+  // change (https://skia-review.googlesource.com/c/skia/+/1205922) lands and a
+  // skwasm binding is exposed. Accepted and stored for now.
+  // https://github.com/flutter/flutter/issues/18443
+  final ui.Hyphens? _hyphens;
 
   @override
   bool operator ==(Object other) {
@@ -856,7 +863,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
         other._textHeightBehavior == _textHeightBehavior &&
         other._strutStyle == _strutStyle &&
         other._ellipsis == _ellipsis &&
-        other._locale == _locale;
+        other._locale == _locale &&
+        other._hyphens == _hyphens;
   }
 
   @override
@@ -874,6 +882,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
       _strutStyle,
       _ellipsis,
       _locale,
+      _hyphens,
     );
   }
 
@@ -896,6 +905,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
           'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
           'strutStyle: ${_strutStyle ?? "unspecified"}, '
           'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
+          'hyphens: ${_hyphens ?? "unspecified"}, '
           'locale: ${_locale ?? "unspecified"}'
           ')';
       return true;

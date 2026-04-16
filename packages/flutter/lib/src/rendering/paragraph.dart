@@ -14,6 +14,7 @@ import 'dart:ui'
         BoxHeightStyle,
         BoxWidthStyle,
         Gradient,
+        Hyphens,
         LineMetrics,
         PlaceholderAlignment,
         Shader,
@@ -41,10 +42,8 @@ typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition posi
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition], for the given [String].
-typedef _TextBoundaryAtPositionInText = _TextBoundaryRecord Function(
-  TextPosition position,
-  String text,
-);
+typedef _TextBoundaryAtPositionInText =
+    _TextBoundaryRecord Function(TextPosition position, String text);
 
 const String _kEllipsis = '\u2026';
 
@@ -352,6 +351,7 @@ class RenderParagraph extends RenderBox
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
+    ui.Hyphens hyphens = ui.Hyphens.manual,
     List<RenderBox>? children,
     Color? selectionColor,
     SelectionRegistrar? registrar,
@@ -379,6 +379,7 @@ class RenderParagraph extends RenderBox
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
          textHeightBehavior: textHeightBehavior,
+         hyphens: hyphens,
        ) {
     addAll(children);
     this.registrar = registrar;
@@ -409,7 +410,8 @@ class RenderParagraph extends RenderBox
       ..locale = _textPainter.locale
       ..strutStyle = _textPainter.strutStyle
       ..textWidthBasis = _textPainter.textWidthBasis
-      ..textHeightBehavior = _textPainter.textHeightBehavior;
+      ..textHeightBehavior = _textPainter.textHeightBehavior
+      ..hyphens = _textPainter.hyphens;
   }
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -757,6 +759,18 @@ class RenderParagraph extends RenderBox
       return;
     }
     _textPainter.textHeightBehavior = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.painting.textPainter.hyphens}
+  ui.Hyphens get hyphens => _textPainter.hyphens;
+
+  set hyphens(ui.Hyphens value) {
+    if (_textPainter.hyphens == value) {
+      return;
+    }
+    _textPainter.hyphens = value;
     _overflowShader = null;
     markNeedsLayout();
   }

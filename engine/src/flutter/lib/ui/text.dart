@@ -1327,6 +1327,20 @@ enum TextAlign {
   end,
 }
 
+/// The behavior of soft hyphens (U+00AD) at a line break.
+///
+/// This affects rendering only; it does not change where lines break, since
+/// Flutter always treats U+00AD as a line-break opportunity.
+enum Hyphens {
+  /// A hyphen glyph is rendered at the end of a line that breaks on a soft
+  /// hyphen (U+00AD). Soft hyphens elsewhere remain invisible.
+  manual,
+
+  /// No hyphen glyph is rendered for soft hyphens. The line still breaks at
+  /// U+00AD; only the glyph is suppressed.
+  hidden,
+}
+
 /// A horizontal line used for aligning text.
 enum TextBaseline {
   /// The horizontal line used to align the bottom of glyphs for alphabetic characters.
@@ -1950,8 +1964,9 @@ Int32List _encodeParagraphStyle(
   StrutStyle? strutStyle,
   String? ellipsis,
   Locale? locale,
+  Hyphens? hyphens,
 ) {
-  final result = Int32List(7); // also update paragraph_builder.cc
+  final result = Int32List(8); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -2001,6 +2016,10 @@ Int32List _encodeParagraphStyle(
   if (locale != null) {
     result[0] |= 1 << 12;
     // Passed separately to native.
+  }
+  if (hyphens != null) {
+    result[0] |= 1 << 13;
+    result[7] = hyphens.index;
   }
   return result;
 }
@@ -2068,6 +2087,9 @@ class ParagraphStyle {
   ///   considered equivalent and turn off this behavior.
   ///
   /// * `locale`: The locale used to select region-specific glyphs.
+  ///
+  /// * `hyphens`: Whether to render a hyphen glyph for soft hyphens (U+00AD)
+  ///   that fall at a line break. Defaults to [Hyphens.manual].
   ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
@@ -2081,6 +2103,7 @@ class ParagraphStyle {
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
+    Hyphens? hyphens,
   }) : _encoded = _encodeParagraphStyle(
          textAlign,
          textDirection,
@@ -2094,6 +2117,7 @@ class ParagraphStyle {
          strutStyle,
          ellipsis,
          locale,
+         hyphens,
        ),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
@@ -2157,7 +2181,8 @@ class ParagraphStyle {
         'height: ${_encoded[0] & 0x200 == 0x200 ? "${_height}x" : "unspecified"}, '
         'strutStyle: ${_encoded[0] & 0x400 == 0x400 ? _strutStyle : "unspecified"}, '
         'ellipsis: ${_encoded[0] & 0x800 == 0x800 ? '"$_ellipsis"' : "unspecified"}, '
-        'locale: ${_encoded[0] & 0x1000 == 0x1000 ? _locale : "unspecified"}'
+        'locale: ${_encoded[0] & 0x1000 == 0x1000 ? _locale : "unspecified"}, '
+        'hyphens: ${_encoded[0] & 0x2000 == 0x2000 ? Hyphens.values[_encoded[7]] : "unspecified"}'
         ')';
   }
 }

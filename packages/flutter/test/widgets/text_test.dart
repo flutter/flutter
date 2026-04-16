@@ -1801,6 +1801,41 @@ void main() {
     );
   });
 
+  testWidgets('Text forwards hyphens to RenderParagraph', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text('hy\u00ADphenation', hyphens: Hyphens.hidden),
+      ),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    expect(paragraph.hyphens, Hyphens.hidden);
+  });
+
+  testWidgets('Text defaults hyphens to Hyphens.manual', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(textDirection: TextDirection.ltr, child: Text('hy\u00ADphenation')),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    expect(paragraph.hyphens, Hyphens.manual);
+  });
+
+  testWidgets('Selectable Text forwards hyphens to RenderParagraph', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          focusNode: focusNode,
+          child: const Text('hy\u00ADphenation', hyphens: Hyphens.hidden),
+        ),
+      ),
+    );
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    expect(paragraph.hyphens, Hyphens.hidden);
+  });
+
   testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (
     WidgetTester tester,
   ) async {
