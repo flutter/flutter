@@ -721,6 +721,34 @@ void main() {
     }
   });
 
+  test('RenderBox.debugCheckingIntrinsics error messages', () {
+    final testBox = _ThrowingRenderBox();
+    const viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+
+    late FlutterError error;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      error = details.exception as FlutterError;
+    };
+    try {
+      layout(testBox, constraints: viewport);
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(error, isNotNull);
+    final String errorMessage = error.toStringDeep();
+    expect(errorMessage, contains('getMinIntrinsicWidth'));
+    expect(errorMessage, contains('RenderPositionedBox'));
+    expect(errorMessage, contains('threw an exception during verification.'));
+    expect(errorMessage, contains('following exception was raised:'));
+    expect(errorMessage, contains('Exception: In computeMinIntrinsicWidth'));
+    expect(errorMessage, contains('RenderObject.debugCheckingIntrinsics'));
+    expect(errorMessage, contains('true.'));
+    expect(errorMessage, contains('consistent'));
+    expect(errorMessage, contains('fault'));
+  });
+
   test('UnconstrainedBox.toStringDeep returns useful information', () {
     final unconstrained = RenderConstraintsTransformBox(
       constraintsTransform: ConstraintsTransformBox.unconstrained,
@@ -1373,4 +1401,16 @@ class _DummyHitTestTarget implements HitTestTarget {
 
 class MyHitTestResult extends HitTestResult {
   void publicPushTransform(Matrix4 transform) => pushTransform(transform);
+}
+
+class _ThrowingRenderBox extends RenderBox {
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    throw Exception('In computeMinIntrinsicWidth');
+  }
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
 }
