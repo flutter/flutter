@@ -60,7 +60,7 @@ Thanks for your contribution.`;
       }
     }
 
-    // Check for author commits after label if it's a PR
+    // Check for commits after label if it's a PR
     if (!isResponse && isPr) {
       const commits = await github.paginate(github.rest.pulls.listCommits, {
         owner,
@@ -70,7 +70,7 @@ Thanks for your contribution.`;
 
       for (const commit of commits) {
         const commitDate = new Date(commit.commit.committer.date);
-        if (commit.author && commit.author.id === issue.user.id && commitDate > labeledAt) {
+        if (commitDate > labeledAt) {
           isResponse = true;
           break;
         }
