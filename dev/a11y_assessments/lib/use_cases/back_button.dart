@@ -38,10 +38,16 @@ class MainWidgetState extends State<MainWidget> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-        leading: const BackButton(),
       ),
       body: const Center(
-        child: Text('Check the back button in the app bar'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            BackButton(),
+            SizedBox(height: 20),
+            Text('Check the back button above'),
+          ],
+        ),
       ),
     );
   }
