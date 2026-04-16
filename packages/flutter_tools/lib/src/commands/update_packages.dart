@@ -214,16 +214,8 @@ class UpdatePackagesCommand extends FlutterCommand {
         final List<_ProjectDeps> toolDeps = await _upgrade(
           forceUpgrade: forceUpgrade,
           cherryPicks: cherryPicks,
-          // Since the widget_preview_scaffold depends on the Flutter SDK and flutter_tools, we
-          // need to make sure that flutter_tools uses the same versions for packages that are also
-          // used by the Flutter SDK.
           pinned: deps.toVersions(),
-          projects: [
-            // The widget_preview_scaffold project has a path dependency on flutter_tools, so we must
-            // upgrade the projects together.
-            toolProject,
-            widgetPreviewScaffoldProject,
-          ],
+          projects: <FlutterProject>[toolProject],
           relaxToAny: relaxToAny,
         );
         for (final (:project, :deps) in toolDeps) {
@@ -298,6 +290,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (yamlEditor.parseAt(workspacePath, orElse: () => wrapAsYamlNode(null)).value != null) {
         yamlEditor.remove(workspacePath);
       }
+
       final RelaxMode relaxMode = switch (cherryPicks.isNotEmpty) {
         true => RelaxMode.strict,
         false => relaxToAny ? RelaxMode.any : RelaxMode.caret,
