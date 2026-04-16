@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/dl_image_impeller.h"
-
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
 namespace impeller {
@@ -49,6 +49,17 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
     return nullptr;
   }
   return impeller::DlImageImpeller::Make(snapshot->texture);
+}
+
+std::shared_ptr<Texture> DlImageImpeller::GetCachedTexture(
+    const ContentContext& renderer) const {
+  auto texture = renderer.GetCachedTexture(this);
+  if (texture) {
+    return texture;
+  }
+  texture = GetImpellerTexture(renderer.GetContext());
+  renderer.SetCachedTexture(this, texture);
+  return texture;
 }
 
 DlImageImpellerTexture::DlImageImpellerTexture(std::shared_ptr<Texture> texture,

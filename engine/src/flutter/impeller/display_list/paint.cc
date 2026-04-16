@@ -4,6 +4,8 @@
 
 #include "impeller/display_list/paint.h"
 
+#include "impeller/display_list/dl_image_impeller.h"
+
 #include <memory>
 
 #include "flutter/display_list/effects/dl_color_filter.h"
@@ -189,10 +191,11 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
     case flutter::DlColorSourceType::kImage: {
       const flutter::DlImageColorSource* image_color_source =
           color_source->asImage();
-      FML_DCHECK(image_color_source &&
-                 renderer.GetCachedTexture(image_color_source->image().get()));
+      FML_DCHECK(image_color_source);
       auto texture =
-          renderer.GetCachedTexture(image_color_source->image().get());
+          image_color_source->image()->asImpellerImage()->GetCachedTexture(
+              renderer);
+      FML_DCHECK(texture);
       auto x_tile_mode = static_cast<Entity::TileMode>(
           image_color_source->horizontal_tile_mode());
       auto y_tile_mode = static_cast<Entity::TileMode>(
@@ -258,7 +261,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
           contents->SetColor(Color::BlackTransparent());
           return contents;
         }
-        auto texture = renderer.GetCachedTexture(image->image().get());
+        auto texture =
+            image->image()->asImpellerImage()->GetCachedTexture(renderer);
         FML_DCHECK(texture);
         texture_inputs.push_back({
             .sampler_descriptor =

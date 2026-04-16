@@ -12,6 +12,7 @@ namespace impeller {
 
 class AiksContext;
 class Context;
+class ContentContext;
 
 class DlImageImpeller : public flutter::DlImage {
  public:
@@ -26,6 +27,9 @@ class DlImageImpeller : public flutter::DlImage {
 
   virtual std::shared_ptr<Texture> GetImpellerTexture(
       const std::shared_ptr<Context>& context) const = 0;
+
+  std::shared_ptr<Texture> GetCachedTexture(
+      const ContentContext& renderer) const;
 
   static sk_sp<DlImageImpeller> Make(
       std::shared_ptr<Texture> texture,

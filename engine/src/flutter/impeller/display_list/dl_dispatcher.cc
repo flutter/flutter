@@ -684,15 +684,7 @@ std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
   if (!image) {
     return nullptr;
   }
-  auto texture = GetContentContext().GetCachedTexture(image.get());
-  if (texture) {
-    return texture;
-  }
-  auto impeller_image = static_cast<const DlImageImpeller*>(image.get());
-  texture =
-      impeller_image->GetImpellerTexture(GetContentContext().GetContext());
-  GetContentContext().SetCachedTexture(image.get(), texture);
-  return texture;
+  return image->asImpellerImage()->GetCachedTexture(GetContentContext());
 }
 
 void DlDispatcherBase::drawVertices(

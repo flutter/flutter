@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/image_filter.h"
+#include "impeller/display_list/dl_image_impeller.h"
 
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
@@ -134,7 +135,7 @@ std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
           return nullptr;
         }
         std::shared_ptr<impeller::Texture> texture =
-            renderer.GetCachedTexture(image->image().get());
+            image->image()->asImpellerImage()->GetCachedTexture(renderer);
         FML_DCHECK(texture);
         index++;
         texture_inputs.push_back({
