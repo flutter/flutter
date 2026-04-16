@@ -131,6 +131,7 @@ if not error.Success():
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
   }) async {
+    print("VICTORIA DEBUG 1");
     if (_lldbProcess != null) {
       _logger.printTrace(
         'An LLDB process is already running. It must be stopped before starting a new one.',
