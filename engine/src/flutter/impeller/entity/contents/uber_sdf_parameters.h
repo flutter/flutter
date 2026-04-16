@@ -24,6 +24,7 @@ struct UberSDFParameters {
   enum class Type {
     kCircle,
     kRect,
+    kOval,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -37,6 +38,11 @@ struct UberSDFParameters {
                                       Scalar radius,
                                       std::optional<StrokeParameters> stroke);
 
+  /// Creates UberSDFParameters for an Oval.
+  static UberSDFParameters MakeOval(Color color,
+                                    const Rect& bounds,
+                                    std::optional<StrokeParameters> stroke);
+
   /// The type of shape to render.
   Type type;
 
@@ -46,8 +52,9 @@ struct UberSDFParameters {
   /// The center point of the shape in local coordinates.
   Point center;
 
-  /// The half-extents of the shape. For a rectangle, this is half the width
-  /// and height. For a circle, this is the radius in both dimensions.
+  /// For a rectangle, this is half the width and height.
+  /// For a circle, this is the radius in both dimensions.
+  /// For an oval, this is half the width and height of the bounds.
   Point size;
 
   /// The stroke parameters. If std::nullopt, the shape is filled.
