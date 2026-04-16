@@ -83,6 +83,23 @@ showing the bug). Attach such a file or files to the issue itself.
 For legal reasons, we cannot debug problems that require looking at proprietary
 code or, generally, code that is not publicly available.
 
+### Do not post unfiltered AI output
+
+Comments should add value to the issue. Anyone can easily feed an issue URL
+into an agent, so just posting the results of doing that is generally not
+helpful.
+
+AI tools may be helpful for accomplishing specific tasks, such as
+creating reduced test cases or identifying potential duplicate issues,
+but they should be used as tools for helping you contribute to the issue
+rather than replacements for your contribution. For example, if you use an
+AI to create a reduced test case, make sure that you can actually reproduce
+the issue before posting it.
+
+Keep in mind that longer is not better in issues, and AI output is often
+verbose. If you use AI to write portions of an issue report or comment,
+consider editing the results to focus on the important details.
+
 ### Consider posting issues in English
 
 If you are able to read and write English clearly, consider posting your issue
