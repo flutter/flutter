@@ -1379,4 +1379,19 @@ void main() {
       SystemMouseCursors.forbidden,
     );
   });
+
+  testWidgets('FilterChip does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: FilterChip(label: const Text('X'), onSelected: (_) {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FilterChip)), Size.zero);
+  });
 }
