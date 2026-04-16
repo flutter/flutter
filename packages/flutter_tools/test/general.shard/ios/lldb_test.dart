@@ -89,6 +89,7 @@ void main() {
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
+      'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
       processResumedMatcher,
     ];
@@ -118,7 +119,7 @@ Target 0: (Runner) stopped.
         );
       }
       if (line == processResumedMatcher) {
-        processResumedCompleted.complete(utf8.encode('Process $appProcessId resuming\n'));
+        processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
       }
     });
 
@@ -328,6 +329,7 @@ Target 0: (Runner) stopped.
       'device select $deviceId',
       breakPointMatcher,
       'breakpoint command add --script-type python $breakpointId',
+      'script lldb.debugger.SetAsync(False)',
       processAttachMatcher,
       processResumedMatcher,
     ];
@@ -357,7 +359,7 @@ Target 0: (Runner) stopped.
         );
       }
       if (line == processResumedMatcher) {
-        processResumedCompleted.complete(utf8.encode('Process $appProcessId resuming\n'));
+        processResumedCompleted.complete(utf8.encode('1 location added to breakpoint 1\n'));
       }
     });
 
