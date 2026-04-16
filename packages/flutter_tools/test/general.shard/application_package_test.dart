@@ -841,7 +841,8 @@ void main() {
         sdk.platformToolsAvailable = true;
         sdk.licensesAvailable = false;
 
-        const androidEngineShellArgs = r'[\"--enable-impeller=true\",\"--trace-startup\",\"--verbose-logging\"]';
+        const androidEngineShellArgs =
+            r'[\"--enable-impeller=true\",\"--trace-startup\",\"--verbose-logging\"]';
         fakeProcessManager.addCommand(
           FakeCommand(
             command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
@@ -869,11 +870,10 @@ void main() {
 
         expect(apk, isNotNull);
         expect(apk!.engineShellArgs, isNotNull);
-        expect(apk.engineShellArgs, equals(<String>{
-          '--enable-impeller=true',
-          '--trace-startup',
-          '--verbose-logging',
-        }));
+        expect(
+          apk.engineShellArgs,
+          equals(<String>{'--enable-impeller=true', '--trace-startup', '--verbose-logging'}),
+        );
       },
     );
 

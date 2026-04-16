@@ -95,7 +95,8 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     Set<String>? androidEngineShellArgs;
     final String? androidEngineShellArgsFromManifest = data.androidEngineShellArgs;
-    if (androidEngineShellArgsFromManifest != null && androidEngineShellArgsFromManifest.isNotEmpty) {
+    if (androidEngineShellArgsFromManifest != null &&
+        androidEngineShellArgsFromManifest.isNotEmpty) {
       try {
         final decoded =
             jsonDecode(androidEngineShellArgsFromManifest.replaceAll(r'\"', '"')) as List<dynamic>;

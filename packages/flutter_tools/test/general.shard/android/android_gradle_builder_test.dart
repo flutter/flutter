@@ -1992,12 +1992,7 @@ void main() {
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
         );
-        final androidShellArguments = <String>{
-          '--flag-1',
-          '--flag=2',
-          '--flag=3,4,5',
-          '--flag6',
-        };
+        final androidShellArguments = <String>{'--flag-1', '--flag=2', '--flag=3,4,5', '--flag6'};
         final String androidShellArgumentsStr = jsonEncode(androidShellArguments.toList());
         processManager.addCommand(
           FakeCommand(
