@@ -55,34 +55,57 @@ void main() {
     );
   });
 
-  test('fromMap clamps out-of-range swipeEdge to last valid value', () async {
+  test('fromMap maps unknown swipeEdge to SwipeEdge.none', () async {
     // Android may send unknown swipeEdge indices (e.g. 2) for future edge types.
-    // Values beyond the known range are clamped to the last valid SwipeEdge
+    // Values beyond the known range are mapped to SwipeEdge.none
     // rather than throwing a RangeError.
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 2,
     });
-    expect(event.swipeEdge, SwipeEdge.right);
+    expect(event.swipeEdge, SwipeEdge.none);
   });
 
-  test('fromMap clamps negative swipeEdge to first valid value', () async {
+  test('fromMap maps negative swipeEdge to SwipeEdge.none', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': -1,
     });
-    expect(event.swipeEdge, SwipeEdge.left);
+    expect(event.swipeEdge, SwipeEdge.none);
   });
 
-  test('fromMap clamps large swipeEdge index to last valid value', () async {
+  test('fromMap maps large swipeEdge index to SwipeEdge.none', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
       'swipeEdge': 99,
     });
-    expect(event.swipeEdge, SwipeEdge.right);
+    expect(event.swipeEdge, SwipeEdge.none);
+  });
+
+  test('fromMap can be created with double values for swipeEdge', () async {
+    final eventLeft = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 0.0,
+    });
+    expect(eventLeft.swipeEdge, SwipeEdge.left);
+
+    final eventRight = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 1.0,
+    });
+    expect(eventRight.swipeEdge, SwipeEdge.right);
+
+    final eventNone = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 2.0,
+    });
+    expect(eventNone.swipeEdge, SwipeEdge.none);
   });
 
   test('equality when created with the same parameters', () async {
@@ -115,5 +138,39 @@ void main() {
     expect(eventA, isNot(equals(eventB)));
     expect(eventA.hashCode, isNot(equals(eventB.hashCode)));
     expect(eventA.toString(), isNot(equals(eventB.toString())));
+  });
+
+  test('isButtonEvent detection', () async {
+    // Case 1: SwipeEdge.none
+    final event1 = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 0.0],
+      'progress': 0.0,
+      'swipeEdge': 2,
+    });
+    expect(event1.isButtonEvent, isTrue);
+
+    // Case 2: touchOffset is null
+    final event2 = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': null,
+      'progress': 0.0,
+      'swipeEdge': 0,
+    });
+    expect(event2.isButtonEvent, isTrue);
+
+    // Case 3: touchOffset is zero and progress is 0.0
+    final event3 = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 0.0],
+      'progress': 0.0,
+      'swipeEdge': 0,
+    });
+    expect(event3.isButtonEvent, isTrue);
+
+    // Case 4: Actual gesture
+    final event4 = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[100.0, 100.0],
+      'progress': 0.5,
+      'swipeEdge': 0,
+    });
+    expect(event4.isButtonEvent, isFalse);
   });
 }

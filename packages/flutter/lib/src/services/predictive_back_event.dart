@@ -16,6 +16,14 @@ enum SwipeEdge {
 
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
+
+  /// Indicates that the swipe gesture starts from an edge other than left or right.
+  ///
+  /// This corresponds to Android's `BackEvent.EDGE_NONE` and is used when
+  /// the back gesture is triggered by a button press rather than a swipe.
+  ///
+  /// See also: https://developer.android.com/reference/android/window/BackEvent#EDGE_NONE
+  none,
 }
 
 /// Object used to report back gesture progress in Android.
@@ -40,7 +48,12 @@ final class PredictiveBackEvent {
           ? null
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
-      swipeEdge: SwipeEdge.values[(map['swipeEdge']! as num).toInt().clamp(0, SwipeEdge.values.length - 1)],
+      swipeEdge: switch (map['swipeEdge']) {
+        0 || 0.0 => SwipeEdge.left,
+        1 || 1.0 => SwipeEdge.right,
+        2 || 2.0 => SwipeEdge.none,
+        _ => SwipeEdge.none,
+      },
     );
   }
 
@@ -86,7 +99,9 @@ final class PredictiveBackEvent {
       // back button is pressed, but in practice it seems to return 0.0, hence
       // the check for Offset.zero here. This was tested directly in the engine
       // on Android emulator running API 34.
-      touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
+      swipeEdge == SwipeEdge.none ||
+      touchOffset == null ||
+      (progress == 0.0 && touchOffset == Offset.zero);
 
   @override
   bool operator ==(Object other) {

@@ -457,9 +457,10 @@ class _PredictiveBackSharedElementPageTransitionState
         // The y position before commit is given by the vertical drag, not by an
         // animation.
         begin: switch (widget.currentBackEvent?.swipeEdge) {
-          SwipeEdge.left => Offset(xShift, _getYShiftPosition(screenSize.height)),
-          SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
+          SwipeEdge.left ||
+          SwipeEdge.none ||
           null => Offset(xShift, _getYShiftPosition(screenSize.height)),
+          SwipeEdge.right => Offset(-xShift, _getYShiftPosition(screenSize.height)),
         },
         end: Offset.zero,
       ),
