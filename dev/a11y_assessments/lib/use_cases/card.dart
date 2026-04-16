@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CardUseCase extends UseCase {
-  CardUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  CardUseCase() ;
 
   @override
   String get name => 'Card';
@@ -16,7 +16,7 @@ class CardUseCase extends UseCase {
   String get route => '/card';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ElevatedButtonUseCase extends UseCase {
-  ElevatedButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  ElevatedButtonUseCase() ;
 
   @override
   String get name => 'ElevatedButton';
@@ -16,7 +16,7 @@ class ElevatedButtonUseCase extends UseCase {
   String get route => '/elevated-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

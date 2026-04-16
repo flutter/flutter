@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SegmentedButtonUseCase extends UseCase {
-  SegmentedButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  SegmentedButtonUseCase() ;
 
   @override
   String get name => 'SegmentedButton';
@@ -16,7 +16,7 @@ class SegmentedButtonUseCase extends UseCase {
   String get route => '/segmented-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

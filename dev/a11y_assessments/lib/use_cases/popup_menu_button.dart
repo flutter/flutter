@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class PopupMenuButtonUseCase extends UseCase {
-  PopupMenuButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  PopupMenuButtonUseCase() ;
 
   @override
   String get name => 'PopupMenuButton';
@@ -16,7 +16,7 @@ class PopupMenuButtonUseCase extends UseCase {
   String get route => '/popup-menu-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

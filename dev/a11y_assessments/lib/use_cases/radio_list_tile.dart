@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class RadioListTileUseCase extends UseCase {
-  RadioListTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  RadioListTileUseCase() ;
 
   @override
   String get name => 'RadioListTile';
@@ -16,7 +16,7 @@ class RadioListTileUseCase extends UseCase {
   String get route => '/radio-list-tile';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();

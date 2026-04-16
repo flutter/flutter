@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class RangeSliderUseCase extends UseCase {
-  RangeSliderUseCase() : super(useCaseCategory: UseCaseCategory.additional);
+  RangeSliderUseCase() ;
 
   @override
   String get name => 'RangeSlider';
@@ -16,7 +16,7 @@ class RangeSliderUseCase extends UseCase {
   String get route => '/range-slider';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.additional];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

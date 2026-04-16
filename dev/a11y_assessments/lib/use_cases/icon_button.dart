@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class IconButtonUseCase extends UseCase {
-  IconButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  IconButtonUseCase() ;
 
   @override
   String get name => 'IconButton';
@@ -16,7 +16,7 @@ class IconButtonUseCase extends UseCase {
   String get route => '/icon-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

@@ -62,7 +62,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final ScrollController scrollController = ScrollController();
 
-  bool _showAdditionalUseCases = false;
+
+  final Set<Tag> _selectedTags = <Tag>{Tag.batch2};
 
   @override
   void dispose() {
@@ -89,24 +90,44 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<UseCase> effectiveUseCases = useCases.where((UseCase useCase) {
-      return _showAdditionalUseCases || useCase.useCaseCategory == UseCaseCategory.core;
+      return _selectedTags.isEmpty || useCase.tags.any((Tag tag) => _selectedTags.contains(tag));
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
         actions: <Widget>[
-          Tooltip(
-            message: 'Show additional use cases',
-            waitDuration: const Duration(milliseconds: 500),
-            child: Switch(
-              value: _showAdditionalUseCases,
-              onChanged: (bool newValue) {
-                setState(() {
-                  _showAdditionalUseCases = newValue;
-                });
-              },
-            ),
+          MenuAnchor(
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              return Tooltip(
+                message: 'Filter by tags',
+                child: IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                ),
+              );
+            },
+            menuChildren: Tag.values.map((Tag tag) {
+              return CheckboxMenuButton(
+                value: _selectedTags.contains(tag),
+                onChanged: (bool? value) {
+                  setState(() {
+                    if (value ?? false) {
+                      _selectedTags.add(tag);
+                    } else {
+                      _selectedTags.remove(tag);
+                    }
+                  });
+                },
+                child: Text(tag.name),
+              );
+            }).toList(),
           ),
         ],
       ),

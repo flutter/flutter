@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CloseButtonUseCase extends UseCase {
-  CloseButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  CloseButtonUseCase() ;
 
   @override
   String get name => 'CloseButton';
@@ -16,7 +16,7 @@ class CloseButtonUseCase extends UseCase {
   String get route => '/close-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

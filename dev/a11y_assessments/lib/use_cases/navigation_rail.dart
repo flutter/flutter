@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationRailUseCase extends UseCase {
-  NavigationRailUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  NavigationRailUseCase() ;
 
   @override
   String get name => 'NavigationRail';
@@ -16,7 +16,7 @@ class NavigationRailUseCase extends UseCase {
   String get route => '/navigation-rail';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const NavRailExample();

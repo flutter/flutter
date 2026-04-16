@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
-  BadgeUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  BadgeUseCase() ;
 
   @override
   String get name => 'Badge';
@@ -16,7 +16,7 @@ class BadgeUseCase extends UseCase {
   String get route => '/badge';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

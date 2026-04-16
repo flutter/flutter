@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ToggleButtonsUseCase extends UseCase {
-  ToggleButtonsUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  ToggleButtonsUseCase() ;
 
   @override
   String get name => 'ToggleButtons';
@@ -16,7 +16,7 @@ class ToggleButtonsUseCase extends UseCase {
   String get route => '/toggle-buttons';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

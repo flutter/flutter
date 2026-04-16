@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class FloatingActionButtonUseCase extends UseCase {
-  FloatingActionButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  FloatingActionButtonUseCase() ;
 
   @override
   String get name => 'FloatingActionButton';
@@ -16,7 +16,7 @@ class FloatingActionButtonUseCase extends UseCase {
   String get route => '/floating-action-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

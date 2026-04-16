@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class BackButtonUseCase extends UseCase {
-  BackButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  BackButtonUseCase() ;
 
   @override
   String get name => 'BackButton';
@@ -16,7 +16,7 @@ class BackButtonUseCase extends UseCase {
   String get route => '/back-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ActionChipUseCase extends UseCase {
-  ActionChipUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  ActionChipUseCase() ;
 
   @override
   String get name => 'ActionChip';
@@ -16,7 +16,7 @@ class ActionChipUseCase extends UseCase {
   String get route => '/action-chip';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

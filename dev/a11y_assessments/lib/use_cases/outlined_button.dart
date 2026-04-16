@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class OutlinedButtonUseCase extends UseCase {
-  OutlinedButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  OutlinedButtonUseCase() ;
 
   @override
   String get name => 'OutlinedButton';
@@ -16,7 +16,7 @@ class OutlinedButtonUseCase extends UseCase {
   String get route => '/outlined-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

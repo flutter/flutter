@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationBarUseCase extends UseCase {
-  NavigationBarUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  NavigationBarUseCase() ;
 
   @override
   String get name => 'NavigationBar';
@@ -16,7 +16,7 @@ class NavigationBarUseCase extends UseCase {
   String get route => '/navigation-bar';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

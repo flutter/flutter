@@ -21,7 +21,7 @@ const List<ExampleDestination> destinations = <ExampleDestination>[
 ];
 
 class NavigationDrawerUseCase extends UseCase {
-  NavigationDrawerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  NavigationDrawerUseCase() ;
 
   @override
   String get name => 'NavigationDrawer';
@@ -30,7 +30,7 @@ class NavigationDrawerUseCase extends UseCase {
   String get route => '/navigation-drawer';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const NavigationDrawerExample();

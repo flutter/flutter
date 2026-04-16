@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SwitchListTileUseCase extends UseCase {
-  SwitchListTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  SwitchListTileUseCase() ;
 
   @override
   String get name => 'SwitchListTile';
@@ -16,7 +16,7 @@ class SwitchListTileUseCase extends UseCase {
   String get route => '/switch-list-tile';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const SwitchListTileExample();

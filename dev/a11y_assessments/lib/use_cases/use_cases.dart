@@ -39,23 +39,21 @@ import 'text_field.dart';
 import 'text_field_password.dart';
 import 'toggle_buttons.dart';
 
-/// The category a use-case falls under.
-enum UseCaseCategory {
-  /// An essential use-case requested to be covered for the purpose of various
-  /// a11y certifications.
-  core,
+enum Tag {
+  batch1('First batch of widgets for VPAT assessment'),
+  batch2('Second batch of widgets for VPAT assessment, Q2 2026'),
+  core('Essential use-cases requested for various a11y certifications'),
 
   /// An additional use-case that the team considers important to cover, even if
   /// nobody requested this as part of any certification process.
-  additional,
+  additional('Additional use-cases covered by the team');
+
+  const Tag(this.description);
+  final String description;
 }
 
-enum Tag { batch1, batch2 }
-
 abstract class UseCase {
-  UseCase({required this.useCaseCategory});
-
-  final UseCaseCategory useCaseCategory;
+  UseCase();
 
   String get name;
   String get route;

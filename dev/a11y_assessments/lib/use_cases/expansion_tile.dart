@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ExpansionTileUseCase extends UseCase {
-  ExpansionTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  ExpansionTileUseCase() ;
 
   @override
   String get name => 'ExpansionTile';
@@ -16,7 +16,7 @@ class ExpansionTileUseCase extends UseCase {
   String get route => '/expansion-tile';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1];
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const ExpansionTileExample();

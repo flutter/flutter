@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class FilledButtonUseCase extends UseCase {
-  FilledButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  FilledButtonUseCase() ;
 
   @override
   String get name => 'FilledButton';
@@ -16,7 +16,7 @@ class FilledButtonUseCase extends UseCase {
   String get route => '/filled-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch2];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
