@@ -305,9 +305,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         final double diff = remainder > itemExtent / 2 ? itemExtent - remainder : remainder;
         if (diff > precisionErrorTolerance) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('RenderSliverFixedExtentBoxAdaptor.computeMaxScrollOffset() returned a value that is not an even multiple of its itemExtent.'),
-            ErrorDescription('The itemExtent was $itemExtent, but the scrollExtent was $scrollExtent.'),
-            ErrorDescription('The difference was $diff, which is greater than precisionErrorTolerance ($precisionErrorTolerance).'),
+            ErrorSummary(
+              'RenderSliverFixedExtentBoxAdaptor.computeMaxScrollOffset() returned a value that is not an even multiple of its itemExtent.',
+            ),
+            ErrorDescription(
+              'The itemExtent was $itemExtent, but the scrollExtent was $scrollExtent.',
+            ),
+            ErrorDescription(
+              'The difference was $diff, which is greater than precisionErrorTolerance ($precisionErrorTolerance).',
+            ),
             describeForError('The render object in question was'),
           ]);
         }

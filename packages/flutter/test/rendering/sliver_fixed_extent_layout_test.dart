@@ -366,12 +366,19 @@ void main() {
     );
 
     late FlutterError error;
-    layout(root, onErrors: () {
-      final FlutterErrorDetails? details = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails();
-      error = details!.exception as FlutterError;
-    });
+    layout(
+      root,
+      onErrors: () {
+        final FlutterErrorDetails? details = TestRenderingFlutterBinding.instance
+            .takeFlutterErrorDetails();
+        error = details!.exception as FlutterError;
+      },
+    );
 
-    expect(error.message, contains('returned a value that is not an even multiple of its itemExtent'));
+    expect(
+      error.message,
+      contains('returned a value that is not an even multiple of its itemExtent'),
+    );
   });
 
   test('RenderSliverFixedExtentBoxAdaptor rounding tolerance test', () {
@@ -390,9 +397,12 @@ void main() {
       children: <RenderSliver>[sliver],
     );
 
-    layout(root, onErrors: () {
-      fail('Should not have errors');
-    });
+    layout(
+      root,
+      onErrors: () {
+        fail('Should not have errors');
+      },
+    );
     expect(TestRenderingFlutterBinding.instance.takeFlutterErrorDetails(), isNull);
   });
 }
@@ -496,17 +506,14 @@ class NonMultipleFixedExtentList extends RenderSliverFixedExtentList {
   @override
   void performLayout() {
     super.performLayout();
-    geometry = geometry!.copyWith(
-      scrollExtent: totalExtent,
-      maxPaintExtent: totalExtent,
-    );
+    geometry = geometry!.copyWith(scrollExtent: totalExtent, maxPaintExtent: totalExtent);
   }
 }
 
 class TestChildManagerSimple extends RenderSliverBoxChildManager {
   TestChildManagerSimple();
 
-  RenderSliverMultiBoxAdaptor? _renderObject;
+  late RenderSliverMultiBoxAdaptor? _renderObject;
   RenderBox? child;
 
   void setup(RenderSliverMultiBoxAdaptor renderObject, RenderBox child) {
@@ -515,7 +522,7 @@ class TestChildManagerSimple extends RenderSliverBoxChildManager {
   }
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
+  void createChild(int index, {required RenderBox? after}) {
     if (index == 0 && child != null) {
       _renderObject!.insert(child!, after: after);
     }
@@ -523,24 +530,25 @@ class TestChildManagerSimple extends RenderSliverBoxChildManager {
 
   @override
   void removeChild(RenderBox child) {}
-  
+
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int? firstIndex,
     int? lastIndex,
     double? leadingScrollOffset,
     double? trailingScrollOffset,
   }) => 0.0;
-  
+
   @override
   int get childCount => 1;
-  
+
   @override
   void didAdoptChild(RenderBox child) {
     final childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = 0;
   }
-  
+
   @override
   void setDidUnderflow(bool value) {}
 }
