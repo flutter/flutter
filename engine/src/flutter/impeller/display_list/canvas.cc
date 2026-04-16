@@ -897,12 +897,8 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
     } else {
       params = UberSDFParameters::MakeOval(paint.color, rect, std::nullopt);
     }
-    auto geom = std::make_unique<UberSDFGeometry>(params);
-    auto contents = UberSDFContents::Make(params, std::move(geom));
 
-    auto g = contents->GetGeometry();
-
-    AddRenderSDFEntityToCurrentPass(entity, g, paint, std::move(contents));
+    AddRenderSDFEntityToCurrentPass(paint, params);
     return;
   }
 
