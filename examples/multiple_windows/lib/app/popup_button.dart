@@ -8,9 +8,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
+import 'element_position_tracker.dart';
 import 'models.dart';
 import 'popup_window_content.dart';
-import 'element_position_tracker.dart';
 
 class PopupButton extends StatefulWidget {
   const PopupButton({super.key, required this.parentController});
@@ -32,10 +32,7 @@ class _PopupButtonState extends State<PopupButton> {
     super.dispose();
   }
 
-  void _onPressed(
-    final WindowRegistry windowRegistry,
-    final WindowSettings windowSettings,
-  ) {
+  void _onPressed(final WindowRegistry windowRegistry, final WindowSettings windowSettings) {
     // Toggle popup visibility.
     if (_popupWindowEntry != null) {
       _popupWindowEntry!.controller.destroy();
@@ -46,9 +43,7 @@ class _PopupButtonState extends State<PopupButton> {
       });
     } else {
       // Popup is not shown, show it.
-      final tracker = ElementPositionTracker(
-        element: _popupButtonKey.currentContext!,
-      );
+      final tracker = ElementPositionTracker(element: _popupButtonKey.currentContext!);
       late final WindowEntry entry;
       final controller = PopupWindowController(
         anchorRect: tracker.getGlobalRect()!,
@@ -69,8 +64,7 @@ class _PopupButtonState extends State<PopupButton> {
       );
       entry = WindowEntry(
         controller: controller,
-        builder: (BuildContext context) =>
-            PopupWindowContent(controller: controller),
+        builder: (BuildContext context) => PopupWindowContent(controller: controller),
       );
       windowRegistry.register(entry);
       tracker.onGlobalRectChange = (rect) {
