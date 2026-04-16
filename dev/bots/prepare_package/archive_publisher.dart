@@ -13,6 +13,7 @@ import 'package:process/process.dart';
 
 import 'common.dart';
 import 'process_runner.dart';
+import 'transactional_update.dart';
 
 class ArchivePublisher {
   ArchivePublisher(
@@ -76,7 +77,26 @@ class ArchivePublisher {
     await _cloudCopy(src: outputFile.absolute.path, dest: destGsPath);
     assert(tempDir.existsSync());
     final gcsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
-    await _publishMetadata(gcsPath);
+
+    await transactionalUpdate(
+      gsPath: gcsPath,
+      fs: fs,
+      tempDirectory: tempDir,
+      runGsUtil: (List<String> args) => _runGsUtil(args),
+      callback: (String currentContents) async {
+        var jsonData = <String, dynamic>{};
+        if (currentContents.isNotEmpty) {
+          try {
+            jsonData = json.decode(currentContents) as Map<String, dynamic>;
+          } on FormatException catch (e) {
+            throw PreparePackageException('Unable to parse JSON metadata: $e');
+          }
+        }
+        jsonData = await _addRelease(jsonData);
+        const encoder = JsonEncoder.withIndent('  ');
+        return encoder.convert(jsonData);
+      },
+    );
   }
 
   /// Downloads and updates the metadata file without publishing it.
@@ -103,6 +123,10 @@ class ArchivePublisher {
     newEntry['release_date'] = DateTime.now().toUtc().toIso8601String();
     newEntry['archive'] = destinationArchivePath;
     newEntry['sha256'] = await _getChecksum(outputFile);
+
+    print(
+      'Adding new release entry to manifest:\n${const JsonEncoder.withIndent('  ').convert(newEntry)}',
+    );
 
     // Search for any entries with the same hash and channel and remove them.
     final releases = jsonData['releases'] as List<dynamic>;
@@ -150,21 +174,6 @@ class ArchivePublisher {
 
     const encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
-  }
-
-  /// Publishes the metadata file to GCS.
-  Future<void> _publishMetadata(String gsPath) async {
-    final File metadataFile = fs.file(
-      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
-    );
-    await _cloudCopy(
-      src: metadataFile.absolute.path,
-      dest: gsPath,
-      // This metadata file is used by the website, so we don't want a long
-      // latency between publishing a release and it being available on the
-      // site.
-      cacheSeconds: shortCacheSeconds,
-    );
   }
 
   Future<String> _runGsUtil(
