@@ -55,15 +55,34 @@ void main() {
     );
   });
 
-  test('fromMap throws when given invalid swipeEdge', () async {
-    expect(
-      () => PredictiveBackEvent.fromMap(const <String?, Object?>{
-        'touchOffset': <double>[0.0, 100.0],
-        'progress': 0.0,
-        'swipeEdge': 2,
-      }),
-      throwsRangeError,
-    );
+  test('fromMap clamps out-of-range swipeEdge to last valid value', () async {
+    // Android may send unknown swipeEdge indices (e.g. 2) for future edge types.
+    // Values beyond the known range are clamped to the last valid SwipeEdge
+    // rather than throwing a RangeError.
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 2,
+    });
+    expect(event.swipeEdge, SwipeEdge.right);
+  });
+
+  test('fromMap clamps negative swipeEdge to first valid value', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': -1,
+    });
+    expect(event.swipeEdge, SwipeEdge.left);
+  });
+
+  test('fromMap clamps large swipeEdge index to last valid value', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 99,
+    });
+    expect(event.swipeEdge, SwipeEdge.right);
   });
 
   test('equality when created with the same parameters', () async {
