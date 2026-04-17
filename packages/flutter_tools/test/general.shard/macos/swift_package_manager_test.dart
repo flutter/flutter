@@ -562,6 +562,26 @@ let package = Package(
         });
       });
     }
+
+    group('parseError', () {
+      testWithoutContext('returns null for empty or null message', () {
+        expect(SwiftPackageManager.parseError(null), isNull);
+        expect(SwiftPackageManager.parseError(''), isNull);
+      });
+
+      testWithoutContext('returns null for unknown error', () {
+        expect(SwiftPackageManager.parseError('some random error'), isNull);
+      });
+
+      testWithoutContext('returns guided message for outside package root error', () {
+        const message = 'xcodebuild: error: Could not resolve package dependencies:\n'
+            "  target 'plugin_1' in package 'plugin_1' is outside the package root";
+        const expected = 'Flutter plugin "plugin_1" is not formatted correctly.\n'
+            'Its target path is outside the package root, which is not supported by Swift Package Manager.\n'
+            'Please contact the plugin author.';
+        expect(SwiftPackageManager.parseError(message), expected);
+      });
+    });
   });
 }
 

@@ -21,6 +21,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../macos/swift_package_manager.dart';
 import '../reporting/reporting.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -460,6 +461,12 @@ class XcodeProjectInterpreter {
         await _swiftPackageFetchStderrSubscription?.cancel();
       });
       if (exitCode != 0) {
+        final stderrString = stderrBuffer.toString();
+        final String? swiftPackageManagerError = SwiftPackageManager.parseError(stderrString);
+
+        if (swiftPackageManagerError != null) {
+          throwToolExit(swiftPackageManagerError);
+        }
         throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
       }
     } finally {

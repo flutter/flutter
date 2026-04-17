@@ -1126,6 +1126,9 @@ Future<bool> _handleIssues(
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
   final String? swiftPackageManagerMinPlatformMismatchMessage =
       _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
+  final String? swiftPackageManagerError =
+      SwiftPackageManager.parseError(result.stdout) ??
+      SwiftPackageManager.parseError(result.stderr);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1158,6 +1161,9 @@ Future<bool> _handleIssues(
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   } else if (swiftPackageManagerMinPlatformMismatchMessage != null) {
     logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
+    issueDetected = true;
+  } else if (swiftPackageManagerError != null) {
+    logger.printError(swiftPackageManagerError, emphasis: true);
     issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();

@@ -236,6 +236,13 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
+      final errorString = e.toString();
+      final String? swiftPackageManagerError = SwiftPackageManager.parseError(errorString);
+
+      if (swiftPackageManagerError != null) {
+        throwToolExit(swiftPackageManagerError);
+      }
+
       if (optionalOnly) {
         // This part of the migration is optional. We'll log this for debugging sake but don't
         // really expect the user to see it.

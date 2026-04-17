@@ -403,4 +403,35 @@ class SwiftPackageManager {
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
     );
   }
+
+  static final List<_SwiftPMErrorMatcher> _errorMatchers = <_SwiftPMErrorMatcher>[
+    _SwiftPMErrorMatcher(
+      pattern: RegExp(r"target '([^']+)' in package '[^']+' is outside the package root"),
+      message: (RegExpMatch match) =>
+          'Flutter plugin "${match.group(1)}" is not formatted correctly.\n'
+          'Its target path is outside the package root, which is not supported by Swift Package Manager.\n'
+          'Please contact the plugin author.',
+    ),
+  ];
+
+  /// Parses a Swift Package Manager error message and returns a guided error
+  /// message if the error matches a known pattern.
+  static String? parseError(String? message) {
+    if (message == null || message.isEmpty) {
+      return null;
+    }
+    for (final _SwiftPMErrorMatcher matcher in _errorMatchers) {
+      final RegExpMatch? match = matcher.pattern.firstMatch(message);
+      if (match != null) {
+        return matcher.message(match);
+      }
+    }
+    return null;
+  }
+}
+
+class _SwiftPMErrorMatcher {
+  const _SwiftPMErrorMatcher({required this.pattern, required this.message});
+  final RegExp pattern;
+  final String Function(RegExpMatch match) message;
 }
