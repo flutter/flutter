@@ -1241,7 +1241,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<List<String>> xcodebuildProjectCommand(
     String projectPath,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }

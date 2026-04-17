@@ -221,7 +221,7 @@ Future<void> buildMacOS({
         ...(await globals.xcode!.xcodebuildProjectCommand(
           flutterProject.macos.hostAppRoot.path,
           globals.fs.directory(buildDirectoryPath),
-          skipPackageResolution: false,
+          skipPackageUpdatesAndValidation: false,
         )),
         '-workspace',
         xcodeWorkspace.path,

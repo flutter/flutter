@@ -305,7 +305,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     ...(await globals.xcode!.xcodebuildProjectCommand(
       app.project.hostAppRoot.path,
       globals.fs.directory(buildDirectoryPath),
-      skipPackageResolution: false,
+      skipPackageUpdatesAndValidation: false,
     )),
     '-configuration',
     configuration,

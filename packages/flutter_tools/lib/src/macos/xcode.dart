@@ -234,11 +234,11 @@ class Xcode {
   Future<List<String>> xcodebuildProjectCommand(
     String projectPath,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
     projectPath,
     buildDirectory,
-    skipPackageResolution: skipPackageResolution,
+    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);

@@ -186,13 +186,14 @@ class XcodeProjectInterpreter {
   /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
   /// and that the Swift package cache is properly configured.
   ///
-  /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
-  /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
-  /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
+  /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
+  /// Swift package updates and validation. This should be false when running
+  /// [prefetchSwiftPackages], so packages should already be resolved, downloaded, updated, and
+  /// validated on subsequent `xcodebuild` commands.
   Future<List<String>> xcodebuildProjectCommand(
     String projectPath,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
@@ -201,13 +202,13 @@ class XcodeProjectInterpreter {
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
-      skipPackageResolution: skipPackageResolution,
+      skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
     );
   }
 
   List<String> _xcodebuildProjectCommandArguments(
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) {
     final String cachePath = buildDirectory
         .childDirectory(kSwiftPackageCacheDirectoryName)
@@ -218,7 +219,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
       cachePath,
-      if (skipPackageResolution) ...<String>[
+      if (skipPackageUpdatesAndValidation) ...<String>[
         '-skipPackageUpdates',
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
@@ -400,7 +401,10 @@ class XcodeProjectInterpreter {
     Status? status;
     try {
       final command = <String>[
-        ..._xcodebuildProjectCommandArguments(buildDirectory, skipPackageResolution: false),
+        ..._xcodebuildProjectCommandArguments(
+          buildDirectory,
+          skipPackageUpdatesAndValidation: false,
+        ),
         '-resolvePackageDependencies',
       ];
       if (_swiftPackageFetchProcess == null) {
