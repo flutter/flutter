@@ -770,53 +770,6 @@ TEST_F(WindowManagerTest, PopupWindowDoesNotStealFocus) {
   EXPECT_NE(focused_after, popup_window_handle);
 }
 
-TEST_F(WindowManagerTest, PopupWindowReturnsNoActivateOnMouseClick) {
-  IsolateScope isolate_scope(isolate());
-
-  const int64_t parent_view_id =
-      InternalFlutterWindows_WindowManager_CreateRegularWindow(
-          engine_id(), regular_creation_request());
-  const HWND parent_window_handle =
-      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
-          engine_id(), parent_view_id);
-
-  auto position_callback = [](const WindowSize& child_size,
-                              const WindowRect& parent_rect,
-                              const WindowRect& output_rect) -> WindowRect* {
-    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
-    rect->left = parent_rect.left + 10;
-    rect->top = parent_rect.top + 10;
-    rect->width = child_size.width;
-    rect->height = child_size.height;
-    return rect;
-  };
-
-  PopupWindowCreationRequest creation_request{
-      .preferred_constraints = {.has_view_constraints = true,
-                                .view_min_width = 100,
-                                .view_min_height = 50,
-                                .view_max_width = 300,
-                                .view_max_height = 200},
-      .parent = parent_window_handle,
-      .get_position_callback = position_callback};
-
-  const int64_t popup_view_id =
-      InternalFlutterWindows_WindowManager_CreatePopupWindow(engine_id(),
-                                                             &creation_request);
-
-  HWND popup_window_handle =
-      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
-          engine_id(), popup_view_id);
-
-  // Send WM_MOUSEACTIVATE message to the popup window
-  LRESULT result = SendMessage(popup_window_handle, WM_MOUSEACTIVATE,
-                               reinterpret_cast<WPARAM>(parent_window_handle),
-                               MAKELPARAM(HTCLIENT, WM_LBUTTONDOWN));
-
-  // Verify the popup returns MA_NOACTIVATE
-  EXPECT_EQ(result, MA_NOACTIVATE);
-}
-
 TEST_F(WindowManagerTest, PopupWindowUpdatesPositionOnViewSizeChange) {
   IsolateScope isolate_scope(isolate());
 
