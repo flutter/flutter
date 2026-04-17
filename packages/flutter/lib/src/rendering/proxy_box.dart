@@ -589,6 +589,62 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 }
 
+double _debugGetChildMaxIntrinsicWidth(String parentType, RenderBox child, double height) {
+  final double result = child.getMaxIntrinsicWidth(height);
+  assert(
+    RenderBox.debugCheckFiniteIntrinsic(
+      parentType: parentType,
+      child: child,
+      dimension: 'width',
+      methodName: 'getMaxIntrinsicWidth',
+      value: result,
+    ),
+  );
+  return result;
+}
+
+double _debugGetChildMinIntrinsicWidth(String parentType, RenderBox child, double height) {
+  final double result = child.getMinIntrinsicWidth(height);
+  assert(
+    RenderBox.debugCheckFiniteIntrinsic(
+      parentType: parentType,
+      child: child,
+      dimension: 'width',
+      methodName: 'getMinIntrinsicWidth',
+      value: result,
+    ),
+  );
+  return result;
+}
+
+double _debugGetChildMaxIntrinsicHeight(String parentType, RenderBox child, double width) {
+  final double result = child.getMaxIntrinsicHeight(width);
+  assert(
+    RenderBox.debugCheckFiniteIntrinsic(
+      parentType: parentType,
+      child: child,
+      dimension: 'height',
+      methodName: 'getMaxIntrinsicHeight',
+      value: result,
+    ),
+  );
+  return result;
+}
+
+double _debugGetChildMinIntrinsicHeight(String parentType, RenderBox child, double width) {
+  final double result = child.getMinIntrinsicHeight(width);
+  assert(
+    RenderBox.debugCheckFiniteIntrinsic(
+      parentType: parentType,
+      child: child,
+      dimension: 'height',
+      methodName: 'getMinIntrinsicHeight',
+      value: result,
+    ),
+  );
+  return result;
+}
+
 /// Sizes its child to the child's maximum intrinsic width.
 ///
 /// This class is useful, for example, when unlimited width is available and
@@ -679,18 +735,11 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    final double width = child!.getMaxIntrinsicWidth(height);
-    assert(() {
-      if (!width.isFinite) {
-        RenderBox.reportInfiniteIntrinsic(
-          'RenderIntrinsicWidth',
-          child!,
-          'width',
-          'getMaxIntrinsicWidth',
-        );
-      }
-      return true;
-    }());
+    final double width = _debugGetChildMaxIntrinsicWidth(
+      objectRuntimeType(this, 'RenderIntrinsicWidth'),
+      child!,
+      height,
+    );
     return _applyStep(width, _stepWidth);
   }
 
@@ -703,18 +752,11 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
-    final double height = child!.getMinIntrinsicHeight(width);
-    assert(() {
-      if (!height.isFinite) {
-        RenderBox.reportInfiniteIntrinsic(
-          'RenderIntrinsicWidth',
-          child!,
-          'height',
-          'getMinIntrinsicHeight',
-        );
-      }
-      return true;
-    }());
+    final double height = _debugGetChildMinIntrinsicHeight(
+      objectRuntimeType(this, 'RenderIntrinsicWidth'),
+      child!,
+      width,
+    );
     return _applyStep(height, _stepHeight);
   }
 
@@ -727,52 +769,31 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
-    final double height = child!.getMaxIntrinsicHeight(width);
-    assert(() {
-      if (!height.isFinite) {
-        RenderBox.reportInfiniteIntrinsic(
-          'RenderIntrinsicWidth',
-          child!,
-          'height',
-          'getMaxIntrinsicHeight',
-        );
-      }
-      return true;
-    }());
+    final double height = _debugGetChildMaxIntrinsicHeight(
+      objectRuntimeType(this, 'RenderIntrinsicWidth'),
+      child!,
+      width,
+    );
     return _applyStep(height, _stepHeight);
   }
 
   BoxConstraints _childConstraints(RenderBox child, BoxConstraints constraints) {
     double? width;
     if (!constraints.hasTightWidth) {
-      width = child.getMaxIntrinsicWidth(constraints.maxHeight);
-      assert(() {
-        if (!width!.isFinite) {
-          RenderBox.reportInfiniteIntrinsic(
-            'RenderIntrinsicWidth',
-            child,
-            'width',
-            'getMaxIntrinsicWidth',
-          );
-        }
-        return true;
-      }());
+      width = _debugGetChildMaxIntrinsicWidth(
+        objectRuntimeType(this, 'RenderIntrinsicWidth'),
+        child,
+        constraints.maxHeight,
+      );
       width = _applyStep(width, _stepWidth);
     }
     double? height;
     if (stepHeight != null) {
-      height = child.getMaxIntrinsicHeight(constraints.maxWidth);
-      assert(() {
-        if (!height!.isFinite) {
-          RenderBox.reportInfiniteIntrinsic(
-            'RenderIntrinsicWidth',
-            child,
-            'height',
-            'getMaxIntrinsicHeight',
-          );
-        }
-        return true;
-      }());
+      height = _debugGetChildMaxIntrinsicHeight(
+        objectRuntimeType(this, 'RenderIntrinsicWidth'),
+        child,
+        constraints.maxWidth,
+      );
       height = _applyStep(height, _stepHeight);
     }
     return constraints.tighten(width: width, height: height);
@@ -848,20 +869,17 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       return 0.0;
     }
     if (!height.isFinite) {
-      height = child!.getMaxIntrinsicHeight(double.infinity);
-      assert(() {
-        if (!height.isFinite) {
-          RenderBox.reportInfiniteIntrinsic(
-            'RenderIntrinsicHeight',
-            child!,
-            'height',
-            'getMaxIntrinsicHeight',
-          );
-        }
-        return true;
-      }());
+      height = _debugGetChildMaxIntrinsicHeight(
+        objectRuntimeType(this, 'RenderIntrinsicHeight'),
+        child!,
+        double.infinity,
+      );
     }
-    return child!.getMinIntrinsicWidth(height);
+    return _debugGetChildMinIntrinsicWidth(
+      objectRuntimeType(this, 'RenderIntrinsicHeight'),
+      child!,
+      height,
+    );
   }
 
   @override
@@ -870,20 +888,17 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       return 0.0;
     }
     if (!height.isFinite) {
-      height = child!.getMaxIntrinsicHeight(double.infinity);
-      assert(() {
-        if (!height.isFinite) {
-          RenderBox.reportInfiniteIntrinsic(
-            'RenderIntrinsicHeight',
-            child!,
-            'height',
-            'getMaxIntrinsicHeight',
-          );
-        }
-        return true;
-      }());
+      height = _debugGetChildMaxIntrinsicHeight(
+        objectRuntimeType(this, 'RenderIntrinsicHeight'),
+        child!,
+        double.infinity,
+      );
     }
-    return child!.getMaxIntrinsicWidth(height);
+    return _debugGetChildMaxIntrinsicWidth(
+      objectRuntimeType(this, 'RenderIntrinsicHeight'),
+      child!,
+      height,
+    );
   }
 
   @override
@@ -895,18 +910,11 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (constraints.hasTightHeight) {
       return constraints;
     }
-    final double height = child.getMaxIntrinsicHeight(constraints.maxWidth);
-    assert(() {
-      if (!height.isFinite) {
-        RenderBox.reportInfiniteIntrinsic(
-          'RenderIntrinsicHeight',
-          child,
-          'height',
-          'getMaxIntrinsicHeight',
-        );
-      }
-      return true;
-    }());
+    final double height = _debugGetChildMaxIntrinsicHeight(
+      objectRuntimeType(this, 'RenderIntrinsicHeight'),
+      child,
+      constraints.maxWidth,
+    );
     return constraints.tighten(height: height);
   }
 

@@ -2876,7 +2876,7 @@ abstract class RenderBox extends RenderObject {
       ErrorDescription(explanation),
       ErrorHint(
         'If you are not writing your own RenderBox subclass, then this is an issue in the framework. '
-        'Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+        'Contact support: https://github.com/flutter/flutter/issues/new',
       ),
       DiagnosticsStackTrace('Stack trace', stack),
     ]);
@@ -2899,9 +2899,28 @@ abstract class RenderBox extends RenderObject {
       ),
       ErrorHint(
         'If you are not writing your own RenderBox subclass, then this is an issue in the framework. '
-        'Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
+        'Contact support: https://github.com/flutter/flutter/issues/new',
       ),
     ]);
+  }
+
+  /// Checks if an intrinsic dimension is finite and reports an error if not.
+  ///
+  /// This is used to centralize the boilerplate for finiteness checks during
+  /// debug consistency checks.
+  ///
+  /// Returns true so it can be used in an assert.
+  static bool debugCheckFiniteIntrinsic({
+    required String parentType,
+    required RenderBox child,
+    required String dimension,
+    required String methodName,
+    required double value,
+  }) {
+    if (!value.isFinite) {
+      reportInfiniteIntrinsic(parentType, child, dimension, methodName);
+    }
+    return true;
   }
 
   @override
