@@ -51,7 +51,7 @@ class LLDB {
   /// Pattern of lldb log when the process has started and the breakpoint is added.
   ///
   /// Example: (lldb) 1 location added to breakpoint 1
-  static final _lldbBreakpointAdded = RegExp(r'\d+ location added to breakpoint \d+');
+  static final _lldbBreakpointAdded = RegExp(r'location added to breakpoint');
 
   /// Pattern of lldb log when the breakpoint is added.
   ///
