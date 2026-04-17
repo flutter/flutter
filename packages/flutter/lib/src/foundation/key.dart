@@ -15,11 +15,32 @@ import 'diagnostics.dart';
 /// A new widget will only be used to update an existing element if its key is
 /// the same as the key of the current widget associated with the element.
 ///
+/// If no key is provided, the default value is `null`, meaning the widget is
+/// considered unkeyed. In this case, Flutter matches widgets based on their
+/// runtimeType and position in the tree during rebuilds.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kn0EOS-ZiIc}
 ///
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
+///
+/// When building widgets from a collection of data, especially when that
+/// collection can change over time (for example, items being inserted, removed,
+/// or reordered), keys are used to preserve the association between a widget
+/// and the underlying data.
+///
+/// Without keys, Flutter has no way to distinguish between a change in the data
+/// of an existing widget and a structural change in the list. As a result,
+/// widgets may be incorrectly updated, and state held by stateful widgets can
+/// be reused for a different piece of data.
+///
+/// Assigning a key ties the widget subtree to a specific piece of data, allowing
+/// Flutter to correctly match old and new widgets and preserve state as expected.
+///
+/// In such cases, a [ValueKey] is typically appropriate, using a value that is
+/// stable and unique for each item (for example, an identifier from the data
+/// model).
 ///
 /// See also:
 ///
