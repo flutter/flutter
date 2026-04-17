@@ -50,16 +50,16 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
 
     final Widget header = Container(
       color: colorScheme.surface,
-      padding: const EdgeInsets.all(4),
+      padding: const .all(4),
       child: Material(
         color: colorScheme.primaryContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: .circular(8),
           side: BorderSide(width: 7, color: colorScheme.outline),
         ),
         child: Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(vertical: 48),
+          alignment: .center,
+          padding: const .symmetric(vertical: 48),
           child: Text(
             count.isOdd
                 ? 'Alternative Title\nWith Two Lines'
@@ -75,7 +75,7 @@ class _PinnedHeaderSliverExampleState extends State<PinnedHeaderSliverExample> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const .symmetric(horizontal: 4),
           child: CustomScrollView(
             controller: scrollController,
             slivers: <Widget>[

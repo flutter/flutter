@@ -18,9 +18,7 @@ struct UniqueID {
 
   UniqueID();
 
-  constexpr bool operator==(const UniqueID& other) const {
-    return id == other.id;
-  }
+  constexpr auto operator<=>(const UniqueID&) const = default;
 };
 
 class ComparableBase {};
@@ -98,14 +96,6 @@ template <>
 struct hash<impeller::UniqueID> {
   constexpr std::size_t operator()(const impeller::UniqueID& id) {
     return id.id;
-  }
-};
-
-template <>
-struct less<impeller::UniqueID> {
-  constexpr bool operator()(const impeller::UniqueID& lhs,
-                            const impeller::UniqueID& rhs) const {
-    return lhs.id < rhs.id;
   }
 };
 

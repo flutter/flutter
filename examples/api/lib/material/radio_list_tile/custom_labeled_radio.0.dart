@@ -83,16 +83,16 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
           });
         },
         child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             LinkedLabelRadio(
               label: 'First tappable label text',
-              padding: EdgeInsets.symmetric(horizontal: 5.0),
+              padding: .symmetric(horizontal: 5.0),
               value: true,
             ),
             LinkedLabelRadio(
               label: 'Second tappable label text',
-              padding: EdgeInsets.symmetric(horizontal: 5.0),
+              padding: .symmetric(horizontal: 5.0),
               value: false,
             ),
           ],

@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -61,6 +62,18 @@ void main() {
             fileSystem: fileSystem,
             logger: BufferLogger.test(),
             osUtils: FakeOperatingSystemUtils(),
+            config: FakeConfig(),
+            platform: FakePlatform(),
+            fileSystemUtils: FakeFileSystemUtils(),
+            terminal: FakeTerminal(),
+            plistParser: FakePlistParser(),
+            processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -90,6 +103,18 @@ void main() {
             fileSystem: fileSystem,
             logger: logger,
             osUtils: FakeOperatingSystemUtils(),
+            config: FakeConfig(),
+            platform: FakePlatform(),
+            fileSystemUtils: FakeFileSystemUtils(),
+            terminal: FakeTerminal(),
+            plistParser: FakePlistParser(),
+            processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -118,6 +143,18 @@ void main() {
             fileSystem: fileSystem,
             logger: logger,
             osUtils: FakeOperatingSystemUtils(),
+            config: FakeConfig(),
+            platform: FakePlatform(),
+            fileSystemUtils: FakeFileSystemUtils(),
+            terminal: FakeTerminal(),
+            plistParser: FakePlistParser(),
+            processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -148,6 +185,18 @@ void main() {
             fileSystem: fileSystem,
             logger: logger,
             osUtils: FakeOperatingSystemUtils(),
+            config: FakeConfig(),
+            platform: FakePlatform(),
+            fileSystemUtils: FakeFileSystemUtils(),
+            terminal: FakeTerminal(),
+            plistParser: FakePlistParser(),
+            processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 
@@ -177,6 +226,18 @@ void main() {
             fileSystem: fileSystem,
             logger: logger,
             osUtils: FakeOperatingSystemUtils(),
+            config: FakeConfig(),
+            platform: FakePlatform(),
+            fileSystemUtils: FakeFileSystemUtils(),
+            terminal: FakeTerminal(),
+            plistParser: FakePlistParser(),
+            processUtils: FakeProcessUtils(),
+            processManager: FakeProcessManager.any(),
+            templateRenderer: FakeTemplateRenderer(),
+            xcode: FakeXcode(),
+            artifacts: FakeArtifacts(),
+            cache: FakeCache(),
+            flutterVersion: FakeFlutterVersion(),
           ),
         ).run(<String>['build', 'web', '--no-pub']);
 

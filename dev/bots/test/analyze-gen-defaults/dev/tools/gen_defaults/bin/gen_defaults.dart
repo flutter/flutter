@@ -8,5 +8,5 @@ const String materialLib = 'packages/flutter/lib/src/material';
 
 Future<void> main(List<String> args) async {
   final tokens = <String, dynamic>{};
-  ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
+  await ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "text_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/text_delegate.h"
 
 #include <fuchsia/ui/input/cpp/fidl.h>
 #include <fuchsia/ui/input3/cpp/fidl.h>
@@ -14,11 +14,10 @@
 #include <lib/fidl/cpp/binding_set.h>
 #include <lib/zx/eventpair.h>
 
-#include "tests/fakes/platform_message.h"
+#include <memory>
 
 #include "flutter/lib/ui/window/platform_message.h"
-
-#include <memory>
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/platform_message.h"
 
 namespace flutter_runner::testing {
 

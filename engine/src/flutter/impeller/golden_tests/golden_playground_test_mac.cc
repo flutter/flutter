@@ -166,6 +166,9 @@ void GoldenPlaygroundTest::SetUp() {
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
+    case PlaygroundBackend::kMetalSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
     case PlaygroundBackend::kMetal:
       if (!DoesSupportWideGamutTests()) {
         GTEST_SKIP()
@@ -342,6 +345,10 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
       std::round(pimpl_->window_size.height * content_scale.y));
   return pimpl_->screenshotter->MakeScreenshot(
       renderer, DisplayListToTexture(list, physical_window_size, renderer));
+}
+
+RuntimeStageBackend GoldenPlaygroundTest::GetRuntimeStageBackend() const {
+  return pimpl_->screenshotter->GetPlayground().GetRuntimeStageBackend();
 }
 
 }  // namespace impeller

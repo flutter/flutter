@@ -17,6 +17,9 @@ namespace impeller {
 
 class RuntimeEffectContents final : public ColorSourceContents {
  public:
+  explicit RuntimeEffectContents(const Geometry* geometry);
+
+  ~RuntimeEffectContents() override;
   struct TextureInput {
     SamplerDescriptor sampler_descriptor;
     std::shared_ptr<Texture> texture;
@@ -27,6 +30,8 @@ class RuntimeEffectContents final : public ColorSourceContents {
   void SetUniformData(std::shared_ptr<std::vector<uint8_t>> uniform_data);
 
   void SetTextureInputs(std::vector<TextureInput> texture_inputs);
+
+  const Geometry* GetGeometry() const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -59,6 +64,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
       ContentContextOptions options,
       bool async) const;
 
+  const Geometry* geometry_ = nullptr;
   std::shared_ptr<RuntimeStage> runtime_stage_;
   std::shared_ptr<std::vector<uint8_t>> uniform_data_;
   std::vector<TextureInput> texture_inputs_;

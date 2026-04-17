@@ -83,6 +83,23 @@ showing the bug). Attach such a file or files to the issue itself.
 For legal reasons, we cannot debug problems that require looking at proprietary
 code or, generally, code that is not publicly available.
 
+### Do not post unfiltered AI output
+
+Comments should add value to the issue. Anyone can easily feed an issue URL
+into an agent, so just posting the results of doing that is generally not
+helpful.
+
+AI tools may be helpful for accomplishing specific tasks, such as
+creating reduced test cases or identifying potential duplicate issues,
+but they should be used as tools for helping you contribute to the issue
+rather than replacements for your contribution. For example, if you use an
+AI to create a reduced test case, make sure that you can actually reproduce
+the issue before posting it.
+
+Keep in mind that longer is not better in issues, and AI output is often
+verbose. If you use AI to write portions of an issue report or comment,
+consider editing the results to focus on the important details.
+
 ### Consider posting issues in English
 
 If you are able to read and write English clearly, consider posting your issue
@@ -212,7 +229,7 @@ Common naming conventions for labels include:
 - **`d: *`** - The purple `d` ("devtools") labels are for organizing our developer tool issues.
 - **`d: *`** - The green `d` ("documentation") labels are for organizing our documentation-related issues.
 - **`dependency: *`** - Indicates the upstream team for issues that are blocked on some work from an upstream project (e.g. Skia, Dart).
-- **`e: *`** - The `e` ("engine") prefix is for subsets of the Flutter engine ([flutter/engine](https://github.com/flutter/engine)).
+- **`e: *`** - The `e` ("engine") prefix is for subsets of the Flutter engine ([flutter/engine](https://github.com/flutter/flutter/tree/main/engine)).
 - **`f: *`** - The `f` ("framework") prefix is for subsets of the Flutter framework ([flutter/flutter's packages/flutter/](https://github.com/flutter/flutter/tree/main/packages/flutter)).
 - **`found in release: x.yy`** - Used for a series of labels that indicate which versions of Flutter an issue was found in.
 - **`from: *`** - Labels that indicate where an issue originated (e.g. research, postmortems), if it wasn't filed organically.

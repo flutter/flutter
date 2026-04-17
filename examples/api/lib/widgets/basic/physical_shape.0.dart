@@ -30,14 +30,11 @@ class PhysicalShapeExample extends StatelessWidget {
     return PhysicalShape(
       elevation: 5.0,
       clipper: ShapeBorderClipper(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: .circular(10.0)),
       ),
       color: Colors.orange,
-      child: const SizedBox(
-        height: 200.0,
-        width: 200.0,
+      child: const SizedBox.square(
+        dimension: 200.0,
         child: Center(
           child: Text(
             'Hello, World!',

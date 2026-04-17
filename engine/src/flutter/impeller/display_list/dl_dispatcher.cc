@@ -590,7 +590,7 @@ void DlDispatcherBase::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
 void DlDispatcherBase::drawPath(const DlPath& path) {
   AUTO_DEPTH_WATCHER(1u);
 
-  SimplifyOrDrawPath(GetCanvas(), path, paint_);
+  GetCanvas().DrawPath(path, paint_);
 }
 
 void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
@@ -1085,21 +1085,16 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     return;
   }
 
-  if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = paint_.stroke;
-  }
+  properties.stroke = paint_.GetStroke();
 
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
     properties.color = paint_.color.WithAlpha(1.0);
   }
-  auto scale = TextFrame::RoundScaledFontSize(
-      (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY());
 
   renderer_.GetLazyGlyphAtlas()->AddTextFrame(
       text_frame,   //
-      scale,        //
       Point(x, y),  //
       matrix_,
       (properties.stroke.has_value() || text_frame->HasColor())  //

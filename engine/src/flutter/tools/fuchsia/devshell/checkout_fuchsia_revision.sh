@@ -22,7 +22,7 @@ ensure_engine_dir
 engine-info "Fetching upstream/main to make sure we recognize Fuchsia's version of Flutter Engine..."
 git -C "$ENGINE_DIR"/flutter fetch upstream
 
-fuchsia_flutter_git_revision="$(cat $FUCHSIA_DIR/integration/jiri.lock | grep -A 1 "\"package\": \"flutter/fuchsia\"" | grep "git_revision" | tr ":" "\n" | sed -n 3p | tr "\"" "\n" | sed -n 1p)"
+fuchsia_flutter_git_revision="$(grep -A 1 "\"package\": \"flutter/fuchsia\"" < "$FUCHSIA_DIR/integration/jiri.lock" | grep "git_revision" | tr ":" "\n" | sed -n 3p | tr "\"" "\n" | sed -n 1p)"
 engine-info "Checking out Fuchsia's revision of Flutter Engine ($fuchsia_flutter_git_revision)..."
 git -C "$ENGINE_DIR"/flutter checkout $fuchsia_flutter_git_revision
 

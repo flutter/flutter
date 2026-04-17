@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
-import '../widgets/editable_text_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1723,6 +1723,21 @@ void main() {
     expect(find.text('**validation error**'), findsOneWidget);
   });
 
+  testWidgets(
+    'TextFormField asserts when both errorBuilder and decoration.errorText are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => TextFormField(
+          decoration: const InputDecoration(errorText: 'Decoration error'),
+          errorBuilder: (BuildContext context, String errorText) {
+            return Text(errorText);
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
+
   group('context menu', () {
     testWidgets(
       'iOS uses the system context menu by default if supported',
@@ -1888,7 +1903,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(TextFormField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
-    tester.pump();
+    await tester.pump();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/180056.

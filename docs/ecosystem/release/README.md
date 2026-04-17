@@ -30,6 +30,8 @@ The most common source of failure of the `release` task is that another test fai
 
 High-traffic packages can enable "Batch release" to group multiple commits into a single periodic release, rather than publishing after every commit (the default "Automatic release" behavior).
 
+**Packages in this mode must not be in pre-release versions, as the batch release tooling does not support them.**
+
 ### Configuration
 
 To enable batch release for a package:

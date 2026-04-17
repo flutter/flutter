@@ -45,9 +45,8 @@ void main() {
         theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: textDirection,
-          child: SizedBox(
-            height: itemHeight * 10,
-            width: itemHeight * 10,
+          child: SizedBox.square(
+            dimension: itemHeight * 10,
             child: ReorderableListView(
               header: header,
               footer: footer,
@@ -363,9 +362,8 @@ void main() {
           return MaterialApp(
             home: Directionality(
               textDirection: TextDirection.ltr,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: ReorderableListView(
                   children: const <Widget>[SizedBox(key: firstBox, width: 10, height: 10)],
                   onReorderItem: (_, _) {},
@@ -543,9 +541,8 @@ void main() {
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child: SizedBox(
-            width: 100.0,
-            height: 100.0,
+          child: SizedBox.square(
+            dimension: 100.0,
             child: Directionality(textDirection: TextDirection.ltr, child: overlay),
           ),
         );
@@ -1146,9 +1143,8 @@ void main() {
           return MaterialApp(
             home: Directionality(
               textDirection: TextDirection.ltr,
-              child: SizedBox(
-                width: 100,
-                height: 100,
+              child: SizedBox.square(
+                dimension: 100.0,
                 child: ReorderableListView(
                   scrollDirection: Axis.horizontal,
                   children: const <Widget>[SizedBox(key: firstBox, width: 10, height: 10)],
@@ -2394,9 +2390,8 @@ void main() {
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      child: SizedBox(
-        width: 100.0,
-        height: 100.0,
+      child: SizedBox.square(
+        dimension: 100.0,
         child: Directionality(textDirection: TextDirection.ltr, child: reorderableList),
       ),
     );
@@ -2798,9 +2793,8 @@ class _StatefulState extends State<_Stateful> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48.0,
-      height: 48.0,
+    return SizedBox.square(
+      dimension: 48.0,
       child: Material(
         child: Checkbox(value: checked, onChanged: (bool? newValue) => checked = newValue),
       ),

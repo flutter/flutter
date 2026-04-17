@@ -77,12 +77,15 @@ std::optional<Catalog::Match> FindMatchForSelectedMatcher(
       const char* position = full_match.data();
       for (int i = 1; i <= num_groups; ++i) {
         std::string_view submatch = submatches[i];
+        if (submatch.data() == nullptr) {
+          continue;
+        }
         if (submatch.data() > position) {
           non_group_text.append(position, submatch.data() - position);
         }
         position = submatch.data() + submatch.size();
       }
-      if (position < full_match_end) {
+      if (position != nullptr && position < full_match_end) {
         non_group_text.append(position, full_match_end - position);
       }
 

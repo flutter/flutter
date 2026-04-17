@@ -246,12 +246,7 @@ class ChromiumLauncher {
       // See: https://github.com/flutter/flutter/issues/153928
       '--disable-search-engine-choice-screen',
 
-      if (headless) ...<String>[
-        '--no-sandbox',
-        '--headless',
-        '--disable-gpu',
-        '--window-size=2400,1800',
-      ],
+      if (headless) ...<String>['--no-sandbox', '--headless', '--window-size=2400,1800'],
       ...webBrowserFlags,
       url,
     ];

@@ -10,7 +10,7 @@
 
 // Impeller should only be enabled if the Vulkan backend is enabled.
 #define TESTER_ENABLE_VULKAN \
-  (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN)
+  (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN && SHELL_ENABLE_VULKAN)
 
 namespace flutter {
 

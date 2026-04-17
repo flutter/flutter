@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "portable_ui_test.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/portable_ui_test.h"
 
 #include <fuchsia/inspect/cpp/fidl.h>
+#include <fuchsia/kernel/cpp/fidl.h>
 #include <fuchsia/logger/cpp/fidl.h>
 #include <fuchsia/sysmem/cpp/fidl.h>
 #include <fuchsia/sysmem2/cpp/fidl.h>
@@ -14,8 +15,8 @@
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
 
-#include "check_view.h"
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/check_view.h"
 
 namespace fuchsia_test_utils {
 namespace {
@@ -80,8 +81,9 @@ void PortableUITest::SetUpRealmBase() {
 
   // // Route base system services to flutter and the test UI stack.
   realm_builder_.AddRoute(Route{
-      .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
-                       Protocol{fuchsia::inspect::InspectSink::Name_},
+      .capabilities = {Protocol{fuchsia::inspect::InspectSink::Name_},
+                       Protocol{fuchsia::kernel::VmexResource::Name_},
+                       Protocol{fuchsia::logger::LogSink::Name_},
                        Protocol{fuchsia::sysmem::Allocator::Name_},
                        Protocol{fuchsia::sysmem2::Allocator::Name_},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},

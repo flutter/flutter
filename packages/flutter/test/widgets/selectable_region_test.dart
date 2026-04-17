@@ -10,10 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
-import 'editable_text_utils.dart' show TestTextField;
+import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -5427,17 +5428,63 @@ void main() {
     skip: kIsWeb, // [intended] Web uses its native context menu.
   );
 
+  testWidgets(
+    'can hide context menu with DismissIntent',
+    (WidgetTester tester) async {
+      final toolbarKey = UniqueKey();
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: testTextSelectionHandleControls,
+            contextMenuBuilder:
+                (BuildContext context, SelectableRegionState selectableRegionState) {
+                  return SizedBox.shrink(key: toolbarKey);
+                },
+            child: const Text('How are you?'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph, 6),
+      ); // at the 'r'
+      addTearDown(gesture.removePointer);
+      await tester.pump(const Duration(milliseconds: 500));
+      // `are` is selected.
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+      await tester.pumpAndSettle();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      // Context menu has appeared.
+      expect(find.byKey(toolbarKey), findsOneWidget);
+
+      // Hide the context menu using the DismissIntent.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(find.byKey(toolbarKey), findsNothing);
+    },
+    skip: kIsWeb, // [intended] Web uses its native context menu.
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/121053.
   testWidgets(
-    'Ensure SelectionArea does not affect the layout of its children',
+    'Ensure SelectableRegion does not affect the layout of its children',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        TestWidgetsApp(
           home: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              SelectionArea(child: Text('row 1')),
-              Text('row 2'),
+              SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: const Text('row 1'),
+              ),
+              const Text('row 2'),
             ],
           ),
         ),
@@ -5445,7 +5492,44 @@ void main() {
       await tester.pumpAndSettle();
       final double xOffset1 = tester.getTopLeft(find.text('row 1')).dx;
       final double xOffset2 = tester.getTopLeft(find.text('row 2')).dx;
+      final Size size1 = tester.getSize(find.text('row 1'));
+      final Size size2 = tester.getSize(find.text('row 2'));
       expect(xOffset1, xOffset2);
+      expect(size1, size2);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/171632.
+  testWidgets(
+    'SelectableRegion preserves constraints from parent rather than loosening them',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 300.0, minHeight: 400.0),
+              child: SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: Container(
+                  key: const Key('container'),
+                  constraints: const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[Text('Row 1')],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Because min constraints win, the container size should be forced to 300x400.
+      final Size containerSize = tester.getSize(find.byKey(const Key('container')));
+      expect(containerSize.width, 300.0);
+      expect(containerSize.height, 400.0);
     },
     variant: TargetPlatformVariant.all(),
   );
@@ -6533,6 +6617,119 @@ void main() {
 
     final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
     expect(clipboardData['text'], 'Hello my name is Dash.');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174246
+  testWidgets('SelectableRegion applies correct mouse cursors in its empty region', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey innerRegion = GlobalKey();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        // Region 1 (fullscreen)
+        home: MouseRegion(
+          cursor: SystemMouseCursors.grab,
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(border: Border.all()),
+              // Region 2 (SelectableRegion)
+              child: SelectableRegion(
+                selectionControls: emptyTextSelectionControls,
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  // Region 3 (inner MouseRegion)
+                  child: MouseRegion(
+                    key: innerRegion,
+                    cursor: SystemMouseCursors.forbidden,
+                    onHover: (_) {},
+                    child: Container(color: const Color(0xFFAA9933), width: 200, height: 50),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    // On web, ensure that the HtmlElementView is initialized.
+    if (kIsWeb) {
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) => widget.toString().contains('_PlatformViewPlaceHolder'),
+        ),
+        findsNothing,
+      );
+    }
+
+    const region1 = Offset(10, 10);
+    final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
+    final Offset region3 = tester.getCenter(find.byKey(innerRegion));
+
+    final TestGesture gesture = await tester.startGesture(region1, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+
+    await gesture.moveTo(region3);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.forbidden,
+    );
+
+    await gesture.moveTo(region2);
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.grab,
+    );
+  });
+
+  testWidgets('selects all text including trailing newline using mouse drag', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/154253.
+    const text = 'Hello world\n';
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Text(
+            text,
+            style: TextStyle(
+              // This is needed to reproduce the issue. This causes the
+              // line height to differ from the character height.
+              height: 1.4,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text(text), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      tester.getTopLeft(find.text(text)),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getBottomRight(find.text(text)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph.selections, isNotEmpty);
+    expect(paragraph.selections.first, const TextSelection(baseOffset: 0, extentOffset: 12));
   });
 }
 

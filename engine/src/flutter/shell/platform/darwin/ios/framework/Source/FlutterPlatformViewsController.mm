@@ -141,11 +141,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly) std::unordered_set<int64_t>& viewsToRecomposite;
 
-/// @brief The composition order from the previous thread.
-///
-/// Only accessed from the platform thread.
-@property(nonatomic, readonly) std::vector<int64_t>& previousCompositionOrder;
-
 /// Whether the previous frame had any platform views in active composition order.
 ///
 /// This state is tracked so that the first frame after removing the last platform view
@@ -583,16 +578,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
         // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;
+        BOOL isRoundedSuperellipse = NO;
+        // If there's multiple clips, this uses the innermost to decide if its
+        // rse or not. The assumption being the innermost will be the tightest
         if ([pendingClipRRects count] > 0) {
-          cornerRadius = pendingClipRRects[0].topLeftRadius;
+          cornerRadius = pendingClipRRects.lastObject.topLeftRadius;
+          isRoundedSuperellipse = pendingClipRRects.lastObject.isRoundedSuperellipse;
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
+        if (@available(iOS 13.0, *)) {
+          visualEffectView.layer.cornerCurve =
+              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
+        }
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
                                                                   cornerRadius:cornerRadius
+                                                         isRoundedSuperellipse:isRoundedSuperellipse
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
@@ -620,7 +624,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         break;
       }
       case flutter::MutatorType::kBackdropClipRSuperellipse: {
-        // TODO(https://github.com/flutter/flutter/issues/179125)
+        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
+        flutter::DlRoundSuperellipse rse = (*iter)->GetBackdropClipRSuperellipse().rse;
+
+        clip.rect = boundingRect;
+        impeller::RoundingRadii radii = rse.GetRadii();
+        clip.topLeftRadius = radii.top_left.width;
+        clip.topRightRadius = radii.top_right.width;
+        clip.bottomLeftRadius = radii.bottom_left.width;
+        clip.bottomRightRadius = radii.bottom_right.width;
+        clip.isRoundedSuperellipse = YES;
+        [pendingClipRRects addObject:clip];
         break;
       }
       case flutter::MutatorType::kBackdropClipPath: {
@@ -691,7 +705,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       [self.platformViews[viewId].root_view removeFromSuperview];
     }
     self.platformViews.clear();
-    self.previousCompositionOrder.clear();
+    _previousCompositionOrder.clear();
   });
 
   self.compositionOrder.clear();
@@ -914,10 +928,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   FML_DCHECK(self.flutterView);
   UIView* flutterView = self.flutterView;
 
-  self.previousCompositionOrder.clear();
+  _previousCompositionOrder.clear();
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
   for (int64_t platformViewId : compositionOrder) {
-    self.previousCompositionOrder.push_back(platformViewId);
+    _previousCompositionOrder.push_back(platformViewId);
     UIView* platformViewRoot = self.platformViews[platformViewId].root_view;
     if (platformViewRoot != nil) {
       [desiredPlatformSubviews addObject:platformViewRoot];
@@ -971,7 +985,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     compositionOrderSet.insert(viewId);
   }
   // Remove unused platform views.
-  for (int64_t viewId : self.previousCompositionOrder) {
+  for (int64_t viewId : _previousCompositionOrder) {
     if (compositionOrderSet.find(viewId) == compositionOrderSet.end()) {
       UIView* platformViewRoot = self.platformViews[viewId].root_view;
       [platformViewRoot removeFromSuperview];
@@ -1091,8 +1105,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return _viewsToRecomposite;
 }
 
-- (std::vector<int64_t>&)previousCompositionOrder {
-  return _previousCompositionOrder;
+- (NSArray<NSNumber*>*)previousCompositionOrder {
+  // TODO(cbracken): Migrate to Obj-C types. https://github.com/flutter/flutter/issues/185139
+  NSMutableArray* array = [NSMutableArray arrayWithCapacity:_previousCompositionOrder.size()];
+  for (int64_t viewId : _previousCompositionOrder) {
+    [array addObject:@(viewId)];
+  }
+  return array;
 }
 
 @end

@@ -60,38 +60,50 @@ void test9() { }
 void test10() { }
 
 @Deprecated(
+  'Version number test (should fail). '
+  'This feature was deprecated after 1.0.0.' // ERROR: Deprecation notice must end with a line saying "This feature was deprecated after v<version>.".
+)
+void test11() {}
+
+@Deprecated(
+  'Version number test (should fail). '
+  'This feature was deprecated after v1.0.0' // ERROR: Deprecation notice must end with a line saying "This feature was deprecated after v<version>.".
+)
+void test12() {}
+
+@Deprecated(
   'Version number test (special beta should pass). '
   'This feature was deprecated after v3.1.0.'
 )
-void test11() { }
+void test13() { }
 
 @Deprecated(
   'Version number test (should be fine). '
   'This feature was deprecated after v0.1.0.'
 )
-void test12() { }
+void test14() { }
 
 @Deprecated(
   'Version number test (should be fine). '
   'This feature was deprecated after v1.20.0-1.0.pre.'
 )
-void test13() { }
+void test15() { }
 
 @Deprecated(
   "Double quotes' test (should fail). " // ERROR: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (').
   'This feature was deprecated after v2.1.0-11.0.pre.'
 )
-void test14() { }
+void test16() { }
 
 @Deprecated( // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
   'Missing the version line. '
 )
-void test15() { }
+void test17() { }
 // dart format on
 
 // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000
 @Deprecated('Missing the version line. ')
-void test16() {}
+void test18() {}
 
 class TestClass1 {
   // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/000000

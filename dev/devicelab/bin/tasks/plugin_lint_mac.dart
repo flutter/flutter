@@ -15,6 +15,9 @@ Future<void> main() async {
   await task(() async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin_test.');
     try {
+      // This test validates pods, so we need to disable SwiftPM.
+      await flutter('config', options: <String>['--no-enable-swift-package-manager']);
+
       section('Lint integration_test');
 
       await inDirectory(tempDir, () async {
@@ -37,7 +40,13 @@ Future<void> main() async {
           'integration_test.podspec',
         );
 
-        await exec('pod', <String>['lib', 'lint', iosintegrationTestPodspec, '--use-libraries']);
+        await exec('pod', <String>[
+          'lib',
+          'lint',
+          iosintegrationTestPodspec,
+          '--use-libraries',
+          '--quick',
+        ]);
 
         final String macosintegrationTestPodspec = path.join(
           integrationTestPackage,

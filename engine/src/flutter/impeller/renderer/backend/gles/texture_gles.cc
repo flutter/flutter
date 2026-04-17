@@ -16,7 +16,6 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
-#include "impeller/renderer/backend/gles/handle_gles.h"
 
 namespace impeller {
 
@@ -62,80 +61,6 @@ static TextureGLES::Type GetTextureTypeFromDescriptor(
                  : TextureGLES::Type::kTexture;
 }
 
-struct TexImage2DData {
-  GLint internal_format = 0;
-  GLenum external_format = GL_NONE;
-  GLenum type = GL_NONE;
-  std::shared_ptr<const fml::Mapping> data;
-
-  explicit TexImage2DData(PixelFormat pixel_format) {
-    switch (pixel_format) {
-      case PixelFormat::kA8UNormInt:
-        internal_format = GL_ALPHA;
-        external_format = GL_ALPHA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-      case PixelFormat::kR8UNormInt:
-        internal_format = GL_RED;
-        external_format = GL_RED;
-        type = GL_UNSIGNED_BYTE;
-        break;
-      case PixelFormat::kR8G8B8A8UNormInt:
-      case PixelFormat::kB8G8R8A8UNormInt:
-      case PixelFormat::kR8G8B8A8UNormIntSRGB:
-      case PixelFormat::kB8G8R8A8UNormIntSRGB:
-        internal_format = GL_RGBA;
-        external_format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-      case PixelFormat::kR32Float:
-        internal_format = GL_R32F;
-        external_format = GL_RGBA;
-        type = GL_FLOAT;
-        break;
-      case PixelFormat::kR32G32B32A32Float:
-        internal_format = GL_RGBA32F;
-        external_format = GL_RGBA;
-        type = GL_FLOAT;
-        break;
-      case PixelFormat::kR16G16B16A16Float:
-        internal_format = GL_RGBA16F;
-        external_format = GL_RGBA;
-        type = GL_HALF_FLOAT;
-        break;
-      case PixelFormat::kS8UInt:
-        // Pure stencil textures are only available in OpenGL 4.4+, which is
-        // ~0% of mobile devices. Instead, we use a depth-stencil texture and
-        // only use the stencil component.
-        //
-        // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-      case PixelFormat::kD24UnormS8Uint:
-        internal_format = GL_DEPTH_STENCIL;
-        external_format = GL_DEPTH_STENCIL;
-        type = GL_UNSIGNED_INT_24_8;
-        break;
-      case PixelFormat::kUnknown:
-      case PixelFormat::kD32FloatS8UInt:
-      case PixelFormat::kR8G8UNormInt:
-      case PixelFormat::kB10G10R10XRSRGB:
-      case PixelFormat::kB10G10R10XR:
-      case PixelFormat::kB10G10R10A10XR:
-        return;
-    }
-    is_valid_ = true;
-  }
-
-  TexImage2DData(PixelFormat pixel_format,
-                 std::shared_ptr<const fml::Mapping> mapping)
-      : TexImage2DData(pixel_format) {
-    data = std::move(mapping);
-  }
-
-  bool IsValid() const { return is_valid_; }
-
- private:
-  bool is_valid_ = false;
-};
 }  // namespace
 
 HandleType ToHandleType(TextureGLES::Type type) {
@@ -217,7 +142,6 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
   if (!GetTextureDescriptor().IsValid()) {
-    VALIDATION_LOG << "Invalid texture descriptor.";
     return;
   }
   // Ensure the texture doesn't exceed device capabilities.
@@ -331,18 +255,22 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
       break;
   }
 
-  auto data = std::make_shared<TexImage2DData>(tex_descriptor.format,
-                                               std::move(mapping));
-  if (!data || !data->IsValid()) {
+  std::optional<PixelFormatGLES> gles_format =
+      ToPixelFormatGLES(tex_descriptor.format,
+                        /*supports_bgra=*/
+                        reactor_->GetProcTable().GetDescription()->HasExtension(
+                            "GL_EXT_texture_format_BGRA8888"));
+  if (!gles_format.has_value()) {
     VALIDATION_LOG << "Invalid texture format.";
     return false;
   }
 
-  ReactorGLES::Operation texture_upload = [handle = handle_,            //
-                                           data,                        //
-                                           size = tex_descriptor.size,  //
-                                           texture_type,                //
-                                           texture_target               //
+  ReactorGLES::Operation texture_upload = [handle = handle_,              //
+                                           mapping,                       //
+                                           format = gles_format.value(),  //
+                                           size = tex_descriptor.size,    //
+                                           texture_type,                  //
+                                           texture_target                 //
   ](const auto& reactor) {
     auto gl_handle = reactor.GetGLHandle(handle);
     if (!gl_handle.has_value()) {
@@ -353,24 +281,23 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
     const auto& gl = reactor.GetProcTable();
     gl.BindTexture(texture_type, gl_handle.value());
     const GLvoid* tex_data = nullptr;
-    if (data->data) {
-      tex_data = data->data->GetMapping();
+    if (mapping) {
+      tex_data = mapping->GetMapping();
     }
 
     {
       TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
-                   std::to_string(data->data->GetSize()).c_str());
+                   std::to_string(mapping->GetSize()).c_str());
       gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      gl.TexImage2D(texture_target,         // target
-                    0u,                     // LOD level
-                    data->internal_format,  // internal format
-                    size.width,             // width
-                    size.height,            // height
-                    0u,                     // border
-                    data->external_format,  // external format
-                    data->type,             // type
-                    tex_data                // data
-      );
+      gl.TexImage2D(texture_target,          // target
+                    0u,                      // LOD level
+                    format.internal_format,  // internal format
+                    size.width,              // width
+                    size.height,             // height
+                    0u,                      // border
+                    format.external_format,  // format
+                    format.type,             // type
+                    tex_data);               // data
     }
   };
 
@@ -448,8 +375,12 @@ void TextureGLES::InitializeContentsIfNecessary() const {
   switch (type_) {
     case Type::kTexture:
     case Type::kTextureMultisampled: {
-      TexImage2DData tex_data(GetTextureDescriptor().format);
-      if (!tex_data.IsValid()) {
+      std::optional<PixelFormatGLES> gles_format = ToPixelFormatGLES(
+          GetTextureDescriptor().format,
+          /*supports_bgra=*/
+          reactor_->GetProcTable().GetDescription()->HasExtension(
+              "GL_EXT_texture_format_BGRA8888"));
+      if (!gles_format.has_value()) {
         VALIDATION_LOG << "Invalid format for texture image.";
         return;
       }
@@ -458,13 +389,13 @@ void TextureGLES::InitializeContentsIfNecessary() const {
         TRACE_EVENT0("impeller", "TexImage2DInitialization");
         gl.TexImage2D(GL_TEXTURE_2D,  // target
                       0u,             // LOD level (base mip level size checked)
-                      tex_data.internal_format,  // internal format
-                      size.width,                // width
-                      size.height,               // height
-                      0u,                        // border
-                      tex_data.external_format,  // format
-                      tex_data.type,             // type
-                      nullptr                    // data
+                      gles_format->internal_format,  // internal format
+                      size.width,                    // width
+                      size.height,                   // height
+                      0u,                            // border
+                      gles_format->external_format,  // format
+                      gles_format->type,             // type
+                      nullptr                        // data
         );
       }
     } break;
