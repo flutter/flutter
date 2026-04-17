@@ -59,79 +59,89 @@ void main() {
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
-    testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
-      final device = AndroidDevice(
-        '1234',
-        modelID: 'TestModel',
-        fileSystem: fileSystem,
-        processManager: processManager,
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        androidSdk: androidSdk,
-      );
-      final File apkFile = fileSystem.file('app-debug.apk')..createSync();
-      final apk = AndroidApk(
-        id: 'FlutterApp',
-        applicationPackage: apkFile,
-        launchActivity: 'FlutterActivity',
-        versionCode: 1,
-      );
+    testUsingContext(
+      'AndroidDevice.startApp allows release builds on $targetPlatform',
+      () async {
+        final String arch = getAndroidArchForName(
+          getNameForTargetPlatform(targetPlatform),
+        ).archName;
+        final device = AndroidDevice(
+          '1234',
+          modelID: 'TestModel',
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          androidSdk: androidSdk,
+        );
+        final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+        final apk = AndroidApk(
+          id: 'FlutterApp',
+          applicationPackage: apkFile,
+          launchActivity: 'FlutterActivity',
+          versionCode: 1,
+        );
 
-      processManager.addCommand(kAdbVersionCommand);
-      processManager.addCommand(kStartServer);
+        processManager.addCommand(kAdbVersionCommand);
+        processManager.addCommand(kStartServer);
 
-      // This configures the target platform of the device.
-      processManager.addCommand(
-        FakeCommand(
-          command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
-          stdout: '[ro.product.cpu.abi]: [$arch]',
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
-        ),
-      );
-      processManager.addCommand(kShaCommand);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'am',
-            'start',
-            '-a',
-            'android.intent.action.MAIN',
-            '-c',
-            'android.intent.category.LAUNCHER',
-            '-f',
-            '0x20000000',
-            'FlutterActivity',
-          ],
-        ),
-      );
+        // This configures the target platform of the device.
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [$arch]',
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
+          ),
+        );
+        processManager.addCommand(kShaCommand);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'adb',
+              '-s',
+              '1234',
+              'shell',
+              'am',
+              'start',
+              '-a',
+              'android.intent.action.MAIN',
+              '-c',
+              'android.intent.category.LAUNCHER',
+              '-f',
+              '0x20000000',
+              'FlutterActivity',
+            ],
+          ),
+        );
 
-      final LaunchResult launchResult = await device.startApp(
-        apk,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        platformArgs: <String, dynamic>{},
-      );
+        final LaunchResult launchResult = await device.startApp(
+          apk,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          platformArgs: <String, dynamic>{},
+        );
 
-      expect(launchResult.started, true);
-      expect(processManager, hasNoRemainingExpectations);
-    });
+        expect(launchResult.started, true);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        ApplicationPackageFactory: () =>
+            _FakeApplicationPackageFactory('FlutterApp', 'app-debug.apk', 'FlutterActivity'),
+      },
+    );
   }
 
-  testWithoutContext(
+  testUsingContext(
     'AndroidDevice.startApp forwards only the --user flag to the Intent if specified in debugging options',
     () async {
       final device = AndroidDevice(
@@ -252,6 +262,11 @@ void main() {
       // This fails to start due to VM Service discovery issues.
       expect(launchResult.started, false);
       expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      ApplicationPackageFactory: () =>
+          _FakeApplicationPackageFactory('FlutterApp', 'app-debug.apk', 'FlutterActivity'),
     },
   );
 
@@ -644,6 +659,120 @@ void main() {
         final expectedShellArgs = <String>[
           '--enable-dart-profiling',
           '--trace-allowlist=foo2',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--verbose-logging',
+          '--route=$testRoute',
+        ];
+
+        final LaunchResult launchResult = await device.startApp(
+          apk,
+          prebuiltApplication: true,
+          debuggingOptions: debuggingOptions,
+          userIdentifier: '10',
+          route: testRoute,
+        );
+
+        expect(launchResult.started, false);
+        expect(fakeAndroidBuilder.capturedAndroidShellArgs, expectedShellArgs);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => fakeAndroidBuilder,
+        ApplicationPackageFactory: () => fakeApplicationPackageFactory,
+      },
+    );
+
+    testUsingContext(
+      'startApp rebuilds APK if engine shell arguments are specified and previous arguments are null',
+      () async {
+        final device = AndroidDevice(
+          '1234',
+          modelID: 'TestModel',
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          androidSdk: androidSdk,
+        );
+        final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+        const testRoute = 'some/route';
+        // Create APK without engineShellArgs (defaults to null)
+        final apk = AndroidApk(
+          id: 'FlutterApp',
+          applicationPackage: apkFile,
+          launchActivity: 'FlutterActivity',
+          versionCode: 1,
+        );
+
+        // These commands are required to install and start the app
+        processManager.addCommand(kAdbVersionCommand);
+        processManager.addCommand(kStartServer);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [x86_64]',
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'adb',
+              '-s',
+              '1234',
+              'shell',
+              'am',
+              'force-stop',
+              '--user',
+              '10',
+              apkId,
+            ],
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', '--user', '10', apkPath],
+            stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
+          ),
+        );
+        processManager.addCommand(kShaCommand);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+          ),
+        );
+
+        // This command contains the user launch arguments.
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'adb',
+              '-s',
+              '1234',
+              'shell',
+              'am',
+              'start',
+              '-a',
+              'android.intent.action.MAIN',
+              '-c',
+              'android.intent.category.LAUNCHER',
+              '-f',
+              '0x20000000',
+              '--user',
+              '10',
+              apkLaunchActivity,
+            ],
+          ),
+        );
+
+        final debuggingOptions = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          traceAllowlist: 'foo',
+          verboseSystemLogs: true,
+        );
+        final expectedShellArgs = <String>[
+          '--enable-dart-profiling',
+          '--trace-allowlist=foo',
           '--enable-checked-mode',
           '--verify-entry-points',
           '--verbose-logging',

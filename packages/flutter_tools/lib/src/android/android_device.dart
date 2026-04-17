@@ -591,13 +591,15 @@ class AndroidDevice extends Device {
           !previousEngineShellArguments.containsAll(androidShellArguments) ||
           !androidShellArguments.containsAll(previousEngineShellArguments) ||
           previousEngineShellArguments.length != androidShellArguments.length;
+    } else if (androidShellArguments.isNotEmpty) {
+      shouldRegenerateEngineShellArgsManifest = true;
     }
 
     if (!prebuiltApplication ||
         shouldRegenerateEngineShellArgsManifest ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       final bool apkBuildNotExpected =
-          shouldRegenerateEngineShellArgsManifest && !prebuiltApplication;
+          shouldRegenerateEngineShellArgsManifest && prebuiltApplication;
       final buildApkLoggerMessage = apkBuildNotExpected
           ? 'Re-building APK instead of using prebuilt application binary to include updated engine flags'
           : 'Building APK';
