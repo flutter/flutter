@@ -32,7 +32,7 @@ final class RunCommand extends CommandBase {
     argParser.addOption(
       'flutter-flags',
       help:
-          'A string of arguments to pass to the "flutter run" command, separated by commas or spaces.',
+          'A string of arguments to pass to the "flutter run" command, surrounded by double quotes and separated by commas or spaces. For example: --flutter-flags "--profile,--verbose,--device-id=some-device".',
       defaultsTo: '',
     );
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
