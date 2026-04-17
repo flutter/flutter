@@ -179,8 +179,8 @@ void main() {
   vec2 gradient = vec2(dFdx(dist), dFdy(dist));
 
   // The length of the gradient vector is how fast the SDF changes per
-  // screen-space pixel distance. This is equal to the width of a pixel when
-  // measuring in the direction of the gradient vector.
+  // screen-space pixel distance. In other words, it is the size of a pixel
+  // measured in the units of the SDF calculation.
   //
   // In local space, the SDF always increases by 1 in the gradient's direction
   // per unit distance. That's the definition of an SDF: it is the distance to
@@ -188,15 +188,22 @@ void main() {
   // increase by a different amount than 1 per unit distance (in screen-space
   // units, i.e. physical pixels), due to scales/skews/rotations.
   //
-  // As an example, if the SDF is a plain unscaled/unskewed circle centered at
-  // the origin, the gradient is vec2(1.0, 0.0) for points along the positive x
-  // axis: For every one pixel we move along the positive x axis, the SDF value
-  // increases by 1.0. Now consider a the same circle with a transformation that
-  // scales it by 2 along the x axis. In screen-space the circle is stretched to
-  // be twice as wide as the original circle in the postive and negative x
-  // directions. The gradient for this will be vec2(0.5, 0.0) along the positive
-  // x axis, because now for every physical pixel we move along the this axis,
-  // the stretched SDF increases by only 0.5.
+  // As an example, consider the SDF of an unscaled/unskewed circle centered at
+  // the origin. The gradient is vec2(1.0, 0.0) for points along the positive x
+  // axis[^1]: for every one pixel we move along the positive x axis,
+  // the SDF value increases by 1.0. Now consider the same circle with a
+  // transformation that scales it by 2 along the x axis. With a transformation,
+  // the local space size of the circle remains the same, but the way it maps
+  // onto screen-space pixels is changed. In screen-space the circle is
+  // stretched to be twice as wide as the original circle in the postive and
+  // negative x directions. The gradient for this will be vec2(0.5, 0.0) along
+  // the positive x axis: for every physical pixel we move along the positive x
+  // axis, we move only 0.5 units in the SDF's local space.
+  //
+  // [^1]: In the real world, there would not be a pixel where the gradient
+  // vector for a circle is exactly (1.0, 0.0) due to the way dFdx and dFdy are
+  // approximated from pixel samples. This does not affect the applicability
+  // of this example.
   float pixel_size = length(gradient);
 
   // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
