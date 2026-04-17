@@ -180,6 +180,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = false,
     String? title,
   }) {
     throw UnimplementedError('Satellite windows are not yet implemented on macOS.');
