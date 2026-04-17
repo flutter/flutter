@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 import 'package:file/file.dart';
 
 /// Performs a transactional update of a file in Google Cloud Storage.
@@ -29,12 +30,43 @@ Future<void> transactionalUpdate({
     return;
   }
 
+  final createTemp = tempDirectory == null;
+  final Directory tempDir =
+      tempDirectory ?? fs.systemTempDirectory.createTempSync('transactional_update.');
+
+  try {
+    await _transactionalUpdate(
+      gsPath: gsPath,
+      callback: callback,
+      runGsUtil: runGsUtil,
+      fs: fs,
+      maxRetries: maxRetries,
+      tempDir: tempDir,
+    );
+  } finally {
+    if (createTemp) {
+      try {
+        tempDir.deleteSync(recursive: true);
+      } catch (e) {
+        print('Failed to delete temp directory ${tempDir.path}: $e');
+      }
+    }
+  }
+}
+
+Future<void> _transactionalUpdate({
+  required String gsPath,
+  required Future<String> Function(String currentContents) callback,
+  required Future<String> Function(List<String> args) runGsUtil,
+  required FileSystem fs,
+  required int maxRetries,
+  required Directory tempDir,
+}) async {
   final generationRegex = RegExp(r'Generation:\s+(\d+)');
 
   for (var attempt = 1; attempt <= maxRetries; attempt++) {
     print('Attempt $attempt of $maxRetries to update $gsPath');
 
-    // 1. Get the current generation ID.
     var generation = '0';
     var fileExists = true;
 
@@ -51,39 +83,30 @@ Future<void> transactionalUpdate({
       generation = '0';
     }
 
-    final shouldDeleteTemp = tempDirectory == null;
-    final Directory tempDir =
-        tempDirectory ?? fs.systemTempDirectory.createTempSync('transactional_update.');
     final File localFile = fs.file(fs.path.join(tempDir.path, 'downloaded.json'));
-
     var contents = '';
 
     if (fileExists) {
-      // 2. Download that specific version.
       try {
         await runGsUtil(<String>['cp', '$gsPath#$generation', localFile.path]);
         contents = localFile.readAsStringSync();
       } catch (e) {
         print('Failed to download generation $generation of $gsPath: $e');
-        if (shouldDeleteTemp) {
-          tempDir.deleteSync(recursive: true);
-        }
         if (attempt == maxRetries) {
           rethrow;
         }
-        await Future<void>.delayed(const Duration(seconds: 1));
+        final int backoffMs = pow(2, attempt).toInt() * 1000;
+        final int jitterMs = Random().nextInt(1000);
+        await Future<void>.delayed(Duration(milliseconds: backoffMs + jitterMs));
         continue;
       }
     }
 
-    // 3. Call callback.
     final String newContents = await callback(contents);
 
-    // 4. Write new contents to a file for upload.
     final File uploadFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
     uploadFile.writeAsStringSync(newContents);
 
-    // 5. Upload with generation match.
     try {
       await runGsUtil(<String>[
         '-h',
@@ -93,19 +116,15 @@ Future<void> transactionalUpdate({
         gsPath,
       ]);
       print('Successfully updated $gsPath');
-      if (shouldDeleteTemp) {
-        tempDir.deleteSync(recursive: true);
-      }
       return;
     } catch (e) {
       print('Failed to upload $gsPath with generation match $generation: $e');
-      if (shouldDeleteTemp) {
-        tempDir.deleteSync(recursive: true);
-      }
       if (attempt == maxRetries) {
         rethrow;
       }
-      await Future<void>.delayed(const Duration(seconds: 1));
+      final int backoffMs = pow(2, attempt).toInt() * 1000;
+      final int jitterMs = Random().nextInt(1000);
+      await Future<void>.delayed(Duration(milliseconds: backoffMs + jitterMs));
       continue;
     }
   }

@@ -98,7 +98,7 @@ void main() {
       late FakeProcessManager processManager;
       late FileSystem fs;
       final args = <List<String>>[];
-      final namedArgs = <Map<Symbol, dynamic>>[];
+      final namedArgs = <Map<Symbol, Object?>>[];
       late String flutter;
       late String dart;
 
@@ -606,14 +606,14 @@ void main() {
         expect(contents, contains('"channel": "beta"'));
         // Make sure old matching entries are removed.
         expect(contents, isNot(contains('v0.0.0')));
-        final jsonData = json.decode(contents) as Map<String, dynamic>;
-        final releases = jsonData['releases'] as List<dynamic>;
+        final jsonData = json.decode(contents) as Map<String, Object?>;
+        final releases = jsonData['releases'] as List<Object?>;
         expect(releases.length, equals(3));
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
           DateTime.now().difference(
-            DateTime.parse((releases[0] as Map<String, dynamic>)['release_date'] as String),
+            DateTime.parse((releases[0] as Map<String, Object?>)['release_date'] as String),
           ),
           lessThan(const Duration(minutes: 1)),
         );
@@ -775,8 +775,8 @@ void main() {
         final File releaseFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
-        final releases = jsonDecode(contents) as Map<String, dynamic>;
-        expect((releases['releases'] as List<dynamic>).length, equals(2));
+        final releases = jsonDecode(contents) as Map<String, Object?>;
+        expect((releases['releases'] as List<Object?>).length, equals(2));
       });
 
       test('updates base_url from old bucket to new bucket', () async {
@@ -861,7 +861,7 @@ void main() {
         final File releaseFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
-        final jsonData = json.decode(contents) as Map<String, dynamic>;
+        final jsonData = json.decode(contents) as Map<String, Object?>;
         expect(
           jsonData['base_url'],
           'https://storage.googleapis.com/flutter_infra_release/releases',

@@ -105,17 +105,17 @@ class ArchivePublisher {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
+  Future<Map<String, Object?>> _addRelease(Map<String, Object?> jsonData) async {
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    (jsonData['current_release'] as Map<String, dynamic>)[branch.name] = revision;
+    (jsonData['current_release'] as Map<String, Object?>)[branch.name] = revision;
     if (!jsonData.containsKey('releases')) {
-      jsonData['releases'] = <Map<String, dynamic>>[];
+      jsonData['releases'] = <Map<String, Object?>>[];
     }
 
-    final newEntry = <String, dynamic>{};
+    final newEntry = <String, Object?>{};
     newEntry['hash'] = revision;
     newEntry['channel'] = branch.name;
     newEntry['version'] = version[frameworkVersionTag];
@@ -130,16 +130,16 @@ class ArchivePublisher {
     );
 
     // Search for any entries with the same hash and channel and remove them.
-    final releases = jsonData['releases'] as List<dynamic>;
+    final releases = jsonData['releases'] as List<Object?>;
     jsonData['releases'] =
-        <Map<String, dynamic>>[
-          for (final Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
+        <Map<String, Object?>>[
+          for (final Map<String, Object?> entry in releases.cast<Map<String, Object?>>())
             if (entry['hash'] != newEntry['hash'] ||
                 entry['channel'] != newEntry['channel'] ||
                 entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
               entry,
           newEntry,
-        ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
+        ]..sort((Map<String, Object?> a, Map<String, Object?> b) {
           final DateTime aDate = DateTime.parse(a['release_date'] as String);
           final DateTime bDate = DateTime.parse(b['release_date'] as String);
           return bDate.compareTo(aDate);
@@ -156,14 +156,14 @@ class ArchivePublisher {
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     await _runGsUtil(<String>['cp', gsPath, metadataFile.absolute.path]);
-    var jsonData = <String, dynamic>{};
+    var jsonData = <String, Object?>{};
     if (!dryRun) {
       final String currentMetadata = metadataFile.readAsStringSync();
       if (currentMetadata.isEmpty) {
         throw PreparePackageException('Empty metadata received from server');
       }
       try {
-        jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
+        jsonData = json.decode(currentMetadata) as Map<String, Object?>;
       } on FormatException catch (e) {
         throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
       }
