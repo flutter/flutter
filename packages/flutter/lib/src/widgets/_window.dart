@@ -293,6 +293,8 @@ abstract class RegularWindowController extends BaseWindowController {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
+    WidgetsFlutterBinding.ensureInitialized();
+
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createRegularWindowController(
       delegate: delegate ?? RegularWindowControllerDelegate(),
