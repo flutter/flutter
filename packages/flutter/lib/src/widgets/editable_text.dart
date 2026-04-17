@@ -5149,7 +5149,12 @@ class EditableTextState extends State<EditableText>
     // TextEditingValue value, in case the formatter would reject the change.
     final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
     if (shouldShowCaret) {
-      _scheduleShowCaretOnScreen(withAnimation: true);
+      // Avoid scrolling during a drag. The handle is assumed to be under the
+      // pointer and already visible. This prevents the viewport from snapping
+      // to the opposite end of a selection that exceeds the viewport height.
+      if (cause != SelectionChangedCause.drag) {
+        _scheduleShowCaretOnScreen(withAnimation: true);
+      }
     }
 
     // Even if the value doesn't change, it may be necessary to focus and build
