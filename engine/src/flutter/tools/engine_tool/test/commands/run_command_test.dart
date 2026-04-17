@@ -370,7 +370,13 @@ void main() {
     });
 
     test('delegates to `flutter run` with --flutter-flags', () async {
-      await et.run(['run', '--config=android_debug_arm64', '--flutter-flags=--foo', '--flutter-flags=--bar,baz']);
+      await et.run([
+        'run',
+        '--config=android_debug_arm64',
+        '--flutter-flags=--foo',
+        '--flutter-flags=--bar=baz,foobar',
+        '--flutter-flags=--flag1 --flag2',
+      ]);
 
       expect(
         commandsRun,
@@ -385,8 +391,9 @@ void main() {
             '--local-engine-host',
             'host_debug',
             '--foo',
-            '--bar',
-            'baz',
+            '--bar=baz,foobar',
+            '--flag1',
+            '--flag2',
           ]),
         ]),
       );
