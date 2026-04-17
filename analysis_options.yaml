@@ -267,4 +267,5 @@ linter:
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - use_truncating_division
     - valid_regexps
+    - var_with_no_type_annotation
     - void_checks
