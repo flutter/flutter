@@ -607,13 +607,13 @@ void main() {
         // Make sure old matching entries are removed.
         expect(contents, isNot(contains('v0.0.0')));
         final jsonData = json.decode(contents) as Map<String, Object?>;
-        final releases = jsonData['releases'] as List<Object?>;
+        final releases = jsonData['releases']! as List<Object?>;
         expect(releases.length, equals(3));
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
           DateTime.now().difference(
-            DateTime.parse((releases[0] as Map<String, Object?>)['release_date'] as String),
+            DateTime.parse((releases[0]! as Map<String, Object?>)['release_date']! as String),
           ),
           lessThan(const Duration(minutes: 1)),
         );
@@ -776,7 +776,7 @@ void main() {
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         final releases = jsonDecode(contents) as Map<String, Object?>;
-        expect((releases['releases'] as List<Object?>).length, equals(2));
+        expect((releases['releases']! as List<Object?>).length, equals(2));
       });
 
       test('updates base_url from old bucket to new bucket', () async {

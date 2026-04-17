@@ -110,7 +110,7 @@ class ArchivePublisher {
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
     }
-    (jsonData['current_release'] as Map<String, Object?>)[branch.name] = revision;
+    (jsonData['current_release']! as Map<String, Object?>)[branch.name] = revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <Map<String, Object?>>[];
     }
@@ -130,7 +130,7 @@ class ArchivePublisher {
     );
 
     // Search for any entries with the same hash and channel and remove them.
-    final releases = jsonData['releases'] as List<Object?>;
+    final releases = jsonData['releases']! as List<Object?>;
     jsonData['releases'] =
         <Map<String, Object?>>[
           for (final Map<String, Object?> entry in releases.cast<Map<String, Object?>>())
@@ -140,8 +140,8 @@ class ArchivePublisher {
               entry,
           newEntry,
         ]..sort((Map<String, Object?> a, Map<String, Object?> b) {
-          final DateTime aDate = DateTime.parse(a['release_date'] as String);
-          final DateTime bDate = DateTime.parse(b['release_date'] as String);
+          final DateTime aDate = DateTime.parse(a['release_date']! as String);
+          final DateTime bDate = DateTime.parse(b['release_date']! as String);
           return bDate.compareTo(aDate);
         });
     return jsonData;

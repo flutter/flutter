@@ -217,12 +217,11 @@ class ArchiveUnpublisher {
   Future<void> unpublishArchive() async {
     // 1. Load metadata to find paths to remove.
     final Map<String, Object?> initialJsonData = await _loadMetadata();
-    final List<Map<String, String>> initialReleases = (initialJsonData['releases'] as List<Object?>)
-        .map<Map<String, String>>((Object? entry) {
-          final mapEntry = entry as Map<String, Object?>;
+    final List<Map<String, String>> initialReleases =
+        (initialJsonData['releases']! as List<Object?>).map<Map<String, String>>((Object? entry) {
+          final mapEntry = entry! as Map<String, Object?>;
           return mapEntry.cast<String, String>();
-        })
-        .toList();
+        }).toList();
     final Map<Channel, Map<String, String>> paths = await _getArchivePaths(initialReleases);
 
     // 2. Remove archives first.
@@ -246,9 +245,9 @@ class ArchiveUnpublisher {
           throw Exception('Unable to parse JSON metadata received from cloud: $e');
         }
 
-        final List<Map<String, String>> releases = (jsonData['releases'] as List<Object?>)
+        final List<Map<String, String>> releases = (jsonData['releases']! as List<Object?>)
             .map<Map<String, String>>((Object? entry) {
-              final mapEntry = entry as Map<String, Object?>;
+              final mapEntry = entry! as Map<String, Object?>;
               return mapEntry.cast<String, String>();
             })
             .toList();
@@ -269,14 +268,14 @@ class ArchiveUnpublisher {
 
         for (final Channel channel in channels) {
           if (!revisionsBeingRemoved.contains(
-            (jsonData['current_release'] as Map<String, Object?>)[getChannelName(channel)],
+            (jsonData['current_release']! as Map<String, Object?>)[getChannelName(channel)],
           )) {
             continue;
           }
           final Map<String, String> replacementRelease = releases.firstWhere(
             (Map<String, String> value) => value['channel'] == getChannelName(channel),
           );
-          (jsonData['current_release'] as Map<String, Object?>)[getChannelName(channel)] =
+          (jsonData['current_release']! as Map<String, Object?>)[getChannelName(channel)] =
               replacementRelease['hash'];
           print(
             '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
