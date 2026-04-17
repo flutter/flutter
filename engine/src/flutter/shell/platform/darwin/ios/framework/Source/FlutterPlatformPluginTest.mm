@@ -25,7 +25,7 @@ FLUTTER_ASSERT_ARC
 - (void)showShareViewController:(NSString*)content;
 - (void)playSystemSound:(NSString*)soundType;
 - (void)vibrateHapticFeedback:(NSString*)feedbackType;
-- (void)showTranslateViewController:(NSString*)term;
+- (void)showTranslateViewControllerForTerm:(NSString*)term;
 @end
 
 @interface UIViewController ()

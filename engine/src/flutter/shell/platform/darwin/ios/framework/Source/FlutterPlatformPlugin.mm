@@ -157,7 +157,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     [self showLookUpViewController:args];
     result(nil);
   } else if ([method isEqualToString:@"Translate.invoke"]) {
-    [self showTranslateViewController:args];
+    [self showTranslateViewControllerForTerm:args];
     result(nil);
   } else if ([method isEqualToString:@"Share.invoke"]) {
     [self showShareViewController:args];
@@ -454,7 +454,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
                                    completion:nil];
 }
 
-- (void)showTranslateViewController:(NSString*)term {
+- (void)showTranslateViewControllerForTerm:(NSString*)term {
   UIViewController* flutterViewController = [self.engine viewController];
   FLTTranslateViewController* translateViewController;
 

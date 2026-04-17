@@ -79,13 +79,11 @@ class TranslateViewController: UIViewController {
 }
 
 @available(iOS 17.4, *)
-struct ContentView: View {
-  let termToTranslate: String
-  let ipadBounds: CGRect?
+fileprivate struct ContentView: View {
+  fileprivate let termToTranslate: String
+  fileprivate let ipadBounds: CGRect?
 
-  var onDismiss: (() -> Void)?
-
-  @State private var isPresented = false
+  fileprivate var onDismiss: (() -> Void)?
 
   private var anchorSource: Anchor<CGRect>.Source {
     // On iPad, the translate screen is presented in a popover view
@@ -101,21 +99,10 @@ struct ContentView: View {
     Color.clear
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .translationPresentation(
-        isPresented: Binding(
-          get: { isPresented },
-          set: { newValue in
-            isPresented = newValue
-            if !newValue {
-              onDismiss?()
-            }
-          }
-        ),
+        isPresented: Binding( get: { true }, set: { shown in if !shown { onDismiss?() } } ),
         text: termToTranslate,
         attachmentAnchor: .rect(anchorSource)
       )
-      .onAppear {
-        isPresented = true
-      }
   }
 }
 
