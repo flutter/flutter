@@ -219,7 +219,6 @@ class XcodeProjectInterpreter {
       '-clonedSourcePackagesDirPath',
       cachePath,
       if (skipPackageResolution) ...<String>[
-        '-disableAutomaticPackageResolution',
         '-skipPackageUpdates',
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
