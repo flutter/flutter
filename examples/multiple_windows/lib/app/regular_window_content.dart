@@ -5,14 +5,15 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/material.dart';
-import 'dialog_window_content.dart';
-
-import 'popup_button.dart';
-import 'models.dart';
-import 'rotated_wire_cube.dart';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+
+import 'dialog_window_content.dart';
+import 'models.dart';
+import 'popup_button.dart';
+import 'rotated_wire_cube.dart';
 import 'tooltip_button.dart';
 
 class RegularWindowContent extends StatefulWidget {
@@ -29,11 +30,11 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
 
   static Color _generateRandomDarkColor() {
     final random = Random();
-    const int lowerBound = 32;
-    const int span = 160;
-    int red = lowerBound + random.nextInt(span);
-    int green = lowerBound + random.nextInt(span);
-    int blue = lowerBound + random.nextInt(span);
+    const lowerBound = 32;
+    const span = 160;
+    final int red = lowerBound + random.nextInt(span);
+    final int green = lowerBound + random.nextInt(span);
+    final int blue = lowerBound + random.nextInt(span);
     return Color.fromARGB(255, red, green, blue);
   }
 
@@ -45,11 +46,11 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
 
   @override
   Widget build(BuildContext context) {
-    final dpr = MediaQuery.of(context).devicePixelRatio;
-    final windowSize = WindowScope.contentSizeOf(context);
+    final double dpr = MediaQuery.of(context).devicePixelRatio;
+    final Size windowSize = WindowScope.contentSizeOf(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Regular Window')),
+      appBar: AppBar(title: const Text('Regular Window')),
       body: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -60,7 +61,6 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _WindowCreationButtons(
                   regularWindowController: widget.regularWindowController,
@@ -72,7 +72,7 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
                 const SizedBox(height: 20),
                 Text(
                   'View #${widget.regularWindowController.rootView.viewId}\n'
-                  'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'
+                  'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
                   'Device Pixel Ratio: $dpr',
                   textAlign: TextAlign.center,
                 ),
@@ -96,7 +96,7 @@ class _WindowCreationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
-    final windowRegistry = WindowRegistry.of(context);
+    final WindowRegistry windowRegistry = WindowRegistry.of(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

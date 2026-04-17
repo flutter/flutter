@@ -54,7 +54,7 @@ void main() async {
   test('should screenshot a platform view with no rect clipping', () async {
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.no_rect_clipping_surfaceview.png'),
+      matchesGoldenFile('$goldenPrefix.no_rect_surfaceview.png'),
     );
   }, timeout: Timeout.none);
 
@@ -62,7 +62,7 @@ void main() async {
     await flutterDriver.tap(find.byValueKey('toggle_cliprect_button'));
     await expectLater(
       nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.yes_rect_clipping_surfaceview.png'),
+      matchesGoldenFile('$goldenPrefix.yes_rect_surfaceview.png'),
     );
   }, timeout: Timeout.none);
 }

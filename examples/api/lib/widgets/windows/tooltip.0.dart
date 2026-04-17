@@ -66,7 +66,7 @@ class _MyAppState extends State<MyApp> {
         TooltipWindow(
           controller: _tooltipController!,
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const .all(8),
             color: Colors.black,
             child: const Text(
               'This is a tooltip',
@@ -96,7 +96,7 @@ class _MyAppState extends State<MyApp> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         color: _tooltipController != null ? Colors.blueAccent : Colors.blue,
-        padding: const EdgeInsets.all(12),
+        padding: const .all(12),
         child: Row(children: children),
       ),
     );

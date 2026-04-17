@@ -48,7 +48,7 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
         ),
       ),
       body: Align(
-        alignment: Alignment.topLeft,
+        alignment: .topLeft,
         child: RawAutocomplete<String>(
           key: _autocompleteKey,
           focusNode: _focusNode,
