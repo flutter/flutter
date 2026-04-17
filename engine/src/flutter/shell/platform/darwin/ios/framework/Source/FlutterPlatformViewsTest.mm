@@ -5023,13 +5023,13 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                withIosContext:std::make_shared<flutter::IOSContextNoop>()];
 
   // The above code should result in previousCompositionOrder having one viewId in it
-  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 1ul);
+  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.count, 1ul);
 
   // reset should clear previousCompositionOrder
   [flutterPlatformViewsController reset];
 
   // previousCompositionOrder should now be empty
-  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 0ul);
+  XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.count, 0ul);
 }
 
 - (void)testNilPlatformViewDoesntCrash {
