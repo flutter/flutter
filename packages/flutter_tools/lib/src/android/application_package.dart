@@ -405,8 +405,11 @@ class ApkManifestData {
         final _Attribute? androidEngineShellArgsList = metadata.firstAttribute('android:value');
         if (androidEngineShellArgsList != null && androidEngineShellArgsList.value != null) {
           //  A: android:value(0x01010024)="--enable-dart-profiling;--enable-checked-mode" (Raw: "--enable-dart-profiling;--enable-checked-mode")
-          final String androidEngineShellArgsListValue = androidEngineShellArgsList.value!
-              .substring(1, androidEngineShellArgsList.value?.indexOf('" '));
+          final String value = androidEngineShellArgsList.value!;
+          final int endIndex = value.indexOf('" ');
+          final String androidEngineShellArgsListValue = endIndex == -1
+              ? value.substring(1, value.length - 1)
+              : value.substring(1, endIndex);
           androidEngineShellArgs = androidEngineShellArgsListValue.isEmpty
               ? null
               : androidEngineShellArgsListValue;
