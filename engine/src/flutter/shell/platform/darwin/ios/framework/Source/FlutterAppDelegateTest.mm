@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
@@ -230,6 +231,19 @@ FLUTTER_ASSERT_ARC
   }
   // A retain cycle would keep this alive.
   XCTAssertNil(appDelegate);
+}
+
+// Verifies that acquireLaunchEngine logs a warning when called before
+// a FlutterViewController is available.
+- (void)testAcquireLaunchEngineLogsWarning {
+  FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
+  writer.expectedOutput = @"Registering plugins before a FlutterViewController is available";
+  FlutterLogger.outputWriter = writer;
+
+  [self.appDelegate acquireLaunchEngine];
+  XCTAssertTrue(writer.gotExpectedOutput, @"Expected warning was not logged");
+
+  FlutterLogger.outputWriter = nil;
 }
 
 @end

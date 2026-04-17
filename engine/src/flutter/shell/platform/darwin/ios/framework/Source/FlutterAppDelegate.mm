@@ -249,12 +249,22 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   }
 }
 
+- (FlutterEngine*)acquireLaunchEngine {
+  [FlutterLogger
+      logWarning:
+          @"Registering plugins before a FlutterViewController is available is a "
+          @"deprecated behavior. Consider conforming to FlutterImplicitEngineDelegate "
+          @"and implementing didInitializeImplicitFlutterEngine instead. "
+          @"See https://docs.flutter.dev/release/breaking-changes/uiscenedelegate for details."];
+  return [self.launchEngine acquireEngine];
+}
+
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   FlutterViewController* flutterRootViewController = [self rootFlutterViewController];
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return [[self.launchEngine acquireEngine] registrarForPlugin:pluginKey];
+  return [[self acquireLaunchEngine] registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -262,7 +272,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return [[self.launchEngine acquireEngine] hasPlugin:pluginKey];
+  return [[self acquireLaunchEngine] hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -270,7 +280,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return [[self.launchEngine acquireEngine] valuePublishedByPlugin:pluginKey];
+  return [[self acquireLaunchEngine] valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling
