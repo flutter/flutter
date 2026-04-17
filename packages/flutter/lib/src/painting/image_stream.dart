@@ -101,7 +101,7 @@ class ImageInfo {
   /// ```
   /// {@end-tool}
   bool isCloneOf(ImageInfo other) {
-    return other.image.isCloneOf(image) && scale == scale && other.debugLabel == debugLabel;
+    return other.image.isCloneOf(image) && other.scale == scale && other.debugLabel == debugLabel;
   }
 
   /// The raw image pixels.
