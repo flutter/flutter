@@ -47,4 +47,32 @@ UberSDFParameters UberSDFParameters::MakeCircle(
                            .stroke = stroke};
 }
 
+UberSDFParameters UberSDFParameters::MakeOval(
+    Color color,
+    const Rect& bounds,
+    std::optional<StrokeParameters> stroke) {
+  // Size here refers to the extent of the oval along each axis from the center
+  Point size = Point(bounds.GetSize() * 0.5);
+
+  return UberSDFParameters{.type = Type::kOval,
+                           .color = color,
+                           .center = bounds.GetCenter(),
+                           .size = size,
+                           .stroke = stroke};
+}
+
+UberSDFParameters UberSDFParameters::MakeRoundedRect(
+    Color color,
+    const Rect& rect,
+    const RoundingRadii& radii,
+    std::optional<StrokeParameters> stroke) {
+  Point size = Point(rect.GetSize() * 0.5f);
+  return UberSDFParameters{.type = Type::kRoundedRect,
+                           .color = color,
+                           .center = rect.GetCenter(),
+                           .size = size,
+                           .stroke = stroke,
+                           .radii = radii};
+}
+
 }  // namespace impeller
