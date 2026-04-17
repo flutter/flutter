@@ -1535,7 +1535,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _labelPainter
         ..text = TextSpan(style: _sliderTheme.valueIndicatorTextStyle, text: label)
         ..textDirection = textDirection
-        ..textScaleFactor = textScaleFactor
+        ..textScaler = TextScaler.linear(textScaleFactor)
         ..maxLines = 1
         ..ellipsis =
             '\u2026' // Standard Unicode ellipsis

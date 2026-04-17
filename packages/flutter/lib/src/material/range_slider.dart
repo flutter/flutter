@@ -1266,7 +1266,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     labelPainter
       ..text = TextSpan(style: _sliderTheme.valueIndicatorTextStyle, text: text)
       ..textDirection = textDirection
-      ..textScaleFactor = textScaleFactor
+      ..textScaler = TextScaler.linear(textScaleFactor)
       ..maxLines = 1
       ..ellipsis =
           '\u2026' // Standard Unicode ellipsis

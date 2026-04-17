@@ -4073,6 +4073,7 @@ void main() {
     expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
     expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
   });
+
   testWidgets('RangeSlider labels respect horizontal buffer and avoid screen overflow', (
     WidgetTester tester,
   ) async {
