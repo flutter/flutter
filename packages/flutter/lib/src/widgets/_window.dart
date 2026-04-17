@@ -195,6 +195,7 @@ abstract class RegularWindowController extends BaseWindowController {
   /// given [preferredSize].
   ///
   /// {@template flutter.widgets.windowing.sizedConstructor}
+  ///
   /// The [preferredSize] is the preferred content size of the window. The
   /// platform will try to apply this size when the window is created, but it
   /// might not be honored.
@@ -254,12 +255,12 @@ abstract class RegularWindowController extends BaseWindowController {
 
   /// Creates a [RegularWindowController] that sizes the window to its content.
   ///
+  /// {@template flutter.widgets.windowing.sizedToContentConstructor}
   /// Upon construction, the window is created by the platform and initially
   /// sized to fit its content. If [resizable] is `true`, the user may resize
   /// the window after it is initially sized. If [resizable] is `false`, the
   /// window will always be resized to the current size of its content.
   ///
-  /// {@template flutter.widgets.windowing.sizedToContentConstructor}
   /// The [preferredConstraints] field enforces the minimum and maximum size of
   /// the window. If the user attempts to resize the window beyond these
   /// constraints, the platform will enforce the constraints according to its
@@ -548,8 +549,8 @@ mixin class DialogWindowControllerDelegate {
 abstract class DialogWindowController extends BaseWindowController {
   /// Creates a [DialogWindowController] with a specific size.
   ///
-  /// Upon construction, the window is created by the platform with the
-  /// given [preferredSize].
+  /// Upon construction, the window is created by the platform with
+  /// the given [preferredSize].
   ///
   /// {@macro flutter.widgets.windowing.sizedConstructor}
   ///
@@ -578,6 +579,10 @@ abstract class DialogWindowController extends BaseWindowController {
     bool decorated = true,
     DialogWindowControllerDelegate? delegate,
   }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
 
     if (preferredConstraints != null) {
@@ -597,9 +602,6 @@ abstract class DialogWindowController extends BaseWindowController {
 
   /// Creates a [DialogWindowController] that sizes the window to its content.
   ///
-  /// Upon construction, the window is created by the platform and initially
-  /// sized to fit its content.
-  ///
   /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
   ///
   /// To create a dialog with a specific size instead, use the default
@@ -618,6 +620,10 @@ abstract class DialogWindowController extends BaseWindowController {
     bool decorated = true,
     DialogWindowControllerDelegate? delegate,
   }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createDialogWindowController(
@@ -1143,8 +1149,10 @@ mixin class SatelliteWindowControllerDelegate {
 abstract class SatelliteWindowController extends BaseWindowController {
   /// Creates a [SatelliteWindowController] with the provided properties.
   ///
-  /// Upon construction, the window is created by the platform.
+  /// Upon construction, the window is created by the platform with
+  /// the given [preferredSize].
   ///
+  /// {@template flutter.widgets.windowing.satelliteConstructorCommon}
   /// The [parent] argument specifies the parent window of this satellite.
   ///
   /// The [initialPositioner] argument specifies how the satellite should be positioned
@@ -1157,30 +1165,9 @@ abstract class SatelliteWindowController extends BaseWindowController {
   /// The [initialAnchorRect] argument specifies the rectangle in the parent's coordinate
   /// space to which the tooltip is anchored. If it is `null`, then the satellite
   /// is position relative to the parent window, including its decorations.
-  ///
-  /// {@template flutter.widgets.windowing.constraints}
-  /// The [preferredSize] is the preferred content size of the window.
-  /// This might not be honored by the platform. This is the size that
-  /// the platform will try to apply to the window when it is created.
-  /// When `null`, the window will be sized to its content.
-  ///
-  /// In contrast, the [preferredConstraints] field enforces the minimum and maximum size of
-  /// the window. If the [preferredSize] does not satisfy the [preferredConstraints]
-  /// or the [preferredSize] is null, then the platform will attempt to use an
-  /// initial size that does satisfy the [preferredConstraints] instead.
-  ///
-  /// The [preferredConstraints] are the constraints placed upon the size
-  /// of the window. This might not be honored by the platform.
-  /// This field enforces a minimum and maximum size on the window. If the
-  /// user attempts to resize the window beyond these constraints, the platform
-  /// will enforce the constraints according to its own policy. For example, the
-  /// platform might clip the content to fit within the resized window, or it might
-  /// prevent the window from being resized altogether. If null, the window will
-  /// be unconstrained.
-  ///
-  /// If both [preferredSize] and [preferredConstraints] are null,
-  /// then the platform will size the window to its content exactly.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.windowing.sizedConstructor}
   ///
   /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
@@ -1216,6 +1203,44 @@ abstract class SatelliteWindowController extends BaseWindowController {
       initialPositioner: initialPositioner,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
+      title: title,
+    );
+  }
+
+  /// Creates a [SatelliteWindowController] that sizes the window to its content.
+  ///
+  /// {@macro flutter.widgets.windowing.satelliteConstructorCommon}
+  ///
+  /// {@macro flutter.widgets.windowing.sizedToContentConstructor}
+  ///
+  /// To create a dialog with a specific size instead, use the default
+  /// [SatelliteWindowController] constructor.
+  ///
+  /// {@macro flutter.widgets.windowing.shared}
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  factory SatelliteWindowController.sizedToContent({
+    required BaseWindowController parent,
+    required WindowPositioner initialPositioner,
+    Rect? initialAnchorRect,
+    bool resizable = true,
+    BoxConstraints? preferredConstraints,
+    String? title,
+    SatelliteWindowControllerDelegate? delegate,
+  }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    WidgetsFlutterBinding.ensureInitialized();
+    final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
+    return owner.createSatelliteWindowController(
+      delegate: delegate ?? SatelliteWindowControllerDelegate(),
+      parent: parent,
+      initialAnchorRect: initialAnchorRect,
+      initialPositioner: initialPositioner,
+      preferredConstraints: preferredConstraints,
+      resizable: resizable,
       title: title,
     );
   }
@@ -1397,6 +1422,7 @@ abstract class WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
   });
 }
@@ -1479,6 +1505,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
   }) {
     throw UnimplementedError(errorMessage);

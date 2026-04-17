@@ -1008,6 +1008,7 @@ class _TestWindowingOwner extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
   }) {
     return _TestSatelliteWindowController(

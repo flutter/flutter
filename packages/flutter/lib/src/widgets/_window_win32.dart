@@ -219,6 +219,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    bool resizable = true,
     String? title,
   }) {
     throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
