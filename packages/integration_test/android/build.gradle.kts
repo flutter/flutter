@@ -55,7 +55,8 @@ android {
 
         api("androidx.test:runner:1.2+")
         api("androidx.test:rules:1.2+")
-        api("androidx.test.espresso:espresso-core:3.2+")
+        api("androidx.test.espresso:espresso-core:3.6+")
+        api("androidx.test.espresso:espresso-idling-resource:3.6+")
 
         implementation("com.google.guava:guava:28.1-android")
     }
