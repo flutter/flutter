@@ -328,9 +328,10 @@ class UpgradeCommandRunner {
   Future<FlutterVersion> fetchLatestVersion({required FlutterVersion localVersion}) async {
     String revision;
     try {
-      // Fetch upstream branch's commits and tags
+      // Fetch upstream branch's commits and tags.
+      // Use BatchMode to prevent ssh-agent hanging in the background.
       await globals.git.run(
-        ['fetch', '--tags'],
+        ['-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );

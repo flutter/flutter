@@ -60,7 +60,11 @@ interface class Git {
       allowedFailures: allowedFailures,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: {
+        ..._noPromptEnvironment,
+        if (_platform.isWindows) ..._useNoGlobCygwinGit,
+        ...?environment,
+      },
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -90,7 +94,11 @@ interface class Git {
       allowedFailures: allowedFailures,
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: {
+        ..._noPromptEnvironment,
+        if (_platform.isWindows) ..._useNoGlobCygwinGit,
+        ...?environment,
+      },
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -128,4 +136,11 @@ interface class Git {
   }
 
   static const _useNoGlobCygwinGit = {'MSYS': 'noglob', 'CYGWIN': 'noglob'};
+
+  /// Environment variables to ensure that background Git operations fail fast rather than
+  /// hanging if they require user interaction (e.g. asking for SSH passphrases).
+  /// See: https://github.com/flutter/flutter/issues/184309
+  static const _noPromptEnvironment = <String, String>{
+    'GIT_TERMINAL_PROMPT': '0',
+  };
 }
