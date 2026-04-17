@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -96,6 +97,7 @@ class IOSCoreDeviceLauncher {
     required String bundleId,
     required List<String> launchArguments,
     required ShutdownHooks shutdownHooks,
+    required BuildMode mode,
   }) async {
     // Install app to device
     final (bool installStatus, IOSCoreDeviceInstallResult? installResult) = await _coreDeviceControl
@@ -145,6 +147,7 @@ class IOSCoreDeviceLauncher {
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
+      mode: mode,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
@@ -785,7 +788,6 @@ class IOSCoreDeviceControl {
       final StreamSubscription<String> stdoutSubscription = launchProcess.stdout
           .transform(utf8LineDecoder)
           .listen((String line) {
-            _logger.printTrace('[devicectl]: $line');
             if (line.trim().isEmpty) {
               return;
             }
@@ -803,7 +805,6 @@ class IOSCoreDeviceControl {
       final StreamSubscription<String> stderrSubscription = launchProcess.stderr
           .transform(utf8LineDecoder)
           .listen((String line) {
-            _logger.printTrace('[devicectl]: $line');
             if (line.trim().isEmpty) {
               return;
             }

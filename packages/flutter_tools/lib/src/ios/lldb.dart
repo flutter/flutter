@@ -11,6 +11,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
 /// launched on a physical iOS device, you can attach to it using LLDB.
@@ -42,12 +43,15 @@ class LLDB {
   /// Example: (lldb) Process 6152 stopped
   static final _lldbProcessStopped = RegExp(r'Process \d* stopped');
 
-  /// Pattern of lldb log when the process is resuming and the breakpoint is added.
+  /// Pattern of lldb log when the process is resuming.
   ///
   /// Example: (lldb) Process 6152 resuming
   static final _lldbProcessResuming = RegExp(r'Process \d+ resuming');
 
-  // static final _lldbProcessResuming = RegExp(r'location added to breakpoint');
+  /// Pattern of lldb log when the process has started and the breakpoint is added.
+  ///
+  /// Example: (lldb) 1 location added to breakpoint 1
+  static final _lldbBreakpointAdded = RegExp(r'\d+ location added to breakpoint \d+');
 
   /// Pattern of lldb log when the breakpoint is added.
   ///
@@ -90,6 +94,7 @@ return False
     required String deviceId,
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
+    required BuildMode mode,
   }) async {
     Timer? timer;
     try {
@@ -113,9 +118,11 @@ return False
         return false;
       }
       await _selectDevice(deviceId);
-      await _setBreakpoint();
+      if (mode == BuildMode.debug) {
+        await _setBreakpoint();
+      }
       await _attachToAppProcess(appProcessId);
-      await _resumeProcess();
+      await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
       _logger.printTrace('lldb failed with error: ${e.message}');
@@ -148,11 +155,9 @@ return False
         appProcessId: appProcessId,
         logger: _logger,
       );
-      print("VICTORIA DEBUG 2");
       final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
           .transform(utf8LineDecoder)
           .listen((String line) {
-            _logger.printTrace('[lldb]: $line');
             if (_isAttached && !_ignoreLog(line)) {
               // Only forwards logs after LLDB is attached. All logs before then are part of the
               // attach process.
@@ -248,13 +253,16 @@ return False
     // Disable asynchronous mode to workaround issues with rearming of breakpoints.
     // See https://github.com/flutter/flutter/issues/184254 and upstream issue
     // https://github.com/llvm/llvm-project/issues/190956.
-    // await _lldbProcess?.stdinWriteln('script lldb.debugger.SetAsync(False)');
+    await _lldbProcess?.stdinWriteln('script lldb.debugger.SetAsync(False)');
   }
 
   /// Resume the stopped process.
-  Future<void> _resumeProcess() async {
+  Future<void> _resumeProcess(BuildMode mode) async {
     final Future<String> futureLog = _startWaitingForLog(
-      _lldbProcessResuming,
+      // When using debug mode, a breakpoint is added once the process resumes and no resume log
+      // is shown. Instead we match on the breakpoint added log. In profile mode, a resume log is
+      // shown once the process resumes and no breakpoint log is shown.
+      mode == BuildMode.debug ? _lldbBreakpointAdded : _lldbProcessResuming,
     ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('process continue');
