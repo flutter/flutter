@@ -476,6 +476,41 @@ TEST_P(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderRoundedRectWithUniformRadii) {
+  Scalar top_left = 20.f;
+  Scalar top_right = 40.f;
+  Scalar bottom_left = 60.f;
+  Scalar bottom_right = 80.f;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("top_left", &top_left, 0, 250);
+      ImGui::SliderFloat("top_right", &top_right, 0, 250);
+      ImGui::SliderFloat("bottom_left", &bottom_left, 0, 250);
+      ImGui::SliderFloat("bottom_right", &bottom_right, 0, 250);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    DlPaint paint;
+    paint.setColor(DlColor::kRed());
+
+    RoundingRadii radii = {
+        .top_left = DlSize(top_left, top_left),
+        .top_right = DlSize(top_right, top_right),
+        .bottom_left = DlSize(bottom_left, bottom_left),
+        .bottom_right = DlSize(bottom_right, bottom_right),
+    };
+    DlRoundRect rrect =
+        DlRoundRect::MakeRectRadii(DlRect::MakeXYWH(100, 100, 500, 500), radii);
+
+    builder.DrawRoundRect(rrect, paint);
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, CanDrawPaint) {
   auto medium_turquoise =
       DlColor::RGBA(72.0f / 255.0f, 209.0f / 255.0f, 204.0f / 255.0f, 1.0f);
@@ -2312,12 +2347,14 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
   Scalar width = 200.f;
   Scalar height = 60.f;
   Scalar corner = 1.f;
+  bool stroked = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("width", &width, 0, 200);
       ImGui::SliderFloat("height", &height, 0, 200);
       ImGui::SliderFloat("corner", &corner, 0, 1);
+      ImGui::Checkbox("stroked", &stroked);
       ImGui::End();
     }
 
@@ -2337,8 +2374,12 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
                                               DlTileMode::kClamp);
     paint.setColorSource(gradient);
     paint.setColor(DlColor::kWhite());
-    paint.setDrawStyle(DlDrawStyle::kStroke);
-    paint.setStrokeWidth(20);
+    if (stroked) {
+      paint.setDrawStyle(DlDrawStyle::kStroke);
+      paint.setStrokeWidth(20);
+    } else {
+      paint.setDrawStyle(DlDrawStyle::kFill);
+    }
 
     builder.Save();
     builder.Translate(100, 100);
