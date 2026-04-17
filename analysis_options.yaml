@@ -55,6 +55,7 @@ linter:
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
+    # TODO(kallentu): Remove this lint once the Dart SDK in Flutter is on version 3.13.
     - avoid_final_parameters
     - avoid_function_literals_in_foreach_calls
     # - avoid_futureor_void # not yet tested
