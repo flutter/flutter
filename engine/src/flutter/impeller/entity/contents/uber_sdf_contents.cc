@@ -30,6 +30,8 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 2.0f;
     case UberSDFParameters::Type::kRoundedRect:
       return 3.0f;
+    case UberSDFParameters::Type::kRoundSuperellipse:
+      return 4.0f;
   }
 }
 
@@ -79,6 +81,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
+  frag_info.superellipse_n = params_.superellipse_n;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);

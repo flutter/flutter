@@ -28,6 +28,7 @@ struct UberSDFParameters {
     kRect,
     kOval,
     kRoundedRect,
+    kRoundSuperellipse,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -53,6 +54,12 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
+  static UberSDFParameters MakeRoundSuperellipse(
+      Color color,
+      const Rect& bounds,
+      Scalar n,
+      std::optional<StrokeParameters> stroke);
+
   /// The type of shape to render.
   Type type;
 
@@ -73,6 +80,8 @@ struct UberSDFParameters {
   /// The corner radii for a rounded rectangle.
   /// Only used if type is kRoundedRect.
   RoundingRadii radii;
+
+  Scalar superellipse_n;
 };
 
 }  // namespace impeller
