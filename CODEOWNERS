@@ -56,3 +56,7 @@
 .agents/skills @reidbaker # Fallback owners
 .agents/skills/find-release @reidbaker
 .agents/skills/rebuilding-flutter-tool @vashworth
+.agents/skills/finding-tests @vashworth @reidbaker
+.agents/skills/running-ci-tests-locally @vashworth
+.agents/skills/running-tests @vashworth @reidbaker
+.agents/skills/writing-tests @vashworth

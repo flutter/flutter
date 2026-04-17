@@ -1,6 +1,6 @@
 ---
 name: finding-tests
-description: Locates relevant test files for the codebase. Use when a user asks to find tests for a particular file, feature, or component.
+description: Locates relevant test files for the codebase. Use when a user asks to add or find tests for a particular file, feature, or component.
 ---
 
 ## Step 1: Determine Search Scope
