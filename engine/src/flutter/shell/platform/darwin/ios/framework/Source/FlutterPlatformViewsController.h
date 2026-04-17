@@ -155,7 +155,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
 
-- (std::vector<int64_t>&)previousCompositionOrder;
+/// @brief The composition order from the previous frame.
+///
+/// Only accessed from the platform thread.
+- (NSArray<NSNumber*>*)previousCompositionOrder;
 
 @end
 

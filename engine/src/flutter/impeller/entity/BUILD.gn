@@ -289,6 +289,7 @@ impeller_component("entity_unittests") {
     "contents/filters/gaussian_blur_filter_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
     "contents/filters/matrix_filter_contents_unittests.cc",
+    "contents/filters/morphology_filter_contents_unittests.cc",
     "contents/host_buffer_unittests.cc",
     "contents/line_contents_unittests.cc",
     "contents/text_contents_unittests.cc",
