@@ -94,16 +94,16 @@ const maxKnownAndSupportedKgpVersion = '2.3.10';
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const maxKnownAndSupportedAgpVersion = '9.0';
+const maxKnownAndSupportedAgpVersion = '9.1';
 
 // Update this when new versions of AGP with Kotlin support come out.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAgpVersionWithFullKotlinSupport = '8.13.0';
+const maxKnownAgpVersionWithFullKotlinSupport = '9.0';
 
 // Update this when new versions of AGP come out.
-const maxKnownAgpVersion = '9.0';
+const maxKnownAgpVersion = '9.1';
 
 // Supported here means tooling is aware of this versions
 // Java <-> AGP compatibility and does not imply broader flutter support.
@@ -582,8 +582,13 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // Documented max is 2.3.10, using 2.3.29 covers patch versions.
-  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.29')) {
+  // Documented max is 2.3.20, using 2.3.29 covers patch versions.
+  if (isWithinVersionRange(kgpV, min: '2.3.20', max: '2.3.29')) {
+    // Documented max is 9.3.0, using 9.3.99 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.3.99', inclusiveMax: false);
+  }
+  // Documented max is 2.3.10, using 2.3.19 covers patch versions.
+  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.19')) {
     // Documented max is 9.0.0, using 9.0.99 non inclusive covers patch versions.
     return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.0.99', inclusiveMax: false);
   }
