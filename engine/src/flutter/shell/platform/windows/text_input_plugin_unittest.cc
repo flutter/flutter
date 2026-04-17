@@ -240,9 +240,8 @@ TEST_F(TextInputPluginTest, ClearClientResetsComposing) {
                                   message->size(), reply_handler);
 }
 
-// Verify that clear client succeeds gracefully if in headless mode
-// (i.e. when the view has already been destroyed).
-TEST_F(TextInputPluginTest, ClearClientSucceedsWithoutView) {
+// Verify that clear client fails if in headless mode.
+TEST_F(TextInputPluginTest, ClearClientRequiresView) {
   UseHeadlessEngine();
 
   TestBinaryMessenger messenger([](const std::string& channel,
@@ -262,7 +261,10 @@ TEST_F(TextInputPluginTest, ClearClientSucceedsWithoutView) {
   messenger.SimulateEngineMessage(kChannelName, message->data(),
                                   message->size(), reply_handler);
 
-  EXPECT_EQ(reply, "[null]");
+  EXPECT_EQ(
+      reply,
+      "[\"Internal Consistency Error\",\"Text input is not available because "
+      "view with view_id=0 cannot be found\",null]");
 }
 
 // Verify that the embedder sends state update messages to the framework during
