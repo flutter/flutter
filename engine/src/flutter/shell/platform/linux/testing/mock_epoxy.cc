@@ -430,6 +430,9 @@ static void _glBlitFramebuffer(GLint srcX0,
 }
 
 GLuint _glCreateProgram() {
+  if (mock) {
+    return mock->glCreateProgram();
+  }
   return 0;
 }
 
@@ -440,6 +443,9 @@ void _glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
 }
 
 GLuint _glCreateShader(GLenum shaderType) {
+  if (mock) {
+    return mock->glCreateShader(shaderType);
+  }
   return 0;
 }
 
