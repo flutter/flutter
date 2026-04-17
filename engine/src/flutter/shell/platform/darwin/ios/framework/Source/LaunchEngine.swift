@@ -4,10 +4,10 @@
 
 import Foundation
 
-/// A lazy container for a FlutterEngine instance used during application startup.
+/// A lazy container for a `FlutterEngine` instance used during application startup.
 ///
 /// This class manages the lifecycle of a single FlutterEngine used primarily for plugin
-/// registration before a FlutterViewController is presented.
+/// registration before a `FlutterViewController` is presented.
 ///
 /// Calling the `acquireEngine` method lazily creates and starts the engine. Ownership of the
 /// engine can be transferred to a consumer by calling `takeEngine()`. Once the engine has been
