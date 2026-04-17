@@ -20,53 +20,63 @@ Future<void> transactionalUpdate({
   required FileSystem fs,
   int maxRetries = 5,
   Directory? tempDirectory,
+  bool dryRun = false,
 }) async {
+  if (dryRun) {
+    print('Dry run: simulating update for $gsPath');
+    final String newContents = await callback('');
+    print('Resulting manifest content:\n$newContents');
+    return;
+  }
+
   final generationRegex = RegExp(r'Generation:\s+(\d+)');
 
   for (var attempt = 1; attempt <= maxRetries; attempt++) {
     print('Attempt $attempt of $maxRetries to update $gsPath');
 
     // 1. Get the current generation ID.
-    String statOutput;
+    var generation = '0';
+    var fileExists = true;
+
     try {
-      statOutput = await runGsUtil(<String>['stat', gsPath]);
-    } catch (e) {
-      print('Failed to stat $gsPath: $e');
-      if (attempt == maxRetries) {
-        rethrow;
+      final String statOutput = await runGsUtil(<String>['stat', gsPath]);
+      final Match? match = generationRegex.firstMatch(statOutput);
+      if (match == null) {
+        throw Exception('Could not find generation ID in stat output:\n$statOutput');
       }
-      await Future<void>.delayed(const Duration(seconds: 1));
-      continue;
+      generation = match.group(1)!;
+    } catch (e) {
+      print('Failed to stat $gsPath, assuming file does not exist: $e');
+      fileExists = false;
+      generation = '0';
     }
 
-    final Match? match = generationRegex.firstMatch(statOutput);
-    if (match == null) {
-      throw Exception('Could not find generation ID in stat output:\n$statOutput');
-    }
-    final String generation = match.group(1)!;
-
-    // 2. Download that specific version.
     final shouldDeleteTemp = tempDirectory == null;
     final Directory tempDir =
         tempDirectory ?? fs.systemTempDirectory.createTempSync('transactional_update.');
     final File localFile = fs.file(fs.path.join(tempDir.path, 'downloaded.json'));
 
-    try {
-      await runGsUtil(<String>['cp', '$gsPath#$generation', localFile.path]);
-    } catch (e) {
-      print('Failed to download generation $generation of $gsPath: $e');
-      if (shouldDeleteTemp) {
-        tempDir.deleteSync(recursive: true);
+    var contents = '';
+
+    if (fileExists) {
+      // 2. Download that specific version.
+      try {
+        await runGsUtil(<String>['cp', '$gsPath#$generation', localFile.path]);
+        contents = localFile.readAsStringSync();
+      } catch (e) {
+        print('Failed to download generation $generation of $gsPath: $e');
+        if (shouldDeleteTemp) {
+          tempDir.deleteSync(recursive: true);
+        }
+        if (attempt == maxRetries) {
+          rethrow;
+        }
+        await Future<void>.delayed(const Duration(seconds: 1));
+        continue;
       }
-      if (attempt == maxRetries) {
-        rethrow;
-      }
-      await Future<void>.delayed(const Duration(seconds: 1));
-      continue;
     }
 
-    // 3. Read contents and call callback.
-    final String contents = localFile.readAsStringSync();
+    // 3. Call callback.
     final String newContents = await callback(contents);
 
     // 4. Write new contents to a file for upload.

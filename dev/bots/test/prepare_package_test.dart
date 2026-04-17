@@ -1041,6 +1041,79 @@ void main() {
         expect(processManager.hasRemainingExpectations, isFalse);
       });
 
+      test('assumes generation 0 if stat fails', () async {
+        final String gsutilScript = platform.isWindows
+            ? path.join('D:', 'depot_tools', 'gsutil.py')
+            : path.join('/', 'depot_tools', 'gsutil.py');
+
+        final commands = <FakeCommand>[
+          FakeCommand(
+            command: <String>['python3', gsutilScript, '--', 'stat', gsPath],
+            exitCode: 1,
+            stderr: 'No such object',
+          ),
+          FakeCommand(
+            command: <String>[
+              'python3',
+              gsutilScript,
+              '--',
+              '-h',
+              'x-goog-if-generation-match:0',
+              'cp',
+              fs.path.join(tempDirectory.path, 'upload.json'),
+              gsPath,
+            ],
+          ),
+        ];
+        processManager.addCommands(commands);
+
+        await transactionalUpdate(
+          gsPath: gsPath,
+          fs: fs,
+          tempDirectory: tempDirectory,
+          runGsUtil: (List<String> args) async {
+            final runner = ProcessRunner(
+              processManager: processManager,
+              platform: platform,
+              subprocessOutput: false,
+            );
+            return runner.runProcess(<String>[
+              'python3',
+              if (platform.isWindows)
+                path.join('D:', 'depot_tools', 'gsutil.py')
+              else
+                path.join('/', 'depot_tools', 'gsutil.py'),
+              '--',
+              ...args,
+            ]);
+          },
+          callback: (String contents) async {
+            expect(contents, equals(''));
+            return '{"releases": [{"version": "1.0.0"}]}';
+          },
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      });
+
+      test('short-circuits on dryRun', () async {
+        var callbackCalled = false;
+        await transactionalUpdate(
+          gsPath: gsPath,
+          fs: fs,
+          tempDirectory: tempDirectory,
+          dryRun: true,
+          runGsUtil: (List<String> args) async {
+            fail('runGsUtil should not be called');
+          },
+          callback: (String contents) async {
+            callbackCalled = true;
+            expect(contents, equals(''));
+            return '{"releases": [{"version": "1.0.0"}]}';
+          },
+        );
+        expect(callbackCalled, isTrue);
+      });
+
       test('retries on upload failure', () async {
         final String gsutilScript = platform.isWindows
             ? path.join('D:', 'depot_tools', 'gsutil.py')

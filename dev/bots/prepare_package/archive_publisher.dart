@@ -82,12 +82,13 @@ class ArchivePublisher {
       gsPath: gcsPath,
       fs: fs,
       tempDirectory: tempDir,
+      dryRun: dryRun,
       runGsUtil: (List<String> args) => _runGsUtil(args),
       callback: (String currentContents) async {
-        var jsonData = <String, dynamic>{};
+        var jsonData = <String, Object?>{};
         if (currentContents.isNotEmpty) {
           try {
-            jsonData = json.decode(currentContents) as Map<String, dynamic>;
+            jsonData = json.decode(currentContents) as Map<String, Object?>;
           } on FormatException catch (e) {
             throw PreparePackageException('Unable to parse JSON metadata: $e');
           }

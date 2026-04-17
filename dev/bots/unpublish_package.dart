@@ -216,10 +216,10 @@ class ArchiveUnpublisher {
   /// Remove the archive from Google Storage.
   Future<void> unpublishArchive() async {
     // 1. Load metadata to find paths to remove.
-    final Map<String, dynamic> initialJsonData = await _loadMetadata();
-    final List<Map<String, String>> initialReleases = (initialJsonData['releases'] as List<dynamic>)
-        .map<Map<String, String>>((dynamic entry) {
-          final mapEntry = entry as Map<String, dynamic>;
+    final Map<String, Object?> initialJsonData = await _loadMetadata();
+    final List<Map<String, String>> initialReleases = (initialJsonData['releases'] as List<Object?>)
+        .map<Map<String, String>>((Object? entry) {
+          final mapEntry = entry as Map<String, Object?>;
           return mapEntry.cast<String, String>();
         })
         .toList();
@@ -233,18 +233,22 @@ class ArchiveUnpublisher {
     await transactionalUpdate(
       gsPath: metadataGsPath,
       fs: const LocalFileSystem(),
+      dryRun: !confirmed,
       runGsUtil: (List<String> args) => _runGsUtil(args, confirm: confirmed),
       callback: (String currentContents) async {
-        Map<String, dynamic> jsonData;
+        if (currentContents.isEmpty) {
+          return '';
+        }
+        Map<String, Object?> jsonData;
         try {
-          jsonData = json.decode(currentContents) as Map<String, dynamic>;
+          jsonData = json.decode(currentContents) as Map<String, Object?>;
         } on FormatException catch (e) {
           throw Exception('Unable to parse JSON metadata received from cloud: $e');
         }
 
-        final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>)
-            .map<Map<String, String>>((dynamic entry) {
-              final mapEntry = entry as Map<String, dynamic>;
+        final List<Map<String, String>> releases = (jsonData['releases'] as List<Object?>)
+            .map<Map<String, String>>((Object? entry) {
+              final mapEntry = entry as Map<String, Object?>;
               return mapEntry.cast<String, String>();
             })
             .toList();
@@ -265,14 +269,14 @@ class ArchiveUnpublisher {
 
         for (final Channel channel in channels) {
           if (!revisionsBeingRemoved.contains(
-            (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)],
+            (jsonData['current_release'] as Map<String, Object?>)[getChannelName(channel)],
           )) {
             continue;
           }
           final Map<String, String> replacementRelease = releases.firstWhere(
             (Map<String, String> value) => value['channel'] == getChannelName(channel),
           );
-          (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] =
+          (jsonData['current_release'] as Map<String, Object?>)[getChannelName(channel)] =
               replacementRelease['hash'];
           print(
             '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
@@ -312,7 +316,7 @@ class ArchiveUnpublisher {
     return paths;
   }
 
-  Future<Map<String, dynamic>> _loadMetadata() async {
+  Future<Map<String, Object?>> _loadMetadata() async {
     final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
     // Always run this, even in dry runs.
     await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path], confirm: true);
@@ -321,9 +325,9 @@ class ArchiveUnpublisher {
       throw UnpublishException('Empty metadata received from server');
     }
 
-    Map<String, dynamic> jsonData;
+    Map<String, Object?> jsonData;
     try {
-      jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
+      jsonData = json.decode(currentMetadata) as Map<String, Object?>;
     } on FormatException catch (e) {
       throw UnpublishException('Unable to parse JSON metadata received from cloud: $e');
     }
