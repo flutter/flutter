@@ -62,9 +62,7 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _WindowCreationButtons(
-                  regularWindowController: widget.regularWindowController,
-                ),
+                _WindowCreationButtons(regularWindowController: widget.regularWindowController),
                 const SizedBox(height: 20),
                 TooltipButton(parentController: widget.regularWindowController),
                 const SizedBox(height: 20),
@@ -114,9 +112,8 @@ class _WindowCreationButtons extends StatelessWidget {
 
             entry = WindowEntry(
               controller: controller,
-              builder: (BuildContext context) => RegularWindowContent(
-                regularWindowController: controller,
-              ),
+              builder: (BuildContext context) =>
+                  RegularWindowContent(regularWindowController: controller),
             );
             windowRegistry.register(entry);
           },
@@ -138,9 +135,8 @@ class _WindowCreationButtons extends StatelessWidget {
 
             entry = WindowEntry(
               controller: controller,
-              builder: (BuildContext context) => DialogWindowContent(
-                dialogWindowController: controller,
-              ),
+              builder: (BuildContext context) =>
+                  DialogWindowContent(dialogWindowController: controller),
             );
             windowRegistry.register(entry);
           },
@@ -151,8 +147,7 @@ class _WindowCreationButtons extends StatelessWidget {
   }
 }
 
-class CallbackRegularWindowControllerDelegate
-    with RegularWindowControllerDelegate {
+class CallbackRegularWindowControllerDelegate with RegularWindowControllerDelegate {
   CallbackRegularWindowControllerDelegate({required this.onDestroyed});
 
   @override
