@@ -70,6 +70,13 @@ class TextInputPlugin {
   // input method such as in CJK text input.
   virtual void ComposeChangeHook(const std::u16string& text, int cursor_pos);
 
+  // Called when a view is removed from the engine.
+  //
+  // If the removed view is the currently active view for text input, resets
+  // the active model and view id to prevent stale references. The implicit
+  // view is excluded from this reset.
+  void OnViewRemoved(FlutterViewId view_id);
+
  private:
   // Allows modifying the TextInputPlugin in tests.
   friend class TextInputPluginModifier;

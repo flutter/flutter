@@ -831,9 +831,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
       !paint.mask_blur_descriptor.has_value()) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color, /*rect=*/rect,
-        /*stroke=*/paint.style == Paint::Style::kStroke
-            ? std::make_optional(paint.stroke)
-            : std::nullopt);
+        /*stroke=*/paint.GetStroke());
     auto geometry = std::make_unique<UberSDFGeometry>(params);
     auto contents = UberSDFContents::Make(params, std::move(geometry));
 
@@ -883,6 +881,24 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
+
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value()) {
+    UberSDFParameters params;
+
+    if (paint.style == Paint::Style::kStroke) {
+      params = UberSDFParameters::MakeOval(paint.color, rect, paint.stroke);
+    } else {
+      params = UberSDFParameters::MakeOval(paint.color, rect, std::nullopt);
+    }
+    auto geom = std::make_unique<UberSDFGeometry>(params);
+    auto contents = UberSDFContents::Make(params, std::move(geom));
+
+    auto g = contents->GetGeometry();
+
+    AddRenderSDFEntityToCurrentPass(entity, g, paint, std::move(contents));
+    return;
+  }
 
   if (paint.style == Paint::Style::kStroke) {
     StrokeEllipseGeometry geom(rect, paint.stroke);
@@ -1031,9 +1047,7 @@ void Canvas::DrawCircle(const Point& center,
       !paint.mask_blur_descriptor.has_value()) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
-        /*stroke=*/paint.style == Paint::Style::kStroke
-            ? std::make_optional(paint.stroke)
-            : std::nullopt);
+        /*stroke=*/paint.GetStroke());
     auto geometry = std::make_unique<UberSDFGeometry>(params);
     auto contents = UberSDFContents::Make(params, std::move(geometry));
 
@@ -1933,10 +1947,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   text_contents->SetScreenTransform(GetCurrentTransform());
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
   text_contents->SetColor(paint.color);
-  text_contents->SetTextProperties(paint.color,
-                                   paint.style == Paint::Style::kStroke
-                                       ? std::optional(paint.stroke)
-                                       : std::nullopt);
+  text_contents->SetTextProperties(paint.color, paint.GetStroke());
 
   entity.SetTransform(GetCurrentTransform());
 
