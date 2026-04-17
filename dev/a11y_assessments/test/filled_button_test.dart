@@ -11,6 +11,6 @@ import 'test_utils.dart';
 void main() {
   testWidgets('filled button can run', (WidgetTester tester) async {
     await pumpsUseCase(tester, FilledButtonUseCase());
-    expect(find.byType(FilledButton), findsOneWidget);
+    expect(find.byType(FilledButton), findsNWidgets(2));
   });
 }

@@ -16,7 +16,9 @@ void main() {
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, this.initialTags = const <Tag>{Tag.batch2}});
+
+  final Set<Tag> initialTags;
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +50,15 @@ class App extends StatelessWidget {
       title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
-      routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
+      routes: <String, WidgetBuilder>{'/': (_) => HomePage(initialTags: initialTags), ...routes},
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.initialTags});
+
+  final Set<Tag> initialTags;
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -63,7 +67,13 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final ScrollController scrollController = ScrollController();
 
-  final Set<Tag> _selectedTags = <Tag>{Tag.batch2};
+  late Set<Tag> _selectedTags;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTags = Set<Tag>.from(widget.initialTags);
+  }
 
   @override
   void dispose() {

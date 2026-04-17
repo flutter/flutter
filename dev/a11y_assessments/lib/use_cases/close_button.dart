@@ -38,6 +38,7 @@ class MainWidgetState extends State<MainWidget> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+        automaticallyImplyLeading: false,
       ),
       body: const Center(
         child: Column(
