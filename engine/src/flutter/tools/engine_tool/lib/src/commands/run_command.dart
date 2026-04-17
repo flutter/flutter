@@ -178,15 +178,8 @@ See `flutter run --help` for a listing
     ];
 
     // Add flags passed to --flutter-flags.
-    final flutterFlags = argResults!['flutter-flags'] as String;
-    if (flutterFlags.isNotEmpty) {
-      // Replace commas with spaces, then split by any amount of whitespace.
-      final List<String> flags = flutterFlags.replaceAll(',', ' ').split(RegExp(r'\s+'));
-      // Filter out any empty strings that might result from multiple spaces.
-      command.addAll(flags.where((String f) => f.isNotEmpty));
-    }
-
-    command.addAll(argResults!.rest);
+    final List<String> flutterFlags = argResults!['flutter-flags'] as List<String>;
+    command.addAll(flutterFlags);
 
     // TODO(johnmccutchan): Be smart and if the user requested a profile
     // config, add the '--profile' flag when invoking flutter run.
