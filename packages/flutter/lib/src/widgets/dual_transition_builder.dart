@@ -11,6 +11,13 @@ import 'framework.dart';
 /// `animation` and wrapping the provided `child`.
 ///
 /// The `animation` provided to the builder always runs forward from 0.0 to 1.0.
+///
+/// An optional `child` widget which represents a pre-built widget subtree that
+/// does not depend on the animation's value.
+///
+/// Passing a pre-built widget here and incorporating it into the returned
+/// widget tree avoids rebuilding it for every frame of the animation and
+/// can improve performance significantly in some cases.
 typedef AnimatedTransitionBuilder =
     Widget Function(BuildContext context, Animation<double> animation, Widget? child);
 
@@ -56,7 +63,7 @@ class DualTransitionBuilder extends StatefulWidget {
   /// See also:
   ///
   ///  * [reverseBuilder], which builds the transition for making the [child]
-  ///   disappear from the screen.
+  ///    disappear from the screen.
   final AnimatedTransitionBuilder forwardBuilder;
 
   /// A builder for a transition that makes [child] disappear from the screen.
@@ -78,6 +85,14 @@ class DualTransitionBuilder extends StatefulWidget {
   ///
   /// This child widget will be wrapped by the transitions built by
   /// [forwardBuilder] and [reverseBuilder].
+  ///
+  /// If a pre-built subtree is provided as the [child], it will be passed to
+  /// the [reverseBuilder], and the result of that will in turn be passed to
+  /// the [forwardBuilder]. This allows the builders to incorporate the
+  /// subtree without rebuilding it on every frame.
+  ///
+  /// Using this pre-built child is entirely optional, but can improve
+  /// performance significantly in some cases and is therefore a good practice.
   final Widget? child;
 
   @override
