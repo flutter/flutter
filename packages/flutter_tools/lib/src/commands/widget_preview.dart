@@ -273,6 +273,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     fs: fs,
     onChangeDetected: onChangeDetected,
     onPubspecChangeDetected: _onPubspecChangeDetected,
+    shutdownHooks: shutdownHooks,
     dtd: _dtdService,
     processManager: processManager,
     terminal: terminal,
