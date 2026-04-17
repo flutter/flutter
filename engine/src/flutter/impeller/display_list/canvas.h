@@ -20,6 +20,7 @@
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/solid_rrect_like_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -381,11 +382,8 @@ class Canvas {
       bool reuse_depth = false,
       std::shared_ptr<Contents> override_contents = nullptr);
 
-  void AddRenderSDFEntityToCurrentPass(
-      Entity& entity,
-      const Geometry* geom,
-      const Paint& paint,
-      std::shared_ptr<ColorSourceContents> contents);
+  void AddRenderSDFEntityToCurrentPass(const Paint& paint,
+                                       UberSDFParameters params);
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
