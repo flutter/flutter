@@ -29,11 +29,10 @@ final class RunCommand extends CommandBase {
     @visibleForTesting FlutterTool? flutterTool,
   }) {
     builds = BuildPlan.configureArgParser(argParser, environment, configs: configs, help: help);
-    argParser.addOption(
+    argParser.addMultiOption(
       'flutter-flags',
       help:
-          'A string of arguments to pass to the "flutter run" command, surrounded by double quotes and separated by commas or spaces. For example: --flutter-flags "--profile,--verbose,--device-id=some-device".',
-      defaultsTo: '',
+          'Arguments to pass to the "flutter run" command. This can be specified multiple times.',
     );
     _flutterTool = flutterTool ?? FlutterTool.fromEnvironment(environment);
   }
