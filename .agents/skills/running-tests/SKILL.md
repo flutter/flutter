@@ -17,11 +17,11 @@ Use the file path or test type to categorize the test.
 
 ## Step 3: Documentation Review
 Before execution, you must read the official documentation to determine the correct syntax and environment requirements.
-  - Framework Tests -> [docs/contributing/testing/Running-and-writing-tests.md](docs/contributing/testing/Running-and-writing-tests.md)
-  - Tool Tests -> [flutter_tools/README.md](flutter_tools/README.md)
-  - DeviceLab Tests -> [dev/devicelab/README.md](dev/devicelab/README.md)
-  - Engine Tests -> [docs/engine/testing/Testing-the-engine.md](docs/engine/testing/Testing-the-engine.md)
-  - Sharded Tests -> [dev/bots/test.dart (header)](dev/bots/test.dart)
+  - Framework Tests -> [docs/contributing/testing/Running-and-writing-tests.md](/docs/contributing/testing/Running-and-writing-tests.md)
+  - Tool Tests -> [flutter_tools/README.md](/flutter_tools/README.md)
+  - DeviceLab Tests -> [dev/devicelab/README.md](/dev/devicelab/README.md)
+  - Engine Tests -> [docs/engine/testing/Testing-the-engine.md](/docs/engine/testing/Testing-the-engine.md)
+  - Sharded Tests -> [dev/bots/test.dart (header)](/dev/bots/test.dart)
 
 
 ## Step 4: Environment & Tool Setup
@@ -32,8 +32,8 @@ You must pause and collect the following information from the user before execut
 2. **Rebuild Preference:** You must ask the user if they want you to rebuild the engine.
 3. **Prepare the tools required for building and testing:**
    * **Binary Location:** `engine/src/flutter/bin/et`
-   * **Documentation:** [engine/src/flutter/tools/engine_tool/README.md](engine/src/flutter/tools/engine_tool/README.md)
-   * **Action:** Use [engine/src/build/find_depot_tools.py](engine/src/build/find_depot_tools.py) to find `depot_tools`.
+   * **Documentation:** [engine/src/flutter/tools/engine_tool/README.md](/engine/src/flutter/tools/engine_tool/README.md)
+   * **Action:** Use [engine/src/build/find_depot_tools.py](/engine/src/build/find_depot_tools.py) to find `depot_tools`.
    * **Troubleshooting (Third-Party Dependency Error):** If you encounter an error regarding a third_party dependency, you must instruct the user to run `gclient sync -D` in the root directory. **Constraint:** The user must complete this action themselves because you run in a sandbox.
 
 ## Step 5: Test Execution

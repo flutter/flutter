@@ -10,8 +10,8 @@ Attempt to extract the builder name from the provided CI URL.
 
 ## Step 2: Locate Configuration
 Determine where the test is defined:
-* **Framework tests:** Defined in the root `.ci.yaml`.
-* **Engine tests:** Defined in `engine/src/flutter/.ci.yaml` or have "Engine Drone" in the builder name.
+* **Framework tests:** Defined in the root [.ci.yaml](/.ci.yaml).
+* **Engine tests:** Defined in [engine/src/flutter/.ci.yaml](/engine/src/flutter/.ci.yaml) or have "Engine Drone" in the builder name.
     * If it is an "Engine Drone" test, visit the URL to find the ancestor test, which is listed under the Infra tab > Input Properties > config_name.
     * If it is a normal engine test, visit the URL to determine which specific sub-build failed.
 * **Constraint:** Only determine the test from the listed steps. Do not analyze logs at this stage.
@@ -23,4 +23,4 @@ For tests that use the following recipes, use the following paths to locate the 
 - `engine_v2/engine_v2` -> `engine/src/flutter/ci/builders`
 
 ## Step 4: Test Execution
-Execute the tests using the companion skill `.agents/skills/running-tests`.
+Execute the tests using the companion skill [running-tests](/.agents/skills/running-tests/SKILL.md).

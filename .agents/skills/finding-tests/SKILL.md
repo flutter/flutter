@@ -22,4 +22,4 @@ Review [TBD] for a detailed breakdown.
 *Note: Always look at adjacent code files to see where their tests are located.*
 
 ## Step 3: Transition to Execution
-If the user requests you to run the tests after finding them, refer to the companion skill [`running-tests`](.agents/skills/running-tests/SKILL.md) to determine how to execute them.
+If the user requests you to run the tests after finding them, refer to the companion skill [`running-tests`](/.agents/skills/running-tests/SKILL.md) to determine how to execute them.
