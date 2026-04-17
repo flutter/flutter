@@ -141,7 +141,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly) std::unordered_set<int64_t>& viewsToRecomposite;
 
-
 /// Whether the previous frame had any platform views in active composition order.
 ///
 /// This state is tracked so that the first frame after removing the last platform view
