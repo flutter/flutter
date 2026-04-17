@@ -84,7 +84,6 @@ SnapshotControllerSkia::MakeImpellerSnapshotSync(
     DlISize size,
     SnapshotPixelFormat pixel_format) {
   FML_UNREACHABLE();
-  return nullptr;
 }
 
 sk_sp<SkImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
@@ -208,7 +207,6 @@ void SnapshotControllerSkia::CacheRuntimeStage(
 
 bool SnapshotControllerSkia::MakeRenderContextCurrent() {
   FML_UNREACHABLE();
-  return false;
 }
 
 }  // namespace flutter

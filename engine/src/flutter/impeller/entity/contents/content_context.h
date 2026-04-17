@@ -281,12 +281,21 @@ class ContentContext {
   void ClearCachedRuntimeEffectPipeline(
       const std::string& unique_entrypoint_name) const;
 
+  /// @brief Enable or disable texture caching.
   void SetTextureCachingEnabled(bool enabled);
+
+  /// @brief Get a cached texture for the given image.
   std::shared_ptr<Texture> GetCachedTexture(
       const flutter::DlImage* image) const;
+
+  /// @brief Set a cached texture for the given image.
   void SetCachedTexture(const flutter::DlImage* image,
                         const std::shared_ptr<Texture>& texture) const;
+
+  /// @brief Remove a cached texture for the given image.
   void RemoveCachedTexture(const flutter::DlImage* image) const;
+
+  /// @brief Clear all cached textures.
   void ClearCachedTextures() const;
 
   /// @brief Retrieve the current host buffer for transient storage of indexes

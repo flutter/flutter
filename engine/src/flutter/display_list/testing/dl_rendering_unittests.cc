@@ -4816,7 +4816,6 @@ class DisplayListNopTest : public DisplayListRendering {
                         .setColorFilter(color_filter)  //
                         .setImageFilter(image_filter);
     builder.DrawImage(DlImageSkia::Make(test_image_src_data->image()),
-
                       DlPoint(0, 0), DlImageSampling::kNearestNeighbor, &paint);
     auto dl = builder.Build();
 

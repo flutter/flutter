@@ -51,6 +51,9 @@ class PixelDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
   size_t GetApproximateByteSize() const override;
 
   // |DlImage|
+  DlColorSpace GetColorSpace() const override;
+
+  // |DlImage|
   std::optional<std::string> get_error() const override;
 
  private:

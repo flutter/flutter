@@ -39,6 +39,9 @@ class DlWimpImageBase : public impeller::DlImageImpeller {
 
   bool isOpaque() const override { return false; }
   bool isUIThreadSafe() const override { return true; }
+  flutter::DlColorSpace GetColorSpace() const override {
+    return flutter::DlColorSpace::kSRGB;
+  }
 
   virtual ~DlWimpImageBase();
 

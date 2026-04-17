@@ -60,6 +60,23 @@ size_t PixelDeferredImageGPUImpeller::GetApproximateByteSize() const {
   return size;
 }
 
+flutter::DlColorSpace PixelDeferredImageGPUImpeller::GetColorSpace() const {
+  if (!wrapper_) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  std::shared_ptr<impeller::Texture> texture = wrapper_->texture();
+  if (!texture) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  switch (texture->GetTextureDescriptor().format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+    case impeller::PixelFormat::kR16G16B16A16Float:
+      return flutter::DlColorSpace::kExtendedSRGB;
+    default:
+      return flutter::DlColorSpace::kSRGB;
+  }
+}
+
 std::optional<std::string> PixelDeferredImageGPUImpeller::get_error() const {
   return wrapper_ ? wrapper_->get_error() : std::nullopt;
 }

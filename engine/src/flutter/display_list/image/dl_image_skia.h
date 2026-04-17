@@ -42,6 +42,9 @@ class DlImageSkia : public DlImage {
   // |DlImage|
   size_t GetApproximateByteSize() const override;
 
+  // |DlImage|
+  DlColorSpace GetColorSpace() const override;
+
  private:
   sk_sp<SkImage> image_;
 

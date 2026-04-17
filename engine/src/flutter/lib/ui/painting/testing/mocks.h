@@ -100,6 +100,7 @@ class MockDlImage : public impeller::DlImageImpeller {
   MOCK_METHOD(size_t, GetApproximateByteSize, (), (const, override));
   MOCK_METHOD(bool, isUIThreadSafe, (), (const, override));
   MOCK_METHOD(DlImage::Type, GetImageType, (), (const, override));
+  MOCK_METHOD(DlColorSpace, GetColorSpace, (), (const, override));
   MOCK_METHOD(const DlImageSkia*, asSkiaImage, (), (const, override));
   MOCK_METHOD(std::shared_ptr<impeller::Texture>,
               GetImpellerTexture,

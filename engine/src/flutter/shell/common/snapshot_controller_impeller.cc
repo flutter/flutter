@@ -125,7 +125,6 @@ sk_sp<SkImage> SnapshotControllerImpeller::MakeSkiaSnapshotSync(
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
   FML_UNREACHABLE();
-  return nullptr;
 }
 
 void SnapshotControllerImpeller::MakeImpellerSnapshot(

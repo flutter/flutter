@@ -1304,6 +1304,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
       paint.color_source->type() == flutter::DlColorSourceType::kImage) {
     const flutter::DlImageColorSource* image_color_source =
         paint.color_source->asImage();
+    FML_DCHECK(image_color_source);
     auto texture =
         image_color_source->image()->asImpellerImage()->GetCachedTexture(
             renderer_);

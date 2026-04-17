@@ -267,7 +267,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
         texture_inputs.push_back({
             .sampler_descriptor =
                 skia_conversions::ToSamplerDescriptor(image->sampling()),
-            .texture = texture,
+            .texture = std::move(texture),
         });
       }
 

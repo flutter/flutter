@@ -70,4 +70,9 @@ size_t DlImageSkia::GetApproximateByteSize() const {
   return size;
 }
 
+// |DlImage|
+DlColorSpace DlImageSkia::GetColorSpace() const {
+  return DlColorSpace::kSRGB;
+}
+
 }  // namespace flutter
