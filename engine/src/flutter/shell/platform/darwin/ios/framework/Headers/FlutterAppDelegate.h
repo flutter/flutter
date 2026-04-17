@@ -33,8 +33,8 @@ FLUTTER_DARWIN_EXPORT
  * A user-assignable `FlutterPluginRegistrant` for deferred plugin registration.
  *
  * For applications adopting the `UISceneDelegate` lifecycle, the recommended approach is to update
- * the application's `UIAppDelegate` to conform to `FlutterImplicitEngineDelegate` and perform
- * plugin registration via the generated plugin registrant in the
+ * the application's `UIApplicationDelegate` to conform to `FlutterImplicitEngineDelegate` and
+ * perform plugin registration via the generated plugin registrant in the
  * `didInitializeImplicitFlutterEngine` callback.
  *
  * Alternatively, assigning a `FlutterPluginRegistrant` to this property allows Flutter to
