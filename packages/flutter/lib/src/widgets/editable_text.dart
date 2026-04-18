@@ -103,6 +103,57 @@ typedef EditableTextContextMenuBuilder =
 // [TextPosition] after applying the given [TextBoundary].
 typedef _ApplyTextBoundary = TextPosition Function(TextPosition, bool, TextBoundary);
 
+// Converts a code-unit offset in [text] to the corresponding grapheme-cluster
+// index. Used to map original-text cursor positions to obscured bullet positions.
+int _codeUnitOffsetToGraphemeIndex(String text, int codeUnitOffset) {
+  if (codeUnitOffset < 0) {
+    return codeUnitOffset; // preserve invalid sentinel values (e.g. -1)
+  }
+  if (codeUnitOffset == 0) {
+    return 0;
+  }
+  if (codeUnitOffset >= text.length) {
+    return text.characters.length;
+  }
+  return text.substring(0, codeUnitOffset).characters.length;
+}
+
+// Converts a grapheme-cluster index in [text] to the corresponding code-unit
+// offset. Used to map obscured bullet positions back to original-text offsets.
+int _graphemeIndexToCodeUnitOffset(String text, int graphemeIndex) {
+  if (graphemeIndex <= 0) {
+    return 0;
+  }
+  var offset = 0;
+  var i = 0;
+  for (final String char in text.characters) {
+    if (i == graphemeIndex) {
+      return offset;
+    }
+    offset += char.length;
+    i++;
+  }
+  return text.length;
+}
+
+// Maps a TextSelection from original-text code-unit offsets to grapheme-cluster
+// indices for use by RenderEditable when rendering obscured text.
+TextSelection _mapSelectionToObscured(String originalText, TextSelection selection) {
+  return selection.copyWith(
+    baseOffset: _codeUnitOffsetToGraphemeIndex(originalText, selection.baseOffset),
+    extentOffset: _codeUnitOffsetToGraphemeIndex(originalText, selection.extentOffset),
+  );
+}
+
+// Maps a TextSelection from grapheme-cluster indices (as reported by
+// RenderEditable on obscured text) back to original-text code-unit offsets.
+TextSelection _mapSelectionFromObscured(String originalText, TextSelection selection) {
+  return selection.copyWith(
+    baseOffset: _graphemeIndexToCodeUnitOffset(originalText, selection.baseOffset),
+    extentOffset: _graphemeIndexToCodeUnitOffset(originalText, selection.extentOffset),
+  );
+}
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -5145,6 +5196,15 @@ class EditableTextState extends State<EditableText>
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause? cause) {
+    // When obscureText is true, RenderEditable reports selections in
+    // grapheme-cluster indices (bullet positions). Convert back to the
+    // code-unit offsets used by the rest of the text editing system.
+    if (widget.obscureText && cause != SelectionChangedCause.keyboard) {
+      value = value.copyWith(
+        selection: _mapSelectionFromObscured(value.text, value.selection),
+      );
+    }
+
     // Compare the current TextEditingValue with the pre-format new
     // TextEditingValue value, in case the formatter would reject the change.
     final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
@@ -6208,7 +6268,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       textAlign: textAlign,
       textDirection: textDirection,
       locale: locale ?? Localizations.maybeLocaleOf(context),
-      selection: value.selection,
+      selection: obscureText ? _mapSelectionToObscured(value.text, value.selection) : value.selection,
       offset: offset,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
@@ -6252,7 +6312,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textAlign = textAlign
       ..textDirection = textDirection
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
-      ..selection = value.selection
+      ..selection = obscureText ? _mapSelectionToObscured(value.text, value.selection) : value.selection
       ..offset = offset
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
