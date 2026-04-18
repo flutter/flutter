@@ -32,7 +32,7 @@ rootProject.allprojects {
 // }
 
 android {
-    namespace = "dev.flutter.integration_test"
+    namespace = "dev.flutter.plugins.integration_test"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
