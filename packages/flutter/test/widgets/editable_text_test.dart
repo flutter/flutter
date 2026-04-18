@@ -138,15 +138,13 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
-  // TODO(justinmc): Widgets tests should not import Material.
-  // https://github.com/flutter/flutter/issues/177028
   testWidgets(
     'Tapping the Live Text button calls onLiveTextInput',
     (WidgetTester tester) async {
       var invokedLiveTextInputSuccessfully = false;
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Align(
             alignment: Alignment.topLeft,
             child: SizedBox(
@@ -157,12 +155,12 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.titleMedium!,
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
+                style: const TextStyle(fontSize: 16.0),
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF9E9E9E),
                 keyboardType: TextInputType.text,
                 textAlign: TextAlign.right,
-                selectionControls: materialTextSelectionHandleControls,
+                selectionControls: emptyTextSelectionControls,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return CupertinoAdaptiveTextSelectionToolbar.editable(
                     key: key,
