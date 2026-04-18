@@ -4089,11 +4089,13 @@ void main() {
     // Populate the viewport and scroll to the bottom to prepare for an upward drag.
     scrollController.jumpTo(scrollController.position.maxScrollExtent);
     await tester.pumpAndSettle();
-    final double initialOffset = scrollController.offset;
 
     // Establish an initial selection at the end of the text.
     controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
     await tester.pumpAndSettle();
+
+    // Capture the offset after the selection is established but before the drag.
+    final double offsetBeforeDrag = scrollController.offset;
 
     final EditableTextState state = tester.state(find.byType(EditableText));
 
@@ -4107,13 +4109,12 @@ void main() {
       SelectionChangedCause.drag,
     );
 
-    // Wait for the scroll animation triggered by bringIntoView to complete.
     await tester.pumpAndSettle();
 
-    // The viewport should scroll upwards to follow the base handle. If the
-    // viewport incorrectly prioritizes the extent handle, the offset
-    // remains at the bottom.
-    expect(scrollController.offset, lessThan(initialOffset));
+    // The scroll offset should decrease as the viewport follows the base handle
+    // upwards. This verifies that the viewport is no longer snapping to the
+    // selection extent at the bottom.
+    expect(scrollController.offset, lessThan(offsetBeforeDrag));
   });
 
   testWidgets(
