@@ -5,9 +5,11 @@
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -58,17 +60,17 @@ void main() {
     final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: EditableText(
             key: editableTextKey,
             controller: controller,
-            backgroundCursorColor: Colors.grey,
+            backgroundCursorColor: const Color(0xFF9E9E9E),
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
-            selectionControls: materialTextSelectionControls,
+            selectionControls: emptyTextSelectionControls,
             showSelectionHandles: true,
           ),
         ),
