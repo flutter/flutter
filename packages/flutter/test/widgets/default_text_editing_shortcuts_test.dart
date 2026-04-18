@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'keyboard_utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   Widget buildSpyAboveEditableText({
@@ -17,7 +18,7 @@ void main() {
     final controller = TextEditingController(text: 'dummy text');
     addTearDown(controller.dispose);
 
-    return MaterialApp(
+    return TestWidgetsApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
@@ -35,9 +36,9 @@ void main() {
               textScaleFactor: 1,
               // Avoid the cursor from taking up width.
               cursorWidth: 0,
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-              selectionControls: materialTextSelectionControls,
+              cursorColor: const Color(0xFF2196F3),
+              backgroundCursorColor: const Color(0xFF9E9E9E),
+              selectionControls: emptyTextSelectionControls,
               keyboardType: TextInputType.text,
               maxLines: null,
               textAlign: TextAlign.left,
@@ -836,7 +837,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Align(
               alignment: Alignment.topLeft,
               child: EditableText(
@@ -844,8 +845,8 @@ void main() {
                 autofocus: true,
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 10.0),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
+                cursorColor: const Color(0xFF2196F3),
+                backgroundCursorColor: const Color(0xFF9E9E9E),
               ),
             ),
           ),
@@ -877,7 +878,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Align(
               alignment: Alignment.topLeft,
               child: EditableText(
@@ -885,8 +886,8 @@ void main() {
                 autofocus: true,
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 10.0),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
+                cursorColor: const Color(0xFF2196F3),
+                backgroundCursorColor: const Color(0xFF9E9E9E),
               ),
             ),
           ),
