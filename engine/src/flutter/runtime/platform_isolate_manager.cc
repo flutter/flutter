@@ -22,7 +22,7 @@ bool PlatformIsolateManager::HasShutdownMaybeFalseNegative() {
 bool PlatformIsolateManager::RegisterPlatformIsolate(Dart_Isolate isolate) {
   std::scoped_lock lock(lock_);
   if (is_shutdown_) {
-    // It's possible shutdown occured while we were trying to aquire the lock.
+    // It's possible shutdown occurred while we were trying to acquire the lock.
     return false;
   }
   FML_DCHECK(platform_isolates_.find(isolate) == platform_isolates_.end());
