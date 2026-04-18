@@ -294,6 +294,65 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  testWidgets('EditableText uses tight selection width style by default for multiline', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          maxLines: null,
+          style: textStyle,
+          cursorColor: cursorColor,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    RenderEditable renderEditable = findRenderEditable(tester);
+    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    renderEditable = findRenderEditable(tester);
+    expect(renderEditable.selectionWidthStyle, EditableText.defaultSelectionWidthStyle);
+  });
+
+  testWidgets('Explicit selectionWidthStyle is honored for multiline EditableText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          maxLines: null,
+          selectionWidthStyle: BoxWidthStyle.max,
+          style: textStyle,
+          cursorColor: cursorColor,
+          backgroundCursorColor: Colors.grey,
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+  });
+
   group('Check the passed groupId value', () {
     testWidgets('The value of the passed-in groupId should match the groupId of the EditableText', (
       WidgetTester tester,
