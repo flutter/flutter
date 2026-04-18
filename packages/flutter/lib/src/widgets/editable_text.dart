@@ -970,7 +970,8 @@ class EditableText extends StatefulWidget {
            : inputFormatters,
        showCursor = showCursor ?? !readOnly,
        selectionHeightStyle = selectionHeightStyle ?? defaultSelectionHeightStyle,
-       selectionWidthStyle = selectionWidthStyle ?? defaultSelectionWidthStyle;
+       selectionWidthStyle =
+           selectionWidthStyle ?? _selectionWidthStyleForMaxLines(maxLines: maxLines);
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -2091,6 +2092,15 @@ class EditableText extends StatefulWidget {
   ///
   /// This defaults to [ui.BoxWidthStyle.tight] on all platforms.
   static ui.BoxWidthStyle get defaultSelectionWidthStyle {
+    return ui.BoxWidthStyle.tight;
+  }
+
+  static ui.BoxWidthStyle _selectionWidthStyleForMaxLines({required int? maxLines}) {
+    if (maxLines == 1) {
+      return defaultSelectionWidthStyle;
+    }
+    // Multi-line selections should not be extended to match other lines'
+    // widths by default.
     return ui.BoxWidthStyle.tight;
   }
 
