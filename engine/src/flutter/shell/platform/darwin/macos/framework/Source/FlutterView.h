@@ -15,6 +15,16 @@
 
 @class FlutterView;
 
+@protocol FlutterViewContentDelegate <NSObject>
+
+/**
+ * Called when the view's size changes. The container should update its
+ * layout to accommodate the new size.
+ */
+- (void)viewDidUpdateContents:(nonnull FlutterView*)view withSize:(NSSize)newSize;
+
+@end
+
 /**
  * Interface that facilitates process of sizing the FlutterView to its
  * content. It is used to determine the content constraints and to notify
@@ -36,12 +46,6 @@
  * For views that are not sized to content, this method should return std::nullopt.
  */
 - (std::optional<NSSize>)maximumViewSize:(nonnull FlutterView*)view;
-
-/**
- * Called when the view's size changes. The container should update its
- * layout to accommodate the new size.
- */
-- (void)viewDidUpdateContents:(nonnull FlutterView*)view withSize:(NSSize)newSize;
 
 @end
 
@@ -87,6 +91,11 @@
  * providing and presenting render surfaces.
  */
 @property(readonly, nonatomic, nonnull) FlutterSurfaceManager* surfaceManager;
+
+/**
+ * Optional content delegate. If set, the view will inform the delegate about content change;
+ */
+@property(readwrite, nonatomic, weak, nullable) id<FlutterViewContentDelegate> contentDelegate;
 
 /**
  * Optional sizing delegate. If set, the view can be sized to its content.
