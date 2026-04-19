@@ -13,7 +13,8 @@
 #include "flutter/shell/platform/common/isolate_scope.h"
 
 // A delegate for a Flutter managed window.
-@interface FlutterWindowOwner : NSObject <NSWindowDelegate, FlutterViewSizingDelegate> {
+@interface FlutterWindowOwner
+    : NSObject <NSWindowDelegate, FlutterViewContentDelegate, FlutterViewSizingDelegate> {
   // Strong reference to the window. This is the only strong reference to the
   // window.
   NSWindow* _window;
@@ -28,6 +29,7 @@
 @property(readonly, nonatomic) NSWindow* window;
 @property(readonly, nonatomic) FlutterViewController* flutterViewController;
 @property(readwrite, nonatomic) BOOL closeWhenParentResignsKey;
+@property(readwrite, nonatomic) dispatch_block_t onFirstFrame;
 
 - (instancetype)initWithWindow:(NSWindow*)window
          flutterViewController:(FlutterViewController*)viewController
@@ -196,41 +198,56 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 }
 
 - (void)viewDidUpdateContents:(FlutterView*)view withSize:(NSSize)newSize {
+  // There is no positioner associated with this window.
   if (_creationRequest.on_get_window_position == nullptr) {
-    // There is no positioner associated with this window.
-    return;
-  }
-
-  NSRect globalScreenFrame = ComputeGlobalScreenFrame();
-
-  NSRect parentRect =
-      [self.window.parentWindow contentRectForFrameRect:self.window.parentWindow.frame];
-  FlipRect(parentRect, globalScreenFrame);
-
-  NSRect screenRect = [self.window.screen visibleFrame];
-  FlipRect(screenRect, globalScreenFrame);
-
-  flutter::IsolateScope isolate_scope(*_isolate);
-  auto position = _creationRequest.on_get_window_position(
-      FlutterWindowSize::fromNSSize(newSize), FlutterWindowRect::fromNSRect(parentRect),
-      FlutterWindowRect::fromNSRect(screenRect));
-
-  NSRect positionRect = position->toNSRect();
-  FlipRect(positionRect, globalScreenFrame);
-
-  [self.window setFrame:positionRect display:NO animate:NO];
-
-  free(position);
-
-  // For windows sized to contents if the positioner size doesn't match actual size
-  // the requested size needs to be passed through constraints.
-  if (view.sizedToContents &&
-      (positionRect.size.width < newSize.width || positionRect.size.height < newSize.height)) {
-    _positionerSizeConstraints = positionRect.size;
-    [view constraintsDidChange];
+    bool firstFrame = self.onFirstFrame != nil;
+    // Either missing initiali size or always sized to content, resize the window
+    // based on content size.
+    if ((firstFrame && _creationRequest.has_size) || !_creationRequest.resizable) {
+      [view.window setContentSize:newSize];
+    }
+    if (_creationRequest.resizable) {
+      view.sizingDelegate = nil;
+    }
+    if (firstFrame) {
+      self.onFirstFrame();
+      self.onFirstFrame = nil;
+    }
   } else {
-    // Only show the window initially if positioner agrees with the size.
-    self.window.alphaValue = 1.0;
+    NSRect globalScreenFrame = ComputeGlobalScreenFrame();
+
+    NSRect parentRect =
+        [self.window.parentWindow contentRectForFrameRect:self.window.parentWindow.frame];
+    FlipRect(parentRect, globalScreenFrame);
+
+    NSRect screenRect = [self.window.screen visibleFrame];
+    FlipRect(screenRect, globalScreenFrame);
+
+    flutter::IsolateScope isolate_scope(*_isolate);
+    auto position = _creationRequest.on_get_window_position(
+        FlutterWindowSize::fromNSSize(newSize), FlutterWindowRect::fromNSRect(parentRect),
+        FlutterWindowRect::fromNSRect(screenRect));
+
+    NSRect positionRect = position->toNSRect();
+    FlipRect(positionRect, globalScreenFrame);
+
+    [self.window setFrame:positionRect display:NO animate:NO];
+
+    free(position);
+
+    // For windows sized to contents if the positioner size doesn't match actual size
+    // the requested size needs to be passed through constraints.
+    if (view.sizedToContents &&
+        (positionRect.size.width < newSize.width || positionRect.size.height < newSize.height)) {
+      _positionerSizeConstraints = positionRect.size;
+      [view constraintsDidChange];
+    } else {
+      // Only show the window initially if positioner agrees with the size.
+      if (self.onFirstFrame) {
+        self.onFirstFrame();
+        self.onFirstFrame = nil;
+      }
+    }
   }
 }
 
@@ -332,13 +349,16 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [window setReleasedWhenClosed:NO];
 
   window.contentViewController = controller;
-  window.styleMask =
-      NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
+  window.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
+  if (request->resizable) {
+    window.styleMask |= NSWindowStyleMaskResizable;
+  }
+
   window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
   }
-  if (request->has_constraints) {
+  if (request->resizable && request->has_constraints) {
     [window flutterSetConstraints:request->constraints];
   }
 
@@ -347,6 +367,12 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
                                                          creationRequest:*request];
   window.delegate = owner;
   [_windows addObject:owner];
+
+  if (!request->has_size) {
+    controller.flutterView.sizingDelegate = owner;
+    [controller.flutterView constraintsDidChange];
+  }
+  controller.flutterView.contentDelegate = owner;
 
   NSWindow* parent = nil;
 
@@ -362,20 +388,22 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     }
   }
 
-  if (parent != nil) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [self fixMoveRunLoopModeIfNeeded];
-      // beginCriticalSheet blocks with nested run loop until the
-      // sheet animation is finished.
-      [parent beginCriticalSheet:window
-               completionHandler:^(NSModalResponse response){
-               }];
-    });
+  owner.onFirstFrame = ^{
+    if (parent != nil) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self fixMoveRunLoopModeIfNeeded];
+        // beginCriticalSheet blocks with nested run loop until the
+        // sheet animation is finished.
+        [parent beginCriticalSheet:window
+                 completionHandler:^(NSModalResponse response){
+                 }];
+      });
 
-  } else {
-    [window setIsVisible:YES];
-    [window makeKeyAndOrderFront:nil];
-  }
+    } else {
+      [window setIsVisible:YES];
+      [window makeKeyAndOrderFront:nil];
+    }
+  };
 
   return controller.viewIdentifier;
 }
@@ -401,6 +429,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
                                                          creationRequest:*request];
 
   controller.flutterView.sizingDelegate = owner;
+  controller.flutterView.contentDelegate = owner;
   controller.flutterView.backgroundColor = [NSColor clearColor];
   // Resend configure event after setting the sizing delegate.
   [controller.flutterView constraintsDidChange];
@@ -425,6 +454,11 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   window.collectionBehavior = NSWindowCollectionBehaviorAuxiliary;
   [parent addChildWindow:window ordered:NSWindowAbove];
   window.alphaValue = 0.0;
+
+  owner.onFirstFrame = ^{
+    window.alphaValue = 1.0;
+  };
+
   return controller.viewIdentifier;
 }
 
@@ -447,18 +481,19 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   window.opaque = NO;
   window.backgroundColor = [NSColor clearColor];
 
-  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
-                                               flutterViewController:controller
-                                                     creationRequest:*request];
+  FlutterWindowOwner* owner = [[FlutterWindowOwner alloc] initWithWindow:window
+                                                   flutterViewController:controller
+                                                         creationRequest:*request];
 
-  controller.flutterView.sizingDelegate = w;
+  controller.flutterView.sizingDelegate = owner;
+  controller.flutterView.contentDelegate = owner;
   [controller.flutterView setBackgroundColor:[NSColor clearColor]];
   // Resend configure event after setting the sizing delegate.
   [controller.flutterView constraintsDidChange];
-  w.closeWhenParentResignsKey = NO;
+  owner.closeWhenParentResignsKey = NO;
 
-  window.delegate = w;
-  [_windows addObject:w];
+  window.delegate = owner;
+  [_windows addObject:owner];
 
   NSWindow* parent = nil;
 
@@ -475,6 +510,11 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   window.collectionBehavior = NSWindowCollectionBehaviorAuxiliary;
   [parent addChildWindow:window ordered:NSWindowAbove];
   window.alphaValue = 0.0;
+
+  owner.onFirstFrame = ^{
+    window.alphaValue = 1.0;
+  };
+
   return controller.viewIdentifier;
 }
 
@@ -488,23 +528,39 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   // using ARC.
   [window setReleasedWhenClosed:NO];
 
+  window.styleMask =
+      NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+  if (request->resizable) {
+    window.styleMask |= NSWindowStyleMaskResizable;
+  }
+
   window.contentViewController = controller;
-  window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
-                     NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+
   if (request->has_size) {
     [window flutterSetContentSize:request->size];
   }
-  if (request->has_constraints) {
+  if (request->resizable && request->has_constraints) {
     [window flutterSetConstraints:request->constraints];
   }
-  [window setIsVisible:YES];
-  [window makeKeyAndOrderFront:nil];
 
   FlutterWindowOwner* owner = [[FlutterWindowOwner alloc] initWithWindow:window
                                                    flutterViewController:controller
                                                          creationRequest:*request];
+
+  controller.flutterView.contentDelegate = owner;
+
+  if (!request->has_size) {
+    controller.flutterView.sizingDelegate = owner;
+    [controller.flutterView constraintsDidChange];
+  }
+
   window.delegate = owner;
   [_windows addObject:owner];
+
+  owner.onFirstFrame = ^{
+    [window setIsVisible:YES];
+    [window makeKeyAndOrderFront:nil];
+  };
 
   return controller.viewIdentifier;
 }
