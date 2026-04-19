@@ -201,9 +201,9 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   // There is no positioner associated with this window.
   if (_creationRequest.on_get_window_position == nullptr) {
     bool firstFrame = self.onFirstFrame != nil;
-    // Either missing initiali size or always sized to content, resize the window
+    // Either missing initial size or always sized to content, resize the window
     // based on content size.
-    if ((firstFrame && _creationRequest.has_size) || !_creationRequest.resizable) {
+    if ((firstFrame && !_creationRequest.has_size) || !_creationRequest.resizable) {
       [view.window setContentSize:newSize];
     }
     if (_creationRequest.resizable) {
