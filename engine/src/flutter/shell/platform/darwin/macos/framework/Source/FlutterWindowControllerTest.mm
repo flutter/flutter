@@ -75,6 +75,7 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -104,6 +105,7 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
   auto request = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -128,6 +130,7 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
           .max_width = 1000,
           .max_height = 1000,
       },
+      .resizable = true,
       .parent_view_id = parentViewId,
       .on_should_close = [] {},
       .on_will_close = [] {},
@@ -148,6 +151,7 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
   auto request = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -172,6 +176,7 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
           .max_width = 1000,
           .max_height = 1000,
       },
+      .resizable = true,
       .parent_view_id = parentViewId,
       .on_should_close = [] {},
       .on_will_close = [] {},
@@ -188,6 +193,7 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -211,6 +217,8 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
     weakEngine = engine;
     [engine runWithEntrypoint:@"testWindowControllerRetainCycle"];
 
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, false);
+
     int64_t engineId = reinterpret_cast<int64_t>(engine);
 
     {
@@ -220,6 +228,8 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
       int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
       EXPECT_EQ(handle, 1);
     }
+
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, false);
 
     [engine.windowController closeAllWindows];
     [engine shutDownEngine];
@@ -231,6 +241,7 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -252,6 +263,7 @@ TEST_F(FlutterWindowControllerTest, InternalFlutterWindowGetHandle) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -272,6 +284,7 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -310,6 +323,7 @@ TEST_F(FlutterWindowControllerTest, ClosesAllWindowsOnEngineRestart) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -353,6 +367,7 @@ TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraint
   auto parentRequest = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -398,7 +413,7 @@ TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraint
 
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
 
-  [flutterView.sizingDelegate viewDidUpdateContents:flutterView withSize:NSMakeSize(1000, 1000)];
+  [flutterView.contentDelegate viewDidUpdateContents:flutterView withSize:NSMakeSize(1000, 1000)];
 
   // The constraints from request are 1000x1000, but additional constraints came from the positioner
   // and must be respected.
