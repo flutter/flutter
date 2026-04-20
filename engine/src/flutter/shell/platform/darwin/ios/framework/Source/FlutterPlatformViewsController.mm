@@ -141,11 +141,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly) std::unordered_set<int64_t>& viewsToRecomposite;
 
-/// @brief The composition order from the previous thread.
-///
-/// Only accessed from the platform thread.
-@property(nonatomic, readonly) std::vector<int64_t>& previousCompositionOrder;
-
 /// Whether the previous frame had any platform views in active composition order.
 ///
 /// This state is tracked so that the first frame after removing the last platform view
@@ -710,7 +705,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       [self.platformViews[viewId].root_view removeFromSuperview];
     }
     self.platformViews.clear();
-    self.previousCompositionOrder.clear();
+    _previousCompositionOrder.clear();
   });
 
   self.compositionOrder.clear();
@@ -933,10 +928,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   FML_DCHECK(self.flutterView);
   UIView* flutterView = self.flutterView;
 
-  self.previousCompositionOrder.clear();
+  _previousCompositionOrder.clear();
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
   for (int64_t platformViewId : compositionOrder) {
-    self.previousCompositionOrder.push_back(platformViewId);
+    _previousCompositionOrder.push_back(platformViewId);
     UIView* platformViewRoot = self.platformViews[platformViewId].root_view;
     if (platformViewRoot != nil) {
       [desiredPlatformSubviews addObject:platformViewRoot];
@@ -990,7 +985,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     compositionOrderSet.insert(viewId);
   }
   // Remove unused platform views.
-  for (int64_t viewId : self.previousCompositionOrder) {
+  for (int64_t viewId : _previousCompositionOrder) {
     if (compositionOrderSet.find(viewId) == compositionOrderSet.end()) {
       UIView* platformViewRoot = self.platformViews[viewId].root_view;
       [platformViewRoot removeFromSuperview];
@@ -1110,8 +1105,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return _viewsToRecomposite;
 }
 
-- (std::vector<int64_t>&)previousCompositionOrder {
-  return _previousCompositionOrder;
+- (NSArray<NSNumber*>*)previousCompositionOrder {
+  // TODO(cbracken): Migrate to Obj-C types. https://github.com/flutter/flutter/issues/185139
+  NSMutableArray* array = [NSMutableArray arrayWithCapacity:_previousCompositionOrder.size()];
+  for (int64_t viewId : _previousCompositionOrder) {
+    [array addObject:@(viewId)];
+  }
+  return array;
 }
 
 @end
