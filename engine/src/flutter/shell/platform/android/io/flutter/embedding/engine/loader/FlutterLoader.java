@@ -412,9 +412,7 @@ public class FlutterLoader {
                   || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
                 // Perform security check for path containing application's compiled Dart
                 // code and potentially user-provided compiled native code.
-                String aotSharedLibraryPath =
-                    arg.substring(
-                        FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
+                String aotSharedLibraryPath = arg.substring(flag.engineArgument.length());
                 maybeAddAotSharedLibraryNameArg(
                     applicationContext, aotSharedLibraryPath, shellArgs);
                 continue;
@@ -453,8 +451,7 @@ public class FlutterLoader {
               || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
             // Perform security check for path containing application's compiled Dart
             // code and potentially user-provided compiled native code.
-            String aotSharedLibraryPath =
-                arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
+            String aotSharedLibraryPath = arg.substring(flag.engineArgument.length());
             maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
             continue;
           }
