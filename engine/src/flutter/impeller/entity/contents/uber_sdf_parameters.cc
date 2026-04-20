@@ -79,6 +79,9 @@ UberSDFParameters UberSDFParameters::MakeRoundSuperellipse(
     Color color,
     const Rect& rect,
     Scalar n,
+    Scalar corner_radius,
+    Scalar corner_arc_angle,
+    Point corner_circle_center,
     std::optional<StrokeParameters> stroke) {
   Point size = Point(rect.GetSize() * 0.5f);
   return UberSDFParameters{.type = Type::kRoundSuperellipse,
@@ -86,7 +89,10 @@ UberSDFParameters UberSDFParameters::MakeRoundSuperellipse(
                            .center = rect.GetCenter(),
                            .size = size,
                            .stroke = stroke,
-                           .superellipse_n = n};
+                           .superellipse_n = n,
+                           .corner_radius = corner_radius,
+                           .corner_arc_angle = corner_arc_angle,
+                           .corner_circle_center = corner_circle_center};
 }
 
 }  // namespace impeller

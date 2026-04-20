@@ -18,6 +18,9 @@ uniform FragInfo {
   float type;
   vec4 radii;
   float superellipse_n;
+  float corner_radius;
+  float corner_arc_angle;
+  vec2 corner_circle_center;
 }
 frag_info;
 
@@ -91,7 +94,23 @@ float sdSuperellipse(vec2 p, float n) {
   return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
 }
 
-float distanceFromRoundSuperellipse(vec2 p, vec2 ab, float n) {
+float distanceFromRoundSuperellipse(vec2 p,
+                                    vec2 ab,
+                                    float n,
+                                    float corner_arc_angle,
+                                    vec2 corner_circle_center,
+                                    float corner_radius) {
+  float half_pi = 1.57079633;
+  float min_angle = 0.5 * (half_pi - corner_arc_angle);
+  float max_angle = (half_pi + corner_arc_angle) * 0.5;
+
+  vec2 p_remap = p - corner_circle_center;
+  float theta = atan(p_remap.y, p_remap.x);
+
+  if (theta > min_angle && theta < max_angle) {
+    return distanceFromCircle(p - corner_circle_center, corner_radius);
+  }
+
   return sdSuperellipse(p / ab, n);
 }
 
@@ -219,7 +238,9 @@ float filledSDF(vec2 p) {
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
-    return distanceFromRoundSuperellipse(p, frag_info.size, frag_info.superellipse_n);
+    return distanceFromRoundSuperellipse(
+        p, frag_info.size, frag_info.superellipse_n, frag_info.corner_arc_angle,
+        frag_info.corner_circle_center, frag_info.corner_radius);
   }
 }
 
@@ -255,8 +276,9 @@ float strokedSDF(vec2 p) {
     outer = d - half_stroke;
     inner = d + half_stroke;
   } else {  // Round Superellipse
-    float d = distanceFromRoundSuperellipse(p, frag_info.size,
-                                            frag_info.superellipse_n);
+    float d = distanceFromRoundSuperellipse(
+        p, frag_info.size, frag_info.superellipse_n, frag_info.corner_arc_angle,
+        frag_info.corner_circle_center, frag_info.corner_radius);
     outer = d - half_stroke;
     inner = d + half_stroke;
   }

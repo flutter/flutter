@@ -59,6 +59,7 @@
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/round_superellipse_param.h"
 #include "impeller/geometry/rstransform.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -1039,20 +1040,24 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    auto oct = RoundSuperellipseParam::ComputeOctant(
-        round_superellipse.GetBounds().GetCenter(),
-        round_superellipse.GetBounds().GetWidth() / 2.0,
-        round_superellipse.GetRadii().top_left.height);
+    auto rs_param = RoundSuperellipseParam::MakeBoundsRadius(
+        round_superellipse.GetBounds(),
+        round_superellipse.GetRadii().bottom_left.height);
 
-    if (paint.style == Paint::Style::kFill) {
-      auto params = UberSDFParameters::MakeRoundSuperellipse(
-          paint.color, round_superellipse.GetBounds(), oct.se_n, std::nullopt);
-      AddRenderSDFEntityToCurrentPass(paint, params);
-    } else {
-      auto params = UberSDFParameters::MakeRoundSuperellipse(
-          paint.color, round_superellipse.GetBounds(), oct.se_n, paint.stroke);
-      AddRenderSDFEntityToCurrentPass(paint, params);
-    }
+    auto oct = rs_param.top_right.top;
+
+    auto modified_radius = oct.circle_radius;
+
+    auto params = UberSDFParameters::MakeRoundSuperellipse(
+        paint.color, round_superellipse.GetBounds(), oct.se_n, modified_radius,
+        oct.circle_max_angle.radians, oct.circle_center, paint.GetStroke());
+    AddRenderSDFEntityToCurrentPass(paint, params);
+
+    FML_LOG(IMPORTANT) << oct.circle_radius;
+    FML_LOG(IMPORTANT) << oct.circle_center.GetDistance(oct.circle_start);
+    oct = rs_param.top_right.right;
+    FML_LOG(IMPORTANT) << oct.circle_center.GetDistance(oct.circle_start);
+
     return;
   }
 

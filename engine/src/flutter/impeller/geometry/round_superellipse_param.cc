@@ -560,6 +560,7 @@ RoundSuperellipseParam::ComputeOctant(Point center, Scalar a, Scalar radius) {
       .circle_start = pointJ,
       .circle_center = circle_center,
       .circle_max_angle = circle_max_angle,
+      .circle_radius = R,
   };
 }
 

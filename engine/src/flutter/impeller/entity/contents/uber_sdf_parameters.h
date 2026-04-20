@@ -59,6 +59,9 @@ struct UberSDFParameters {
       Color color,
       const Rect& bounds,
       Scalar n,
+      Scalar corner_radius,
+      Scalar corner_arc_angle,
+      Point corner_circle_center,
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
@@ -84,6 +87,9 @@ struct UberSDFParameters {
 
   // The power of a superellipse
   Scalar superellipse_n;
+  Scalar corner_radius;
+  Scalar corner_arc_angle;
+  Point corner_circle_center;
 };
 
 }  // namespace impeller
