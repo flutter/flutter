@@ -1717,19 +1717,6 @@ targets:
       - engine/**
       - DEPS
 
-  - name: linux_android_emu_unstable android_engine_vulkan_tests
-    recipe: flutter/flutter_drone
-    bringup: true
-    timeout: 60
-    properties:
-      shard: android_engine_vulkan_tests
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
-        ]
-
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -2980,6 +2967,24 @@ targets:
         ["devicelab", "linux"]
       task_name: native_assets_android
 
+  - name: Linux_android_emu android_engine_flags_debug_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_engine_flags_debug_test
+
+  - name: Linux_android_emu android_engine_flags_release_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_engine_flags_release_test
+
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
@@ -3766,8 +3771,6 @@ targets:
   - name: Mac_arm64 build_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
-    # Flake rate of >2.5% in presubmit
-    presubmit: false # https://github.com/flutter/flutter/issues/150642
     properties:
       add_recipes_cq: "true"
       dependencies: >-

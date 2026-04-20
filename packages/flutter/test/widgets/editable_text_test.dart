@@ -205,6 +205,96 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  testWidgets(
+    'Tapping the Live Text button reports error when channel fails',
+    (WidgetTester tester) async {
+      final TargetPlatform? originalPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final FlutterExceptionHandler? oldOnError = FlutterError.onError;
+      final errors = <FlutterErrorDetails>[];
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+
+      final liveTextInputTester = LiveTextInputTester();
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+
+      try {
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 400,
+                child: EditableText(
+                  maxLines: 10,
+                  controller: controller,
+                  focusNode: focusNode,
+                  style: const TextStyle(),
+                  cursorColor: const Color(0xff0000ff),
+                  backgroundCursorColor: const Color(0xff00ffff),
+                  toolbarOptions: ToolbarOptions.empty,
+                  contextMenuBuilder: (BuildContext context, EditableTextState state) {
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        focusNode.requestFocus();
+        await tester.pump();
+
+        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+        // Mock TextInput.startLiveTextInput failure
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'TextInput.startLiveTextInput') {
+              throw Exception('Channel failed');
+            }
+            return null;
+          },
+        );
+
+        // Find the button item.
+        final List<ContextMenuButtonItem> items = state.contextMenuButtonItems;
+        final ContextMenuButtonItem liveTextItem = items.firstWhere(
+          (ContextMenuButtonItem item) => item.type == ContextMenuButtonType.liveTextInput,
+          orElse: () => throw Exception(
+            'Live Text button not found in items: ${items.map((i) => i.type).toList()}',
+          ),
+        );
+
+        liveTextItem.onPressed!();
+        await tester.pump();
+
+        expect(errors, hasLength(1));
+        expect(errors.single.exception, isA<Exception>());
+        expect(errors.single.exception.toString(), contains('Channel failed'));
+        expect(errors.single.context.toString(), contains('while starting Live Text input'));
+      } finally {
+        debugDefaultTargetPlatformOverride = originalPlatform;
+        FlutterError.onError = oldOnError;
+        liveTextInputTester.dispose();
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.textInput,
+          null,
+        );
+        controller.dispose();
+        focusNode.dispose();
+      }
+    },
+    skip: kIsWeb, // [intended]
+  );
+
   group('Check the passed groupId value', () {
     testWidgets('The value of the passed-in groupId should match the groupId of the EditableText', (
       WidgetTester tester,
@@ -18406,6 +18496,70 @@ void main() {
       TargetPlatform.android,
       TargetPlatform.fuchsia,
     }),
+  );
+
+  testWidgets(
+    'context menu reappears after a non-fling scroll that keeps selection in view while semantics are disabled',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/185052.
+      controller.text = 'Lorem ipsum dolor sit amet ' * 200;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: EditableText(
+              maxLines: null,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: const Color(0xFF424242),
+              focusNode: focusNode,
+              selectionControls: testTextSelectionHandleControls,
+              contextMenuBuilder: (context, editableTextState) {
+                return const SizedBox.shrink();
+              },
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder editableText = find.byType(EditableText);
+      final EditableTextState editableTextState = tester.state<EditableTextState>(editableText);
+
+      // Long press at the center of the widget to select a word that is
+      // well within the viewport.
+      await tester.longPressAt(tester.getCenter(editableText));
+      await tester.pumpAndSettle();
+      expect(editableTextState.showToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+
+      // Perform a short scroll that keeps the selection in view.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(editableText));
+      await gesture.moveBy(const Offset(0.0, -20.0));
+      await tester.pump();
+
+      // The toolbar should be hidden during the scroll.
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, false);
+
+      // Release the gesture / end the scroll.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The toolbar should re-appear since the selection is still in view.
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+    },
+    // semanticsEnabled is set to false to match on-device behavior. With
+    // semantics enabled (the testWidgets default), setIgnorePointer during
+    // scroll activity transitions calls markNeedsSemanticsUpdate which
+    // schedules a frame as a side effect, masking the bug.
+    semanticsEnabled: false,
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }), // Only applies to platforms where the context menu hides on scroll.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: kIsWeb,
   );
 }
 

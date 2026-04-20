@@ -69,6 +69,7 @@
 
 @interface FlutterWindowController () {
   NSMutableArray<FlutterWindowOwner*>* _windows;
+  BOOL _runLoopModeFixApplied;
 }
 
 - (void)windowDidResignKey:(FlutterWindowOwner*)window;
@@ -263,6 +264,20 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
 @end
 
+@interface _FlutterRunLoopModeFixWindowDelegate : NSObject <NSWindowDelegate>
+@end
+
+@implementation _FlutterRunLoopModeFixWindowDelegate
+
+- (NSRect)windowWillUseStandardFrame:(NSWindow*)window defaultFrame:(NSRect)newFrame {
+  // Small frame difference (100px to 110px) to trigger the animation but make it fast.
+  newFrame.size.width = 110;
+  newFrame.size.height = 110;
+  return newFrame;
+}
+
+@end
+
 @implementation FlutterWindowController
 
 - (instancetype)init {
@@ -271,6 +286,39 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     _windows = [NSMutableArray array];
   }
   return self;
+}
+
+- (void)fixMoveRunLoopModeIfNeeded {
+  if (_runLoopModeFixApplied) {
+    return;
+  }
+  // When modal sheet is presented, for the duration of the animation the run loop
+  // is running in _NSMoveTimerRunLoopMode. This prevents Flutter content from
+  // being rendered. The solution is to add _NSMoveTimerRunLoopMode to common
+  // run loop modes, but referencing it directly may be flagged as SPI usage.
+  // Instead as a workaround a very short window zoom animation is triggered, which
+  // runs in _NSMoveTimerRunLoopMode adding the mode to CFRunLoop all modes list.
+  // After that it can be queried and added to common modes.
+  NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 100, 100)
+                                                 styleMask:NSWindowStyleMaskResizable
+                                                   backing:NSBackingStoreNonretained
+                                                     defer:NO];
+  _FlutterRunLoopModeFixWindowDelegate* delegate =
+      [[_FlutterRunLoopModeFixWindowDelegate alloc] init];
+  window.releasedWhenClosed = NO;
+  window.delegate = delegate;
+  window.ignoresMouseEvents = YES;
+  window.alphaValue = 0;
+  [window orderFront:nil];
+  [window zoom:nil];
+  [window close];
+  NSArray* modes = (__bridge_transfer NSArray*)CFRunLoopCopyAllModes(CFRunLoopGetCurrent());
+  for (NSString* mode in modes) {
+    if ([mode hasSuffix:@"MoveTimerRunLoopMode"]) {
+      CFRunLoopAddCommonMode(CFRunLoopGetCurrent(), (__bridge CFStringRef)mode);
+    }
+  }
+  _runLoopModeFixApplied = YES;
 }
 
 - (FlutterViewIdentifier)createDialogWindow:(const FlutterWindowCreationRequest*)request {
@@ -316,6 +364,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   if (parent != nil) {
     dispatch_async(dispatch_get_main_queue(), ^{
+      [self fixMoveRunLoopModeIfNeeded];
       // beginCriticalSheet blocks with nested run loop until the
       // sheet animation is finished.
       [parent beginCriticalSheet:window

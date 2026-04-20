@@ -5,7 +5,7 @@
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
     branches:
       - master
@@ -19,15 +19,15 @@ jobs:
   check_freeze:
     name: Check Code Freeze
     runs-on: ubuntu-latest
-    if: github.repository == 'flutter/flutter'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    if: ${{ github.repository == 'flutter/flutter' }}
 
+    steps:
       - name: Check for changes in frozen folders
+        if: github.event_name != 'merge_group'
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          token: ${{ github.token }}
           filters: |
             frozen:
               - 'packages/flutter/lib/src/material/**'
@@ -44,27 +44,9 @@ jobs:
               - 'packages/flutter/test_fixes/cupertino/**'
 
       - name: Fail on frozen changes
-        # This step only runs if the 'frozen' filter matched AND the override label is NOT present
-        if: |
-          steps.filter.outputs.frozen == 'true' &&
-          !contains(github.event.pull_request.labels.*.name, 'override: code freeze')
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
         run: |
           echo "Error: Code changes detected during the current code freeze."
-          echo "The following paths are currently frozen:"
-          echo "  - packages/flutter/lib/src/material/"
-          echo "  - packages/flutter/lib/src/cupertino/"
-          echo "  - (and associated tests/examples)"
-          echo ""
-          echo "If this is a critical fix that must land during the freeze, please file an issue for team-design."
-          echo "Information on this code freeze: https://github.com/flutter/flutter/issues/184093"
+          echo "If this is a critical fix that must land, please file an issue for team-design."
+          echo "Info: https://github.com/flutter/flutter/issues/184093"
           exit 1
-
-      - name: Pass if overridden
-        if: |
-          steps.filter.outputs.frozen == 'true' &&
-          contains(github.event.pull_request.labels.*.name, 'override: code freeze')
-        run: echo "Code freeze overridden by 'override: code freeze' label."
-
-      - name: Pass if no frozen changes
-        if: steps.filter.outputs.frozen == 'false'
-        run: echo "No changes to frozen code."
