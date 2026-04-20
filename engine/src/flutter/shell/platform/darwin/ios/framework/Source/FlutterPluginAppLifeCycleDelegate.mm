@@ -171,7 +171,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   if (![self application:application
           didFinishLaunchingWithOptions:convertedLaunchOptions
                      isFallbackForScene:YES]) {
-    return NO;
+    return YES;
   }
 
   UIApplicationShortcutItem* shortcutItem = connectionOptions.shortcutItem;
