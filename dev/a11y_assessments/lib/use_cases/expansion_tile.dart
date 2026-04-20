@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ExpansionTileUseCase extends UseCase {
-  ExpansionTileUseCase() ;
+  ExpansionTileUseCase();
 
   @override
   String get name => 'ExpansionTile';

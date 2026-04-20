@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class TabBarViewUseCase extends UseCase {
-  TabBarViewUseCase() ;
+  TabBarViewUseCase();
 
   @override
   String get name => 'TabBarView';

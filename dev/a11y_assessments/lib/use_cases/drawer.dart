@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DrawerUseCase extends UseCase {
-  DrawerUseCase() ;
+  DrawerUseCase();
 
   @override
   String get name => 'drawer';

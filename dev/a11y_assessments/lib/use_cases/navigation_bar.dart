@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationBarUseCase extends UseCase {
-  NavigationBarUseCase() ;
+  NavigationBarUseCase();
 
   @override
   String get name => 'NavigationBar';

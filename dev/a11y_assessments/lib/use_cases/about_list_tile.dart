@@ -41,9 +41,7 @@ class MainWidget extends StatelessWidget {
             applicationVersion: '1.0.0',
             applicationIcon: FlutterLogo(),
             applicationLegalese: '© 2026 The Flutter Authors',
-            aboutBoxChildren: <Widget>[
-              Text('This is a test app for accessibility.'),
-            ],
+            aboutBoxChildren: <Widget>[Text('This is a test app for accessibility.')],
           ),
         ],
       ),

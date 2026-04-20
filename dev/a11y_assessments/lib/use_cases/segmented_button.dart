@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SegmentedButtonUseCase extends UseCase {
-  SegmentedButtonUseCase() ;
+  SegmentedButtonUseCase();
 
   @override
   String get name => 'SegmentedButton';

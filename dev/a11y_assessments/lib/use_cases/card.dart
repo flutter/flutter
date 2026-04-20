@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CardUseCase extends UseCase {
-  CardUseCase() ;
+  CardUseCase();
 
   @override
   String get name => 'Card';

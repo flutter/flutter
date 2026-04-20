@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SwitchListTileUseCase extends UseCase {
-  SwitchListTileUseCase() ;
+  SwitchListTileUseCase();
 
   @override
   String get name => 'SwitchListTile';

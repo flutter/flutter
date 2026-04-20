@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class TextButtonUseCase extends UseCase {
-  TextButtonUseCase() ;
+  TextButtonUseCase();
 
   @override
   String get name => 'TextButton';

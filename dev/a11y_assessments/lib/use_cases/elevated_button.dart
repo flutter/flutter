@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ElevatedButtonUseCase extends UseCase {
-  ElevatedButtonUseCase() ;
+  ElevatedButtonUseCase();
 
   @override
   String get name => 'ElevatedButton';
@@ -43,10 +43,7 @@ class MainWidgetState extends State<MainWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Elevated Button'),
-            ),
+            ElevatedButton(onPressed: () {}, child: const Text('Elevated Button')),
             const ElevatedButton(
               onPressed: null, // Disabled
               child: Text('Disabled ElevatedButton'),

@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CloseButtonUseCase extends UseCase {
-  CloseButtonUseCase() ;
+  CloseButtonUseCase();
 
   @override
   String get name => 'CloseButton';

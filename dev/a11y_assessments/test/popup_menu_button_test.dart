@@ -16,7 +16,7 @@ void main() {
 
   testWidgets('popup menu button can select item', (WidgetTester tester) async {
     await pumpsUseCase(tester, PopupMenuButtonUseCase());
-    
+
     expect(find.text('Selected: None'), findsOneWidget);
 
     final Finder findButton = find.byType(PopupMenuButton<String>);

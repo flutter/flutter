@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class BadgeUseCase extends UseCase {
-  BadgeUseCase() ;
+  BadgeUseCase();
 
   @override
   String get name => 'Badge';

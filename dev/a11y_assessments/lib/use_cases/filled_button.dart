@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class FilledButtonUseCase extends UseCase {
-  FilledButtonUseCase() ;
+  FilledButtonUseCase();
 
   @override
   String get name => 'FilledButton';
@@ -43,10 +43,7 @@ class MainWidgetState extends State<MainWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            FilledButton(
-              onPressed: () {},
-              child: const Text('Filled Button'),
-            ),
+            FilledButton(onPressed: () {}, child: const Text('Filled Button')),
             const FilledButton(
               onPressed: null, // Disabled
               child: Text('Disabled FilledButton'),

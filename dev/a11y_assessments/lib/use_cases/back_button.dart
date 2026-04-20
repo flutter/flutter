@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class BackButtonUseCase extends UseCase {
-  BackButtonUseCase() ;
+  BackButtonUseCase();
 
   @override
   String get name => 'BackButton';

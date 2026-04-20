@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class AppBarUseCase extends UseCase {
-  AppBarUseCase() ;
+  AppBarUseCase();
 
   @override
   String get name => 'AppBar';

@@ -21,7 +21,7 @@ void main() {
 
     final Finder findToggleButtons = find.byType(ToggleButtons);
     expect(findToggleButtons, findsOneWidget);
-    
+
     ToggleButtons widget = tester.widget(findToggleButtons);
     expect(widget.isSelected[0], isTrue);
 

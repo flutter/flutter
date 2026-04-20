@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ToggleButtonsUseCase extends UseCase {
-  ToggleButtonsUseCase() ;
+  ToggleButtonsUseCase();
 
   @override
   String get name => 'ToggleButtons';

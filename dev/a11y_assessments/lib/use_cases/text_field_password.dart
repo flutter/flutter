@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class TextFieldPasswordUseCase extends UseCase {
-  TextFieldPasswordUseCase() ;
+  TextFieldPasswordUseCase();
 
   @override
   String get name => 'TextField password';

@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class NavigationRailUseCase extends UseCase {
-  NavigationRailUseCase() ;
+  NavigationRailUseCase();
 
   @override
   String get name => 'NavigationRail';

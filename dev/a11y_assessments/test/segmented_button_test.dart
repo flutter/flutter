@@ -16,16 +16,16 @@ void main() {
 
   testWidgets('segmented button can change selection', (WidgetTester tester) async {
     await pumpsUseCase(tester, SegmentedButtonUseCase());
-    
+
     final Finder findSegmentedButton = find.byType(SegmentedButton<String>);
     expect(findSegmentedButton, findsOneWidget);
-    
+
     SegmentedButton<String> widget = tester.widget(findSegmentedButton);
     expect(widget.selected, contains('Day'));
 
     final Finder findWeekSegment = find.text('Week');
     expect(findWeekSegment, findsOneWidget);
-    
+
     await tester.tap(findWeekSegment);
     await tester.pumpAndSettle();
 

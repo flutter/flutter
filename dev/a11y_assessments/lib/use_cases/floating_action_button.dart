@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class FloatingActionButtonUseCase extends UseCase {
-  FloatingActionButtonUseCase() ;
+  FloatingActionButtonUseCase();
 
   @override
   String get name => 'FloatingActionButton';
@@ -40,9 +40,7 @@ class MainWidgetState extends State<MainWidget> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
-      body: Center(
-        child: Text('Tap count: $_tapCount'),
-      ),
+      body: Center(child: Text('Tap count: $_tapCount')),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {

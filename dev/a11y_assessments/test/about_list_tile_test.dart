@@ -16,7 +16,7 @@ void main() {
 
   testWidgets('about list tile can open dialog', (WidgetTester tester) async {
     await pumpsUseCase(tester, AboutListTileUseCase());
-    
+
     final Finder findTile = find.byType(AboutListTile);
     expect(findTile, findsOneWidget);
     await tester.tap(findTile);

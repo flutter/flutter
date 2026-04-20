@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DatePickerUseCase extends UseCase {
-  DatePickerUseCase() ;
+  DatePickerUseCase();
 
   @override
   String get name => 'DatePicker';

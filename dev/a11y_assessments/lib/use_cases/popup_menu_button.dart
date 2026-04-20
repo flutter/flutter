@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class PopupMenuButtonUseCase extends UseCase {
-  PopupMenuButtonUseCase() ;
+  PopupMenuButtonUseCase();
 
   @override
   String get name => 'PopupMenuButton';
@@ -53,14 +53,8 @@ class MainWidgetState extends State<MainWidget> {
                 });
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'Item 1',
-                  child: Text('Item 1'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Item 2',
-                  child: Text('Item 2'),
-                ),
+                const PopupMenuItem<String>(value: 'Item 1', child: Text('Item 1')),
+                const PopupMenuItem<String>(value: 'Item 2', child: Text('Item 2')),
               ],
             ),
           ],

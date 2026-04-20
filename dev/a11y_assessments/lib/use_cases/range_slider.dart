@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class RangeSliderUseCase extends UseCase {
-  RangeSliderUseCase() ;
+  RangeSliderUseCase();
 
   @override
   String get name => 'RangeSlider';

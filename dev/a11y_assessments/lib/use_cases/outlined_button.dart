@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class OutlinedButtonUseCase extends UseCase {
-  OutlinedButtonUseCase() ;
+  OutlinedButtonUseCase();
 
   @override
   String get name => 'OutlinedButton';
@@ -43,10 +43,7 @@ class MainWidgetState extends State<MainWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            OutlinedButton(
-              onPressed: () {},
-              child: const Text('Outlined Button'),
-            ),
+            OutlinedButton(onPressed: () {}, child: const Text('Outlined Button')),
             const OutlinedButton(
               onPressed: null, // Disabled
               child: Text('Disabled OutlinedButton'),

@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class AutoCompleteUseCase extends UseCase {
-  AutoCompleteUseCase() ;
+  AutoCompleteUseCase();
 
   @override
   String get name => 'AutoComplete';

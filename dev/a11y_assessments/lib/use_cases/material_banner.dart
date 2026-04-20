@@ -7,7 +7,7 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class MaterialBannerUseCase extends UseCase {
-  MaterialBannerUseCase() ;
+  MaterialBannerUseCase();
 
   @override
   String get name => 'MaterialBanner';

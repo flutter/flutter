@@ -50,7 +50,10 @@ class App extends StatelessWidget {
       title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
-      routes: <String, WidgetBuilder>{'/': (_) => HomePage(initialTags: initialTags), ...routes},
+      routes: <String, WidgetBuilder>{
+        '/': (_) => HomePage(initialTags: initialTags),
+        ...routes,
+      },
     );
   }
 }
