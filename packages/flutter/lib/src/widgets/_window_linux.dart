@@ -92,9 +92,8 @@ class WindowingOwnerLinux extends WindowingOwner {
   RegularWindowController createRegularWindowController({
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    bool resizable = true,
+    required bool resizable,
     String? title,
-    bool decorated = true,
     required RegularWindowControllerDelegate delegate,
   }) {
     final controller = RegularWindowControllerLinux(
@@ -103,7 +102,6 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
     );
     _windows[controller.rootView.viewId] = controller._window;
     _views[controller.rootView.viewId] = controller._view;
@@ -116,10 +114,9 @@ class WindowingOwnerLinux extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    bool resizable = true,
+    required bool resizable,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   }) {
     final controller = DialogWindowControllerLinux(
       owner: this,
@@ -128,7 +125,6 @@ class WindowingOwnerLinux extends WindowingOwner {
       preferredConstraints: preferredConstraints,
       parent: parent,
       title: title,
-      decorated: decorated,
     );
     _windows[controller.rootView.viewId] = controller._window;
     _views[controller.rootView.viewId] = controller._view;

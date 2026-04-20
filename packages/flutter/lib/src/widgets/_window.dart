@@ -217,10 +217,6 @@ abstract class RegularWindowController extends BaseWindowController {
   /// The [title] argument configures the window's title.
   /// If omitted, some platforms might fall back to the app's name.
   ///
-  /// The [decorated] argument configures whether the window has decorations
-  /// such as title bar, borders, etc. If false, the user should provide their
-  /// own decorations.
-  ///
   /// The [delegate] argument can be used to listen to the window's
   /// lifecycle. For example, it can be used to save state before
   /// a window is closed.
@@ -232,7 +228,6 @@ abstract class RegularWindowController extends BaseWindowController {
     required Size preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
     RegularWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -249,7 +244,7 @@ abstract class RegularWindowController extends BaseWindowController {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
+      resizable: true,
     );
   }
 
@@ -284,10 +279,9 @@ abstract class RegularWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   factory RegularWindowController.sizedToContent({
-    bool resizable = true,
+    bool resizable = false,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
     RegularWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -302,7 +296,6 @@ abstract class RegularWindowController extends BaseWindowController {
       preferredConstraints: preferredConstraints,
       resizable: resizable,
       title: title,
-      decorated: decorated,
     );
   }
 
@@ -576,7 +569,6 @@ abstract class DialogWindowController extends BaseWindowController {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
     DialogWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -595,8 +587,8 @@ abstract class DialogWindowController extends BaseWindowController {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
       parent: parent,
+      resizable: true,
     );
   }
 
@@ -613,11 +605,10 @@ abstract class DialogWindowController extends BaseWindowController {
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   factory DialogWindowController.sizedToContent({
-    bool resizable = true,
+    bool resizable = false,
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
     DialogWindowControllerDelegate? delegate,
   }) {
     if (!isWindowingEnabled) {
@@ -631,7 +622,6 @@ abstract class DialogWindowController extends BaseWindowController {
       preferredConstraints: preferredConstraints,
       resizable: resizable,
       title: title,
-      decorated: decorated,
       parent: parent,
     );
   }
@@ -815,6 +805,10 @@ abstract class TooltipWindowController extends BaseWindowController {
     BoxConstraints preferredConstraints = const BoxConstraints(),
     TooltipWindowControllerDelegate? delegate,
   }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final TooltipWindowController controller = owner.createTooltipWindowController(
@@ -950,6 +944,10 @@ abstract class PopupWindowController extends BaseWindowController {
     BoxConstraints? preferredConstraints,
     PopupWindowControllerDelegate? delegate,
   }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     return owner.createPopupWindowController(
@@ -1204,6 +1202,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      resizable: true,
     );
   }
 
@@ -1223,7 +1222,7 @@ abstract class SatelliteWindowController extends BaseWindowController {
     required BaseWindowController parent,
     required WindowPositioner initialPositioner,
     Rect? initialAnchorRect,
-    bool resizable = true,
+    bool resizable = false,
     BoxConstraints? preferredConstraints,
     String? title,
     SatelliteWindowControllerDelegate? delegate,
@@ -1352,9 +1351,8 @@ abstract class WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    bool resizable = true,
+    required bool resizable,
     String? title,
-    bool decorated = true,
   });
 
   /// Creates a [DialogWindowController] with the provided properties.
@@ -1369,10 +1367,9 @@ abstract class WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    bool resizable = true,
+    required bool resizable,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   });
 
   /// Creates a [TooltipWindowController] with the provided properties.
@@ -1422,7 +1419,7 @@ abstract class WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    bool resizable = true,
+    required bool resizable,
     String? title,
   });
 }
@@ -1457,7 +1454,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     bool resizable = true,
     String? title,
-    bool decorated = true,
   }) {
     throw UnsupportedError(errorMessage);
   }
@@ -1470,7 +1466,6 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
     bool resizable = true,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   }) {
     throw UnsupportedError(errorMessage);
   }
