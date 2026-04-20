@@ -177,4 +177,29 @@ class GenerateEngineFlagsManifestTaskTest {
         assertTrue(manifestOutputFile.exists(), "Output file should be created")
         assertEquals(expectedContent, manifestOutputFile.readText())
     }
+
+    @Test
+    fun generateHandlesArgsWithSingleQuotesCorrectly() {
+        val shellArgs = "[\"--some-arg='a'\"]"
+        val manifestOutputFile = File(testProjectDir, "AndroidManifest.xml")
+        val expectedContent =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <application>
+                    <meta-data
+                        android:name="androidEngineShellArgs"
+                        android:value="${shellArgs.replace("'", "&apos;").replace("\"", "&quot;")}" />
+                </application>
+            </manifest>
+            """.trimIndent()
+
+        task.shellArgs.set(shellArgs)
+        task.manifestOutputFile.set(manifestOutputFile)
+
+        task.generate()
+
+        assertTrue(manifestOutputFile.exists(), "Output file should be created")
+        assertEquals(expectedContent, manifestOutputFile.readText())
+    }
 }
