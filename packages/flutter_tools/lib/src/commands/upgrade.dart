@@ -306,7 +306,8 @@ class UpgradeCommandRunner {
   }
 
   @protected
-  Future<bool> hasUncommittedChanges(FlutterVersion flutterVersion) async {
+  @visibleForTesting
+  Future<bool> hasUncommittedChanges(FlutterVersion version) async {
     try {
       final RunResult result = await globals.git.run(
         ['status', '-s'],
@@ -317,24 +318,28 @@ class UpgradeCommandRunner {
       if (output.isEmpty) {
         return false;
       }
-      if (flutterVersion.channel == 'stable') {
-        return true;
-      }
-      final List<String> lines = output.split('\n');
-      for (final line in lines) {
-        final String trimmed = line.trim();
-        if (trimmed.isEmpty) {
-          continue;
+
+      // On non-stable channels, we ignore changes to pubspec.lock files.
+      if (version.channel != 'stable') {
+        final List<String> lines = output.split('\n');
+        var hasOtherChanges = false;
+        for (final line in lines) {
+          final String trimmed = line.trim();
+          if (trimmed.isEmpty) {
+            continue;
+          }
+          // Check if the file is pubspec.lock. We check for a leading space or
+          // directory separator to avoid matching files like 'another_pubspec.lock'.
+          if (trimmed.endsWith(' pubspec.lock') || trimmed.endsWith('/pubspec.lock')) {
+            continue;
+          }
+          hasOtherChanges = true;
+          break;
         }
-        // Ignore modifications to pubspec.lock files on non-stable branches.
-        // These files are automatically updated with the active Dart SDK dev
-        // constraints during internal tool operations, and should not block
-        // the automatic upgrade workflow.
-        if (!trimmed.endsWith('pubspec.lock')) {
-          return true;
-        }
+        return hasOtherChanges;
       }
-      return false;
+
+      return true;
     } on ProcessException catch (error) {
       throwToolExit(
         'The tool could not verify the status of the current flutter checkout. '
