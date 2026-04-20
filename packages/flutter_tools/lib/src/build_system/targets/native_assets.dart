@@ -56,18 +56,18 @@ class BuildHooks extends Target {
     }
     final FlutterNativeAssetsBuildRunner buildRunner =
         _buildRunner ?? await createFlutterNativeAssetsBuildRunner(environment);
-    final ({SerializedBuildResults results, List<Uri> dependencies}) record =
-        await runFlutterSpecificBuildHooks(
-          environmentDefines: environment.defines,
-          buildRunner: buildRunner,
-          targetPlatform: targetPlatform,
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
-          buildDataAssets: true,
-        );
-    final SerializedBuildResults results = record.results;
-    final List<Uri> dependencies = record.dependencies;
+    final (
+      results: SerializedBuildResults results,
+      dependencies: List<Uri> dependencies,
+    ) = await runFlutterSpecificBuildHooks(
+      environmentDefines: environment.defines,
+      buildRunner: buildRunner,
+      targetPlatform: targetPlatform,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+      buildDataAssets: true,
+    );
 
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(resultFilename);
     if (!dartBuildOutputJsonFile.parent.existsSync()) {

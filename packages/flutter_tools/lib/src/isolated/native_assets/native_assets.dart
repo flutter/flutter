@@ -87,16 +87,18 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 
   final buildStart = DateTime.now();
 
-  final ({SerializedBuildResults results, List<Uri> dependencies}) buildRecord =
-      await runFlutterSpecificBuildHooks(
-        environmentDefines: environmentDefines,
-        buildRunner: buildRunner,
-        targetPlatform: targetPlatform,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        buildCodeAssets: buildCodeAssets,
-        buildDataAssets: buildDataAssets,
-      );
+  final (
+    results: SerializedBuildResults results,
+    dependencies: List<Uri> dependencies,
+  ) = await runFlutterSpecificBuildHooks(
+    environmentDefines: environmentDefines,
+    buildRunner: buildRunner,
+    targetPlatform: targetPlatform,
+    projectUri: projectUri,
+    fileSystem: fileSystem,
+    buildCodeAssets: buildCodeAssets,
+    buildDataAssets: buildDataAssets,
+  );
 
   final DartHooksResult linkResult = await runFlutterSpecificLinkHooks(
     environmentDefines: environmentDefines,
@@ -106,7 +108,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     fileSystem: fileSystem,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
-    buildResults: buildRecord.results,
+    buildResults: results,
     recordedUsesFile: recordedUsesFile,
   );
 
@@ -115,7 +117,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     buildEnd: linkResult.buildEnd,
     codeAssets: linkResult.codeAssets,
     dataAssets: linkResult.dataAssets,
-    dependencies: <Uri>{...buildRecord.dependencies, ...linkResult.dependencies}.toList(),
+    dependencies: <Uri>{...dependencies, ...linkResult.dependencies}.toList(),
   );
 }
 
@@ -300,21 +302,23 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
       linkResult = await _link(buildRunner, extensions, buildResult, recordedUsesFile);
 
       if (target is CodeAssetTarget) {
-        codeAssets.addAll(
-          _filterCodeAssets(
-            linkResult.encodedAssets,
-            Target.fromArchitectureAndOS(target.architecture, target.os),
-          ),
-        );
-        codeAssets.addAll(
-          _filterCodeAssets(
-            buildResult.encodedAssets,
-            Target.fromArchitectureAndOS(target.architecture, target.os),
-          ),
-        );
+        codeAssets
+          ..addAll(
+            _filterCodeAssets(
+              linkResult.encodedAssets,
+              Target.fromArchitectureAndOS(target.architecture, target.os),
+            ),
+          )
+          ..addAll(
+            _filterCodeAssets(
+              buildResult.encodedAssets,
+              Target.fromArchitectureAndOS(target.architecture, target.os),
+            ),
+          );
       }
-      dataAssets.addAll(_filterDataAssets(linkResult.encodedAssets));
-      dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
+      dataAssets
+        ..addAll(_filterDataAssets(linkResult.encodedAssets))
+        ..addAll(_filterDataAssets(buildResult.encodedAssets));
       dependencies.addAll(linkResult.dependencies);
     } else {
       if (target is CodeAssetTarget) {
