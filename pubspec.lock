@@ -502,10 +502,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: "1da87338673b2c0618cd65ad07cebb6244f69e70e9ee0aad3288605eba1e18dc"
+      sha256: "132d5ae53e6f1e313f5877ff9664ed8a333e8f4807de0717a00d8a6f1f37ddaa"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.2.0"
   html:
     dependency: "direct main"
     description:
