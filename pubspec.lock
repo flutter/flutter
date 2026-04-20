@@ -178,6 +178,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  dart_skills_lint:
+    dependency: transitive
+    description:
+      path: "tool/dart_skills_lint"
+      ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      resolved-ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      url: "https://github.com/flutter/skills"
+    source: git
+    version: "0.2.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -558,10 +567,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "9922a1ad59ac5afb154cc948aa6ded01987a75003651d0a2866afc23f4da624e"
+      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.3"
+    version: "9.3.0"
   package_config:
     dependency: "direct main"
     description:

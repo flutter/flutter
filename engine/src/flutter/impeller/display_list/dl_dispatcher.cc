@@ -1085,9 +1085,7 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     return;
   }
 
-  if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = paint_.stroke;
-  }
+  properties.stroke = paint_.GetStroke();
 
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so

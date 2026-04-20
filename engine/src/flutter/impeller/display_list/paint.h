@@ -85,6 +85,13 @@ struct Paint {
 
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 
+  /// @brief   Return an optional StrokeParameters if this Paint is a stroked
+  ///          Paint, otherwise return a nullopt.
+  /// @return  An optional set of StrokeParameters
+  std::optional<StrokeParameters> GetStroke() const {
+    return (style == Style::kStroke) ? std::optional(stroke) : std::nullopt;
+  }
+
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
   /// @return     The filter-wrapped contents. If there are no filters that need
