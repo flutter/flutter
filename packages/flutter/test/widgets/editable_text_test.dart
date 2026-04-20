@@ -4111,10 +4111,15 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // The scroll offset should decrease as the viewport follows the base handle
-      // upwards. This verifies that the viewport is no longer snapping to the
-      // selection extent at the bottom.
-      expect(scrollController.offset, lessThan(offsetBeforeDrag));
+      // The scroll offset remains stationary during a drag because automated
+      // scrolling is disabled. This prevents the viewport from snapping to
+      // the selection extent.
+      expect(
+        scrollController.offset,
+        lessThan(offsetBeforeDrag),
+        reason:
+            'The viewport should follow the base handle upwards instead of snapping to the extent.',
+      );
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
