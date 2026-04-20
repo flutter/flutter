@@ -588,9 +588,8 @@ class AndroidDevice extends Device {
     final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
     if (previousEngineShellArguments != null) {
       shouldRegenerateEngineShellArgsManifest =
-          !previousEngineShellArguments.containsAll(androidShellArguments) ||
-          !androidShellArguments.containsAll(previousEngineShellArguments) ||
-          previousEngineShellArguments.length != androidShellArguments.length;
+          previousEngineShellArguments.length != androidShellArguments.length ||
+          !previousEngineShellArguments.containsAll(androidShellArguments);
     } else if (androidShellArguments.isNotEmpty) {
       shouldRegenerateEngineShellArgsManifest = true;
     }

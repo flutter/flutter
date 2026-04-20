@@ -21,6 +21,7 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
     @TaskAction
     fun generate() {
         val outputFile = manifestOutputFile.get().asFile
+        val cleanedShellArgs = shellArgs.get().replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;")
         val content =
             """
             <?xml version="1.0" encoding="utf-8"?>
@@ -28,7 +29,7 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
                 <application>
                     <meta-data
                         android:name="androidEngineShellArgs"
-                        android:value="${shellArgs.get().replace("&", "&amp;").replace("\"", "&quot;")}" />
+                        android:value="$cleanedShellArgs" />
                 </application>
             </manifest>
             """.trimIndent()
