@@ -52,5 +52,13 @@ std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateSkiaMetal() {
   return nullptr;
 }
 #endif
+#ifndef IMPELLER_ENABLE_METAL
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateImpellerMetal() {
+  return nullptr;
+}
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateImpellerMetalSDF() {
+  return nullptr;
+}
+#endif
 
 }  // namespace flutter::testing
