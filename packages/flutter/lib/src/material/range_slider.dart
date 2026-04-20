@@ -1270,7 +1270,11 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       ..maxLines = 1
       ..ellipsis =
           '\u2026' // Standard Unicode ellipsis
-      ..layout(maxWidth: safeMaxWidth);
+      ..layout(
+        maxWidth: screenSize.width.isFinite && screenSize.width > 0
+            ? safeMaxWidth
+            : double.infinity,
+      );
 
     // Changing the textDirection can result in the layout changing, because the
     // bidi algorithm might line up the glyphs differently which can result in

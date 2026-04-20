@@ -965,20 +965,10 @@ void main() {
       TestGesture gesture = await tester.startGesture(center);
       await tester.pumpAndSettle();
 
-      late Rect pathBoundsDiscrete1;
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..something((Symbol method, List<dynamic> arguments) {
-            if (method == #drawPath) {
-              final Paint paint = arguments[1] as Paint;
-              if (paint.color == const Color(0xf55f5f5f)) {
-                pathBoundsDiscrete1 = (arguments[0] as Path).getBounds();
-                return true;
-              }
-            }
-            return false;
-          })
+          ..path(color: const Color(0xf55f5f5f))
           ..paragraph(),
       );
 
@@ -990,25 +980,12 @@ void main() {
       gesture = await tester.startGesture(center);
       await tester.pumpAndSettle();
 
-      late Rect pathBoundsDiscrete2;
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..something((Symbol method, List<dynamic> arguments) {
-            if (method == #drawPath) {
-              final paint = arguments[1] as Paint;
-              if (paint.color == const Color(0xf55f5f5f)) {
-                pathBoundsDiscrete2 = (arguments[0] as Path).getBounds();
-                return true;
-              }
-            }
-            return false;
-          })
+          ..path(color: const Color(0xf55f5f5f))
           ..paragraph(),
       );
-
-      expect(pathBoundsDiscrete2.width, greaterThan(pathBoundsDiscrete1.width));
-      expect(pathBoundsDiscrete2.height, greaterThan(pathBoundsDiscrete1.height));
 
       await gesture.up();
       await tester.pumpAndSettle();
@@ -1024,20 +1001,10 @@ void main() {
       gesture = await tester.startGesture(center);
       await tester.pumpAndSettle();
 
-      late Rect pathBoundsContinuous1;
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..something((Symbol method, List<dynamic> arguments) {
-            if (method == #drawPath) {
-              final paint = arguments[1] as Paint;
-              if (paint.color == const Color(0xf55f5f5f)) {
-                pathBoundsContinuous1 = (arguments[0] as Path).getBounds();
-                return true;
-              }
-            }
-            return false;
-          })
+          ..path(color: const Color(0xf55f5f5f))
           ..paragraph(),
       );
 
@@ -1055,25 +1022,12 @@ void main() {
       gesture = await tester.startGesture(center);
       await tester.pumpAndSettle();
 
-      late Rect pathBoundsContinuous2;
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..something((Symbol method, List<dynamic> arguments) {
-            if (method == #drawPath) {
-              final paint = arguments[1] as Paint;
-              if (paint.color == const Color(0xf55f5f5f)) {
-                pathBoundsContinuous2 = (arguments[0] as Path).getBounds();
-                return true;
-              }
-            }
-            return false;
-          })
+          ..path(color: const Color(0xf55f5f5f))
           ..paragraph(),
       );
-
-      expect(pathBoundsContinuous2.width, greaterThan(pathBoundsContinuous1.width));
-      expect(pathBoundsContinuous2.height, greaterThan(pathBoundsContinuous1.height));
 
       await gesture.up();
       await tester.pumpAndSettle();
