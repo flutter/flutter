@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CheckBoxListTile extends UseCase {
-  CheckBoxListTile() : super(useCaseCategory: UseCaseCategory.core);
+  CheckBoxListTile();
 
   @override
   String get name => 'CheckBoxListTile';
 
   @override
   String get route => '/check-box-list-tile';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();

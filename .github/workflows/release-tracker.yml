@@ -28,11 +28,15 @@ jobs:
     steps:
       - name: Create Tracking Issue
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          VERSION: ${{ inputs.version }}
+          CHANNEL: ${{ inputs.release_channel }}
+          HOTFIX: ${{ inputs.hotfix }}
         with:
           script: |
-            const version = "${{ inputs.version }}";
-            const channel = "${{ inputs.release_channel }}";
-            const hotfix = "${{ inputs.hotfix }}";
+            const version = process.env.VERSION;
+            const channel = process.env.CHANNEL;
+            const hotfix = process.env.HOTFIX;
             const releaseType = hotfix === "true" ? "hotfix" : "initial";
 
             let versionValidator;
