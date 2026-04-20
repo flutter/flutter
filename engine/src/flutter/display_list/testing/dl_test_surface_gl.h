@@ -26,9 +26,9 @@ class DlOpenGLSurfaceProvider : public DlSurfaceProvider {
       size_t height,
       PixelFormat format) const override;
   const std::string backend_name() const override { return "OpenGL"; }
-  BackendType backend_type() const override { return kOpenGlBackend; }
+  BackendType backend_type() const override { return BackendType::kSkiaOpenGL; }
   bool supports(PixelFormat format) const override {
-    return format == kN32PremulPixelFormat;
+    return format == kN32Premul;
   }
 
  private:

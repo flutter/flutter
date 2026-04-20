@@ -57,6 +57,8 @@ DlPaint GetPaintForRun(unsigned attributes) {
 
   if (attributes & kHairlineStroke) {
     paint.setStrokeWidth(0.0f);
+  } else if (attributes & kWideStroke) {
+    paint.setStrokeWidth(10.0f);
   } else {
     paint.setStrokeWidth(1.0f);
   }
@@ -70,10 +72,12 @@ void AnnotateAttributes(unsigned attributes,
                         const DisplayListAttributeFlags flags) {
   if (flags.always_stroked()) {
     state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
+    state.counters["WideStroke"] = attributes & kWideStroke ? 1 : 0;
   }
   if (flags.applies_style()) {
-    state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
     state.counters["StrokedStyle"] = attributes & kStrokedStyle ? 1 : 0;
+    state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
+    state.counters["WideStroke"] = attributes & kWideStroke ? 1 : 0;
     state.counters["FilledStyle"] = attributes & kFilledStyle ? 1 : 0;
   }
   if (flags.applies_anti_alias()) {
@@ -111,7 +115,6 @@ void BM_DrawLine(benchmark::State& state,
 
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   state.counters["DrawCallCount"] = kLinesToDraw;
   for (size_t i = 0; i < kLinesToDraw; i++) {
@@ -123,13 +126,13 @@ void BM_DrawLine(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawLine-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Draws a series of square rects of the requested width across
@@ -149,7 +152,6 @@ void BM_DrawRect(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   // As rects have DlScalar dimensions, we want to ensure that we also
   // draw rects with non-integer position and size
@@ -174,13 +176,13 @@ void BM_DrawRect(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawRect-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Draws a series of ovals of the requested height with aspect ratio 3:2 across
@@ -200,7 +202,6 @@ void BM_DrawOval(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   const DlPoint offset(0.5f, 0.5f);
   DlPoint origin;
@@ -222,13 +223,13 @@ void BM_DrawOval(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawOval-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Draws a series of circles of the requested radius across
@@ -248,7 +249,6 @@ void BM_DrawCircle(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlScalar radius = length / 2.0f;
   const DlPoint offset(0.5f, 0.5f);
@@ -270,13 +270,13 @@ void BM_DrawCircle(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawCircle-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Draws a series of rounded rects of the requested width across
@@ -297,7 +297,6 @@ void BM_DrawRRect(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlRoundingRadii radii;
   switch (type) {
@@ -344,13 +343,31 @@ void BM_DrawRRect(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawRRect-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
+}
+
+void BM_DrawSimpleRRect(benchmark::State& state,
+                        BackendType backend_type,
+                        unsigned attributes) {
+  BM_DrawRRect(state, backend_type, attributes, RRectType::kSimple);
+}
+
+void BM_DrawNinePatchRRect(benchmark::State& state,
+                           BackendType backend_type,
+                           unsigned attributes) {
+  BM_DrawRRect(state, backend_type, attributes, RRectType::kNinePatch);
+}
+
+void BM_DrawComplexRRect(benchmark::State& state,
+                         BackendType backend_type,
+                         unsigned attributes) {
+  BM_DrawRRect(state, backend_type, attributes, RRectType::kComplex);
 }
 
 // Draws a series of "DR" rects of the requested width across
@@ -374,7 +391,6 @@ void BM_DrawDRRect(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlRoundingRadii radii;
   switch (type) {
@@ -427,13 +443,13 @@ void BM_DrawDRRect(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawDRRect-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 void BM_DrawArc(benchmark::State& state,
@@ -450,7 +466,6 @@ void BM_DrawArc(benchmark::State& state,
   size_t canvas_size = length * 2;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlScalar starting_angle = 0.0f;
   DlPoint offset(0.5f, 0.5f);
@@ -482,13 +497,13 @@ void BM_DrawArc(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawArc-" +
                   std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Returns a list of DlPoints that represent `n` points equally spaced out
@@ -678,7 +693,6 @@ void BM_DrawPath(benchmark::State& state,
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlPathBuilder path_builder;
 
@@ -699,18 +713,18 @@ void BM_DrawPath(benchmark::State& state,
   auto display_list = builder.Build();
 
   // Prime any path conversions
-  canvas->DrawDisplayList(display_list);
+  surface->RenderDisplayList(display_list);
   surface->FlushSubmitCpuSync();
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawPath-" + label +
                   "-" + std::to_string(state.range(0)) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Returns a set of vertices that describe a circle that has a
@@ -823,7 +837,6 @@ void BM_DrawVertices(benchmark::State& state,
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlPoint center = DlPoint(length / 2.0f, length / 2.0f);
 
@@ -850,14 +863,14 @@ void BM_DrawVertices(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawVertices-" +
                   std::to_string(disc_count) + "-" + VertexModeToString(mode) +
                   ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Generate `count` test points.
@@ -933,7 +946,6 @@ void BM_DrawPoints(benchmark::State& state,
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   size_t point_count = state.range(0);
   state.SetComplexityN(point_count);
@@ -947,14 +959,14 @@ void BM_DrawPoints(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawPoints-" +
                   PointModeToString(mode) + "-" + std::to_string(point_count) +
                   ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 sk_sp<SkImage> ImageFromBitmapWithNewID(const SkBitmap& bitmap) {
@@ -984,7 +996,6 @@ void BM_DrawImage(benchmark::State& state,
   size_t canvas_size = 2 * bitmap_size;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   sk_sp<SkImage> image;
   std::shared_ptr<DlSurfaceInstance> offscreen_instance;
@@ -1000,8 +1011,7 @@ void BM_DrawImage(benchmark::State& state,
   } else {
     offscreen_instance =
         surface_provider->MakeOffscreenSurface(bitmap_size, bitmap_size);
-    offscreen = offscreen_instance->sk_surface();
-    offscreen->getCanvas()->clear(SK_ColorRED);
+    offscreen_instance->GetCanvas()->Clear(DlColor::kRed());
   }
 
   const DlPoint offset(0.5f, 0.5f);
@@ -1025,14 +1035,14 @@ void BM_DrawImage(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawImage-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
                   std::to_string(bitmap_size) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 std::string ConstraintToString(DlSrcRectConstraint constraint) {
@@ -1067,7 +1077,6 @@ void BM_DrawImageRect(benchmark::State& state,
   size_t canvas_size = 2 * bitmap_size;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   sk_sp<SkImage> image;
   std::shared_ptr<DlSurfaceInstance> offscreen_instance;
@@ -1083,8 +1092,7 @@ void BM_DrawImageRect(benchmark::State& state,
   } else {
     offscreen_instance =
         surface_provider->MakeOffscreenSurface(bitmap_size, bitmap_size);
-    offscreen = offscreen_instance->sk_surface();
-    offscreen->getCanvas()->clear(SK_ColorRED);
+    offscreen_instance->GetCanvas()->Clear(DlColor::kRed());
   }
 
   const DlPoint offset(0.5f, 0.5f);
@@ -1112,7 +1120,7 @@ void BM_DrawImageRect(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
@@ -1120,7 +1128,7 @@ void BM_DrawImageRect(benchmark::State& state,
                   (upload_bitmap ? "Upload-" : "Texture-") +
                   ConstraintToString(constraint) + "-" +
                   std::to_string(bitmap_size) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 std::string FilterModeToString(const DlFilterMode mode) {
@@ -1155,7 +1163,6 @@ void BM_DrawImageNine(benchmark::State& state,
   size_t canvas_size = 2 * bitmap_size;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlIRect center = DlIRect::MakeXYWH(bitmap_size / 4, bitmap_size / 4,
                                      bitmap_size / 2, bitmap_size / 2);
@@ -1174,8 +1181,7 @@ void BM_DrawImageNine(benchmark::State& state,
   } else {
     offscreen_instance =
         surface_provider->MakeOffscreenSurface(bitmap_size, bitmap_size);
-    offscreen = offscreen_instance->sk_surface();
-    offscreen->getCanvas()->clear(SK_ColorRED);
+    offscreen_instance->GetCanvas()->Clear(DlColor::kRed());
   }
 
   const DlPoint offset(0.5f, 0.5f);
@@ -1200,7 +1206,7 @@ void BM_DrawImageNine(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
@@ -1208,7 +1214,7 @@ void BM_DrawImageNine(benchmark::State& state,
                   (upload_bitmap ? "Upload-" : "Texture-") +
                   FilterModeToString(filter) + "-" +
                   std::to_string(bitmap_size) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Draws a series of glyph runs with 32 glyphs in each run. The number of runs
@@ -1231,7 +1237,6 @@ void BM_DrawTextBlob(benchmark::State& state,
   size_t canvas_size = kFixedCanvasSize;
   surface_provider->InitializeSurface(canvas_size, canvas_size);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   state.SetComplexityN(draw_calls);
   state.counters["DrawCallCount_Varies"] = draw_calls;
@@ -1247,13 +1252,13 @@ void BM_DrawTextBlob(benchmark::State& state,
   auto display_list = builder.Build();
 
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-DrawTextBlob-" +
                   std::to_string(draw_calls) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Draw the shadow for a 10-sided regular polygon where the polygon's
@@ -1278,7 +1283,6 @@ void BM_DrawShadow(benchmark::State& state,
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   DlPathBuilder path_builder;
 
@@ -1314,12 +1318,12 @@ void BM_DrawShadow(benchmark::State& state,
   auto display_list = builder.Build();
 
   // Prime the path conversion.
-  canvas->DrawDisplayList(display_list);
+  surface->RenderDisplayList(display_list);
   surface->FlushSubmitCpuSync();
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
@@ -1327,7 +1331,7 @@ void BM_DrawShadow(benchmark::State& state,
                   VerbToString(type) + "-" +
                   (transparent_occluder ? "Transparent-" : "Opaque-") +
                   std::to_string(elevation) + "-" + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
 // Calls saveLayer N times from the root canvas layer, and optionally calls
@@ -1349,7 +1353,6 @@ void BM_SaveLayer(benchmark::State& state,
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
-  auto canvas = surface->GetCanvas();
 
   size_t save_layer_calls = state.range(0);
 
@@ -1373,27 +1376,79 @@ void BM_SaveLayer(benchmark::State& state,
 
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
-    canvas->DrawDisplayList(display_list);
+    surface->RenderDisplayList(display_list);
     surface->FlushSubmitCpuSync();
   }
 
   auto filename = surface_provider->backend_name() + "-SaveLayer-" +
                   std::to_string(save_depth) + "-" +
                   std::to_string(save_layer_calls) + ".png";
-  surface_provider->Snapshot(filename);
+  surface->Snapshot(filename);
 }
 
+#ifdef DISPLAY_LIST_BENCHMARK_ALL_OPS
+
 #ifdef ENABLE_SOFTWARE_BENCHMARKS
-RUN_DISPLAYLIST_BENCHMARKS(Software)
+RUN_DISPLAYLIST_BENCHMARKS(SkiaSoftware)
 #endif
 
 #ifdef ENABLE_OPENGL_BENCHMARKS
-RUN_DISPLAYLIST_BENCHMARKS(OpenGL)
+RUN_DISPLAYLIST_BENCHMARKS(SkiaOpenGL)
 #endif
 
 #ifdef ENABLE_METAL_BENCHMARKS
-RUN_DISPLAYLIST_BENCHMARKS(Metal)
+RUN_DISPLAYLIST_BENCHMARKS(SkiaMetal)
+RUN_DISPLAYLIST_BENCHMARKS(ImpellerMetal)
+RUN_DISPLAYLIST_BENCHMARKS(ImpellerMetalSDF)
 #endif
+
+#else  // DISPLAY_LIST_BENCHMARK_ALL_OPS
+
+// clang-format off
+
+#define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
+  BENCHMARK_CAPTURE(BM_Draw##TYPE, BACKEND,                                  \
+                    BackendType::k##BACKEND,                                 \
+                    ATTRIBUTES)                                              \
+      ->RangeMultiplier(4)                                                   \
+      ->Range(16, 1024)                                                      \
+      ->UseRealTime()                                                        \
+      ->Unit(benchmark::kMillisecond);
+
+#define DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                              \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kStrokedStyle | kHairlineStroke)  \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kStrokedStyle | kWideStroke)
+
+#define DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, TYPE)                        \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kFilledStyle)                     \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kStrokedStyle | kHairlineStroke)  \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kStrokedStyle | kWideStroke)      \
+
+#define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
+  DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Rect)                              \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Oval)                              \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Circle)                            \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRRect)                       \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRRect)
+
+// clang-format on
+
+#ifdef ENABLE_SOFTWARE_BENCHMARKS
+DRAW_BENCHMARK_PRIMITIVE_SUITE(SkiaSoftware)
+#endif
+
+#ifdef ENABLE_OPENGL_BENCHMARKS
+DRAW_BENCHMARK_PRIMITIVE_SUITE(SkiaOpenGL)
+#endif
+
+#ifdef ENABLE_METAL_BENCHMARKS
+DRAW_BENCHMARK_PRIMITIVE_SUITE(SkiaMetal)
+DRAW_BENCHMARK_PRIMITIVE_SUITE(ImpellerMetal)
+DRAW_BENCHMARK_PRIMITIVE_SUITE(ImpellerMetalSDF)
+#endif
+
+#endif  // DISPLAY_LIST_BENCHMARK_ALL_OPS
 
 }  // namespace testing
 }  // namespace flutter

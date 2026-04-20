@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_METAL_H_
-#define FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_METAL_H_
+#ifndef FLUTTER_DISPLAY_LIST_TESTING_SKIA_DL_TEST_SURFACE_PROVIDER_SKIA_METAL_H_
+#define FLUTTER_DISPLAY_LIST_TESTING_SKIA_DL_TEST_SURFACE_PROVIDER_SKIA_METAL_H_
 
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
+
 #include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/testing/test_metal_surface.h"
@@ -15,10 +16,11 @@ namespace testing {
 
 using MetalScreenshotter = impeller::testing::MetalScreenshotter;
 
-class DlMetalSurfaceProvider : public DlSurfaceProvider {
+class DlSurfaceProviderSkiaMetal : public DlSurfaceProvider {
  public:
-  explicit DlMetalSurfaceProvider() : DlSurfaceProvider() {}
-  virtual ~DlMetalSurfaceProvider() = default;
+  explicit DlSurfaceProviderSkiaMetal(bool use_sdfs)
+      : DlSurfaceProvider(), use_sdfs_(use_sdfs) {}
+  virtual ~DlSurfaceProviderSkiaMetal() = default;
 
   bool InitializeSurface(size_t width,
                          size_t height,
@@ -29,9 +31,12 @@ class DlMetalSurfaceProvider : public DlSurfaceProvider {
       size_t height,
       PixelFormat format) const override;
   const std::string backend_name() const override { return "Metal"; }
-  BackendType backend_type() const override { return kMetalBackend; }
+  BackendType backend_type() const override {
+    return use_sdfs_ ? BackendType::kImpellerMetalSDF
+                     : BackendType::kImpellerMetal;
+  }
   bool supports(PixelFormat format) const override {
-    return format == kN32PremulPixelFormat;
+    return format == kN32Premul;
   }
   bool supports_impeller() const override { return true; }
   sk_sp<DlPixelData> ImpellerSnapshot(const sk_sp<DisplayList>& list,
@@ -46,6 +51,7 @@ class DlMetalSurfaceProvider : public DlSurfaceProvider {
   // autorelease pool.
   fml::ScopedNSAutoreleasePool autorelease_pool_;
 
+  bool use_sdfs_;
   std::unique_ptr<TestMetalContext> metal_context_;
   std::shared_ptr<DlSurfaceInstance> metal_surface_;
   mutable std::unique_ptr<MetalScreenshotter> snapshotter_;
@@ -57,4 +63,4 @@ class DlMetalSurfaceProvider : public DlSurfaceProvider {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_METAL_H_
+#endif  // FLUTTER_DISPLAY_LIST_TESTING_SKIA_DL_TEST_SURFACE_PROVIDER_SKIA_METAL_H_
