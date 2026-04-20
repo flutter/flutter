@@ -335,5 +335,8 @@ if (enable_unittests) {
       "//flutter/display_list",
       "//third_party/googletest:gmock",
     ]
+    if (impeller_supports_rendering) {
+      public_deps += [ "//flutter/impeller/display_list" ]
+    }
   }
 }

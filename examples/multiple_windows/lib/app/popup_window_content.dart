@@ -34,14 +34,8 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
   Widget build(BuildContext context) {
     return RepeatingAnimationBuilder(
       animatable: TweenSequence<double>([
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 0.0, end: 1.0),
-          weight: 50.0,
-        ),
-        TweenSequenceItem(
-          tween: Tween<double>(begin: 1.0, end: 0.0),
-          weight: 50.0,
-        ),
+        TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 1.0), weight: 50.0),
+        TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.0), weight: 50.0),
       ]),
       duration: const Duration(seconds: 1),
       builder: (context, double value, Widget? child) {
@@ -50,24 +44,17 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
           alwaysSizeToContent: true,
           child: Material(
             child: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
                 ),
                 boxShadow: [
-                  BoxShadow(
-                    color: Color(0x4D000000),
-                    blurRadius: 12.0,
-                    offset: Offset(0, 4),
-                  ),
+                  BoxShadow(color: Color(0x4D000000), blurRadius: 12.0, offset: Offset(0, 4)),
                 ],
               ),
-              padding: EdgeInsets.symmetric(
-                horizontal: padding,
-                vertical: padding,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -80,11 +67,7 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
                           shape: BoxShape.circle,
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Icons.info,
-                          color: Color(0xFFFFFFFF),
-                          size: 20,
-                        ),
+                        child: const Icon(Icons.info, color: Color(0xFFFFFFFF), size: 20),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -105,17 +88,11 @@ class _PopupWindowContentState extends State<PopupWindowContent> {
                       color: const Color(0x33FFFFFF),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: TextField(
                       controller: _textController,
                       focusNode: _focusNode,
-                      style: const TextStyle(
-                        color: Color(0xFFFFFFFF),
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 14),
                       cursorColor: const Color(0xFFFFFFFF),
                     ),
                   ),

@@ -64,10 +64,3 @@ abstract class LayerImageFilter implements ui.ImageFilter {
   @override
   String get debugShortDescription => toString();
 }
-
-/// A [ui.Path] with a helper method to convert it to an SVG string.
-abstract class LayerPath implements ui.Path {
-  // In order to properly clip platform views with paths, we need to be able to get a
-  // string representation of them.
-  String toSvgString();
-}

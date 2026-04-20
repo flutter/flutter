@@ -53,7 +53,7 @@ TEST_P(AiksTest, VerticesGeometryUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -76,7 +76,7 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
   paint.setColorSource(
@@ -101,7 +101,7 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -129,7 +129,7 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));

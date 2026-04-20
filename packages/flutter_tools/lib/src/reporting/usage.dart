@@ -291,6 +291,7 @@ class _DefaultUsage implements Usage {
     if (suppressAnalytics) {
       return;
     }
+    // ignore: avoid_type_to_string
     _analytics.sendException(exception.runtimeType.toString());
   }
 
