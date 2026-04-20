@@ -928,10 +928,7 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
 
   const Scalar kTriangleHeight = 100;
   DlRoundRect rrect = DlRoundRect::MakeRectRadii(
-      DlRect::MakeXYWH(-kTriangleHeight / 2.0f, -kTriangleHeight / 2.0f,
-                       kTriangleHeight, kTriangleHeight),
-      radii  //
-  );
+      DlRect::MakeCircleBounds({0, 0}, kTriangleHeight * 0.5f), radii);
   // We use the factory method to convert the rrect to a path so that it
   // uses the legacy conics for legacy golden output.
   DlPath rrect_path = DlPath::MakeRoundRect(rrect);
