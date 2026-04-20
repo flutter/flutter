@@ -121,7 +121,7 @@ public final class ResizeSynchronizer: NSObject {
   @objc public nonisolated func performCommit(
     forSize size: CGSize,
     afterDelay delay: TimeInterval,
-    notify: @MainActor @Sendable @escaping () -> Void
+    notify: @MainActor @escaping () -> Void
   ) {
 
     // If we're currently resizing, process immediately.

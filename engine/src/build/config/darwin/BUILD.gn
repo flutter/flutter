@@ -58,7 +58,7 @@ config("compiler") {
   # source-compatible. If any public API *is* written in Swift, it's possible
   # we may need to prepare concurrent Swift 5 and 6 builds during a transition
   # period.
-  _swift_version = "5"
+  _swift_version = "6"
 
   # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
   # Look up xcode_version in apple_sdk.gni
@@ -75,7 +75,5 @@ config("compiler") {
     _target_triplet,
     "-swift-version",
     _swift_version,
-    "-strict-concurrency",
-    "complete",
   ]
 }
