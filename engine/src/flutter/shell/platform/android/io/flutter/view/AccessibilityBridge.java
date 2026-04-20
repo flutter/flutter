@@ -2030,6 +2030,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_36 && object.didChangeCheckedState()) {
         sendWindowContentChangeEvent(object.id, AccessibilityEvent.CONTENT_CHANGE_TYPE_CHECKED);
       }
+      if (Build.VERSION.SDK_INT >= API_LEVELS.API_36 && object.didChangeExpandState()) {
+        sendWindowContentChangeEvent(object.id, AccessibilityEvent.CONTENT_CHANGE_TYPE_EXPANDED);
+      }
       if (accessibilityFocusedSemanticsNode != null
           && accessibilityFocusedSemanticsNode.id == object.id
           && !object.hadFlag(Flag.IS_SELECTED)
@@ -2746,6 +2749,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (hasFlag(Flag.IS_CHECKED) != hadFlag(Flag.IS_CHECKED))
           || (hasFlag(Flag.IS_CHECK_STATE_MIXED) != hadFlag(Flag.IS_CHECK_STATE_MIXED))
           || (hasFlag(Flag.IS_TOGGLED) != hadFlag(Flag.IS_TOGGLED));
+    }
+
+    private boolean didChangeExpandState() {
+      if (!hadPreviousConfig) {
+        return false;
+      }
+      return (hasFlag(Flag.IS_EXPANDED) != hadFlag(Flag.IS_EXPANDED))
+          || (hasFlag(Flag.HAS_EXPANDED_STATE) != hadFlag(Flag.HAS_EXPANDED_STATE));
     }
 
     private void log(@NonNull String indent, boolean recursive) {
