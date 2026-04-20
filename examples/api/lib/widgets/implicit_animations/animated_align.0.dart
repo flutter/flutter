@@ -57,7 +57,7 @@ class _AnimatedAlignExampleState extends State<AnimatedAlignExample> {
           height: 250.0,
           color: Colors.red,
           child: AnimatedAlign(
-            alignment: selected ? Alignment.topRight : Alignment.bottomLeft,
+            alignment: selected ? .topRight : .bottomLeft,
             duration: widget.duration,
             curve: widget.curve,
             child: const FlutterLogo(size: 50.0),

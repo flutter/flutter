@@ -45,7 +45,7 @@ class _HomePageState extends State<_HomePage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Page One'),
             if (_formData != null)
@@ -153,7 +153,7 @@ class _PageTwoBodyState extends State<_PageTwoBody> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             const Text('Page Two'),
             Form(

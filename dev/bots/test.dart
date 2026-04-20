@@ -247,6 +247,7 @@ Future<void> _runIntegrationToolTests() async {
 
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
+  await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app'));
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {
@@ -354,6 +355,7 @@ Future<void> _runBuildTests() async {
         )
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'android_views')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'channels')))
+        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'data_asset_app')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
         ..add(
@@ -363,6 +365,7 @@ Future<void> _runBuildTests() async {
           Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')),
         )
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
+        ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'record_use_test_app')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
         ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 

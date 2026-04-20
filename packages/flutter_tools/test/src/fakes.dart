@@ -9,6 +9,7 @@ import 'package:dds/dds_launcher.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -23,6 +25,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -542,6 +545,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isDartDataAssetsEnabled = false,
+    this.isRecordUseEnabled = false,
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
@@ -585,6 +589,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isDartDataAssetsEnabled;
 
   @override
+  final bool isRecordUseEnabled;
+
+  @override
   final bool isSwiftPackageManagerEnabled;
 
   @override
@@ -625,6 +632,7 @@ class TestFeatureFlags implements FeatureFlags {
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
+      recordUse => isRecordUseEnabled,
       _ => false,
     };
   }
@@ -642,6 +650,7 @@ class TestFeatureFlags implements FeatureFlags {
     cliAnimation,
     dartDataAssets,
     nativeAssets,
+    recordUse,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
@@ -908,3 +917,11 @@ class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 class FakeTerminal extends Fake implements Terminal {}
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
+
+class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
+
+class FakeXcode extends Fake implements Xcode {}
+
+class FakeArtifacts extends Fake implements Artifacts {}
+
+class FakeCache extends Fake implements Cache {}
