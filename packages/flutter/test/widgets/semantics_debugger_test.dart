@@ -499,12 +499,7 @@ void main() {
       TestWidgetsApp(
         home: SemanticsDebugger(
           key: debugger,
-          child: Semantics(
-            key: textField,
-            textField: true,
-            enabled: true,
-            child: const TestTextField(),
-          ),
+          child: TestTextField(key: textField),
         ),
       ),
     );
