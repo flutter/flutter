@@ -279,11 +279,6 @@ DEF_SWITCH(EnablePlatformIsolates,
 DEF_SWITCH(MergedPlatformUIThread,
            "merged-platform-ui-thread",
            "Sets whether the ui thread and platform thread should be merged.")
-// This is a legacy flag that has been superseded by merged-platform-ui-thread.
-// TODO(163064): remove this when users have been migrated.
-DEF_SWITCH(DisableMergedPlatformUIThread,
-           "no-enable-merged-platform-ui-thread",
-           "Disables merging of the UI and platform threads.")
 DEF_SWITCH(EnableAndroidHcppAndSurfaceControl,
            "enable-hcpp-and-surface-control",
            "Enable the HCPP platform view mode and SurfaceControl backed "
