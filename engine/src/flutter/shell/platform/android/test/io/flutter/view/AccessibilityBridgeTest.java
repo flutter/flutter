@@ -2931,7 +2931,7 @@ public class AccessibilityBridgeTest {
       }
     }
     assertEquals(
-        "CONTENT_CHANGE_TYPE_EXPANDED event should be sent twice for expand transitions",
+        "CONTENT_CHANGE_TYPE_EXPANDED event should be sent twice for expansion state changes",
         2,
         foundCount);
   }
