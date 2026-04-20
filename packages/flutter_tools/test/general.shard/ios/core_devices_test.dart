@@ -217,6 +217,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isTrue);
@@ -275,6 +276,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isTrue);
@@ -326,6 +328,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -370,6 +373,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -420,6 +424,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -464,6 +469,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -510,6 +516,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -558,6 +565,7 @@ void main() {
           bundleId: 'bundle-id',
           launchArguments: <String>[],
           shutdownHooks: FakeShutdownHooks(),
+          mode: BuildMode.debug,
         );
 
         expect(result, isFalse);
@@ -4020,6 +4028,7 @@ class FakeLLDB extends Fake implements LLDB {
     required String deviceId,
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
+    required BuildMode mode,
   }) async {
     attemptedToAttach = true;
     attachedProcessId = appProcessId;
