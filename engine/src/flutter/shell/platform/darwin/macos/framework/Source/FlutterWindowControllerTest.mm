@@ -57,6 +57,8 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
 
 class FlutterWindowControllerRetainTest : public ::testing::Test {};
 
+class FlutterWindowControllerSizeTest : public FlutterEngineTest {};
+
 TEST_F(FlutterWindowControllerTest, FixMoveRunLoopMode) {
   FlutterEngine* engine = GetFlutterEngine();
   [engine.windowController fixMoveRunLoopModeIfNeeded];
@@ -457,4 +459,58 @@ TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
   [childWindow close];
   [parentWindow close];
 }
+
+TEST_F(FlutterWindowControllerSizeTest, SizedToContent) {
+  FlutterWindowCreationRequest request{
+      .has_size = false,
+      .has_constraints = true,
+      .constraints{
+          .min_width = 0,
+          .min_height = 0,
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .resizable = false,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+
+  auto engine = GetFlutterEngine();
+  [engine runWithEntrypoint:@"testRenderSizedToContent"];
+
+  auto engineId = reinterpret_cast<int64_t>(GetFlutterEngine());
+
+  std::optional<Isolate> isolate;
+
+  bool signalled = false;
+  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      signalled = true;
+                      isolate = Isolate::Current();
+                    }));
+
+  while (!signalled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  int64_t viewId = 0;
+  {
+    IsolateScope isolate_scope(*isolate);
+    viewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  }
+
+  auto controller = [engine viewControllerForIdentifier:viewId];
+  auto window = controller.view.window;
+  while (window.frame.size.width == 0) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  NSRect contentRect = [window contentRectForFrameRect:window.frame];
+  EXPECT_EQ(contentRect.size.width, 150.0);
+  EXPECT_EQ(contentRect.size.height, 150.0);
+
+  [engine.windowController closeAllWindows];
+  [engine shutDownEngine];
+}
+
 }  // namespace flutter::testing
