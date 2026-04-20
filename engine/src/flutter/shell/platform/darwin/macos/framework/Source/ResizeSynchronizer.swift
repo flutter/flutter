@@ -45,8 +45,9 @@ import Foundation
 public final class ResizeSynchronizer: NSObject {
   private static let invalidSize = CGSize(width: -1, height: -1)
 
-  // Synchronizes access to _isInResize_unsafe: isInResize is accessed from multiple threads and
-  // thus requires synchronized access to the underlying storage.
+  // Synchronizes access to _isInResize_unsafe: isInResize is accessed from
+  // both the raster thread and the platform thread, and thus requires
+  // synchronized access to the underlying storage.
   private let isInResizeLock = NSLock()
   private nonisolated(unsafe) var _isInResize_unsafe: Bool = false
   private nonisolated var isInResize: Bool {
@@ -117,7 +118,8 @@ public final class ResizeSynchronizer: NSObject {
   /// Schedules the given block on the platform thread with the given delay. Unblocks `beginResize`
   /// on the platform thread, if waiting for the surface during resize.
   ///
-  /// Called from the raster thread on frame present.
+  /// Called from the raster thread on frame present. The `notify` callback will
+  /// be invoked on the platform thread.
   @objc public nonisolated func performCommit(
     forSize size: CGSize,
     afterDelay delay: TimeInterval,
