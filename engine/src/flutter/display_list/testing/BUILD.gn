@@ -80,6 +80,10 @@ source_set("display_list_surface_provider") {
     "//flutter/testing:testing_lib",
   ]
 
+  if (is_mac) {
+    deps += [ "//flutter/impeller/golden_tests:metal_screenshot" ]
+  }
+
   if (impeller_supports_rendering) {
     sources += [
       "impeller/dl_test_surface_instance_impeller.cc",
@@ -88,10 +92,7 @@ source_set("display_list_surface_provider") {
       "impeller/dl_test_surface_provider_impeller.h",
     ]
 
-    deps += [
-      "//flutter/impeller/golden_tests:metal_screenshot",
-      "//flutter/impeller/playground",
-    ]
+    deps += [ "//flutter/impeller/playground" ]
   }
 
   public_configs = [ ":surface_provider_config" ]
