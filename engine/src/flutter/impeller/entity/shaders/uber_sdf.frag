@@ -160,6 +160,7 @@ float filledSDF(vec2 p) {
 }
 
 float strokedSDF(vec2 p, float base_sdf, float base_sdf_pixel_size) {
+  // Stroke width is clamped to be at least base_sdf_pixel_size.
   float half_stroke = max(frag_info.stroke_width, base_sdf_pixel_size) * 0.5;
 
   // Some cases need special handling because their stroked SDFs have a

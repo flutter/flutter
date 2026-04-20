@@ -41,8 +41,6 @@ struct UberSDFParameters {
                                       Scalar radius,
                                       std::optional<StrokeParameters> stroke);
 
-  bool IsHairlineStroked() const { return stroke && stroke->width == 0.0f; }
-
   /// Creates UberSDFParameters for an Oval.
   static UberSDFParameters MakeOval(Color color,
                                     const Rect& bounds,
