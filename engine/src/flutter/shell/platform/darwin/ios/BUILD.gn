@@ -224,6 +224,12 @@ if (enable_ios_unittests) {
       "framework/Source/LaunchEngineTest.swift",
     ]
     frameworks = [ "XCTest.framework" ]
+    include_dirs = [
+      "//flutter/shell/platform/darwin/common/framework/Headers",
+      "//flutter/shell/platform/darwin/macos/framework/Headers",
+      "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
+    ]
+
     deps = [ ":flutter_framework_source" ]
   }
 
