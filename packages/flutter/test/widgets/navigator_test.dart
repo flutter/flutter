@@ -15,6 +15,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
+import 'route_tester.dart';
 import 'semantics_tester.dart';
 
 @pragma('vm:entry-point')
@@ -356,8 +357,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final pages = <Page<void>>[
-      const ZeroTransitionPage(name: 'Page 1'),
-      const ZeroTransitionPage(name: 'Page 2'),
+      const ZeroTransitionPage(name: 'Page 1', child: Text('Page 1')),
+      const ZeroTransitionPage(name: 'Page 2', child: Text('Page 2')),
     ];
     final observations = <NavigatorObservation>[];
 
@@ -4100,8 +4101,9 @@ void main() {
         return TestDependencies(
           child: Navigator(
             pages: <Page<void>>[
-              const ZeroDurationPage(child: Text('page1')),
-              if (secondPage) const ZeroDurationPage(child: Text('page2')),
+              const ZeroTransitionPage<void>(allowSnapshotting: false, child: Text('page1')),
+              if (secondPage)
+                const ZeroTransitionPage<void>(allowSnapshotting: false, child: Text('page2')),
             ],
             onPopPage: (Route<dynamic> route, dynamic result) => false,
           ),
@@ -5122,7 +5124,7 @@ void main() {
       final ByteData? fakeMessage = SystemChannels.accessibility.codec.encodeMessage(
         <String, dynamic>{'type': 'didGainFocus', 'nodeId': 5},
       );
-      tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.accessibility.name,
         fakeMessage,
         (ByteData? data) {},
@@ -6458,15 +6460,6 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }
 }
 
-class ZeroTransitionPage extends Page<void> {
-  const ZeroTransitionPage({super.key, super.arguments, required String super.name});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return NoAnimationPageRoute(settings: this, pageBuilder: (BuildContext context) => Text(name!));
-  }
-}
-
 typedef CanPopPageInvoke = (bool didPop, Object? result);
 
 class CanPopPage<T> extends Page<T> {
@@ -6553,55 +6546,6 @@ class BuilderPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(settings: this, pageBuilder: pageBuilder);
   }
-}
-
-class ZeroDurationPage extends Page<void> {
-  const ZeroDurationPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return ZeroDurationPageRoute(page: this);
-  }
-}
-
-class ZeroDurationPageRoute extends PageRoute<void> {
-  ZeroDurationPageRoute({required ZeroDurationPage page})
-    : super(settings: page, allowSnapshotting: false);
-
-  @override
-  Duration get transitionDuration => Duration.zero;
-
-  ZeroDurationPage get _page => settings as ZeroDurationPage;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return _page.child;
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
-  }
-
-  @override
-  bool get maintainState => false;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
 }
 
 class _MockNavigatorObserver implements NavigatorObserver {

@@ -182,6 +182,35 @@ class WindowingOwnerLinux extends WindowingOwner {
   }
 }
 
+/// Platform specific functionality for all window controllers on Linux.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract interface class WindowControllerLinux {
+  /// Returns pointer to the underlying [GtkWindow](https://docs.gtk.org/gtk3/class.Window.html).
+  ///
+  /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  ffi.Pointer<ffi.Void> get windowHandle;
+
+  /// Returns pointer to the [FlView](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/linux/public/flutter_linux/fl_view.h)
+  /// that renders the Flutter content in this window.
+  ///
+  /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  ffi.Pointer<ffi.Void> get flutterViewHandle;
+}
+
 /// Implementation of [RegularWindowController] for the Linux platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -189,7 +218,8 @@ class WindowingOwnerLinux extends WindowingOwner {
 /// See also:
 ///
 ///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerLinux extends RegularWindowController {
+class RegularWindowControllerLinux extends RegularWindowController
+    implements WindowControllerLinux {
   /// Creates a new regular window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -364,6 +394,22 @@ class RegularWindowControllerLinux extends RegularWindowController {
       _window.unfullscreen();
     }
   }
+
+  @override
+  ffi.Pointer<ffi.Void> get windowHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _window.instance.cast();
+  }
+
+  @override
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _view.instance.cast();
+  }
 }
 
 /// Implementation of [DialogWindowController] for the Linux platform.
@@ -373,7 +419,7 @@ class RegularWindowControllerLinux extends RegularWindowController {
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerLinux extends DialogWindowController {
+class DialogWindowControllerLinux extends DialogWindowController implements WindowControllerLinux {
   /// Creates a new dialog window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -532,6 +578,22 @@ class DialogWindowControllerLinux extends DialogWindowController {
       _window.deiconify();
     }
   }
+
+  @override
+  ffi.Pointer<ffi.Void> get windowHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _window.instance.cast();
+  }
+
+  @override
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _view.instance.cast();
+  }
 }
 
 /// Implementation of [TooltipWindowController] for the Linux platform.
@@ -541,7 +603,8 @@ class DialogWindowControllerLinux extends DialogWindowController {
 /// See also:
 ///
 ///  * [TooltipWindowController], the base class for tooltip windows.
-class TooltipWindowControllerLinux extends TooltipWindowController {
+class TooltipWindowControllerLinux extends TooltipWindowController
+    implements WindowControllerLinux {
   /// Creates a new tooltip window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -705,6 +768,22 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       maxWidth: constraints.maxWidth.isInfinite ? 0x7fffffff : constraints.maxWidth.toInt(),
       maxHeight: constraints.maxHeight.isInfinite ? 0x7fffffff : constraints.maxHeight.toInt(),
     );
+  }
+
+  @override
+  ffi.Pointer<ffi.Void> get windowHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _window.instance.cast();
+  }
+
+  @override
+  ffi.Pointer<ffi.Void> get flutterViewHandle {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+    return _view.instance.cast();
   }
 }
 

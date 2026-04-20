@@ -7,11 +7,12 @@ library;
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   group('generateTestSemanticsExpressionForCurrentSemanticsTree', () {
@@ -26,7 +27,7 @@ void _tests() {
 
   Future<void> pumpTestWidget(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           children: <Widget>[
             const Text('Plain text'),
@@ -120,34 +121,28 @@ void _tests() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 4,
+                          id: 6,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 7,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 5,
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  label: 'Plain text',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 6,
-                                  tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
-                                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
-                                  label: '\u202aInteractive text\u202c',
-                                  value: 'test-value',
-                                  increasedValue: 'test-increasedValue',
-                                  decreasedValue: 'test-decreasedValue',
-                                  hint: 'test-hint',
-                                  textDirection: TextDirection.rtl,
-                                ),
-                              ],
+                              id: 4,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'Plain text',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 5,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
+                              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
+                              label: '\u202aInteractive text\u202c',
+                              value: 'test-value',
+                              increasedValue: 'test-increasedValue',
+                              decreasedValue: 'test-decreasedValue',
+                              hint: 'test-hint',
+                              textDirection: TextDirection.rtl,
                             ),
                           ],
                         ),

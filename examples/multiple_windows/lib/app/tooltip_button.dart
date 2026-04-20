@@ -7,9 +7,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
-import 'tooltip_window_content.dart';
+
 import 'element_position_tracker.dart';
 import 'models.dart';
+import 'tooltip_window_content.dart';
 
 class TooltipButton extends StatefulWidget {
   const TooltipButton({super.key, required this.parentController});
@@ -31,10 +32,7 @@ class _TooltipButtonState extends State<TooltipButton> {
     super.dispose();
   }
 
-  void _onPressed(
-    final WindowRegistry windowRegistry,
-    final WindowSettings windowSettings,
-  ) {
+  void _onPressed(final WindowRegistry windowRegistry, final WindowSettings windowSettings) {
     // Toggle tooltip visibility.
     if (_tooltipEntry != null) {
       _tooltipEntry!.controller.destroy();
@@ -45,9 +43,7 @@ class _TooltipButtonState extends State<TooltipButton> {
       });
     } else {
       // Tooltip is not shown, show it.
-      final tracker = ElementPositionTracker(
-        element: _tooltipButtonKey.currentContext!,
-      );
+      final tracker = ElementPositionTracker(element: _tooltipButtonKey.currentContext!);
       late final WindowEntry entry;
       final controller = TooltipWindowController(
         anchorRect: tracker.getGlobalRect()!,
@@ -68,8 +64,7 @@ class _TooltipButtonState extends State<TooltipButton> {
       );
       entry = WindowEntry(
         controller: controller,
-        builder: (BuildContext context) =>
-            TooltipWindowContent(controller: controller),
+        builder: (BuildContext context) => TooltipWindowContent(controller: controller),
       );
       windowRegistry.register(entry);
       tracker.onGlobalRectChange = (rect) {

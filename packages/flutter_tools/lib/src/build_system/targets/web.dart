@@ -17,6 +17,7 @@ import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
+import '../../features.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../isolated/native_assets/dart_hook_result.dart';
@@ -30,6 +31,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
+import 'common.dart';
 import 'localizations.dart';
 import 'native_assets.dart';
 
@@ -185,6 +187,10 @@ class Dart2JSTarget extends Dart2WebTarget {
       else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
+      if (featureFlags.isRecordUseEnabled) ...<String>[
+        '--write-resources',
+        '--enable-experiment=record-use',
+      ],
     ];
 
     // NOTE: most args should be populated in [toSharedCommandOptions].
@@ -216,6 +222,14 @@ class Dart2JSTarget extends Dart2WebTarget {
       outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
+
+    final File resourcesFile = environment.buildDir.childFile('main.dart.js.resources.json');
+    final File recordedUsesFile = environment.buildDir.childFile(LinkHooks.recordedUsesJsFileName);
+    if (resourcesFile.existsSync()) {
+      resourcesFile.renameSync(recordedUsesFile.path);
+    } else if (featureFlags.isRecordUseEnabled) {
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
+    }
     final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
       environment.logger.printWarning(
@@ -273,6 +287,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     'main.dart.js',
     'main.dart.js_*.part.js',
     if (compilerConfig.sourceMaps) ...<String>['main.dart.js.map', 'main.dart.js_*.part.js.map'],
+    if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesJsFileName,
   ];
 }
 
@@ -347,6 +362,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
+      if (featureFlags.isRecordUseEnabled) ...<String>[
+        '--recorded-uses=${environment.buildDir.childFile(LinkHooks.recordedUsesWasmFileName).path}',
+        '--enable-experiment=record-use',
+      ],
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
@@ -364,6 +383,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
     );
     if (compilerConfig.dryRun) {
       await _handleDryRunResult(environment, runResult);
+    }
+    final File recordedUsesFile = environment.buildDir.childFile(
+      LinkHooks.recordedUsesWasmFileName,
+    );
+    if (!recordedUsesFile.existsSync() && featureFlags.isRecordUseEnabled) {
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
   }
 
@@ -404,6 +429,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'main.dart.wasm',
           'main.dart.mjs',
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+          if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
         ];
 
   @visibleForTesting
@@ -569,7 +595,7 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    const DartBuild(specifiedTargetPlatform: TargetPlatform.web_javascript),
+    LinkHooks(platform: HookPlatform.web, extraDependencies: compileTargets),
   ];
 
   Iterable<String> get buildPatternStems =>
@@ -578,7 +604,7 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    const Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
   ];
 
@@ -611,7 +637,7 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),

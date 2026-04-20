@@ -2466,7 +2466,7 @@ TEST_F(ShellTest, RasterizerScreenshot) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
+TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
   Settings settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);
   auto task_runner = CreateNewThread();
@@ -2487,7 +2487,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
       shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
-        sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
+        sk_sp<SkImage> image = delegate->MakeSkiaSnapshotSync(
             MakeSizedDisplayList(50, 50), DlISize(50, 50),
             SnapshotPixelFormat::kDontCare);
         EXPECT_NE(image, nullptr);
