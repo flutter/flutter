@@ -712,12 +712,12 @@ class RenderEnvironment {
     FML_DCHECK(valid());
     FML_DCHECK(surface_1x_ != nullptr);
     FML_DCHECK(surface_2x_ != nullptr);
-    // if (width == kTestWidth && height == kTestHeight) {
-    //   return surface_1x_->sk_surface();
-    // }
-    // if (width == kTestWidth * 2 && height == kTestHeight * 2) {
-    //   return surface_2x_->sk_surface();
-    // }
+    if (width == kTestWidth && height == kTestHeight) {
+      return surface_1x_->sk_surface();
+    }
+    if (width == kTestWidth * 2 && height == kTestHeight * 2) {
+      return surface_2x_->sk_surface();
+    }
     FML_LOG(ERROR) << "Test surface size (" << width << " x " << height
                    << ") not supported.";
     FML_DCHECK(false);
@@ -4784,16 +4784,16 @@ class DisplayListNopTest : public DisplayListRendering {
       auto result_surface = provider->MakeOffscreenSurface(
           test_image->width(), test_image->height(),
           DlSurfaceProvider::kN32Premul);
-      DlCanvas* result_canvas = result_surface->GetCanvas();
-      result_canvas->Clear(DlColor::kTransparent());
-      // result_canvas->drawImage(test_image.get(), 0, 0);
-      // result_canvas->drawRect(ToSkRect(test_bounds), sk_paint);
+      SkCanvas* result_canvas = result_surface->sk_surface()->getCanvas();
+      result_canvas->clear(SK_ColorTRANSPARENT);
+      result_canvas->drawImage(test_image.get(), 0, 0);
+      result_canvas->drawRect(ToSkRect(test_bounds), sk_paint);
       result_surface->FlushSubmitCpuSync();
-      // const std::unique_ptr<RenderResult> result_pixels =
-      //     std::make_unique<SkRenderResult>(result_surface->sk_surface());
+      const std::unique_ptr<RenderResult> result_pixels =
+          std::make_unique<SkRenderResult>(result_surface->sk_surface());
 
-      // int all_flags = check_image_result(test_data, result_pixels, dl, desc);
-      // report_results(all_flags, dl, desc);
+      int all_flags = check_image_result(test_data, result_pixels, dl, desc);
+      report_results(all_flags, dl, desc);
     }
   };
 
@@ -4841,18 +4841,18 @@ class DisplayListNopTest : public DisplayListRendering {
       auto provider = CanvasCompareTester::GetProvider(back_end);
       auto result_surface =
           provider->MakeOffscreenSurface(w, h, DlSurfaceProvider::kN32Premul);
-      DlCanvas* result_canvas = result_surface->GetCanvas();
-      result_canvas->Clear(DlColor::kTransparent());
-      // result_canvas->DrawImage(test_image_dst_data->image(), 0, 0);
-      // result_canvas->DrawImage(test_image_src_data->image(), 0, 0,
-      //                          SkSamplingOptions(), &sk_paint);
+      SkCanvas* result_canvas = result_surface->sk_surface()->getCanvas();
+      result_canvas->clear(SK_ColorTRANSPARENT);
+      result_canvas->drawImage(test_image_dst_data->image(), 0, 0);
+      result_canvas->drawImage(test_image_src_data->image(), 0, 0,
+                               SkSamplingOptions(), &sk_paint);
       result_surface->FlushSubmitCpuSync();
-      // std::unique_ptr<RenderResult> result_pixels =
-      //     std::make_unique<SkRenderResult>(result_surface->sk_surface());
+      std::unique_ptr<RenderResult> result_pixels =
+          std::make_unique<SkRenderResult>(result_surface->sk_surface());
 
-      // int all_flags =
-      //     check_image_result(test_image_dst_data, result_pixels, dl, desc);
-      // report_results(all_flags, dl, desc);
+      int all_flags =
+          check_image_result(test_image_dst_data, result_pixels, dl, desc);
+      report_results(all_flags, dl, desc);
     }
   };
 };

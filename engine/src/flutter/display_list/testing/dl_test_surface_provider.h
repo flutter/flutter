@@ -61,6 +61,11 @@ class DlSurfaceInstance {
 
   /// The height of the underlying surface.
   virtual int height() const = 0;
+
+  /// Return a pointer to an underlying SkSurface if the image instance
+  /// has one.
+  /// THIS METHOD IS DEPRECATED AND ONLY USED IN DL_RENDERING_UNITTESTS.
+  virtual sk_sp<SkSurface> sk_surface() { return nullptr; }
 };
 
 class DlSurfaceProvider {

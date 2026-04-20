@@ -33,6 +33,9 @@ class DlSurfaceInstanceSkiaBase : public DlSurfaceInstance {
   // |DlSurfaceInstance|
   int height() const override;
 
+  // |DlSurfaceInstance|
+  sk_sp<SkSurface> sk_surface() override { return GetSurface(); }
+
  protected:
   explicit DlSurfaceInstanceSkiaBase();
   virtual ~DlSurfaceInstanceSkiaBase();
