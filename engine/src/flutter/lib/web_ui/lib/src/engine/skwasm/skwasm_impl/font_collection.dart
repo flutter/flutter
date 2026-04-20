@@ -138,14 +138,6 @@ class SkwasmFontCollection implements FlutterFontCollection {
     }
   }
 
-  Future<bool> loadFontFromUrl(String familyName, String url) async {
-    final HttpFetchResponse response = await httpFetch(url);
-    final SkDataHandle fontData = await _loadDataFromResponse(response);
-    final bool success = _registerTypeface(familyName, fontData);
-    skDataDispose(fontData);
-    return success;
-  }
-
   @override
   Future<bool> loadFontFromBytes(Uint8List list, {String? fontFamily}) async {
     final SkDataHandle fontData = skDataCreate(list.length);
