@@ -166,7 +166,6 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 
   // Only send shortcuts and user activities if didFinishLaunching returns YES.
-  //
   // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:performactionfor:completionhandler:)#Discussion
   if (![self application:application
           didFinishLaunchingWithOptions:convertedLaunchOptions
