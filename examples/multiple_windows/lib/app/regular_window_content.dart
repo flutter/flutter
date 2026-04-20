@@ -16,12 +16,17 @@ import 'popup_button.dart';
 import 'rotated_wire_cube.dart';
 import 'tooltip_button.dart';
 
-class RegularWindowContent extends StatelessWidget {
-  RegularWindowContent({super.key, required this.regularWindowController})
-    : cubeColor = _generateRandomDarkColor();
+class RegularWindowContent extends StatefulWidget {
+  const RegularWindowContent({super.key, required this.regularWindowController});
 
   final RegularWindowController regularWindowController;
-  final Color cubeColor;
+
+  @override
+  State<RegularWindowContent> createState() => _RegularWindowContentState();
+}
+
+class _RegularWindowContentState extends State<RegularWindowContent> {
+  late final Color cubeColor;
 
   static Color _generateRandomDarkColor() {
     final random = Random();
@@ -34,11 +39,15 @@ class RegularWindowContent extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    cubeColor = _generateRandomDarkColor();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double dpr = MediaQuery.of(context).devicePixelRatio;
     final Size windowSize = WindowScope.contentSizeOf(context);
-    final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
-    final WindowRegistry windowRegistry = WindowRegistry.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Regular Window')),
@@ -53,56 +62,14 @@ class RegularWindowContent extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    late final WindowEntry entry;
-                    final controller = RegularWindowController(
-                      delegate: CallbackRegularWindowControllerDelegate(
-                        onDestroyed: () => windowRegistry.unregister(entry),
-                      ),
-                      title: 'Regular',
-                      preferredSize: windowSettings.regularSize,
-                    );
-
-                    entry = WindowEntry(
-                      controller: controller,
-                      builder: (BuildContext context) =>
-                          RegularWindowContent(regularWindowController: controller),
-                    );
-                    windowRegistry.register(entry);
-                  },
-                  child: const Text('Create Regular Window'),
-                ),
+                _WindowCreationButtons(regularWindowController: widget.regularWindowController),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    late final WindowEntry entry;
-                    final controller = DialogWindowController(
-                      delegate: CallbackDialogWindowControllerDelegate(
-                        onDestroyed: () => windowRegistry.unregister(entry),
-                      ),
-                      title: 'Modal Dialog',
-                      preferredSize: windowSettings.dialogSize,
-                      parent: regularWindowController,
-                      decorated: windowSettings.dialogDecorated,
-                    );
-
-                    entry = WindowEntry(
-                      controller: controller,
-                      builder: (BuildContext context) =>
-                          DialogWindowContent(dialogWindowController: controller),
-                    );
-                    windowRegistry.register(entry);
-                  },
-                  child: const Text('Create Modal Dialog'),
-                ),
+                TooltipButton(parentController: widget.regularWindowController),
                 const SizedBox(height: 20),
-                TooltipButton(parentController: regularWindowController),
-                const SizedBox(height: 20),
-                PopupButton(parentController: regularWindowController),
+                PopupButton(parentController: widget.regularWindowController),
                 const SizedBox(height: 20),
                 Text(
-                  'View #${regularWindowController.rootView.viewId}\n'
+                  'View #${widget.regularWindowController.rootView.viewId}\n'
                   'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
                   'Device Pixel Ratio: $dpr',
                   textAlign: TextAlign.center,
@@ -112,6 +79,70 @@ class RegularWindowContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Extracted widget that depends on [WindowRegistry] so that registry changes
+/// (e.g. opening/closing windows) only rebuild these buttons, not the entire
+/// [RegularWindowContent] tree.
+class _WindowCreationButtons extends StatelessWidget {
+  const _WindowCreationButtons({required this.regularWindowController});
+
+  final RegularWindowController regularWindowController;
+
+  @override
+  Widget build(BuildContext context) {
+    final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
+    final WindowRegistry windowRegistry = WindowRegistry.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            late final WindowEntry entry;
+            final controller = RegularWindowController(
+              delegate: CallbackRegularWindowControllerDelegate(
+                onDestroyed: () => windowRegistry.unregister(entry),
+              ),
+              title: 'Regular',
+              preferredSize: windowSettings.regularSize,
+            );
+
+            entry = WindowEntry(
+              controller: controller,
+              builder: (BuildContext context) =>
+                  RegularWindowContent(regularWindowController: controller),
+            );
+            windowRegistry.register(entry);
+          },
+          child: const Text('Create Regular Window'),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            late final WindowEntry entry;
+            final controller = DialogWindowController(
+              delegate: CallbackDialogWindowControllerDelegate(
+                onDestroyed: () => windowRegistry.unregister(entry),
+              ),
+              title: 'Modal Dialog',
+              preferredSize: windowSettings.dialogSize,
+              parent: regularWindowController,
+              decorated: windowSettings.dialogDecorated,
+            );
+
+            entry = WindowEntry(
+              controller: controller,
+              builder: (BuildContext context) =>
+                  DialogWindowContent(dialogWindowController: controller),
+            );
+            windowRegistry.register(entry);
+          },
+          child: const Text('Create Modal Dialog'),
+        ),
+      ],
     );
   }
 }
