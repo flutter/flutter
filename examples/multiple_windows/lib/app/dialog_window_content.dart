@@ -41,7 +41,6 @@ class DialogWindowContent extends StatelessWidget {
                       title: 'Modal Dialog',
                       preferredSize: windowSettings.dialogSize,
                       parent: dialogWindowController,
-                      decorated: windowSettings.dialogDecorated,
                     );
 
                     entry = WindowEntry(

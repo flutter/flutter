@@ -237,7 +237,6 @@ class _WindowCreatorCard extends StatelessWidget {
                           ),
                           title: 'Modeless Dialog',
                           preferredSize: windowSettings.dialogSize,
-                          decorated: windowSettings.dialogDecorated,
                         );
 
                         entry = WindowEntry(
@@ -262,7 +261,6 @@ class _WindowCreatorCard extends StatelessWidget {
                           title: 'Modal Dialog',
                           preferredSize: windowSettings.dialogSize,
                           parent: windowController,
-                          decorated: windowSettings.dialogDecorated,
                         );
 
                         entry = WindowEntry(

@@ -129,21 +129,6 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
               decoration: const InputDecoration(labelText: 'Initial height'),
             ),
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Text('Decorations'),
-              const SizedBox(width: 10),
-              Switch(
-                value: widget.settings.regularDecorated,
-                onChanged: (bool value) {
-                  setState(() {
-                    widget.settings.regularDecorated = value;
-                  });
-                },
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -166,21 +151,6 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
               controller: _dialogHeightController,
               decoration: const InputDecoration(labelText: 'Initial height'),
             ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Text('Decorations'),
-              const SizedBox(width: 10),
-              Switch(
-                value: widget.settings.dialogDecorated,
-                onChanged: (bool value) {
-                  setState(() {
-                    widget.settings.dialogDecorated = value;
-                  });
-                },
-              ),
-            ],
           ),
         ],
       ),
