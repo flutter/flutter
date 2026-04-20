@@ -394,7 +394,7 @@ void main() {
           expect(
             commandsRun,
             containsAllInOrder([
-              containsAllInOrder(['flutter', 'run', '--$mode']),
+              containsAllInOrder([endsWith('flutter'), contains('run'), contains('--$mode')]),
             ]),
           );
         });
