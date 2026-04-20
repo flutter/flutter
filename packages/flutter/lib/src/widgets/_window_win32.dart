@@ -221,7 +221,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
   }
 
-  /// Register a new [WindowsMessageHandler].
+  /// Register a new [_WindowsMessageHandler].
   ///
   /// The handler will be triggered for unhandled messages for all top level
   /// windows.
@@ -240,7 +240,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     _messageHandlers.add(handler);
   }
 
-  /// Unregister a [WindowsMessageHandler].
+  /// Unregister a [_WindowsMessageHandler].
   ///
   /// If the handler has not been registered, this method has no effect.
   void _removeMessageHandler(_WindowsMessageHandler handler) {
@@ -291,6 +291,23 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
   }
 }
 
+/// Platform specific functionality for all window controllers on Windows.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract mixin class WindowControllerWin32 {
+  /// Returns the underlying HWND for this window.
+  ///
+  /// Using this handle implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  HWND get windowHandle;
+}
+
 /// Implementation of [RegularWindowController] for the Windows platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -298,7 +315,7 @@ class _RegularWindowMesageHandler implements _WindowsMessageHandler {
 /// See also:
 ///
 ///  * [RegularWindowController], the base class for regular windows.
-class RegularWindowControllerWin32 extends RegularWindowController {
+class RegularWindowControllerWin32 extends RegularWindowController with WindowControllerWin32 {
   /// Creates a new regular window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -350,7 +367,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   @internal
   Size get contentSize {
     _ensureNotDestroyed();
-    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
+    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(windowHandle);
     final result = Size(size.width, size.height);
     return result;
   }
@@ -359,49 +376,49 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   @internal
   String get title {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.getWindowTitle(_owner.allocator, getWindowHandle());
+    return _Win32PlatformInterface.getWindowTitle(_owner.allocator, windowHandle);
   }
 
   @override
   @internal
   bool get isActivated {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.getForegroundWindow() == getWindowHandle();
+    return _Win32PlatformInterface.getForegroundWindow() == windowHandle;
   }
 
   @override
   @internal
   bool get isMaximized {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.isZoomed(getWindowHandle()) != 0;
+    return _Win32PlatformInterface.isZoomed(windowHandle) != 0;
   }
 
   @override
   @internal
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.isIconic(getWindowHandle()) != 0;
+    return _Win32PlatformInterface.isIconic(windowHandle) != 0;
   }
 
   @override
   @internal
   bool get isFullscreen {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.getFullscreen(getWindowHandle());
+    return _Win32PlatformInterface.getFullscreen(windowHandle);
   }
 
   @override
   @internal
   void setSize(Size? size) {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.setWindowContentSize(_owner.allocator, getWindowHandle(), size);
+    _Win32PlatformInterface.setWindowContentSize(_owner.allocator, windowHandle, size);
   }
 
   @override
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.setWindowConstraints(_owner.allocator, getWindowHandle(), constraints);
+    _Win32PlatformInterface.setWindowConstraints(_owner.allocator, windowHandle, constraints);
     notifyListeners();
   }
 
@@ -409,7 +426,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   @internal
   void setTitle(String title) {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.setWindowTitle(_owner.allocator, getWindowHandle(), title);
+    _Win32PlatformInterface.setWindowTitle(_owner.allocator, windowHandle, title);
     notifyListeners();
   }
 
@@ -417,7 +434,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   @internal
   void activate() {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+    _Win32PlatformInterface.showWindow(windowHandle, _SW_RESTORE);
   }
 
   @override
@@ -425,9 +442,9 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   void setMaximized(bool maximized) {
     _ensureNotDestroyed();
     if (maximized) {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MAXIMIZE);
+      _Win32PlatformInterface.showWindow(windowHandle, _SW_MAXIMIZE);
     } else {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _Win32PlatformInterface.showWindow(windowHandle, _SW_RESTORE);
     }
   }
 
@@ -436,9 +453,9 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
+      _Win32PlatformInterface.showWindow(windowHandle, _SW_MINIMIZE);
     } else {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _Win32PlatformInterface.showWindow(windowHandle, _SW_RESTORE);
     }
   }
 
@@ -447,15 +464,15 @@ class RegularWindowControllerWin32 extends RegularWindowController {
   void setFullscreen(bool fullscreen, {Display? display}) {
     _Win32PlatformInterface.setFullscreen(
       _owner.allocator,
-      getWindowHandle(),
+      windowHandle,
       fullscreen,
       display: display,
     );
   }
 
   /// Returns HWND pointer to the top level window.
-  @internal
-  HWND getWindowHandle() {
+  @override
+  HWND get windowHandle {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -474,7 +491,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
     if (_destroyed) {
       return;
     }
-    _Win32PlatformInterface.destroyWindow(getWindowHandle());
+    _Win32PlatformInterface.destroyWindow(windowHandle);
     _destroyed = true;
   }
 
@@ -489,6 +506,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
       return null;
     }
 
+    // User handler can not prevent controller from processing windows message.
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
       return 0;
@@ -528,7 +546,7 @@ class _DialogWindowMesageHandler implements _WindowsMessageHandler {
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerWin32 extends DialogWindowController {
+class DialogWindowControllerWin32 extends DialogWindowController with WindowControllerWin32 {
   /// Creates a new dialog window controller for Win32.
   ///
   /// When this constructor completes the native window has been created and
@@ -589,7 +607,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   @internal
   Size get contentSize {
     _ensureNotDestroyed();
-    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
+    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(windowHandle);
     final result = Size(size.width, size.height);
     return result;
   }
@@ -598,28 +616,28 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   @internal
   String get title {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.getWindowTitle(_owner.allocator, getWindowHandle());
+    return _Win32PlatformInterface.getWindowTitle(_owner.allocator, windowHandle);
   }
 
   @override
   @internal
   bool get isActivated {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.getForegroundWindow() == getWindowHandle();
+    return _Win32PlatformInterface.getForegroundWindow() == windowHandle;
   }
 
   @override
   @internal
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _Win32PlatformInterface.isIconic(getWindowHandle()) != 0;
+    return _Win32PlatformInterface.isIconic(windowHandle) != 0;
   }
 
   @override
   @internal
   void setSize(Size? size) {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.setWindowContentSize(_owner.allocator, getWindowHandle(), size);
+    _Win32PlatformInterface.setWindowContentSize(_owner.allocator, windowHandle, size);
     // Note that we do not notify the listener when setting the size,
     // as that will happen when the WM_SIZE message is received in
     // _handleWindowsMessage.
@@ -629,7 +647,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.setWindowConstraints(_owner.allocator, getWindowHandle(), constraints);
+    _Win32PlatformInterface.setWindowConstraints(_owner.allocator, windowHandle, constraints);
     notifyListeners();
   }
 
@@ -637,7 +655,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   @internal
   void setTitle(String title) {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.setWindowTitle(_owner.allocator, getWindowHandle(), title);
+    _Win32PlatformInterface.setWindowTitle(_owner.allocator, windowHandle, title);
     notifyListeners();
   }
 
@@ -645,7 +663,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   @internal
   void activate() {
     _ensureNotDestroyed();
-    _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+    _Win32PlatformInterface.showWindow(windowHandle, _SW_RESTORE);
   }
 
   @override
@@ -657,9 +675,9 @@ class DialogWindowControllerWin32 extends DialogWindowController {
 
     _ensureNotDestroyed();
     if (minimized) {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_MINIMIZE);
+      _Win32PlatformInterface.showWindow(windowHandle, _SW_MINIMIZE);
     } else {
-      _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+      _Win32PlatformInterface.showWindow(windowHandle, _SW_RESTORE);
     }
   }
 
@@ -668,8 +686,8 @@ class DialogWindowControllerWin32 extends DialogWindowController {
   BaseWindowController? get parent => _parent;
 
   /// Returns HWND pointer to the top level window.
-  @internal
-  HWND getWindowHandle() {
+  @override
+  HWND get windowHandle {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -688,7 +706,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
     if (_destroyed) {
       return;
     }
-    _Win32PlatformInterface.destroyWindow(getWindowHandle());
+    _Win32PlatformInterface.destroyWindow(windowHandle);
   }
 
   int? _handleWindowsMessage(
@@ -702,6 +720,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
       return null;
     }
 
+    // User handler can not prevent controller from processing windows message.
     if (message == _WM_CLOSE) {
       _delegate.onWindowCloseRequested(this);
       return 0;
@@ -732,6 +751,7 @@ typedef _GetWindowPositionNative =
 ///
 ///  * [TooltipWindowController], the base class for tooltip windows.
 class TooltipWindowControllerWin32 extends TooltipWindowController
+    with WindowControllerWin32
     implements _WindowsMessageHandler {
   /// Creates a new tooltip window controller for Win32.
   ///
@@ -821,8 +841,8 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   }
 
   /// Returns HWND pointer to the top level window.
-  @internal
-  HWND getWindowHandle() {
+  @override
+  HWND get windowHandle {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
       PlatformDispatcher.instance.engineId!,
@@ -833,7 +853,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   @override
   Size get contentSize {
     _ensureNotDestroyed();
-    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
+    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(windowHandle);
     return Size(size.width, size.height);
   }
 
@@ -848,7 +868,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     if (_destroyed) {
       return;
     }
-    _Win32PlatformInterface.destroyWindow(getWindowHandle());
+    _Win32PlatformInterface.destroyWindow(windowHandle);
     _destroyed = true;
   }
 
@@ -860,7 +880,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     if (positioner != null) {
       _positioner = positioner;
     }
-    _Win32PlatformInterface.updateTooltipWindowPosition(getWindowHandle());
+    _Win32PlatformInterface.updateTooltipWindowPosition(windowHandle);
   }
 
   late final ffi.NativeCallable<_GetWindowPositionNative> _onGetWindowPosition;
