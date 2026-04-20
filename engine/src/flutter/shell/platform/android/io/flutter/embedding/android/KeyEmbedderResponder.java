@@ -194,6 +194,9 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
       }
     }
 
+    boolean isVirtualKeyboard =
+        event.getDeviceId() == android.view.KeyCharacterMap.VIRTUAL_KEYBOARD;
+
     // Fill the rest of the pre-event states to match the true state.
     if (truePressed) {
       // It is required that at least one key is pressed.
@@ -203,12 +206,14 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
         }
         if (postEventAnyPressed) {
           preEventStates[keyIdx] = nowStates[keyIdx];
+        } else if (isVirtualKeyboard) {
+          preEventStates[keyIdx] = nowStates[keyIdx];
         } else {
           preEventStates[keyIdx] = true;
           postEventAnyPressed = true;
         }
       }
-      if (!postEventAnyPressed) {
+      if (!postEventAnyPressed && !isVirtualKeyboard) {
         preEventStates[0] = true;
       }
     } else {
