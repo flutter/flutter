@@ -4068,54 +4068,56 @@ void main() {
     },
   );
 
-  testWidgets('Dragging selection base handle upwards scrolls the viewport', (
-    WidgetTester tester,
-  ) async {
-    final controller = TextEditingController(text: 'Line 1\n' * 100);
-    final scrollController = ScrollController();
+  testWidgets(
+    'Dragging selection base handle upwards scrolls the viewport',
+    (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'Line 1\n' * 100);
+      final scrollController = ScrollController();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TextField(
-            controller: controller,
-            scrollController: scrollController,
-            maxLines: null,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TextField(
+              controller: controller,
+              scrollController: scrollController,
+              maxLines: null,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Populate the viewport and scroll to the bottom to prepare for an upward drag.
-    scrollController.jumpTo(scrollController.position.maxScrollExtent);
-    await tester.pumpAndSettle();
+      // Populate the viewport and scroll to the bottom to prepare for an upward drag.
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      await tester.pumpAndSettle();
 
-    // Establish an initial selection at the end of the text.
-    controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
-    await tester.pumpAndSettle();
+      // Establish an initial selection at the end of the text.
+      controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
+      await tester.pumpAndSettle();
 
-    // Capture the offset after the selection is established but before the drag.
-    final double offsetBeforeDrag = scrollController.offset;
+      // Capture the offset after the selection is established but before the drag.
+      final double offsetBeforeDrag = scrollController.offset;
 
-    final EditableTextState state = tester.state(find.byType(EditableText));
+      final EditableTextState state = tester.state(find.byType(EditableText));
 
-    // Simulate a drag that moves the base (start) handle toward the beginning
-    // of the text while keeping the extent (end) handle stationary.
-    state.userUpdateTextEditingValue(
-      TextEditingValue(
-        text: 'Line 1\n' * 100,
-        selection: const TextSelection(baseOffset: 10, extentOffset: 600),
-      ),
-      SelectionChangedCause.drag,
-    );
+      // Simulate a drag that moves the base (start) handle toward the beginning
+      // of the text while keeping the extent (end) handle stationary.
+      state.userUpdateTextEditingValue(
+        TextEditingValue(
+          text: 'Line 1\n' * 100,
+          selection: const TextSelection(baseOffset: 10, extentOffset: 600),
+        ),
+        SelectionChangedCause.drag,
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    // The scroll offset should decrease as the viewport follows the base handle
-    // upwards. This verifies that the viewport is no longer snapping to the
-    // selection extent at the bottom.
-    expect(scrollController.offset, lessThan(offsetBeforeDrag));
-  });
+      // The scroll offset should decrease as the viewport follows the base handle
+      // upwards. This verifies that the viewport is no longer snapping to the
+      // selection extent at the bottom.
+      expect(scrollController.offset, lessThan(offsetBeforeDrag));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   testWidgets(
     'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',
