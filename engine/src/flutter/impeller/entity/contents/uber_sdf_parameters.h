@@ -10,7 +10,9 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/stroke_parameters.h"
+#include "impeller/geometry/vector.h"
 
 namespace impeller {
 
@@ -24,6 +26,8 @@ struct UberSDFParameters {
   enum class Type {
     kCircle,
     kRect,
+    kOval,
+    kRoundedRect,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -37,6 +41,18 @@ struct UberSDFParameters {
                                       Scalar radius,
                                       std::optional<StrokeParameters> stroke);
 
+  /// Creates UberSDFParameters for an Oval.
+  static UberSDFParameters MakeOval(Color color,
+                                    const Rect& bounds,
+                                    std::optional<StrokeParameters> stroke);
+
+  /// Creates UberSDFParameters for a rounded rectangle.
+  static UberSDFParameters MakeRoundedRect(
+      Color color,
+      const Rect& rect,
+      const RoundingRadii& radii,
+      std::optional<StrokeParameters> stroke);
+
   /// The type of shape to render.
   Type type;
 
@@ -46,12 +62,17 @@ struct UberSDFParameters {
   /// The center point of the shape in local coordinates.
   Point center;
 
-  /// The half-extents of the shape. For a rectangle, this is half the width
-  /// and height. For a circle, this is the radius in both dimensions.
+  /// For a rectangle, this is half the width and height.
+  /// For a circle, this is the radius in both dimensions.
+  /// For an oval, this is half the width and height of the bounds.
   Point size;
 
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
+
+  /// The corner radii for a rounded rectangle.
+  /// Only used if type is kRoundedRect.
+  RoundingRadii radii;
 };
 
 }  // namespace impeller

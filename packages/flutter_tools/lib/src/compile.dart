@@ -991,7 +991,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
           onDone: () {
             // when outputFilename future is not completed, but stdout is closed
             // process has died unexpectedly.
-            if (_stdoutHandler.compilerOutput?.isCompleted == false) {
+            if (_stdoutHandler.compilerOutput?.isCompleted == false &&
+                !_shutdownHooks.isShuttingDown) {
               _stdoutHandler.compilerOutput?.complete();
               throwToolExit('The Dart compiler exited unexpectedly.');
             }
