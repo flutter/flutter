@@ -6736,7 +6736,7 @@ void main() {
   testWidgets(
     'context menu overlay entry is built after selection handles',
     (WidgetTester tester) async {
-      final List<String> buildOrder = <String>[];
+      final buildOrder = <String>[];
       final selectionControls = _TextSelectionControlsSpy(
         onBuildHandle: () => buildOrder.add('handle'),
       );
