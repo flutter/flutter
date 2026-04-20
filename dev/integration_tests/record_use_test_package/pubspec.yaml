@@ -1,0 +1,26 @@
+name: record_use_test_package
+description: A new Flutter package project.
+version: 0.0.1
+publish_to: none
+
+resolution: workspace
+environment:
+  sdk: '>=3.5.0-0 <4.0.0'
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hooks: ^1.0.2
+  data_assets: ^0.19.6
+  record_use: 0.6.0
+  meta: 1.18.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: eblt6v

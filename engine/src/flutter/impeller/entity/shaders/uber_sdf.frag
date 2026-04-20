@@ -16,32 +16,13 @@ uniform FragInfo {
   float aa_pixels;
   float stroked;
   float type;
+  vec4 radii;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
-
-bool typeIsCircle() {
-  return abs(frag_info.type - 0.0) < 0.01;
-}
-
-bool typeIsRect() {
-  return abs(frag_info.type - 1.0) < 0.01;
-}
-
-bool joinIsMiter() {
-  return abs(frag_info.stroke_join - 0.0) < 0.01;
-}
-
-bool joinIsBevel() {
-  return abs(frag_info.stroke_join - 1.0) < 0.01;
-}
-
-bool joinIsRound() {
-  return abs(frag_info.stroke_join - 2.0) < 0.01;
-}
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -50,6 +31,67 @@ float distanceFromCircle(vec2 p, float radius) {
 float distanceFromRect(vec2 p, vec2 b) {
   vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+// Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
+// plane. Let q(w0) be the closest point on q to p, then q(w0) - p is tangent to
+// q(w0), and (q(w0) - p) dot q'(w0) = 0. This function uses the Newton-Raphson
+// method to find q(w0).
+//
+// `p` is the coordinate of the point relative to the center of the oval
+// `ab` is the extent of the oval from the center to the x and y axis
+//
+// https://iquilezles.org/articles/ellipsedist/
+//
+// The MIT License
+// Copyright © 2015 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions: The above copyright
+// notice and this permission notice shall be included in all copies or
+// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
+// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// https://www.youtube.com/c/InigoQuilez
+// https://iquilezles.org
+
+float distanceFromOval(vec2 p, vec2 ab) {
+  // The ellipse is symmetric along both axes, do the calculation in the upper
+  // right quadrant.
+  p = abs(p);
+
+  // Initial guess for w0. Determine whether q is closer to the top of the
+  // ellipse or closer to the righthand side. Use the top (0) or righthand side
+  // (pi/2) as the initial guess for w0.
+  vec2 q = ab * (p - ab);
+  float w = (q.x < q.y) ? 1.570796327 : 0.0;
+  for (int i = 0; i < 5; i++) {
+    vec2 cs = vec2(cos(w), sin(w));
+
+    // u = q(w) = (a*cos(w), b*sin(w))
+    vec2 u = ab * vec2(cs.x, cs.y);
+
+    // v = q'(w) = (a*-sin(w), b*cos(w))
+    vec2 v = ab * vec2(-cs.y, cs.x);
+
+    // Newton-Raphson update step, w_n = w_n-1 + f(w_n-1)/f'(w_n-1)
+    // In this case f(w) = (p - q(w)) dot q'(w) = (p - u) dot v
+    w = w + dot(p - u, v) / (dot(p - u, u) + dot(v, v));
+  }
+
+  // Compute final point and distance
+  float d = length(p - ab * vec2(cos(w), sin(w)));
+
+  // Return signed distance.
+  // p is outside the ellipse if (p.x/a)^2 + (p.y/b)^2 > 0
+  return (dot(p / ab, p / ab) > 1.0) ? d : -d;
 }
 
 float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
@@ -70,26 +112,67 @@ float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
   return length(d);
 }
 
+// Exact math for rounded rect.
+//
+// `p` is position relative to the center of the shape.
+// `b` is the size of box, .x is the distance between center and left/right, .y
+// is the distance between center and top/bottom. `r` is radii for each corner
+// in order [bottom_right, top_right, bottom_left, top_left].
+//
+// See https://iquilezles.org/articles/distfunctions2d/
+//
+// The MIT License
+// Copyright © 2015 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions: The above copyright
+// notice and this permission notice shall be included in all copies or
+// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
+// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// https://www.youtube.com/c/InigoQuilez
+// https://iquilezles.org
+
+float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
+  r.xy = (p.x > 0.0) ? r.xy : r.zw;
+  r.x = (p.y > 0.0) ? r.x : r.y;
+  vec2 q = abs(p) - b + r.x;
+  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
+}
+
 float filledSDF(vec2 p) {
   if (frag_info.type < 0.5) {  // Circle
     return distanceFromCircle(p, frag_info.size.x);
-  } else {  // Rect
+  } else if (frag_info.type < 1.5) {  // Rect
     return distanceFromRect(p, frag_info.size);
+  } else if (frag_info.type < 2.5) {  // Oval
+    return distanceFromOval(p, frag_info.size);
+  } else {  // Rounded Rect
+    return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   }
 }
 
-float strokedSDF(vec2 p, float base_sdf, float pixel_size) {
-  float half_stroke = max(frag_info.stroke_width, pixel_size) * 0.5;
+float strokedSDF(vec2 p, float base_sdf, float base_sdf_pixel_size) {
+  float half_stroke = max(frag_info.stroke_width, base_sdf_pixel_size) * 0.5;
 
-  // Special case handling for certain shapes.
-  if (typeIsRect()) {
-    if (joinIsMiter()) {
+  // Some cases need special handling because their stroked SDFs have a
+  // different shape from their base SDFs.
+  if (frag_info.type > 0.5 && frag_info.type < 1.5) {  // Rect
+
+    if (frag_info.stroke_join < 0.5) {  // Miter
       // Outer edge is the SDF for a rect with size expanded by half_stroke.
       float outer = distanceFromRect(p, frag_info.size + half_stroke);
       // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
       return max(outer, -inner);
-    } else if (joinIsBevel()) {
+    } else if (frag_info.stroke_join < 1.5) {  // Bevel
       // Outer edge is the SDF for a rect with size expanded by half_stroke,
       // with a half_stroke chamfer.
       float outer =
@@ -97,35 +180,94 @@ float strokedSDF(vec2 p, float base_sdf, float pixel_size) {
       // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
       return max(outer, -inner);
+    }  // else stroke_join is Round. Fall through to the common case.
+  }
+
+  // For most shapes, the stroked SDF is defined by the +/- half_stroke
+  // isolines of the base SDF. See the "Making shapes annular" section in
+  // https://iquilezles.org/articles/distfunctions2d/.
+  return abs(base_sdf) - half_stroke;
+}
+
+float pixelSize(float sdf, float base_sdf_pixel_size) {
+  // Filled shape.
+  if (frag_info.stroked < 0.5) {
+    return base_sdf_pixel_size;
+  }
+
+  // Stroked shape with an SDF different from the base SDF. These cases match
+  // the cases in the strokedSDF function which return custom SDFs.
+  if (frag_info.type > 0.5 && frag_info.type < 1.5) {  // Rect
+    if (frag_info.stroke_join < 1.5) {  // Miter (0.0) or Bevel (1.0)
+      // Calculate a new pixel size based on the SDF. The comments for gradient
+      // and base_sdf_pixel_size below explain how this is calculated.
+      return length(vec2(dFdx(sdf), dFdy(sdf)));
     }
   }
 
-  // Most stroked SDFs are the shape within the half-stroke offset isolines of
-  // the filled SDF.
-  return abs(base_sdf) - half_stroke;
+  // Stroked shape with an SDF that has the same shape as the base SDF.
+  return base_sdf_pixel_size;
 }
 
 void main() {
   vec2 p = v_position - frag_info.center;
 
+  // The SDF of the base shape (not accounting for stroking).
   float base_sdf = filledSDF(p);
 
-  // Gradient vector of the SDF. Points in the direction of steepest increase
-  // away from shape. At the edges of the shape, this is perpendicular to the
-  // edge.
+  // Gradient vector of the SDF at point p. Points in the direction of steepest
+  // increase away from SDF's shape. At the edges of the shape, this is
+  // perpendicular to the edge.
+  //
+  // The x and y magnitudes of the gradient are determined by the dFdx and dFdy
+  // of the SDF value. dFdx and dFdy return the change of a value in the x and y
+  // direction per screen-space unit (physical pixel). So this gradient
+  // is the change in the SDF, at point p, in local space units per pixel.
   vec2 gradient = vec2(dFdx(base_sdf), dFdy(base_sdf));
 
-  // The length of the gradient vector is how fast the SDF changes per unit
-  // distance. This is equal to the width of a pixel in the direction of the
-  // gradient.
-  float pixel_size = length(gradient);
+  // The length of the gradient vector is how fast the SDF changes per
+  // screen-space pixel distance. In other words, it is the size of a pixel
+  // measured in the units of the SDF calculation.
+  //
+  // In local space, the SDF always increases by 1 in the gradient's direction
+  // per unit distance. That's the definition of an SDF: it is the distance to
+  // the closest point of the shape. But in terms of screen-space, the SDF may
+  // increase by a different amount than 1 per unit distance (in screen-space
+  // units, i.e. physical pixels), due to scales/skews/rotations.
+  //
+  // As an example, consider the SDF of an unscaled/unskewed circle centered at
+  // the origin. The gradient is vec2(1.0, 0.0) for points along the positive x
+  // axis[^1]: for every one pixel we move along the positive x axis,
+  // the SDF value increases by 1.0. Now consider the same circle with a
+  // transformation that scales it by 2 along the x axis. With a transformation,
+  // the local space size of the circle remains the same, but the way it maps
+  // onto screen-space pixels is changed. In screen-space the circle is
+  // stretched to be twice as wide as the original circle in the postive and
+  // negative x directions. The gradient for this will be vec2(0.5, 0.0) along
+  // the positive x axis: for every physical pixel we move along the positive x
+  // axis, we move only 0.5 units in the SDF's local space.
+  //
+  // [^1]: In the real world, there would not be a pixel where the gradient
+  // vector for a circle is exactly (1.0, 0.0) due to the way dFdx and dFdy are
+  // approximated from pixel samples. This does not affect the applicability
+  // of this example.
+  float base_sdf_pixel_size = length(gradient);
 
-  float sdf = (frag_info.stroked < 0.5) ? base_sdf
-                                        : strokedSDF(p, base_sdf, pixel_size);
+  // The SDF of the shape, accounting for stroking.
+  float sdf =
+      (frag_info.stroked < 0.5)
+          ? base_sdf                                       // Filled shape
+          : strokedSDF(p, base_sdf, base_sdf_pixel_size);  // Stroked shape
 
-  // Anti-aliasing
+  // The pixel size of sdf. For most shapes, this is the same as the pixel size
+  // of base_sdf. pixelSize() determines whether to use base_sdf's pixel_size or
+  // whether a new pixel size is calculated.
+  float pixel_size = pixelSize(sdf, base_sdf_pixel_size);
+
+  // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
+  // goes from negative to positive). Fade through distance of half
+  // (pixel_size * aa_pixels) in each direction.
   float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
-
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);

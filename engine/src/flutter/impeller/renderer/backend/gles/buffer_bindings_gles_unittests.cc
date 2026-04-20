@@ -39,10 +39,10 @@ TEST(BufferBindingsGLESTest, BindUniformData) {
                                      .array_elements = std::nullopt,
                                      .float_type = ShaderFloatType::kFloat}}};
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
   DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
-                                 reactor, backing_store);
+                                 reactor, std::move(backing_store));
   BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
@@ -75,11 +75,11 @@ TEST(BufferBindingsGLESTest, BindArrayData) {
                                      .array_elements = 4,
                                      .float_type = ShaderFloatType::kFloat}}};
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float) * 4}));
   DeviceBufferGLES device_buffer(
       DeviceBufferDescriptor{.size = sizeof(float) * 4}, reactor,
-      backing_store);
+      std::move(backing_store));
   BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
@@ -134,10 +134,10 @@ TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
       }};
 
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{1024}));  // Plenty of space
   DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 1024}, reactor,
-                                 backing_store);
+                                 std::move(backing_store));
   BufferView buffer_view(&device_buffer, Range(0, 1024));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 

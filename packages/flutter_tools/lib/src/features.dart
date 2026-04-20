@@ -59,6 +59,9 @@ abstract class FeatureFlags {
   /// Whether dart data assets building and bundling is enabled.
   bool get isDartDataAssetsEnabled => false;
 
+  /// Whether record use experiment is enabled.
+  bool get isRecordUseEnabled;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -100,6 +103,7 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     dartDataAssets,
+    recordUse,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
@@ -208,6 +212,14 @@ const dartDataAssets = Feature(
   name: 'Dart data assets building and bundling',
   configSetting: 'enable-dart-data-assets',
   environmentOverride: 'FLUTTER_DART_DATA_ASSETS',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Enable record use experiment.
+const recordUse = Feature(
+  name: 'record use experiment',
+  configSetting: 'enable-record-use',
+  environmentOverride: 'FLUTTER_RECORD_USE',
   master: FeatureChannelSetting(available: true),
 );
 
