@@ -241,7 +241,7 @@ FLUTTER_ASSERT_ARC
                                      completionHandler:OCMArg.any]);
 
   // Calling sceneWillConnectFallback a second time, didFinishLaunching
-  // should not be called again.
+  // will be called again.
   [delegate sceneWillConnectFallback:mockOptions];
   OCMVerify(times(2), [mockPlugin application:UIApplication.sharedApplication
                           didFinishLaunchingWithOptions:expectedApplicationOptions]);
