@@ -52,8 +52,6 @@ jobs:
 
       - name: Check for Changes
         id: git-check
-        env:
-          ENGINE_HASH: ${{ env.ENGINE_HASH }}
         run: |
           # -f adds even if it's in the .gitignore (which it usually is)
           git add -f bin/internal/engine.version
@@ -72,8 +70,6 @@ jobs:
         if: steps.git-check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          ENGINE_HASH: ${{ env.ENGINE_HASH }}
-          OLD_HASH: ${{ env.OLD_HASH }}
           REF_NAME: ${{ github.ref_name }}
         run: |
           git commit -m "Update engine.version to $ENGINE_HASH"
