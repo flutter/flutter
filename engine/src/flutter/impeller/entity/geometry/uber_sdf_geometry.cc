@@ -45,7 +45,8 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
     // The SDF is a filled axis-aligned rectangle. It covers the input rect if
     // the SDF's rect covers the input rect, subtracting the AA padding from the
     // SDF rect.
-    Rect transformed_bounds = GetExpandedBounds(transform);
+    Rect transformed_bounds =
+        GetExpandedBounds(transform).TransformAndClipBounds(transform);
     return transformed_bounds.Expand(-UberSDFParameters::kAntialiasPixels)
         .Contains(rect);
   }
