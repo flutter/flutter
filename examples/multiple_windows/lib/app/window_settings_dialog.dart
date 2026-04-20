@@ -7,14 +7,14 @@
 import 'package:flutter/material.dart';
 // ignore: implementation_imports
 import 'package:flutter/src/widgets/_window_positioner.dart';
+
 import 'models.dart';
 
 Future<void> showWindowSettingsDialog(
   BuildContext context,
   WindowSettings settings,
-) async {
-  return await showDialog(
-    barrierDismissible: true,
+) {
+  return showDialog(
     context: context,
     builder: (BuildContext ctx) {
       return _WindowSettingsEditor(
@@ -172,7 +172,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             isExpanded: true,
             value: _parentAnchor,
             items: [
-              for (WindowPositionerAnchor anchor
+              for (final WindowPositionerAnchor anchor
                   in WindowPositionerAnchor.values)
                 DropdownMenuItem(
                   value: anchor,
