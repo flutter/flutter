@@ -381,14 +381,7 @@ void main() {
       expect(
         commandsRun,
         containsAllInOrder([
-          containsAllInOrder([
-            'flutter',
-            'run',
-            '--foo',
-            '--bar=baz,foobar',
-            '--flag1',
-            '--flag2',
-          ]),
+          containsAllInOrder(['flutter', 'run', '--foo', '--bar=baz,foobar', '--flag1', '--flag2']),
         ]),
       );
     });
@@ -401,11 +394,7 @@ void main() {
           expect(
             commandsRun,
             containsAllInOrder([
-              containsAllInOrder([
-                'flutter',
-                'run',
-                '--$mode',
-              ]),
+              containsAllInOrder(['flutter', 'run', '--$mode']),
             ]),
           );
         });
