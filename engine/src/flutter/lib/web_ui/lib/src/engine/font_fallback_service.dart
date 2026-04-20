@@ -171,7 +171,7 @@ class FallbackFontService {
       // If all candidate fonts for a character are dead, we stop trying to avoid infinite loops.
       final bool isUnavailable = unavailableCache.putIfAbsent(
         component,
-        () => !component.fonts.any((NotoFont f) => !_permanentlyUnavailableFonts.contains(f)),
+        () => component.fonts.every((NotoFont f) => _permanentlyUnavailableFonts.contains(f)),
       );
       if (isUnavailable) {
         newlyUnsupported.add(cp);
