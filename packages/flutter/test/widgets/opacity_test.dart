@@ -219,4 +219,16 @@ void main() {
     await expectLater(find.byKey(key), matchesGoldenFile('opacity_disabled_with_child.png'));
     debugDisableOpacityLayers = false;
   });
+
+  testWidgets('Opacity does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Opacity(opacity: 0.5)),
+      ),
+    );
+    expect(tester.getSize(find.byType(Opacity)), Size.zero);
+  });
 }
