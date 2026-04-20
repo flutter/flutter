@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
-class CardUseCase extends UseCase {
-  CardUseCase();
+class ToggleButtonsUseCase extends UseCase {
+  ToggleButtonsUseCase();
 
   @override
-  String get name => 'Card';
+  String get name => 'ToggleButtons';
 
   @override
-  String get route => '/card';
+  String get route => '/toggle-buttons';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -30,9 +30,8 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-  bool favorite = false;
-
-  String pageTitle = getUseCaseName(CardUseCase());
+  String pageTitle = getUseCaseName(ToggleButtonsUseCase());
+  final List<bool> _selected = <bool>[true, false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +40,18 @@ class MainWidgetState extends State<MainWidget> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(
+        child: ToggleButtons(
+          isSelected: _selected,
+          onPressed: (int index) {
+            setState(() {
+              _selected[index] = !_selected[index];
+            });
+          },
           children: <Widget>[
-            Card(
-              child: Padding(padding: EdgeInsets.all(16), child: Text('Card')),
-            ),
+            Semantics(label: 'Bold', child: const Icon(Icons.format_bold)),
+            Semantics(label: 'Italic', child: const Icon(Icons.format_italic)),
+            Semantics(label: 'Underline', child: const Icon(Icons.format_underlined)),
           ],
         ),
       ),

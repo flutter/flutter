@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
-class CardUseCase extends UseCase {
-  CardUseCase();
+class FloatingActionButtonUseCase extends UseCase {
+  FloatingActionButtonUseCase();
 
   @override
-  String get name => 'Card';
+  String get name => 'FloatingActionButton';
 
   @override
-  String get route => '/card';
+  String get route => '/floating-action-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -30,9 +30,8 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-  bool favorite = false;
-
-  String pageTitle = getUseCaseName(CardUseCase());
+  String pageTitle = getUseCaseName(FloatingActionButtonUseCase());
+  int _tapCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +40,15 @@ class MainWidgetState extends State<MainWidget> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Card(
-              child: Padding(padding: EdgeInsets.all(16), child: Text('Card')),
-            ),
-          ],
-        ),
+      body: Center(child: Text('Tap count: $_tapCount')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _tapCount++;
+          });
+        },
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
       ),
     );
   }

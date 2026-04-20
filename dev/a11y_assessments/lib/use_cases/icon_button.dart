@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
-class SnackBarUseCase extends UseCase {
-  SnackBarUseCase();
+class IconButtonUseCase extends UseCase {
+  IconButtonUseCase();
 
   @override
-  String get name => 'SnackBar';
+  String get name => 'IconButton';
 
   @override
-  String get route => '/snack-bar';
+  String get route => '/icon-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -30,7 +30,7 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-  String pageTitle = getUseCaseName(SnackBarUseCase());
+  String pageTitle = getUseCaseName(IconButtonUseCase());
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +41,17 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              child: const Text('Show Snackbar'),
-              onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Awesome Snackbar!')));
-              },
+            IconButton(
+              icon: const Icon(Icons.volume_up),
+              tooltip: 'Increase volume',
+              onPressed: () {},
             ),
-            ElevatedButton(
-              child: const Text('Show Snackbar with action '),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Awesome Snackbar!'),
-                    action: SnackBarAction(label: 'Action', onPressed: () {}),
-                  ),
-                );
-              },
+            const IconButton(
+              icon: Icon(Icons.volume_up),
+              tooltip: 'Increase volume',
+              onPressed: null, // Disabled
             ),
           ],
         ),

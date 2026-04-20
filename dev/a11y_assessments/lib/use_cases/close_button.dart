@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
-class CardUseCase extends UseCase {
-  CardUseCase();
+class CloseButtonUseCase extends UseCase {
+  CloseButtonUseCase();
 
   @override
-  String get name => 'Card';
+  String get name => 'CloseButton';
 
   @override
-  String get route => '/card';
+  String get route => '/close-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -30,9 +30,7 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-  bool favorite = false;
-
-  String pageTitle = getUseCaseName(CardUseCase());
+  String pageTitle = getUseCaseName(CloseButtonUseCase());
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +38,15 @@ class MainWidgetState extends State<MainWidget> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
+        automaticallyImplyLeading: false,
       ),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Card(
-              child: Padding(padding: EdgeInsets.all(16), child: Text('Card')),
-            ),
+            CloseButton(),
+            SizedBox(height: 20),
+            Text('Check the close button above'),
           ],
         ),
       ),

@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import '../utils.dart';
 import 'use_cases.dart';
 
-class SnackBarUseCase extends UseCase {
-  SnackBarUseCase();
+class PopupMenuButtonUseCase extends UseCase {
+  PopupMenuButtonUseCase();
 
   @override
-  String get name => 'SnackBar';
+  String get name => 'PopupMenuButton';
 
   @override
-  String get route => '/snack-bar';
+  String get route => '/popup-menu-button';
 
   @override
-  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
+  List<Tag> get tags => <Tag>[Tag.batch2, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -30,7 +30,8 @@ class MainWidget extends StatefulWidget {
 }
 
 class MainWidgetState extends State<MainWidget> {
-  String pageTitle = getUseCaseName(SnackBarUseCase());
+  String pageTitle = getUseCaseName(PopupMenuButtonUseCase());
+  String _selectedItem = 'None';
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +42,20 @@ class MainWidgetState extends State<MainWidget> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              child: const Text('Show Snackbar'),
-              onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Awesome Snackbar!')));
+            Text('Selected: $_selectedItem'),
+            PopupMenuButton<String>(
+              tooltip: 'Show menu',
+              onSelected: (String item) {
+                setState(() {
+                  _selectedItem = item;
+                });
               },
-            ),
-            ElevatedButton(
-              child: const Text('Show Snackbar with action '),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Awesome Snackbar!'),
-                    action: SnackBarAction(label: 'Action', onPressed: () {}),
-                  ),
-                );
-              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'Item 1', child: Text('Item 1')),
+                const PopupMenuItem<String>(value: 'Item 2', child: Text('Item 2')),
+              ],
             ),
           ],
         ),
