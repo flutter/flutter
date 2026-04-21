@@ -54,13 +54,14 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
-  /// Creates UberSDFParameters for a rounded rectangle.
+  /// Creates UberSDFParameters for a symmetric round superellipse.
   static UberSDFParameters MakeRoundSuperellipse(
       Color color,
       const Rect& bounds,
       Scalar n,
       Scalar corner_radius,
-      Scalar corner_arc_angle,
+      Scalar corner_angle_start,
+      Scalar corner_angle_span,
       Point corner_circle_center,
       std::optional<StrokeParameters> stroke);
 
@@ -85,10 +86,19 @@ struct UberSDFParameters {
   /// Only used if type is kRoundedRect.
   RoundingRadii radii;
 
-  // The power of a superellipse
+  // The degree of a RoundSuperellipse.
   Scalar superellipse_n;
+
+  // The radius of the circular arcs of a RoundSuperellipse.
   Scalar corner_radius;
-  Scalar corner_arc_angle;
+
+  // The angle at which the circular arc starts in a RoundSuperellipse
+  Scalar corner_angle_start;
+
+  // The span of the circular arc in a RoundSuperellipse
+  Scalar corner_angle_span;
+
+  // The center of the circular arc in a RoundSuperellipse
   Point corner_circle_center;
 };
 

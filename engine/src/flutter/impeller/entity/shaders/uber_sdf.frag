@@ -19,7 +19,8 @@ uniform FragInfo {
   vec4 radii;
   float superellipse_n;
   float corner_radius;
-  float corner_arc_angle;
+  float corner_angle_start;
+  float corner_angle_span;
   vec2 corner_circle_center;
 }
 frag_info;
@@ -97,21 +98,32 @@ float sdSuperellipse(vec2 p, float n) {
 float distanceFromRoundSuperellipse(vec2 p,
                                     vec2 ab,
                                     float n,
-                                    float corner_arc_angle,
-                                    vec2 corner_circle_center,
-                                    float corner_radius) {
-  float half_pi = 1.57079633;
-  float min_angle = 0.5 * (half_pi - corner_arc_angle);
-  float max_angle = (half_pi + corner_arc_angle) * 0.5;
-
-  vec2 p_remap = p - corner_circle_center;
-  float theta = atan(p_remap.y, p_remap.x);
-
-  if (theta > min_angle && theta < max_angle) {
-    return distanceFromCircle(p - corner_circle_center, corner_radius);
+                                    float angle_start,
+                                    float angle_span,
+                                    vec2 circle_center,
+                                    float radius) {
+  p = abs(p);
+  // Mirror the point into the 'top' octant (y >= x) to match the
+  // parameters passed from the CPU.
+  if (p.x > p.y) {
+    p = p.yx;
   }
 
-  return sdSuperellipse(p / ab, n);
+  vec2 p_remap = p - circle_center;
+  float theta = atan(p_remap.y, p_remap.x);
+
+  float d_theta = theta - angle_start;
+  float pi = 3.14159265;
+  d_theta = mod(d_theta + pi, 2.0 * pi) - pi;
+
+  float d_norm;
+  if (abs(d_theta) < abs(angle_span)) {
+    d_norm = distanceFromCircle(p - circle_center, radius);
+  } else {
+    d_norm = sdSuperellipse(p / ab, n) * ab.x;
+  }
+
+  return d_norm;
 }
 
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
@@ -239,7 +251,8 @@ float filledSDF(vec2 p) {
     return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
     return distanceFromRoundSuperellipse(
-        p, frag_info.size, frag_info.superellipse_n, frag_info.corner_arc_angle,
+        p, frag_info.size, frag_info.superellipse_n,
+        frag_info.corner_angle_start, frag_info.corner_angle_span,
         frag_info.corner_circle_center, frag_info.corner_radius);
   }
 }
@@ -277,7 +290,8 @@ float strokedSDF(vec2 p) {
     inner = d + half_stroke;
   } else {  // Round Superellipse
     float d = distanceFromRoundSuperellipse(
-        p, frag_info.size, frag_info.superellipse_n, frag_info.corner_arc_angle,
+        p, frag_info.size, frag_info.superellipse_n,
+        frag_info.corner_angle_start, frag_info.corner_angle_span,
         frag_info.corner_circle_center, frag_info.corner_radius);
     outer = d - half_stroke;
     inner = d + half_stroke;

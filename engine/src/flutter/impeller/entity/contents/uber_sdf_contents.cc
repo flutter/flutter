@@ -83,7 +83,8 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
   frag_info.superellipse_n = params_.superellipse_n;
   frag_info.corner_radius = params_.corner_radius;
-  frag_info.corner_arc_angle = params_.corner_arc_angle;
+  frag_info.corner_angle_start = params_.corner_angle_start;
+  frag_info.corner_angle_span = params_.corner_angle_span;
   frag_info.corner_circle_center = params_.corner_circle_center;
 
   auto geometry_result =

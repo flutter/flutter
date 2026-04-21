@@ -1039,28 +1039,27 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      !paint.mask_blur_descriptor.has_value() &&
+      // SDF RoundSuperellipse only works for square-like RSEs with circular
+      // corners.
+      round_superellipse.GetBounds().IsSquare() &&
+      round_superellipse.GetRadii().AreAllCornersSame() &&
+      AreCornersCircular(round_superellipse.GetRadii())) {
     auto rs_param = RoundSuperellipseParam::MakeBoundsRadius(
         round_superellipse.GetBounds(),
         round_superellipse.GetRadii().bottom_left.height);
 
     auto oct = rs_param.top_right.top;
 
-    auto modified_radius = oct.circle_radius;
-
     auto params = UberSDFParameters::MakeRoundSuperellipse(
-        paint.color, round_superellipse.GetBounds(), oct.se_n, modified_radius,
+        paint.color, round_superellipse.GetBounds(), oct.se_n,
+        oct.circle_radius, oct.circle_start_angle.radians,
         oct.circle_max_angle.radians, oct.circle_center, paint.GetStroke());
-    AddRenderSDFEntityToCurrentPass(paint, params);
 
-    FML_LOG(IMPORTANT) << oct.circle_radius;
-    FML_LOG(IMPORTANT) << oct.circle_center.GetDistance(oct.circle_start);
-    oct = rs_param.top_right.right;
-    FML_LOG(IMPORTANT) << oct.circle_center.GetDistance(oct.circle_start);
+    AddRenderSDFEntityToCurrentPass(paint, params);
 
     return;
   }
-
   if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
                                    round_superellipse.GetRadii());

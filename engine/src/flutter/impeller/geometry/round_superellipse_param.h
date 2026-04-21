@@ -49,6 +49,8 @@ struct RoundSuperellipseParam {
     Point circle_center;
     // The angular span of the circular arc, measured in radians.
     Radians circle_max_angle;
+    // The angle of the start point (M) relative to the circle center.
+    Radians circle_start_angle;
 
     Scalar circle_radius;
   };
