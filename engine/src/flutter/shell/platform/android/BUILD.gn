@@ -380,7 +380,6 @@ android_java_sources = [
   "io/flutter/view/AccessibilityStringBuilder.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
   "io/flutter/view/FlutterCallbackInformation.java",
-  "io/flutter/view/FlutterRunArguments.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
