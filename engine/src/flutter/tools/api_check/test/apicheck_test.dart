@@ -262,14 +262,13 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
   void check(String description, FormalParameterList parameters) {
     for (final FormalParameter parameter in parameters.parameters) {
       TypeAnnotation? type;
-      final dynamic dynParam = parameter;
       try {
         // ignore: avoid_dynamic_calls
-        type = dynParam.type as TypeAnnotation?;
+        type = (parameter as dynamic).type as TypeAnnotation?;
       } catch (_) {
         try {
           // ignore: avoid_dynamic_calls
-          type = dynParam.parameter.type as TypeAnnotation?;
+          type = (parameter as dynamic).parameter.type as TypeAnnotation?;
         } catch (_) {
           // Ignore if not accessible.
         }
