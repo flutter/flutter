@@ -2949,37 +2949,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
-  /// Finds the index of the [Selectable] in [selectables] whose global
-  /// bounding box is closest to [globalPosition].
-  ///
-  /// This is used to clamp selection gestures that land in empty space
-  /// (such as padding) to the nearest selectable content.
-  int _closestSelectableIndexTo(Offset globalPosition) {
-    assert(selectables.isNotEmpty);
-    double minDistanceSquared = double.infinity;
-    var closestIndex = 0;
-    for (var index = 0; index < selectables.length; index += 1) {
-      final Selectable selectable = selectables[index];
-      final Matrix4 transform = selectable.getTransformTo(null);
-      for (final Rect rect in selectable.boundingBoxes) {
-        final Rect globalRect = MatrixUtils.transformRect(transform, rect);
-        final double dx =
-            globalPosition.dx - clampDouble(globalPosition.dx, globalRect.left, globalRect.right);
-        final double dy =
-            globalPosition.dy - clampDouble(globalPosition.dy, globalRect.top, globalRect.bottom);
-        final double distanceSquared = dx * dx + dy * dy;
-        if (distanceSquared < minDistanceSquared) {
-          minDistanceSquared = distanceSquared;
-          closestIndex = index;
-          if (distanceSquared == 0.0) {
-            return closestIndex;
-          }
-        }
-      }
-    }
-    return closestIndex;
-  }
-
   // Clears the selection in all [selectables], optionally skipping
   // the [Selectable] at the given index.
   void _clearSelectables({int skipIndex = -1}) {
@@ -3002,6 +2971,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       _ => throw ArgumentError('Unsupported selection event: $event'),
     };
     SelectionResult? lastSelectionResult;
+    // For tracking the nearest index if no bounding box contains the position.
+    double minDistanceSquared = double.infinity;
+    var nearestIndex = 0;
     for (var index = 0; index < selectables.length; index += 1) {
       var globalRectsContainPosition = false;
       final Matrix4 transform = selectables[index].getTransformTo(null);
@@ -3010,6 +2982,17 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (globalRect.contains(effectiveGlobalPosition)) {
           globalRectsContainPosition = true;
           break;
+        }
+        final double dx =
+            effectiveGlobalPosition.dx -
+            clampDouble(effectiveGlobalPosition.dx, globalRect.left, globalRect.right);
+        final double dy =
+            effectiveGlobalPosition.dy -
+            clampDouble(effectiveGlobalPosition.dy, globalRect.top, globalRect.bottom);
+        final double distanceSquared = dx * dx + dy * dy;
+        if (distanceSquared < minDistanceSquared) {
+          minDistanceSquared = distanceSquared;
+          nearestIndex = index;
         }
       }
       if (globalRectsContainPosition) {
@@ -3042,7 +3025,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // No selectable's bounding box contained the position. Clamp to the nearest
     // selectable so that the boundary selection event always produces a valid selection.
     if (selectables.isNotEmpty) {
-      final int nearestIndex = _closestSelectableIndexTo(effectiveGlobalPosition);
       final SelectionGeometry existingGeometry = selectables[nearestIndex].value;
       dispatchSelectionEventToChild(selectables[nearestIndex], event);
       if (selectables[nearestIndex].value != existingGeometry) {
