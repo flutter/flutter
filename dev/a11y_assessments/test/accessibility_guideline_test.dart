@@ -10,6 +10,34 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('testing accessibility guideline for home page with filter closed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const App(initialTags: <Tag>{}));
+    await tester.pumpAndSettle();
+
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+  });
+
+  testWidgets('testing accessibility guideline for home page with filter open', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const App(initialTags: <Tag>{}));
+    await tester.pumpAndSettle();
+
+    // Open the filter menu.
+    await tester.tap(find.byTooltip('Filter by tags'));
+    await tester.pumpAndSettle();
+
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+  });
+
   for (final UseCase useCase in useCases) {
     testWidgets('testing accessibility guideline for ${useCase.name}', (WidgetTester tester) async {
       await tester.pumpWidget(const App(initialTags: <Tag>{}));
