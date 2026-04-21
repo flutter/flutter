@@ -159,13 +159,18 @@ float filledSDF(vec2 p) {
   }
 }
 
+// Computes the SDF for a stroked shape.
+//
+// `p`: The position relative to the center of the shape.
+// `base_sdf`: The SDF value at point `p` of the base filled shape.
+// `base_sdf_pixel_size`: The pixel size at point `p` calculated from base_sdf.
 float strokedSDF(vec2 p, float base_sdf, float base_sdf_pixel_size) {
   // Stroke width is clamped to be at least base_sdf_pixel_size.
   float half_stroke = max(frag_info.stroke_width, base_sdf_pixel_size) * 0.5;
 
   // Some cases need special handling because their stroked SDFs have a
   // different shape from their base SDFs.
-  if (frag_info.type > 0.5 && frag_info.type < 1.5) {  // Rect
+  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
 
     if (frag_info.stroke_join < 0.5) {  // Miter
       // Outer edge is the SDF for a rect with size expanded by half_stroke.
@@ -190,6 +195,15 @@ float strokedSDF(vec2 p, float base_sdf, float base_sdf_pixel_size) {
   return abs(base_sdf) - half_stroke;
 }
 
+// Returns the pixel size for the given SDF.
+//
+// For most shapes, this is the same as the pixel size of the base filled shape.
+// For shapes where the SDF is shaped differently from the base filled shape,
+// (the special case ones in the strokedSDF function), this calculates a new
+// pixel size from the SDF's gradient.
+//
+// `sdf`: The SDF value at the current fragment.
+// `base_sdf_pixel_size`: The pixel size calculated from the base filled shape.
 float pixelSize(float sdf, float base_sdf_pixel_size) {
   // Filled shape.
   if (frag_info.stroked < 0.5) {
@@ -198,7 +212,7 @@ float pixelSize(float sdf, float base_sdf_pixel_size) {
 
   // Stroked shape with an SDF different from the base SDF. These cases match
   // the cases in the strokedSDF function which return custom SDFs.
-  if (frag_info.type > 0.5 && frag_info.type < 1.5) {  // Rect
+  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
     if (frag_info.stroke_join < 1.5) {  // Miter (0.0) or Bevel (1.0)
       // Calculate a new pixel size based on the SDF. The comments for gradient
       // and base_sdf_pixel_size below explain how this is calculated.

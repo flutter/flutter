@@ -9,9 +9,7 @@
 namespace impeller {
 
 UberSDFGeometry::UberSDFGeometry(const UberSDFParameters& params)
-    : params_(params) {
-  base_bounds_ = Rect::MakeEllipseBounds(params_.center, params_.size);
-}
+    : params_(params) {}
 
 UberSDFGeometry::~UberSDFGeometry() = default;
 
@@ -25,14 +23,13 @@ GeometryResult UberSDFGeometry::GetPositionBuffer(
   // For future performance enhancements (if the fill rate is a limiting factor)
   // this can be optimized to use a tighter geometry for specific shapes. E.g.
   // Using a tighter polygon, or cutting out the interior for stroked shapes.
-  FillRectGeometry frg(GetExpandedBounds(entity.GetTransform()));
+  FillRectGeometry frg(GetLocalSpaceCoverage(entity.GetTransform()));
   return frg.GetPositionBuffer(renderer, entity, pass);
 }
 
 std::optional<Rect> UberSDFGeometry::GetCoverage(
     const Matrix& transform) const {
-  Rect local_space_bounds = GetExpandedBounds(transform);
-  return local_space_bounds.TransformAndClipBounds(transform);
+  return GetLocalSpaceCoverage(transform).TransformAndClipBounds(transform);
 }
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
@@ -40,14 +37,14 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
   if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
       transform.IsTranslationScaleOnly()) {
     // The SDF is a filled axis-aligned rectangle. It covers the input rect if
-    // the SDF's rect covers the input rect, subtracting the AA padding from the
-    // SDF rect.
-    Rect transformed_bounds =
-        GetExpandedBounds(transform).TransformAndClipBounds(transform);
-    return transformed_bounds
+    // the SDF's transformed coverage rect covers the input rect, subtracting
+    // the AA padding from the SDF rect.
+    return GetLocalSpaceCoverage(transform)
+        .TransformAndClipBounds(transform)
         // Subtract twice the AA padding. This subtracts the AA padding added
-        // by GetExpandedBounds, and also insets the quad by another AA padding
-        // amount to account for AA fading into the interior of the shape.
+        // by GetLocalSpaceCoverage, and also insets the quad by another AA
+        // padding amount to account for AA fading into the interior of the
+        // shape.
         .Expand(-2.0f * UberSDFParameters::kAntialiasPixels)
         .Contains(rect);
   }
@@ -61,7 +58,7 @@ bool UberSDFGeometry::IsAxisAlignedRect() const {
   return (params_.type == UberSDFParameters::Type::kRect && !params_.stroke);
 }
 
-Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
+Rect UberSDFGeometry::GetLocalSpaceCoverage(const Matrix& transform) const {
   // Get the scaling factor of the transform in the X and Y directions.
   Vector2 transform_scaling = transform.GetBasisScaleXY();
 
@@ -87,7 +84,8 @@ Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
   // Padding for antialiasing.
   Size aa_padding = UberSDFParameters::kAntialiasPixels * device_pixel_size;
 
-  return base_bounds_.Expand(stroke_padding + aa_padding);
+  return Rect::MakeEllipseBounds(params_.center, params_.size)
+      .Expand(stroke_padding + aa_padding);
 }
 
 }  // namespace impeller
