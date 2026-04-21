@@ -16,19 +16,23 @@ import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
 
+/// Utilities for interacting with the host operating system.
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils({
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    Abi? currentAbi,
   }) {
+    final Abi resolvedAbi = currentAbi ?? Abi.current();
     if (platform.isWindows) {
       return _WindowsUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     } else if (platform.isMacOS) {
       return _MacOSUtils(
@@ -36,6 +40,7 @@ abstract class OperatingSystemUtils {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     } else if (platform.isLinux) {
       return _LinuxUtils(
@@ -43,6 +48,7 @@ abstract class OperatingSystemUtils {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     } else {
       return _PosixUtils(
@@ -50,6 +56,7 @@ abstract class OperatingSystemUtils {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: resolvedAbi,
       );
     }
   }
@@ -59,11 +66,15 @@ abstract class OperatingSystemUtils {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    required Abi currentAbi,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _processManager = processManager,
+       _currentAbi = currentAbi,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
+  final Abi _currentAbi;
 
   @visibleForTesting
   static final gzipLevel1 = GZipCodec(level: 1);
@@ -132,7 +143,19 @@ abstract class OperatingSystemUtils {
     return osNames[osName] ?? osName;
   }
 
-  HostPlatform get hostPlatform;
+  /// Represents the platform of the host machine running the Flutter tool.
+  HostPlatform get hostPlatform {
+    return switch (_currentAbi) {
+      Abi.macosX64 => HostPlatform.darwin_x64,
+      Abi.macosArm64 => HostPlatform.darwin_arm64,
+      Abi.linuxX64 => HostPlatform.linux_x64,
+      Abi.linuxArm64 => HostPlatform.linux_arm64,
+      Abi.linuxRiscv64 => HostPlatform.linux_riscv64,
+      Abi.windowsX64 => HostPlatform.windows_x64,
+      Abi.windowsArm64 => HostPlatform.windows_arm64,
+      _ => throw UnsupportedError('Unsupported host platform: $_currentAbi'),
+    };
+  }
 
   List<File> _which(String execName, {bool all = false});
 
@@ -178,6 +201,7 @@ class _PosixUtils extends OperatingSystemUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   }) : super._private();
 
   @override
@@ -259,35 +283,6 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   String get pathVarSeparator => ':';
-
-  HostPlatform? _hostPlatform;
-
-  @override
-  HostPlatform get hostPlatform {
-    if (_hostPlatform == null) {
-      final RunResult hostPlatformCheck = _processUtils.runSync(<String>['uname', '-m']);
-      // On x64 stdout is "uname -m: x86_64"
-      // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
-      if (hostPlatformCheck.exitCode != 0) {
-        _hostPlatform = HostPlatform.linux_x64;
-        _logger.printError(
-          'Encountered an error trying to run "uname -m":\n'
-          '  exit code: ${hostPlatformCheck.exitCode}\n'
-          '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
-          '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
-          'Assuming host platform is ${_hostPlatform!.cliName}.',
-        );
-      } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
-        _hostPlatform = HostPlatform.linux_x64;
-      } else if (hostPlatformCheck.stdout.trim().endsWith('riscv64')) {
-        _hostPlatform = HostPlatform.linux_riscv64;
-      } else {
-        // We default to ARM if it's not x86_64 and we did not get an error.
-        _hostPlatform = HostPlatform.linux_arm64;
-      }
-    }
-    return _hostPlatform!;
-  }
 }
 
 class _LinuxUtils extends _PosixUtils {
@@ -296,6 +291,7 @@ class _LinuxUtils extends _PosixUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   });
 
   String? _name;
@@ -363,6 +359,7 @@ class _MacOSUtils extends _PosixUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   });
 
   String? _name;
@@ -388,37 +385,6 @@ class _MacOSUtils extends _PosixUtils {
       _name ??= super.name;
     }
     return _name!;
-  }
-
-  // On ARM returns arm64, even when this process is running in Rosetta.
-  @override
-  HostPlatform get hostPlatform {
-    if (_hostPlatform == null) {
-      String? sysctlPath;
-      if (which('sysctl') == null) {
-        // Fallback to known install locations.
-        for (final path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
-          if (_fileSystem.isFileSync(path)) {
-            sysctlPath = path;
-          }
-        }
-      } else {
-        sysctlPath = 'sysctl';
-      }
-
-      if (sysctlPath == null) {
-        throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
-      }
-      final RunResult arm64Check = _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
-      // On arm64 stdout is "sysctl hw.optional.arm64: 1"
-      // On x86 hw.optional.arm64 is unavailable and exits with 1.
-      if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
-        _hostPlatform = HostPlatform.darwin_arm64;
-      } else {
-        _hostPlatform = HostPlatform.darwin_x64;
-      }
-    }
-    return _hostPlatform!;
   }
 
   // unzip, then rsync
@@ -472,20 +438,8 @@ class _WindowsUtils extends OperatingSystemUtils {
     required super.logger,
     required super.platform,
     required super.processManager,
+    required super.currentAbi,
   }) : super._private();
-
-  HostPlatform? _hostPlatform;
-
-  @override
-  HostPlatform get hostPlatform {
-    if (_hostPlatform == null) {
-      final abi = Abi.current();
-      _hostPlatform = (abi == Abi.windowsArm64)
-          ? HostPlatform.windows_arm64
-          : HostPlatform.windows_x64;
-    }
-    return _hostPlatform!;
-  }
 
   @override
   void makeExecutable(File file) {}
