@@ -8,6 +8,9 @@
 mergeInto(LibraryManager.library, {
   $skwasm_support_setup__postset: 'skwasm_support_setup();',
   $skwasm_support_setup: function() {
+    var _skwasm_dispatchDisposeDlImage;
+    var _skwasm_disposeDlImageOnWorker;
+
     if (Module["skwasmSingleThreaded"]) {
       _skwasm_isSingleThreaded = function() {
         return true;
@@ -137,6 +140,9 @@ mergeInto(LibraryManager.library, {
             }
             associatedObjectsMap.delete(pointer);
             return;
+          case 'disposeDlImage':
+            _skwasm_disposeDlImageOnWorker(data.image);
+            return;
           case 'disposeSurface':
             _surface_dispose(data.surface);
             return;
@@ -186,7 +192,14 @@ mergeInto(LibraryManager.library, {
         skwasmMessage: 'disposeSurface',
         surface,
       }, [], threadId);
-    }
+    };
+
+    _skwasm_dispatchDisposeDlImage = function(threadId, image) {
+      skwasm_postMessage({
+        skwasmMessage: 'disposeDlImage',
+        image,
+      }, [], threadId);
+    };
 
     // Surface Setup
     _skwasm_dispatchTransferCanvas = function (threadId, surfaceHandle, canvas, callbackId) {
@@ -412,4 +425,8 @@ mergeInto(LibraryManager.library, {
   skwasm_dispatchRasterizeImage__deps: ['$skwasm_support_setup'],
   skwasm_postRasterizeResult: function() {},
   skwasm_postRasterizeResult__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchDisposeDlImage: function() {},
+  skwasm_dispatchDisposeDlImage__deps: ['$skwasm_support_setup'],
+  skwasm_disposeDlImageOnWorker: function() {},
+  skwasm_disposeDlImageOnWorker__deps: ['$skwasm_support_setup'],
 });
