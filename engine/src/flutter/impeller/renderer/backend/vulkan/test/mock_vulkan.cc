@@ -110,6 +110,7 @@ class MockDevice final {
 struct MockVulkanState {
   std::vector<std::string> instance_extensions;
   std::vector<std::string> instance_layers;
+  std::vector<std::string> device_extensions;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,
                      VkFormatProperties* pFormatProperties)>
@@ -246,10 +247,15 @@ VkResult vkEnumerateDeviceExtensionProperties(
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
-    *pPropertyCount = 1;
+    *pPropertyCount = GetMockVulkanState().device_extensions.size();
   } else {
-    strcpy(pProperties[0].extensionName, "VK_KHR_swapchain");
-    pProperties[0].specVersion = 0;
+    uint32_t count = 0;
+    for (const std::string& ext : GetMockVulkanState().device_extensions) {
+      strncpy(pProperties[count].extensionName, ext.c_str(),
+              sizeof(VkExtensionProperties::extensionName));
+      pProperties[count].specVersion = 0;
+      count++;
+    }
   }
   return VK_SUCCESS;
 }
@@ -1026,6 +1032,7 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
 
 MockVulkanContextBuilder::MockVulkanContextBuilder()
     : instance_extensions_({"VK_KHR_surface", "VK_MVK_macos_surface"}),
+      device_extensions_({"VK_KHR_swapchain"}),
       format_properties_callback_([](VkPhysicalDevice physicalDevice,
                                      VkFormat format,
                                      VkFormatProperties* pFormatProperties) {
@@ -1054,6 +1061,7 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_mock_vulkan_state.reset(new MockVulkanState());
   g_mock_vulkan_state->instance_extensions = instance_extensions_;
   g_mock_vulkan_state->instance_layers = instance_layers_;
+  g_mock_vulkan_state->device_extensions = device_extensions_;
   g_mock_vulkan_state->format_properties_callback = format_properties_callback_;
   g_mock_vulkan_state->physical_device_properties_callback =
       physical_properties_callback_;
