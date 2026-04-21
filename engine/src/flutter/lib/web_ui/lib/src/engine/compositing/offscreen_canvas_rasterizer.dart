@@ -21,10 +21,11 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 
   @override
   @visibleForTesting
-  SurfaceProvider get surfaceProvider => _surfaceProvider;
+  OffscreenSurfaceProvider get surfaceProvider => _surfaceProvider;
 
-  /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
-  /// used to render to many RenderCanvases to produce the rendered scene.
+  /// A surface that can be used for general purpose off-screen rendering.
+  ///
+  /// This is used by some renderers for things like `Picture.toImage`.
   late final OffscreenSurface offscreenSurface = _surfaceProvider.createSurface();
 
   @override
@@ -42,10 +43,11 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 
   @override
   void dispose() {
-    _surfaceProvider.dispose();
     for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
       viewRasterizer.dispose();
     }
+    _viewRasterizers.clear();
+    _surfaceProvider.dispose();
   }
 
   @override
@@ -55,9 +57,15 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 }
 
 class OffscreenCanvasViewRasterizer extends ViewRasterizer {
-  OffscreenCanvasViewRasterizer(super.view, this.rasterizer);
+  OffscreenCanvasViewRasterizer(super.view, this.rasterizer)
+      : offscreenSurface = rasterizer.surfaceProvider.createSurface();
 
   final OffscreenCanvasRasterizer rasterizer;
+
+  /// This is an SkSurface backed by an OffScreenCanvas. This Surface is
+  /// used to render to many RenderCanvases to produce the rendered scene for
+  /// the view associated with this rasterizer.
+  final OffscreenSurface offscreenSurface;
 
   @override
   final DisplayCanvasFactory<RenderCanvas> displayFactory = DisplayCanvasFactory<RenderCanvas>(
@@ -66,7 +74,7 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> prepareToDraw() async {
-    await rasterizer.offscreenSurface.setSize(currentFrameSize);
+    await offscreenSurface.setSize(currentFrameSize);
   }
 
   @override
@@ -80,21 +88,27 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     }
     recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
-      final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
+      final List<DomImageBitmap> bitmaps = await offscreenSurface
           .rasterizeToImageBitmaps(pictures);
       for (var i = 0; i < displayCanvases.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }
     } else {
       for (var i = 0; i < displayCanvases.length; i++) {
-        await rasterizer.offscreenSurface.rasterizeToCanvas(pictures[i]);
+        await offscreenSurface.rasterizeToCanvas(pictures[i]);
         (displayCanvases[i] as RenderCanvas).renderWithNoBitmapSupport(
-          rasterizer.offscreenSurface.canvasImageSource,
+          offscreenSurface.canvasImageSource,
           currentFrameSize.height,
           currentFrameSize,
         );
       }
     }
     recorder?.recordRasterFinish();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    offscreenSurface.dispose();
   }
 }

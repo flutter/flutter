@@ -95,5 +95,47 @@ void testMain() {
         isTrue,
       );
     });
+
+    test('concurrently rendering views of different sizes does not corrupt sizes', () async {
+      // Only run this test if we are using the OffscreenCanvasRasterizer.
+      // Other rasterizers (like MultiSurfaceRasterizer) don't share the surface.
+      if (renderer.rasterizer is! OffscreenCanvasRasterizer) {
+        return;
+      }
+
+      final view1 = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('view-1'),
+      );
+      view1.debugPhysicalSizeOverride = const ui.Size(100, 100);
+      EnginePlatformDispatcher.instance.viewManager.registerView(view1);
+
+      final view2 = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('view-2'),
+      );
+      view2.debugPhysicalSizeOverride = const ui.Size(200, 200);
+      EnginePlatformDispatcher.instance.viewManager.registerView(view2);
+
+      // Render both views concurrently.
+      await Future.wait([
+        renderer.renderScene(scene, view1),
+        renderer.renderScene(scene, view2),
+      ]);
+
+      final DomHTMLCanvasElement? canvas1 = view1.dom.renderingHost.querySelector('canvas') as DomHTMLCanvasElement?;
+      final DomHTMLCanvasElement? canvas2 = view2.dom.renderingHost.querySelector('canvas') as DomHTMLCanvasElement?;
+
+      expect(canvas1, isNotNull);
+      expect(canvas2, isNotNull);
+
+      expect(canvas1!.width, 100, reason: 'View 1 canvas width should be 100');
+      expect(canvas1.height, 100, reason: 'View 1 canvas height should be 100');
+      expect(canvas2!.width, 200, reason: 'View 2 canvas width should be 200');
+      expect(canvas2.height, 200, reason: 'View 2 canvas height should be 200');
+
+      view1.dispose();
+      view2.dispose();
+    });
   });
 }
