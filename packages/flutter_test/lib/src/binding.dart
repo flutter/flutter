@@ -947,7 +947,6 @@ class _TestWindowingOwner extends WindowingOwner {
     required bool resizable,
     BaseWindowController? parent,
     String? title,
-    required bool decorated,
   }) {
     return _TestDialogWindowController(
       delegate: delegate,
