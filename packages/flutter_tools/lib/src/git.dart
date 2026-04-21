@@ -131,7 +131,7 @@ interface class Git {
   Map<String, String> _buildGitEnvironment(Map<String, String>? environment) {
     return <String, String>{
       if (_platform.isWindows) ..._useNoGlobCygwinGit,
-      if (!_platform.environment.containsKey(_kGitTerminalPrompt)) _kGitTerminalPrompt: '0',
+      _kGitTerminalPrompt: _platform.environment[_kGitTerminalPrompt] ?? '0',
       ...?environment,
     };
   }

@@ -26,17 +26,17 @@ void main() {
 
     setUp(() {
       git = Git(
-        currentPlatform: FakePlatform(
-          operatingSystem: 'windows',
-          environment: {'GIT_TERMINAL_PROMPT': '0'},
-        ),
+        currentPlatform: FakePlatform(operatingSystem: 'windows'),
         runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
       );
     });
 
     test('git.runSync passes ENV=noglob if environment is omitted', () {
       processManager.addCommand(
-        const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
+        const FakeCommand(
+          command: ['git', 'foo', 'bar'],
+          environment: {...expectedCygwinEnvVars, 'GIT_TERMINAL_PROMPT': '0'},
+        ),
       );
       git.runSync(['foo', 'bar']);
     });
@@ -45,7 +45,7 @@ void main() {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],
-          environment: {...expectedCygwinEnvVars, 'baz': 'BAZ'},
+          environment: {...expectedCygwinEnvVars, 'GIT_TERMINAL_PROMPT': '0', 'baz': 'BAZ'},
         ),
       );
       git.runSync(['foo', 'bar'], environment: {'baz': 'BAZ'});
@@ -53,7 +53,10 @@ void main() {
 
     test('git.run passes ENV=noglob if environment is omitted', () async {
       processManager.addCommand(
-        const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
+        const FakeCommand(
+          command: ['git', 'foo', 'bar'],
+          environment: {...expectedCygwinEnvVars, 'GIT_TERMINAL_PROMPT': '0'},
+        ),
       );
       await git.run(['foo', 'bar']);
     });
@@ -62,7 +65,7 @@ void main() {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],
-          environment: {...expectedCygwinEnvVars, 'baz': 'BAZ'},
+          environment: {...expectedCygwinEnvVars, 'GIT_TERMINAL_PROMPT': '0', 'baz': 'BAZ'},
         ),
       );
       await git.run(['foo', 'bar'], environment: {'baz': 'BAZ'});
@@ -70,7 +73,10 @@ void main() {
 
     test('git.stream passes ENV=noglob if environment is omitted', () async {
       processManager.addCommand(
-        const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
+        const FakeCommand(
+          command: ['git', 'foo', 'bar'],
+          environment: {...expectedCygwinEnvVars, 'GIT_TERMINAL_PROMPT': '0'},
+        ),
       );
       await git.stream(['foo', 'bar']);
     });
@@ -79,7 +85,7 @@ void main() {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],
-          environment: {...expectedCygwinEnvVars, 'baz': 'BAZ'},
+          environment: {...expectedCygwinEnvVars, 'GIT_TERMINAL_PROMPT': '0', 'baz': 'BAZ'},
         ),
       );
       await git.stream(['foo', 'bar'], environment: {'baz': 'BAZ'});
@@ -116,7 +122,7 @@ void main() {
         ),
         runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
       );
-      processManager.addCommand(const FakeCommand(command: ['git', 'foo'], environment: {}));
+      processManager.addCommand(const FakeCommand(command: ['git', 'foo'], environment: {'GIT_TERMINAL_PROMPT': '1'}));
       git.runSync(['foo']);
     });
 
