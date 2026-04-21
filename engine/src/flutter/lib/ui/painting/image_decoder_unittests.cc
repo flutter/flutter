@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 #include "flutter/common/task_runners.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/core/device_buffer.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
@@ -336,10 +338,12 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
     ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image,
                                              const std::string& decode_error) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image && image->skia_image());
+      auto skia_image = image ? image->asSkiaImage() : nullptr;
+      ASSERT_TRUE(skia_image && skia_image->skia_image());
       EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
+
     EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
     image_decoder->Decode(
         descriptor,
@@ -396,9 +400,11 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
   EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
-  EXPECT_EQ(
-      result.first->impeller_texture()->GetTextureDescriptor().storage_mode,
-      impeller::StorageMode::kHostVisible);
+  EXPECT_EQ(result.first->asImpellerImage()
+                ->GetImpellerTexture(no_gpu_access_context)
+                ->GetTextureDescriptor()
+                .storage_mode,
+            impeller::StorageMode::kHostVisible);
 
   no_gpu_access_context->FlushTasks(/*fail=*/true);
 }
@@ -652,8 +658,11 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
     ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image,
                                              const std::string& decode_error) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image && image->skia_image());
-      decoded_size = image->skia_image()->dimensions();
+
+      auto skia_image = image ? image->asSkiaImage() : nullptr;
+      ASSERT_TRUE(skia_image && skia_image->skia_image());
+      decoded_size = skia_image->skia_image()->dimensions();
+
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(
@@ -716,7 +725,10 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
     ImageDecoder::ImageResult callback = [&](const sk_sp<DlImage>& image,
                                              const std::string& decode_error) {
       ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-      ASSERT_TRUE(image && image->skia_image());
+
+      auto skia_image = image ? image->asSkiaImage() : nullptr;
+      ASSERT_TRUE(skia_image && skia_image->skia_image());
+
       runners.GetIOTaskRunner()->PostTask(release_io_manager);
     };
     image_decoder->Decode(
@@ -794,8 +806,10 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
       ImageDecoder::ImageResult callback =
           [&](const sk_sp<DlImage>& image, const std::string& decode_error) {
             ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-            ASSERT_TRUE(image && image->skia_image());
-            final_size = image->skia_image()->dimensions();
+            auto skia_image = image ? image->asSkiaImage() : nullptr;
+            ASSERT_TRUE(skia_image && skia_image->skia_image());
+            final_size = skia_image->skia_image()->dimensions();
+
             latch.Signal();
           };
       image_decoder->Decode(

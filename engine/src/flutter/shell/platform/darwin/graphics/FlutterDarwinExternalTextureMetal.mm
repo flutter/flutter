@@ -6,6 +6,8 @@
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/display_list/image/dl_image_skia.h"
+
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "impeller/base/validation.h"
 #include "impeller/display_list/aiks_context.h"
@@ -221,7 +223,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // This image should not escape local use by this flutter::Texture implementation
-  return flutter::DlImage::Make(skImage);
+  return flutter::DlImageSkia::Make(skImage);
 }
 
 - (sk_sp<flutter::DlImage>)wrapBGRAExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
@@ -262,7 +264,7 @@ FLUTTER_ASSERT_ARC
   }
 
   // This image should not escape local use by this flutter::Texture implementation
-  return flutter::DlImage::Make(skImage);
+  return flutter::DlImageSkia::Make(skImage);
 }
 
 @end

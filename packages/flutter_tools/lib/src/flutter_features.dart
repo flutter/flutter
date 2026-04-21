@@ -53,6 +53,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isDartDataAssetsEnabled => isEnabled(dartDataAssets);
 
   @override
+  bool get isRecordUseEnabled => isEnabled(recordUse);
+
+  @override
   bool get isSwiftPackageManagerEnabled => isEnabled(swiftPackageManager);
 
   @override
