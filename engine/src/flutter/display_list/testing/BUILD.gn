@@ -58,11 +58,6 @@ config("surface_provider_config") {
   if (surface_provider_include_metal) {
     defines += [ "ENABLE_METAL_BENCHMARKS" ]
   }
-
-  # Don't snapshot test results on mobile platforms
-  if (is_android || is_ios) {
-    defines += [ "BENCHMARKS_NO_SNAPSHOT" ]
-  }
 }
 
 source_set("display_list_surface_provider") {

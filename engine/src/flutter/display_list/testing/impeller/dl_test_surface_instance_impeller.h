@@ -35,7 +35,7 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   void FlushSubmitCpuSync() override;
 
   // |DlSurfaceInstance|
-  bool Snapshot(std::string& filename) const override;
+  bool SnapshotToFile(std::string& filename) const override;
 
   // |DlSurfaceInstance|
   int width() const override;

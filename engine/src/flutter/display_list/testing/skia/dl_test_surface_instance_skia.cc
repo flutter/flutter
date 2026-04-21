@@ -48,10 +48,7 @@ void DlSurfaceInstanceSkiaBase::FlushSubmitCpuSync() {
   }
 }
 
-bool DlSurfaceInstanceSkiaBase::Snapshot(std::string& filename) const {
-#ifdef BENCHMARKS_NO_SNAPSHOT
-  return false;
-#else
+bool DlSurfaceInstanceSkiaBase::SnapshotToFile(std::string& filename) const {
   auto surface = GetSurface();
   auto image = surface->makeImageSnapshot();
   if (!image) {
@@ -68,7 +65,6 @@ bool DlSurfaceInstanceSkiaBase::Snapshot(std::string& filename) const {
   fml::NonOwnedMapping mapping(static_cast<const uint8_t*>(data->data()),
                                data->size());
   return WriteAtomically(OpenFixturesDirectory(), filename.c_str(), mapping);
-#endif
 }
 
 int DlSurfaceInstanceSkiaBase::width() const {

@@ -17,6 +17,10 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
+// This label can be defined to produce snapshots of what the benchmarks
+// are drawing for debugging purposes. (Disabled here for production use.)
+#undef WRITE_BENCHMARK_SNAPSHOTS
+
 namespace flutter {
 namespace testing {
 
@@ -128,6 +132,7 @@ constexpr size_t kRectsToDraw = 5000;
 constexpr size_t kOvalsToDraw = 1000;
 constexpr size_t kCirclesToDraw = 5000;
 constexpr size_t kRRectsToDraw = 5000;
+constexpr size_t kRSEsToDraw = 5000;
 constexpr size_t kDRRectsToDraw = 2000;
 constexpr size_t kArcSweepSetsToDraw = 1000;
 constexpr size_t kImagesToDraw = 500;
@@ -173,9 +178,11 @@ void BM_DrawLine(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawLine-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Draws a series of square rects of the requested width across
@@ -218,9 +225,11 @@ void BM_DrawRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawRect-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Draws a series of ovals of the requested height with aspect ratio 3:2 across
@@ -261,9 +270,11 @@ void BM_DrawOval(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawOval-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Draws a series of circles of the requested radius across
@@ -304,9 +315,11 @@ void BM_DrawCircle(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawCircle-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Draws a series of rounded rects of the requested width across
@@ -377,9 +390,11 @@ void BM_DrawRRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawRRect-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 void BM_DrawSimpleRRect(benchmark::State& state,
@@ -398,6 +413,101 @@ void BM_DrawComplexRRect(benchmark::State& state,
                          BackendType backend_type,
                          unsigned attributes) {
   BM_DrawRRect(state, backend_type, attributes, RRectType::kComplex);
+}
+
+// Draws a series of rounded superellipses of the requested width across
+// the canvas and repeats until `kRSEsToDraw` rects have been drawn.
+//
+// Half the drawn rounded rects will not have an integral offset.
+void BM_DrawRSE(benchmark::State& state,
+                BackendType backend_type,
+                unsigned attributes,
+                RRectType type) {
+  auto surface_provider = DlSurfaceProvider::Create(backend_type);
+  DisplayListBuilder builder;
+  DlPaint paint = GetPaintForRun(attributes);
+
+  AnnotateAttributes(attributes, state,
+                     DisplayListOpFlags::kDrawRSuperellipseFlags);
+
+  size_t length = state.range(0);
+  surface_provider->InitializeSurface(length * 2, length * 2);
+  auto surface = surface_provider->GetPrimarySurface();
+
+  DlRoundingRadii radii;
+  // Keep all radii under 8 so that they won't overflow the rrect
+  // bounds which are 16 units wide at the smallest.
+  switch (type) {
+    case RRectType::kSimple:
+      radii.top_left = DlSize(5.0f, 5.0f);
+      radii.top_right = DlSize(5.0f, 5.0f);
+      radii.bottom_right = DlSize(5.0f, 5.0f);
+      radii.bottom_left = DlSize(5.0f, 5.0f);
+      break;
+    case RRectType::kNinePatch:
+      radii.top_left = DlSize(5.0f, 2.0f);
+      radii.top_right = DlSize(3.0f, 2.0f);
+      radii.bottom_right = DlSize(3.0f, 4.0f);
+      radii.bottom_left = DlSize(5.0f, 4.0f);
+      break;
+    case RRectType::kComplex:
+      radii.top_left = DlSize(5.0f, 4.0f);
+      radii.top_right = DlSize(4.0f, 5.0f);
+      radii.bottom_right = DlSize(3.0f, 6.0f);
+      radii.bottom_left = DlSize(2.0f, 7.0f);
+      break;
+    default:
+      FML_UNREACHABLE();
+  }
+
+  const DlPoint offset = DlPoint(0.5f, 0.5f);
+  const DlScalar multiplier = length / 16.0f;
+  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
+
+  radii = radii * multiplier;
+
+  state.counters["DrawCallCount"] = kRSEsToDraw;
+  for (size_t i = 0; i < kRSEsToDraw; i++) {
+    DlRoundSuperellipse rse =
+        DlRoundSuperellipse::MakeRectRadii(bouncer.GetRect(), radii);
+    builder.DrawRoundSuperellipse(rse, paint);
+    bouncer.Bounce();
+  }
+  auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kRSEsToDraw);
+
+  // We only want to time the actual rasterization.
+  size_t items_processed = 0;
+  for ([[maybe_unused]] auto _ : state) {
+    surface->RenderDisplayList(display_list);
+    items_processed += kRSEsToDraw;
+    surface->FlushSubmitCpuSync();
+  }
+  state.SetItemsProcessed(items_processed);
+
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
+  auto filename = surface_provider->backend_name() + "-DrawRSE-" +
+                  std::to_string(state.range(0)) + ".png";
+  surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
+}
+
+void BM_DrawSimpleRSE(benchmark::State& state,
+                      BackendType backend_type,
+                      unsigned attributes) {
+  BM_DrawRSE(state, backend_type, attributes, RRectType::kSimple);
+}
+
+void BM_DrawNinePatchRSE(benchmark::State& state,
+                         BackendType backend_type,
+                         unsigned attributes) {
+  BM_DrawRSE(state, backend_type, attributes, RRectType::kNinePatch);
+}
+
+void BM_DrawComplexRSE(benchmark::State& state,
+                       BackendType backend_type,
+                       unsigned attributes) {
+  BM_DrawRSE(state, backend_type, attributes, RRectType::kComplex);
 }
 
 // Draws a series of "DR" rects of the requested width across
@@ -475,9 +585,11 @@ void BM_DrawDRRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawDRRect-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 void BM_DrawArc(benchmark::State& state,
@@ -526,9 +638,11 @@ void BM_DrawArc(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawArc-" +
                   std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Returns a list of DlPoints that represent `n` points equally spaced out
@@ -750,9 +864,11 @@ void BM_DrawPath(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawPath-" + label +
                   "-" + std::to_string(state.range(0)) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Returns a set of vertices that describe a circle that has a
@@ -899,10 +1015,12 @@ void BM_DrawVertices(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawVertices-" +
                   std::to_string(disc_count) + "-" + VertexModeToString(mode) +
                   ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Generate `count` test points.
@@ -997,10 +1115,12 @@ void BM_DrawPoints(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawPoints-" +
                   PointModeToString(mode) + "-" + std::to_string(point_count) +
                   ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 sk_sp<SkImage> ImageFromBitmapWithNewID(const SkBitmap& bitmap) {
@@ -1071,10 +1191,12 @@ void BM_DrawImage(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawImage-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
                   std::to_string(bitmap_size) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 std::string ConstraintToString(DlSrcRectConstraint constraint) {
@@ -1152,11 +1274,13 @@ void BM_DrawImageRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawImageRect-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
                   ConstraintToString(constraint) + "-" +
                   std::to_string(bitmap_size) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 std::string FilterModeToString(const DlFilterMode mode) {
@@ -1235,11 +1359,13 @@ void BM_DrawImageNine(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawImageNine-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
                   FilterModeToString(filter) + "-" +
                   std::to_string(bitmap_size) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Draws a series of glyph runs with 32 glyphs in each run. The number of runs
@@ -1284,9 +1410,11 @@ void BM_DrawTextBlob(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawTextBlob-" +
                   std::to_string(draw_calls) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Draw the shadow for a 10-sided regular polygon where the polygon's
@@ -1358,11 +1486,13 @@ void BM_DrawShadow(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-DrawShadow-" +
                   VerbToString(type) + "-" +
                   (transparent_occluder ? "Transparent-" : "Opaque-") +
                   std::to_string(elevation) + "-" + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 // Calls saveLayer N times from the root canvas layer, and optionally calls
@@ -1416,10 +1546,12 @@ void BM_SaveLayer(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
   auto filename = surface_provider->backend_name() + "-SaveLayer-" +
                   std::to_string(save_depth) + "-" +
                   std::to_string(save_layer_calls) + ".png";
   surface->Snapshot(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
 #ifdef DISPLAY_LIST_BENCHMARK_ALL_OPS
@@ -1473,7 +1605,9 @@ constexpr int kWideStrokePrimitive =
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Oval)                              \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Circle)                            \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRRect)                       \
-  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRRect)
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRRect)                      \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRSE)                         \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRSE)
 
 // clang-format on
 

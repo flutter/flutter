@@ -54,7 +54,7 @@ class DlSurfaceInstance {
   virtual void FlushSubmitCpuSync() = 0;
 
   /// Store a snapshot of this Surface to the file indicated by the filename.
-  virtual bool Snapshot(std::string& filename) const = 0;
+  virtual bool SnapshotToFile(std::string& filename) const = 0;
 
   /// The size of the underlying surface.
   DlISize GetSize() const { return DlISize(width(), height()); }

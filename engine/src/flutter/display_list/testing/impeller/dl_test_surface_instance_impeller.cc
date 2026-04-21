@@ -48,12 +48,8 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
   }
 }
 
-bool DlSurfaceInstanceImpeller::Snapshot(std::string& filename) const {
-#ifdef BENCHMARKS_NO_SNAPSHOT
+bool DlSurfaceInstanceImpeller::SnapshotToFile(std::string& filename) const {
   return false;
-#else
-  return false;
-#endif
 }
 
 int DlSurfaceInstanceImpeller::width() const {
