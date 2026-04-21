@@ -6,7 +6,7 @@ import 'dart:io';
 
 void main() async {
   final String scriptPath = Platform.script.toFilePath();
-  final Directory scriptDir = Directory(scriptPath).parent;
+  final Directory scriptDir = File(scriptPath).parent;
 
   // Go up 4 levels to find the repo root:
   // scripts/ -> rebuilding-flutter-tool/ -> skills/ -> .agents/ -> <repo_root>/
@@ -26,11 +26,8 @@ void main() async {
 
   // Triggers the rebuild by executing any flutter command
   stdout.writeln('Triggering rebuild by running flutter help...');
-  final ProcessResult result = await Process.run('flutter', <String>['help']);
-  if (result.exitCode != 0) {
-    stderr.write(result.stderr);
-    exit(result.exitCode);
-  }
-  stdout.write(result.stdout);
-  stdout.writeln('Flutter tool rebuilt successfully!');
+  final process = await Process.start('flutter', <String>[
+    'help',
+  ], mode: ProcessStartMode.inheritStdio);
+  exit(await process.exitCode);
 }
