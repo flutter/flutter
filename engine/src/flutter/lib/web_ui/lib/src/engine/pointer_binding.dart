@@ -848,7 +848,16 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     _callback(event, _convertWheelEventToPointerData(wheelEvent));
 
     if (_view.browserScrollController.enabled) {
-      event.preventDefault();
+      // If a nested Flutter scrollable consumed this wheel event, block the
+      // browser from also scrolling <flutter-view>.
+      // Otherwise (outermost BrowserScrollPhysics declined, or no scrollable
+      // at target), skip preventDefault so the browser handles the wheel
+      // natively via overflow: auto on <flutter-view>. This delivers real
+      // browser-native wheel physics and lets the browser chain the scroll
+      // to a parent document when <flutter-view> hits its boundary.
+      if (_lastWheelEventHandledByWidget) {
+        event.preventDefault();
+      }
       return;
     }
 

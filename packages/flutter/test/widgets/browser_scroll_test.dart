@@ -9,6 +9,7 @@
 @TestOn('!chrome')
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1106,6 +1107,124 @@ void main() {
             'the slot and delegate to the browser. Otherwise Navigator '
             'push leaves the top route stuck on Dart-driven physics.',
       );
+    });
+  });
+
+  group('ScrollableState browser-scroll – wheel events', () {
+    late ScrollController controller;
+
+    setUp(() {
+      controller = ScrollController();
+    });
+
+    tearDown(() {
+      controller.dispose();
+    });
+
+    testWidgets(
+      'wheel on outer BrowserScrollable does not move pixels and allows browser default',
+      (tester) async {
+        await tester.pumpWidget(_buildTestApp(controller));
+        await tester.pump();
+
+        _clearCalls();
+
+        final respondCalls = <bool>[];
+        final Offset location = tester.getCenter(find.byType(ListView));
+        final testPointer = TestPointer(1, PointerDeviceKind.mouse);
+        testPointer.hover(location);
+
+        final event = PointerScrollEvent(
+          position: location,
+          scrollDelta: const Offset(0.0, 100.0),
+          onRespond: ({required bool allowPlatformDefault}) {
+            respondCalls.add(allowPlatformDefault);
+          },
+        );
+
+        await tester.sendEventToBinding(event);
+        await tester.pump();
+
+        // Pixels must not move: the framework declined to handle the wheel
+        // because BrowserScrollPhysics is active; the browser owns this
+        // wheel event.
+        expect(controller.position.pixels, 0.0);
+
+        // The resolver auto-responds true when no widget registers. This is
+        // the signal the engine watches to decide whether to preventDefault.
+        expect(
+          respondCalls,
+          equals(<bool>[true]),
+          reason:
+              'Outer BrowserScrollPhysics declined the wheel event. '
+              'PointerSignalResolver should auto-respond allowPlatformDefault=true '
+              'so the web engine skips preventDefault and lets the browser '
+              'scroll <flutter-view> natively.',
+        );
+
+        // The framework did not push a programmatic scroll to the engine.
+        expect(_callsOf('browserScrollTo'), isEmpty);
+        expect(_callsOf('browserSmoothScrollTo'), isEmpty);
+      },
+    );
+
+    testWidgets('wheel on nested inner Scrollable moves the inner, not the outer', (tester) async {
+      final innerController = ScrollController();
+      addTearDown(innerController.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: BrowserScrollable(
+              child: ListView(
+                controller: controller,
+                children: <Widget>[
+                  SizedBox(
+                    height: 400.0,
+                    child: ListView.builder(
+                      key: const Key('inner'),
+                      controller: innerController,
+                      itemCount: 30,
+                      itemBuilder: (context, index) =>
+                          SizedBox(height: 50.0, child: Text('Inner $index')),
+                    ),
+                  ),
+                  const SizedBox(height: 2000.0, child: Text('Outer tail')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      _clearCalls();
+
+      final respondCalls = <bool>[];
+      final Offset location = tester.getCenter(find.byKey(const Key('inner')));
+      final testPointer = TestPointer(1, PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      final event = PointerScrollEvent(
+        position: location,
+        scrollDelta: const Offset(0.0, 80.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          respondCalls.add(allowPlatformDefault);
+        },
+      );
+
+      await tester.sendEventToBinding(event);
+      await tester.pump();
+
+      // Inner scrollable handled the wheel.
+      expect(innerController.offset, closeTo(80.0, 1.0));
+      expect(controller.position.pixels, 0.0);
+
+      // Inner called respond(allowPlatformDefault=false) so the engine will
+      // preventDefault and the browser won't also scroll <flutter-view>.
+      expect(respondCalls, equals(<bool>[false]));
     });
   });
 }

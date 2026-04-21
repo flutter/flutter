@@ -1183,6 +1183,14 @@ class ScrollableState extends State<Scrollable>
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
         return;
       }
+      // With BrowserScrollPhysics the browser owns wheel scrolling on
+      // <flutter-view> via overflow: auto. Decline to register here so
+      // PointerSignalResolver auto-responds with allowPlatformDefault=true.
+      // That tells the web engine to skip preventDefault on the wheel event
+      // and let the browser scroll natively.
+      if (_physics is BrowserScrollPhysics) {
+        return;
+      }
       final double delta = _pointerSignalEventDelta(event);
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
       // Only express interest in the event if it would actually result in a scroll.
