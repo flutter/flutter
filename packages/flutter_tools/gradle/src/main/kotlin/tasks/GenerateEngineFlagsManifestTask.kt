@@ -21,7 +21,16 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
     @TaskAction
     fun generate() {
         val outputFile = manifestOutputFile.get().asFile
-        val cleanedShellArgs = shellArgs.get().replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;")
+        val cleanedShellArgs =
+            shellArgs
+                .get()
+                .replace(
+                    "&",
+                    "&amp;"
+                ).replace("\"", "&quot;")
+                .replace("'", "&apos;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
         val content =
             """
             <?xml version="1.0" encoding="utf-8"?>
