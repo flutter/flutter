@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 
@@ -21,7 +22,7 @@ static std::shared_ptr<DlColorSource> CreateCheckerboardShader(SkColor c1,
   bm.eraseColor(c1);
   bm.eraseArea(SkIRect::MakeLTRB(0, 0, size, size), c2);
   bm.eraseArea(SkIRect::MakeLTRB(size, size, 2 * size, 2 * size), c2);
-  auto image = DlImage::Make(SkImages::RasterFromBitmap(bm));
+  auto image = DlImageSkia::Make(SkImages::RasterFromBitmap(bm));
   return DlColorSource::MakeImage(image, DlTileMode::kRepeat,
                                   DlTileMode::kRepeat,
                                   DlImageSampling::kNearestNeighbor);
