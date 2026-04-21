@@ -146,5 +146,5 @@ void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
     RegExp(r'final assets = <String>\[[^\]]*\]; // @assets'),
     'final assets = $assetList; // @assets',
   );
-  helperFile.writeAsStringSync(newContent);
+  writeFile(helperFile.path, newContent);
 }
