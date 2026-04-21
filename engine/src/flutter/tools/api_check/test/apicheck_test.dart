@@ -262,11 +262,22 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
   void check(String description, FormalParameterList parameters) {
     for (final FormalParameter parameter in parameters.parameters) {
       TypeAnnotation? type;
-      if (parameter is SimpleFormalParameter) {
-        type = parameter.type;
-      } else if (parameter is DefaultFormalParameter) {
-        type = (parameter.parameter as SimpleFormalParameter).type;
+      final dynamic dynParam = parameter;
+      try {
+        // ignore: avoid_dynamic_calls
+        type = dynParam.type as TypeAnnotation?;
+      } catch (_) {
+        try {
+          // ignore: avoid_dynamic_calls
+          type = dynParam.parameter.type as TypeAnnotation?;
+        } catch (_) {
+          // Ignore if not accessible.
+        }
       }
+      // Clean Analyzer 13 version (uncomment once migrated):
+      // if (parameter is RegularFormalParameter) {
+      //   type = parameter.type;
+      // }
       if (type! is NamedType) {
         final String name = (type as NamedType).name.lexeme;
         if (type.question != null && simpleTypes.contains(name)) {
