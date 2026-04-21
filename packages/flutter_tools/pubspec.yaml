@@ -132,4 +132,8 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
+<<<<<<< HEAD
 # PUBSPEC CHECKSUM: 3bm17u
+=======
+# PUBSPEC CHECKSUM: lim8o
+>>>>>>> 578994cc647 (use update-packages to update the pubspec.lock)
