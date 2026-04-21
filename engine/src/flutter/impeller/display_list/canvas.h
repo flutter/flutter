@@ -120,11 +120,6 @@ class Canvas {
  public:
   static constexpr uint32_t kMaxDepth = 1 << 24;
 
-  using BackdropFilterProc = std::function<std::shared_ptr<FilterContents>(
-      FilterInput::Ref,
-      const Matrix& effect_transform,
-      Entity::RenderingMode rendering_mode)>;
-
   Canvas(ContentContext& renderer,
          const RenderTarget& render_target,
          bool is_onscreen,
