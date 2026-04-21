@@ -44,7 +44,11 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
     // SDF rect.
     Rect transformed_bounds =
         GetExpandedBounds(transform).TransformAndClipBounds(transform);
-    return transformed_bounds.Expand(-UberSDFParameters::kAntialiasPixels)
+    return transformed_bounds
+        // Subtract twice the AA padding. This subtracts the AA padding added
+        // by GetExpandedBounds, and also insets the quad by another AA padding
+        // amount to account for AA fading into the interior of the shape.
+        .Expand(-2.0f * UberSDFParameters::kAntialiasPixels)
         .Contains(rect);
   }
 
@@ -80,13 +84,8 @@ Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
     stroke_padding = effective_stroke_width * 0.5f;
   }
 
-  // The AA padding is half of the AA pixel amount multiplied by the device
-  // pixel size. The padding is multiplied by 0.5 because AA fades the SDF
-  // alpha across |kAntialiasPixels| pixels at the shape's edge, so half of the
-  // fade occurs inside the shape and half of the fade occurs outside the shape.
-  // This padding covers the half of the fade that occurs outside of the shape.
-  Size aa_padding =
-      UberSDFParameters::kAntialiasPixels * device_pixel_size * 0.5f;
+  // Padding for antialiasing.
+  Size aa_padding = UberSDFParameters::kAntialiasPixels * device_pixel_size;
 
   return base_bounds_.Expand(stroke_padding + aa_padding);
 }
