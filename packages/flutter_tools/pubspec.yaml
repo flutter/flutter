@@ -14,7 +14,10 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.3.0
-  dwds: 26.2.5
+  dwds:
+    git:
+      url: git@github.com:dart-lang/webdev.git
+      ref: e43744b235531f409ab5e2f1271178943569697a
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
