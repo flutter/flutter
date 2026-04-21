@@ -39,8 +39,7 @@ class UnpublishException implements Exception {
 
   @override
   String toString() {
-    var output = '$runtimeType';
-    output += ': $message';
+    var output = '$runtimeType: $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
