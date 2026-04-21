@@ -342,7 +342,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
                                                                             nibName:nil
                                                                              bundle:nil];
-
+  controller.mouseTrackingMode = kFlutterMouseTrackingModeAlways;
   NSWindow* window = [[NSWindow alloc] init];
   // If this is not set there will be double free on window close when
   // using ARC.
@@ -412,7 +412,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
                                                                             nibName:nil
                                                                              bundle:nil];
-
+  controller.mouseTrackingMode = kFlutterMouseTrackingModeAlways;
   NSWindow* window = [[NSWindow alloc] init];
   // If this is not set there will be double free on window close when
   // using ARC.
@@ -466,9 +466,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
                                                                             nibName:nil
                                                                              bundle:nil];
-  // By default this is kFlutterMouseTrackingModeInKeyWindow but popup window is never
-  // key window.
-  controller.mouseTrackingMode = kFlutterMouseTrackingModeInActiveApp;
+  controller.mouseTrackingMode = kFlutterMouseTrackingModeAlways;
 
   NSWindow* window = [[FlutterPopupWindow alloc] init];
   // If this is not set there will be double free on window close when
@@ -522,7 +520,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
                                                                             nibName:nil
                                                                              bundle:nil];
-
+  controller.mouseTrackingMode = kFlutterMouseTrackingModeAlways;
   NSWindow* window = [[NSWindow alloc] init];
   // If this is not set there will be double free on window close when
   // using ARC.
