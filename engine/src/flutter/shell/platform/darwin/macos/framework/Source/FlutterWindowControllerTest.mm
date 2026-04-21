@@ -460,6 +460,60 @@ TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
   [parentWindow close];
 }
 
+TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
+  FlutterWindowCreationRequest request{
+      .has_size = false,
+      .has_constraints = true,
+      .constraints{
+          .min_width = 0,
+          .min_height = 0,
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .resizable = true,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+
+  auto engine = GetFlutterEngine();
+  [engine runWithEntrypoint:@"testRenderSizedToContentResizable"];
+
+  auto engineId = reinterpret_cast<int64_t>(GetFlutterEngine());
+
+  std::optional<Isolate> isolate;
+
+  bool signalled = false;
+  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      signalled = true;
+                      isolate = Isolate::Current();
+                    }));
+
+  while (!signalled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  int64_t viewId = 0;
+  {
+    IsolateScope isolate_scope(*isolate);
+    viewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  }
+
+  auto controller = [engine viewControllerForIdentifier:viewId];
+  auto window = controller.view.window;
+  while (window.frame.size.width != 150) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  NSRect contentRect = [window contentRectForFrameRect:window.frame];
+  EXPECT_EQ(contentRect.size.width, 150.0);
+  EXPECT_EQ(contentRect.size.height, 150.0);
+  EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) != 0);
+
+  [engine.windowController closeAllWindows];
+  [engine shutDownEngine];
+}
+
 TEST_F(FlutterWindowControllerSizeTest, SizedToContent) {
   FlutterWindowCreationRequest request{
       .has_size = false,
@@ -501,13 +555,25 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContent) {
 
   auto controller = [engine viewControllerForIdentifier:viewId];
   auto window = controller.view.window;
-  while (window.frame.size.width == 0) {
+
+  while (window.frame.size.width != 150) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
   NSRect contentRect = [window contentRectForFrameRect:window.frame];
   EXPECT_EQ(contentRect.size.width, 150.0);
   EXPECT_EQ(contentRect.size.height, 150.0);
+  EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) == 0);
+
+  // Wait until the second frame is rendered, which should resize the window based
+  // on new content.
+  while (window.frame.size.width == 150) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  contentRect = [window contentRectForFrameRect:window.frame];
+  EXPECT_EQ(contentRect.size.width, 100.0);
+  EXPECT_EQ(contentRect.size.height, 100.0);
 
   [engine.windowController closeAllWindows];
   [engine shutDownEngine];
