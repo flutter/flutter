@@ -286,7 +286,7 @@ void main() {
         const version = '1.2.3';
 
         processManager.addCommands(<FakeCommand>[
-          const FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+          const FakeCommand(command: <String>['git', 'fetch', '--tags']),
           const FakeCommand(
             command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
             stdout: revision,
@@ -319,7 +319,7 @@ void main() {
         const revision = 'abc123';
 
         processManager.addCommands(<FakeCommand>[
-          const FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+          const FakeCommand(command: <String>['git', 'fetch', '--tags']),
           const FakeCommand(
             command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
             stdout: revision,
@@ -348,7 +348,7 @@ void main() {
       'fetchLatestVersion throws toolExit if HEAD is detached',
       () async {
         processManager.addCommands(const <FakeCommand>[
-          FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+          FakeCommand(command: <String>['git', 'fetch', '--tags']),
           FakeCommand(
             command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
             exception: ProcessException('git', <String>[
@@ -381,7 +381,7 @@ void main() {
       'fetchLatestVersion throws toolExit if no upstream configured',
       () async {
         processManager.addCommands(const <FakeCommand>[
-          FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+          FakeCommand(command: <String>['git', 'fetch', '--tags']),
           FakeCommand(
             command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
             exception: ProcessException('git', <String>[

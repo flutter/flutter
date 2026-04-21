@@ -167,7 +167,7 @@ void main() {
               ],
               stdout: getChannelUpToDateVersion().toString(),
             ),
-            const FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+            const FakeCommand(command: <String>['git', 'fetch', '--tags']),
             FakeCommand(
               command: const <String>[
                 'git',
@@ -367,7 +367,7 @@ void main() {
               ],
               stdout: getChannelUpToDateVersion().toString(),
             ),
-            const FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+            const FakeCommand(command: <String>['git', 'fetch', '--tags']),
             FakeCommand(
               command: const <String>[
                 'git',
@@ -1483,7 +1483,7 @@ void main() {
         stdout: 'master',
       ),
       const FakeCommand(
-        command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
+        command: <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags', '-f'],
       ),
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
       ...mockGitTagHistory(
@@ -1506,7 +1506,7 @@ void main() {
         stdout: 'master',
       ),
       const FakeCommand(
-        command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
+        command: <String>['git', 'fetch', 'https://githubmirror.com/flutter.git', '--tags', '-f'],
       ),
       const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
       ...mockGitTagHistory(

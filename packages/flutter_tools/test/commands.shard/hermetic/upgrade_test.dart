@@ -67,7 +67,7 @@ void main() {
           stdout: startingTag,
         ),
         // Ensure we have upstream tags present locally
-        const FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
         const FakeCommand(
           command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
           stdout: upstreamHeadRevision,
@@ -152,7 +152,7 @@ void main() {
           command: <String>['git', 'tag', '--points-at', 'HEAD'],
           stdout: startingTag,
         ),
-        const FakeCommand(command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']),
+        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
         const FakeCommand(
           command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
           stdout: upstreamHeadRevision,
@@ -244,7 +244,7 @@ void main() {
           workingDirectory: flutterRoot,
         ),
         const FakeCommand(
-          command: <String>['git', '-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags'],
+          command: <String>['git', 'fetch', '--tags'],
           workingDirectory: flutterRoot,
         ),
         const FakeCommand(

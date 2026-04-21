@@ -137,10 +137,12 @@ interface class Git {
 
   static const _useNoGlobCygwinGit = {'MSYS': 'noglob', 'CYGWIN': 'noglob'};
 
-  /// Environment variables to ensure that background Git operations fail fast rather than
-  /// hanging if they require user interaction (e.g. asking for SSH passphrases).
-  /// See: https://github.com/flutter/flutter/issues/184309
   static const _noPromptEnvironment = <String, String>{
     'GIT_TERMINAL_PROMPT': '0',
   };
+
+  static const List<String> silentSshArgs = <String>[
+    '-c',
+    'core.sshCommand=ssh -o BatchMode=yes',
+  ];
 }

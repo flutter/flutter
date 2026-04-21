@@ -391,9 +391,8 @@ abstract class FlutterVersion {
   /// remote git repository is not reachable due to a network issue.
   Future<String> _fetchRemoteFrameworkCommitDate() async {
     try {
-      // Fetch upstream branch's commit and tags.
-      // Use BatchMode to prevent ssh-agent hanging in the background.
-      await _run(_git, ['-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', '--tags']);
+      // Fetch upstream branch's commit and tags
+      await _run(_git, ['fetch', '--tags']);
       return _gitCommitDate(
         git: _git,
         gitRef: kGitTrackingUpstream,
@@ -1022,11 +1021,7 @@ class GitTagVersion {
       } else {
         final String flutterGit =
             platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-        // Use BatchMode to prevent ssh-agent hanging in the background.
-        git.runSync(
-          ['-c', 'core.sshCommand=ssh -o BatchMode=yes', 'fetch', flutterGit, '--tags', '-f'],
-          workingDirectory: workingDirectory,
-        );
+        git.runSync(['fetch', flutterGit, '--tags', '-f'], workingDirectory: workingDirectory);
       }
     }
     // find all tags attached to the given [gitRef]. These are returned in alphabetical order, so

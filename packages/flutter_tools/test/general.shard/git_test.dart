@@ -22,7 +22,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/74165.
   group('on Windows', () {
-    const expectedCygwinEnvVars = {'MSYS': 'noglob', 'CYGWIN': 'noglob'};
+    const expectedCygwinEnvVars = {'MSYS': 'noglob', 'CYGWIN': 'noglob', 'GIT_TERMINAL_PROMPT': '0'};
 
     setUp(() {
       git = Git(
@@ -67,7 +67,7 @@ void main() {
 
     test('git.stream passes ENV=noglob if environment is omitted', () async {
       processManager.addCommand(
-        const FakeCommand(command: ['git', 'foo', 'bar'], environment: expectedCygwinEnvVars),
+        const FakeCommand(command: ['git', 'foo', 'bar'], environment: {'MSYS': 'noglob', 'CYGWIN': 'noglob'}),
       );
       await git.stream(['foo', 'bar']);
     });
@@ -76,7 +76,7 @@ void main() {
       processManager.addCommand(
         const FakeCommand(
           command: ['git', 'foo', 'bar'],
-          environment: {...expectedCygwinEnvVars, 'baz': 'BAZ'},
+          environment: {'MSYS': 'noglob', 'CYGWIN': 'noglob', 'baz': 'BAZ'},
         ),
       );
       await git.stream(['foo', 'bar'], environment: {'baz': 'BAZ'});
