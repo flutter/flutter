@@ -234,6 +234,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.3"
+  dart_skills_lint:
+    dependency: transitive
+    description:
+      path: "tool/dart_skills_lint"
+      ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      resolved-ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      url: "https://github.com/flutter/skills"
+    source: git
+    version: "0.2.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -453,10 +462,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_mobile_ads
-      sha256: e2d18992d30b2be77cb6976b931112fc3c4612feffb5eb7a8b036bd7a64934da
+      sha256: "50549f6c945d7a445d53c04f34d025b1a1723fbd02719de9e67de432e2597f40"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "8.0.0"
   googleapis:
     dependency: "direct main"
     description:
@@ -493,10 +502,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: "1da87338673b2c0618cd65ad07cebb6244f69e70e9ee0aad3288605eba1e18dc"
+      sha256: "132d5ae53e6f1e313f5877ff9664ed8a333e8f4807de0717a00d8a6f1f37ddaa"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.1"
+    version: "1.2.0"
   html:
     dependency: "direct main"
     description:
@@ -1298,18 +1307,18 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter
-      sha256: ec81f57aa1611f8ebecf1d2259da4ef052281cb5ad624131c93546c79ccc7736
+      sha256: a3da219916aba44947d3a5478b1927876a09781174b5a2b67fa5be0555154bf9
       url: "https://pub.dev"
     source: hosted
-    version: "4.9.0"
+    version: "4.13.1"
   webview_flutter_android:
     dependency: "direct main"
     description:
       name: webview_flutter_android
-      sha256: "47a8da40d02befda5b151a26dba71f47df471cddd91dfdb7802d0a87c5442558"
+      sha256: f560f57d0f529c1dcdaf4edc3a3217b099560622f9f4a10b6bdbb566553c61ea
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.9"
+    version: "4.11.0"
   webview_flutter_platform_interface:
     dependency: "direct main"
     description:
@@ -1322,10 +1331,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: d7219cfabc6f5fc2032e0fa980ec36d71f308a35a823395af1abc34d9a2ede83
+      sha256: e15d8828e014291324a4d0cf6e272090167f4fa5673ffcf8fe446f4a4cd35861
       url: "https://pub.dev"
     source: hosted
-    version: "3.24.2"
+    version: "3.24.3"
   xdg_directories:
     dependency: "direct main"
     description:
