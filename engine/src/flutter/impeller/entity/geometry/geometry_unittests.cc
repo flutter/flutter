@@ -82,39 +82,40 @@ TEST(EntityGeometryTest, RectGeometryCoversArea) {
 }
 
 TEST(EntityGeometryTest, UberSDFGeometryPaddingIsAdjustedByInverseMaxBasis) {
-  UberSDFGeometry geometry(UberSDFParameters::MakeRect(
-      Color::Red(), Rect::MakeLTRB(0, 0, 100, 100), /*stroke=*/std::nullopt));
+  Rect rect = Rect::MakeLTRB(0, 0, 100, 100);
+  UberSDFGeometry geometry(
+      UberSDFParameters::MakeRect(Color::Red(), rect, /*stroke=*/std::nullopt));
 
-  // At scale 1, padding should be 1.
+  // At scale 1, padding should be 0.5.
   {
     auto coverage = geometry.GetCoverage(Matrix());
     EXPECT_TRUE(coverage.has_value());
     if (coverage.has_value()) {
-      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-1, -1, 101, 101));
+      EXPECT_EQ(coverage.value(), rect.Expand(0.5f));
     }
   }
 
-  // At scale 2, padding should be 0.5 in local coordinates, which becomes 1.0
+  // At scale 2, padding should be 0.25 in local coordinates, which becomes 0.5
   // in screen coordinates.
   {
     auto matrix = Matrix::MakeScale({2.0, 2.0, 1.0});
     auto coverage = geometry.GetCoverage(matrix);
     EXPECT_TRUE(coverage.has_value());
     if (coverage.has_value()) {
-      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-0.5, -0.5, 100.5, 100.5)
-                                      .TransformAndClipBounds(matrix));
+      EXPECT_EQ(coverage.value(),
+                rect.Expand(0.25f).TransformAndClipBounds(matrix));
     }
   }
 
-  // At scale 0.5, padding should be 2.0 in local coordinates, which becomes 1.0
+  // At scale 0.5, padding should be 1.0 in local coordinates, which becomes 0.5
   // in screen coordinates.
   {
     auto matrix = Matrix::MakeScale({0.5, 0.5, 1.0});
     auto coverage = geometry.GetCoverage(matrix);
     EXPECT_TRUE(coverage.has_value());
     if (coverage.has_value()) {
-      EXPECT_EQ(coverage.value(), Rect::MakeLTRB(-2.0, -2.0, 102.0, 102.0)
-                                      .TransformAndClipBounds(matrix));
+      EXPECT_EQ(coverage.value(),
+                rect.Expand(1.0f).TransformAndClipBounds(matrix));
     }
   }
 }

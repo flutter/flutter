@@ -1242,7 +1242,7 @@ TEST(EntityTest, UberSDFContentsCoverageFillRect) {
   ASSERT_TRUE(coverage.has_value());
   ASSERT_RECT_NEAR(
       coverage.value(),
-      Rect::MakeXYWH(100, 100, 200, 200).Expand(1.0f));  // expanded by AA
+      Rect::MakeXYWH(100, 100, 200, 200).Expand(0.5f));  // expanded by AA (0.5)
 }
 
 TEST(EntityTest, UberSDFContentsCoverageStrokeRect) {
@@ -1255,9 +1255,10 @@ TEST(EntityTest, UberSDFContentsCoverageStrokeRect) {
   Entity entity;
   auto coverage = contents->GetCoverage(entity);
   ASSERT_TRUE(coverage.has_value());
-  ASSERT_RECT_NEAR(coverage.value(),
-                   Rect::MakeXYWH(100, 100, 200, 200)
-                       .Expand(3.0f));  // expanded by half stroke width + AA
+  ASSERT_RECT_NEAR(
+      coverage.value(),
+      Rect::MakeXYWH(100, 100, 200, 200)
+          .Expand(2.5f));  // expanded by half stroke width (2) + AA (0.5)
 }
 
 TEST(EntityTest, UberSDFContentsCoverageFillCircle) {
@@ -1272,7 +1273,7 @@ TEST(EntityTest, UberSDFContentsCoverageFillCircle) {
   ASSERT_TRUE(coverage.has_value());
   ASSERT_RECT_NEAR(
       coverage.value(),
-      Rect::MakeXYWH(40, 40, 20, 20).Expand(1.0f));  // expanded by AA
+      Rect::MakeXYWH(40, 40, 20, 20).Expand(0.5f));  // expanded by AA
 }
 
 TEST(EntityTest, UberSDFContentsCoverageStrokeCircle) {
@@ -1285,9 +1286,10 @@ TEST(EntityTest, UberSDFContentsCoverageStrokeCircle) {
   Entity entity;
   auto coverage = contents->GetCoverage(entity);
   ASSERT_TRUE(coverage.has_value());
-  ASSERT_RECT_NEAR(coverage.value(),
-                   Rect::MakeXYWH(40, 40, 20, 20)
-                       .Expand(3.0f));  // expanded by half stroke width + AA
+  ASSERT_RECT_NEAR(
+      coverage.value(),
+      Rect::MakeXYWH(40, 40, 20, 20)
+          .Expand(2.5f));  // expanded by half stroke width (2) + AA (0.5)
 }
 
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
