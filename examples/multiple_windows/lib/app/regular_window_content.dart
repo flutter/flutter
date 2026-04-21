@@ -17,10 +17,7 @@ import 'rotated_wire_cube.dart';
 import 'tooltip_button.dart';
 
 class RegularWindowContent extends StatefulWidget {
-  const RegularWindowContent({
-    super.key,
-    required this.regularWindowController,
-  });
+  const RegularWindowContent({super.key, required this.regularWindowController});
 
   final RegularWindowController regularWindowController;
 
@@ -65,9 +62,7 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _WindowCreationButtons(
-                  regularWindowController: widget.regularWindowController,
-                ),
+                _WindowCreationButtons(regularWindowController: widget.regularWindowController),
                 const SizedBox(height: 20),
                 TooltipButton(parentController: widget.regularWindowController),
                 const SizedBox(height: 20),
@@ -151,8 +146,7 @@ class _WindowCreationButtons extends StatelessWidget {
   }
 }
 
-class CallbackRegularWindowControllerDelegate
-    with RegularWindowControllerDelegate {
+class CallbackRegularWindowControllerDelegate with RegularWindowControllerDelegate {
   CallbackRegularWindowControllerDelegate({required this.onDestroyed});
 
   @override
