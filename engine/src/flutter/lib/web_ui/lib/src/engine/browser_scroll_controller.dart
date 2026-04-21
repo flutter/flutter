@@ -4,6 +4,8 @@
 
 import 'dart:js_interop';
 
+import 'package:meta/meta.dart';
+
 import 'dom.dart';
 import 'view_embedder/embedding_strategy/embedding_strategy.dart';
 import 'window.dart';
@@ -215,8 +217,17 @@ class BrowserScrollController {
       _touchStartY = touches.first.clientY;
       final DomEventTarget? target = event.target;
       if (target != null && target.isA<DomElement>()) {
-        _activeScrollable = _findScrollableAncestor(target as DomElement);
-        _activeScrollable ??= _findScrollableDescendant(pvHost);
+        final el = target as DomElement;
+        _activeScrollable = _findScrollableAncestor(el);
+        if (_activeScrollable == null) {
+          // Scope the descendant walk to the specific platform view the
+          // user touched. Walking all of pvHost would return a scrollable
+          // from a different platform view and scroll the wrong content.
+          final DomElement? pv = containingPlatformView(el, pvHost);
+          if (pv != null) {
+            _activeScrollable = _findScrollableDescendant(pv);
+          }
+        }
       }
     });
 
@@ -337,6 +348,21 @@ class BrowserScrollController {
     } else {
       scrollable.scrollTop = scrollTop + deltaY;
     }
+  }
+
+  /// Returns the direct child of [pvHost] that contains [target], or null
+  /// if [target] is not inside any platform view.
+  ///
+  /// Used by the touch-start path to scope the scrollable-descendant search
+  /// to a single platform view so a touch on one platform view cannot
+  /// return a scrollable that lives in a different platform view.
+  @visibleForTesting
+  DomElement? containingPlatformView(DomElement target, DomElement pvHost) {
+    DomElement? current = target;
+    while (current != null && current.parentElement != pvHost) {
+      current = current.parentElement;
+    }
+    return current;
   }
 
   /// Walks down from [element] to find the first descendant with scrollable

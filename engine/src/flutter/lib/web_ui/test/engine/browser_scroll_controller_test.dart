@@ -184,6 +184,57 @@ void testMain() {
     });
   });
 
+  group('containingPlatformView', () {
+    test('returns the direct child of pvHost that contains a leaf target', () {
+      final DomElement pvHost = view.dom.platformViewsHost;
+      final DomElement pv = createDomHTMLDivElement();
+      final DomElement inner = createDomHTMLDivElement();
+      final DomElement leaf = createDomHTMLDivElement();
+      inner.append(leaf);
+      pv.append(inner);
+      pvHost.append(pv);
+
+      expect(controller.containingPlatformView(leaf, pvHost), pv);
+    });
+
+    test('returns the pv itself when target is the pv', () {
+      final DomElement pvHost = view.dom.platformViewsHost;
+      final DomElement pv = createDomHTMLDivElement();
+      pvHost.append(pv);
+
+      expect(controller.containingPlatformView(pv, pvHost), pv);
+    });
+
+    test('returns null when target is outside any platform view', () {
+      final DomElement pvHost = view.dom.platformViewsHost;
+      final DomElement stray = createDomHTMLDivElement();
+      domDocument.body!.append(stray);
+
+      expect(controller.containingPlatformView(stray, pvHost), isNull);
+
+      stray.remove();
+    });
+
+    test('selects the containing pv, not a sibling pv', () {
+      // Regression: previously the touch-start fallback walked all of
+      // pvHost, which could return a scrollable from a different platform
+      // view than the one the user actually touched. This test guards the
+      // scoping helper so touches on pvA resolve to pvA, not pvB.
+      final DomElement pvHost = view.dom.platformViewsHost;
+
+      final DomElement pvA = createDomHTMLDivElement();
+      final DomElement pvALeaf = createDomHTMLDivElement();
+      pvA.append(pvALeaf);
+      pvHost.append(pvA);
+
+      final DomElement pvB = createDomHTMLDivElement();
+      pvHost.append(pvB);
+
+      expect(controller.containingPlatformView(pvALeaf, pvHost), pvA);
+      expect(controller.containingPlatformView(pvB, pvHost), pvB);
+    });
+  });
+
   group('dispose', () {
     test('disable is called on dispose', () {
       controller.dispose();
