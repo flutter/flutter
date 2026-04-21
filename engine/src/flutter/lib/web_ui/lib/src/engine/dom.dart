@@ -526,7 +526,15 @@ extension type DomElement._(JSObject _) implements DomNode {
 
   external double scrollTop;
   external double scrollLeft;
+  external double get scrollHeight;
   external DomTokenList get classList;
+
+  @JS('scrollTo')
+  external void _scrollTo([JSAny? options]);
+
+  void scrollTo({required double top, String behavior = 'auto'}) {
+    _scrollTo(<String, dynamic>{'top': top, 'behavior': behavior}.toJSAnyDeep);
+  }
 
   /// Scrolls the element into the visible area of the browser window.
   ///
@@ -1995,6 +2003,10 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   @JS('changedTouches')
   external _DomList get _changedTouches;
   Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
+
+  @JS('touches')
+  external _DomList get _touches;
+  Iterable<DomTouch> get touches => _createDomListWrapper<DomTouch>(_touches);
 }
 
 @JS('Touch')

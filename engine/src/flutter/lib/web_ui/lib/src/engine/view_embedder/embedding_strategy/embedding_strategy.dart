@@ -44,4 +44,22 @@ abstract class EmbeddingStrategy {
 
   /// Attaches the view root element into the hostElement.
   void attachViewRoot(DomElement rootElement);
+
+  /// Whether browser-driven scrolling is supported by this embedding strategy.
+  bool get supportsBrowserScrolling => false;
+
+  /// Enables browser-driven scrolling for the outermost scrollable.
+  ///
+  /// When enabled, the host element becomes a real scrollable DOM element,
+  /// allowing the browser to handle scroll physics, momentum, and scroll
+  /// chaining natively. The framework syncs its scroll position from the
+  /// browser's scroll events.
+  void enableBrowserScrolling(DomElement rootElement) {}
+
+  /// Disables browser-driven scrolling, restoring the original styles.
+  void disableBrowserScrolling(DomElement rootElement) {}
+
+  /// Updates the scroll content height so the browser knows how much
+  /// content is available to scroll through.
+  void updateScrollContentHeight(double height) {}
 }

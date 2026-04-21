@@ -11,6 +11,8 @@ abstract class Display {
   double get refreshRate;
 }
 
+typedef BrowserScrollCallback = void Function(double offset);
+
 abstract class FlutterView {
   PlatformDispatcher get platformDispatcher;
   int get viewId;
@@ -27,6 +29,18 @@ abstract class FlutterView {
   DisplayCornerRadii? get displayCornerRadii;
   void render(Scene scene, {Size? size});
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
+
+  // Browser-driven scrolling API (web-only, no-op on other platforms).
+
+  void enableBrowserScrolling() {}
+  void disableBrowserScrolling() {}
+  void browserScrollTo(double offset) {}
+  void browserSmoothScrollTo(double offset) {}
+  void browserScrollBy(double delta) {}
+  void updateBrowserScrollContentHeight(double height) {}
+
+  BrowserScrollCallback? get onBrowserScroll => null;
+  set onBrowserScroll(BrowserScrollCallback? callback) {}
 }
 
 abstract class SingletonFlutterWindow extends FlutterView {
