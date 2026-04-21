@@ -20,7 +20,7 @@ enum BenchmarkAttributes {
   kStrokedStyle = 1 << 0,
   kFilledStyle = 1 << 1,
   kHairlineStroke = 1 << 2,
-  kWideStroke = 1 << 3,
+  kWideStroke10 = 1 << 3,
   kAntiAliasing = 1 << 4
 };
 

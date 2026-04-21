@@ -98,7 +98,7 @@ DlPaint GetPaintForRun(unsigned attributes) {
 
   if (attributes & kHairlineStroke) {
     paint.setStrokeWidth(0.0f);
-  } else if (attributes & kWideStroke) {
+  } else if (attributes & kWideStroke10) {
     paint.setStrokeWidth(10.0f);
   } else {
     paint.setStrokeWidth(1.0f);
@@ -111,25 +111,25 @@ DlPaint GetPaintForRun(unsigned attributes) {
 void AnnotateAttributes(unsigned attributes,
                         benchmark::State& state,
                         const DisplayListAttributeFlags flags) {
-  if (flags.always_stroked()) {
-    state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
-    state.counters["WideStroke"] = attributes & kWideStroke ? 1 : 0;
+  if (flags.always_stroked() && attributes & kFilledStyle) {
+    state.SkipWithError("Cannot fill an operation that is always stroked");
   }
   if (flags.applies_style()) {
-    state.counters["StrokedStyle"] = attributes & kStrokedStyle ? 1 : 0;
-    state.counters["HairlineStroke"] = attributes & kHairlineStroke ? 1 : 0;
-    state.counters["WideStroke"] = attributes & kWideStroke ? 1 : 0;
-    state.counters["FilledStyle"] = attributes & kFilledStyle ? 1 : 0;
-  }
-  if (flags.applies_anti_alias()) {
-    state.counters["AntiAliasing"] = attributes & kAntiAliasing ? 1 : 0;
+    if ((attributes & kFilledStyle) == 0 && (attributes & kStrokedStyle) == 0) {
+      state.SkipWithError("must specify stroked and/or filled style");
+    }
+    if ((attributes & kStrokedStyle) == 0) {
+      if ((attributes & kHairlineStroke) || (attributes & kWideStroke10)) {
+        state.SkipWithError("Cannot specify stroke style if op is not stroked");
+      }
+    }
   }
 }
 
 // Constants chosen to produce benchmark results in the region of 1-50ms
 constexpr size_t kLinesToDraw = 10000;
 constexpr size_t kRectsToDraw = 5000;
-constexpr size_t kOvalsToDraw = 1000;
+constexpr size_t kOvalsToDraw = 5000;
 constexpr size_t kCirclesToDraw = 5000;
 constexpr size_t kRRectsToDraw = 5000;
 constexpr size_t kRSEsToDraw = 5000;
@@ -1574,30 +1574,30 @@ RUN_DISPLAYLIST_BENCHMARKS(ImpellerMetalSDF)
 
 // clang-format off
 
-constexpr int kFilledPrimitive =
+constexpr int kAAFilledPrimitive =
     kAntiAliasing | kFilledStyle;
-constexpr int kHairlinePrimitive =
+constexpr int kAAHairlinePrimitive =
     kAntiAliasing | kStrokedStyle | kHairlineStroke;
-constexpr int kWideStrokePrimitive =
-    kAntiAliasing | kStrokedStyle | kWideStroke;
+constexpr int kAAStroke10Primitive =
+    kAntiAliasing | kStrokedStyle | kWideStroke10;
 
 #define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
-  BENCHMARK_CAPTURE(BM_Draw##TYPE, BACKEND,                                  \
+  BENCHMARK_CAPTURE(BM_Draw##TYPE, ATTRIBUTES/BACKEND,                       \
                     BackendType::k##BACKEND,                                 \
-                    ATTRIBUTES)                                              \
+                    k##ATTRIBUTES##Primitive)                                \
       ->RangeMultiplier(4)                                                   \
       ->Range(16, 1024)                                                      \
       ->UseRealTime()                                                        \
       ->Unit(benchmark::kMillisecond);
 
 #define DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                              \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kHairlinePrimitive)               \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kWideStrokePrimitive)
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, AAHairline)                       \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, AAStroke10)
 
 #define DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, TYPE)                        \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kFilledPrimitive)                 \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kHairlinePrimitive)               \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kWideStrokePrimitive)             \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAFilled)                         \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAHairline)                       \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAStroke10)                       \
 
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
   DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \
