@@ -84,9 +84,7 @@ void RenderPrimitiveWithStroke(DisplayListBuilder& builder,
     }
 
     // Square bounds to match the overall size of the circle described.
-    DlRect square_bounds =
-        DlRect::MakeLTRB(params.center.x - radius, params.center.y - radius,
-                         params.center.x + radius, params.center.y + radius);
+    DlRect square_bounds = DlRect::MakeCircleBounds(params.center, radius);
     // Rectangular bounds slightly elongated from the square bounds.
     DlRect rect_bounds = square_bounds.Expand(20.0f, 0.0f);
 
