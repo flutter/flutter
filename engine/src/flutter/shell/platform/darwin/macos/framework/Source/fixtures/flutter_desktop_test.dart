@@ -103,7 +103,7 @@ void testWindowController() {
 void testWindowControllerRetainCycle() {}
 
 @pragma('vm:entry-point')
-void testRenderSizedToContent() {
+void testRenderSizedToContentResizable() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
@@ -114,6 +114,28 @@ void testRenderSizedToContent() {
     final builder = SceneBuilder();
     builder.addPicture(const Offset(0.0, 0.0), picture);
     PlatformDispatcher.instance.views.last.render(builder.build(), size: const Size(300, 300));
+  };
+
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+void testRenderSizedToContent() {
+  int frameCount = 0;
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    Size size = frameCount == 0 ? const Size(300, 300) : const Size(200, 200);
+    final baseRecorder = PictureRecorder();
+    final canvas = Canvas(baseRecorder);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    canvas.drawRect(Offset.zero & size, blackPaint);
+    final picture = baseRecorder.endRecording();
+    final builder = SceneBuilder();
+    builder.addPicture(const Offset(0.0, 0.0), picture);
+    PlatformDispatcher.instance.views.last.render(builder.build(), size: size);
+    ++frameCount;
+    if (frameCount == 1) {
+      PlatformDispatcher.instance.scheduleFrame();
+    }
   };
 
   signalNativeTest();
