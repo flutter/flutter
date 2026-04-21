@@ -108,10 +108,6 @@ struct RoundSuperellipseParam {
       const Rect& bounds,
       Scalar radius);
 
-  [[nodiscard]] static Octant ComputeOctant(Point center,
-                                            Scalar a,
-                                            Scalar radius);
-
   // Returns whether this rounded superellipse contains the point.
   //
   // This method does not perform any prescreening such as comparing the point

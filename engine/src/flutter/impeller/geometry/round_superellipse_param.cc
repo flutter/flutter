@@ -123,6 +123,81 @@ Point FindCircleCenter(Point a, Point b, Scalar r) {
   return m - distance_cm * c_to_m.Normalize();
 }
 
+// Compute parameters for a square-like rounded superellipse with a symmetrical
+// radius.
+RoundSuperellipseParam::Octant ComputeOctant(Point center,
+                                             Scalar a,
+                                             Scalar radius) {
+  /* The following figure shows the first quadrant of a square-like rounded
+   * superellipse.
+   *
+   *              superelipse
+   *        A     ↓            circular arc
+   *        ---------...._J   ↙
+   *        |           /   `⟍ M (where x=y)
+   *        |          /     ⟋ ⟍
+   *        |         /   ⟋     \
+   *        |        / ⟋         |
+   *        |       ᜱD           |
+   *        |     ⟋              |
+   *        |  ⟋                 |
+   *        |⟋                   |
+   *        +--------------------| A'
+   *       O
+   *        ←-------- a ---------→
+   */
+
+  if (radius <= kEhCloseEnough) {
+    // Corners with really small radii are treated as sharp corners, since they
+    // might lead to NaNs due to `ratio` being too large.
+    return RoundSuperellipseParam::Octant{
+        .offset = center,
+
+        .se_a = a,
+        .se_n = 0,
+
+        .circle_start = {a, a},
+    };
+  }
+
+  Scalar ratio = a * 2 / radius;
+  Scalar g = RoundSuperellipseParam::kGapFactor * radius;
+
+  auto precomputed_vars = ComputeNAndXj(ratio);
+  Scalar n = precomputed_vars[0];
+  Scalar xJ = precomputed_vars[1] * a;
+  Scalar yJ = pow(1 - pow(precomputed_vars[1], n), 1 / n) * a;
+  Scalar max_theta = asinf(pow(precomputed_vars[1], n / 2));
+
+  Scalar tan_phiJ = pow(xJ / yJ, n - 1);
+  Scalar d = (xJ - tan_phiJ * yJ) / (1 - tan_phiJ);
+  Scalar R = (a - d - g) * sqrt(2);
+
+  Point pointM{a - g, a - g};
+  Point pointJ = Point{xJ, yJ};
+  Point circle_center =
+      radius == 0 ? pointM : FindCircleCenter(pointJ, pointM, R);
+  Radians circle_max_angle =
+      radius == 0 ? Radians(0)
+                  : (pointM - circle_center).AngleTo(pointJ - circle_center);
+  Point v = pointM - circle_center;
+  Radians circle_start_angle = Radians(std::atan2(v.y, v.x));
+
+  return RoundSuperellipseParam::Octant{
+      .offset = center,
+
+      .se_a = a,
+      .se_n = n,
+      .se_max_theta = max_theta,
+
+      .circle_start = pointJ,
+      .circle_center = circle_center,
+      .circle_max_angle = circle_max_angle,
+      .circle_start_angle = circle_start_angle,
+      .circle_radius = R,
+  };
+}
+
 // Compute parameters for a quadrant of a rounded superellipse with asymmetrical
 // radii.
 //
@@ -161,10 +236,8 @@ RoundSuperellipseParam::Quadrant ComputeQuadrant(Point center,
   return RoundSuperellipseParam::Quadrant{
       .offset = center,
       .signed_scale = signed_scale,
-      .top = RoundSuperellipseParam::ComputeOctant(
-          Point{0, -c}, norm_half_size.x, norm_radius),
-      .right = RoundSuperellipseParam::ComputeOctant(
-          Point{c, 0}, norm_half_size.y, norm_radius),
+      .top = ComputeOctant(Point{0, -c}, norm_half_size.x, norm_radius),
+      .right = ComputeOctant(Point{c, 0}, norm_half_size.y, norm_radius),
   };
 }
 
@@ -492,80 +565,6 @@ class RoundSuperellipseBuilder {
 };
 
 }  // namespace
-
-// Compute parameters for a square-like rounded superellipse with a symmetrical
-// radius.
-RoundSuperellipseParam::Octant
-RoundSuperellipseParam::ComputeOctant(Point center, Scalar a, Scalar radius) {
-  /* The following figure shows the first quadrant of a square-like rounded
-   * superellipse.
-   *
-   *              superelipse
-   *        A     ↓            circular arc
-   *        ---------...._J   ↙
-   *        |           /   `⟍ M (where x=y)
-   *        |          /     ⟋ ⟍
-   *        |         /   ⟋     \
-   *        |        / ⟋         |
-   *        |       ᜱD           |
-   *        |     ⟋              |
-   *        |  ⟋                 |
-   *        |⟋                   |
-   *        +--------------------| A'
-   *       O
-   *        ←-------- a ---------→
-   */
-
-  if (radius <= kEhCloseEnough) {
-    // Corners with really small radii are treated as sharp corners, since they
-    // might lead to NaNs due to `ratio` being too large.
-    return RoundSuperellipseParam::Octant{
-        .offset = center,
-
-        .se_a = a,
-        .se_n = 0,
-
-        .circle_start = {a, a},
-    };
-  }
-
-  Scalar ratio = a * 2 / radius;
-  Scalar g = RoundSuperellipseParam::kGapFactor * radius;
-
-  auto precomputed_vars = ComputeNAndXj(ratio);
-  Scalar n = precomputed_vars[0];
-  Scalar xJ = precomputed_vars[1] * a;
-  Scalar yJ = pow(1 - pow(precomputed_vars[1], n), 1 / n) * a;
-  Scalar max_theta = asinf(pow(precomputed_vars[1], n / 2));
-
-  Scalar tan_phiJ = pow(xJ / yJ, n - 1);
-  Scalar d = (xJ - tan_phiJ * yJ) / (1 - tan_phiJ);
-  Scalar R = (a - d - g) * sqrt(2);
-
-  Point pointM{a - g, a - g};
-  Point pointJ = Point{xJ, yJ};
-  Point circle_center =
-      radius == 0 ? pointM : FindCircleCenter(pointJ, pointM, R);
-  Radians circle_max_angle =
-      radius == 0 ? Radians(0)
-                  : (pointM - circle_center).AngleTo(pointJ - circle_center);
-  Point v = pointM - circle_center;
-  Radians circle_start_angle = Radians(std::atan2(v.y, v.x));
-
-  return RoundSuperellipseParam::Octant{
-      .offset = center,
-
-      .se_a = a,
-      .se_n = n,
-      .se_max_theta = max_theta,
-
-      .circle_start = pointJ,
-      .circle_center = circle_center,
-      .circle_max_angle = circle_max_angle,
-      .circle_start_angle = circle_start_angle,
-      .circle_radius = R,
-  };
-}
 
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadius(
     const Rect& bounds,
