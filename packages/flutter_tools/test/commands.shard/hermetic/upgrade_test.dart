@@ -396,11 +396,13 @@ void main() {
 
       expect(
         () => runner.run(<String>['upgrade']),
-        throwsA(isA<ToolExit>().having(
-          (ToolExit e) => e.message,
-          'message',
-          contains('Your flutter checkout has local changes'),
-        )),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains('Your flutter checkout has local changes'),
+          ),
+        ),
       );
     },
     overrides: <Type, Generator>{
