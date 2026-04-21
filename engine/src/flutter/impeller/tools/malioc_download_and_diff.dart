@@ -141,8 +141,7 @@ Future<void> downloadMalioc(Directory armToolsDir, String version) async {
   );
   final initExitCode = await cipdInitProcess.exitCode;
   if (initExitCode != 0) {
-    print('Error running cipd init: $initExitCode');
-    exit(initExitCode);
+    throw Exception('Error running cipd init: $initExitCode');
   }
 
   print('Downloading malioc tools to ${armToolsDir.path}...');
@@ -155,8 +154,7 @@ Future<void> downloadMalioc(Directory armToolsDir, String version) async {
   ], mode: ProcessStartMode.inheritStdio);
   final exitCode = await cipdProcess.exitCode;
   if (exitCode != 0) {
-    print('Error running cipd install: $exitCode');
-    exit(exitCode);
+    throw Exception('Error running cipd install: $exitCode');
   }
 }
 
@@ -168,8 +166,7 @@ Future<String> findMalioc(Directory armToolsDir) async {
       }
     }
   }
-  print('Error: Could not find malioc executable in downloaded tools.');
-  exit(1);
+  throw Exception('Could not find malioc executable in downloaded tools.');
 }
 
 Future<void> runGN(
@@ -194,8 +191,7 @@ Future<void> runGN(
   );
   final exitCode = await process.exitCode;
   if (exitCode != 0) {
-    print('Error running GN: $exitCode');
-    exit(exitCode);
+    throw Exception('Error running GN: $exitCode');
   }
 }
 
@@ -209,8 +205,7 @@ Future<void> runNinja(Directory srcRoot, String config, String target) async {
   );
   final exitCode = await process.exitCode;
   if (exitCode != 0) {
-    print('Error running Ninja: $exitCode');
-    exit(exitCode);
+    throw Exception('Error running Ninja: $exitCode');
   }
 }
 
@@ -235,5 +230,7 @@ Future<void> runDiff(Directory flutterDir, Directory srcRoot, String config, boo
     mode: ProcessStartMode.inheritStdio,
   );
   final exitCode = await process.exitCode;
-  exit(exitCode);
+  if (exitCode != 0) {
+    throw Exception('Error running diff: $exitCode');
+  }
 }
