@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -38,13 +39,12 @@ class IOSCoreDeviceLauncher {
     required XcodeDebug xcodeDebug,
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
-    required Xcode xcode,
     @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
        _xcodeDebug = xcodeDebug,
        _fileSystem = fileSystem,
-       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils, xcode: xcode);
+       _lldb = lldb ?? LLDB(logger: logger, processUtils: processUtils);
 
   final IOSCoreDeviceControl _coreDeviceControl;
   final Logger _logger;
@@ -97,6 +97,7 @@ class IOSCoreDeviceLauncher {
     required String bundleId,
     required List<String> launchArguments,
     required ShutdownHooks shutdownHooks,
+    required BuildMode mode,
   }) async {
     // Install app to device
     final (bool installStatus, IOSCoreDeviceInstallResult? installResult) = await _coreDeviceControl
@@ -146,6 +147,7 @@ class IOSCoreDeviceLauncher {
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
+      mode: mode,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
@@ -832,7 +834,7 @@ class IOSCoreDeviceControl {
       // Signal script child jobs to exit and exit the shell.
       // See https://linux.die.net/Bash-Beginners-Guide/sect_12_01.html#sect_12_01_01_02.
       shutdownHooks.addShutdownHook(() => launchProcess.kill());
-      return launchCompleter.future;
+      return await launchCompleter.future;
     } on ProcessException catch (err) {
       _logger.printTrace('Error executing devicectl: $err');
       return false;

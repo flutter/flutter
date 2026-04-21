@@ -55,3 +55,5 @@
 # Skills owners
 .agents/skills @reidbaker # Fallback owners
 .agents/skills/find-release @reidbaker
+.agents/skills/rebuilding-flutter-tool @vashworth
+.agents/skills/upgrade-browser @mdebbar
