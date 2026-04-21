@@ -1807,9 +1807,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a header.
   ///
-  /// A header divides into sections. For example, an address book application
-  /// might define headers A, B, C, etc. to divide the list of alphabetically
-  /// sorted contacts into sections.
+  /// A header is typically the top element of a page or section, such as a
+  /// page title or app bar title.
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
@@ -2235,7 +2234,11 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// The heading level in the document structure.
   ///
-  /// Screen readers will use this value to determine which part of the page
+  /// A heading divides content into sections. For example, an address book
+  /// application might define headings A, B, C, etc. to divide the list of
+  /// alphabetically sorted contacts into sections.
+  ///
+  /// Screen readers use this value to determine which part of the page
   /// structure this heading represents. A level 1 heading usually indicates
   /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.

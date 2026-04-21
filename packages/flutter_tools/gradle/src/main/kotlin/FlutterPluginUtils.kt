@@ -39,6 +39,33 @@ object FlutterPluginUtils {
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_PREPROVISIONED_NDK_VERSION = "flutter-preprovisioned-ndk-version"
+    internal const val TASK_PRINT_NDK_VERSION = "printNdkVersion"
+    internal const val NDK_VERSION_OUTPUT_PREFIX = "NdkVersion: "
+
+    /**
+     * The URL for documentation for general information on migration to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin"
+
+    /**
+     * The URL for documentation instructing app developers how to migrate their app to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_APPS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers"
+
+    /**
+     * The URL for documentation instructing plugin authors how to migrate to their plugin to built-in Kotlin.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors"
+
+    /**
+     * The URL for documentation instructing app developers on how to report incompatible KGP usage to plugin authors.
+     */
+    internal const val BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS =
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers/report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
 
     /**
      * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
@@ -610,12 +637,11 @@ object FlutterPluginUtils {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
-//            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
                     logger.quiet(
                         """
                         Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
                         If your project uses Kotlin, ensure KGP is declared in the root plugins block.
-                        For more details check: [link here]
+                        For more details check: $BUILT_IN_KOTLIN_DOCS
                         """.trimIndent()
                     )
                 }
@@ -634,18 +660,16 @@ object FlutterPluginUtils {
 
         project.gradle.projectsEvaluated {
             if (shouldLogForApp) {
-//            TODO(jesswon): Update [link here] with the Built-in Kotlin Migration doc
                 project.logger.error(
                     """
                     WARNING: Your Android app project: ${project.name} located at: ${project.buildFile.absolutePath}
                     applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter. 
-                    Please migrate your app to Built-in Kotlin using this guide: [link here]
+                    Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
                     
                     """.trimIndent()
                 )
             }
             if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
-//            TODO(jesswon): Update [link here] with a guide to report Built-in Kotlin issue to plugins doc
             project.logger.error(
                 """
                 WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): ${pluginsWithKGPAppliedList.joinToString()}
@@ -653,7 +677,9 @@ object FlutterPluginUtils {
                 
                 Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
                 If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing 
-                an issue against a plugin: [link here]
+                an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
+                
+                If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
                 """.trimIndent()
             )
         }
@@ -764,6 +790,14 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
+        if (isFlutterAppProject(gradleProject) && isInvokingMetadataNdkVersionTask(gradleProject)) {
+            return
+        }
+
+        if (isFlutterAppProject(gradleProject) && hasPreprovisionedNdkVersion(gradleProject)) {
+            return
+        }
+
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
@@ -805,6 +839,18 @@ object FlutterPluginUtils {
             )
         }
     }
+
+    @JvmStatic
+    @JvmName("hasPreprovisionedNdkVersion")
+    internal fun hasPreprovisionedNdkVersion(project: Project): Boolean =
+        project.findProperty(PROP_PREPROVISIONED_NDK_VERSION)?.toString() != null
+
+    @JvmStatic
+    @JvmName("isInvokingMetadataNdkVersionTask")
+    internal fun isInvokingMetadataNdkVersionTask(project: Project): Boolean =
+        project.gradle.startParameter.taskNames.any { taskName ->
+            taskName == TASK_PRINT_NDK_VERSION || taskName.endsWith(":$TASK_PRINT_NDK_VERSION")
+        }
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
@@ -934,6 +980,27 @@ object FlutterPluginUtils {
                 variantNames.get().forEach { name ->
                     println("BuildVariant: $name")
                 }
+            }
+        }
+    }
+
+    // Add a task that can be called on Flutter projects that prints the effective ndkVersion
+    // configured for the Android app.
+    //
+    // This task prints the version in this format:
+    //
+    // NdkVersion: 28.2.13676358
+    //
+    // Format of the output of this task is used by Flutter tool Android NDK preflight.
+    @JvmStatic
+    @JvmName("addTaskForPrintNdkVersion")
+    internal fun addTaskForPrintNdkVersion(project: Project) {
+        val androidExtension = getAndroidApplicationExtension(project)
+        project.tasks.register(TASK_PRINT_NDK_VERSION) {
+            description = "Prints out the configured ndkVersion for this Android project"
+            doLast {
+                val configuredNdkVersion = androidExtension.ndkVersion ?: FlutterExtension().ndkVersion
+                println("$NDK_VERSION_OUTPUT_PREFIX$configuredNdkVersion")
             }
         }
     }

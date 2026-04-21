@@ -52,7 +52,7 @@ class _PanelDemoState extends State<PanelDemo> {
             ),
             if (_isPanelOpen)
               Align(
-                alignment: Alignment.bottomCenter,
+                alignment: .bottomCenter,
                 child: Container(
                   height: 200,
                   color: Colors.blueAccent,

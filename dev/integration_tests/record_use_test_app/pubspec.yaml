@@ -1,0 +1,23 @@
+name: record_use_test_app
+description: A new Flutter application project.
+version: 0.0.1
+publish_to: none
+
+resolution: workspace
+environment:
+  sdk: '>=3.5.0-0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  record_use_test_package:
+    path: ../record_use_test_package
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: 7usc28
