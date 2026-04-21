@@ -26,7 +26,10 @@ void main() {
 
     setUp(() {
       git = Git(
-        currentPlatform: FakePlatform(operatingSystem: 'windows'),
+        currentPlatform: FakePlatform(
+          operatingSystem: 'windows',
+          environment: {'GIT_TERMINAL_PROMPT': '0'},
+        ),
         runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
       );
     });
@@ -80,6 +83,55 @@ void main() {
         ),
       );
       await git.stream(['foo', 'bar'], environment: {'baz': 'BAZ'});
+    });
+  });
+
+  group('GIT_TERMINAL_PROMPT', () {
+    setUp(() {
+      git = Git(
+        currentPlatform: FakePlatform(operatingSystem: 'macos'),
+        runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
+      );
+    });
+
+    test('git.runSync sets GIT_TERMINAL_PROMPT to 0 by default', () {
+      processManager.addCommand(
+        const FakeCommand(command: ['git', 'foo'], environment: {'GIT_TERMINAL_PROMPT': '0'}),
+      );
+      git.runSync(['foo']);
+    });
+
+    test('git.runSync respects caller environment for GIT_TERMINAL_PROMPT', () {
+      processManager.addCommand(
+        const FakeCommand(command: ['git', 'foo'], environment: {'GIT_TERMINAL_PROMPT': '1'}),
+      );
+      git.runSync(['foo'], environment: {'GIT_TERMINAL_PROMPT': '1'});
+    });
+
+    test('git.runSync respects platform environment for GIT_TERMINAL_PROMPT', () {
+      git = Git(
+        currentPlatform: FakePlatform(
+          operatingSystem: 'macos',
+          environment: {'GIT_TERMINAL_PROMPT': '1'},
+        ),
+        runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
+      );
+      processManager.addCommand(const FakeCommand(command: ['git', 'foo'], environment: {}));
+      git.runSync(['foo']);
+    });
+
+    test('git.run sets GIT_TERMINAL_PROMPT to 0 by default', () async {
+      processManager.addCommand(
+        const FakeCommand(command: ['git', 'foo'], environment: {'GIT_TERMINAL_PROMPT': '0'}),
+      );
+      await git.run(['foo']);
+    });
+
+    test('git.stream sets GIT_TERMINAL_PROMPT to 0 by default', () async {
+      processManager.addCommand(
+        const FakeCommand(command: ['git', 'foo'], environment: {'GIT_TERMINAL_PROMPT': '0'}),
+      );
+      await git.stream(['foo']);
     });
   });
 }

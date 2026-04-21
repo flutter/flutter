@@ -37,6 +37,7 @@ interface class Git {
   }
 
   static const _ignoreLogShowSignature = ['-c', 'log.showSignature=false'];
+  static const String _kGitTerminalPrompt = 'GIT_TERMINAL_PROMPT';
 
   /// Spawns a child process to run `git`.
   ///
@@ -60,7 +61,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _buildGitEnvironment(environment),
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -90,7 +91,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _buildGitEnvironment(environment),
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -123,8 +124,16 @@ interface class Git {
       filter: filter,
       stdoutErrorMatcher: stdoutErrorMatcher,
       mapFunction: mapFunction,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _buildGitEnvironment(environment),
     );
+  }
+
+  Map<String, String> _buildGitEnvironment(Map<String, String>? environment) {
+    return <String, String>{
+      if (_platform.isWindows) ..._useNoGlobCygwinGit,
+      if (!_platform.environment.containsKey(_kGitTerminalPrompt)) _kGitTerminalPrompt: '0',
+      ...?environment,
+    };
   }
 
   static const _useNoGlobCygwinGit = {'MSYS': 'noglob', 'CYGWIN': 'noglob'};
