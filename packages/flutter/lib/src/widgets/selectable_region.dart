@@ -2925,12 +2925,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final int skipIndex = currentSelectionStartIndex == -1
           ? currentSelectionEndIndex
           : currentSelectionStartIndex;
-      selectables
-          .where((Selectable target) => target != selectables[skipIndex])
-          .forEach(
-            (Selectable target) =>
-                dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-          );
+      _clearSelectables(skipIndex: skipIndex);
       return;
     }
     final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
@@ -2985,30 +2980,36 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return closestIndex;
   }
 
+  // Clears the selection in all [selectables], optionally skipping
+  // the [Selectable] at the given index.
+  void _clearSelectables({int skipIndex = -1}) {
+    for (var i = 0; i < selectables.length; i++) {
+      if (i == skipIndex) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectables[i], const ClearSelectionEvent());
+    }
+  }
+
   SelectionResult _handleSelectBoundary(SelectionEvent event) {
     assert(
       event is SelectWordSelectionEvent || event is SelectParagraphSelectionEvent,
       'This method should only be given selection events that select text boundaries.',
     );
-    late final Offset effectiveGlobalPosition;
-    if (event.type == SelectionEventType.selectWord) {
-      effectiveGlobalPosition = (event as SelectWordSelectionEvent).globalPosition;
-    } else if (event.type == SelectionEventType.selectParagraph) {
-      effectiveGlobalPosition = (event as SelectParagraphSelectionEvent).globalPosition;
-    }
+    final Offset effectiveGlobalPosition = switch (event) {
+      SelectWordSelectionEvent(:final globalPosition) => globalPosition,
+      SelectParagraphSelectionEvent(:final globalPosition) => globalPosition,
+      _ => throw ArgumentError('Unsupported selection event: $event'),
+    };
     SelectionResult? lastSelectionResult;
     for (var index = 0; index < selectables.length; index += 1) {
       var globalRectsContainPosition = false;
-      if (selectables[index].boundingBoxes.isNotEmpty) {
-        for (final Rect rect in selectables[index].boundingBoxes) {
-          final Rect globalRect = MatrixUtils.transformRect(
-            selectables[index].getTransformTo(null),
-            rect,
-          );
-          if (globalRect.contains(effectiveGlobalPosition)) {
-            globalRectsContainPosition = true;
-            break;
-          }
+      final Matrix4 transform = selectables[index].getTransformTo(null);
+      for (final Rect rect in selectables[index].boundingBoxes) {
+        final Rect globalRect = MatrixUtils.transformRect(transform, rect);
+        if (globalRect.contains(effectiveGlobalPosition)) {
+          globalRectsContainPosition = true;
+          break;
         }
       }
       if (globalRectsContainPosition) {
@@ -3026,12 +3027,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.
-          selectables
-              .where((Selectable target) => target != selectables[index])
-              .forEach(
-                (Selectable target) =>
-                    dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-              );
+          _clearSelectables(skipIndex: index);
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
         return SelectionResult.end;
@@ -3052,12 +3048,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (selectables[nearestIndex].value != existingGeometry) {
         // Geometry has changed as a result of select word, need to clear the
         // selection of other selectables to keep selection in sync.
-        selectables
-            .where((Selectable target) => target != selectables[nearestIndex])
-            .forEach(
-              (Selectable target) =>
-                  dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-            );
+        _clearSelectables(skipIndex: nearestIndex);
         currentSelectionStartIndex = currentSelectionEndIndex = nearestIndex;
       }
     }
