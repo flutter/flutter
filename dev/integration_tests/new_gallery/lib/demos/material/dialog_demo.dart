@@ -201,8 +201,6 @@ class _NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
   _NoAnimationMaterialPageRoute({
     required super.builder,
     super.settings,
-    super.maintainState,
-    super.fullscreenDialog,
   });
 
   @override
