@@ -32,6 +32,10 @@ class Options {
 }
 
 void main(List<String> arguments) async {
+  if (!Platform.isLinux) {
+    print('Error: This script is only supported on Linux.');
+    exit(1);
+  }
   final options = parseArgs(arguments);
 
   final scriptFile = File(Platform.script.toFilePath());
