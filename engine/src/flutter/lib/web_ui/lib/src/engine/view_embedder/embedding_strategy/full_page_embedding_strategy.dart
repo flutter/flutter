@@ -36,6 +36,13 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
   DomElement? _scrollHeightPlaceholder;
 
+  // Per-child inline style snapshot taken on enable so disable can restore
+  // the exact pre-enable state. Needed because some engine-managed children
+  // such as <flt-semantics-host> carry inline `position: absolute` that
+  // otherwise falls through to `static` when we clear the style.
+  final Map<DomElement, Map<String, String>> _savedChildStyles =
+      <DomElement, Map<String, String>>{};
+
   @override
   void setLocale(ui.Locale locale) {
     domDocument.documentElement!.setAttribute('lang', locale.toLanguageTag());
@@ -97,7 +104,17 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     // visible at the top of the viewport while the element scrolls.
     // This includes <flt-glass-pane>, <flt-text-editing-host>, and
     // <flt-semantics-host>.
+    //
+    // Snapshot each child's inline position/top/left first so disable can
+    // restore them. <flt-semantics-host> in particular ships with inline
+    // `position: absolute` set by StyleManager; clearing to empty would
+    // drop it through to `static` and break its transform scaling.
     for (final DomElement child in rootElement.children) {
+      _savedChildStyles[child] = <String, String>{
+        'position': child.style.position,
+        'top': child.style.top,
+        'left': child.style.left,
+      };
       child.style
         ..position = 'sticky'
         ..top = '0'
@@ -137,13 +154,16 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
       ..overflow = '';
 
     setElementStyle(rootElement, 'touch-action', '');
+    setElementStyle(hostElement, 'touch-action', '');
 
     for (final DomElement child in rootElement.children) {
+      final Map<String, String>? saved = _savedChildStyles[child];
       child.style
-        ..position = ''
-        ..top = ''
-        ..left = '';
+        ..position = saved?['position'] ?? ''
+        ..top = saved?['top'] ?? ''
+        ..left = saved?['left'] ?? '';
     }
+    _savedChildStyles.clear();
 
     _scrollHeightPlaceholder?.remove();
     _scrollHeightPlaceholder = null;

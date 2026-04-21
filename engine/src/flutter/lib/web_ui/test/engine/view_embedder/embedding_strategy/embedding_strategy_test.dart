@@ -121,6 +121,45 @@ void doTests() {
       strategy.updateScrollContentHeight(5000);
     });
 
+    test('FullPage disableBrowserScrolling restores inline child styles', () {
+      final strategy = EmbeddingStrategy.create() as FullPageEmbeddingStrategy;
+      final DomElement rootElement = createDomElement('flutter-view');
+      domDocument.body!.append(rootElement);
+
+      // Mimic StyleManager.styleSemanticsHost applying inline position.
+      final DomElement semanticsHost = createDomElement('flt-semantics-host');
+      semanticsHost.style.position = 'absolute';
+      rootElement.append(semanticsHost);
+
+      // Mimic a child without inline position.
+      final DomElement glassPane = createDomElement('flt-glass-pane');
+      rootElement.append(glassPane);
+
+      strategy.enableBrowserScrolling(rootElement);
+      expect(semanticsHost.style.position, 'sticky');
+      expect(glassPane.style.position, 'sticky');
+
+      strategy.disableBrowserScrolling(rootElement);
+      expect(semanticsHost.style.position, 'absolute');
+      expect(glassPane.style.position, '');
+
+      rootElement.remove();
+    });
+
+    test('FullPage disableBrowserScrolling clears hostElement touch-action', () {
+      final strategy = EmbeddingStrategy.create() as FullPageEmbeddingStrategy;
+      final DomElement rootElement = createDomElement('flutter-view');
+      domDocument.body!.append(rootElement);
+
+      strategy.enableBrowserScrolling(rootElement);
+      expect(strategy.hostElement.style.getPropertyValue('touch-action'), 'pan-y');
+
+      strategy.disableBrowserScrolling(rootElement);
+      expect(strategy.hostElement.style.getPropertyValue('touch-action'), '');
+
+      rootElement.remove();
+    });
+
     test('CustomElement enableBrowserScrolling is a no-op', () {
       final DomElement element = createDomElement('some-element');
       final strategy = EmbeddingStrategy.create(hostElement: element);
