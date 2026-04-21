@@ -836,8 +836,11 @@ assembleProfile
         );
 
         expect(status, GradleBuildStatus.exit);
-        expect(testLogger.statusText, contains('org.gradle.jvmargs'));
-        expect(testLogger.statusText, contains('gradle.properties'));
+        expect(testLogger.statusText, contains('Java heap space'));
+        expect(
+          testLogger.statusText,
+          contains('https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory'),
+        );
       },
       overrides: <Type, Generator>{
         GradleUtils: () => FakeGradleUtils(),
