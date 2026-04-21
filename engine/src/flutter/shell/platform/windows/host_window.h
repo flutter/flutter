@@ -66,7 +66,35 @@ class HostWindow {
       LPCWSTR title,
       HWND parent);
 
+  // Creates a tooltip Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_constraints| are the constraints set on
+  // the window's size. |get_position_callback| is a callback
+  // that determines the position of the tooltip window. It is invoked on the
+  // platform thread whenever the rendered content size of the tooltip changes,
+  // including after the initial frame is rendered and on any subsequent content
+  // resize. It is not called in response to parent window movement or other
+  // Win32 window messages. |parent| is the parent of this tooltip, which must
+  // be non-null.
   static std::unique_ptr<HostWindow> CreateTooltipWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
+      HWND parent);
+
+  // Creates a popup Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_constraints| are the constraints set on
+  // the window's size. |get_position_callback| is a callback that determines
+  // the position of the popup window. It is invoked on the platform thread
+  // whenever the rendered content size of the popup changes, including after
+  // the initial frame is rendered and on any subsequent content resize. It is
+  // not called in response to parent window movement or other Win32 window
+  // messages. |parent| is the parent of this popup, which must be non-null.
+  static std::unique_ptr<HostWindow> CreatePopupWindow(
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,
       const WindowConstraints& preferred_constraints,
@@ -191,6 +219,9 @@ class HostWindow {
   // is enabled, returns the current window. If no window is enabled, returns
   // `nullptr`.
   HostWindow* FindFirstEnabledDescendant() const;
+
+  // Returns the archetype of this window.
+  WindowArchetype GetArchetype() const { return archetype_; }
 
   // Returns windows owned by this window.
   std::vector<HostWindow*> GetOwnedWindows() const;
