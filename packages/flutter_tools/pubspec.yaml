@@ -16,7 +16,7 @@ dependencies:
   dds: 5.3.0
   dwds:
     git:
-      url: git@github.com:dart-lang/webdev.git
+      url: https://github.com/dart-lang/webdev.git
       ref: e43744b235531f409ab5e2f1271178943569697a
       path: dwds
   code_builder: 4.11.1
