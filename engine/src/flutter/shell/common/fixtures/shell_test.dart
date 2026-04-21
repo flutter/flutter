@@ -641,3 +641,17 @@ external void _reportEngineId(int? identifier);
 void providesEngineId() {
   _reportEngineId(PlatformDispatcher.instance.engineId);
 }
+
+@pragma('vm:entry-point')
+void hitTestInsidePlatformViewMain() {
+  PlatformDispatcher.instance.onHitTest = (HitTestRequest request) {
+    return const HitTestResponse(hasPlatformView: true);
+  };
+}
+
+@pragma('vm:entry-point')
+void hitTestOutsidePlatformViewMain() {
+  PlatformDispatcher.instance.onHitTest = (HitTestRequest request) {
+    return HitTestResponse.empty;
+  };
+}
