@@ -37,8 +37,6 @@ enum class PathVerb {
   kCubic,
 };
 
-DlPaint GetPaintForRun(unsigned attributes);
-
 using BackendType = DlSurfaceProvider::BackendType;
 
 // Benchmarks

@@ -9,6 +9,7 @@
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
+#include "flutter/testing/display_list_testing.h"
 
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -17,6 +18,41 @@
 
 namespace flutter {
 namespace testing {
+
+namespace {
+
+class RectBouncer {
+ public:
+  RectBouncer(DlRect rect, DlPoint bounce_offset, DlISize bounce_limit)
+      : rect_(rect),
+        bounce_offset_(bounce_offset),
+        bounce_limit_(bounce_limit) {}
+
+  RectBouncer(DlRect rect,
+              DlPoint bounce_offset,
+              const std::shared_ptr<DlSurfaceInstance>& surface)
+      : RectBouncer(rect, bounce_offset, surface->GetSize()) {}
+
+  void Bounce() {
+    rect_ = rect_.Shift(bounce_offset_);
+    if (rect_.GetRight() > bounce_limit_.width) {
+      rect_ = rect_.Shift(-bounce_limit_.width, 0);
+    }
+    if (rect_.GetBottom() > bounce_limit_.height) {
+      rect_ = rect_.Shift(0, -bounce_limit_.height);
+    }
+  }
+
+  const DlRect& GetRect() const { return rect_; }
+  const DlPoint GetPoint() const { return rect_.GetOrigin(); }
+  const DlPoint GetCenter() const { return rect_.GetCenter(); }
+
+ private:
+  DlRect rect_;
+
+  DlPoint bounce_offset_;
+  DlSize bounce_limit_;
+};
 
 class DlPathVerbCounter : public DlPathReceiver {
  public:
@@ -96,6 +132,8 @@ constexpr size_t kArcSweepSetsToDraw = 1000;
 constexpr size_t kImagesToDraw = 500;
 constexpr size_t kFixedCanvasSize = 1024;
 
+}  // namespace
+
 // Draw a series of diagonal lines across a square canvas of width/height of
 // the length requested. The lines will start from the top left corner to the
 // bottom right corner, and move from left to right (at the top) and from right
@@ -123,12 +161,16 @@ void BM_DrawLine(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kLinesToDraw);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kLinesToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawLine-" +
                   std::to_string(state.range(0)) + ".png";
@@ -149,36 +191,31 @@ void BM_DrawRect(benchmark::State& state,
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRectFlags);
 
   size_t length = state.range(0);
-  size_t canvas_size = length * 2;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   // As rects have DlScalar dimensions, we want to ensure that we also
   // draw rects with non-integer position and size
   const DlPoint offset(0.5f, 0.5f);
-  DlPoint origin;
-  DlSize size(length, length);
+  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
 
   state.counters["DrawCallCount"] = kRectsToDraw;
   for (size_t i = 0; i < kRectsToDraw; i++) {
-    DlRect rect = DlRect::MakeOriginSize(origin, size);
-    builder.DrawRect(rect, paint);
-    origin += offset;
-    if (origin.x + size.width > canvas_size) {
-      origin.x -= canvas_size;
-    }
-    if (rect.GetBottom() > canvas_size) {
-      origin.y -= canvas_size;
-    }
+    builder.DrawRect(bouncer.GetRect(), paint);
+    bouncer.Bounce();
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kRectsToDraw);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kRectsToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawRect-" +
                   std::to_string(state.range(0)) + ".png";
@@ -199,33 +236,29 @@ void BM_DrawOval(benchmark::State& state,
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawOvalFlags);
 
   size_t length = state.range(0);
-  size_t canvas_size = length * 2;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   const DlPoint offset(0.5f, 0.5f);
-  DlPoint origin;
   DlSize size(length * 1.5f, length);
+  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
 
   state.counters["DrawCallCount"] = kOvalsToDraw;
   for (size_t i = 0; i < kOvalsToDraw; i++) {
-    DlRect rect = DlRect::MakeOriginSize(origin, size);
-    builder.DrawOval(rect, paint);
-    origin += offset;
-    if (origin.x + size.width > canvas_size) {
-      origin.x -= canvas_size;
-    }
-    if (origin.y + size.height > canvas_size) {
-      origin.y -= canvas_size;
-    }
+    builder.DrawOval(bouncer.GetRect(), paint);
+    bouncer.Bounce();
   }
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kOvalsToDraw);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kOvalsToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawOval-" +
                   std::to_string(state.range(0)) + ".png";
@@ -246,33 +279,29 @@ void BM_DrawCircle(benchmark::State& state,
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawCircleFlags);
 
   size_t length = state.range(0);
-  size_t canvas_size = length * 2;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   DlScalar radius = length / 2.0f;
   const DlPoint offset(0.5f, 0.5f);
-
-  DlPoint center = DlPoint(radius, radius);
+  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
 
   state.counters["DrawCallCount"] = kCirclesToDraw;
   for (size_t i = 0; i < kCirclesToDraw; i++) {
-    builder.DrawCircle(center, radius, paint);
-    center += offset;
-    if (center.x + radius > canvas_size) {
-      center.x = radius;
-    }
-    if (center.y + radius > canvas_size) {
-      center.y = radius;
-    }
+    builder.DrawCircle(bouncer.GetCenter(), radius, paint);
+    bouncer.Bounce();
   }
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kCirclesToDraw);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kCirclesToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawCircle-" +
                   std::to_string(state.range(0)) + ".png";
@@ -294,11 +323,12 @@ void BM_DrawRRect(benchmark::State& state,
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRRectFlags);
 
   size_t length = state.range(0);
-  size_t canvas_size = length * 2;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   DlRoundingRadii radii;
+  // Keep all radii under 8 so that they won't overflow the rrect
+  // bounds which are 16 units wide at the smallest.
   switch (type) {
     case RRectType::kSimple:
       radii.top_left = DlSize(5.0f, 5.0f);
@@ -322,30 +352,29 @@ void BM_DrawRRect(benchmark::State& state,
       FML_UNREACHABLE();
   }
 
-  const DlScalar offset = 0.5f;
+  const DlPoint offset = DlPoint(0.5f, 0.5f);
   const DlScalar multiplier = length / 16.0f;
+  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
 
-  DlRoundRect rrect = DlRoundRect::MakeRectRadii(
-      DlRect::MakeLTRB(0, 0, length, length), radii * multiplier);
+  radii = radii * multiplier;
 
   state.counters["DrawCallCount"] = kRRectsToDraw;
   for (size_t i = 0; i < kRRectsToDraw; i++) {
+    DlRoundRect rrect = DlRoundRect::MakeRectRadii(bouncer.GetRect(), radii);
     builder.DrawRoundRect(rrect, paint);
-    rrect = rrect.Shift(offset, offset);
-    if (rrect.GetBounds().GetRight() > canvas_size) {
-      rrect = rrect.Shift(-canvas_size, 0);
-    }
-    if (rrect.GetBounds().GetBottom() > canvas_size) {
-      rrect = rrect.Shift(0, -canvas_size);
-    }
+    bouncer.Bounce();
   }
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kRRectsToDraw);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kRRectsToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawRRect-" +
                   std::to_string(state.range(0)) + ".png";
@@ -388,11 +417,12 @@ void BM_DrawDRRect(benchmark::State& state,
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawDRRectFlags);
 
   size_t length = state.range(0);
-  size_t canvas_size = length * 2;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   DlRoundingRadii radii;
+  // Keep all radii under 6 so that they won't underflow on the inner rect
+  // which is 16 - 2 * 0.1 * 16 == 12.8 units wide and tall at the smallest.
   switch (type) {
     case RRectType::kSimple:
       radii.top_left = DlSize(5.0f, 5.0f);
@@ -401,8 +431,8 @@ void BM_DrawDRRect(benchmark::State& state,
       radii.bottom_left = DlSize(5.0f, 5.0f);
       break;
     case RRectType::kNinePatch:
-      radii.top_left = DlSize(5.0f, 7.0f);
-      radii.top_right = DlSize(3.0f, 7.0f);
+      radii.top_left = DlSize(5.0f, 6.0f);
+      radii.top_right = DlSize(3.0f, 6.0f);
       radii.bottom_right = DlSize(3.0f, 4.0f);
       radii.bottom_left = DlSize(5.0f, 4.0f);
       break;
@@ -410,42 +440,39 @@ void BM_DrawDRRect(benchmark::State& state,
       radii.top_left = DlSize(5.0f, 4.0f);
       radii.top_right = DlSize(4.0f, 5.0f);
       radii.bottom_right = DlSize(3.0f, 6.0f);
-      radii.bottom_left = DlSize(8.0f, 7.0f);
+      radii.bottom_left = DlSize(6.0f, 3.0f);
       break;
     default:
       FML_UNREACHABLE();
   }
 
-  const DlScalar offset = 0.5f;
+  const DlPoint offset(0.5f, 0.5f);
+  const DlScalar inner_scale = -0.1f * length;
   const DlScalar multiplier = length / 16.0f;
+  DlRoundingRadii scaled_radii = radii * multiplier;
 
-  DlRoundRect rrect = DlRoundRect::MakeRectRadii(
-      DlRect::MakeLTRB(0, 0, length, length), radii * multiplier);
-  DlRoundRect rrect_2 = DlRoundRect::MakeRectRadii(
-      DlRect::MakeLTRB(0, 0, length, length).Expand(-0.1f * length),
-      radii * multiplier);
+  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
 
   state.counters["DrawCallCount"] = kDRRectsToDraw;
   for (size_t i = 0; i < kDRRectsToDraw; i++) {
-    builder.DrawDiffRoundRect(rrect, rrect_2, paint);
-    rrect = rrect.Shift(offset, offset);
-    rrect_2 = rrect_2.Shift(offset, offset);
-    if (rrect.GetBounds().GetRight() > canvas_size) {
-      rrect = rrect.Shift(-canvas_size, 0);
-      rrect_2 = rrect_2.Shift(-canvas_size, 0);
-    }
-    if (rrect.GetBounds().GetBottom() > canvas_size) {
-      rrect = rrect.Shift(0, -canvas_size);
-      rrect_2 = rrect_2.Shift(0, -canvas_size);
-    }
+    const DlRect outer_rect = bouncer.GetRect();
+    const DlRect inner_rect = outer_rect.Expand(inner_scale);
+    DlRoundRect outer = DlRoundRect::MakeRectRadii(outer_rect, scaled_radii);
+    DlRoundRect inner = DlRoundRect::MakeRectRadii(inner_rect, scaled_radii);
+    builder.DrawDiffRoundRect(outer, inner, paint);
+    bouncer.Bounce();
   }
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kDRRectsToDraw);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kDRRectsToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawDRRect-" +
                   std::to_string(state.range(0)) + ".png";
@@ -463,8 +490,7 @@ void BM_DrawArc(benchmark::State& state,
                      DisplayListOpFlags::kDrawArcNoCenterFlags);
 
   size_t length = state.range(0);
-  size_t canvas_size = length * 2;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   DlScalar starting_angle = 0.0f;
@@ -474,32 +500,30 @@ void BM_DrawArc(benchmark::State& state,
   std::vector<DlScalar> segment_sweeps = {5.5f,  -10.0f, 42.0f, 71.7f, 90.0f,
                                           37.5f, 17.9f,  32.0f, 379.4f};
 
-  DlPoint origin;
   DlSize size(length, length);
+  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
 
-  state.counters["DrawCallCount"] = kArcSweepSetsToDraw * segment_sweeps.size();
+  size_t total_call_count = kArcSweepSetsToDraw * segment_sweeps.size();
+  state.counters["DrawCallCount"] = total_call_count;
   for (size_t i = 0; i < kArcSweepSetsToDraw; i++) {
-    DlRect bounds = DlRect::MakeOriginSize(origin, size);
     for (DlScalar sweep : segment_sweeps) {
-      builder.DrawArc(bounds, starting_angle, sweep, false, paint);
+      builder.DrawArc(bouncer.GetRect(), starting_angle, sweep, false, paint);
       starting_angle += sweep + 5.0f;
     }
-    origin += offset;
-    if (origin.x + size.width > canvas_size) {
-      origin.x -= canvas_size;
-    }
-    if (origin.y + size.height > canvas_size) {
-      origin.y -= canvas_size;
-    }
+    bouncer.Bounce();
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), total_call_count);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += total_call_count;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawArc-" +
                   std::to_string(state.range(0)) + ".png";
@@ -717,10 +741,13 @@ void BM_DrawPath(benchmark::State& state,
   surface->FlushSubmitCpuSync();
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += counter.GetVerbCount();
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawPath-" + label +
                   "-" + std::to_string(state.range(0)) + ".png";
@@ -860,12 +887,16 @@ void BM_DrawVertices(benchmark::State& state,
   state.SetComplexityN(total_vertex_count);
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), center_points.size());
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += total_vertex_count;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawVertices-" +
                   std::to_string(disc_count) + "-" + VertexModeToString(mode) +
@@ -952,16 +983,18 @@ void BM_DrawPoints(benchmark::State& state,
   state.counters["PointCount"] = point_count;
   state.counters["DrawCallCount"] = 1;
 
-  std::vector<DlPoint> points =
-      GetTestPoints(point_count, DlISize(length, length));
+  std::vector<DlPoint> points = GetTestPoints(point_count, surface->GetSize());
   builder.DrawPoints(mode, points.size(), points.data(), paint);
 
   auto display_list = builder.Build();
 
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += point_count;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawPoints-" +
                   PointModeToString(mode) + "-" + std::to_string(point_count) +
@@ -993,8 +1026,7 @@ void BM_DrawImage(benchmark::State& state,
                      DisplayListOpFlags::kDrawImageWithPaintFlags);
 
   size_t bitmap_size = state.range(0);
-  size_t canvas_size = 2 * bitmap_size;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(bitmap_size * 2, bitmap_size * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   sk_sp<SkImage> image;
@@ -1015,29 +1047,28 @@ void BM_DrawImage(benchmark::State& state,
   }
 
   const DlPoint offset(0.5f, 0.5f);
-  DlPoint dst;
+  const DlSize size(bitmap_size, bitmap_size);
+  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.DrawImage(DlImage::Make(image), dst, options, &paint);
-
-    dst += offset;
-    if (dst.x + bitmap_size > canvas_size) {
-      dst.x = 0;
-    }
-    if (dst.y + bitmap_size > canvas_size) {
-      dst.y = 0;
-    }
+    builder.DrawImage(DlImage::Make(image), bouncer.GetPoint(), options,
+                      &paint);
+    bouncer.Bounce();
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kImagesToDraw);
 
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kImagesToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawImage-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
@@ -1074,8 +1105,7 @@ void BM_DrawImageRect(benchmark::State& state,
                      DisplayListOpFlags::kDrawImageRectWithPaintFlags);
 
   size_t bitmap_size = state.range(0);
-  size_t canvas_size = 2 * bitmap_size;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(bitmap_size * 2, bitmap_size * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   sk_sp<SkImage> image;
@@ -1098,31 +1128,28 @@ void BM_DrawImageRect(benchmark::State& state,
   const DlPoint offset(0.5f, 0.5f);
   DlRect src = DlRect::MakeXYWH(bitmap_size / 4.0f, bitmap_size / 4.0f,
                                 bitmap_size / 2.0f, bitmap_size / 2.0f);
-  DlPoint origin;
   DlSize size(bitmap_size * 0.75f, bitmap_size * 0.75f);
+  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    DlRect dst = DlRect::MakeOriginSize(origin, size);
-    builder.DrawImageRect(DlImage::Make(image), src, dst, options, &paint,
-                          constraint);
-    origin += offset;
-    if (origin.x + size.width > canvas_size) {
-      origin.x = 0.0f;
-    }
-    if (origin.y + size.height > canvas_size) {
-      origin.y = 0.0f;
-    }
+    builder.DrawImageRect(DlImage::Make(image), src, bouncer.GetRect(), options,
+                          &paint, constraint);
+    bouncer.Bounce();
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kImagesToDraw);
 
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kImagesToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawImageRect-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
@@ -1160,8 +1187,7 @@ void BM_DrawImageNine(benchmark::State& state,
                      DisplayListOpFlags::kDrawImageNineWithPaintFlags);
 
   size_t bitmap_size = state.range(0);
-  size_t canvas_size = 2 * bitmap_size;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(bitmap_size * 2, bitmap_size * 2);
   auto surface = surface_provider->GetPrimarySurface();
 
   DlIRect center = DlIRect::MakeXYWH(bitmap_size / 4, bitmap_size / 4,
@@ -1185,30 +1211,28 @@ void BM_DrawImageNine(benchmark::State& state,
   }
 
   const DlPoint offset(0.5f, 0.5f);
-  DlPoint origin;
   DlSize size(bitmap_size * 0.75f, bitmap_size * 0.75f);
+  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    DlRect dst = DlRect::MakeOriginSize(origin, size);
-    builder.DrawImageNine(DlImage::Make(image), center, dst, filter, &paint);
-    origin += offset;
-    if (origin.x + size.width > canvas_size) {
-      origin.x = 0.0f;
-    }
-    if (origin.y + size.height > canvas_size) {
-      origin.y = 0.0f;
-    }
+    builder.DrawImageNine(DlImage::Make(image), center, bouncer.GetRect(),
+                          filter, &paint);
+    bouncer.Bounce();
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), kImagesToDraw);
 
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += kImagesToDraw;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawImageNine-" +
                   (upload_bitmap ? "Upload-" : "Texture-") +
@@ -1234,8 +1258,7 @@ void BM_DrawTextBlob(benchmark::State& state,
   AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextFlags);
 
   size_t draw_calls = state.range(0);
-  size_t canvas_size = kFixedCanvasSize;
-  surface_provider->InitializeSurface(canvas_size, canvas_size);
+  surface_provider->InitializeSurface(kFixedCanvasSize, kFixedCanvasSize);
   auto surface = surface_provider->GetPrimarySurface();
 
   state.SetComplexityN(draw_calls);
@@ -1250,11 +1273,15 @@ void BM_DrawTextBlob(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), draw_calls);
 
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += draw_calls;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawTextBlob-" +
                   std::to_string(draw_calls) + ".png";
@@ -1322,10 +1349,13 @@ void BM_DrawShadow(benchmark::State& state,
   surface->FlushSubmitCpuSync();
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += 1;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-DrawShadow-" +
                   VerbToString(type) + "-" +
@@ -1361,7 +1391,8 @@ void BM_SaveLayer(benchmark::State& state,
   DlRect rect2 =
       DlRect::MakeLTRB(0.25f * length, 0.25f * length, length, length);
 
-  state.counters["DrawCallCount_Varies"] = save_layer_calls * save_depth;
+  size_t total_save_calls = save_layer_calls * save_depth;
+  state.counters["DrawCallCount_Varies"] = total_save_calls;
   for (size_t i = 0; i < save_layer_calls; i++) {
     for (size_t j = 0; j < save_depth; j++) {
       builder.SaveLayer(std::nullopt, nullptr);
@@ -1373,12 +1404,16 @@ void BM_SaveLayer(benchmark::State& state,
     }
   }
   auto display_list = builder.Build();
+  EXPECT_GE(display_list->GetRecordCount(), total_save_calls);
 
   // We only want to time the actual rasterization.
+  size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
     surface->RenderDisplayList(display_list);
+    items_processed += total_save_calls;
     surface->FlushSubmitCpuSync();
   }
+  state.SetItemsProcessed(items_processed);
 
   auto filename = surface_provider->backend_name() + "-SaveLayer-" +
                   std::to_string(save_depth) + "-" +
@@ -1406,6 +1441,13 @@ RUN_DISPLAYLIST_BENCHMARKS(ImpellerMetalSDF)
 
 // clang-format off
 
+constexpr int kFilledPrimitive =
+    kAntiAliasing | kFilledStyle;
+constexpr int kHairlinePrimitive =
+    kAntiAliasing | kStrokedStyle | kHairlineStroke;
+constexpr int kWideStrokePrimitive =
+    kAntiAliasing | kStrokedStyle | kWideStroke;
+
 #define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
   BENCHMARK_CAPTURE(BM_Draw##TYPE, BACKEND,                                  \
                     BackendType::k##BACKEND,                                 \
@@ -1416,13 +1458,13 @@ RUN_DISPLAYLIST_BENCHMARKS(ImpellerMetalSDF)
       ->Unit(benchmark::kMillisecond);
 
 #define DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                              \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kStrokedStyle | kHairlineStroke)  \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kStrokedStyle | kWideStroke)
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kHairlinePrimitive)               \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, Line, kWideStrokePrimitive)
 
 #define DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, TYPE)                        \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kFilledStyle)                     \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kStrokedStyle | kHairlineStroke)  \
-  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kStrokedStyle | kWideStroke)      \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kFilledPrimitive)                 \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kHairlinePrimitive)               \
+  DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, kWideStrokePrimitive)             \
 
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
   DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \

@@ -56,6 +56,9 @@ class DlSurfaceInstance {
   /// Store a snapshot of this Surface to the file indicated by the filename.
   virtual bool Snapshot(std::string& filename) const = 0;
 
+  /// The size of the underlying surface.
+  DlISize GetSize() const { return DlISize(width(), height()); }
+
   /// The width of the underlying surface.
   virtual int width() const = 0;
 
