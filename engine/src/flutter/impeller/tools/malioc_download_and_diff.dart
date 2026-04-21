@@ -3,6 +3,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// This script automates the process of downloading the `malioc` (Mali Offline Compiler)
+/// tools, running the GN and Ninja builds to generate shader performance statistics,
+/// and diffing the results against the golden file (`malioc.json`).
+///
+/// By default, it extracts the version of `malioc` specified in
+/// `ci/builders/linux_unopt.json`, downloads it to a temporary directory, and
+/// automatically cleans it up when finished.
+///
+/// Usage:
+///   dart flutter/impeller/tools/malioc_download_and_diff.dart [options]
+///
+/// Options:
+///   --config=<config>      The build configuration (default: android_debug_unopt).
+///   --target=<target>      The Ninja target to build (default: impeller).
+///   --malioc-path=<path>   Use a local `malioc` binary instead of downloading.
+///   --update               Update the golden file with the new results.
+
 import 'dart:convert';
 import 'dart:io';
 
