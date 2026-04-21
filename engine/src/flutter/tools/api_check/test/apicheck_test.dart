@@ -262,10 +262,10 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
   void check(String description, FormalParameterList parameters) {
     for (final FormalParameter parameter in parameters.parameters) {
       TypeAnnotation? type;
-      if (parameter is SimpleFormalParameter) {
+      if (parameter is RegularFormalParameter) {
         type = parameter.type;
       } else if (parameter is DefaultFormalParameter) {
-        type = (parameter.parameter as SimpleFormalParameter).type;
+        type = (parameter.parameter as RegularFormalParameter).type;
       }
       if (type! is NamedType) {
         final String name = (type as NamedType).name.lexeme;

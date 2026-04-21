@@ -196,7 +196,7 @@ void main() {
           );
         }
         // check nullability
-        if (uiParam is SimpleFormalParameter && webParam is SimpleFormalParameter) {
+        if (uiParam is RegularFormalParameter && webParam is RegularFormalParameter) {
           final isUiNullable = uiParam.type?.question != null;
           final isWebNullable = webParam.type?.question != null;
           if (isUiNullable != isWebNullable) {
@@ -273,13 +273,13 @@ void main() {
       }
 
       // This is not entirely true and can break, but this way we can support both positional and named params
-      // (The assumption that the parameter of a DefaultFormalParameter is a SimpleFormalParameter is a stretch)
+      // (The assumption that the parameter of a DefaultFormalParameter is a RegularFormalParameter is a stretch)
       final uiParam =
           ((uiFormalParam is DefaultFormalParameter) ? uiFormalParam.parameter : uiFormalParam)
-              as SimpleFormalParameter;
+              as RegularFormalParameter;
       final webParam =
           ((webFormalParam is DefaultFormalParameter) ? webFormalParam.parameter : uiFormalParam)
-              as SimpleFormalParameter;
+              as RegularFormalParameter;
 
       if (webParam.name == null) {
         failed = true;
