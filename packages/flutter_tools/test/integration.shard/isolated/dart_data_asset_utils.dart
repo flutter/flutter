@@ -6,7 +6,7 @@ import 'package:file/file.dart';
 import 'package:yaml_edit/yaml_edit.dart' show YamlEditor;
 
 import '../../src/common.dart';
-import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin, platform;
+import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin, platform, writeFile;
 import '../transition_test_utils.dart';
 import 'native_assets_test_utils.dart';
 
@@ -115,10 +115,10 @@ void writeHookLibrary(
     RegExp(r"file: input.packageRoot.resolve\('.*\$id'\)"),
     "file: input.packageRoot.resolve('$filePrefix\$id')",
   );
-  writeFile(hookFile, newContent);
+  writeFile(hookFile.path, newContent);
 
   for (final MapEntry(:key, :value) in dataAssets.entries) {
-    writeFile(root.childDirectory('data').childFile(key), value);
+    writeFile(root.childDirectory('data').childFile(key).path, value);
   }
 }
 
@@ -129,7 +129,7 @@ void writeAssets(Map<String, String> dataAssets, Directory root, {String subdir 
   }
   targetDir.createSync(recursive: true);
   dataAssets.forEach((String id, String content) {
-    writeFile(targetDir.childFile(id), content);
+    writeFile(targetDir.childFile(id).path, content);
   });
 }
 
@@ -148,7 +148,3 @@ void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
   );
   helperFile.writeAsStringSync(newContent);
 }
-
-void writeFile(File file, String content) => file
-  ..createSync(recursive: true)
-  ..writeAsStringSync(content);
