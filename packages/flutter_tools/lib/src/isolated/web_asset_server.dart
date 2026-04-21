@@ -152,9 +152,9 @@ class WebAssetServer implements AssetReader {
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{
-        // Use relative path for module so the app can still find it even if
+        // Use only the path for the module so the app can still find it even if
         // it's in a different domain than the server.
-        'src': relativeModulePath,
+        'src': '/$relativeModulePath',
         'module': metadata.name,
         'libraries': libraries,
       });
