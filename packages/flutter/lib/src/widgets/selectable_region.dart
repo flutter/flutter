@@ -2951,7 +2951,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
 
   // Clears the selection in all [selectables], optionally skipping
   // the [Selectable] at the given index.
-  void _clearSelectables({int skipIndex = -1}) {
+  void _clearSelectables({int? skipIndex}) {
     for (var i = 0; i < selectables.length; i++) {
       if (i == skipIndex) {
         continue;
