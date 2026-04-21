@@ -18,6 +18,7 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
   SurfaceProvider(this._canvasProvider, this.surfaceCreateFn);
 
   final D _canvasProvider;
+
   /// A function that creates a new surface of type [C] using a [CanvasProvider] of type [D].
   @visibleForTesting
   final C Function(D) surfaceCreateFn;
