@@ -39,6 +39,7 @@ class UnpublishException implements Exception {
 
   @override
   String toString() {
+    // ignore: avoid_type_to_string
     var output = runtimeType.toString();
     output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
