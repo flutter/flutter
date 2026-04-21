@@ -115,10 +115,14 @@ void writeHookLibrary(
     RegExp(r"file: input.packageRoot.resolve\('.*\$id'\)"),
     "file: input.packageRoot.resolve('$filePrefix\$id')",
   );
-  writeFile(hookFile.path, newContent);
+  writeFile(hookFile.path, newContent, writeFutureModifiedDate: true);
 
   for (final MapEntry(:key, :value) in dataAssets.entries) {
-    writeFile(root.childDirectory('data').childFile(key).path, value);
+    writeFile(
+      root.childDirectory('data').childFile(key).path,
+      value,
+      writeFutureModifiedDate: true,
+    );
   }
 }
 
@@ -129,7 +133,7 @@ void writeAssets(Map<String, String> dataAssets, Directory root, {String subdir 
   }
   targetDir.createSync(recursive: true);
   dataAssets.forEach((String id, String content) {
-    writeFile(targetDir.childFile(id).path, content);
+    writeFile(targetDir.childFile(id).path, content, writeFutureModifiedDate: true);
   });
 }
 
@@ -146,5 +150,5 @@ void writeHelperLibrary(Directory root, String version, List<String> assetIds) {
     RegExp(r'final assets = <String>\[[^\]]*\]; // @assets'),
     'final assets = $assetList; // @assets',
   );
-  writeFile(helperFile.path, newContent);
+  writeFile(helperFile.path, newContent, writeFutureModifiedDate: true);
 }
