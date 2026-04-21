@@ -1,0 +1,1 @@
+When generating code for widgets, you must refer to and follow the guidelines in the `widget-accessibility` skill located in `.agents/skills/widget-accessibility` to ensure proper implementation and testing of accessibility features.
