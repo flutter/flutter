@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
-
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
@@ -13,6 +12,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
@@ -409,11 +409,6 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
         flutter::DlTileMode::kClamp);
   }
 
-  auto RectMakeCenterHalfSize = [](Point center, Point half_size) {
-    Size size(half_size.x * 2, half_size.y * 2);
-    return Rect::MakeOriginSize(center - half_size, size);
-  };
-
   RenderCallback callback = [&](RenderTarget& render_target) {
     ContentContext context(GetContext(), nullptr);
     Canvas canvas(context, render_target, true, false);
@@ -436,8 +431,8 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
         ctm * (right_center + default_size / 2), 30, Color::White());
     Point right_reference = i_ctm * DrawPlaygroundPoint(right_reference_var);
     Point half_size = (right_reference - right_center).Abs();
-    Rect left_bounds = RectMakeCenterHalfSize(left_center, half_size);
-    Rect right_bounds = RectMakeCenterHalfSize(right_center, half_size);
+    Rect left_bounds = Rect::MakeEllipseBounds(left_center, half_size);
+    Rect right_bounds = Rect::MakeEllipseBounds(right_center, half_size);
 
     Paint paint{
         .color = color,
@@ -461,6 +456,38 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   };
 
   ASSERT_TRUE(Playground::OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
+  ContentContext context(GetContext(), nullptr);
+
+  TextureDescriptor desc;
+  desc.size = {100, 100};
+  desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  auto texture =
+      context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+  auto dl_image = impeller::DlImageImpeller::Make(texture);
+
+  context.SetTextureCachingEnabled(true);
+  auto cached_tex1 = dl_image->GetCachedTexture(context);
+  ASSERT_EQ(cached_tex1, texture);
+
+  auto cached_tex2 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex2, texture);
+
+  context.RemoveCachedTexture(dl_image.get());
+  auto cached_tex3 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex3, nullptr);
+
+  auto cached_tex4 = dl_image->GetCachedTexture(context);
+  ASSERT_EQ(cached_tex4, texture);
+
+  context.ClearCachedTextures();
+  auto cached_tex5 = context.GetCachedTexture(dl_image.get());
+  ASSERT_EQ(cached_tex5, nullptr);
+
+  context.SetTextureCachingEnabled(false);
 }
 
 }  // namespace testing

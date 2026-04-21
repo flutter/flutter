@@ -69,10 +69,6 @@ namespace testing {
 using EntityTest = EntityPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
 
-Rect RectMakeCenterSize(Point center, Size size) {
-  return Rect::MakeSize(size).Shift(center - size / 2);
-}
-
 TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
   ASSERT_TRUE(entity.GetTransform().IsIdentity());
@@ -2527,8 +2523,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     // UI state.
     static int style_index = 0;
-    static float center[2] = {830, 830};
-    static float size[2] = {600, 600};
+    static Point center = {830, 830};
+    static Point size = {600, 600};
     static bool horizontal_symmetry = true;
     static bool vertical_symmetry = true;
     static bool corner_symmetry = true;
@@ -2572,8 +2568,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     {
       ImGui::Combo("Style", &style_index, style_options,
                    sizeof(style_options) / sizeof(char*));
-      ImGui::SliderFloat2("Center", center, 0, 1000);
-      ImGui::SliderFloat2("Size", size, 0, 1000);
+      ImGui::SliderFloat2("Center", &center.x, 0, 1000);
+      ImGui::SliderFloat2("Size", &size.x, 0, 1000);
       ImGui::Checkbox("Symmetry: Horizontal", &horizontal_symmetry);
       ImGui::Checkbox("Symmetry: Vertical", &vertical_symmetry);
       ImGui::Checkbox("Symmetry: Corners", &corner_symmetry);
@@ -2609,14 +2605,13 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     };
 
     auto rse = RoundSuperellipse::MakeRectRadii(
-        RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}), radii);
+        Rect::MakeEllipseBounds(center, size * 0.5f), radii);
 
     flutter::DlPath path;
     std::unique_ptr<Geometry> geom;
     if (style_index == 0) {
       geom = std::make_unique<RoundSuperellipseGeometry>(
-          RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}),
-          radii);
+          Rect::MakeEllipseBounds(center, size * 0.5f), radii);
     } else {
       path = flutter::DlPath::MakeRoundSuperellipse(rse);
       geom = Geometry::MakeStrokePath(path, {.width = 2.0f});
