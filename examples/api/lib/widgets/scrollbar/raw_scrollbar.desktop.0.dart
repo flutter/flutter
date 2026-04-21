@@ -60,7 +60,7 @@ class _DesktopExampleState extends State<DesktopExample> {
                     return SizedBox(
                       height: 50,
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const .all(8.0),
                         child: Text('Scrollable 1 : Index $index'),
                       ),
                     );
@@ -88,7 +88,7 @@ class _DesktopExampleState extends State<DesktopExample> {
                       return SizedBox(
                         height: 50,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const .all(8.0),
                           child: Text('Scrollable 2 : Index $index'),
                         ),
                       );

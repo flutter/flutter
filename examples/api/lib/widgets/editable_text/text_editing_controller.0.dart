@@ -55,8 +55,8 @@ class _TextEditingControllerExampleState
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(6),
+        alignment: .center,
+        padding: const .all(6),
         child: TextFormField(
           controller: _controller,
           decoration: const InputDecoration(border: OutlineInputBorder()),

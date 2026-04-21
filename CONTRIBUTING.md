@@ -54,6 +54,10 @@ If you want to help us triage, you are very welcome to do so!
    provide enough details that you can reproduce the problem, pointing out duplicates,
    and so on. Chat on the #hackers-triage channel to let us know what you're up to!
 
+   * **Do not** run an unsupervised agent that posts triage comments to the issue database.
+     Any automated agent needs to be approved in advance, after discussion with the
+     Flutter team.
+
 4. Familiarize yourself with our
    [issue hygiene](./docs/contributing/issue_hygiene/README.md) wiki page,
    which covers the meanings of some important GitHub labels and

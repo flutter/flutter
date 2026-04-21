@@ -5,27 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// A simple [Page] that creates a zero-transition [PageRoute] without Material dependencies.
-class _TestPage extends Page<void> {
-  const _TestPage({required super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return PageRouteBuilder<void>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return child;
-          },
-    );
-  }
-}
+import 'test_page_tester.dart';
 
 void main() {
   Future<void> buildPages(
@@ -48,13 +28,13 @@ void main() {
   testWidgets('Page API will not call onDidRemovePage', (WidgetTester tester) async {
     final removedPages = <Page<void>>[];
 
-    const page = _TestPage(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = _TestPage(key: ValueKey<String>('page1'), child: Text('page1'));
-    const page2 = _TestPage(key: ValueKey<String>('page2'), child: Text('page2'));
-    const page3 = _TestPage(key: ValueKey<String>('page3'), child: Text('page3'));
-    const page4 = _TestPage(key: ValueKey<String>('page4'), child: Text('page4'));
-    const page5 = _TestPage(key: ValueKey<String>('page5'), child: Text('page5'));
-    const page6 = _TestPage(key: ValueKey<String>('page6'), child: Text('page6'));
+    const page = TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page2 = TestPage<void>(key: ValueKey<String>('page2'), child: Text('page2'));
+    const page3 = TestPage<void>(key: ValueKey<String>('page3'), child: Text('page3'));
+    const page4 = TestPage<void>(key: ValueKey<String>('page4'), child: Text('page4'));
+    const page5 = TestPage<void>(key: ValueKey<String>('page5'), child: Text('page5'));
+    const page6 = TestPage<void>(key: ValueKey<String>('page6'), child: Text('page6'));
     await buildPages(<Page<void>>[page], tester, removedPage: removedPages);
 
     expect(find.text('page'), findsOneWidget);
@@ -80,8 +60,8 @@ void main() {
     final key = GlobalKey<NavigatorState>();
     final removedPage = <Page<void>>[];
 
-    const page = _TestPage(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = _TestPage(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page = TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
     await buildPages(<Page<void>>[page, page1], tester, removedPage: removedPage, navKey: key);
 
     expect(find.text('page1'), findsOneWidget);
@@ -103,22 +83,16 @@ void main() {
     final key = GlobalKey<NavigatorState>();
     final removedPage = <Page<void>>[];
 
-    const page = _TestPage(key: ValueKey<String>('page'), child: Text('page'));
-    const page1 = _TestPage(key: ValueKey<String>('page1'), child: Text('page1'));
+    const page = TestPage<void>(key: ValueKey<String>('page'), child: Text('page'));
+    const page1 = TestPage<void>(key: ValueKey<String>('page1'), child: Text('page1'));
     await buildPages(<Page<void>>[page, page1], tester, removedPage: removedPage, navKey: key);
 
     expect(find.text('page1'), findsOneWidget);
 
     key.currentState!.pushReplacement(
       PageRouteBuilder<void>(
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) {
-              return const Text('new page');
-            },
+        pageBuilder: (_, _, _) => const Text('new page'),
+        transitionsBuilder: (_, _, _, child) => child,
       ),
     );
 

@@ -172,14 +172,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
 
-    // This package is intentionally not part of the workspace as it's a rehydrated template.
-    final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
-      rootProject.directory
-          .childDirectory('dev')
-          .childDirectory('integration_tests')
-          .childDirectory('widget_preview_scaffold'),
-    );
-
     // This package is intentionally not part of the workspace to test
     // user-defines in its local pubspec.
     final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
@@ -214,16 +206,10 @@ class UpdatePackagesCommand extends FlutterCommand {
         final List<_ProjectDeps> toolDeps = await _upgrade(
           forceUpgrade: forceUpgrade,
           cherryPicks: cherryPicks,
-          // Since the widget_preview_scaffold depends on the Flutter SDK and flutter_tools, we
-          // need to make sure that flutter_tools uses the same versions for packages that are also
+          // Ensure that flutter_tools uses the same versions for packages that are also
           // used by the Flutter SDK.
           pinned: deps.toVersions(),
-          projects: [
-            // The widget_preview_scaffold project has a path dependency on flutter_tools, so we must
-            // upgrade the projects together.
-            toolProject,
-            widgetPreviewScaffoldProject,
-          ],
+          projects: <FlutterProject>[toolProject],
           relaxToAny: relaxToAny,
         );
         for (final (:project, :deps) in toolDeps) {
@@ -245,7 +231,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
-    await _pubGet(widgetPreviewScaffoldProject, false);
     await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
 
     await _downloadCoverageData();

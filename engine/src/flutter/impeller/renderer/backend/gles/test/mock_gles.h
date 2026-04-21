@@ -96,7 +96,11 @@ class IMockGLESImpl {
   virtual void DiscardFramebufferEXT(GLenum target,
                                      GLsizei numAttachments,
                                      const GLenum* attachments) {};
+  virtual void InvalidateFramebuffer(GLenum target,
+                                     GLsizei numAttachments,
+                                     const GLenum* attachments) {};
   virtual void GetIntegerv(GLenum name, GLint* attachments) {};
+  virtual void Viewport(GLint x, GLint y, GLsizei width, GLsizei height) {}
 };
 
 class MockGLESImpl : public IMockGLESImpl {
@@ -231,7 +235,17 @@ class MockGLESImpl : public IMockGLESImpl {
                GLsizei numAttachments,
                const GLenum* attachments),
               (override));
+  MOCK_METHOD(void,
+              InvalidateFramebuffer,
+              (GLenum target,
+               GLsizei numAttachments,
+               const GLenum* attachments),
+              (override));
   MOCK_METHOD(void, GetIntegerv, (GLenum name, GLint* value), (override));
+  MOCK_METHOD(void,
+              Viewport,
+              (GLint x, GLint y, GLsizei width, GLsizei height),
+              (override));
 };
 
 /// @brief      Provides a mocked version of the |ProcTableGLES| class.
@@ -246,7 +260,8 @@ class MockGLES final {
  public:
   static std::shared_ptr<MockGLES> Init(
       std::unique_ptr<MockGLESImpl> impl,
-      const std::optional<std::vector<const char*>>& extensions = std::nullopt);
+      const std::optional<std::vector<const char*>>& extensions = std::nullopt,
+      const char* version_string = "OpenGL ES 3.0");
 
   /// @brief      Returns an initialized |MockGLES| instance.
   ///

@@ -224,12 +224,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
-      )
-      ..addFlag(
-        RunCommand.kEnableLocalDiscovery,
-        help:
-            'Whether to advertise the application on the local network (via mDNS) '
-            'for discovery by "flutter running-apps".',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -249,6 +243,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
     addEnableHcppFlag(verboseHelp: verboseHelp);
+    addTestFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -266,7 +261,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
   bool get enableHcpp => boolArg('enable-hcpp');
-  bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
+  bool get testFlag => boolArg('test-flag');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -332,7 +327,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
-        enableLocalDiscovery: enableLocalDiscovery,
+        testFlag: testFlag,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -396,8 +391,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableHcpp: enableHcpp,
-        enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
+        testFlag: testFlag,
       );
     }
   }
@@ -417,11 +412,20 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
     );
 
+    final String? baseHref = stringArg('base-href') ?? fileConfig.baseHref;
+    if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
+    }
+
     final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
       host: stringArg('web-hostname'),
       port: webPort,
       https: httpsConfig,
       headers: extractWebHeaders(),
+      baseHref: baseHref,
     );
     return webDevServerConfig;
   }
@@ -443,7 +447,6 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
-
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -511,8 +514,6 @@ class RunCommand extends RunCommandBase {
   @override
   final name = 'run';
 
-  static const String kEnableLocalDiscovery = 'enable-local-discovery';
-
   @override
   DeprecationBehavior get deprecationBehavior =>
       boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : _deviceDeprecationBehavior;
@@ -574,6 +575,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: record.runEnableImpeller,
       runIOSInterfaceType: record.runIOSInterfaceType,
       runIsTest: record.runIsTest,
+      runEnableHcpp: record.runEnableHcpp,
     );
   }
 
@@ -654,6 +656,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
+      runEnableHcpp: enableHcpp,
     );
   })();
 
@@ -911,9 +914,9 @@ class RunCommand extends RunCommandBase {
     final appStartedTimeRecorder = Completer<void>.sync();
 
     TerminalHandler? handler;
+    // This callback can't throw.
     unawaited(
-      // This callback is executed once the application has successfully started.
-      appStartedTimeRecorder.future.then<void>((_) async {
+      appStartedTimeRecorder.future.then<void>((_) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
           handler =
@@ -984,4 +987,5 @@ typedef AnalyticsUsageValuesRecord = ({
   bool runProjectModule,
   String runTargetName,
   String runTargetOsVersion,
+  bool? runEnableHcpp,
 });

@@ -18,7 +18,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
@@ -35,7 +34,6 @@ import 'globals.dart' as globals;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
-import 'mdns_device_discovery.dart';
 import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
@@ -207,6 +205,9 @@ class FlutterDevice {
               await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
                 vmServiceUri!,
                 debuggingOptions: debuggingOptions,
+                appName:
+                    'Kind: Flutter - Device: ${device!.displayName} - '
+                    'Package: ${FlutterProject.current().manifest.appName}',
               );
               break;
             } on DartDevelopmentServiceException catch (e, st) {
@@ -300,7 +301,6 @@ class FlutterDevice {
         }
 
         await (await device!.getLogReader(app: package)).provideVmService(vmService!);
-
         completer.complete();
         await subscription.cancel();
       },
@@ -575,6 +575,12 @@ abstract class ResidentHandlers {
 
   /// Whether an application can be detached without being stopped.
   bool get supportsDetach;
+
+  /// Whether a hot reload should be treated as a hot restart.
+  ///
+  /// This is used by platforms like web where hot reload must always perform
+  /// a full restart instead of updating code in-place.
+  bool get reloadIsRestart;
 
   @protected
   Logger get logger;
@@ -953,7 +959,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     CommandHelp? commandHelp,
     this.dartBuilder,
-    ShutdownHooks? shutdownHooks,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -969,12 +974,10 @@ abstract class ResidentRunner extends ResidentHandlers {
              terminal: globals.terminal,
              platform: globals.platform,
              outputPreferences: globals.outputPreferences,
-           ),
-       shutdownHooks = shutdownHooks ?? globals.shutdownHooks {
+           ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
-    this.shutdownHooks.addShutdownHook(cleanupAtFinish);
   }
 
   @override
@@ -1002,7 +1005,6 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
-  final ShutdownHooks shutdownHooks;
 
   var _exited = false;
   var _finished = Completer<int>();
@@ -1105,6 +1107,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get canHotReload => hotMode;
 
   /// Whether the hot reload support is implemented as hot restart.
+  @override
   bool get reloadIsRestart => false;
 
   /// Start the app and keep the process running during its lifetime.
@@ -1260,7 +1263,6 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
-    final String appName = FlutterProject.current().manifest.appName;
     for (final FlutterDevice? device in flutterDevices) {
       await device!.connect(
         debuggingOptions: debuggingOptions,
@@ -1271,25 +1273,6 @@ abstract class ResidentRunner extends ResidentHandlers {
         printStructuredErrorLogMethod: printStructuredErrorLog,
       );
       await device.vmService!.getFlutterViews();
-
-      // Start mDNS service
-      if (debuggingOptions.enableLocalDiscovery) {
-        final mdnsDeviceDiscovery = MDNSDeviceDiscovery(
-          device: device.device!,
-          vmService: device.vmService!.service,
-          debuggingOptions: debuggingOptions,
-          logger: globals.logger,
-          platform: globals.platform,
-          flutterVersion: globals.flutterVersion,
-          systemClock: globals.systemClock,
-          botDetector: globals.botDetector,
-        );
-        _mdnsDiscoveries.add(mdnsDeviceDiscovery);
-        await mdnsDeviceDiscovery.advertise(
-          appName: appName,
-          vmServiceUri: device.vmService!.httpAddress,
-        );
-      }
 
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
@@ -1338,19 +1321,10 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
-
   Future<int> waitForAppToFinish() async {
     final int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
-  }
-
-  @mustCallSuper
-  Future<void> cleanupAtFinish() async {
-    final discoveries = List<MDNSDeviceDiscovery>.of(_mdnsDiscoveries);
-    _mdnsDiscoveries.clear();
-    await discoveries.map((MDNSDeviceDiscovery discovery) => discovery.stop()).wait;
   }
 
   @mustCallSuper
@@ -1485,6 +1459,9 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> cleanupAfterSignal();
+
+  /// Called right before we exit.
+  Future<void> cleanupAtFinish();
 }
 
 class OperationResult {
@@ -1759,7 +1736,10 @@ class TerminalHandler {
         await residentRunner.exit();
         return true;
       case 'r':
-        if (!residentRunner.canHotReload) {
+        // Allow hot reload if enabled. Also allow it if reloadIsRestart is true
+        // (e.g., web with --no-hot), since in that case the reload will be
+        // converted to a restart internally.
+        if (!(residentRunner.canHotReload || residentRunner.reloadIsRestart)) {
           return false;
         }
         final OperationResult result = await residentRunner.restart();

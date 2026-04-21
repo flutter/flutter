@@ -1600,7 +1600,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       for (final RenderObject node in nodesToProcess.reversed) {
         node._semantics.computeAncestorInfo(treeShapeToken);
         final targets = <_RenderObjectSemantics>[];
-        if (node._semantics.geometry == null) {
+        if (node._semantics.geometryDirty) {
           if (node._semantics.firstAncestorNodeWithCleanGeometry != null) {
             targets.add(node._semantics.firstAncestorNodeWithCleanGeometry!);
           }
@@ -1609,10 +1609,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // geometry becomes invisible after the ensureGeometry call above,
           // the parent of this node will have to update its semantics subtree to remove
           // this node from its children.
-          if (!node._semantics.geometry!.isVisible &&
-              !node._semantics.isRoot &&
-              node._semantics.parentInSemanticsTree != null) {
-            targets.add(node._semantics.parentInSemanticsTree!);
+          if (!node._semantics.geometry!.isVisible && !node._semantics.isRoot) {
+            final _RenderObjectSemantics? parentInSemanticsTree =
+                node._semantics.parentInSemanticsTree;
+            if (parentInSemanticsTree != null) {
+              if (!parentInSemanticsTree.geometryDirty) {
+                targets.add(parentInSemanticsTree);
+              } else {
+                final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
+                    parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
+                // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
+                if (firstAncestorNodeWithCleanGeometry != null) {
+                  targets.add(firstAncestorNodeWithCleanGeometry);
+                }
+              }
+            }
           }
           targets.add(node._semantics);
         }
@@ -4689,15 +4700,16 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
 
   bool _hasPendingSystemFontsDidChangeCallBack = false;
   void _scheduleSystemFontsUpdate() {
-    assert(
-      SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle,
-      '${objectRuntimeType(this, "RelayoutWhenSystemFontsChangeMixin")}._scheduleSystemFontsUpdate() '
-      'called during ${SchedulerBinding.instance.schedulerPhase}.',
-    );
     if (_hasPendingSystemFontsDidChangeCallBack) {
       return;
     }
     _hasPendingSystemFontsDidChangeCallBack = true;
+
+    // The system fonts notification can arrive during any scheduler phase
+    // (e.g. midFrameMicrotasks on web when fonts load asynchronously).
+    // scheduleFrameCallback is safe to call during any phase; if called
+    // mid-frame, the callback runs in the next frame's transient callback
+    // phase since handleBeginFrame snapshots and replaces _transientCallbacks.
     SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
       assert(_hasPendingSystemFontsDidChangeCallBack);
       _hasPendingSystemFontsDidChangeCallBack = false;
@@ -5648,8 +5660,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (next == null) {
       return;
     }
-    next.computeAncestorInfo(treeShapeToken);
-    firstAncestorNodeWithCleanGeometry ??= next.firstAncestorNodeWithCleanGeometry;
+
+    if (firstAncestorNodeWithCleanGeometry == null) {
+      next.computeAncestorInfo(treeShapeToken);
+      firstAncestorNodeWithCleanGeometry = next.firstAncestorNodeWithCleanGeometry;
+    }
   }
 
   /// If this forms a semantics node, all of the properties in config are

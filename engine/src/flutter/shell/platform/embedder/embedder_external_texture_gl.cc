@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_context.h"
@@ -124,7 +125,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
   }
 
   // This image should not escape local use by EmbedderExternalTextureGL
-  return DlImage::Make(std::move(image));
+  return DlImageSkia::Make(std::move(image));
 }
 
 sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
@@ -137,6 +138,13 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
   if (!texture) {
     return nullptr;
   }
+
+  // Call the destruction callback if an error occurs.
+  fml::ScopedCleanupClosure scoped_cleanup([&texture]() {
+    if (texture->destruction_callback) {
+      texture->destruction_callback(texture->user_data);
+    }
+  });
 
   if (texture->format != GL_RGBA8) {
     FML_LOG(ERROR) << "Only support GL_RGBA8 format now";
@@ -155,24 +163,31 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
       impeller::TextureGLES::WrapTexture(context.GetReactor(), desc, handle);
 
   if (!image) {
-    // In case Skia rejects the image, call the release proc so that
-    // embedders can perform collection of intermediates.
-    if (texture->destruction_callback) {
-      texture->destruction_callback(texture->user_data);
-    }
     FML_LOG(ERROR) << "Could not create external texture";
     return nullptr;
   }
-  if (texture->destruction_callback &&
-      !context.GetReactor()->RegisterCleanupCallback(
-          handle,
-          [callback = texture->destruction_callback,
-           user_data = texture->user_data]() { callback(user_data); })) {
+
+  VoidCallback destruction_callback = texture->destruction_callback;
+  if (!destruction_callback) {
+    // Set a no-op cleanup callback if the texture does not provide a callback.
+    // The presence of a cleanup callback indicates that the embedder controls
+    // the GL texture's lifetime and Impeller should not delete it.
+    destruction_callback = [](void*) {};
+  }
+  auto cleanup_callback = [callback = destruction_callback,
+                           user_data = texture->user_data]() {
+    callback(user_data);
+  };
+  if (!context.GetReactor()->RegisterCleanupCallback(handle,
+                                                     cleanup_callback)) {
     FML_LOG(ERROR) << "Could not register destruction callback";
     return nullptr;
   }
+
   image->SetCoordinateSystem(
       impeller::TextureCoordinateSystem::kUploadFromHost);
+
+  scoped_cleanup.Release();
 
   return impeller::DlImageImpeller::Make(image);
 }
