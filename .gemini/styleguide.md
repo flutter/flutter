@@ -20,9 +20,11 @@ flutter/flutter repository. It is based on the more comprehensive official
   [Effective Dart: Style](https://dart.dev/effective-dart/style)
   should only be followed when it does not conflict with the former.
 
+
 ## Review Agent Guidelines
 
 - Only review changes to the `master` branch. Other changes have already been reviewed (and are being cherrypicked).
+- **Check for redundant tooltips and labels**: Flag instances where a widget that already supports a `tooltip` or `semanticLabel` property directly (such as `IconButton`, `FloatingActionButton`, or `TextField`) is wrapped in a `Tooltip` or `Semantics` widget with the same message. This structure creates duplicate semantic nodes that confuse screen readers and fail accessibility guidelines.
 
 ## General Philosophy
 
