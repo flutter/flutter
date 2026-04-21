@@ -197,28 +197,10 @@ void main() {
           );
         }
         // check nullability
-        bool hasDefault(dynamic p) {
-          try {
-            if (p.parameter != null) return true;
-          } catch (_) {}
-          try {
-            if (p.defaultClause != null) return true;
-          } catch (_) {}
-          return false;
-        }
-
-        bool hasType(dynamic p) {
-          try {
-            var _ = p.type;
-            return true;
-          } catch (_) {}
-          return false;
-        }
-
-        if (!hasDefault(uiParam) &&
-            !hasDefault(webParam) &&
-            hasType(uiParam) &&
-            hasType(webParam)) {
+        if (!_hasDefault(uiParam) &&
+            !_hasDefault(webParam) &&
+            _hasType(uiParam) &&
+            _hasType(webParam)) {
           final uiType = (uiParam as dynamic).type as TypeAnnotation?;
           final webType = (webParam as dynamic).type as TypeAnnotation?;
 
@@ -313,22 +295,14 @@ void main() {
 
       // This is not entirely true and can break, but this way we can support both positional and named params
       // (The assumption that the parameter of a DefaultFormalParameter is a SimpleFormalParameter is a stretch)
-      final dynamic dynUiFormalParam = uiFormalParam;
       dynamic uiParam = uiFormalParam;
       try {
-        final dynamic wrapped = dynUiFormalParam.parameter;
-        if (wrapped != null) {
-          uiParam = wrapped;
-        }
+        uiParam = (uiFormalParam as dynamic).parameter ?? uiParam;
       } catch (_) {}
 
-      final dynamic dynWebFormalParam = webFormalParam;
       dynamic webParam = webFormalParam;
       try {
-        final dynamic wrapped = dynWebFormalParam.parameter;
-        if (wrapped != null) {
-          webParam = wrapped;
-        }
+        webParam = (webFormalParam as dynamic).parameter ?? webParam;
       } catch (_) {}
 
       // Clean Analyzer 13 version (uncomment once migrated):
@@ -496,4 +470,27 @@ void _collectPublicTypeDefs(
       destination[typeDeclaration.name.lexeme] = typeDeclaration;
     }
   }
+}
+
+bool _hasDefault(dynamic p) {
+  try {
+    if (p.parameter != null) {
+      return true;
+    }
+  } catch (_) {}
+  try {
+    if (p.defaultClause != null) {
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
+
+bool _hasType(dynamic p) {
+  try {
+    // ignore: unused_local_variable
+    final dynamic type = p.type;
+    return true;
+  } catch (_) {}
+  return false;
 }
