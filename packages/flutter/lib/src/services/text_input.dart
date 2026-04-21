@@ -1893,6 +1893,23 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
+void _reportError(
+  Object exception,
+  StackTrace stack,
+  String context, [
+  InformationCollector? informationCollector,
+]) {
+  FlutterError.reportError(
+    FlutterErrorDetails(
+      exception: exception,
+      stack: stack,
+      library: 'services library',
+      context: ErrorDescription(context),
+      informationCollector: informationCollector,
+    ),
+  );
+}
+
 /// An low-level interface to the system's text input control.
 ///
 /// To start interacting with the system's text input control, call [attach] to
@@ -2127,20 +2144,13 @@ class TextInput {
     try {
       return await _handleTextInputInvocation(call);
     } catch (exception, stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: ErrorDescription('during method call ${call.method}'),
-          informationCollector: () => <DiagnosticsNode>[
-            DiagnosticsProperty<MethodCall>(
-              'call',
-              call,
-              style: DiagnosticsTreeStyle.errorProperty,
-            ),
-          ],
-        ),
+      _reportError(
+        exception,
+        stack,
+        'during method call ${call.method}',
+        () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
       );
       rethrow;
     }
@@ -2632,81 +2642,141 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.setClient', <Object>[
-      TextInput._instance._currentConnection!._id,
-      _configurationToJson(configuration),
-    ]);
+    _channel
+        .invokeMethod<void>('TextInput.setClient', <Object>[
+          TextInput._instance._currentConnection!._id,
+          _configurationToJson(configuration),
+        ])
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while attaching the text input client'),
+        );
   }
 
   @override
   void detach(TextInputClient client) {
-    _channel.invokeMethod<void>('TextInput.clearClient');
+    _channel
+        .invokeMethod<void>('TextInput.clearClient')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while detaching the text input client'),
+        );
   }
 
   @override
   void updateConfig(TextInputConfiguration configuration) {
-    _channel.invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration));
+    _channel
+        .invokeMethod<void>('TextInput.updateConfig', _configurationToJson(configuration))
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while updating text input configuration'),
+        );
   }
 
   @override
   void setEditingState(TextEditingValue value) {
-    _channel.invokeMethod<void>('TextInput.setEditingState', value.toJSON());
+    _channel
+        .invokeMethod<void>('TextInput.setEditingState', value.toJSON())
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input editing state'),
+        );
   }
 
   @override
   void show() {
-    _channel.invokeMethod<void>('TextInput.show');
+    _channel
+        .invokeMethod<void>('TextInput.show')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while showing the text input client'),
+        );
   }
 
   @override
   void hide() {
-    _channel.invokeMethod<void>('TextInput.hide');
+    _channel
+        .invokeMethod<void>('TextInput.hide')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while hiding the text input client'),
+        );
   }
 
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    _channel.invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
-      'width': editableBoxSize.width,
-      'height': editableBoxSize.height,
-      'transform': transform.storage,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setEditableSizeAndTransform', <String, dynamic>{
+          'width': editableBoxSize.width,
+          'height': editableBoxSize.height,
+          'transform': transform.storage,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input size and transform'),
+        );
   }
 
   @override
   void setComposingRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
-      'width': rect.width,
-      'height': rect.height,
-      'x': rect.left,
-      'y': rect.top,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setMarkedTextRect', <String, dynamic>{
+          'width': rect.width,
+          'height': rect.height,
+          'x': rect.left,
+          'y': rect.top,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input composing rect'),
+        );
   }
 
   @override
   void setCaretRect(Rect rect) {
-    _channel.invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
-      'width': rect.width,
-      'height': rect.height,
-      'x': rect.left,
-      'y': rect.top,
-    });
+    _channel
+        .invokeMethod<void>('TextInput.setCaretRect', <String, dynamic>{
+          'width': rect.width,
+          'height': rect.height,
+          'x': rect.left,
+          'y': rect.top,
+        })
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input caret rect'),
+        );
   }
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {
-    _channel.invokeMethod<void>(
-      'TextInput.setSelectionRects',
-      selectionRects.map((SelectionRect rect) {
-        return <num>[
-          rect.bounds.left,
-          rect.bounds.top,
-          rect.bounds.width,
-          rect.bounds.height,
-          rect.position,
-          rect.direction.index,
-        ];
-      }).toList(),
-    );
+    _channel
+        .invokeMethod<void>(
+          'TextInput.setSelectionRects',
+          selectionRects.map((SelectionRect rect) {
+            return <num>[
+              rect.bounds.left,
+              rect.bounds.top,
+              rect.bounds.width,
+              rect.bounds.height,
+              rect.position,
+              rect.direction.index,
+            ];
+          }).toList(),
+        )
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while setting text input selection rects'),
+        );
   }
 
   @override
@@ -2730,17 +2800,35 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void updateStyle(TextInputStyle style) {
-    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
+    _channel
+        .invokeMethod<void>('TextInput.setStyle', style.toJson())
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while updating text input style'),
+        );
   }
 
   @override
   void requestAutofill() {
-    _channel.invokeMethod<void>('TextInput.requestAutofill');
+    _channel
+        .invokeMethod<void>('TextInput.requestAutofill')
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while requesting autofill'),
+        );
   }
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {
-    _channel.invokeMethod<void>('TextInput.finishAutofillContext', shouldSave);
+    _channel
+        .invokeMethod<void>('TextInput.finishAutofillContext', shouldSave)
+        .then(
+          (void _) {},
+          onError: (Object error, StackTrace stack) =>
+              _reportError(error, stack, 'while finishing autofill context'),
+        );
   }
 }
 

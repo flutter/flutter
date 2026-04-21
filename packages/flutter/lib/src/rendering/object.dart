@@ -4700,15 +4700,16 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
 
   bool _hasPendingSystemFontsDidChangeCallBack = false;
   void _scheduleSystemFontsUpdate() {
-    assert(
-      SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle,
-      '${objectRuntimeType(this, "RelayoutWhenSystemFontsChangeMixin")}._scheduleSystemFontsUpdate() '
-      'called during ${SchedulerBinding.instance.schedulerPhase}.',
-    );
     if (_hasPendingSystemFontsDidChangeCallBack) {
       return;
     }
     _hasPendingSystemFontsDidChangeCallBack = true;
+
+    // The system fonts notification can arrive during any scheduler phase
+    // (e.g. midFrameMicrotasks on web when fonts load asynchronously).
+    // scheduleFrameCallback is safe to call during any phase; if called
+    // mid-frame, the callback runs in the next frame's transient callback
+    // phase since handleBeginFrame snapshots and replaces _transientCallbacks.
     SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
       assert(_hasPendingSystemFontsDidChangeCallBack);
       _hasPendingSystemFontsDidChangeCallBack = false;

@@ -346,6 +346,7 @@ void main() {
               appBuildDirectory: fileSystem.directory(projectUri),
             ),
             buildDataAssets: true,
+            recordedUsesFile: null,
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(
@@ -368,8 +369,12 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for $expectedArchsBeingBuilt.',
-              'Building native assets for $expectedArchsBeingBuilt done.',
+              'Running build hooks for $expectedArchsBeingBuilt.',
+              'Running build hooks for $expectedArchsBeingBuilt done.',
+              if (buildMode == BuildMode.release) ...<String>[
+                'Running link hooks for $expectedArchsBeingBuilt.',
+                'Running link hooks for $expectedArchsBeingBuilt done.',
+              ],
             ]),
           );
           final String nativeAssetsFileContent = await fileSystem
