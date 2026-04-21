@@ -7,6 +7,7 @@
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/display_list_testing.h"
@@ -1054,7 +1055,7 @@ void BM_DrawImage(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.DrawImage(DlImage::Make(image), bouncer.GetPoint(), options,
+    builder.DrawImage(DlImageSkia::Make(image), bouncer.GetPoint(), options,
                       &paint);
     bouncer.Bounce();
   }
@@ -1135,8 +1136,8 @@ void BM_DrawImageRect(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.DrawImageRect(DlImage::Make(image), src, bouncer.GetRect(), options,
-                          &paint, constraint);
+    builder.DrawImageRect(DlImageSkia::Make(image), src, bouncer.GetRect(),
+                          options, &paint, constraint);
     bouncer.Bounce();
   }
 
@@ -1218,7 +1219,7 @@ void BM_DrawImageNine(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.DrawImageNine(DlImage::Make(image), center, bouncer.GetRect(),
+    builder.DrawImageNine(DlImageSkia::Make(image), center, bouncer.GetRect(),
                           filter, &paint);
     bouncer.Bounce();
   }
