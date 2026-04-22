@@ -864,7 +864,7 @@ void BM_DrawPath(benchmark::State& state,
   state.SetItemsProcessed(items_processed);
 
   SaveSnapshotIfNecessary(surface_provider, surface, state,
-                          "DrawArc-" + label + "-");
+                          "DrawPath-" + label);
 }
 
 // Returns a set of vertices that describe a circle that has a
