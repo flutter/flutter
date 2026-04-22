@@ -403,6 +403,9 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The builder function used to create the [InputDecoration] passed to the text field.
   ///
+  /// If a value is provided for this property and the resulting [InputDecoration.prefixIcon]
+  /// is null, [leadingIcon] is assigned as the prefix icon.
+  ///
   /// If a value is provided for this property and the resulting [InputDecoration.suffixIcon]
   /// is null, a default [IconButton] is assigned as the suffix icon. This button's icon will
   /// use [trailingIcon] and [selectedTrailingIcon] if those are explicitly defined; otherwise,
@@ -1234,6 +1237,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final DropdownMenuDecorationBuilder decorationBuilder =
             widget.decorationBuilder ?? _buildDefaultDecoration;
         InputDecoration decoration = decorationBuilder(context, controller);
+        if (decoration.prefixIcon == null) {
+          decoration = decoration.copyWith(prefixIcon: widget.leadingIcon);
+        }
         // If no suffixIcon is provided, the default IconButton is used for convenience.
         if (decoration.suffixIcon == null) {
           decoration = decoration.copyWith(
