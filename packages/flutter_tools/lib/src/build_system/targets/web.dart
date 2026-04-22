@@ -716,8 +716,12 @@ class WebTemplatedFiles extends Target {
     // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
     // the output directory at this point.
     final wasmHashes = <String, String>{};
-    final String canvasKitPath = globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path;
-    final Directory canvasKitDirectory = globals.fs.directory(globals.fs.path.join(canvasKitPath, 'canvaskit'));
+    final String canvasKitPath = globals.artifacts!
+        .getHostArtifact(HostArtifact.flutterWebSdk)
+        .path;
+    final Directory canvasKitDirectory = globals.fs.directory(
+      globals.fs.path.join(canvasKitPath, 'canvaskit'),
+    );
     if (canvasKitDirectory.existsSync()) {
       for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
         if (file.path.endsWith('.wasm')) {

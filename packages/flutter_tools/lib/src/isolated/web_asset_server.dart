@@ -614,8 +614,12 @@ class WebAssetServer implements AssetReader {
         wasmHashes[path] = crypto.sha256.convert(_webMemoryFS.files[path]!).toString();
       }
     }
-    final String canvasKitPath = globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path;
-    final Directory canvasKitDirectory = fileSystem.directory(fileSystem.path.join(canvasKitPath, 'canvaskit'));
+    final String canvasKitPath = globals.artifacts!
+        .getHostArtifact(HostArtifact.flutterWebSdk)
+        .path;
+    final Directory canvasKitDirectory = fileSystem.directory(
+      fileSystem.path.join(canvasKitPath, 'canvaskit'),
+    );
     if (canvasKitDirectory.existsSync()) {
       for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
         if (file.path.endsWith('.wasm')) {
