@@ -715,7 +715,7 @@ class WebTemplatedFiles extends Target {
     // Calculate SHA-256 hashes for WASM assets to support Cross-Origin Storage
     // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
     // the output directory at this point.
-    final Map<String, String> wasmHashes = <String, String>{};
+    final wasmHashes = <String, String>{};
     final String canvasKitPath = globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path;
     final Directory canvasKitDirectory = globals.fs.directory(globals.fs.path.join(canvasKitPath, 'canvaskit'));
     if (canvasKitDirectory.existsSync()) {
