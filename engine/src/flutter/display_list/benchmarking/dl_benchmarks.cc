@@ -167,7 +167,7 @@ void BM_DrawLine(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kLinesToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kLinesToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -214,7 +214,7 @@ void BM_DrawRect(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kRectsToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kRectsToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -259,7 +259,7 @@ void BM_DrawOval(benchmark::State& state,
     bouncer.Bounce();
   }
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kOvalsToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kOvalsToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -304,7 +304,7 @@ void BM_DrawCircle(benchmark::State& state,
     bouncer.Bounce();
   }
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kCirclesToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kCirclesToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -379,7 +379,7 @@ void BM_DrawRRect(benchmark::State& state,
     bouncer.Bounce();
   }
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kRRectsToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kRRectsToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -474,7 +474,7 @@ void BM_DrawRSE(benchmark::State& state,
     bouncer.Bounce();
   }
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kRSEsToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kRSEsToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -574,7 +574,7 @@ void BM_DrawDRRect(benchmark::State& state,
     bouncer.Bounce();
   }
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kDRRectsToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kDRRectsToDraw);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -627,7 +627,7 @@ void BM_DrawArc(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), total_call_count);
+  FML_CHECK(display_list->GetRecordCount() >= total_call_count);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -1004,7 +1004,7 @@ void BM_DrawVertices(benchmark::State& state,
   state.SetComplexityN(total_vertex_count);
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), center_points.size());
+  FML_CHECK(display_list->GetRecordCount() >= center_points.size());
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;
@@ -1181,7 +1181,7 @@ void BM_DrawImage(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kImagesToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kImagesToDraw);
 
   size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
@@ -1264,7 +1264,7 @@ void BM_DrawImageRect(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kImagesToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kImagesToDraw);
 
   size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
@@ -1349,7 +1349,7 @@ void BM_DrawImageNine(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), kImagesToDraw);
+  FML_CHECK(display_list->GetRecordCount() >= kImagesToDraw);
 
   size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
@@ -1400,7 +1400,7 @@ void BM_DrawTextBlob(benchmark::State& state,
   }
 
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), draw_calls);
+  FML_CHECK(display_list->GetRecordCount() >= draw_calls);
 
   size_t items_processed = 0;
   for ([[maybe_unused]] auto _ : state) {
@@ -1535,7 +1535,7 @@ void BM_SaveLayer(benchmark::State& state,
     }
   }
   auto display_list = builder.Build();
-  EXPECT_GE(display_list->GetRecordCount(), total_save_calls);
+  FML_CHECK(display_list->GetRecordCount() >= total_save_calls);
 
   // We only want to time the actual rasterization.
   size_t items_processed = 0;

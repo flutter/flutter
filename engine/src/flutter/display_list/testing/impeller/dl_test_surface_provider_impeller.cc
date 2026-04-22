@@ -38,8 +38,38 @@ std::shared_ptr<DlSurfaceInstance>
 DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) const {
-  DlISize size(width, height);
-  return std::make_shared<DlSurfaceInstanceImpeller>(nullptr, nullptr);
+  impeller::ISize size(width, height);
+  int mip_count = 1;
+
+  impeller::PlaygroundImpl* playground = GetPlayground();
+  std::shared_ptr<impeller::Context> context = playground->GetContext();
+  impeller::RenderTargetAllocator render_target_allocator =
+      impeller::RenderTargetAllocator(context->GetResourceAllocator());
+  std::shared_ptr<impeller::RenderTarget> target;
+  if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
+    target = std::make_shared<impeller::RenderTarget>(render_target_allocator.CreateOffscreenMSAA(
+        *context,  // context
+        size,      // size
+        /*mip_count=*/mip_count,
+        "Picture Snapshot MSAA",  // label
+        impeller::RenderTarget::
+            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+    ));
+  } else {
+    target = std::make_shared<impeller::RenderTarget>(render_target_allocator.CreateOffscreen(
+        *context,  // context
+        size,      // size
+        /*mip_count=*/mip_count,
+        "Picture Snapshot",  // label
+        impeller::RenderTarget::
+            kDefaultColorAttachmentConfig  // color_attachment_config
+    ));
+  }
+  if (!target->IsValid()) {
+    return nullptr;
+  }
+  return std::make_shared<DlSurfaceInstanceImpeller>(std::move(context),
+                                                     target);
 }
 
 bool DlSurfaceProviderImpeller::supports(PixelFormat format) const {

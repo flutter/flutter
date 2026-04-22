@@ -29,7 +29,8 @@ DlSurfaceProviderImpellerMetalSDF::DlSurfaceProviderImpellerMetalSDF()
 std::unique_ptr<impeller::PlaygroundImpl>
     DlSurfaceProviderImpellerMetalSDF::playground_;
 
-impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetal::GetPlayground() {
+impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetal::GetPlayground()
+    const {
   if (playground_ == nullptr) {
     FML_CHECK(::glfwInit() == GLFW_TRUE);
     playground_ = MakePlayground(impeller::PlaygroundBackend::kMetal);
@@ -37,7 +38,8 @@ impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetal::GetPlayground() {
   return playground_.get();
 }
 
-impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetalSDF::GetPlayground() {
+impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetalSDF::GetPlayground()
+    const {
   if (playground_ == nullptr) {
     FML_CHECK(::glfwInit() == GLFW_TRUE);
     playground_ = MakePlayground(impeller::PlaygroundBackend::kMetalSDF);
@@ -55,7 +57,7 @@ DlSurfaceProvider::BackendType DlSurfaceProviderImpellerMetal::backend_type()
 }
 
 const std::string DlSurfaceProviderImpellerMetalSDF::backend_name() const {
-  return "ImpellerMetalSDFS";
+  return "ImpellerMetalSDF";
 }
 
 DlSurfaceProvider::BackendType DlSurfaceProviderImpellerMetalSDF::backend_type()

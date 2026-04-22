@@ -20,6 +20,11 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   explicit DlSurfaceInstanceImpeller(
       std::shared_ptr<impeller::Context> context,
       std::shared_ptr<impeller::Surface> surface);
+
+  explicit DlSurfaceInstanceImpeller(
+      std::shared_ptr<impeller::Context> context,
+      std::shared_ptr<impeller::RenderTarget> surface);
+
   virtual ~DlSurfaceInstanceImpeller();
 
   // |DlSurfaceInstance|
@@ -47,6 +52,8 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   DisplayListBuilder builder_;
   std::shared_ptr<impeller::Context> context_;
   std::shared_ptr<impeller::Surface> surface_;
+  std::shared_ptr<impeller::RenderTarget> target_holder_;
+  const impeller::RenderTarget* target_;
 
   void DoRenderDisplayList(const sk_sp<DisplayList>& display_list);
 

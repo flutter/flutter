@@ -43,7 +43,6 @@ void DlSurfaceInstanceSkiaBase::FlushSubmitCpuSync() {
   }
   if (GrDirectContext* dContext =
           GrAsDirectContext(surface->recordingContext())) {
-    dContext->flushAndSubmit();
     dContext->flushAndSubmit(surface.get(), GrSyncCpu::kYes);
   }
 }

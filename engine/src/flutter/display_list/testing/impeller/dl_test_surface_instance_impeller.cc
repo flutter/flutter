@@ -13,7 +13,16 @@ namespace testing {
 DlSurfaceInstanceImpeller::DlSurfaceInstanceImpeller(
     std::shared_ptr<impeller::Context> context,
     std::shared_ptr<impeller::Surface> surface)
-    : context_(std::move(context)), surface_(std::move(surface)) {}
+    : context_(std::move(context)),
+      surface_(std::move(surface)),
+      target_(&surface_->GetRenderTarget()) {}
+
+DlSurfaceInstanceImpeller::DlSurfaceInstanceImpeller(
+    std::shared_ptr<impeller::Context> context,
+    std::shared_ptr<impeller::RenderTarget> target)
+    : context_(std::move(context)),
+      target_holder_(std::move(target)),
+      target_(target_holder_.get()) {}
 
 DlSurfaceInstanceImpeller::~DlSurfaceInstanceImpeller() = default;
 
@@ -43,8 +52,8 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
   if (display_list->GetRecordCount() > 0) {
     impeller::AiksContext aiks_context(context_, typographer_context_);
     impeller::RenderToTarget(aiks_context.GetContentContext(),
-                             surface_->GetRenderTarget(), display_list,
-                             display_list->GetBounds(), false, false);
+                             *target_, display_list, display_list->GetBounds(),
+                             false, false);
   }
 }
 
@@ -53,11 +62,11 @@ bool DlSurfaceInstanceImpeller::SnapshotToFile(std::string& filename) const {
 }
 
 int DlSurfaceInstanceImpeller::width() const {
-  return builder_.GetBaseLayerDimensions().width;
+  return target_->GetRenderTargetSize().width;
 }
 
 int DlSurfaceInstanceImpeller::height() const {
-  return builder_.GetBaseLayerDimensions().height;
+  return target_->GetRenderTargetSize().height;
 }
 
 std::shared_ptr<impeller::TypographerContext>

@@ -30,11 +30,8 @@ class DlSurfaceProviderSkiaMetal : public DlSurfaceProvider {
       size_t width,
       size_t height,
       PixelFormat format) const override;
-  const std::string backend_name() const override { return "Metal"; }
-  BackendType backend_type() const override {
-    return use_sdfs_ ? BackendType::kImpellerMetalSDF
-                     : BackendType::kImpellerMetal;
-  }
+  const std::string backend_name() const override { return "SkiaMetal"; }
+  BackendType backend_type() const override { return BackendType::kSkiaMetal; }
   bool supports(PixelFormat format) const override {
     return format == kN32Premul;
   }

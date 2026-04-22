@@ -30,7 +30,7 @@ class DlSurfaceProviderImpeller : public DlSurfaceProvider {
  protected:
   DlSurfaceProviderImpeller();
 
-  virtual impeller::PlaygroundImpl* GetPlayground() = 0;
+  virtual impeller::PlaygroundImpl* GetPlayground() const = 0;
 
   static std::unique_ptr<impeller::PlaygroundImpl> MakePlayground(
       impeller::PlaygroundBackend backend);

@@ -21,7 +21,7 @@ class DlSurfaceProviderImpellerMetal : public DlSurfaceProviderImpeller {
   BackendType backend_type() const override;
 
  protected:
-  impeller::PlaygroundImpl* GetPlayground() override;
+  impeller::PlaygroundImpl* GetPlayground() const override;
 
  private:
   static std::unique_ptr<impeller::PlaygroundImpl> playground_;
@@ -35,7 +35,7 @@ class DlSurfaceProviderImpellerMetalSDF : public DlSurfaceProviderImpeller {
   BackendType backend_type() const override;
 
  protected:
-  impeller::PlaygroundImpl* GetPlayground() override;
+  impeller::PlaygroundImpl* GetPlayground() const override;
 
  private:
   static std::unique_ptr<impeller::PlaygroundImpl> playground_;
