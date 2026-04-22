@@ -11,6 +11,8 @@ library foundation;
 
 export 'package:meta/meta.dart'
     show
+        // ignore: experimental_member_use
+        experimental,
         factory,
         immutable,
         internal,

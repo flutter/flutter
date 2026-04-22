@@ -984,3 +984,56 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
   @override
   bool get allowImplicitScrolling => false;
 }
+
+/// A [ScrollPhysics] that accepts user scroll gestures but converts all
+/// movement into overscroll, designed for use when the browser drives the
+/// outermost scroll on Flutter Web.
+///
+/// By accepting gestures, the outer scrollable participates in gesture
+/// disambiguation. On touch devices this is critical: if no scrollable
+/// accepted the vertical drag, the gesture would be lost. Once accepted,
+/// all deltas are returned as overscroll via [applyBoundaryConditions],
+/// which the framework catches and forwards to the browser via the
+/// `FlutterView.browserScrollBy` dart:ui API.
+///
+/// For desktop wheel events, the engine handles scroll chaining by
+/// selectively calling `preventDefault()` based on whether a nested
+/// scrollable consumed the event.
+///
+/// When [ScrollBehavior.enableBrowserScrolling] is true, [ScrollableState]
+/// automatically injects this physics for the outermost scrollable and uses
+/// the [FlutterView] browser scroll API to sync positions with the browser.
+/// Programmatic scrolling via [ScrollController.animateTo] and
+/// [ScrollController.jumpTo] is automatically routed through the browser
+/// when this physics is active.
+///
+/// Developers should not need to set this physics manually. Use
+/// [BrowserScrollable] to opt in to browser-driven scrolling.
+@experimental
+class BrowserScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that delegates scrolling to the browser.
+  const BrowserScrollPhysics({super.parent});
+
+  @override
+  BrowserScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return BrowserScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset;
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    return value - position.pixels;
+  }
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    return null;
+  }
+}

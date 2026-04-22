@@ -74,6 +74,29 @@ class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
   const ScrollBehavior();
 
+  /// Whether the outermost scrollable should delegate scrolling to the
+  /// browser's native scroll engine.
+  ///
+  /// When true, [ScrollableState] sets up browser scrolling via the dart:ui
+  /// API to sync positions with the browser and automatically applies
+  /// [BrowserScrollPhysics]. The browser handles scroll physics,
+  /// draws the native scrollbar, and chains overflow to parent pages. Flutter
+  /// still lays out and paints content, but the browser owns the scroll
+  /// position.
+  ///
+  /// The dart:ui browser scroll API is only functional on web. On other
+  /// platforms the binding calls are no-ops, but [BrowserScrollPhysics] is
+  /// still applied to the physics chain so that the behavior can be tested
+  /// without running in a browser.
+  ///
+  /// If multiple nested [Scrollable]s inherit this flag, only the outermost
+  /// one claims the browser-scroll binding. Inner scrollables use their
+  /// normal physics.
+  ///
+  /// Defaults to false.
+  @experimental
+  bool get enableBrowserScrolling => false;
+
   /// Creates a copy of this ScrollBehavior, making it possible to
   /// easily toggle `scrollbar` and `overscrollIndicator` effects.
   ///
@@ -91,6 +114,7 @@ class ScrollBehavior {
     ScrollPhysics? physics,
     TargetPlatform? platform,
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
+    bool? enableBrowserScrolling,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -102,6 +126,7 @@ class ScrollBehavior {
       physics: physics,
       platform: platform,
       keyboardDismissBehavior: keyboardDismissBehavior,
+      enableBrowserScrolling: enableBrowserScrolling,
     );
   }
 
@@ -289,8 +314,10 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.physics,
     this.platform,
     this.keyboardDismissBehavior,
+    bool? enableBrowserScrolling,
   }) : _dragDevices = dragDevices,
-       _pointerAxisModifiers = pointerAxisModifiers;
+       _pointerAxisModifiers = pointerAxisModifiers,
+       _enableBrowserScrolling = enableBrowserScrolling;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -301,6 +328,10 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final Set<PointerDeviceKind>? _dragDevices;
   final MultitouchDragStrategy? multitouchDragStrategy;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
+  final bool? _enableBrowserScrolling;
+
+  @override
+  bool get enableBrowserScrolling => _enableBrowserScrolling ?? delegate.enableBrowserScrolling;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
@@ -340,6 +371,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     ScrollPhysics? physics,
     TargetPlatform? platform,
     ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior,
+    bool? enableBrowserScrolling,
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
@@ -350,6 +382,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
       keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
+      enableBrowserScrolling: enableBrowserScrolling ?? this.enableBrowserScrolling,
     );
   }
 
@@ -378,6 +411,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
         !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers) ||
         oldDelegate.physics != physics ||
         oldDelegate.platform != platform ||
+        oldDelegate._enableBrowserScrolling != _enableBrowserScrolling ||
         delegate.shouldNotify(oldDelegate.delegate);
   }
 

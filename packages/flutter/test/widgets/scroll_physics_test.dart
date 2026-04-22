@@ -364,4 +364,63 @@ FlutterError
     );
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
+
+  group('BrowserScrollPhysics', () {
+    test('applyTo returns BrowserScrollPhysics', () {
+      const physics = BrowserScrollPhysics();
+      final ScrollPhysics result = physics.applyTo(const ClampingScrollPhysics());
+      expect(result, isA<BrowserScrollPhysics>());
+    });
+
+    test('does not allow implicit scrolling', () {
+      const physics = BrowserScrollPhysics();
+      expect(physics.allowImplicitScrolling, isFalse);
+    });
+
+    test('applyPhysicsToUserOffset returns full offset', () {
+      const physics = BrowserScrollPhysics();
+      final metrics = FixedScrollMetrics(
+        minScrollExtent: 0,
+        maxScrollExtent: 1000,
+        pixels: 500,
+        viewportDimension: 600,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+      expect(physics.applyPhysicsToUserOffset(metrics, 42.0), 42.0);
+      expect(physics.applyPhysicsToUserOffset(metrics, -10.0), -10.0);
+    });
+
+    test('applyBoundaryConditions returns entire delta as overscroll', () {
+      const physics = BrowserScrollPhysics();
+      final metrics = FixedScrollMetrics(
+        minScrollExtent: 0,
+        maxScrollExtent: 1000,
+        pixels: 500,
+        viewportDimension: 600,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+      // value=550 means delta of 50 from current pixels=500
+      expect(physics.applyBoundaryConditions(metrics, 550), 50.0);
+      // value=400 means delta of -100 from current pixels=500
+      expect(physics.applyBoundaryConditions(metrics, 400), -100.0);
+      // value=500 means delta of 0
+      expect(physics.applyBoundaryConditions(metrics, 500), 0.0);
+    });
+
+    test('createBallisticSimulation returns null', () {
+      const physics = BrowserScrollPhysics();
+      final metrics = FixedScrollMetrics(
+        minScrollExtent: 0,
+        maxScrollExtent: 1000,
+        pixels: 500,
+        viewportDimension: 600,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+      expect(physics.createBallisticSimulation(metrics, 100.0), isNull);
+      expect(physics.createBallisticSimulation(metrics, 0.0), isNull);
+    });
+  });
 }
