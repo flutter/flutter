@@ -3260,7 +3260,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     // If we already have an opposite edge initialized, start our sweep from there
     // to ensure all items between the two edges are properly visited.
     final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
-    var index = oppositeEdgeIndex != -1 ? oppositeEdgeIndex : 0;
+    var index = math.max(oppositeEdgeIndex, 0);
 
     while (index >= 0 && index < selectables.length) {
       final Selectable child = selectables[index];
