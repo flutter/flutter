@@ -1102,7 +1102,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on arm64 linux', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -1187,7 +1187,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxArm64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -1275,7 +1278,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
