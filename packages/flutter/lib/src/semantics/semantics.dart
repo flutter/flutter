@@ -5020,6 +5020,25 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
 
+    if (!kIsWeb) {
+      final additionalNodes = <SemanticsNode>[];
+      for (final node in updatedVisitedNodes) {
+        if (node._isTraversalParent) {
+          final Set<SemanticsNode>? traversalChildren =
+              _traversalChildNodes[node.traversalParentIdentifier];
+          if (traversalChildren != null) {
+            for (final SemanticsNode child in traversalChildren) {
+              if (child.attached && !child._dirty && !updatedVisitedNodes.contains(child)) {
+                child._dirty = true;
+                additionalNodes.add(child);
+              }
+            }
+          }
+        }
+      }
+      updatedVisitedNodes.addAll(additionalNodes);
+    }
+
     for (final node in updatedVisitedNodes) {
       assert(
         node.parent?._dirty != true || node._isTraversalParent,

@@ -3060,6 +3060,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (inverseTransform == null) {
         inverseTransform = new float[16];
       }
+      if (hitTestTransform == null) {
+        if (BuildConfig.DEBUG) {
+          Log.e(TAG, "hitTestTransform has not been initialized for id = " + id);
+          accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
+        }
+
+        // hitTestTransform has not been initialized via updateWith() yet.
+        // Give a default so Matrix.invertM doesn't throw.
+        hitTestTransform = new float[16];
+        Matrix.setIdentityM(hitTestTransform, 0);
+      }
       if (!Matrix.invertM(inverseTransform, 0, hitTestTransform, 0)) {
         Arrays.fill(inverseTransform, 0);
       }
