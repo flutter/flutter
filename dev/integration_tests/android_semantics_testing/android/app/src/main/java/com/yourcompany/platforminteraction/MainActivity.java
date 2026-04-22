@@ -77,7 +77,8 @@ public class MainActivity extends FlutterActivity {
                 ClipData currentClip = clipboard.getPrimaryClip();
                 if (currentClip != null && currentClip.getItemCount() > 0) {
                     CharSequence text = currentClip.getItemAt(0).getText();
-                    if (text != null && text.length() > 0) {
+                    if (text != null && text.toString().equals(message)) {
+                        // The clipboard already has the expected value, no need to set it.
                         result.success(null);
                         return;
                     }
@@ -89,8 +90,16 @@ public class MainActivity extends FlutterActivity {
             ClipboardManager.OnPrimaryClipChangedListener listener = new ClipboardManager.OnPrimaryClipChangedListener() {
                 @Override
                 public void onPrimaryClipChanged() {
-                    clipboard.removePrimaryClipChangedListener(this);
-                    result.success(null);
+                    ClipData currentClip = clipboard.getPrimaryClip();
+                    if (currentClip != null && currentClip.getItemCount() > 0) {
+                        CharSequence text = currentClip.getItemAt(0).getText();
+                        // Verify if the clipboard has the correct value before returning success to the test runner.
+                        if (text != null && text.toString().equals(message)) {
+                            clipboard.removePrimaryClipChangedListener(this);
+                            result.success(null);
+                            return;
+                        }
+                    }
                 }
             };
 
