@@ -228,13 +228,13 @@ class PlatformViewEmbedder {
                   '${rrect.bottom}px ${rrect.left}px '
                   'round ${rrect.blRadiusX}px)';
             } else {
-              final path = ui.Path() as LayerPath;
+              final path = ui.Path() as LazyPath;
               path.addRRect(mutator.rrect!);
-              clipView.style.clipPath = 'path("${path.toSvgString()}")';
+              clipView.style.clipPath = 'path("${path.builtPath.toSvgString()}")';
+              path.collect();
             }
           } else if (mutator.path != null) {
-            final path = (mutator.path! as LazyPath).builtPath as LayerPath;
-            clipView.style.clipPath = 'path("${path.toSvgString()}")';
+            clipView.style.clipPath = 'path("${mutator.path!.builtPath.toSvgString()}")';
           }
           _resetAnchor(clipView);
           head = clipView;
@@ -372,16 +372,10 @@ class PlatformViewEmbedder {
     for (var i = 0; i < _compositionOrder.length; i++) {
       final int viewId = _compositionOrder[i];
 
-      var isViewInvalid = false;
-      assert(() {
-        isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
-        if (isViewInvalid) {
-          debugInvalidViewIds ??= <int>[];
-          debugInvalidViewIds!.add(viewId);
-        }
-        return true;
-      }());
+      final bool isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
       if (isViewInvalid) {
+        debugInvalidViewIds ??= <int>[];
+        debugInvalidViewIds.add(viewId);
         continue;
       }
 
@@ -393,11 +387,12 @@ class PlatformViewEmbedder {
 
     unusedViews.forEach(disposeView);
 
-    assert(
-      debugInvalidViewIds == null || debugInvalidViewIds!.isEmpty,
-      'Cannot render platform views: ${debugInvalidViewIds!.join(', ')}. '
-      'These views have not been created, or they have been deleted.',
-    );
+    if (debugInvalidViewIds != null && debugInvalidViewIds.isNotEmpty) {
+      printWarning(
+        'Cannot render platform views: ${debugInvalidViewIds.join(', ')}. '
+        'These views have not been created, or they have been deleted.',
+      );
+    }
   }
 
   void disposeView(int viewId) {
@@ -692,7 +687,8 @@ class Mutator {
   const Mutator.clipRect(ui.Rect rect) : this._(MutatorType.clipRect, rect, null, null, null, null);
   const Mutator.clipRRect(ui.RRect rrect)
     : this._(MutatorType.clipRRect, null, rrect, null, null, null);
-  const Mutator.clipPath(ui.Path path) : this._(MutatorType.clipPath, null, null, path, null, null);
+  const Mutator.clipPath(LazyPath path)
+    : this._(MutatorType.clipPath, null, null, path, null, null);
   const Mutator.transform(Matrix4 matrix)
     : this._(MutatorType.transform, null, null, null, matrix, null);
   const Mutator.opacity(int alpha) : this._(MutatorType.opacity, null, null, null, null, alpha);
@@ -702,7 +698,7 @@ class Mutator {
   final MutatorType type;
   final ui.Rect? rect;
   final ui.RRect? rrect;
-  final ui.Path? path;
+  final LazyPath? path;
   final Matrix4? matrix;
   final int? alpha;
 
@@ -760,7 +756,7 @@ class MutatorsStack extends Iterable<Mutator> {
     pushClipRRect(rsuperellipse.toApproximateRRect());
   }
 
-  void pushClipPath(ui.Path path) {
+  void pushClipPath(LazyPath path) {
     _mutators.add(Mutator.clipPath(path));
   }
 

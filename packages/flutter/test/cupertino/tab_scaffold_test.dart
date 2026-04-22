@@ -8,7 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
-import '../widgets/navigator_utils.dart';
+import '../widgets/widget_inspector_test_utils.dart';
+import 'navigator_utils.dart';
 
 late List<int> selectedTabs;
 
@@ -42,6 +43,10 @@ BottomNavigationBarItem tabGenerator(int index) {
 }
 
 void main() {
+  // Must be called before any testWidgets so the service is set before
+  // binding initialization triggers initServiceExtensions.
+  _TabScaffoldWidgetInspectorService.runTests();
+
   setUp(() {
     selectedTabs = <int>[];
   });
@@ -1403,6 +1408,57 @@ void main() {
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
   });
+}
+
+class _TabScaffoldWidgetInspectorService extends TestWidgetInspectorService {
+  // These tests need access to protected members of WidgetInspectorService.
+  static void runTests() {
+    final service = _TabScaffoldWidgetInspectorService();
+    final WidgetInspectorService previousInstance = WidgetInspectorService.instance;
+    WidgetInspectorService.instance = service;
+
+    tearDown(() {
+      service.resetAllState();
+      WidgetInspectorService.instance = previousInstance;
+    });
+
+    testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/115228
+      const group = 'test-group';
+      const Key leafKey = ValueKey<String>('ColoredBox');
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Tab 1'),
+                BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: 'Tab 2'),
+              ],
+            ),
+            tabBuilder: (BuildContext context, int index) {
+              return Builder(
+                builder: (BuildContext context) {
+                  return ColoredBox(key: leafKey, color: CupertinoTheme.of(context).primaryColor);
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      final Element leaf = tester.element(find.byKey(leafKey));
+      service.setSelection(leaf, group);
+      final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group)!;
+
+      await service.testExtension(
+        WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+        <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+      );
+    });
+  }
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {

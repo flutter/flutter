@@ -20,9 +20,9 @@ namespace impeller {
 class FontGlyphAtlas;
 
 struct FrameBounds {
-  /// The bounds of the glyph within the glyph atlas.
+  /// The bounds of the glyph within the glyph atlas texture.
   Rect atlas_bounds;
-  /// The local glyph bounds.
+  /// The glyph bounds within the local coordinate system.
   Rect glyph_bounds;
   /// Whether [atlas_bounds] are still a placeholder and have
   /// not yet been computed.

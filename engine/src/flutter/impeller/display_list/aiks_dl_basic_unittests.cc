@@ -20,6 +20,7 @@
 #include "flutter/impeller/geometry/scalar.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#include "imgui.h"
 #include "impeller/playground/widgets.h"
 
 namespace impeller {
@@ -32,6 +33,14 @@ TEST_P(AiksTest, CanRenderColoredRect) {
   DlPaint paint;
   paint.setColor(DlColor::kBlue());
   builder.DrawPath(DlPath::MakeRectXYWH(100.0f, 100.0f, 100.0f, 100.0f), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderColoredRectPrimitive) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  builder.DrawRect(DlRect::MakeXYWH(100.f, 100.f, 100.f, 100.f), paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -467,6 +476,41 @@ TEST_P(AiksTest, CanRenderRoundedRectWithNonUniformRadii) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderRoundedRectWithUniformRadii) {
+  Scalar top_left = 20.f;
+  Scalar top_right = 40.f;
+  Scalar bottom_left = 60.f;
+  Scalar bottom_right = 80.f;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("top_left", &top_left, 0, 250);
+      ImGui::SliderFloat("top_right", &top_right, 0, 250);
+      ImGui::SliderFloat("bottom_left", &bottom_left, 0, 250);
+      ImGui::SliderFloat("bottom_right", &bottom_right, 0, 250);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    DlPaint paint;
+    paint.setColor(DlColor::kRed());
+
+    RoundingRadii radii = {
+        .top_left = DlSize(top_left, top_left),
+        .top_right = DlSize(top_right, top_right),
+        .bottom_left = DlSize(bottom_left, bottom_left),
+        .bottom_right = DlSize(bottom_right, bottom_right),
+    };
+    DlRoundRect rrect =
+        DlRoundRect::MakeRectRadii(DlRect::MakeXYWH(100, 100, 500, 500), radii);
+
+    builder.DrawRoundRect(rrect, paint);
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, CanDrawPaint) {
   auto medium_turquoise =
       DlColor::RGBA(72.0f / 255.0f, 209.0f / 255.0f, 204.0f / 255.0f, 1.0f);
@@ -686,6 +730,47 @@ TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, DrawThinStrokedCircle) {
+  auto callback = [&]() {
+    static float stroked_radius = 100.0;
+    static float stroke_width = 0.0;
+    static float stroke_width_fine = 2.0;
+    static float stroked_alpha = 255.0;
+    static float stroked_scale[2] = {1.0, 1.0};
+
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
+      ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
+      ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
+      ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
+      ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
+      ImGui::End();
+    }
+
+    flutter::DisplayListBuilder builder;
+
+    DlPaint background_paint;
+    background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+    builder.DrawPaint(background_paint);
+
+    flutter::DlPaint paint;
+
+    paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
+    paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+    paint.setStrokeWidth(stroke_width + stroke_width_fine);
+    builder.Save();
+    builder.Translate(250, 250);
+    builder.Scale(stroked_scale[0], stroked_scale[1]);
+    builder.Translate(-250, -250);
+    builder.DrawCircle(DlPoint(250, 250), stroked_radius, paint);
+    builder.Restore();
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -866,12 +951,12 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   int short_radius = 600;
   while (long_radius > 0 && short_radius > 0) {
     paint.setColor(colors[(c_index++) % color_count]);
-    builder.DrawOval(DlRect::MakeXYWH(10 - long_radius, 10 - short_radius,
-                                      long_radius * 2, short_radius * 2),
-                     paint);
-    builder.DrawOval(DlRect::MakeXYWH(1000 - short_radius, 750 - long_radius,
-                                      short_radius * 2, long_radius * 2),
-                     paint);
+    builder.DrawOval(
+        DlRect::MakeEllipseBounds({10, 10}, Size(long_radius, short_radius)),
+        paint);
+    builder.DrawOval(
+        DlRect::MakeEllipseBounds({1000, 750}, Size(short_radius, long_radius)),
+        paint);
     if (short_radius > 30) {
       short_radius -= 10;
       long_radius -= 5;
@@ -2262,12 +2347,14 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
   Scalar width = 200.f;
   Scalar height = 60.f;
   Scalar corner = 1.f;
+  bool stroked = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("width", &width, 0, 200);
       ImGui::SliderFloat("height", &height, 0, 200);
       ImGui::SliderFloat("corner", &corner, 0, 1);
+      ImGui::Checkbox("stroked", &stroked);
       ImGui::End();
     }
 
@@ -2287,8 +2374,12 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
                                               DlTileMode::kClamp);
     paint.setColorSource(gradient);
     paint.setColor(DlColor::kWhite());
-    paint.setDrawStyle(DlDrawStyle::kStroke);
-    paint.setStrokeWidth(20);
+    if (stroked) {
+      paint.setDrawStyle(DlDrawStyle::kStroke);
+      paint.setStrokeWidth(20);
+    } else {
+      paint.setDrawStyle(DlDrawStyle::kFill);
+    }
 
     builder.Save();
     builder.Translate(100, 100);

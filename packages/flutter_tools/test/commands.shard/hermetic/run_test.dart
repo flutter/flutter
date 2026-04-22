@@ -428,6 +428,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -481,6 +482,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -529,6 +531,50 @@ void main() {
             Logger: () => MachineOutputLogger(parent: logger),
           },
         );
+
+        group('web', () {
+          late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+          setUp(() {
+            fakeWebRunnerFactory = FakeWebRunnerFactory();
+          });
+
+          testUsingContext(
+            'can pass --web-define',
+            () async {
+              final command = RunCommand();
+              final device = FakeDevice(
+                platformType: PlatformType.web,
+                targetPlatform: TargetPlatform.web_javascript,
+              );
+              testDeviceManager.devices = <Device>[device];
+
+              await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+                  'run',
+                  '--no-pub',
+                  '--machine',
+                  '-d',
+                  device.id,
+                  '--web-define=NAME=VAL',
+                ]),
+                throwsToolExit(),
+              );
+              expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'NAME': 'VAL'});
+            },
+            overrides: <Type, Generator>{
+              Artifacts: () => artifacts,
+              Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+              DeviceManager: () => testDeviceManager,
+              FeatureFlags: () => FakeFeatureFlags(),
+              FileSystem: () => fs,
+              ProcessManager: () => FakeProcessManager.any(),
+              Stdio: () => FakeStdio(),
+              Logger: () => MachineOutputLogger(parent: logger),
+              WebRunnerFactory: () => fakeWebRunnerFactory,
+            },
+          );
+        });
 
         testUsingContext(
           'can disable devtools with --no-devtools',
@@ -743,6 +789,7 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -793,6 +840,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -848,6 +896,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -904,6 +953,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -1344,6 +1394,115 @@ server:
             fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+    });
+
+    group('--base-href', () {
+      late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+      setUp(() {
+        fakeWebRunnerFactory = FakeWebRunnerFactory();
+
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+        final device = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        );
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext(
+        'passes base-href to WebDevServerConfig',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, '/preview/');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws ToolExit when base-href does not start with /',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
+            throwsToolExit(message: '--base-href should start and end with /'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws ToolExit when base-href does not end with /',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
+            throwsToolExit(message: '--base-href should start and end with /'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'base-href defaults to null when not provided',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, isNull);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1990,6 +2149,11 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
     }
     return 0;
   }
+
+  @override
+  DebuggingOptions get debuggingOptions {
+    throwToolExit('');
+  }
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
@@ -2019,6 +2183,7 @@ class CapturingAppDomain extends AppDomain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
+    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -2074,6 +2239,7 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
 /// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
 class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   DebuggingOptions? lastOptions;
+  Map<String, String>? lastWebDefines;
 
   @override
   ResidentRunner createWebRunner(
@@ -2094,6 +2260,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     Map<String, String> webDefines = const <String, String>{},
   }) {
     lastOptions = debuggingOptions;
+    lastWebDefines = webDefines;
     return FakeResidentRunner();
   }
 }

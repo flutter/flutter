@@ -133,12 +133,12 @@ static gboolean redraw_cb(gpointer user_data) {
       // size of the render area.
       gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
     }
-    return FALSE;
+    return G_SOURCE_REMOVE;
   }
 
   gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
 
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 // Signal handler for GtkWidget::delete-event
@@ -159,8 +159,12 @@ static void init_touch(FlView* self) {
   self->touch_manager = fl_touch_manager_new(self->engine, self->view_id);
 }
 
-static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
+static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   GdkDevice* device = gdk_event_get_source_device(event);
+  if (device == nullptr) {
+    return kFlutterPointerDeviceKindMouse;
+  }
+
   GdkInputSource source = gdk_device_get_source(device);
   switch (source) {
     case GDK_SOURCE_PEN:
@@ -346,8 +350,9 @@ static gboolean button_press_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_press(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor, button);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      button);
 }
 
 // Signal handler for GtkWidget::button-release-event
@@ -366,8 +371,9 @@ static gboolean button_release_event_cb(FlView* self,
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_button_release(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor, button);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      button);
 }
 
 // Signal handler for GtkWidget::scroll-event
@@ -405,8 +411,8 @@ static gboolean motion_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_motion(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::enter-notify-event
@@ -417,8 +423,8 @@ static gboolean enter_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_enter(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 // Signal handler for GtkWidget::leave-notify-event
@@ -433,8 +439,8 @@ static gboolean leave_notify_event_cb(FlView* self,
   gdk_event_get_coords(event, &x, &y);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   return fl_pointer_manager_handle_leave(
-      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
-      x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event),
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 
 static void gesture_rotation_begin_cb(FlView* self) {
@@ -830,7 +836,8 @@ G_MODULE_EXPORT FlView* fl_view_new_sized_to_content(FlEngine* engine) {
   self->engine = FL_ENGINE(g_object_ref(engine));
 
   self->sized_to_content = TRUE;
-  size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
+  size_t min_width = 1, min_height = 1, max_width = G_MAXSIZE,
+         max_height = G_MAXSIZE;
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,

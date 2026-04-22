@@ -74,6 +74,7 @@ impeller_component("compiler_lib") {
     "//flutter/skia",
 
     # All third_party deps must be included by the global license script.
+    "//third_party/abseil-cpp/absl/status",
     "//third_party/inja",
     "//third_party/shaderc_flutter",
     "//third_party/spirv_cross_flutter",

@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SliderUseCase extends UseCase {
-  SliderUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  SliderUseCase();
 
   @override
   String get name => 'Slider';
 
   @override
   String get route => '/slider';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

@@ -17,6 +17,9 @@ enum class WindowArchetype {
 
   // Tooltip window.
   kTooltip,
+
+  // Popup window.
+  kPopup,
 };
 
 }  // namespace flutter
