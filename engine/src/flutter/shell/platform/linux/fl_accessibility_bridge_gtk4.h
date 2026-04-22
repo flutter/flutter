@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_channel.h"
 #include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
+#include "flutter/shell/platform/linux/fl_accessible_node_gtk4.h"
 
 G_BEGIN_DECLS
 
@@ -34,6 +35,10 @@ void fl_accessibility_bridge_gtk4_send_announcement(
 
 FlAccessibilitySemanticsStore* fl_accessibility_bridge_gtk4_get_semantics_store(
     FlAccessibilityBridgeGtk4* self);
+
+FlAccessibleNodeGtk4* fl_accessibility_bridge_gtk4_lookup_node(
+    FlAccessibilityBridgeGtk4* self,
+    int32_t node_id);
 
 G_END_DECLS
 
