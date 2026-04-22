@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
-import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
@@ -362,8 +361,8 @@ void main() {
             itemMainAxisExtent: 300,
             items: items,
             label: (int item) => tile == item && group == 0
-                ? TextButton(
-                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                ? GestureDetector(
+                    onTap: () => clickedTile = 'Group 0 Tile $item',
                     child: Text('Group 0 Tile $item'),
                   )
                 : Text('Group 0 Tile $item'),
@@ -371,8 +370,8 @@ void main() {
           _buildSliverList(
             items: items,
             label: (int item) => tile == item && group == 1
-                ? TextButton(
-                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                ? GestureDetector(
+                    onTap: () => clickedTile = 'Group 1 Tile $item',
                     child: Text('Group 1 Tile $item'),
                   )
                 : Text('Group 1 Tile $item'),
@@ -381,7 +380,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(TextButton));
+    await tester.tap(find.text('Group 0 Tile 0'));
     await tester.pumpAndSettle();
     expect(clickedTile, equals('Group 0 Tile 0'));
 
@@ -396,8 +395,8 @@ void main() {
             itemMainAxisExtent: 300,
             items: items,
             label: (int item) => tile == item && group == 0
-                ? TextButton(
-                    onPressed: () => clickedTile = 'Group 0 Tile $item',
+                ? GestureDetector(
+                    onTap: () => clickedTile = 'Group 0 Tile $item',
                     child: Text('Group 0 Tile $item'),
                   )
                 : Text('Group 0 Tile $item'),
@@ -405,8 +404,8 @@ void main() {
           _buildSliverList(
             items: items,
             label: (int item) => tile == item && group == 1
-                ? TextButton(
-                    onPressed: () => clickedTile = 'Group 1 Tile $item',
+                ? GestureDetector(
+                    onTap: () => clickedTile = 'Group 1 Tile $item',
                     child: Text('Group 1 Tile $item'),
                   )
                 : Text('Group 1 Tile $item'),
@@ -416,7 +415,7 @@ void main() {
     );
     controller.jumpTo(300.0 * 20);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(TextButton));
+    await tester.tap(find.text('Group 1 Tile 2'));
     await tester.pumpAndSettle();
     expect(clickedTile, equals('Group 1 Tile 2'));
   });
@@ -652,130 +651,6 @@ void main() {
     },
   );
 
-  testWidgets(
-    'SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverMainAxisGroup',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-
-      await tester.pumpWidget(
-        _buildSliverMainAxisGroup(
-          controller: controller,
-          slivers: <Widget>[
-            const SliverAppBar(toolbarHeight: 30, expandedHeight: 60),
-            const SliverToBoxAdapter(child: SizedBox(height: 600)),
-          ],
-          otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
-        ),
-      );
-      await tester.pumpAndSettle();
-      final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      expect(renderGroup.geometry!.scrollExtent, equals(660));
-
-      controller.jumpTo(660);
-      await tester.pumpAndSettle();
-      controller.jumpTo(630);
-      await tester.pumpAndSettle();
-
-      // At a scroll offset of 630, a normal scrolling header should be out of view.
-      final renderHeader =
-          tester.renderObject(find.byType(SliverPersistentHeader, skipOffstage: false))
-              as RenderSliverPersistentHeader;
-      expect(renderHeader.constraints.scrollOffset, equals(630));
-      expect(renderHeader.geometry!.layoutExtent, equals(0.0));
-    },
-  );
-
-  testWidgets(
-    'SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverMainAxisGroup',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-
-      await tester.pumpWidget(
-        _buildSliverMainAxisGroup(
-          controller: controller,
-          slivers: <Widget>[
-            const SliverAppBar(toolbarHeight: 30, expandedHeight: 60, floating: true, snap: true),
-            const SliverToBoxAdapter(child: SizedBox(height: 600)),
-          ],
-          otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
-        ),
-      );
-      await tester.pumpAndSettle();
-      final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final renderHeader =
-          tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
-      expect(renderGroup.geometry!.scrollExtent, equals(660));
-
-      controller.jumpTo(660);
-      await tester.pumpAndSettle();
-
-      final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
-      await gesture.moveBy(const Offset(0.0, 10));
-      await tester.pump();
-
-      // The snap animation does not go through until the gesture is released.
-      expect(renderHeader.geometry!.paintExtent, equals(10));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
-
-      // Once it is released, the header's paint extent becomes the maximum and the group sets an offset of -50.0.
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(renderHeader.geometry!.paintExtent, equals(60));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
-    },
-  );
-
-  testWidgets(
-    'SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverMainAxisGroup',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-
-      await tester.pumpWidget(
-        _buildSliverMainAxisGroup(
-          controller: controller,
-          slivers: <Widget>[
-            const SliverAppBar(
-              toolbarHeight: 30,
-              expandedHeight: 60,
-              floating: true,
-              pinned: true,
-              snap: true,
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 600)),
-          ],
-          otherSlivers: <Widget>[const SliverToBoxAdapter(child: SizedBox(height: 2400))],
-        ),
-      );
-      await tester.pumpAndSettle();
-      final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
-      final renderHeader =
-          tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
-      expect(renderGroup.geometry!.scrollExtent, equals(660));
-
-      controller.jumpTo(660);
-      await tester.pumpAndSettle();
-
-      final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
-      await gesture.moveBy(const Offset(0.0, 10));
-      await tester.pump();
-
-      expect(renderHeader.geometry!.paintExtent, equals(30.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
-
-      // Once we lift the gesture up, the animation should finish.
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(renderHeader.geometry!.paintExtent, equals(60.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
-    },
-  );
-
   testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
     final controller = ScrollController();
     addTearDown(controller.dispose);
@@ -791,19 +666,19 @@ void main() {
         slivers: <Widget>[
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 1000, decoration: const BoxDecoration(color: Colors.amber)),
+            child: Container(height: 1000, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 400, decoration: const BoxDecoration(color: Colors.amber)),
+            child: Container(height: 400, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 500, decoration: const BoxDecoration(color: Colors.amber)),
+            child: Container(height: 500, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 300, decoration: const BoxDecoration(color: Colors.amber)),
+            child: Container(height: 300, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
           ),
         ],
       ),
@@ -829,22 +704,26 @@ void main() {
     // the following SliverMainAxisGroups will not perform extra work.
     final buildsPerGroup = <int, int>{0: 0, 1: 0, 2: 0};
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            for (int groupIndex = 0; groupIndex < 3; groupIndex++)
-              SliverMainAxisGroup(
-                slivers: <Widget>[
-                  SliverList.builder(
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      buildsPerGroup[groupIndex] = buildsPerGroup[groupIndex]! + 1;
-                      return const SizedBox.square(dimension: 50);
-                    },
-                  ),
-                ],
-              ),
-          ],
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              for (int groupIndex = 0; groupIndex < 3; groupIndex++)
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverList.builder(
+                      itemCount: 100,
+                      itemBuilder: (BuildContext context, int index) {
+                        buildsPerGroup[groupIndex] = buildsPerGroup[groupIndex]! + 1;
+                        return const SizedBox.square(dimension: 50);
+                      },
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -861,20 +740,24 @@ void main() {
     const Widget item = SizedBox.square(dimension: 50);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
-          slivers: <Widget>[
-            SliverMainAxisGroup(
-              slivers: <Widget>[
-                const PinnedHeaderSliver(child: SizedBox(height: 500)),
-                SliverList.builder(
-                  itemCount: 100,
-                  itemBuilder: (BuildContext context, int index) => item,
-                ),
-                const SliverToBoxAdapter(child: item),
-              ],
-            ),
-          ],
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  const PinnedHeaderSliver(child: SizedBox(height: 500)),
+                  SliverList.builder(
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) => item,
+                  ),
+                  const SliverToBoxAdapter(child: item),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -905,81 +788,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(key)), Offset.zero);
   });
-
-  // Regression test for https://github.com/flutter/flutter/issues/167801
-  testWidgets(
-    'Nesting SliverMainAxisGroups does not break ShowCaretOnScreen for text fields inside nested SliverMainAxisGroup',
-    (WidgetTester tester) async {
-      // The number of groups and items per group needs to be high enough to reproduce the bug.
-      const sliverGroupsCount = 3;
-      const sliverGroupItemsCount = 60;
-      // To make working with the scroll offset easier, each item is a fixed height.
-      const itemHeight = 72.0;
-
-      final scrollController = ScrollController();
-      addTearDown(scrollController.dispose);
-
-      final Widget widget = MaterialApp(
-        theme: ThemeData(
-          inputDecorationTheme: const InputDecorationTheme(
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF1489FD))),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFB1BDC5))),
-          ),
-        ),
-        home: Scaffold(
-          body: CustomScrollView(
-            controller: scrollController,
-            slivers: <Widget>[
-              SliverMainAxisGroup(
-                slivers: <Widget>[
-                  for (int i = 1; i <= sliverGroupsCount; i++)
-                    SliverMainAxisGroup(
-                      slivers: <Widget>[
-                        SliverList.builder(
-                          itemCount: sliverGroupItemsCount,
-                          itemBuilder: (_, int index) {
-                            final label = 'Field $i.${index + 1}';
-
-                            return SizedBox(
-                              height: itemHeight,
-                              child: Padding(
-                                // This extra padding is to make visually debugging the test app a bit better,
-                                // othwerwise the label text clips the text field above.
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                child: TextField(
-                                  key: ValueKey<String>(label),
-                                  decoration: InputDecoration(labelText: label),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-
-      await tester.pumpWidget(widget);
-
-      // Scroll down to the first field in the second group, so that it is at the top of the screen.
-      const double offset = sliverGroupItemsCount * itemHeight;
-      scrollController.jumpTo(offset);
-
-      await tester.pumpAndSettle();
-
-      // Tap the field so that it gains focus and requests the scrollable to scroll it into view.
-      // However, since the field is at the top of the screen, far away from the keyboard,
-      // the scroll position should not change.
-      await tester.tap(find.byKey(const ValueKey<String>('Field 2.1')));
-      await tester.pumpAndSettle();
-
-      expect(scrollController.offset, offset);
-    },
-  );
 
   testWidgets('SliverMainAxisGroup offstage child', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1070,24 +878,28 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: SizedBox(
-            height: 201,
-            child: CustomScrollView(
-              controller: controller,
-              slivers: const <Widget>[
-                SliverMainAxisGroup(
-                  slivers: <Widget>[
-                    SliverToBoxAdapter(child: SizedBox(height: 70)),
-                    PinnedHeaderSliver(child: SizedBox(height: 70)),
-                    SliverToBoxAdapter(child: SizedBox(height: 70)),
-                    PinnedHeaderSliver(child: SizedBox(height: 70)),
-                    SliverToBoxAdapter(child: SizedBox(height: 70)),
-                    PinnedHeaderSliver(child: SizedBox(height: 70)),
-                  ],
-                ),
-              ],
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Center(
+            child: SizedBox(
+              height: 201,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: const <Widget>[
+                  SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      SliverToBoxAdapter(child: SizedBox(height: 70)),
+                      PinnedHeaderSliver(child: SizedBox(height: 70)),
+                      SliverToBoxAdapter(child: SizedBox(height: 70)),
+                      PinnedHeaderSliver(child: SizedBox(height: 70)),
+                      SliverToBoxAdapter(child: SizedBox(height: 70)),
+                      PinnedHeaderSliver(child: SizedBox(height: 70)),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1131,25 +943,29 @@ void main() {
     addTearDown(controller.dispose);
     const centerKey = Key('center');
     await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
-          center: centerKey,
-          controller: controller,
-          slivers: const <Widget>[
-            SliverMainAxisGroup(
-              slivers: <Widget>[
-                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
-                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
-              ],
-            ),
-            SliverMainAxisGroup(
-              key: centerKey,
-              slivers: <Widget>[
-                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
-                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
-              ],
-            ),
-          ],
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CustomScrollView(
+            center: centerKey,
+            controller: controller,
+            slivers: const <Widget>[
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
+                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
+                ],
+              ),
+              SliverMainAxisGroup(
+                key: centerKey,
+                slivers: <Widget>[
+                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1193,29 +1009,33 @@ void main() {
       addTearDown(controller.dispose);
       final Key key = GlobalKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              height: 100,
-              child: CustomScrollView(
-                controller: controller,
-                slivers: <Widget>[
-                  SliverMainAxisGroup(
-                    slivers: <Widget>[
-                      const PinnedHeaderSliver(child: SizedBox(height: 20)),
-                      const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                      SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
-                    ],
-                  ),
-                  const SliverMainAxisGroup(
-                    slivers: <Widget>[
-                      PinnedHeaderSliver(child: SizedBox(height: 20)),
-                      SliverToBoxAdapter(child: SizedBox(height: 20)),
-                      SliverToBoxAdapter(child: SizedBox(height: 60)),
-                    ],
-                  ),
-                ],
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                height: 100,
+                child: CustomScrollView(
+                  controller: controller,
+                  slivers: <Widget>[
+                    SliverMainAxisGroup(
+                      slivers: <Widget>[
+                        const PinnedHeaderSliver(child: SizedBox(height: 20)),
+                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                        SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
+                      ],
+                    ),
+                    const SliverMainAxisGroup(
+                      slivers: <Widget>[
+                        PinnedHeaderSliver(child: SizedBox(height: 20)),
+                        SliverToBoxAdapter(child: SizedBox(height: 20)),
+                        SliverToBoxAdapter(child: SizedBox(height: 60)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1365,107 +1185,6 @@ void main() {
       expectedLocalPosition: const Offset(15, 5),
     );
   });
-  testWidgets(
-    'With SliverList can handle inaccurate scroll offset due to changes in children list',
-    (WidgetTester tester) async {
-      var skip = true;
-      Widget buildItem(BuildContext context, int index) {
-        return !skip || index.isEven
-            ? Card(
-                child: TestListTile(
-                  title: Text('item$index', style: const TextStyle(fontSize: 80)),
-                ),
-              )
-            : Container();
-      }
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            body: CustomScrollView(
-              slivers: <Widget>[
-                SliverMainAxisGroup(
-                  slivers: <Widget>[
-                    SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      // Only even items 0~12 are on the screen.
-      for (var index = 0; index <= 12; index++) {
-        expect(find.text('item$index'), index.isEven ? findsOneWidget : findsNothing);
-      }
-      expect(find.text('item12'), findsOneWidget);
-      expect(find.text('item14'), findsNothing);
-
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -750.0));
-      await tester.pump();
-      // Only even items 16~28 are on the screen.
-      expect(find.text('item15'), findsNothing);
-      expect(find.text('item16'), findsOneWidget);
-      expect(find.text('item28'), findsOneWidget);
-
-      skip = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CustomScrollView(
-              slivers: <Widget>[
-                SliverMainAxisGroup(
-                  slivers: <Widget>[
-                    SliverList(delegate: SliverChildBuilderDelegate(buildItem, childCount: 30)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // Only items 12~19 are on the screen.
-      expect(find.text('item11'), findsNothing);
-      expect(find.text('item12'), findsOneWidget);
-      expect(find.text('item19'), findsOneWidget);
-      expect(find.text('item20'), findsNothing);
-
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
-      await tester.pump();
-
-      // Only items 10~16 are on the screen.
-      expect(find.text('item9'), findsNothing);
-      expect(find.text('item10'), findsOneWidget);
-      expect(find.text('item16'), findsOneWidget);
-      expect(find.text('item17'), findsNothing);
-
-      // The inaccurate scroll offset should reach zero at this point
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
-      await tester.pump();
-
-      // Only items 7~13 are on the screen.
-      expect(find.text('item6'), findsNothing);
-      expect(find.text('item7'), findsOneWidget);
-      expect(find.text('item13'), findsOneWidget);
-      expect(find.text('item14'), findsNothing);
-
-      // It will be corrected as we scroll, so we have to drag multiple times.
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
-      await tester.pump();
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
-      await tester.pump();
-      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, 250.0));
-      await tester.pump();
-
-      // Only items 0~6 are on the screen.
-      expect(find.text('item0'), findsOneWidget);
-      expect(find.text('item6'), findsOneWidget);
-      expect(find.text('item7'), findsNothing);
-    },
-  );
-
   testWidgets('SliverMainAxisGroup ensure semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -1475,11 +1194,9 @@ void main() {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               },
               childCount: 50,
@@ -1627,9 +1344,10 @@ Widget _buildSliverMainAxisGroup({
   List<Widget> otherSlivers = const <Widget>[],
   List<Widget> precedingSlivers = const <Widget>[],
 }) {
-  return MaterialApp(
-    home: Directionality(
-      textDirection: TextDirection.ltr,
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: const MediaQueryData(),
       child: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
