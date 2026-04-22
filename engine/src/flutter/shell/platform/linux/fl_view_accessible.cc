@@ -8,6 +8,7 @@ extern "C" {
 #include <atk/atk.h>
 }
 
+#include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_accessible_text_field.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
@@ -22,6 +23,8 @@ struct _FlViewAccessible {
   GWeakRef engine;
 
   FlutterViewId view_id;
+
+  FlAccessibilitySemanticsStore* semantics_store;
 
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
@@ -41,17 +44,17 @@ typedef enum {
 } FlAtkLive;
 
 static FlAccessibleNode* create_node(FlViewAccessible* self,
-                                     FlutterSemanticsNode2* semantics) {
+                                     const FlAccessibilitySemanticsNode* node) {
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
   if (engine == nullptr) {
     return nullptr;
   }
 
-  if (semantics->flags2->is_text_field) {
-    return fl_accessible_text_field_new(engine, self->view_id, semantics->id);
+  if (node->flags.is_text_field) {
+    return fl_accessible_text_field_new(engine, self->view_id, node->id);
   }
 
-  return fl_accessible_node_new(engine, self->view_id, semantics->id);
+  return fl_accessible_node_new(engine, self->view_id, node->id);
 }
 
 static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {
@@ -61,8 +64,9 @@ static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {
 
 // Gets the ATK node for the given id.
 // If the node doesn't exist it will be created.
-static FlAccessibleNode* get_node(FlViewAccessible* self,
-                                  FlutterSemanticsNode2* semantics) {
+static FlAccessibleNode* get_node(
+    FlViewAccessible* self,
+    const FlAccessibilitySemanticsNode* semantics) {
   FlAccessibleNode* node = lookup_node(self, semantics->id);
   if (node != nullptr) {
     return node;
@@ -124,6 +128,7 @@ static AtkStateSet* fl_view_accessible_ref_state_set(AtkObject* accessible) {
 static void fl_view_accessible_dispose(GObject* object) {
   FlViewAccessible* self = FL_VIEW_ACCESSIBLE(object);
 
+  g_clear_object(&self->semantics_store);
   g_clear_pointer(&self->semantics_nodes_by_id, g_hash_table_unref);
 
   g_weak_ref_clear(&self->engine);
@@ -151,6 +156,7 @@ FlViewAccessible* fl_view_accessible_new(FlEngine* engine,
       FL_VIEW_ACCESSIBLE(g_object_new(fl_view_accessible_get_type(), nullptr));
   g_weak_ref_init(&self->engine, engine);
   self->view_id = view_id;
+  self->semantics_store = fl_accessibility_semantics_store_new(view_id);
   return self;
 }
 
@@ -159,14 +165,23 @@ void fl_view_accessible_handle_update_semantics(
     const FlutterSemanticsUpdate2* update) {
   g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
 
+  fl_accessibility_semantics_store_handle_update(self->semantics_store, update);
+
   g_autoptr(GHashTable) pending_children =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             reinterpret_cast<GDestroyNotify>(fl_value_unref));
   for (size_t i = 0; i < update->node_count; i++) {
-    FlutterSemanticsNode2* node = update->nodes[i];
+    FlutterSemanticsNode2* update_node = update->nodes[i];
+    const FlAccessibilitySemanticsNode* node =
+        fl_accessibility_semantics_store_lookup_node(self->semantics_store,
+                                                     update_node->id);
+    if (node == nullptr) {
+      continue;
+    }
+
     FlAccessibleNode* atk_node = get_node(self, node);
 
-    fl_accessible_node_set_flags(atk_node, node->flags2);
+    fl_accessible_node_set_flags(atk_node, &node->flags);
     fl_accessible_node_set_actions(atk_node, node->actions);
     fl_accessible_node_set_name(atk_node, node->label);
     fl_accessible_node_set_extents(

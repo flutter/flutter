@@ -9,6 +9,7 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_channel.h"
+#include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
 
 G_BEGIN_DECLS
 
@@ -30,6 +31,9 @@ void fl_accessibility_bridge_gtk4_send_announcement(
     const char* message,
     FlTextDirection text_direction,
     FlAssertiveness assertiveness);
+
+FlAccessibilitySemanticsStore* fl_accessibility_bridge_gtk4_get_semantics_store(
+    FlAccessibilityBridgeGtk4* self);
 
 G_END_DECLS
 

@@ -96,6 +96,7 @@ if (use_gtk4) {
 source_set("flutter_linux_sources") {
   public = _public_headers + [
              "fl_accessibility_bridge_gtk4.h",
+             "fl_accessibility_semantics_store.h",
              "fl_binary_messenger_private.h",
              "fl_engine_private.h",
              "fl_gtk.h",
@@ -125,6 +126,7 @@ source_set("flutter_linux_sources") {
   sources = [
     "fl_accessibility_channel.cc",
     "fl_accessibility_handler.cc",
+    "fl_accessibility_semantics_store.cc",
     "fl_application.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
@@ -250,6 +252,7 @@ if (!use_gtk4) {
 
     sources = [
       "fl_accessibility_handler_test.cc",
+      "fl_accessibility_semantics_store_test.cc",
       "fl_accessible_node_test.cc",
       "fl_accessible_text_field_test.cc",
       "fl_application_test.cc",
