@@ -5,6 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Future<void> tapOutside(WidgetTester tester) async {
+  // Find the RenderBox of the top-most Scaffold and tap outside any region.
+  final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
+  final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
+
+  await tester.tapAt(outsidePoint);
+  await tester.pump();
+}
+
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/153093.
   testWidgets('TapRegion onTapOutside should only trigger on the current route during navigation', (
@@ -34,15 +43,6 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
-      // Find the RenderBox of the region.
-      final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
-      final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
-
-      await tester.tapAt(outsidePoint);
-      await tester.pump();
-    }
-
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -65,7 +65,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside the first TapRegion to trigger onTapOutside.
-    await tapOutside(tester, find.byKey(tapRegion1Key));
+    await tapOutside(tester);
     expect(count1, 1);
     expect(count2, 0);
 
@@ -73,7 +73,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside the second TapRegion to trigger onTapOutside
-    await tapOutside(tester, find.byKey(tapRegion2Key));
+    await tapOutside(tester);
     expect(count1, 2); // When the Fab is pressed, the first TapRegion is still active.
     expect(count2, 1);
 
@@ -82,7 +82,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside the first TapRegion to trigger onTapOutside
-    await tapOutside(tester, find.byKey(tapRegion1Key));
+    await tapOutside(tester);
     expect(count1, 3);
     expect(count2, 1);
   });
@@ -115,15 +115,6 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
-      // Find the RenderBox of the region.
-      final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
-      final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
-
-      await tester.tapAt(outsidePoint);
-      await tester.pump();
-    }
-
     await tester.pumpWidget(
       MaterialApp(
         initialRoute: '/',
@@ -148,7 +139,7 @@ void main() {
 
     // At this point, tapRegion2 is on top of tapRegion1.
     // Tap outside tapRegion2.
-    await tapOutside(tester, find.byKey(tapRegion2Key));
+    await tapOutside(tester);
     expect(count1, 0); // tapRegion1 should not respond.
     expect(count2, 1); // tapRegion2 should respond.
 
@@ -157,7 +148,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside tapRegion1.
-    await tapOutside(tester, find.byKey(tapRegion1Key));
+    await tapOutside(tester);
     expect(count1, 1); // tapRegion1 should respond.
     expect(count2, 1); // tapRegion2 should not respond anymore.
   });
