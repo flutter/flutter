@@ -1238,7 +1238,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }
 
   @override
-  Future<List<String>> xcodebuildProjectCommand(
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     String projectPath,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,

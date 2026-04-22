@@ -231,11 +231,11 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  Future<List<String>> xcodebuildProjectCommand(
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     String projectPath,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
-  }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
+  }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
     projectPath,
     buildDirectory,
     skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
