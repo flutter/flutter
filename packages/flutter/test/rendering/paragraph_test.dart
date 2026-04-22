@@ -1525,7 +1525,7 @@ void main() {
       );
 
       expect(alphabetic, 7.5);
-      expect(ideographic, 10);
+      expect(ideographic, 10.0);
     });
 
     test('CJK text', () {
@@ -1543,7 +1543,7 @@ void main() {
       );
 
       expect(alphabetic, 7.5);
-      expect(ideographic, 10);
+      expect(ideographic, 10.0);
     });
 
     test('mixed text', () {
@@ -1561,7 +1561,7 @@ void main() {
       );
 
       expect(alphabetic, 7.5);
-      expect(ideographic, 10);
+      expect(ideographic, 10.0);
     });
   });
 
