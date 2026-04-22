@@ -1456,12 +1456,12 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       final int skipIndex = currentSelectionStartIndex == -1
           ? currentSelectionEndIndex
           : currentSelectionStartIndex;
-      selectables
-          .where((Selectable target) => target != selectables[skipIndex])
-          .forEach(
-            (Selectable target) =>
-                dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-          );
+      for (var i = 0; i < selectables.length; i++) {
+        if (i == skipIndex) {
+          continue;
+        }
+        dispatchSelectionEventToChild(selectables[i], const ClearSelectionEvent());
+      }
       return;
     }
     final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
