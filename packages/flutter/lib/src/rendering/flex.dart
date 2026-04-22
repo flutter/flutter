@@ -942,7 +942,7 @@ class RenderFlex extends RenderBox
 
     // If this Flex is baseline aligned, and the caller is asking for the same baseline
     // as the alignment baseline, then we can just return the baseline offset we calculated
-    // during layout.
+    // using _computeSizes.
     //
     // However, if the caller is asking for a different baseline (e.g. asking for
     // ideographic baseline on an alphabetic-aligned Row), we cannot use the cached
