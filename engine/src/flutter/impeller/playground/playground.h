@@ -55,6 +55,8 @@ class Playground {
 
   ISize GetWindowSize() const;
 
+  IRect GetWindowBounds() const;
+
   Point GetContentScale() const;
 
   /// @brief Get the amount of time elapsed from the start of the playground's

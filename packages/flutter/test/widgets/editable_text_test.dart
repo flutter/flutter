@@ -18497,6 +18497,70 @@ void main() {
       TargetPlatform.fuchsia,
     }),
   );
+
+  testWidgets(
+    'context menu reappears after a non-fling scroll that keeps selection in view while semantics are disabled',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/185052.
+      controller.text = 'Lorem ipsum dolor sit amet ' * 200;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Center(
+            child: EditableText(
+              maxLines: null,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: const Color(0xFF424242),
+              focusNode: focusNode,
+              selectionControls: testTextSelectionHandleControls,
+              contextMenuBuilder: (context, editableTextState) {
+                return const SizedBox.shrink();
+              },
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder editableText = find.byType(EditableText);
+      final EditableTextState editableTextState = tester.state<EditableTextState>(editableText);
+
+      // Long press at the center of the widget to select a word that is
+      // well within the viewport.
+      await tester.longPressAt(tester.getCenter(editableText));
+      await tester.pumpAndSettle();
+      expect(editableTextState.showToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+
+      // Perform a short scroll that keeps the selection in view.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(editableText));
+      await gesture.moveBy(const Offset(0.0, -20.0));
+      await tester.pump();
+
+      // The toolbar should be hidden during the scroll.
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, false);
+
+      // Release the gesture / end the scroll.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The toolbar should re-appear since the selection is still in view.
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+    },
+    // semanticsEnabled is set to false to match on-device behavior. With
+    // semantics enabled (the testWidgets default), setIgnorePointer during
+    // scroll activity transitions calls markNeedsSemanticsUpdate which
+    // schedules a frame as a side effect, masking the bug.
+    semanticsEnabled: false,
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }), // Only applies to platforms where the context menu hides on scroll.
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: kIsWeb,
+  );
 }
 
 class UnsettableController extends TextEditingController {

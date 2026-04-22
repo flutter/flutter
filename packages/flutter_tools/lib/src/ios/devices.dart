@@ -1077,6 +1077,7 @@ class IOSDevice extends Device {
         bundleId: package.id,
         launchArguments: launchArguments,
         shutdownHooks: globals.shutdownHooks,
+        mode: debuggingOptions.buildInfo.mode,
       );
 
       // If it succeeds to launch with LLDB, return, otherwise continue on to
