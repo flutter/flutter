@@ -230,9 +230,6 @@ vec2 strokedSDF(vec2 p) {
   // Stroke width is clamped to be at least the base sdf's pixel size.
   float half_stroke = max(frag_info.stroke_width, base_pixel_size) * 0.5;
 
-  // The value of the stroked SDF.
-  float sdf;
-
   // Some cases need special handling because their stroked SDFs have a
   // different shape from their base SDFs.
   if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
@@ -242,7 +239,8 @@ vec2 strokedSDF(vec2 p) {
       float outer = distanceFromRect(p, frag_info.size + half_stroke);
       // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
-      sdf = max(outer, -inner);
+      float sdf = max(outer, -inner);
+      return vec2(sdf, pixelSize(sdf));
     } else if (frag_info.stroke_join < 1.5) {  // Bevel
       // Outer edge is the SDF for a rect with size expanded by half_stroke,
       // with a half_stroke chamfer.
@@ -250,19 +248,20 @@ vec2 strokedSDF(vec2 p) {
           distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
       // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
-      sdf = max(outer, -inner);
-    } else {  // Round
-      // Same as the common case below.
-      sdf = abs(base_sdf) - half_stroke;
-    }
-  } else {
-    // For most shapes, the stroked SDF is defined by the +/- half_stroke
-    // isolines of the base SDF. See the "Making shapes annular" section in
-    // https://iquilezles.org/articles/distfunctions2d/.
-    sdf = abs(base_sdf) - half_stroke;
+      float sdf = max(outer, -inner);
+      return vec2(sdf, pixelSize(sdf));
+    }  // else stroke_join is Round. Fall through to the common case.
   }
 
-  return vec2(sdf, pixelSize(sdf));
+  // For most shapes, the stroked SDF is defined by the +/- half_stroke
+  // isolines of the base SDF. See the "Making shapes annular" section in
+  // https://iquilezles.org/articles/distfunctions2d/.
+  float sdf = abs(base_sdf) - half_stroke;
+  // For these shapes, the stroked pixel size is the same as the base pixel
+  // size. This is because the stroked SDF's gradient has the same magnitudes as
+  // the base SDF's gradient (except for a discontinuity at the center of the
+  // stroke, which does not affect the final render).
+  return vec2(sdf, base_pixel_size);
 }
 
 void main() {
