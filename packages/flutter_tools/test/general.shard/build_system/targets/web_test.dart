@@ -376,7 +376,7 @@ _flutter.loader.load();
         const JsCompilerConfig(),
       ], const NoOpAnalytics()).build(environment);
 
-      final List<dynamic> fontManifest =
+      final fontManifest =
           jsonDecode(
                 environment.outputDir
                     .childDirectory('assets')

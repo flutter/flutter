@@ -704,7 +704,7 @@ class WebReleaseBundle extends Target {
     final File fontManifestFile = environment.outputDir
         .childDirectory('assets')
         .childFile(_kFontManifestJsonFile);
-    final List<Object?> manifestJson = fontManifestFile.existsSync()
+    final manifestJson = fontManifestFile.existsSync()
         ? (jsonDecode(fontManifestFile.readAsStringSync()) as List<Object?>)
         : <Object?>[];
 
