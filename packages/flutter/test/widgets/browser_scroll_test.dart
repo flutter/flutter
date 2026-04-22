@@ -1016,4 +1016,96 @@ void main() {
       expect(innerPos.pixels, closeTo(100.0, 1.0));
     });
   });
+
+  group('ScrollableState browser-scroll – slot reclamation', () {
+    testWidgets('second BrowserScrollable reclaims the slot when the first is disposed', (
+      tester,
+    ) async {
+      // Two BrowserScrollables mounted simultaneously simulates the overlap
+      // during a Navigator push: route A still mounted while route B mounts.
+      // Only one owns the slot at a time; this test verifies the rejected
+      // scrollable reclaims when the owner disposes.
+      final firstController = ScrollController();
+      addTearDown(firstController.dispose);
+      final secondController = ScrollController();
+      addTearDown(secondController.dispose);
+
+      Widget buildStack({required bool includeFirst}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: Stack(
+              children: <Widget>[
+                if (includeFirst)
+                  SizedBox(
+                    height: 600,
+                    child: BrowserScrollable(
+                      child: ListView.builder(
+                        controller: firstController,
+                        itemCount: 20,
+                        itemBuilder: (context, index) =>
+                            SizedBox(height: 200.0, child: Text('A $index')),
+                      ),
+                    ),
+                  ),
+                SizedBox(
+                  height: 600,
+                  child: BrowserScrollable(
+                    child: ListView.builder(
+                      controller: secondController,
+                      itemCount: 20,
+                      itemBuilder: (context, index) =>
+                          SizedBox(height: 200.0, child: Text('B $index')),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildStack(includeFirst: true));
+      await tester.pump();
+
+      // Before the first is disposed, the binding belongs to the first
+      // scrollable. Drive it via its controller and see the browser path fire.
+      _clearCalls();
+      firstController.jumpTo(150);
+      await tester.pump();
+      expect(
+        _callsOf('browserScrollTo'),
+        isNotEmpty,
+        reason: 'First scrollable owns the slot and should delegate to the browser',
+      );
+
+      // Second scrollable is rejected: driving it does NOT hit the browser
+      // path because it never claimed the binding.
+      _clearCalls();
+      secondController.jumpTo(150);
+      await tester.pump();
+      expect(
+        _callsOf('browserScrollTo'),
+        isEmpty,
+        reason: 'Second scrollable was rejected and must not drive the shared binding',
+      );
+
+      // Dispose the first scrollable. The second should reclaim.
+      await tester.pumpWidget(buildStack(includeFirst: false));
+      await tester.pump();
+
+      _clearCalls();
+      secondController.jumpTo(200);
+      await tester.pump();
+      expect(
+        _callsOf('browserScrollTo'),
+        isNotEmpty,
+        reason:
+            'After the first scrollable disposes, the second must reclaim '
+            'the slot and delegate to the browser. Otherwise Navigator '
+            'push leaves the top route stuck on Dart-driven physics.',
+      );
+    });
+  });
 }

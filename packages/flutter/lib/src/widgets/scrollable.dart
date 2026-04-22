@@ -629,6 +629,14 @@ class ScrollableState extends State<Scrollable>
   /// scrolling is active.
   static BrowserScrollViewBinding? browserScrollViewBinding;
 
+  // Ticks each time the slot frees so scrollables that were rejected can
+  // retry. Common case: Navigator push keeps route A mounted while route B
+  // mounts; B is rejected because A owns the slot. When A is later popped
+  // and disposed, the tick lets B claim without needing an external trigger.
+  static final ValueNotifier<int> _slotVersion = ValueNotifier<int>(0);
+
+  VoidCallback? _pendingSlotClaim;
+
   /// Grows the browser scroll placeholder to at least [target] so a
   /// subsequent programmatic scroll is not clamped by the "revealed
   /// content" strategy.
@@ -657,8 +665,20 @@ class ScrollableState extends State<Scrollable>
       // scrollables that inherit enableBrowserScrolling from their ancestor
       // ScrollConfiguration are silently skipped.
       if (_activeBrowserScrollInstance != null && _activeBrowserScrollInstance != this) {
+        // Wait for the current owner to release the slot, then retry. Covers
+        // Navigator push where route A still owns the slot while route B
+        // mounts; when A disposes and bumps _slotVersion, B re-runs
+        // _setupBrowserScroll and claims.
+        final int rejectedAt = _slotVersion.value;
+        _pendingSlotClaim ??= () {
+          if (mounted && _slotVersion.value != rejectedAt) {
+            _setupBrowserScroll();
+          }
+        };
+        _slotVersion.addListener(_pendingSlotClaim!);
         return;
       }
+      _cancelPendingSlotClaim();
       _activeBrowserScrollInstance = this;
       browserScrollViewBinding = _viewBinding;
       _browserScrollActive = true;
@@ -669,6 +689,13 @@ class ScrollableState extends State<Scrollable>
       }
     } else if (!shouldBeActive && _browserScrollActive) {
       _teardownBrowserScroll();
+    }
+  }
+
+  void _cancelPendingSlotClaim() {
+    if (_pendingSlotClaim != null) {
+      _slotVersion.removeListener(_pendingSlotClaim!);
+      _pendingSlotClaim = null;
     }
   }
 
@@ -685,6 +712,7 @@ class ScrollableState extends State<Scrollable>
     if (_activeBrowserScrollInstance == this) {
       _activeBrowserScrollInstance = null;
       browserScrollViewBinding = null;
+      _slotVersion.value = _slotVersion.value + 1;
     }
     _maxReachedPixels = 0;
     _reachedBottom = false;
@@ -930,6 +958,7 @@ class ScrollableState extends State<Scrollable>
   @protected
   @override
   void dispose() {
+    _cancelPendingSlotClaim();
     _teardownBrowserScroll();
     if (widget.controller != null) {
       widget.controller!.detach(position);
