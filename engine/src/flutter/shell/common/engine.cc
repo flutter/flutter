@@ -476,6 +476,14 @@ void Engine::DispatchPointerDataPacket(
   pointer_data_dispatcher_->DispatchPacket(std::move(packet), trace_flow_id);
 }
 
+HitTestResponse Engine::HitTest(int64_t view_id,
+                                const flutter::PointData offset) {
+  if (runtime_controller_) {
+    return runtime_controller_->HitTest(view_id, offset);
+  }
+  return {.has_platform_view = false};
+}
+
 void Engine::DispatchSemanticsAction(int64_t view_id,
                                      int node_id,
                                      SemanticsAction action,

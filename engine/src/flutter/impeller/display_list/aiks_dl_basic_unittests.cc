@@ -951,12 +951,12 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   int short_radius = 600;
   while (long_radius > 0 && short_radius > 0) {
     paint.setColor(colors[(c_index++) % color_count]);
-    builder.DrawOval(DlRect::MakeXYWH(10 - long_radius, 10 - short_radius,
-                                      long_radius * 2, short_radius * 2),
-                     paint);
-    builder.DrawOval(DlRect::MakeXYWH(1000 - short_radius, 750 - long_radius,
-                                      short_radius * 2, long_radius * 2),
-                     paint);
+    builder.DrawOval(
+        DlRect::MakeEllipseBounds({10, 10}, Size(long_radius, short_radius)),
+        paint);
+    builder.DrawOval(
+        DlRect::MakeEllipseBounds({1000, 750}, Size(short_radius, long_radius)),
+        paint);
     if (short_radius > 30) {
       short_radius -= 10;
       long_radius -= 5;
