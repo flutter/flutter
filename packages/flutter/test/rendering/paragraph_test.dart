@@ -1520,7 +1520,9 @@ void main() {
       layout(paragraph);
 
       final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+      final double ideographic = paragraph.computeDistanceToActualBaseline(
+        TextBaseline.ideographic,
+      );
 
       expect(alphabetic, 7.5);
       expect(ideographic, 10);
@@ -1536,7 +1538,9 @@ void main() {
       layout(paragraph);
 
       final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+      final double ideographic = paragraph.computeDistanceToActualBaseline(
+        TextBaseline.ideographic,
+      );
 
       expect(alphabetic, 7.5);
       expect(ideographic, 10);
@@ -1552,7 +1556,9 @@ void main() {
       layout(paragraph);
 
       final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
+      final double ideographic = paragraph.computeDistanceToActualBaseline(
+        TextBaseline.ideographic,
+      );
 
       expect(alphabetic, 7.5);
       expect(ideographic, 10);
