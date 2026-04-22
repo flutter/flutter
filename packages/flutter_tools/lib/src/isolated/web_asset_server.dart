@@ -608,7 +608,7 @@ class WebAssetServer implements AssetReader {
   final Logger logger;
 
   String get _buildConfigString {
-    final Map<String, String> wasmHashes = <String, String>{};
+    final wasmHashes = <String, String>{};
     for (final String path in _webMemoryFS.files.keys) {
       if (path.endsWith('.wasm')) {
         wasmHashes[path] = crypto.sha256.convert(_webMemoryFS.files[path]!).toString();
