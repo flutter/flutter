@@ -86,19 +86,19 @@ struct UberSDFParameters {
   /// Only used if type is kRoundedRect.
   RoundingRadii radii;
 
-  // The degree of a RoundSuperellipse.
+  /// The degree of a RoundSuperellipse.
   Scalar superellipse_n;
 
-  // The radius of the circular arcs of a RoundSuperellipse.
+  /// The radius of the circular arcs of a RoundSuperellipse.
   Scalar corner_radius;
 
-  // The angle at which the circular arc starts in a RoundSuperellipse
+  /// The angle at which the circular arc starts in a RoundSuperellipse
   Scalar corner_angle_start;
 
-  // The span of the circular arc in a RoundSuperellipse
+  /// The span of the circular arc in a RoundSuperellipse
   Scalar corner_angle_span;
 
-  // The center of the circular arc in a RoundSuperellipse
+  /// The center of the circular arc in a RoundSuperellipse
   Point corner_circle_center;
 };
 

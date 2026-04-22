@@ -109,21 +109,25 @@ float distanceFromRoundSuperellipse(vec2 p,
     p = p.yx;
   }
 
+  // Move the point to the corner circle's coordinate system.
   vec2 p_remap = p - circle_center;
+
+  // Grab the angle offset of the point.
   float theta = atan(p_remap.y, p_remap.x);
 
-  float d_theta = theta - angle_start;
   float pi = 3.14159265;
+
+  // The angular distance between the point and the start of the circular arc.
+  float d_theta = theta - angle_start;
   d_theta = mod(d_theta + pi, 2.0 * pi) - pi;
 
-  float d_norm;
+  // If the point is within the span of the corner circle's arc,
+  // use a circle SDF.
   if (abs(d_theta) < abs(angle_span)) {
-    d_norm = distanceFromCircle(p - circle_center, radius);
-  } else {
-    d_norm = sdSuperellipse(p / ab, n) * ab.x;
+    return distanceFromCircle(p - circle_center, radius);
   }
 
-  return d_norm;
+  return sdSuperellipse(p / ab, n) * ab.x;
 }
 
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
