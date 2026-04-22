@@ -1205,6 +1205,18 @@ end''');
               ..createSync()
               ..writeAsStringSync('Existing Podfile');
 
+            cocoaPodsUnderTest = CocoaPods(
+              fileSystem: fileSystem,
+              processManager: fakeProcessManager,
+              logger: logger,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+                processManager: fakeProcessManager,
+              ),
+              analytics: fakeAnalytics,
+              currentAbi: Abi.macosArm64,
+            );
+
             fakeProcessManager.addCommands(<FakeCommand>[
               FakeCommand(
                 command: const <String>['pod', 'install', '--verbose'],
