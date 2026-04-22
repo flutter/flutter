@@ -12,8 +12,8 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../macos/application_package.dart';
 import '../project.dart';
+import 'application_package.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
 
