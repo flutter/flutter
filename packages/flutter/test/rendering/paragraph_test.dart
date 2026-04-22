@@ -1532,7 +1532,7 @@ void main() {
       // Verify that the ideographic baseline is correctly calculated based on
       // CJK font metrics.
       final paragraph = RenderParagraph(
-        const TextSpan(text: 'こんにちは', style: TextStyle(fontSize: 10.0)),
+        const TextSpan(text: '一二三', style: TextStyle(fontSize: 10.0)),
         textDirection: TextDirection.ltr,
       );
       layout(paragraph);
@@ -1550,7 +1550,7 @@ void main() {
       // Verify that the baseline calculation correctly handles mixed fonts,
       // extending the metrics to cover both.
       final paragraph = RenderParagraph(
-        const TextSpan(text: 'Hello world こんにちは', style: TextStyle(fontSize: 10.0)),
+        const TextSpan(text: 'Hello world 一二三', style: TextStyle(fontSize: 10.0)),
         textDirection: TextDirection.ltr,
       );
       layout(paragraph);
