@@ -1042,8 +1042,9 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value() &&
-      // SDF RoundSuperellipse (RSE) only works for square-like RSEs with
-      // circular corners.
+      // TODO(https://github.com/flutter/flutter/issues/185421): SDF
+      // RoundSuperellipse (RSE) only works for square-like RSEs with circular
+      // corners.
       round_superellipse.GetBounds().IsSquare() &&
       round_superellipse.GetRadii().AreAllCornersSame() &&
       AreCornersCircular(round_superellipse.GetRadii())) {
