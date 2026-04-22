@@ -23,13 +23,13 @@ GeometryResult UberSDFGeometry::GetPositionBuffer(
   // For future performance enhancements (if the fill rate is a limiting factor)
   // this can be optimized to use a tighter geometry for specific shapes. E.g.
   // Using a tighter polygon, or cutting out the interior for stroked shapes.
-  FillRectGeometry frg(GetLocalSpaceCoverage(entity.GetTransform()));
+  FillRectGeometry frg(GetExpandedBounds(entity.GetTransform()));
   return frg.GetPositionBuffer(renderer, entity, pass);
 }
 
 std::optional<Rect> UberSDFGeometry::GetCoverage(
     const Matrix& transform) const {
-  return GetLocalSpaceCoverage(transform).TransformAndClipBounds(transform);
+  return GetExpandedBounds(transform).TransformAndClipBounds(transform);
 }
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
@@ -37,14 +37,13 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
   if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
       transform.IsTranslationScaleOnly()) {
     // The SDF is a filled axis-aligned rectangle. It covers the input rect if
-    // the SDF's transformed coverage rect covers the input rect, subtracting
+    // the SDF's transformed bounds rect covers the input rect, subtracting
     // the AA padding from the SDF rect.
-    return GetLocalSpaceCoverage(transform)
+    return GetExpandedBounds(transform)
         .TransformAndClipBounds(transform)
         // Subtract twice the AA padding. This subtracts the AA padding added
-        // by GetLocalSpaceCoverage, and also insets the quad by another AA
-        // padding amount to account for AA fading into the interior of the
-        // shape.
+        // by GetExpandedBounds, and also insets the quad by another AA padding
+        // amount to account for AA fading into the interior of the shape.
         .Expand(-2.0f * UberSDFParameters::kAntialiasPixels)
         .Contains(rect);
   }
@@ -58,7 +57,7 @@ bool UberSDFGeometry::IsAxisAlignedRect() const {
   return (params_.type == UberSDFParameters::Type::kRect && !params_.stroke);
 }
 
-Rect UberSDFGeometry::GetLocalSpaceCoverage(const Matrix& transform) const {
+Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
   // Get the scaling factor of the transform in the X and Y directions.
   Vector2 transform_scaling = transform.GetBasisScaleXY();
 

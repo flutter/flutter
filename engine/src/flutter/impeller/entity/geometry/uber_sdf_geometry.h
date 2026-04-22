@@ -38,13 +38,13 @@ class UberSDFGeometry final : public Geometry {
  private:
   UberSDFParameters params_;
 
-  // Returns the coverage rectangle of the SDF, expanded to account for stroke
+  // Returns the bounds rectangle of the SDF, expanded to account for stroke
   // width and AA.
   //
   // The `transform` argument is used to determine the exact stroke width and AA
   // padding to apply. But the returned rectangle is in local space;
-  // `transform` is not applied to the returned coverage rectangle.
-  Rect GetLocalSpaceCoverage(const Matrix& transform) const;
+  // `transform` is not applied to the returned bounds rectangle.
+  Rect GetExpandedBounds(const Matrix& transform) const;
 };
 
 }  // namespace impeller
