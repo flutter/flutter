@@ -5029,7 +5029,6 @@ class SemanticsOwner extends ChangeNotifier {
           if (traversalChildren != null) {
             for (final SemanticsNode child in traversalChildren) {
               if (child.attached && !child._dirty && !updatedVisitedNodes.contains(child)) {
-                child._dirty = true;
                 additionalNodes.add(child);
               }
             }
