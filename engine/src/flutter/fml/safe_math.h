@@ -14,7 +14,7 @@ namespace fml {
 // Based on Skia's SkSafeMath.
 class SafeMath {
  public:
-  bool overflow_detected() { return overflow_detected_; }
+  bool overflow_detected() const { return overflow_detected_; }
 
   size_t mul(size_t x, size_t y);
 
