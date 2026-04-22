@@ -79,7 +79,7 @@ class DarwinDependencyManagement {
       // Start the SwiftPM dependency resolution in the background.
       await _xcodeProjectInterpreter?.prefetchSwiftPackages(
         xcodeProject.hostAppRoot.path,
-        waitForCompletion: false,
+        waitForCompletion: true,
         buildDirectory: _fileSystem.directory(
           platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
