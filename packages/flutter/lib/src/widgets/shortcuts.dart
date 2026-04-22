@@ -88,10 +88,7 @@ class KeySet<T extends KeyboardKey> {
   /// Do not mutate the `keys` set after passing it to this object.
   ///
   /// The `keys` set must not be empty.
-  KeySet.fromSet(Set<T> keys)
-    : assert(keys.isNotEmpty),
-      assert(!keys.contains(null)),
-      _keys = HashSet<T>.of(keys);
+  KeySet.fromSet(Set<T> keys) : assert(keys.isNotEmpty), _keys = HashSet<T>.of(keys);
 
   /// Returns a copy of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => _keys.toSet();
