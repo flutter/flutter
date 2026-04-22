@@ -79,12 +79,36 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
     });
 
     testWithoutContext('newly added code executes during hot reload', () async {
-      await testAddedCodeHotReload(
-        flutter: flutter,
-        project: project,
+      final stdout = StringBuffer();
+      final sawTick1 = Completer<void>();
+      final sawTick2 = Completer<void>();
+      final StreamSubscription<String> subscription = flutter.stdout.listen((String e) {
+        stdout.writeln(e);
+        // Initial run should run the build method before we try and hot reload.
+        if (e.contains('(((TICK 1)))')) {
+          sawTick1.complete();
+        }
+        // If hot reload properly executes newly added code, the 'RELOAD WORKED' message should
+        // be printed before 'TICK 2'. If we don't wait for some signal that the build method
+        // has executed after the reload, this test can encounter a race.
+        if (e.contains('((((TICK 2))))')) {
+          sawTick2.complete();
+        }
+      });
+      await runFlutterWithDevice(
+        flutter,
         chrome: chrome,
         additionalCommandArgs: additionalCommandArgs,
       );
+      await sawTick1.future;
+      project.uncommentHotReloadPrint();
+      try {
+        await flutter.hotReload();
+        await sawTick2.future;
+        expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
+      } finally {
+        await subscription.cancel();
+      }
     });
 
     testWithoutContext('hot restart works without error', () async {
@@ -231,40 +255,6 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       skip: chrome,
     );
   });
-}
-
-Future<void> testAddedCodeHotReload({
-  required FlutterRunTestDriver flutter,
-  required HotReloadProject project,
-  required bool chrome,
-  required List<String> additionalCommandArgs,
-}) async {
-  final stdout = StringBuffer();
-  final sawTick1 = Completer<void>();
-  final sawTick2 = Completer<void>();
-  final StreamSubscription<String> subscription = flutter.stdout.listen((String e) {
-    stdout.writeln(e);
-    // Initial run should run the build method before we try and hot reload.
-    if (e.contains('(((TICK 1)))')) {
-      sawTick1.complete();
-    }
-    // If hot reload properly executes newly added code, the 'RELOAD WORKED' message should
-    // be printed before 'TICK 2'. If we don't wait for some signal that the build method
-    // has executed after the reload, this test can encounter a race.
-    if (e.contains('((((TICK 2))))')) {
-      sawTick2.complete();
-    }
-  });
-  await runFlutterWithDevice(flutter, chrome: chrome, additionalCommandArgs: additionalCommandArgs);
-  await sawTick1.future;
-  project.uncommentHotReloadPrint();
-  try {
-    await flutter.hotReload();
-    await sawTick2.future;
-    expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
-  } finally {
-    await subscription.cancel();
-  }
 }
 
 bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {

@@ -116,7 +116,10 @@ class WebAssetServer implements AssetReader {
     }
   }
 
-  static const _reloadedSourcesFileName = 'reloaded_sources.json';
+  // Use relative path for the URI so the app can still find it even if it's in
+  // a different domain than the server.
+  @visibleForTesting
+  static Uri reloadedSourcesUri = Uri.parse('reloaded_sources.json');
 
   /// Given a list of [modulePaths] that need to be reloaded during a hot
   /// restart or hot reload, writes a file that contains a list of objects each
@@ -159,7 +162,7 @@ class WebAssetServer implements AssetReader {
         'libraries': libraries,
       });
     }
-    writeFile(_reloadedSourcesFileName, json.encode(moduleToLibrary));
+    writeFile(reloadedSourcesUri.path, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -360,9 +363,7 @@ class WebAssetServer implements AssetReader {
                   canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                // Use relative path for the URI so the app can still find it
-                // even if it's in a different domain than the server.
-                reloadedSourcesUri: Uri.parse(_reloadedSourcesFileName),
+                reloadedSourcesUri: reloadedSourcesUri,
               ).strategy
             : FrontendServerRequireStrategyProvider(
                 ReloadConfiguration.none,
