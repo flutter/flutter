@@ -205,6 +205,7 @@ FLUTTER_ASSERT_ARC
       });
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  self.appDelegate.hasBeenActive = YES;
   BOOL result = [self.appDelegate
                application:[UIApplication sharedApplication]
       continueUserActivity:userActivity
@@ -212,6 +213,62 @@ FLUTTER_ASSERT_ARC
         }];
   XCTAssertTrue(result);
   OCMVerify([mockApplication openURL:[OCMArg any]
+                             options:[OCMArg any]
+                   completionHandler:[OCMArg any]]);
+}
+
+- (void)testWarmStartUniversalLinkRelaysToSystemWhenUnhandled {
+  OCMStub([self.mockMainBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"])
+      .andReturn(@YES);
+  NSUserActivity* userActivity = [[NSUserActivity alloc] initWithActivityType:@"com.example.test"];
+  userActivity.webpageURL = [NSURL URLWithString:@"http://myApp/custom/route?query=nonexist"];
+  OCMStub([self.engine sendDeepLinkToFramework:[OCMArg any] completionHandler:[OCMArg any]])
+      .andDo(^(NSInvocation* invocation) {
+        void (^handler)(BOOL success);
+        [invocation getArgument:&handler atIndex:3];
+        handler(NO);
+      });
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  // Simulate warm start: the app has been active before.
+  self.appDelegate.hasBeenActive = YES;
+
+  BOOL result = [self.appDelegate
+               application:[UIApplication sharedApplication]
+      continueUserActivity:userActivity
+        restorationHandler:^(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects){
+        }];
+  XCTAssertTrue(result);
+  OCMVerify([mockApplication openURL:[OCMArg any]
+                             options:[OCMArg any]
+                   completionHandler:[OCMArg any]]);
+}
+
+- (void)testColdStartUniversalLinkDoesNotRelayToSystem {
+  OCMStub([self.mockMainBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"])
+      .andReturn(@YES);
+  NSUserActivity* userActivity = [[NSUserActivity alloc] initWithActivityType:@"com.example.test"];
+  userActivity.webpageURL = [NSURL URLWithString:@"http://myApp/custom/route?query=nonexist"];
+  OCMStub([self.engine sendDeepLinkToFramework:[OCMArg any] completionHandler:[OCMArg any]])
+      .andDo(^(NSInvocation* invocation) {
+        void (^handler)(BOOL success);
+        [invocation getArgument:&handler atIndex:3];
+        handler(NO);
+      });
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  // Cold start: hasBeenActive defaults to NO, so don't set it.
+
+  BOOL result = [self.appDelegate
+               application:[UIApplication sharedApplication]
+      continueUserActivity:userActivity
+        restorationHandler:^(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects){
+        }];
+  XCTAssertTrue(result);
+  // openURL should NOT have been called on cold start.
+  OCMReject([mockApplication openURL:[OCMArg any]
                              options:[OCMArg any]
                    completionHandler:[OCMArg any]]);
 }

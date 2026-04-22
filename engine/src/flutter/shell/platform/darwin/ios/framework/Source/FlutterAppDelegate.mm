@@ -27,6 +27,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @property(nonatomic, strong) FlutterLaunchEngine* launchEngine;
+@property(nonatomic, assign) BOOL hasBeenActive;
 @end
 
 @implementation FlutterAppDelegate
@@ -82,6 +83,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
 
 // Do not remove, some clients may be calling these via `super`.
 - (void)applicationDidBecomeActive:(UIApplication*)application {
+  self.hasBeenActive = YES;
 }
 
 // Do not remove, some clients may be calling these via `super`.
@@ -224,7 +226,19 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
     return YES;
   }
 
-  return [self handleOpenURL:userActivity.webpageURL options:@{} relayToSystemIfUnhandled:YES];
+  // On cold start the Dart framework may not be ready to handle routes yet, so a "not handled"
+  // response does not mean the link is genuinely unsupported — it may just be too early. Only
+  // relay unhandled https links back to iOS (which opens Safari) once the app has been active.
+  //
+  // Trade-off: if the app genuinely can't handle the route on cold start (e.g., AASA claims
+  // paths the app doesn't support), the link is silently dropped instead of opening Safari.
+  // This is acceptable — it's an AASA misconfiguration, and bouncing the user to Safari on
+  // the app they just opened is a worse experience. The warm-start path still relays.
+  // See: https://github.com/flutter/flutter/issues/170665
+  BOOL shouldRelayToSystem = self.hasBeenActive;
+  return [self handleOpenURL:userActivity.webpageURL
+                       options:@{}
+      relayToSystemIfUnhandled:shouldRelayToSystem];
 }
 
 #pragma mark - FlutterPluginRegistry methods. All delegating to the rootViewController

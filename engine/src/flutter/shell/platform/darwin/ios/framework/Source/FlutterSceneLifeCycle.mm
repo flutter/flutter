@@ -435,10 +435,17 @@ FLUTTER_ASSERT_ARC
   //  universal link to the scene(_:willConnectTo:options:) delegate method after launch, and to
   //  scene(_:continue:) when the universal link is tapped while your app is running or suspended in
   //  memory.
+  //
+  //  This method is called during scene connection (cold start). Do not relay unhandled links back
+  //  to the system here because the app may not have finished initializing yet. Relaying an
+  //  https URL back to the system during cold start causes iOS to open Safari, which is a
+  //  disruptive user experience. The warm-start path (scene:continueUserActivity:) still relays
+  //  unhandled links.
+  //  See: https://github.com/flutter/flutter/issues/170665
   for (NSUserActivity* userActivity in connectionOptions.userActivities) {
     if ([self handleDeeplink:userActivity.webpageURL
                        flutterEngine:engine
-            relayToSystemIfUnhandled:YES]) {
+            relayToSystemIfUnhandled:NO]) {
       return;
     }
   }
@@ -447,7 +454,7 @@ FLUTTER_ASSERT_ARC
   //  the scene:willConnectToSession:options: delegate method after launch, and to
   //  scene:openURLContexts: when your app opens a URL while running or suspended in memory.
   for (UIOpenURLContext* urlContext in connectionOptions.URLContexts) {
-    if ([self handleDeeplink:urlContext.URL flutterEngine:engine relayToSystemIfUnhandled:YES]) {
+    if ([self handleDeeplink:urlContext.URL flutterEngine:engine relayToSystemIfUnhandled:NO]) {
       return;
     }
   }
