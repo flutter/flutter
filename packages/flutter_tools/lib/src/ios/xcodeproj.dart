@@ -37,6 +37,7 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Analytics analytics,
+    Abi? currentAbi,
   }) {
     return XcodeProjectInterpreter._(
       platform: platform,
@@ -44,6 +45,7 @@ class XcodeProjectInterpreter {
       logger: logger,
       fileSystem: fileSystem,
       analytics: analytics,
+      currentAbi: currentAbi,
     );
   }
 
