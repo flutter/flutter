@@ -403,8 +403,8 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The builder function used to create the [InputDecoration] passed to the text field.
   ///
-  /// If a value is provided for this property and the resulting [InputDecoration.prefixIcon]
-  /// is null, [leadingIcon] is assigned as the prefix icon.
+  /// If the resulting [InputDecoration.prefixIcon] is null, [leadingIcon] is
+  /// assigned as the prefix icon.
   ///
   /// If a value is provided for this property and the resulting [InputDecoration.suffixIcon]
   /// is null, a default [IconButton] is assigned as the suffix icon. This button's icon will
