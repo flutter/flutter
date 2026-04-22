@@ -75,7 +75,7 @@ UberSDFParameters UberSDFParameters::MakeRoundSuperellipse(
     Color color,
     const Rect& rect,
     Scalar degree,
-    Scalar corner_radius,
+    const RoundingRadii& radii,
     Scalar corner_angle_start,
     Scalar corner_angle_span,
     Point corner_circle_center,
@@ -86,8 +86,8 @@ UberSDFParameters UberSDFParameters::MakeRoundSuperellipse(
                            .center = rect.GetCenter(),
                            .size = size,
                            .stroke = stroke,
+                           .radii = radii,
                            .superellipse_degree = degree,
-                           .corner_radius = corner_radius,
                            .corner_angle_start = corner_angle_start,
                            .corner_angle_span = corner_angle_span,
                            .corner_circle_center = corner_circle_center};

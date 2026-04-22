@@ -59,7 +59,7 @@ struct UberSDFParameters {
       Color color,
       const Rect& bounds,
       Scalar degree,
-      Scalar corner_radius,
+      const RoundingRadii& radii,
       Scalar corner_angle_start,
       Scalar corner_angle_span,
       Point corner_circle_center,
@@ -82,15 +82,12 @@ struct UberSDFParameters {
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
 
-  /// The corner radii for a rounded rectangle.
-  /// Only used if type is kRoundedRect.
+  /// The corner radii for a rounded shapes.
+  /// Used for kRoundedRectangle and kRoundSuperellipse.
   RoundingRadii radii;
 
   /// The degree of a RoundSuperellipse.
   Scalar superellipse_degree;
-
-  /// The radius of the circular arcs of a RoundSuperellipse.
-  Scalar corner_radius;
 
   /// The angle at which the circular arc starts in a RoundSuperellipse
   Scalar corner_angle_start;

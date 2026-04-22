@@ -82,7 +82,6 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
   frag_info.superellipse_degree = params_.superellipse_degree;
-  frag_info.corner_radius = params_.corner_radius;
   frag_info.corner_angle_start = params_.corner_angle_start;
   frag_info.corner_angle_span = params_.corner_angle_span;
   frag_info.corner_circle_center = params_.corner_circle_center;

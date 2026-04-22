@@ -1053,7 +1053,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
     auto params = UberSDFParameters::MakeRoundSuperellipse(
         paint.color, round_superellipse.GetBounds(), oct.se_n,
-        oct.circle_radius, oct.circle_start_angle.radians,
+        round_superellipse.GetRadii(), oct.circle_start_angle.radians,
         oct.circle_max_angle.radians, oct.circle_center, paint.GetStroke());
 
     AddRenderSDFEntityToCurrentPass(paint, params);

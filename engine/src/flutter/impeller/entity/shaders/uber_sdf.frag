@@ -18,7 +18,6 @@ uniform FragInfo {
   float type;
   vec4 radii;
   float superellipse_degree;
-  float corner_radius;
   float corner_angle_start;
   float corner_angle_span;
   vec2 corner_circle_center;
@@ -258,7 +257,7 @@ float filledSDF(vec2 p) {
     return distanceFromRoundSuperellipse(
         p, frag_info.size, frag_info.superellipse_degree,
         frag_info.corner_angle_start, frag_info.corner_angle_span,
-        frag_info.corner_circle_center, frag_info.corner_radius);
+        frag_info.corner_circle_center, frag_info.radii.x);
   }
 }
 
@@ -297,7 +296,7 @@ float strokedSDF(vec2 p) {
     float d = distanceFromRoundSuperellipse(
         p, frag_info.size, frag_info.superellipse_degree,
         frag_info.corner_angle_start, frag_info.corner_angle_span,
-        frag_info.corner_circle_center, frag_info.corner_radius);
+        frag_info.corner_circle_center, frag_info.radii.x);
     return abs(d) - half_stroke;
   }
 
