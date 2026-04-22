@@ -1865,7 +1865,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
   // Regression test for https://github.com/flutter/flutter/issues/141348.
   testWidgets(
-    'Scrollbar should not shown due to precision error on desktop',
+    'Scrollbar should not be shown due to precision error on desktop',
     (WidgetTester tester) async {
       Widget buildFrame(Size size) {
         tester.view.physicalSize = size;
