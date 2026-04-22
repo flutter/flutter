@@ -23,6 +23,9 @@ G_DECLARE_FINAL_TYPE(FlAccessibilityBridgeGtk4,
 FlAccessibilityBridgeGtk4* fl_accessibility_bridge_gtk4_new(
     FlutterViewId view_id);
 
+void fl_accessibility_bridge_gtk4_set_display(FlAccessibilityBridgeGtk4* self,
+                                              GdkDisplay* display);
+
 void fl_accessibility_bridge_gtk4_handle_update_semantics(
     FlAccessibilityBridgeGtk4* self,
     const FlutterSemanticsUpdate2* update);
@@ -39,6 +42,9 @@ FlAccessibilitySemanticsStore* fl_accessibility_bridge_gtk4_get_semantics_store(
 FlAccessibleNodeGtk4* fl_accessibility_bridge_gtk4_lookup_node(
     FlAccessibilityBridgeGtk4* self,
     int32_t node_id);
+
+FlAccessibleNodeGtk4* fl_accessibility_bridge_gtk4_get_root(
+    FlAccessibilityBridgeGtk4* self);
 
 G_END_DECLS
 

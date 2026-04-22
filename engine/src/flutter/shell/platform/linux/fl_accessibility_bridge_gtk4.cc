@@ -11,6 +11,7 @@ struct _FlAccessibilityBridgeGtk4 {
 
   FlAccessibilitySemanticsStore* semantics_store;
   GHashTable* nodes_by_id;
+  GdkDisplay* display;
   gchar* last_announcement;
   FlTextDirection last_text_direction;
   FlAssertiveness last_assertiveness;
@@ -25,6 +26,7 @@ static void fl_accessibility_bridge_gtk4_dispose(GObject* object) {
 
   g_clear_object(&self->semantics_store);
   g_clear_pointer(&self->nodes_by_id, g_hash_table_unref);
+  g_clear_object(&self->display);
   g_clear_pointer(&self->last_announcement, g_free);
 
   G_OBJECT_CLASS(fl_accessibility_bridge_gtk4_parent_class)->dispose(object);
@@ -51,6 +53,25 @@ FlAccessibilityBridgeGtk4* fl_accessibility_bridge_gtk4_new(
   return self;
 }
 
+void fl_accessibility_bridge_gtk4_set_display(FlAccessibilityBridgeGtk4* self,
+                                              GdkDisplay* display) {
+  g_return_if_fail(FL_IS_ACCESSIBILITY_BRIDGE_GTK4(self));
+  g_return_if_fail(display == nullptr || GDK_IS_DISPLAY(display));
+
+  if (self->display == display) {
+    return;
+  }
+
+  g_set_object(&self->display, display);
+  GHashTableIter iter;
+  gpointer value = nullptr;
+  g_hash_table_iter_init(&iter, self->nodes_by_id);
+  while (g_hash_table_iter_next(&iter, nullptr, &value)) {
+    fl_accessible_node_gtk4_set_display(FL_ACCESSIBLE_NODE_GTK4(value),
+                                        self->display);
+  }
+}
+
 void fl_accessibility_bridge_gtk4_handle_update_semantics(
     FlAccessibilityBridgeGtk4* self,
     const FlutterSemanticsUpdate2* update) {
@@ -73,6 +94,7 @@ void fl_accessibility_bridge_gtk4_handle_update_semantics(
         g_hash_table_lookup(self->nodes_by_id, GINT_TO_POINTER(semantics->id)));
     if (node == nullptr) {
       node = fl_accessible_node_gtk4_new(semantics->id);
+      fl_accessible_node_gtk4_set_display(node, self->display);
       g_hash_table_insert(self->nodes_by_id, GINT_TO_POINTER(semantics->id),
                           g_object_ref(node));
       g_object_unref(node);
@@ -141,4 +163,15 @@ FlAccessibleNodeGtk4* fl_accessibility_bridge_gtk4_lookup_node(
 
   return FL_ACCESSIBLE_NODE_GTK4(
       g_hash_table_lookup(self->nodes_by_id, GINT_TO_POINTER(node_id)));
+}
+
+FlAccessibleNodeGtk4* fl_accessibility_bridge_gtk4_get_root(
+    FlAccessibilityBridgeGtk4* self) {
+  g_return_val_if_fail(FL_IS_ACCESSIBILITY_BRIDGE_GTK4(self), nullptr);
+
+  if (!fl_accessibility_semantics_store_has_root(self->semantics_store)) {
+    return nullptr;
+  }
+
+  return fl_accessibility_bridge_gtk4_lookup_node(self, 0);
 }

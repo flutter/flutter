@@ -21,6 +21,9 @@ G_DECLARE_FINAL_TYPE(FlAccessibleNodeGtk4,
 
 FlAccessibleNodeGtk4* fl_accessible_node_gtk4_new(int32_t node_id);
 
+void fl_accessible_node_gtk4_set_display(FlAccessibleNodeGtk4* self,
+                                         GdkDisplay* display);
+
 void fl_accessible_node_gtk4_update_from_semantics(
     FlAccessibleNodeGtk4* self,
     const FlAccessibilitySemanticsNode* semantics);

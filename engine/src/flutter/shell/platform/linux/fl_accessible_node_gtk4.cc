@@ -9,6 +9,7 @@ struct _FlAccessibleNodeGtk4 {
 
   int32_t node_id;
   GtkAccessibleRole role;
+  GdkDisplay* display;
   gchar* label;
   gchar* value;
   FlutterSemanticsFlags flags;
@@ -68,6 +69,7 @@ static void fl_accessible_node_gtk4_dispose(GObject* object) {
 
   g_clear_pointer(&self->children, g_ptr_array_unref);
   g_weak_ref_clear(&self->parent);
+  g_clear_object(&self->display);
 
   G_OBJECT_CLASS(fl_accessible_node_gtk4_parent_class)->dispose(object);
 }
@@ -101,13 +103,29 @@ FlAccessibleNodeGtk4* fl_accessible_node_gtk4_new(int32_t node_id) {
   return self;
 }
 
+void fl_accessible_node_gtk4_set_display(FlAccessibleNodeGtk4* self,
+                                         GdkDisplay* display) {
+  g_return_if_fail(FL_IS_ACCESSIBLE_NODE_GTK4(self));
+  g_return_if_fail(display == nullptr || GDK_IS_DISPLAY(display));
+
+  if (self->display == display) {
+    return;
+  }
+
+  g_set_object(&self->display, display);
+}
+
 void fl_accessible_node_gtk4_update_from_semantics(
     FlAccessibleNodeGtk4* self,
     const FlAccessibilitySemanticsNode* semantics) {
   g_return_if_fail(FL_IS_ACCESSIBLE_NODE_GTK4(self));
   g_return_if_fail(semantics != nullptr);
 
-  self->role = fl_accessible_node_gtk4_resolve_role(semantics);
+  const GtkAccessibleRole role =
+      fl_accessible_node_gtk4_resolve_role(semantics);
+  if (self->role != role) {
+    self->role = role;
+  }
   g_free(self->label);
   self->label = g_strdup(semantics->label);
   g_free(self->value);
