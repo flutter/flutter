@@ -72,9 +72,31 @@ public class MainActivity extends FlutterActivity {
             @SuppressWarnings("unchecked")
             String message = (String) data.get("message");
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+
+            if (clipboard.hasPrimaryClip()) {
+                ClipData currentClip = clipboard.getPrimaryClip();
+                if (currentClip != null && currentClip.getItemCount() > 0) {
+                    CharSequence text = currentClip.getItemAt(0).getText();
+                    if (text != null && text.length() > 0) {
+                        result.success(null);
+                        return;
+                    }
+                }
+            }
+
+            // To avoid race conditions during integration tests, wait until the system has
+            // completed the clipboard update before returning success to the test runner.
+            ClipboardManager.OnPrimaryClipChangedListener listener = new ClipboardManager.OnPrimaryClipChangedListener() {
+                @Override
+                public void onPrimaryClipChanged() {
+                    clipboard.removePrimaryClipChangedListener(this);
+                    result.success(null);
+                }
+            };
+
+            clipboard.addPrimaryClipChangedListener(listener);
             ClipData clip = ClipData.newPlainText("message", message);
             clipboard.setPrimaryClip(clip);
-            result.success(null);
             return;
         }
         result.notImplemented();
