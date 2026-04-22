@@ -251,7 +251,10 @@ vec2 strokedSDF(vec2 p) {
       // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
       sdf = max(outer, -inner);
-    }  // else stroke_join is Round. Fall through to the common case.
+    } else {  // Round
+      // Same as the common case below.
+      sdf = abs(base_sdf) - half_stroke;
+    }
   } else {
     // For most shapes, the stroked SDF is defined by the +/- half_stroke
     // isolines of the base SDF. See the "Making shapes annular" section in
