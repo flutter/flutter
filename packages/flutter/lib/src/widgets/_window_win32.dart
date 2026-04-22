@@ -205,7 +205,14 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError('Popup windows are not yet implemented on Windows.');
+    return PopupWindowControllerWin32(
+      owner: this,
+      delegate: delegate,
+      contentSizeConstraints: preferredConstraints,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
   }
 
   @internal
@@ -927,7 +934,9 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       return null;
     }
 
-    if (message == _WM_DESTROY) {
+    if (message == _WM_SIZE || message == _WM_ACTIVATE) {
+      notifyListeners();
+    } else if (message == _WM_DESTROY) {
       _destroyed = true;
       _onGetWindowPosition.close();
       _owner._removeMessageHandler(this);
@@ -942,6 +951,245 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
 
   @override
   void setConstraints(BoxConstraints constraints) {}
+}
+
+/// Implementation of [PopupWindowController] for the Windows platform.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [PopupWindowController], the base class for popup windows.
+class PopupWindowControllerWin32 extends PopupWindowController implements _WindowsMessageHandler {
+  /// Creates a new popup window controller for Win32.
+  ///
+  /// When this constructor completes, the native window has been created and
+  /// has a view associated with it.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  /// * [PopupWindowController], the base class for popup windows.
+  @internal
+  PopupWindowControllerWin32({
+    required WindowingOwnerWin32 owner,
+    required PopupWindowControllerDelegate delegate,
+    required BoxConstraints contentSizeConstraints,
+    required BaseWindowController parent,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+  }) : _delegate = delegate,
+       _owner = owner,
+       _parent = parent,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
+       super.empty() {
+    _owner._addMessageHandler(this);
+    _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
+      _handleGetWindowPosition,
+    );
+    final int viewId = _Win32PlatformInterface.createPopupWindow(
+      _owner.allocator,
+      PlatformDispatcher.instance.engineId!,
+      contentSizeConstraints,
+      _Win32PlatformInterface.getWindowHandle(
+        PlatformDispatcher.instance.engineId!,
+        parent.rootView.viewId,
+      ),
+      _onGetWindowPosition.nativeFunction,
+    );
+    if (viewId < 0) {
+      throw Exception('Windows failed to create a popup window with a valid view id.');
+    }
+
+    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
+      (FlutterView view) => view.viewId == viewId,
+    );
+    rootView = flutterView;
+  }
+
+  final WindowingOwnerWin32 _owner;
+  final PopupWindowControllerDelegate _delegate;
+  final BaseWindowController _parent;
+  WindowPositioner _positioner;
+  Rect _anchorRect;
+  bool _destroyed = false;
+
+  ffi.Pointer<_Rect> _handleGetWindowPosition(
+    ffi.Pointer<_Size> childSize,
+    ffi.Pointer<_Rect> parentRect,
+    ffi.Pointer<_Rect> outputRect,
+  ) {
+    final double scale = PlatformDispatcher.instance.views
+        .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
+        .devicePixelRatio;
+    final scaledAnchorRect = Rect.fromLTWH(
+      _anchorRect.left * scale,
+      _anchorRect.top * scale,
+      _anchorRect.width * scale,
+      _anchorRect.height * scale,
+    );
+    final Offset scaledOffset = _positioner.offset * scale;
+    final WindowPositioner scaledPositioner = _positioner.copyWith(offset: scaledOffset);
+    final Rect targetRect = scaledPositioner.placeWindow(
+      childSize: childSize.ref.toSize(),
+      anchorRect: scaledAnchorRect.translate(
+        parentRect.ref.left.toDouble(),
+        parentRect.ref.top.toDouble(),
+      ),
+      parentRect: parentRect.ref.toRect(),
+      displayRect: outputRect.ref.toRect(),
+    );
+    final ffi.Pointer<_Rect> result = _owner.allocator<_Rect>();
+    result.ref.left = targetRect.left.toInt();
+    result.ref.top = targetRect.top.toInt();
+    result.ref.width = targetRect.width.toInt();
+    result.ref.height = targetRect.height.toInt();
+    return result;
+  }
+
+  /// Returns HWND pointer to the top level window.
+  @internal
+  HWND getWindowHandle() {
+    _ensureNotDestroyed();
+    return _Win32PlatformInterface.getWindowHandle(
+      PlatformDispatcher.instance.engineId!,
+      rootView.viewId,
+    );
+  }
+
+  @override
+  Size get contentSize {
+    _ensureNotDestroyed();
+    final _ActualContentSize size = _Win32PlatformInterface.getWindowContentSize(getWindowHandle());
+    return Size(size.width, size.height);
+  }
+
+  void _ensureNotDestroyed() {
+    if (_destroyed) {
+      throw StateError('Window has been destroyed.');
+    }
+  }
+
+  @override
+  void destroy() {
+    if (_destroyed) {
+      return;
+    }
+    _Win32PlatformInterface.destroyWindow(getWindowHandle());
+    _destroyed = true;
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    _ensureNotDestroyed();
+    if (anchorRect != null) {
+      _anchorRect = anchorRect;
+    }
+    if (positioner != null) {
+      _positioner = positioner;
+    }
+    _Win32PlatformInterface.updatePopupWindowPosition(getWindowHandle());
+  }
+
+  @override
+  Offset get offsetFromParent {
+    _ensureNotDestroyed();
+    final HWND popupHandle = getWindowHandle();
+    final HWND parentHandle = _Win32PlatformInterface.getWindowHandle(
+      PlatformDispatcher.instance.engineId!,
+      parent.rootView.viewId,
+    );
+
+    final Offset physicalOffset = _Win32PlatformInterface.getWindowOffsetFromParent(
+      _owner.allocator,
+      popupHandle,
+      parentHandle,
+    );
+
+    // Convert from physical pixels to logical pixels.
+    final double scale = PlatformDispatcher.instance.views
+        .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
+        .devicePixelRatio;
+
+    return physicalOffset / scale;
+  }
+
+  late final ffi.NativeCallable<_GetWindowPositionNative> _onGetWindowPosition;
+
+  @override
+  int? handleWindowsMessage(
+    FlutterView view,
+    HWND windowHandle,
+    int message,
+    int wParam,
+    int lParam,
+  ) {
+    // WM_DESTROY is dispatched by the engine after destroyWindow is called.
+    // It must be handled even after _destroyed is set by destroy().
+    if (message == _WM_DESTROY) {
+      _destroyed = true;
+      _onGetWindowPosition.close();
+      _owner._removeMessageHandler(this);
+      _delegate.onWindowDestroyed();
+      return 0;
+    }
+
+    // Once destruction has started, skip all other messages to avoid
+    // accessing the window handle after it has been invalidated.
+    if (_destroyed) {
+      return null;
+    }
+
+    if (view.viewId == parent.rootView.viewId) {
+      if (message == _WM_SIZE) {
+        // Popups should close when their parent window is resized.
+        // Queue the destroy on a microtask to avoid destroying the window
+        // while processing its message.
+        scheduleMicrotask(destroy);
+        return null;
+      }
+    }
+
+    if (message == _WM_ACTIVATE) {
+      // If focus has changed for a window that is managed by this application
+      // AND the new focus is neither the parent window nor a descendant of the
+      // popup, close the popup.
+      final HWND parentHwnd = _Win32PlatformInterface.getWindowHandle(
+        PlatformDispatcher.instance.engineId!,
+        parent.rootView.viewId,
+      );
+      final HWND hFocused = _Win32PlatformInterface.getForegroundWindow();
+      if (hFocused != parentHwnd &&
+          hFocused != getWindowHandle() &&
+          !_Win32PlatformInterface.isChild(getWindowHandle(), hFocused)) {
+        scheduleMicrotask(destroy);
+      }
+      return null;
+    }
+
+    return null;
+  }
+
+  @override
+  BaseWindowController get parent => _parent;
+
+  @override
+  void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  @internal
+  void activate() {
+    _ensureNotDestroyed();
+    _Win32PlatformInterface.showWindow(getWindowHandle(), _SW_RESTORE);
+  }
+
+  @override
+  @internal
+  bool get isActivated {
+    _ensureNotDestroyed();
+    return _Win32PlatformInterface.getForegroundWindow() == getWindowHandle();
+  }
 }
 
 final class _Size extends ffi.Struct {
@@ -959,6 +1207,34 @@ final class _Size extends ffi.Struct {
   Size toSize() {
     return Size(width.toDouble(), height.toDouble());
   }
+}
+
+/// Win32 RECT struct with left, top, right, bottom fields.
+///
+/// Used with Win32 APIs like `GetWindowRect`.
+final class _Win32Rect extends ffi.Struct {
+  @ffi.Int32()
+  external int left;
+
+  @ffi.Int32()
+  external int top;
+
+  @ffi.Int32()
+  external int right;
+
+  @ffi.Int32()
+  external int bottom;
+}
+
+/// Win32 POINT struct with x, y fields.
+///
+/// Used with Win32 APIs like `ClientToScreen`.
+final class _Win32Point extends ffi.Struct {
+  @ffi.Int32()
+  external int x;
+
+  @ffi.Int32()
+  external int y;
 }
 
 final class _Rect extends ffi.Struct {
@@ -1102,6 +1378,42 @@ class _Win32PlatformInterface {
     ffi.Pointer<_TooltipWindowCreationRequest> request,
   );
 
+  static int createPopupWindow(
+    ffi.Allocator allocator,
+    int engineId,
+    BoxConstraints preferredConstraints,
+    HWND parent,
+    ffi.Pointer<
+      ffi.NativeFunction<
+        ffi.Pointer<_Rect> Function(
+          ffi.Pointer<_Size> childSize,
+          ffi.Pointer<_Rect> parentRect,
+          ffi.Pointer<_Rect> outputRect,
+        )
+      >
+    >
+    onGetWindowPosition,
+  ) {
+    final ffi.Pointer<_PopupWindowCreationRequest> request =
+        allocator<_PopupWindowCreationRequest>();
+    try {
+      request.ref.preferredConstraints.from(preferredConstraints);
+      request.ref.parent = parent;
+      request.ref.onGetWindowPosition = onGetWindowPosition;
+      return _createPopupWindow(engineId, request);
+    } finally {
+      allocator.free(request);
+    }
+  }
+
+  @ffi.Native<ffi.Int64 Function(ffi.Int64, ffi.Pointer<_PopupWindowCreationRequest>)>(
+    symbol: 'InternalFlutterWindows_WindowManager_CreatePopupWindow',
+  )
+  external static int _createPopupWindow(
+    int engineId,
+    ffi.Pointer<_PopupWindowCreationRequest> request,
+  );
+
   @ffi.Native<HWND Function(ffi.Int64, ffi.Int64)>(
     symbol: 'InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle',
   )
@@ -1239,6 +1551,46 @@ class _Win32PlatformInterface {
     symbol: 'InternalFlutterWindows_WindowManager_UpdateTooltipPosition',
   )
   external static void updateTooltipWindowPosition(HWND windowHandle);
+
+  @ffi.Native<ffi.Void Function(HWND)>(
+    symbol: 'InternalFlutterWindows_WindowManager_UpdatePopupPosition',
+  )
+  external static void updatePopupWindowPosition(HWND windowHandle);
+
+  @ffi.Native<ffi.Bool Function(HWND, HWND)>(symbol: 'IsChild')
+  external static bool isChild(HWND parent, HWND child);
+
+  @ffi.Native<ffi.Bool Function(HWND, ffi.Pointer<_Win32Rect>)>(symbol: 'GetWindowRect')
+  external static bool getWindowRect(HWND windowHandle, ffi.Pointer<_Win32Rect> rect);
+
+  @ffi.Native<ffi.Bool Function(HWND, ffi.Pointer<_Win32Point>)>(symbol: 'ClientToScreen')
+  external static bool clientToScreen(HWND windowHandle, ffi.Pointer<_Win32Point> point);
+
+  /// Returns the offset of [windowHandle] from the client area of
+  /// [parentHandle], in physical pixels.
+  static Offset getWindowOffsetFromParent(
+    ffi.Allocator allocator,
+    HWND windowHandle,
+    HWND parentHandle,
+  ) {
+    final ffi.Pointer<_Win32Rect> windowRect = allocator<_Win32Rect>();
+    final ffi.Pointer<_Win32Point> parentOrigin = allocator<_Win32Point>();
+    try {
+      getWindowRect(windowHandle, windowRect);
+
+      parentOrigin.ref.x = 0;
+      parentOrigin.ref.y = 0;
+      clientToScreen(parentHandle, parentOrigin);
+
+      return Offset(
+        (windowRect.ref.left - parentOrigin.ref.x).toDouble(),
+        (windowRect.ref.top - parentOrigin.ref.y).toDouble(),
+      );
+    } finally {
+      allocator.free(windowRect);
+      allocator.free(parentOrigin);
+    }
+  }
 }
 
 /// Payload for the creation method used by [_Win32PlatformInterface.createRegularWindow].
@@ -1257,6 +1609,21 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
 }
 
 final class _TooltipWindowCreationRequest extends ffi.Struct {
+  external _WindowConstraintsRequest preferredConstraints;
+  external HWND parent;
+  external ffi.Pointer<
+    ffi.NativeFunction<
+      ffi.Pointer<_Rect> Function(
+        ffi.Pointer<_Size> childSize,
+        ffi.Pointer<_Rect> parentRect,
+        ffi.Pointer<_Rect> outputRect,
+      )
+    >
+  >
+  onGetWindowPosition;
+}
+
+final class _PopupWindowCreationRequest extends ffi.Struct {
   external _WindowConstraintsRequest preferredConstraints;
   external HWND parent;
   external ffi.Pointer<
