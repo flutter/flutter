@@ -47,23 +47,25 @@ DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
       impeller::RenderTargetAllocator(context->GetResourceAllocator());
   std::shared_ptr<impeller::RenderTarget> target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
-    target = std::make_shared<impeller::RenderTarget>(render_target_allocator.CreateOffscreenMSAA(
-        *context,  // context
-        size,      // size
-        /*mip_count=*/mip_count,
-        "Picture Snapshot MSAA",  // label
-        impeller::RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
-    ));
+    target = std::make_shared<impeller::RenderTarget>(
+        render_target_allocator.CreateOffscreenMSAA(
+            *context,  // context
+            size,      // size
+            /*mip_count=*/mip_count,
+            "Picture Snapshot MSAA",  // label
+            impeller::RenderTarget::
+                kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+            ));
   } else {
-    target = std::make_shared<impeller::RenderTarget>(render_target_allocator.CreateOffscreen(
-        *context,  // context
-        size,      // size
-        /*mip_count=*/mip_count,
-        "Picture Snapshot",  // label
-        impeller::RenderTarget::
-            kDefaultColorAttachmentConfig  // color_attachment_config
-    ));
+    target = std::make_shared<impeller::RenderTarget>(
+        render_target_allocator.CreateOffscreen(
+            *context,  // context
+            size,      // size
+            /*mip_count=*/mip_count,
+            "Picture Snapshot",  // label
+            impeller::RenderTarget::
+                kDefaultColorAttachmentConfig  // color_attachment_config
+            ));
   }
   if (!target->IsValid()) {
     return nullptr;

@@ -51,9 +51,9 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
     const sk_sp<DisplayList>& display_list) {
   if (display_list->GetRecordCount() > 0) {
     impeller::AiksContext aiks_context(context_, typographer_context_);
-    impeller::RenderToTarget(aiks_context.GetContentContext(),
-                             *target_, display_list, display_list->GetBounds(),
-                             false, false);
+    impeller::RenderToTarget(aiks_context.GetContentContext(), *target_,
+                             display_list, display_list->GetBounds(), false,
+                             false);
   }
 }
 
