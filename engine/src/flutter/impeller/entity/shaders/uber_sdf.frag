@@ -147,89 +147,11 @@ float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
   return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
-float filledSDF(vec2 p) {
-  if (frag_info.type < 0.5) {  // Circle
-    return distanceFromCircle(p, frag_info.size.x);
-  } else if (frag_info.type < 1.5) {  // Rect
-    return distanceFromRect(p, frag_info.size);
-  } else if (frag_info.type < 2.5) {  // Oval
-    return distanceFromOval(p, frag_info.size);
-  } else {  // Rounded Rect
-    return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
-  }
-}
-
-// Computes the SDF for a stroked shape.
+// Returns the pixel size for the given SDF value.
 //
-// `p`: The position relative to the center of the shape.
-// `base_sdf`: The SDF value at point `p` of the base filled shape.
-// `base_sdf_pixel_size`: The pixel size at point `p` calculated from base_sdf.
-float strokedSDF(vec2 p, float base_sdf, float base_sdf_pixel_size) {
-  // Stroke width is clamped to be at least base_sdf_pixel_size.
-  float half_stroke = max(frag_info.stroke_width, base_sdf_pixel_size) * 0.5;
-
-  // Some cases need special handling because their stroked SDFs have a
-  // different shape from their base SDFs.
-  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
-
-    if (frag_info.stroke_join < 0.5) {  // Miter
-      // Outer edge is the SDF for a rect with size expanded by half_stroke.
-      float outer = distanceFromRect(p, frag_info.size + half_stroke);
-      // Inner edge is base_sdf's -half_stroke isoline.
-      float inner = base_sdf + half_stroke;
-      return max(outer, -inner);
-    } else if (frag_info.stroke_join < 1.5) {  // Bevel
-      // Outer edge is the SDF for a rect with size expanded by half_stroke,
-      // with a half_stroke chamfer.
-      float outer =
-          distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
-      // Inner edge is base_sdf's -half_stroke isoline.
-      float inner = base_sdf + half_stroke;
-      return max(outer, -inner);
-    }  // else stroke_join is Round. Fall through to the common case.
-  }
-
-  // For most shapes, the stroked SDF is defined by the +/- half_stroke
-  // isolines of the base SDF. See the "Making shapes annular" section in
-  // https://iquilezles.org/articles/distfunctions2d/.
-  return abs(base_sdf) - half_stroke;
-}
-
-// Returns the pixel size for the given SDF.
-//
-// For most shapes, this is the same as the pixel size of the base filled shape.
-// For shapes where the SDF is shaped differently from the base filled shape,
-// (the special case ones in the strokedSDF function), this calculates a new
-// pixel size from the SDF's gradient.
-//
-// `sdf`: The SDF value at the current fragment.
-// `base_sdf_pixel_size`: The pixel size calculated from the base filled shape.
-float pixelSize(float sdf, float base_sdf_pixel_size) {
-  // Filled shape.
-  if (frag_info.stroked < 0.5) {
-    return base_sdf_pixel_size;
-  }
-
-  // Stroked shape with an SDF different from the base SDF. These cases match
-  // the cases in the strokedSDF function which return custom SDFs.
-  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
-    if (frag_info.stroke_join < 1.5) {  // Miter (0.0) or Bevel (1.0)
-      // Calculate a new pixel size based on the SDF. The comments for gradient
-      // and base_sdf_pixel_size below explain how this is calculated.
-      return length(vec2(dFdx(sdf), dFdy(sdf)));
-    }
-  }
-
-  // Stroked shape with an SDF that has the same shape as the base SDF.
-  return base_sdf_pixel_size;
-}
-
-void main() {
-  vec2 p = v_position - frag_info.center;
-
-  // The SDF of the base shape (not accounting for stroking).
-  float base_sdf = filledSDF(p);
-
+// This is the size of a pixel at the current fragment, measured in the
+// direction perpendicular to the SDF's shape.
+float pixelSize(float sdf) {
   // Gradient vector of the SDF at point p. Points in the direction of steepest
   // increase away from SDF's shape. At the edges of the shape, this is
   // perpendicular to the edge.
@@ -238,7 +160,7 @@ void main() {
   // of the SDF value. dFdx and dFdy return the change of a value in the x and y
   // direction per screen-space unit (physical pixel). So this gradient
   // is the change in the SDF, at point p, in local space units per pixel.
-  vec2 gradient = vec2(dFdx(base_sdf), dFdy(base_sdf));
+  vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
 
   // The length of the gradient vector is how fast the SDF changes per
   // screen-space pixel distance. In other words, it is the size of a pixel
@@ -266,18 +188,87 @@ void main() {
   // vector for a circle is exactly (1.0, 0.0) due to the way dFdx and dFdy are
   // approximated from pixel samples. This does not affect the applicability
   // of this example.
-  float base_sdf_pixel_size = length(gradient);
+  return length(gradient);
+}
 
-  // The SDF of the shape, accounting for stroking.
-  float sdf =
-      (frag_info.stroked < 0.5)
-          ? base_sdf                                       // Filled shape
-          : strokedSDF(p, base_sdf, base_sdf_pixel_size);  // Stroked shape
+// Computes the SDF value and pixel size for a filled shape.
+//
+// `p` is position relative to the center of the shape.
+//
+// Returns a vec2 with:
+//   x: The SDF value at `p`.
+//   y: The pixel size at `p`.
+vec2 filledSDF(vec2 p) {
+  float sdf;
+  if (frag_info.type < 0.5) {  // Circle
+    sdf = distanceFromCircle(p, frag_info.size.x);
+  } else if (frag_info.type < 1.5) {  // Rect
+    sdf = distanceFromRect(p, frag_info.size);
+  } else if (frag_info.type < 2.5) {  // Oval
+    sdf = distanceFromOval(p, frag_info.size);
+  } else {  // Rounded Rect
+    sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+  }
+  return vec2(sdf, pixelSize(sdf));
+}
 
-  // The pixel size of sdf. For most shapes, this is the same as the pixel size
-  // of base_sdf. pixelSize() determines whether to use base_sdf's pixel_size or
-  // whether a new pixel size is calculated.
-  float pixel_size = pixelSize(sdf, base_sdf_pixel_size);
+// Computes the SDF value and pixel size for a stroked shape.
+//
+// `p` is position relative to the center of the shape.
+//
+// Returns a vec2 with:
+//   x: The SDF value at `p`.
+//   y: The pixel size at `p`.
+vec2 strokedSDF(vec2 p) {
+  // Get the base (filled) SDF for this shape. The filled SDF pixel size is used
+  // to calculate a minimum stroke width, and the filled SDF value is used to
+  // calculate the stroked SDF value for many shapes.
+  vec2 base_sdf_and_pixel_size = filledSDF(p);
+  float base_sdf = base_sdf_and_pixel_size.x;
+  float base_pixel_size = base_sdf_and_pixel_size.y;
+
+  // Stroke width is clamped to be at least the base sdf's pixel size.
+  float half_stroke = max(frag_info.stroke_width, base_pixel_size) * 0.5;
+
+  // The value of the stroked SDF.
+  float sdf;
+
+  // Some cases need special handling because their stroked SDFs have a
+  // different shape from their base SDFs.
+  if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
+
+    if (frag_info.stroke_join < 0.5) {  // Miter
+      // Outer edge is the SDF for a rect with size expanded by half_stroke.
+      float outer = distanceFromRect(p, frag_info.size + half_stroke);
+      // Inner edge is base_sdf's -half_stroke isoline.
+      float inner = base_sdf + half_stroke;
+      sdf = max(outer, -inner);
+    } else if (frag_info.stroke_join < 1.5) {  // Bevel
+      // Outer edge is the SDF for a rect with size expanded by half_stroke,
+      // with a half_stroke chamfer.
+      float outer =
+          distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
+      // Inner edge is base_sdf's -half_stroke isoline.
+      float inner = base_sdf + half_stroke;
+      sdf = max(outer, -inner);
+    }  // else stroke_join is Round. Fall through to the common case.
+  } else {
+    // For most shapes, the stroked SDF is defined by the +/- half_stroke
+    // isolines of the base SDF. See the "Making shapes annular" section in
+    // https://iquilezles.org/articles/distfunctions2d/.
+    sdf = abs(base_sdf) - half_stroke;
+  }
+
+  return vec2(sdf, pixelSize(sdf));
+}
+
+void main() {
+  vec2 p = v_position - frag_info.center;
+
+  vec2 sdf_and_pixel_size =
+      (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
+  float sdf = sdf_and_pixel_size.x;
+  float pixel_size = sdf_and_pixel_size.y;
 
   // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
   // goes from negative to positive). Fade through distance of half
