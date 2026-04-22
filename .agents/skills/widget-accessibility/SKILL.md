@@ -10,8 +10,9 @@ This skill provides instructions and best practices for ensuring Flutter widgets
 ## Guidelines
 
 - **Avoid redundant tooltips and labels**: Do not wrap widgets that already support a `tooltip` or `semanticLabel` property directly in a `Tooltip` or `Semantics` widget with the same message. This creates duplicate semantic nodes.
+- **Prefer tooltips for interactive widgets**: For widgets like `IconButton`, use the `tooltip` property instead of providing a `semanticsLabel` to the internal icon. This provides both a visual hint and accessibility information.
 - **Ensure minimum tap target size**: Interactive elements should have a minimum tap target size of 48x48 logical pixels to accommodate users with limited dexterity.
-- **Provide semantic labels**: Tappable widgets must have a non-empty semantic label or tooltip.
+- **Provide semantic labels**: Tappable widgets must have a non-empty semantic label or tooltip. Decorative elements should be hidden from semantics using `ExcludeSemantics` or by leaving labels null.
 
 ## Testing
 
