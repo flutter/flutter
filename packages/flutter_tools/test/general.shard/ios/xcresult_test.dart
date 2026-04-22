@@ -59,13 +59,6 @@ void main() {
     );
   }
 
-  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-  const kx64CheckCommand = FakeCommand(
-    command: <String>['sysctl', 'hw.optional.arm64'],
-    exitCode: 1,
-  );
-
   XCResultGenerator setupGenerator({
     required String resultJson,
     int exitCode = 0,
@@ -75,10 +68,7 @@ void main() {
     // the logic for pre-Xcode 16 platforms.
     Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
   }) {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      kWhichSysctlCommand,
-      kx64CheckCommand,
-    ]);
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     final xcode = Xcode.test(
       processManager: fakeProcessManager,
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
