@@ -12,6 +12,13 @@ import 'semantics_tester.dart';
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
+// Wraps [child] with the minimal ancestors required by widgets that read
+// Directionality or MediaQuery (e.g. CustomScrollView).
+Widget _wrap(Widget child) => Directionality(
+  textDirection: TextDirection.ltr,
+  child: MediaQuery(data: const MediaQueryData(), child: child),
+);
+
 void main() {
   testWidgets('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
     final items = List<int>.generate(20, (int i) => i);
@@ -704,26 +711,22 @@ void main() {
     // the following SliverMainAxisGroups will not perform extra work.
     final buildsPerGroup = <int, int>{0: 0, 1: 0, 2: 0};
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: CustomScrollView(
-            slivers: <Widget>[
-              for (int groupIndex = 0; groupIndex < 3; groupIndex++)
-                SliverMainAxisGroup(
-                  slivers: <Widget>[
-                    SliverList.builder(
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) {
-                        buildsPerGroup[groupIndex] = buildsPerGroup[groupIndex]! + 1;
-                        return const SizedBox.square(dimension: 50);
-                      },
-                    ),
-                  ],
-                ),
-            ],
-          ),
+      _wrap(
+        CustomScrollView(
+          slivers: <Widget>[
+            for (int groupIndex = 0; groupIndex < 3; groupIndex++)
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  SliverList.builder(
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) {
+                      buildsPerGroup[groupIndex] = buildsPerGroup[groupIndex]! + 1;
+                      return const SizedBox.square(dimension: 50);
+                    },
+                  ),
+                ],
+              ),
+          ],
         ),
       ),
     );
@@ -740,24 +743,20 @@ void main() {
     const Widget item = SizedBox.square(dimension: 50);
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverMainAxisGroup(
-                slivers: <Widget>[
-                  const PinnedHeaderSliver(child: SizedBox(height: 500)),
-                  SliverList.builder(
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) => item,
-                  ),
-                  const SliverToBoxAdapter(child: item),
-                ],
-              ),
-            ],
-          ),
+      _wrap(
+        CustomScrollView(
+          slivers: <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                const PinnedHeaderSliver(child: SizedBox(height: 500)),
+                SliverList.builder(
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => item,
+                ),
+                const SliverToBoxAdapter(child: item),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -878,28 +877,24 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: Center(
-            child: SizedBox(
-              height: 201,
-              child: CustomScrollView(
-                controller: controller,
-                slivers: const <Widget>[
-                  SliverMainAxisGroup(
-                    slivers: <Widget>[
-                      SliverToBoxAdapter(child: SizedBox(height: 70)),
-                      PinnedHeaderSliver(child: SizedBox(height: 70)),
-                      SliverToBoxAdapter(child: SizedBox(height: 70)),
-                      PinnedHeaderSliver(child: SizedBox(height: 70)),
-                      SliverToBoxAdapter(child: SizedBox(height: 70)),
-                      PinnedHeaderSliver(child: SizedBox(height: 70)),
-                    ],
-                  ),
-                ],
-              ),
+      _wrap(
+        Center(
+          child: SizedBox(
+            height: 201,
+            child: CustomScrollView(
+              controller: controller,
+              slivers: const <Widget>[
+                SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
+                    PinnedHeaderSliver(child: SizedBox(height: 70)),
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
+                    PinnedHeaderSliver(child: SizedBox(height: 70)),
+                    SliverToBoxAdapter(child: SizedBox(height: 70)),
+                    PinnedHeaderSliver(child: SizedBox(height: 70)),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -943,29 +938,25 @@ void main() {
     addTearDown(controller.dispose);
     const centerKey = Key('center');
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: CustomScrollView(
-            center: centerKey,
-            controller: controller,
-            slivers: const <Widget>[
-              SliverMainAxisGroup(
-                slivers: <Widget>[
-                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
-                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
-                ],
-              ),
-              SliverMainAxisGroup(
-                key: centerKey,
-                slivers: <Widget>[
-                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
-                  SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
-                ],
-              ),
-            ],
-          ),
+      _wrap(
+        CustomScrollView(
+          center: centerKey,
+          controller: controller,
+          slivers: const <Widget>[
+            SliverMainAxisGroup(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-2'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('-1'))),
+              ],
+            ),
+            SliverMainAxisGroup(
+              key: centerKey,
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('1'))),
+                SliverToBoxAdapter(child: SizedBox(height: 50, child: Text('2'))),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -1009,33 +1000,29 @@ void main() {
       addTearDown(controller.dispose);
       final Key key = GlobalKey();
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                height: 100,
-                child: CustomScrollView(
-                  controller: controller,
-                  slivers: <Widget>[
-                    SliverMainAxisGroup(
-                      slivers: <Widget>[
-                        const PinnedHeaderSliver(child: SizedBox(height: 20)),
-                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                        SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
-                      ],
-                    ),
-                    const SliverMainAxisGroup(
-                      slivers: <Widget>[
-                        PinnedHeaderSliver(child: SizedBox(height: 20)),
-                        SliverToBoxAdapter(child: SizedBox(height: 20)),
-                        SliverToBoxAdapter(child: SizedBox(height: 60)),
-                      ],
-                    ),
-                  ],
-                ),
+        _wrap(
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 100,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      const PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60, key: key)),
+                    ],
+                  ),
+                  const SliverMainAxisGroup(
+                    slivers: <Widget>[
+                      PinnedHeaderSliver(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: SizedBox(height: 60)),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -1347,7 +1334,7 @@ Widget _buildSliverMainAxisGroup({
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
-      data: const MediaQueryData(),
+      data: MediaQueryData(size: Size(viewportWidth, viewportHeight)),
       child: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
