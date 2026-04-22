@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // ignore_for_file: avoid_print
+// ignore_for_file: avoid_dynamic_calls
 
 import 'dart:io';
 
@@ -196,17 +197,37 @@ void main() {
           );
         }
         // check nullability
-        if (uiParam is SimpleFormalParameter && webParam is SimpleFormalParameter) {
-          final isUiNullable = uiParam.type?.question != null;
-          final isWebNullable = webParam.type?.question != null;
-          if (isUiNullable != isWebNullable) {
-            failed = true;
-            print(
-              'Warning: lib/ui/ui.dart $className.$methodName parameter $i '
-              '${uiParam.name} has a different nullability than in lib/web_ui/ui.dart.',
-            );
+        if (!_hasDefault(uiParam) &&
+            !_hasDefault(webParam) &&
+            _hasType(uiParam) &&
+            _hasType(webParam)) {
+          final uiType = (uiParam as dynamic).type as TypeAnnotation?;
+          final webType = (webParam as dynamic).type as TypeAnnotation?;
+
+          if (uiType != null && webType != null) {
+            final isUiNullable = uiType.question != null;
+            final isWebNullable = webType.question != null;
+            if (isUiNullable != isWebNullable) {
+              failed = true;
+              print(
+                'Warning: lib/ui/ui.dart $className.$methodName parameter $i '
+                '${(uiParam as dynamic).name} has a different nullability than in lib/web_ui/ui.dart.',
+              );
+            }
           }
         }
+        // Clean Analyzer 13 version (uncomment once migrated):
+        // if (uiParam is RegularFormalParameter && webParam is RegularFormalParameter) {
+        //   final isUiNullable = uiParam.type?.question != null;
+        //   final isWebNullable = webParam.type?.question != null;
+        //   if (isUiNullable != isWebNullable) {
+        //     failed = true;
+        //     print(
+        //       'Warning: lib/ui/ui.dart $className.$methodName parameter $i '
+        //       '${uiParam.name} has a different nullability than in lib/web_ui/ui.dart.',
+        //     );
+        //   }
+        // }
       }
       // check return type.
       if (uiMethod.returnType?.toString() != webMethod.returnType?.toString()) {
@@ -274,12 +295,19 @@ void main() {
 
       // This is not entirely true and can break, but this way we can support both positional and named params
       // (The assumption that the parameter of a DefaultFormalParameter is a SimpleFormalParameter is a stretch)
-      final uiParam =
-          ((uiFormalParam is DefaultFormalParameter) ? uiFormalParam.parameter : uiFormalParam)
-              as SimpleFormalParameter;
-      final webParam =
-          ((webFormalParam is DefaultFormalParameter) ? webFormalParam.parameter : uiFormalParam)
-              as SimpleFormalParameter;
+      dynamic uiParam = uiFormalParam;
+      try {
+        uiParam = (uiFormalParam as dynamic).parameter ?? uiParam;
+      } catch (_) {}
+
+      dynamic webParam = webFormalParam;
+      try {
+        webParam = (webFormalParam as dynamic).parameter ?? webParam;
+      } catch (_) {}
+
+      // Clean Analyzer 13 version (uncomment once migrated):
+      // final uiParam = uiFormalParam;
+      // final webParam = webFormalParam;
 
       if (webParam.name == null) {
         failed = true;
@@ -442,4 +470,27 @@ void _collectPublicTypeDefs(
       destination[typeDeclaration.name.lexeme] = typeDeclaration;
     }
   }
+}
+
+bool _hasDefault(dynamic p) {
+  try {
+    if (p.parameter != null) {
+      return true;
+    }
+  } catch (_) {}
+  try {
+    if (p.defaultClause != null) {
+      return true;
+    }
+  } catch (_) {}
+  return false;
+}
+
+bool _hasType(dynamic p) {
+  try {
+    // ignore: unused_local_variable
+    final dynamic type = p.type;
+    return true;
+  } catch (_) {}
+  return false;
 }

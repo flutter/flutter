@@ -309,6 +309,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22a%3A%20text%20input%22%2C%22f%3A%20selection%22%2Cteam-text-input%2Cfyi-text-input%20sort%3Aupdated-asc%20label%3AP0)
 - [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input)
+  - Make sure that any PR that still needs review by a platform team has the appropriate `team-<platform>` label(s) on it, so that it shows up in the regular platform team triages. Once reviewed, the platform team can add the `triaged-<platform>` label to remove the PR from their triage queue.
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20response%22)
 
 ### Flutter Tool team (`team-tool`)
