@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart' as shelf;
@@ -68,20 +68,23 @@ class _CustomProxyHandler {
       // Get the response
       final HttpClientResponse httpResponse = await httpRequest.close();
       
-      // Read the response body
-      final String body = await utf8.decoder.bind(httpResponse).join();
-      
       // Build the shelf response with proper Set-Cookie handling
-      final Map<String, String> headers = _buildResponseHeaders(httpResponse);
+      final Map<String, Object> headers = _buildResponseHeaders(httpResponse);
       
-      // Extract Set-Cookie headers specially
-      final List<String> setCookies = httpResponse.headers.values['set-cookie'] ?? [];
+      // Extract Set-Cookie headers specially - use correct index operator
+      final List<String> setCookies = httpResponse.headers['set-cookie'] ?? [];
       
-      _logger.printTrace('$_kLogEntryPrefix Forwarded response with ${setCookies.length} Set-Cookie headers');
+      // Add Set-Cookie headers to the response if present
+      if (setCookies.isNotEmpty) {
+        headers['set-cookie'] = setCookies;
+        _logger.printTrace('$_kLogEntryPrefix Forwarded response with ${setCookies.length} Set-Cookie headers');
+      }
       
+      // Stream the response body directly instead of buffering as string
+      // This preserves binary data and is more memory-efficient
       return shelf.Response(
         httpResponse.statusCode,
-        body: body,
+        body: httpResponse,
         headers: headers,
       );
     } on Exception catch (e) {
@@ -101,14 +104,14 @@ class _CustomProxyHandler {
     );
   }
   
-  Map<String, String> _buildResponseHeaders(HttpClientResponse httpResponse) {
-    final Map<String, String> headers = {};
+  Map<String, Object> _buildResponseHeaders(HttpClientResponse httpResponse) {
+    final Map<String, Object> headers = {};
     
     // Copy all headers except Set-Cookie (handled separately)
     httpResponse.headers.forEach((key, values) {
       if (key.toLowerCase() != 'set-cookie') {
         // For headers with multiple values, join with comma (standard behavior)
-        // except for Set-Cookie which is handled separately
+        // except for Set-Cookie which is handled separately as a list
         headers[key] = values.join(', ');
       }
     });
