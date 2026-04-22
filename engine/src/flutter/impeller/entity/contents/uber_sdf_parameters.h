@@ -58,7 +58,7 @@ struct UberSDFParameters {
   static UberSDFParameters MakeRoundSuperellipse(
       Color color,
       const Rect& bounds,
-      Scalar n,
+      Scalar degree,
       Scalar corner_radius,
       Scalar corner_angle_start,
       Scalar corner_angle_span,
@@ -87,7 +87,7 @@ struct UberSDFParameters {
   RoundingRadii radii;
 
   /// The degree of a RoundSuperellipse.
-  Scalar superellipse_n;
+  Scalar superellipse_degree;
 
   /// The radius of the circular arcs of a RoundSuperellipse.
   Scalar corner_radius;

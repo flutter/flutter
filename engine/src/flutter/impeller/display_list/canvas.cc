@@ -1040,8 +1040,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value() &&
-      // SDF RoundSuperellipse only works for square-like RSEs with circular
-      // corners.
+      // SDF RoundSuperellipse (RSE) only works for square-like RSEs with
+      // circular corners.
       round_superellipse.GetBounds().IsSquare() &&
       round_superellipse.GetRadii().AreAllCornersSame() &&
       AreCornersCircular(round_superellipse.GetRadii())) {
@@ -1049,7 +1049,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
         round_superellipse.GetBounds(),
         round_superellipse.GetRadii().bottom_left.height);
 
-    auto oct = rs_param.top_right.top;
+    RoundSuperellipseParam::Octant oct = rs_param.top_right.top;
 
     auto params = UberSDFParameters::MakeRoundSuperellipse(
         paint.color, round_superellipse.GetBounds(), oct.se_n,

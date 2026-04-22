@@ -17,7 +17,7 @@ uniform FragInfo {
   float stroked;
   float type;
   vec4 radii;
-  float superellipse_n;
+  float superellipse_degree;
   float corner_radius;
   float corner_angle_start;
   float corner_angle_span;
@@ -28,6 +28,9 @@ frag_info;
 out vec4 frag_color;
 
 highp in vec2 v_position;
+
+const float PI = 3.14159265;
+const float TWO_PI = 6.28318531;
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -73,7 +76,7 @@ float sdSuperellipse(vec2 p, float n) {
 
   n = 2.0 / n;  // note the remapping in order to match the implicit versions
 
-  float xa = 0.0, xb = 6.283185 / 8.0;
+  float xa = 0.0, xb = TWO_PI / 8.0;
   for (int i = 0; i < 6; i++) {
     float x = 0.5 * (xa + xb);
     float c = cos(x);
@@ -115,11 +118,9 @@ float distanceFromRoundSuperellipse(vec2 p,
   // Grab the angle offset of the point.
   float theta = atan(p_remap.y, p_remap.x);
 
-  float pi = 3.14159265;
-
   // The angular distance between the point and the start of the circular arc.
   float d_theta = theta - angle_start;
-  d_theta = mod(d_theta + pi, 2.0 * pi) - pi;
+  d_theta = mod(d_theta + PI, TWO_PI) - PI;
 
   // If the point is within the span of the corner circle's arc,
   // use a circle SDF.
@@ -255,7 +256,7 @@ float filledSDF(vec2 p) {
     return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
     return distanceFromRoundSuperellipse(
-        p, frag_info.size, frag_info.superellipse_n,
+        p, frag_info.size, frag_info.superellipse_degree,
         frag_info.corner_angle_start, frag_info.corner_angle_span,
         frag_info.corner_circle_center, frag_info.corner_radius);
   }
@@ -294,11 +295,10 @@ float strokedSDF(vec2 p) {
     inner = d + half_stroke;
   } else {  // Round Superellipse
     float d = distanceFromRoundSuperellipse(
-        p, frag_info.size, frag_info.superellipse_n,
+        p, frag_info.size, frag_info.superellipse_degree,
         frag_info.corner_angle_start, frag_info.corner_angle_span,
         frag_info.corner_circle_center, frag_info.corner_radius);
-    outer = d - half_stroke;
-    inner = d + half_stroke;
+    return abs(d) - half_stroke;
   }
 
   return max(outer, -inner);
