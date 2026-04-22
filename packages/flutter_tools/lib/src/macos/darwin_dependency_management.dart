@@ -83,6 +83,7 @@ class DarwinDependencyManagement {
         buildDirectory: _fileSystem.directory(
           platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
+        quiet: false,
       );
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
