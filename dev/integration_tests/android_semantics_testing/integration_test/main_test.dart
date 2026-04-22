@@ -61,6 +61,27 @@ Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) as
   return AndroidSemanticsNode.deserialize(await completer.future);
 }
 
+// Accessibility updates and clipboard actions are asynchronous on Android and
+// can take time to propagate. This helper polls the expectation to give the
+// system time to update the semantics tree.
+Future<void> expectWithRetry(
+  Future<AndroidSemanticsNode> Function() getSemantics,
+  Matcher matcher,
+  WidgetTester tester,
+) async {
+  TestFailure? lastException;
+  for (var i = 0; i < 10; i++) {
+    try {
+      expect(await getSemantics(), matcher);
+      return;
+    } on TestFailure catch (e) {
+      lastException = e;
+    }
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  throw lastException!;
+}
+
 Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -106,8 +127,8 @@ Future<void> main() async {
         await tester.tap(normalTextField);
         await tester.pumpAndSettle();
 
-        expect(
-          await getSemantics(normalTextField, tester),
+        await expectWithRetry(
+          () => getSemantics(normalTextField, tester),
           hasAndroidSemantics(
             className: AndroidClassName.editText,
             isFocusable: true,
@@ -123,13 +144,14 @@ Future<void> main() async {
             // We can't predict the a11y focus when the screen changes.
             ignoredActions: ignoredAccessibilityFocusActions,
           ),
+          tester,
         );
 
         await tester.enterText(normalTextField, 'hello world');
         await tester.pumpAndSettle();
 
-        expect(
-          await getSemantics(normalTextField, tester),
+        await expectWithRetry(
+          () => getSemantics(normalTextField, tester),
           hasAndroidSemantics(
             text: 'hello world',
             className: AndroidClassName.editText,
@@ -147,6 +169,7 @@ Future<void> main() async {
             // We can't predict the a11y focus when the screen changes.
             ignoredActions: ignoredAccessibilityFocusActions,
           ),
+          tester,
         );
       }, timeout: Timeout.none);
 
@@ -174,8 +197,8 @@ Future<void> main() async {
         await tester.tap(passwordTextField);
         await tester.pumpAndSettle();
 
-        expect(
-          await getSemantics(passwordTextField, tester),
+        await expectWithRetry(
+          () => getSemantics(passwordTextField, tester),
           hasAndroidSemantics(
             className: AndroidClassName.editText,
             isFocusable: true,
@@ -191,13 +214,14 @@ Future<void> main() async {
             // We can't predict the a11y focus when the screen changes.
             ignoredActions: ignoredAccessibilityFocusActions,
           ),
+          tester,
         );
 
         await tester.enterText(passwordTextField, 'hello world');
         await tester.pumpAndSettle();
 
-        expect(
-          await getSemantics(passwordTextField, tester),
+        await expectWithRetry(
+          () => getSemantics(passwordTextField, tester),
           hasAndroidSemantics(
             text: '\u{2022}' * ('hello world'.length),
             className: AndroidClassName.editText,
@@ -215,6 +239,7 @@ Future<void> main() async {
             // We can't predict the a11y focus when the screen changes.
             ignoredActions: ignoredAccessibilityFocusActions,
           ),
+          tester,
         );
       }, timeout: Timeout.none);
     });
