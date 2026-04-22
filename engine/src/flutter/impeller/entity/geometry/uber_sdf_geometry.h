@@ -41,9 +41,9 @@ class UberSDFGeometry final : public Geometry {
   // Returns the coverage rectangle of the SDF, expanded to account for stroke
   // width and AA.
   //
-  // The input transform is used to determine the exact stroke width and AA
-  // padding to apply. But the returned rectangle is in local space; the input
-  // transform is not applied to the returned coverage rectangle.
+  // The `transform` argument is used to determine the exact stroke width and AA
+  // padding to apply. But the returned rectangle is in local space;
+  // `transform` is not applied to the returned coverage rectangle.
   Rect GetLocalSpaceCoverage(const Matrix& transform) const;
 };
 
