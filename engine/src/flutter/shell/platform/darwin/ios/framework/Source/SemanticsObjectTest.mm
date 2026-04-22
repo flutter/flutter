@@ -45,8 +45,8 @@ const float kFloatCompareEpsilon = 0.001;
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
   SemanticsObject* object;
   {
-    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
-        new flutter::testing::MockAccessibilityBridge());
+    auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
     bridge = factory.GetWeakPtr();
     object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
   }
