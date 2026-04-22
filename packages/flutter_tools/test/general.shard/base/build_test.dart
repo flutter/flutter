@@ -12,10 +12,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-const kARMCheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
-
 void main() {
   group('GenSnapshot', () {
     late GenSnapshot genSnapshot;
@@ -193,8 +189,7 @@ void main() {
             'main.dill',
           ],
         ),
-        kWhichSysctlCommand,
-        kARMCheckCommand,
+
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -253,8 +248,7 @@ void main() {
             'main.dill',
           ],
         ),
-        kWhichSysctlCommand,
-        kARMCheckCommand,
+
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -311,8 +305,7 @@ void main() {
             'main.dill',
           ],
         ),
-        kWhichSysctlCommand,
-        kARMCheckCommand,
+
         FakeCommand(
           command: <String>[
             'xcrun',

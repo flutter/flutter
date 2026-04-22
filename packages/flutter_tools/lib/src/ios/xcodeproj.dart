@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ffi' show Abi;
 
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
@@ -54,6 +55,7 @@ class XcodeProjectInterpreter {
     required Analytics analytics,
     Version? version,
     String? build,
+    Abi? currentAbi,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -63,6 +65,7 @@ class XcodeProjectInterpreter {
          logger: logger,
          platform: platform,
          processManager: processManager,
+         currentAbi: currentAbi,
        ),
        _version = version,
        _build = build,
@@ -80,6 +83,7 @@ class XcodeProjectInterpreter {
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
     String? build = '13C100',
     Analytics? analytics,
+    Abi? currentAbi = Abi.macosX64,
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -93,6 +97,7 @@ class XcodeProjectInterpreter {
       version: version,
       build: build,
       analytics: analytics ?? const NoOpAnalytics(),
+      currentAbi: currentAbi,
     );
   }
 
