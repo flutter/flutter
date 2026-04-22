@@ -10,9 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+/// A [CustomPainter] that calls a callback when it paints.
 class TestCallbackPainter extends CustomPainter {
+  /// Creates a [TestCallbackPainter] that calls [onPaint] when it paints.
   const TestCallbackPainter({required this.onPaint});
 
+  /// The callback called when the painter paints.
   final VoidCallback onPaint;
 
   @override
@@ -21,7 +24,7 @@ class TestCallbackPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(TestCallbackPainter oldPainter) => true;
+  bool shouldRepaint(covariant TestCallbackPainter oldDelegate) => true;
 }
 
 class SpyFixedExtentScrollController extends FixedExtentScrollController {
