@@ -126,7 +126,7 @@ class WebAssetServer implements AssetReader {
   /// with three fields:
   ///
   /// `src`: A string that corresponds to the file path relative to the app base
-  /// URL that contains the DDC library bundle.
+  /// URL root that contains the DDC library bundle.
   /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
@@ -135,7 +135,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "<file_name>",
+  ///     "src": "/<file_name>",
   ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
