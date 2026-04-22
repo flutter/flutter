@@ -81,7 +81,7 @@ def safe_description(accessible: object) -> str:
 def safe_state_names(accessible: object) -> list[str]:
     try:
         state_set = accessible.getState()
-        return sorted(state_set.getStates())
+        return sorted(str(state) for state in state_set.getStates())
     except Exception:
         return []
 

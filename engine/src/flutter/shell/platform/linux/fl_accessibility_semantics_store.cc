@@ -29,8 +29,7 @@ static void fl_accessibility_semantics_node_free(gpointer data) {
 
 static FlAccessibilitySemanticsNode* fl_accessibility_semantics_node_new(
     FlutterSemanticsNode2* semantics) {
-  FlAccessibilitySemanticsNode* node =
-      g_new0(FlAccessibilitySemanticsNode, 1);
+  FlAccessibilitySemanticsNode* node = g_new0(FlAccessibilitySemanticsNode, 1);
   node->id = semantics->id;
   node->label = g_strdup(semantics->label);
   node->value = g_strdup(semantics->value);
@@ -62,8 +61,8 @@ static void fl_accessibility_semantics_store_dispose(GObject* object) {
 
   g_clear_pointer(&self->nodes_by_id, g_hash_table_unref);
 
-  G_OBJECT_CLASS(fl_accessibility_semantics_store_parent_class)->dispose(
-      object);
+  G_OBJECT_CLASS(fl_accessibility_semantics_store_parent_class)
+      ->dispose(object);
 }
 
 static void fl_accessibility_semantics_store_class_init(
@@ -74,9 +73,9 @@ static void fl_accessibility_semantics_store_class_init(
 
 static void fl_accessibility_semantics_store_init(
     FlAccessibilitySemanticsStore* self) {
-  self->nodes_by_id = g_hash_table_new_full(
-      g_direct_hash, g_direct_equal, nullptr,
-      fl_accessibility_semantics_node_free);
+  self->nodes_by_id =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
+                            fl_accessibility_semantics_node_free);
 }
 
 FlAccessibilitySemanticsStore* fl_accessibility_semantics_store_new(
@@ -108,7 +107,8 @@ void fl_accessibility_semantics_store_handle_update(
   }
 }
 
-const FlAccessibilitySemanticsNode* fl_accessibility_semantics_store_lookup_node(
+const FlAccessibilitySemanticsNode*
+fl_accessibility_semantics_store_lookup_node(
     FlAccessibilitySemanticsStore* self,
     int32_t node_id) {
   g_return_val_if_fail(FL_IS_ACCESSIBILITY_SEMANTICS_STORE(self), nullptr);

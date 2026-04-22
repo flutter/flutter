@@ -39,7 +39,8 @@ void fl_accessibility_semantics_store_handle_update(
     FlAccessibilitySemanticsStore* self,
     const FlutterSemanticsUpdate2* update);
 
-const FlAccessibilitySemanticsNode* fl_accessibility_semantics_store_lookup_node(
+const FlAccessibilitySemanticsNode*
+fl_accessibility_semantics_store_lookup_node(
     FlAccessibilitySemanticsStore* self,
     int32_t node_id);
 

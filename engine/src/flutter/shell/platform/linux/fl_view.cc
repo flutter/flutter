@@ -22,6 +22,7 @@
 #if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #endif
+#include "flutter/shell/platform/linux/fl_accessibility_semantics_store.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -101,6 +102,13 @@ struct _FlView {
   // GTK4 bridge retaining semantics state until a full native accessibility
   // implementation lands.
   FlAccessibilityBridgeGtk4* accessibility_bridge;
+
+  // Zero-size host for synthetic widget-backed accessibility proxies.
+  GtkWidget* accessibility_host;
+
+  // Synthetic first-level accessibility children used to expose Flutter
+  // semantics through GTK4's widget-backed accessibility model.
+  GHashTable* accessibility_children_by_id;
 #endif
 
   // Signal subscripton for cursor changes.
@@ -125,6 +133,10 @@ enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
 
 static guint fl_view_signals[LAST_SIGNAL];
 
+#if FLUTTER_LINUX_GTK4
+static constexpr double kAccessibilityProxyOffset = -100000.0;
+#endif
+
 static void fl_renderable_iface_init(FlRenderableInterface* iface);
 
 static void fl_view_plugin_registry_iface_init(
@@ -137,6 +149,247 @@ static void log_once(bool* flag, const char* message) {
   *flag = true;
   g_warning("%s", message);
 }
+
+#if FLUTTER_LINUX_GTK4
+static gboolean semantics_is_checked(FlutterSemanticsFlags flags) {
+  return flags.is_checked == kFlutterCheckStateTrue ||
+         flags.is_toggled == kFlutterTristateTrue;
+}
+
+static gboolean semantics_is_checkable(FlutterSemanticsFlags flags) {
+  return flags.is_checked != kFlutterCheckStateNone ||
+         flags.is_toggled != kFlutterTristateNone;
+}
+
+static gboolean semantics_is_selected(FlutterSemanticsFlags flags) {
+  return flags.is_selected == kFlutterTristateTrue;
+}
+
+static gboolean semantics_is_disabled(FlutterSemanticsFlags flags) {
+  return flags.is_enabled != kFlutterTristateNone &&
+         flags.is_enabled != kFlutterTristateTrue;
+}
+
+static gboolean semantics_is_read_only(FlutterSemanticsFlags flags) {
+  return !flags.is_text_field || flags.is_read_only;
+}
+
+static gboolean semantics_is_button(const FlAccessibilitySemanticsNode* node) {
+  return node->flags.is_button ||
+         (!node->flags.is_text_field && !semantics_is_checkable(node->flags) &&
+          (node->actions & kFlutterSemanticsActionTap) != 0);
+}
+
+static gboolean semantics_is_container(
+    const FlAccessibilitySemanticsNode* node) {
+  if (node->flags.is_text_field || semantics_is_checkable(node->flags) ||
+      semantics_is_button(node)) {
+    return FALSE;
+  }
+  return node->child_count > 0 && node->children_in_traversal_order != nullptr;
+}
+
+static const char* semantics_role_description(
+    const FlAccessibilitySemanticsNode* node) {
+  if (node->flags.is_text_field) {
+    return "text box";
+  }
+  if (semantics_is_checkable(node->flags)) {
+    return "checkbox";
+  }
+  if ((node->actions & kFlutterSemanticsActionTap) != 0) {
+    return "button";
+  }
+  return "group";
+}
+
+static void update_accessible_from_semantics(
+    GtkAccessible* accessible,
+    const FlAccessibilitySemanticsNode* node) {
+  if (node == nullptr) {
+    gtk_accessible_reset_property(accessible, GTK_ACCESSIBLE_PROPERTY_LABEL);
+    gtk_accessible_reset_property(accessible,
+                                  GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT);
+    gtk_accessible_reset_property(accessible,
+                                  GTK_ACCESSIBLE_PROPERTY_READ_ONLY);
+    gtk_accessible_reset_property(accessible,
+                                  GTK_ACCESSIBLE_PROPERTY_ROLE_DESCRIPTION);
+    gtk_accessible_reset_state(accessible, GTK_ACCESSIBLE_STATE_DISABLED);
+    gtk_accessible_reset_state(accessible, GTK_ACCESSIBLE_STATE_SELECTED);
+    gtk_accessible_reset_state(accessible, GTK_ACCESSIBLE_STATE_CHECKED);
+    return;
+  }
+
+  if (node->label != nullptr && node->label[0] != '\0') {
+    gtk_accessible_update_property(accessible, GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                   node->label, -1);
+  } else {
+    gtk_accessible_reset_property(accessible, GTK_ACCESSIBLE_PROPERTY_LABEL);
+  }
+
+  if (node->value != nullptr && node->value[0] != '\0') {
+    gtk_accessible_update_property(
+        accessible, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT, node->value, -1);
+  } else {
+    gtk_accessible_reset_property(accessible,
+                                  GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT);
+  }
+
+  gtk_accessible_update_property(accessible, GTK_ACCESSIBLE_PROPERTY_READ_ONLY,
+                                 semantics_is_read_only(node->flags), -1);
+  gtk_accessible_update_property(accessible,
+                                 GTK_ACCESSIBLE_PROPERTY_ROLE_DESCRIPTION,
+                                 semantics_role_description(node), -1);
+  gtk_accessible_update_state(accessible, GTK_ACCESSIBLE_STATE_DISABLED,
+                              semantics_is_disabled(node->flags), -1);
+  gtk_accessible_update_state(accessible, GTK_ACCESSIBLE_STATE_SELECTED,
+                              semantics_is_selected(node->flags), -1);
+  if (semantics_is_checkable(node->flags)) {
+    gtk_accessible_update_state(accessible, GTK_ACCESSIBLE_STATE_CHECKED,
+                                semantics_is_checked(node->flags)
+                                    ? GTK_ACCESSIBLE_TRISTATE_TRUE
+                                    : GTK_ACCESSIBLE_TRISTATE_FALSE,
+                                -1);
+  } else {
+    gtk_accessible_reset_state(accessible, GTK_ACCESSIBLE_STATE_CHECKED);
+  }
+}
+
+static GtkWidget* create_accessibility_child_widget(
+    const FlAccessibilitySemanticsNode* node) {
+  GtkWidget* child = nullptr;
+  if (node->flags.is_text_field) {
+    child = gtk_entry_new();
+    gtk_editable_set_editable(GTK_EDITABLE(child), !node->flags.is_read_only);
+  } else if (semantics_is_checkable(node->flags)) {
+    child = gtk_check_button_new();
+    gtk_check_button_set_active(GTK_CHECK_BUTTON(child),
+                                semantics_is_checked(node->flags));
+  } else if (semantics_is_button(node)) {
+    child = gtk_button_new();
+  } else if (semantics_is_container(node)) {
+    child = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  } else {
+    child = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  }
+
+  gtk_widget_set_size_request(child, 0, 0);
+  gtk_widget_set_hexpand(child, FALSE);
+  gtk_widget_set_vexpand(child, FALSE);
+  gtk_widget_set_focusable(child, FALSE);
+  gtk_widget_set_can_target(child, FALSE);
+  gtk_widget_show(child);
+  return child;
+}
+
+static void fl_view_clear_accessibility_children(FlView* self) {
+  if (self->accessibility_children_by_id == nullptr) {
+    return;
+  }
+
+  g_hash_table_foreach_remove(
+      self->accessibility_children_by_id,
+      [](gpointer key, gpointer value, gpointer user_data) -> gboolean {
+        GtkWidget* child = GTK_WIDGET(value);
+        GtkWidget* parent = gtk_widget_get_parent(child);
+        if (GTK_IS_BOX(parent)) {
+          gtk_box_remove(GTK_BOX(parent), child);
+        }
+        return TRUE;
+      },
+      self);
+}
+
+static void update_accessibility_child_widget(
+    GtkWidget* child,
+    const FlAccessibilitySemanticsNode* node) {
+  gtk_widget_set_sensitive(child, !semantics_is_disabled(node->flags));
+
+  if (GTK_IS_ENTRY(child)) {
+    gtk_editable_set_editable(GTK_EDITABLE(child), !node->flags.is_read_only);
+    gtk_editable_set_text(GTK_EDITABLE(child),
+                          node->value != nullptr ? node->value : "");
+  } else if (GTK_IS_CHECK_BUTTON(child)) {
+    if (node->label != nullptr) {
+      gtk_check_button_set_label(GTK_CHECK_BUTTON(child), node->label);
+    } else {
+      gtk_check_button_set_label(GTK_CHECK_BUTTON(child), "");
+    }
+    gtk_check_button_set_active(GTK_CHECK_BUTTON(child),
+                                semantics_is_checked(node->flags));
+  } else if (GTK_IS_BUTTON(child)) {
+    gtk_button_set_label(GTK_BUTTON(child),
+                         node->label != nullptr ? node->label : "");
+  }
+
+  update_accessible_from_semantics(GTK_ACCESSIBLE(child), node);
+}
+
+static GtkWidget* build_accessibility_subtree(
+    FlView* self,
+    FlAccessibilitySemanticsStore* store,
+    const FlAccessibilitySemanticsNode* node) {
+  GtkWidget* child = create_accessibility_child_widget(node);
+  update_accessibility_child_widget(child, node);
+  g_hash_table_insert(self->accessibility_children_by_id,
+                      GINT_TO_POINTER(node->id), g_object_ref(child));
+
+  if (!GTK_IS_BOX(child) || !semantics_is_container(node)) {
+    return child;
+  }
+
+  for (size_t i = 0; i < node->child_count; ++i) {
+    int32_t child_id = node->children_in_traversal_order[i];
+    const FlAccessibilitySemanticsNode* child_node =
+        fl_accessibility_semantics_store_lookup_node(store, child_id);
+    if (child_node == nullptr) {
+      continue;
+    }
+
+    GtkWidget* subtree = build_accessibility_subtree(self, store, child_node);
+    gtk_box_append(GTK_BOX(child), subtree);
+  }
+
+  return child;
+}
+
+static void fl_view_update_root_accessible_properties(FlView* self) {
+  FlAccessibilitySemanticsStore* store =
+      fl_accessibility_bridge_gtk4_get_semantics_store(
+          self->accessibility_bridge);
+  const FlAccessibilitySemanticsNode* root =
+      fl_accessibility_semantics_store_lookup_node(store, 0);
+  update_accessible_from_semantics(GTK_ACCESSIBLE(self), root);
+}
+
+static void fl_view_update_accessibility_children(FlView* self) {
+  FlAccessibilitySemanticsStore* store =
+      fl_accessibility_bridge_gtk4_get_semantics_store(
+          self->accessibility_bridge);
+  const FlAccessibilitySemanticsNode* root =
+      fl_accessibility_semantics_store_lookup_node(store, 0);
+
+  fl_view_clear_accessibility_children(self);
+  if (root == nullptr || root->child_count == 0 ||
+      root->children_in_traversal_order == nullptr ||
+      self->accessibility_host == nullptr) {
+    return;
+  }
+
+  for (size_t i = 0; i < root->child_count; ++i) {
+    int32_t child_id = root->children_in_traversal_order[i];
+    const FlAccessibilitySemanticsNode* node =
+        fl_accessibility_semantics_store_lookup_node(store, child_id);
+    if (node == nullptr) {
+      continue;
+    }
+
+    GtkWidget* child = build_accessibility_subtree(self, store, node);
+    gtk_fixed_put(GTK_FIXED(self->accessibility_host), child,
+                  kAccessibilityProxyOffset, kAccessibilityProxyOffset);
+  }
+}
+#endif
 
 #if FLUTTER_LINUX_GTK4 && defined(FLUTTER_LINUX_GTK4_NATIVE_COMPOSITOR)
 static gboolean gtk4_native_compositor_enabled() {
@@ -451,6 +704,8 @@ static void update_semantics_cb(FlView* self,
 #else
   fl_accessibility_bridge_gtk4_handle_update_semantics(
       self->accessibility_bridge, update);
+  fl_view_update_root_accessible_properties(self);
+  fl_view_update_accessibility_children(self);
 #endif
 }
 
@@ -1070,6 +1325,8 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->pointer_manager);
   g_clear_object(&self->touch_manager);
 #if FLUTTER_LINUX_GTK4
+  fl_view_clear_accessibility_children(self);
+  g_clear_pointer(&self->accessibility_children_by_id, g_hash_table_unref);
   g_clear_object(&self->motion_controller);
   g_clear_object(&self->click_gesture);
   g_clear_object(&self->scroll_controller);
@@ -1180,6 +1437,9 @@ static void fl_view_class_init(FlViewClass* klass) {
 #if !FLUTTER_LINUX_GTK4
   gtk_widget_class_set_accessible_type(GTK_WIDGET_CLASS(klass),
                                        fl_socket_accessible_get_type());
+#else
+  gtk_widget_class_set_accessible_role(GTK_WIDGET_CLASS(klass),
+                                       GTK_ACCESSIBLE_ROLE_GROUP);
 #endif
 }
 
@@ -1192,6 +1452,8 @@ static void setup_engine(FlView* self) {
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
 #else
   self->accessibility_bridge = fl_accessibility_bridge_gtk4_new(self->view_id);
+  self->accessibility_children_by_id = g_hash_table_new_full(
+      g_direct_hash, g_direct_equal, nullptr, g_object_unref);
 #endif
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
@@ -1279,6 +1541,17 @@ static void fl_view_init(FlView* self) {
   gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
   gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
   gtk_box_append(GTK_BOX(self), GTK_WIDGET(self->render_area));
+
+  self->accessibility_host = gtk_fixed_new();
+  gtk_widget_set_size_request(self->accessibility_host, 0, 0);
+  gtk_widget_set_hexpand(self->accessibility_host, FALSE);
+  gtk_widget_set_vexpand(self->accessibility_host, FALSE);
+  gtk_widget_set_overflow(self->accessibility_host, GTK_OVERFLOW_HIDDEN);
+  gtk_widget_set_opacity(self->accessibility_host, 0.0);
+  gtk_widget_set_focusable(self->accessibility_host, FALSE);
+  gtk_widget_set_can_target(self->accessibility_host, FALSE);
+  gtk_widget_show(self->accessibility_host);
+  gtk_box_append(GTK_BOX(self), self->accessibility_host);
 #else
   gtk_container_add(GTK_CONTAINER(self->event_box),
                     GTK_WIDGET(self->render_area));

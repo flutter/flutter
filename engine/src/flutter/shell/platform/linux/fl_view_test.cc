@@ -120,6 +120,59 @@ TEST(FlViewTest, SemanticsUpdateOtherView) {
   EXPECT_EQ(atk_object_get_n_accessible_children(ATK_OBJECT(accessible)), 0);
 }
 
+#if FLUTTER_LINUX_GTK4
+TEST(FlViewTest, SemanticsButtonWithChildrenUsesButtonWidget) {
+  flutter::testing::fl_ensure_gtk_init();
+
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  FlView* view = fl_view_new(project);
+
+  FlEngine* engine = fl_view_get_engine(view);
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+
+  int32_t root_children[1] = {1};
+  int32_t button_children[1] = {2};
+
+  FlutterSemanticsFlags root_flags = {};
+  FlutterSemanticsFlags button_flags = {};
+  button_flags.is_button = true;
+  FlutterSemanticsFlags label_flags = {};
+
+  FlutterSemanticsNode2 root_node = {
+      .id = 0,
+      .label = "root",
+      .flags2 = &root_flags,
+      .child_count = 1,
+      .children_in_traversal_order = root_children};
+  FlutterSemanticsNode2 button_node = {
+      .id = 1,
+      .label = "Stop",
+      .flags2 = &button_flags,
+      .child_count = 1,
+      .children_in_traversal_order = button_children};
+  FlutterSemanticsNode2 label_node = {
+      .id = 2, .label = "Stop label", .flags2 = &label_flags};
+  FlutterSemanticsNode2* nodes[3] = {&root_node, &button_node, &label_node};
+  FlutterSemanticsUpdate2 update = {
+      .node_count = 3, .nodes = nodes, .view_id = 0};
+  g_signal_emit_by_name(engine, "update-semantics", &update);
+
+  GtkWidget* render_area = gtk_widget_get_first_child(GTK_WIDGET(view));
+  ASSERT_NE(render_area, nullptr);
+  GtkWidget* accessibility_host = gtk_widget_get_next_sibling(render_area);
+  ASSERT_TRUE(GTK_IS_FIXED(accessibility_host));
+
+  GtkWidget* accessibility_child =
+      gtk_widget_get_first_child(accessibility_host);
+  ASSERT_NE(accessibility_child, nullptr);
+  EXPECT_TRUE(GTK_IS_BUTTON(accessibility_child));
+  EXPECT_EQ(
+      gtk_accessible_get_accessible_role(GTK_ACCESSIBLE(accessibility_child)),
+      GTK_ACCESSIBLE_ROLE_BUTTON);
+}
+#endif
+
 // Check secondary view is registered with engine.
 TEST(FlViewTest, SecondaryView) {
   flutter::testing::fl_ensure_gtk_init();
