@@ -2972,10 +2972,7 @@ public class AccessibilityBridgeTest {
         foundCount++;
       }
     }
-    assertEquals(
-        "CONTENT_CHANGE_TYPE_EXPANDED event should not be sent on API 35",
-        0,
-        foundCount);
+    assertEquals("CONTENT_CHANGE_TYPE_EXPANDED event should not be sent on API 35", 0, foundCount);
   }
 
   @Config(sdk = API_LEVELS.API_28)
