@@ -24,8 +24,8 @@ class DlSurfaceProviderImpeller : public DlSurfaceProvider {
       size_t width,
       size_t height,
       PixelFormat format) const override;
-  bool supports(PixelFormat format) const override;
-  bool supports_impeller() const override;
+  bool SupportsPixelFormat(PixelFormat format) const override;
+  bool SupportsImpeller() const override;
 
  protected:
   DlSurfaceProviderImpeller();

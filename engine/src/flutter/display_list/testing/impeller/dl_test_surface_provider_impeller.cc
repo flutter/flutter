@@ -18,14 +18,11 @@ DlSurfaceProviderImpeller::MakePlayground(impeller::PlaygroundBackend backend) {
 bool DlSurfaceProviderImpeller::InitializeSurface(size_t width,
                                                   size_t height,
                                                   PixelFormat format) {
-  if (primary_ == nullptr) {
-    impeller::PlaygroundImpl* playground = GetPlayground();
-    std::shared_ptr<impeller::Context> context = playground->GetContext();
-    std::shared_ptr<impeller::Surface> surface =
-        playground->AcquireSurfaceFrame(context);
-    primary_ = std::make_shared<DlSurfaceInstanceImpeller>(std::move(context),
-                                                           surface);
+  if (format != kN32Premul) {
+    // The caller didn't check our supported formats.
+    return false;
   }
+  primary_ = MakeOffscreenSurface(width, height, format);
   return true;
 }
 
@@ -38,6 +35,10 @@ std::shared_ptr<DlSurfaceInstance>
 DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) const {
+  if (format != kN32Premul) {
+    // The caller didn't check our supported formats.
+    return nullptr;
+  }
   impeller::ISize size(width, height);
   int mip_count = 1;
 
@@ -74,11 +75,11 @@ DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
                                                      target);
 }
 
-bool DlSurfaceProviderImpeller::supports(PixelFormat format) const {
+bool DlSurfaceProviderImpeller::SupportsPixelFormat(PixelFormat format) const {
   return format == kN32Premul;
 }
 
-bool DlSurfaceProviderImpeller::supports_impeller() const {
+bool DlSurfaceProviderImpeller::SupportsImpeller() const {
   return true;
 }
 

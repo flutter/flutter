@@ -17,8 +17,8 @@ class DlSurfaceProviderImpellerMetal : public DlSurfaceProviderImpeller {
  public:
   DlSurfaceProviderImpellerMetal();
 
-  const std::string backend_name() const override;
-  BackendType backend_type() const override;
+  const std::string GetBackendName() const override;
+  BackendType GetBackendType() const override;
 
  protected:
   impeller::PlaygroundImpl* GetPlayground() const override;
@@ -31,8 +31,8 @@ class DlSurfaceProviderImpellerMetalSDF : public DlSurfaceProviderImpeller {
  public:
   DlSurfaceProviderImpellerMetalSDF();
 
-  const std::string backend_name() const override;
-  BackendType backend_type() const override;
+  const std::string GetBackendName() const override;
+  BackendType GetBackendType() const override;
 
  protected:
   impeller::PlaygroundImpl* GetPlayground() const override;

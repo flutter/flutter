@@ -38,25 +38,25 @@ inline void SaveSnapshotIfNecessary(
 #endif  // WRITE_BENCHMARK_SNAPSHOTS
 }
 
-class RectBouncer {
+class RectAnimator {
  public:
-  RectBouncer(DlRect rect, DlPoint bounce_offset, DlISize bounce_limit)
+  RectAnimator(DlRect rect, DlPoint animation_delta, DlISize animation_limit)
       : rect_(rect),
         rect_origin_(rect.GetOrigin()),
-        bounce_offset_(bounce_offset),
-        bounce_limit_(bounce_limit) {}
+        animation_delta_(animation_delta),
+        animation_limit_(animation_limit) {}
 
-  RectBouncer(DlRect rect,
-              DlPoint bounce_offset,
-              const std::shared_ptr<DlSurfaceInstance>& surface)
-      : RectBouncer(rect, bounce_offset, surface->GetSize()) {}
+  RectAnimator(DlRect rect,
+               DlPoint animation_delta,
+               const std::shared_ptr<DlSurfaceInstance>& surface)
+      : RectAnimator(rect, animation_delta, surface->GetSize()) {}
 
-  void Bounce() {
-    rect_ = rect_.Shift(bounce_offset_);
-    if (rect_.GetRight() > bounce_limit_.width) {
+  void Animate() {
+    rect_ = rect_.Shift(animation_delta_);
+    if (rect_.GetRight() > animation_limit_.width) {
       rect_ = rect_.Shift(rect_origin_.x - rect_.GetLeft(), 0);
     }
-    if (rect_.GetBottom() > bounce_limit_.height) {
+    if (rect_.GetBottom() > animation_limit_.height) {
       rect_ = rect_.Shift(0, rect_origin_.y - rect_.GetTop());
     }
   }
@@ -69,8 +69,8 @@ class RectBouncer {
   DlRect rect_;
   const DlPoint rect_origin_;
 
-  const DlPoint bounce_offset_;
-  const DlSize bounce_limit_;
+  const DlPoint animation_delta_;
+  const DlSize animation_limit_;
 };
 
 class DlPathVerbCounter : public DlPathReceiver {
@@ -218,13 +218,13 @@ void BM_DrawRect(benchmark::State& state,
 
   // As rects have DlScalar dimensions, we want to ensure that we also
   // draw rects with non-integer position and size
-  const DlPoint offset(0.5f, 0.5f);
-  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
+  const DlPoint delta(0.5f, 0.5f);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
 
   state.counters["DrawCallCount"] = kRectsToDraw;
   for (size_t i = 0; i < kRectsToDraw; i++) {
-    builder.DrawRect(bouncer.GetRect(), paint);
-    bouncer.Bounce();
+    builder.DrawRect(animator.GetRect(), paint);
+    animator.Animate();
   }
 
   auto display_list = builder.Build();
@@ -261,14 +261,14 @@ void BM_DrawOval(benchmark::State& state,
   surface->Clear(DlColor::kTransparent());
   surface->FlushSubmitCpuSync();
 
-  const DlPoint offset(0.5f, 0.5f);
+  const DlPoint delta(0.5f, 0.5f);
   DlSize size(length * 1.5f, length);
-  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
+  RectAnimator animator(DlRect::MakeSize(size), delta, surface);
 
   state.counters["DrawCallCount"] = kOvalsToDraw;
   for (size_t i = 0; i < kOvalsToDraw; i++) {
-    builder.DrawOval(bouncer.GetRect(), paint);
-    bouncer.Bounce();
+    builder.DrawOval(animator.GetRect(), paint);
+    animator.Animate();
   }
   auto display_list = builder.Build();
   FML_CHECK(display_list->GetRecordCount() >= kOvalsToDraw);
@@ -305,13 +305,13 @@ void BM_DrawCircle(benchmark::State& state,
   surface->FlushSubmitCpuSync();
 
   DlScalar radius = length / 2.0f;
-  const DlPoint offset(0.5f, 0.5f);
-  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
+  const DlPoint delta(0.5f, 0.5f);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
 
   state.counters["DrawCallCount"] = kCirclesToDraw;
   for (size_t i = 0; i < kCirclesToDraw; i++) {
-    builder.DrawCircle(bouncer.GetCenter(), radius, paint);
-    bouncer.Bounce();
+    builder.DrawCircle(animator.GetCenter(), radius, paint);
+    animator.Animate();
   }
   auto display_list = builder.Build();
   FML_CHECK(display_list->GetRecordCount() >= kCirclesToDraw);
@@ -374,17 +374,17 @@ void BM_DrawRRect(benchmark::State& state,
       FML_UNREACHABLE();
   }
 
-  const DlPoint offset = DlPoint(0.5f, 0.5f);
+  const DlPoint delta = DlPoint(0.5f, 0.5f);
   const DlScalar multiplier = length / 16.0f;
-  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
 
   radii = radii * multiplier;
 
   state.counters["DrawCallCount"] = kRRectsToDraw;
   for (size_t i = 0; i < kRRectsToDraw; i++) {
-    DlRoundRect rrect = DlRoundRect::MakeRectRadii(bouncer.GetRect(), radii);
+    DlRoundRect rrect = DlRoundRect::MakeRectRadii(animator.GetRect(), radii);
     builder.DrawRoundRect(rrect, paint);
-    bouncer.Bounce();
+    animator.Animate();
   }
   auto display_list = builder.Build();
   FML_CHECK(display_list->GetRecordCount() >= kRRectsToDraw);
@@ -466,18 +466,18 @@ void BM_DrawRSE(benchmark::State& state,
       FML_UNREACHABLE();
   }
 
-  const DlPoint offset = DlPoint(0.5f, 0.5f);
+  const DlPoint delta = DlPoint(0.5f, 0.5f);
   const DlScalar multiplier = length / 16.0f;
-  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
 
   radii = radii * multiplier;
 
   state.counters["DrawCallCount"] = kRSEsToDraw;
   for (size_t i = 0; i < kRSEsToDraw; i++) {
     DlRoundSuperellipse rse =
-        DlRoundSuperellipse::MakeRectRadii(bouncer.GetRect(), radii);
+        DlRoundSuperellipse::MakeRectRadii(animator.GetRect(), radii);
     builder.DrawRoundSuperellipse(rse, paint);
-    bouncer.Bounce();
+    animator.Animate();
   }
   auto display_list = builder.Build();
   FML_CHECK(display_list->GetRecordCount() >= kRSEsToDraw);
@@ -561,21 +561,21 @@ void BM_DrawDRRect(benchmark::State& state,
       FML_UNREACHABLE();
   }
 
-  const DlPoint offset(0.5f, 0.5f);
+  const DlPoint delta(0.5f, 0.5f);
   const DlScalar inner_scale = -0.1f * length;
   const DlScalar multiplier = length / 16.0f;
   DlRoundingRadii scaled_radii = radii * multiplier;
 
-  RectBouncer bouncer(DlRect::MakeWH(length, length), offset, surface);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
 
   state.counters["DrawCallCount"] = kDRRectsToDraw;
   for (size_t i = 0; i < kDRRectsToDraw; i++) {
-    const DlRect outer_rect = bouncer.GetRect();
+    const DlRect outer_rect = animator.GetRect();
     const DlRect inner_rect = outer_rect.Expand(inner_scale);
     DlRoundRect outer = DlRoundRect::MakeRectRadii(outer_rect, scaled_radii);
     DlRoundRect inner = DlRoundRect::MakeRectRadii(inner_rect, scaled_radii);
     builder.DrawDiffRoundRect(outer, inner, paint);
-    bouncer.Bounce();
+    animator.Animate();
   }
   auto display_list = builder.Build();
   FML_CHECK(display_list->GetRecordCount() >= kDRRectsToDraw);
@@ -608,23 +608,23 @@ void BM_DrawArc(benchmark::State& state,
   surface->FlushSubmitCpuSync();
 
   DlScalar starting_angle = 0.0f;
-  DlPoint offset(0.5f, 0.5f);
+  DlPoint delta(0.5f, 0.5f);
 
   // Just some random sweeps that will mostly circumnavigate the circle
   std::vector<DlScalar> segment_sweeps = {5.5f,  -10.0f, 42.0f, 71.7f, 90.0f,
                                           37.5f, 17.9f,  32.0f, 379.4f};
 
   DlSize size(length, length);
-  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
+  RectAnimator animator(DlRect::MakeSize(size), delta, surface);
 
   size_t total_call_count = kArcSweepSetsToDraw * segment_sweeps.size();
   state.counters["DrawCallCount"] = total_call_count;
   for (size_t i = 0; i < kArcSweepSetsToDraw; i++) {
     for (DlScalar sweep : segment_sweeps) {
-      builder.DrawArc(bouncer.GetRect(), starting_angle, sweep, false, paint);
+      builder.DrawArc(animator.GetRect(), starting_angle, sweep, false, paint);
       starting_angle += sweep + 5.0f;
     }
-    bouncer.Bounce();
+    animator.Animate();
   }
 
   auto display_list = builder.Build();
@@ -1159,9 +1159,9 @@ void BM_DrawImage(benchmark::State& state,
     image = MakeTestImage(bitmap_size, bitmap_size, DlColor::kRed());
   }
 
-  const DlPoint offset(0.5f, 0.5f);
+  const DlPoint delta(0.5f, 0.5f);
   const DlSize size(bitmap_size, bitmap_size);
-  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
+  RectAnimator animator(DlRect::MakeSize(size), delta, surface);
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
@@ -1169,8 +1169,8 @@ void BM_DrawImage(benchmark::State& state,
       auto sk_image = ImageFromBitmapWithNewID(bitmap);
       image = DlImageSkia::Make(sk_image);
     }
-    builder.DrawImage(image, bouncer.GetPoint(), options, &paint);
-    bouncer.Bounce();
+    builder.DrawImage(image, animator.GetPoint(), options, &paint);
+    animator.Animate();
   }
 
   auto display_list = builder.Build();
@@ -1237,11 +1237,11 @@ void BM_DrawImageRect(benchmark::State& state,
     image = MakeTestImage(bitmap_size, bitmap_size, DlColor::kRed());
   }
 
-  const DlPoint offset(0.5f, 0.5f);
+  const DlPoint delta(0.5f, 0.5f);
   DlRect src = DlRect::MakeXYWH(bitmap_size / 4.0f, bitmap_size / 4.0f,
                                 bitmap_size / 2.0f, bitmap_size / 2.0f);
   DlSize size(bitmap_size * 0.75f, bitmap_size * 0.75f);
-  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
+  RectAnimator animator(DlRect::MakeSize(size), delta, surface);
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
@@ -1249,9 +1249,9 @@ void BM_DrawImageRect(benchmark::State& state,
       auto sk_image = ImageFromBitmapWithNewID(bitmap);
       image = DlImageSkia::Make(sk_image);
     }
-    builder.DrawImageRect(image, src, bouncer.GetRect(), options, &paint,
+    builder.DrawImageRect(image, src, animator.GetRect(), options, &paint,
                           constraint);
-    bouncer.Bounce();
+    animator.Animate();
   }
 
   auto display_list = builder.Build();
@@ -1322,9 +1322,9 @@ void BM_DrawImageNine(benchmark::State& state,
     image = MakeTestImage(bitmap_size, bitmap_size, DlColor::kRed());
   }
 
-  const DlPoint offset(0.5f, 0.5f);
+  const DlPoint delta(0.5f, 0.5f);
   DlSize size(bitmap_size * 0.75f, bitmap_size * 0.75f);
-  RectBouncer bouncer(DlRect::MakeSize(size), offset, surface);
+  RectAnimator animator(DlRect::MakeSize(size), delta, surface);
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
@@ -1332,8 +1332,8 @@ void BM_DrawImageNine(benchmark::State& state,
       auto sk_image = ImageFromBitmapWithNewID(bitmap);
       image = DlImageSkia::Make(sk_image);
     }
-    builder.DrawImageNine(image, center, bouncer.GetRect(), filter, &paint);
-    bouncer.Bounce();
+    builder.DrawImageNine(image, center, animator.GetRect(), filter, &paint);
+    animator.Animate();
   }
 
   auto display_list = builder.Build();

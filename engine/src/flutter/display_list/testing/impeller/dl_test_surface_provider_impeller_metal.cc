@@ -47,21 +47,21 @@ impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetalSDF::GetPlayground()
   return playground_.get();
 }
 
-const std::string DlSurfaceProviderImpellerMetal::backend_name() const {
+const std::string DlSurfaceProviderImpellerMetal::GetBackendName() const {
   return "ImpellerMetal";
 }
 
-DlSurfaceProvider::BackendType DlSurfaceProviderImpellerMetal::backend_type()
+DlSurfaceProvider::BackendType DlSurfaceProviderImpellerMetal::GetBackendType()
     const {
   return BackendType::kImpellerMetal;
 }
 
-const std::string DlSurfaceProviderImpellerMetalSDF::backend_name() const {
+const std::string DlSurfaceProviderImpellerMetalSDF::GetBackendName() const {
   return "ImpellerMetalSDF";
 }
 
-DlSurfaceProvider::BackendType DlSurfaceProviderImpellerMetalSDF::backend_type()
-    const {
+DlSurfaceProvider::BackendType
+DlSurfaceProviderImpellerMetalSDF::GetBackendType() const {
   return BackendType::kImpellerMetalSDF;
 }
 

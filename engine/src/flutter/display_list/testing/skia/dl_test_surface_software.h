@@ -25,11 +25,11 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
       size_t width,
       size_t height,
       PixelFormat format) const override;
-  const std::string backend_name() const override { return "SkiaSoftware"; }
-  BackendType backend_type() const override {
+  const std::string GetBackendName() const override { return "SkiaSoftware"; }
+  BackendType GetBackendType() const override {
     return BackendType::kSkiaSoftware;
   }
-  bool supports(PixelFormat format) const override { return true; }
+  bool SupportsPixelFormat(PixelFormat format) const override { return true; }
 
  private:
   std::shared_ptr<DlSurfaceInstance> primary_;

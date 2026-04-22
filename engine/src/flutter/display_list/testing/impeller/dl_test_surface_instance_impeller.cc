@@ -38,7 +38,7 @@ const impeller::RenderTarget& DlSurfaceInstanceImpeller::GetRenderTarget()
 }
 
 void DlSurfaceInstanceImpeller::Clear(const DlColor& color) {
-  // Clear whatever is in the builder as it is now irrellevant.
+  // Clear whatever is in the builder as it is now irrelevant.
   (void)builder_.Build();
   builder_.Clear(color);
   DoRenderDisplayList(builder_.Build());
@@ -64,6 +64,12 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
     impeller::RenderToTarget(aiks_context_.GetContentContext(),
                              GetRenderTarget(), display_list,
                              display_list->GetBounds(), false, false);
+    auto idle_waiter = context_->GetIdleWaiter();
+    if (idle_waiter) {
+      // This is only non-null for Vulkan contexts, which aren't yet
+      // supported yet, but checking it for future potential...
+      idle_waiter->WaitIdle();
+    }
   }
 }
 

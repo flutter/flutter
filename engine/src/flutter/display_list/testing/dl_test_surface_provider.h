@@ -101,10 +101,11 @@ class DlSurfaceProvider {
   static std::unique_ptr<DlSurfaceProvider> Create(BackendType backend_type);
 
   virtual ~DlSurfaceProvider() = default;
-  virtual const std::string backend_name() const = 0;
-  virtual BackendType backend_type() const = 0;
-  virtual bool supports(PixelFormat format) const = 0;
-  virtual bool supports_impeller() const { return false; }
+
+  virtual const std::string GetBackendName() const = 0;
+  virtual BackendType GetBackendType() const = 0;
+  virtual bool SupportsPixelFormat(PixelFormat format) const = 0;
+  virtual bool SupportsImpeller() const { return false; }
   virtual bool InitializeSurface(size_t width,
                                  size_t height,
                                  PixelFormat format = kN32Premul) = 0;

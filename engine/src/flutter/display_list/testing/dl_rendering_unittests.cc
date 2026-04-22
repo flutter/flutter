@@ -605,7 +605,7 @@ class RenderEnvironment {
 
   RenderEnvironment(const DlSurfaceProvider* provider, PixelFormat format)
       : provider_(provider), format_(format) {
-    if (provider->supports(format)) {
+    if (provider->SupportsPixelFormat(format)) {
       surface_1x_ =
           provider->MakeOffscreenSurface(kTestWidth, kTestHeight, format);
       surface_2x_ = provider->MakeOffscreenSurface(kTestWidth * 2,
@@ -688,10 +688,10 @@ class RenderEnvironment {
   }
 
   const DlSurfaceProvider* provider() const { return provider_; }
-  bool valid() const { return provider_->supports(format_); }
-  const std::string backend_name() const { return provider_->backend_name(); }
+  bool valid() const { return provider_->SupportsPixelFormat(format_); }
+  const std::string backend_name() const { return provider_->GetBackendName(); }
   bool supports_impeller() const {
-    return EnableImpeller && provider_->supports_impeller();
+    return EnableImpeller && provider_->SupportsImpeller();
   }
 
   PixelFormat format() const { return format_; }
@@ -748,7 +748,7 @@ class RenderEnvironment {
   }
   static const sk_sp<DlImage> makeTestImpellerImage(
       const DlSurfaceProvider* provider) {
-    FML_DCHECK(provider->supports_impeller());
+    FML_DCHECK(provider->SupportsImpeller());
     DisplayListBuilder builder(DlRect::MakeWH(kRenderWidth, kRenderHeight));
     DrawCheckerboard(&builder);
     return provider->MakeImpellerImage(builder.Build(),  //
@@ -1133,7 +1133,7 @@ class CanvasCompareTester {
     if (!provider) {
       return false;
     }
-    if (provider->supports_impeller()) {
+    if (provider->SupportsImpeller()) {
       ImpellerSupported = true;
     }
     TestBackends.push_back(type);
@@ -1838,7 +1838,7 @@ class CanvasCompareTester {
     // See https://bugs.chromium.org/p/skia/issues/detail?id=14046
     bool no_hairlines =
         testP.is_draw_path() &&
-        env.provider()->backend_type() != BackendType::kSkiaSoftware;
+        env.provider()->GetBackendType() != BackendType::kSkiaSoftware;
     RenderWith(testP, env, tolerance,
                CaseParameters(
                    "Stroke + defaults",
@@ -2542,7 +2542,7 @@ class CanvasCompareTester {
     if (env.format() == PixelFormat::k565) {
       return 9;
     }
-    if (env.provider()->backend_type() == BackendType::kSkiaOpenGL) {
+    if (env.provider()->GetBackendType() == BackendType::kSkiaOpenGL) {
       // OpenGL gets a little fuzzy at times. Still, "within 5" (aka +/-4)
       // for byte samples is not bad, though the other backends give +/-1
       return 5;
