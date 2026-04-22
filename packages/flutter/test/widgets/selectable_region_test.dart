@@ -6967,8 +6967,7 @@ class RenderSelectAll extends RenderProxyBox with Selectable, SelectionRegistran
 
 /// A [TextSelectionControls] spy with [TextSelectionHandleControls] mixin that
 /// exposes an [onBuildHandle] callback, used to verify overlay insertion order.
-class _TextSelectionControlsSpy extends TextSelectionControls
-    with TextSelectionHandleControls {
+class _TextSelectionControlsSpy extends TextSelectionControls with TextSelectionHandleControls {
   _TextSelectionControlsSpy({this.onBuildHandle});
 
   final VoidCallback? onBuildHandle;
