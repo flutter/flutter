@@ -10,11 +10,7 @@ namespace impeller {
 
 UberSDFGeometry::UberSDFGeometry(const UberSDFParameters& params)
     : params_(params) {
-  base_bounds_ = Rect::MakeLTRB(
-      /*left=*/params_.center.x - params_.size.x,
-      /*top=*/params_.center.y - params_.size.y,
-      /*right=*/params_.center.x + params_.size.x,
-      /*bottom=*/params_.center.y + params_.size.y);
+  base_bounds_ = Rect::MakeEllipseBounds(params_.center, params_.size);
   if (params_.stroke) {
     base_bounds_ = base_bounds_.Expand(params_.stroke->width * 0.5);
   }

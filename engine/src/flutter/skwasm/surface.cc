@@ -41,21 +41,29 @@
 //    the Dart code, which will complete the future that was returned by the
 //    original Dart method call.
 
-Skwasm::Surface::Surface() {
-  if (skwasm_isSingleThreaded()) {
-    skwasm_connectThread(0);
-  } else {
+unsigned long Skwasm::GetRasterThread() {
+  static unsigned long thread = []() {
+    if (skwasm_isSingleThreaded()) {
+      skwasm_connectThread(0);
+      return 0UL;
+    }
     assert(emscripten_is_main_browser_thread());
-
-    thread_ = emscripten_malloc_wasm_worker(65536);
-    emscripten_wasm_worker_post_function_v(thread_, []() {
+    unsigned long t = emscripten_malloc_wasm_worker(65536);
+    emscripten_wasm_worker_post_function_v(t, []() {
       // Listen to the main thread from the worker
       skwasm_connectThread(0);
     });
 
     // Listen to messages from the worker
-    skwasm_connectThread(thread_);
-  }
+    skwasm_connectThread(t);
+    return t;
+  }();
+  return thread;
+}
+
+Skwasm::Surface::Surface() {
+  // Ensure the raster thread is initialized
+  GetRasterThread();
 }
 
 // General getters are implemented in the header.
@@ -78,7 +86,7 @@ void Skwasm::Surface::Dispose() {
 uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = ++current_callback_id_;
-  skwasm_dispatchTransferCanvas(thread_, this, canvas, callback_id);
+  skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
   return callback_id;
 }
 
@@ -132,7 +140,8 @@ uint32_t Skwasm::Surface::SetSize(int width, int height) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = ++current_callback_id_;
 
-  skwasm_dispatchResizeSurface(thread_, this, width, height, callback_id);
+  skwasm_dispatchResizeSurface(GetRasterThread(), this, width, height,
+                               callback_id);
   return callback_id;
 }
 
@@ -170,8 +179,8 @@ uint32_t Skwasm::Surface::RenderPictures(flutter::DisplayList** pictures,
 
   // Releasing picture_pointers here and will recreate the unique_ptr on the
   // other thread See surface_renderPicturesOnWorker
-  skwasm_dispatchRenderPictures(thread_, this, picture_pointers.release(),
-                                count, callback_id);
+  skwasm_dispatchRenderPictures(GetRasterThread(), this,
+                                picture_pointers.release(), count, callback_id);
   return callback_id;
 }
 
@@ -208,7 +217,8 @@ uint32_t Skwasm::Surface::RasterizeImage(flutter::DlImage* image,
   uint32_t callback_id = ++current_callback_id_;
   image->ref();
 
-  skwasm_dispatchRasterizeImage(thread_, this, image, format, callback_id);
+  skwasm_dispatchRasterizeImage(GetRasterThread(), this, image, format,
+                                callback_id);
   return callback_id;
 }
 
@@ -236,17 +246,8 @@ void Skwasm::Surface::RasterizeImageOnWorker(flutter::DlImage* image,
   data = SkData::MakeUninitialized(byte_size);
   uint8_t* pixels = reinterpret_cast<uint8_t*>(data->writable_data());
 
-  // TODO(jacksongardner):
-  // Normally we'd just call `readPixels` on the image. However, this doesn't
-  // actually work in some cases due to a skia bug. Instead, we just draw the
-  // image to our scratch canvas and grab the pixels out directly with
-  // `glReadPixels`. Once the skia bug is fixed, we should switch back to using
-  // `SkImage::readPixels` instead.
-  // See https://g-issues.skia.org/issues/349201915
-  render_context_->RenderImage(image, format);
-
-  emscripten_glReadPixels(0, 0, image->width(), image->height(), GL_RGBA,
-                          GL_UNSIGNED_BYTE, reinterpret_cast<void*>(pixels));
+  render_context_->RasterizeImage(image, format,
+                                  reinterpret_cast<void*>(pixels));
 
   image->unref();
   skwasm_postRasterizeResult(this, data.release(), callback_id);
@@ -257,7 +258,7 @@ void Skwasm::Surface::RasterizeImageOnWorker(flutter::DlImage* image,
 uint32_t Skwasm::Surface::TriggerContextLoss() {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = ++current_callback_id_;
-  skwasm_dispatchTriggerContextLoss(thread_, this, callback_id);
+  skwasm_dispatchTriggerContextLoss(GetRasterThread(), this, callback_id);
   return callback_id;
 }
 
@@ -294,7 +295,7 @@ void Skwasm::Surface::SetResourceCacheLimit(int bytes) {
 std::unique_ptr<Skwasm::TextureSourceWrapper>
 Skwasm::Surface::CreateTextureSourceWrapper(SkwasmObject texture_source) {
   return std::unique_ptr<Skwasm::TextureSourceWrapper>(
-      new Skwasm::TextureSourceWrapper(thread_, texture_source));
+      new Skwasm::TextureSourceWrapper(texture_source));
 }
 
 // Private methods
@@ -307,14 +308,13 @@ void Skwasm::Surface::RecreateSurface() {
 
 // TextureSourceWrapper implementation
 
-Skwasm::TextureSourceWrapper::TextureSourceWrapper(unsigned long thread_id,
-                                                   SkwasmObject texture_source)
-    : raster_thread_id_(thread_id) {
-  skwasm_setAssociatedObjectOnThread(thread_id, this, texture_source);
+Skwasm::TextureSourceWrapper::TextureSourceWrapper(
+    SkwasmObject texture_source) {
+  skwasm_setAssociatedObjectOnThread(GetRasterThread(), this, texture_source);
 }
 
 Skwasm::TextureSourceWrapper::~TextureSourceWrapper() {
-  skwasm_disposeAssociatedObjectOnThread(raster_thread_id_, this);
+  skwasm_disposeAssociatedObjectOnThread(GetRasterThread(), this);
 }
 
 SkwasmObject Skwasm::TextureSourceWrapper::GetTextureSource() {
@@ -364,7 +364,7 @@ SKWASM_EXPORT void surface_onResizeComplete(Skwasm::Surface* surface,
 }
 
 SKWASM_EXPORT unsigned long surface_getThreadId(Skwasm::Surface* surface) {
-  return surface->GetThreadId();
+  return Skwasm::GetRasterThread();
 }
 
 SKWASM_EXPORT EMSCRIPTEN_WEBGL_CONTEXT_HANDLE
@@ -400,7 +400,7 @@ SKWASM_EXPORT void surface_setCallbackHandler(
 SKWASM_EXPORT void surface_destroy(Skwasm::Surface* surface) {
   Skwasm::live_surface_count--;
   // Dispatch to the worker
-  skwasm_dispatchDisposeSurface(surface->GetThreadId(), surface);
+  skwasm_dispatchDisposeSurface(Skwasm::GetRasterThread(), surface);
 }
 
 SKWASM_EXPORT void surface_dispose(Skwasm::Surface* surface) {

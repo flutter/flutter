@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class MaterialBannerUseCase extends UseCase {
-  MaterialBannerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  MaterialBannerUseCase();
 
   @override
   String get name => 'MaterialBanner';
 
   @override
   String get route => '/material_banner';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

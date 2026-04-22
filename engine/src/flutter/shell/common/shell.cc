@@ -1226,6 +1226,17 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   next_pointer_flow_id_++;
 }
 
+HitTestResponse Shell::OnPlatformViewHitTest(int64_t view_id,
+                                             const flutter::PointData offset) {
+  // hit test should be performed only when UI & platform threads are merged.
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  if (engine_) {
+    return engine_->HitTest(view_id, offset);
+  }
+  return {.has_platform_view = false};
+}
+
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                                   int32_t node_id,

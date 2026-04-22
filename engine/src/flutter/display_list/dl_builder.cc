@@ -1197,8 +1197,7 @@ void DisplayListBuilder::drawCircle(const DlPoint& center, DlScalar radius) {
   DisplayListAttributeFlags flags = kDrawCircleFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    DlRect bounds = DlRect::MakeLTRB(center.x - radius, center.y - radius,
-                                     center.x + radius, center.y + radius);
+    DlRect bounds = DlRect::MakeCircleBounds(center, radius);
     if (AccumulateOpBounds(bounds, flags)) {
       Push<DrawCircleOp>(0, center, radius);
       CheckLayerOpacityCompatibility();

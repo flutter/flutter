@@ -20,9 +20,13 @@ jobs:
     steps:
       - name: Check if label was added before push
         id: check_timing
+        env:
+          PUSH_TIME: ${{ github.event.pull_request.updated_at }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          # Get push time (commit date of the head SHA)
-          PUSH_TIME='${{ github.event.pull_request.updated_at }}'
           echo "Push time: $PUSH_TIME"
 
           # Get latest CICD labeling event time from the last 100 events
@@ -40,7 +44,7 @@ jobs:
                   }
                 }
               }
-            }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -F pr=${{ github.event.pull_request.number }} \
+            }' -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F pr="$PR_NUMBER" \
             --jq '.data.repository.pullRequest.timelineItems.nodes | map(select(.label.name == "CICD")) | last | .createdAt')
           echo "Label time: $LABEL_TIME"
 
@@ -55,8 +59,6 @@ jobs:
             echo "should_remove=false" >> "$GITHUB_OUTPUT"
             echo "Result: Label added at $LABEL_TIME is newer than or same as push at $PUSH_TIME. Skipping removal."
           fi
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Remove outdated CICD label
         if: steps.check_timing.outputs.should_remove == 'true'

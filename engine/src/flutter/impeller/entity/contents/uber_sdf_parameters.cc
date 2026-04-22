@@ -61,4 +61,18 @@ UberSDFParameters UberSDFParameters::MakeOval(
                            .stroke = stroke};
 }
 
+UberSDFParameters UberSDFParameters::MakeRoundedRect(
+    Color color,
+    const Rect& rect,
+    const RoundingRadii& radii,
+    std::optional<StrokeParameters> stroke) {
+  Point size = Point(rect.GetSize() * 0.5f);
+  return UberSDFParameters{.type = Type::kRoundedRect,
+                           .color = color,
+                           .center = rect.GetCenter(),
+                           .size = size,
+                           .stroke = stroke,
+                           .radii = radii};
+}
+
 }  // namespace impeller

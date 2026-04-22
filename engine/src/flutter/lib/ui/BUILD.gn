@@ -135,6 +135,7 @@ source_set("ui") {
     "text/paragraph_builder.h",
     "ui_dart_state.cc",
     "ui_dart_state.h",
+    "window/hit_test_response.h",
     "window/key_data.cc",
     "window/key_data.h",
     "window/key_data_packet.cc",
@@ -151,6 +152,7 @@ source_set("ui") {
     "window/platform_message_response_dart.h",
     "window/platform_message_response_dart_port.cc",
     "window/platform_message_response_dart_port.h",
+    "window/point_data.h",
     "window/pointer_data.cc",
     "window/pointer_data.h",
     "window/pointer_data_packet.cc",
@@ -335,5 +337,8 @@ if (enable_unittests) {
       "//flutter/display_list",
       "//third_party/googletest:gmock",
     ]
+    if (impeller_supports_rendering) {
+      public_deps += [ "//flutter/impeller/display_list" ]
+    }
   }
 }

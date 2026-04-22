@@ -273,10 +273,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 /// that wish to show all the licenses can obtain them by calling [licenses].
 ///
 /// The flutter tool will automatically collect the contents of all the LICENSE
-/// files found at the root of each package into a single LICENSE file in the
-/// default asset bundle. Each license in that file is separated from the next
+/// files found at the root of each package into a single NOTICES file (or its
+/// compressed variant, `NOTICES.Z`) in the default asset bundle. Each license
+/// in that file is separated from the next
 /// by a line of eighty hyphens (`-`), and begins with a list of package names
-/// that the license applies to, one to a line, separated from the next by a
+/// that the license applies to, one to a line, separated from the license text by a
 /// blank line. The `services` package registers a license collector that splits
 /// that file and adds each entry to the registry.
 ///

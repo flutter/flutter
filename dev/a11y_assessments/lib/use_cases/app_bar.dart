@@ -7,13 +7,16 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class AppBarUseCase extends UseCase {
-  AppBarUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  AppBarUseCase();
 
   @override
   String get name => 'AppBar';
 
   @override
   String get route => '/app-bar';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

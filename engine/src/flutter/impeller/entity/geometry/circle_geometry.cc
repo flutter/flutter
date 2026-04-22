@@ -91,9 +91,7 @@ std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
 
   Scalar half_width = stroke_width_ < 0 ? 0.0 : stroke_width_ * 0.5f;
   Scalar outer_radius = radius_ + half_width + expansion;
-  return Rect::MakeLTRB(-outer_radius, -outer_radius,  //
-                        +outer_radius, +outer_radius)
-      .Shift(center_)
+  return Rect::MakeCircleBounds(center_, outer_radius)
       .TransformAndClipBounds(transform);
 }
 

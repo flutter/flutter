@@ -143,6 +143,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (std::unique_ptr<PointerDataPacket> packet),
               (override));
 
+  MOCK_METHOD(HitTestResponse,
+              OnPlatformViewHitTest,
+              (int64_t view_id, const flutter::PointData offset),
+              (override));
+
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
               (int64_t view_id,
@@ -591,6 +596,74 @@ TEST_F(ShellTest, FixturesAreFunctional) {
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   DestroyShell(std::move(shell));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, HitTestInsidePlatformViewIsFunctional) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+
+  configuration.SetEntrypoint("hitTestInsidePlatformViewMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::AutoResetWaitableEvent latch;
+
+  task_runner->PostTask([&shell, &latch]() {
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = 100;
+    metrics.physical_height = 100;
+    metrics.device_pixel_ratio = 1.0;
+    shell->GetEngine()->SetViewportMetrics(0, metrics);
+
+    HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
+    EXPECT_TRUE(response.has_platform_view);
+    latch.Signal();
+  });
+
+  latch.Wait();
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, HitTestOutsidePlatformViewIsFunctional) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+
+  configuration.SetEntrypoint("hitTestOutsidePlatformViewMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::AutoResetWaitableEvent latch;
+
+  task_runner->PostTask([&shell, &latch]() {
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = 100;
+    metrics.physical_height = 100;
+    metrics.device_pixel_ratio = 1.0;
+    shell->GetEngine()->SetViewportMetrics(0, metrics);
+
+    HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
+    EXPECT_FALSE(response.has_platform_view);
+    latch.Signal();
+  });
+
+  latch.Wait();
+  DestroyShell(std::move(shell), task_runners);
 }
 
 TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
@@ -2466,7 +2539,7 @@ TEST_F(ShellTest, RasterizerScreenshot) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
+TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
   Settings settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);
   auto task_runner = CreateNewThread();
@@ -2487,7 +2560,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
       shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
-        sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
+        sk_sp<SkImage> image = delegate->MakeSkiaSnapshotSync(
             MakeSizedDisplayList(50, 50), DlISize(50, 50),
             SnapshotPixelFormat::kDontCare);
         EXPECT_NE(image, nullptr);

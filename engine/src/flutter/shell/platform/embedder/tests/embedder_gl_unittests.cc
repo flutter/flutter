@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "GLES3/gl3.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -4312,8 +4313,9 @@ TEST_F(EmbedderTest, SnapshotRenderTargetScalesDownToDriverMax) {
         ASSERT_EQ(big_image->height(), max_size / 2);
 
         CanvasImage* small_image = get_arg(1);
-        ASSERT_TRUE(ImageMatchesFixture("snapshot_large_scene.png",
-                                        small_image->image()->skia_image()));
+        ASSERT_TRUE(ImageMatchesFixture(
+            "snapshot_large_scene.png",
+            small_image->image()->asSkiaImage()->skia_image()));
 
         latch.Signal();
       })));

@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_metal.h"
 
 #include "flow/layers/layer.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -131,7 +132,7 @@ sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
   }
 
   // This image should not escape local use by EmbedderExternalTextureMetal
-  return DlImage::Make(std::move(image));
+  return DlImageSkia::Make(std::move(image));
 }
 
 // |flutter::Texture|

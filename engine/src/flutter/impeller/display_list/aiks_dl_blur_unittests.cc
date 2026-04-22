@@ -1112,8 +1112,7 @@ TEST_P(AiksTest, GaussianBlurScaledAndClipped) {
   Vector2 center = Vector2(1024, 768) / 2;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto rect =
-      Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
+  auto rect = Rect::MakeEllipseBounds(center, clip_size);
   builder.ClipRect(DlRect::MakeLTRB(rect.GetLeft(), rect.GetTop(),
                                     rect.GetRight(), rect.GetBottom()));
   builder.Translate(center.x, center.y);
@@ -1223,8 +1222,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
   Vector2 center = Vector2(1024, 768) / 2;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto clip_bounds =
-      Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
+  auto clip_bounds = Rect::MakeEllipseBounds(center, clip_size);
   builder.ClipRect(DlRect::MakeLTRB(clip_bounds.GetLeft(), clip_bounds.GetTop(),
                                     clip_bounds.GetRight(),
                                     clip_bounds.GetBottom()));
@@ -1278,7 +1276,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     builder.Rotate(rotation);
 
     DlRoundRect rrect =
-        DlRoundRect::MakeRectXY(DlRect::MakeXYWH(-100, -100, 200, 200), 10, 10);
+        DlRoundRect::MakeRectXY(DlRect::MakeCircleBounds({0, 0}, 100), 10, 10);
     builder.DrawRoundRect(rrect, paint);
     return builder.Build();
   };

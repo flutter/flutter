@@ -43,12 +43,14 @@ void CanvasImage::dispose() {
 }
 
 int CanvasImage::colorSpace() {
-  if (image_->impeller_texture()) {
-#if IMPELLER_SUPPORTS_RENDERING
-    return ImageEncodingImpeller::GetColorSpace(image_->impeller_texture());
-#endif  // IMPELLER_SUPPORTS_RENDERING
+  DlColorSpace cs = image_->GetColorSpace();
+  switch (cs) {
+    case DlColorSpace::kExtendedSRGB:
+      return ColorSpace::kExtendedSRGB;
+    case DlColorSpace::kSRGB:
+    default:
+      return ColorSpace::kSRGB;
   }
-  return ColorSpace::kSRGB;
 }
 
 }  // namespace flutter

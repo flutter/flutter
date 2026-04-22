@@ -337,14 +337,6 @@ void main() {
                 ))
               .dependencies,
         );
-        expect(
-          pub.pubspecs[widgetPreviewScaffold.absolute.path]!.first.dependencies,
-          (Pubspec.parse(kWidgetTestPubspecYaml)
-                ..dependencies['unified_analytics'] = HostedDependency(
-                  version: VersionConstraint.parse('8.0.10'),
-                ))
-              .dependencies,
-        );
       },
       overrides: <Type, Generator>{
         Pub: () => pub,

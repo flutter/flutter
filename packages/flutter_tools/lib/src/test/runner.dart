@@ -277,10 +277,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     String pathToImport(String path) {
       assert(path.endsWith('.dart'));
       return path
-          .replaceAll('.', '_')
-          .replaceAll(':', '_')
-          .replaceAll('/', '_')
-          .replaceAll(r'\', '_')
+          .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
@@ -499,10 +496,7 @@ String pathToImport(String path) {
   assert(path.endsWith('.dart'));
   return path
       .replaceRange(path.length - '.dart'.length, null, '')
-      .replaceAll('.', '_')
-      .replaceAll(':', '_')
-      .replaceAll('/', '_')
-      .replaceAll(r'\', '_');
+      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
 }
 
 class SpawnPlugin extends PlatformPlugin {

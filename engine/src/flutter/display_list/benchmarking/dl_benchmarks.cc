@@ -7,6 +7,7 @@
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_text_skia.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 
@@ -1011,7 +1012,7 @@ void BM_DrawImage(benchmark::State& state,
   for (size_t i = 0; i < kImagesToDraw; i++) {
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
-    builder.DrawImage(DlImage::Make(image), dst, options, &paint);
+    builder.DrawImage(DlImageSkia::Make(image), dst, options, &paint);
 
     dst += offset;
     if (dst.x + bitmap_size > canvas_size) {
@@ -1098,7 +1099,7 @@ void BM_DrawImageRect(benchmark::State& state,
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
     DlRect dst = DlRect::MakeOriginSize(origin, size);
-    builder.DrawImageRect(DlImage::Make(image), src, dst, options, &paint,
+    builder.DrawImageRect(DlImageSkia::Make(image), src, dst, options, &paint,
                           constraint);
     origin += offset;
     if (origin.x + size.width > canvas_size) {
@@ -1187,7 +1188,8 @@ void BM_DrawImageNine(benchmark::State& state,
     image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
                           : offscreen->makeImageSnapshot();
     DlRect dst = DlRect::MakeOriginSize(origin, size);
-    builder.DrawImageNine(DlImage::Make(image), center, dst, filter, &paint);
+    builder.DrawImageNine(DlImageSkia::Make(image), center, dst, filter,
+                          &paint);
     origin += offset;
     if (origin.x + size.width > canvas_size) {
       origin.x = 0.0f;

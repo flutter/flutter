@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DrawerUseCase extends UseCase {
-  DrawerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  DrawerUseCase();
 
   @override
   String get name => 'drawer';
 
   @override
   String get route => '/drawer';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const DrawerExample();

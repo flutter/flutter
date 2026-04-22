@@ -16,6 +16,7 @@ import '../prepare_package/archive_creator.dart';
 import '../prepare_package/archive_publisher.dart';
 import '../prepare_package/common.dart';
 import '../prepare_package/process_runner.dart';
+import '../prepare_package/transactional_update.dart';
 import 'common.dart';
 
 void main() {
@@ -97,7 +98,7 @@ void main() {
       late FakeProcessManager processManager;
       late FileSystem fs;
       final args = <List<String>>[];
-      final namedArgs = <Map<Symbol, dynamic>>[];
+      final namedArgs = <Map<Symbol, Object?>>[];
       late String flutter;
       late String dart;
 
@@ -549,15 +550,19 @@ void main() {
 }
 ''';
         fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final calls = <String, List<ProcessResult>?>{
-          // This process fails because the file does NOT already exist
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- rm $gsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath':
+          '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
               null,
         };
         processManager.addCommands(convertResults(calls));
@@ -581,10 +586,9 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = fs.file(jsonPath);
+        final File releaseFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         // Make sure new data is added.
@@ -602,14 +606,14 @@ void main() {
         expect(contents, contains('"channel": "beta"'));
         // Make sure old matching entries are removed.
         expect(contents, isNot(contains('v0.0.0')));
-        final jsonData = json.decode(contents) as Map<String, dynamic>;
-        final releases = jsonData['releases'] as List<dynamic>;
+        final jsonData = json.decode(contents) as Map<String, Object?>;
+        final releases = jsonData['releases']! as List<Object?>;
         expect(releases.length, equals(3));
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
           DateTime.now().difference(
-            DateTime.parse((releases[0] as Map<String, dynamic>)['release_date'] as String),
+            DateTime.parse((releases[0]! as Map<String, Object?>)['release_date']! as String),
           ),
           lessThan(const Duration(minutes: 1)),
         );
@@ -658,15 +662,19 @@ void main() {
 }
 ''';
         fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final calls = <String, List<ProcessResult>?>{
-          // This process fails because the file does NOT already exist
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- rm $gsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath':
+          '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
               null,
         };
         processManager.addCommands(convertResults(calls));
@@ -690,10 +698,9 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = fs.file(jsonPath);
+        final File releaseFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         expect(contents, contains('"dart_sdk_version": "3.2.1"'));
@@ -726,15 +733,19 @@ void main() {
 }
 ''';
         fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final calls = <String, List<ProcessResult>?>{
-          // This process fails because the file does NOT already exist
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- rm $gsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath':
+          '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
               null,
         };
         processManager.addCommands(convertResults(calls));
@@ -758,14 +769,14 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
+
         await publisher.publishArchive();
 
-        final File releaseFile = fs.file(jsonPath);
+        final File releaseFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
-        final releases = jsonDecode(contents) as Map<String, dynamic>;
-        expect((releases['releases'] as List<dynamic>).length, equals(2));
+        final releases = jsonDecode(contents) as Map<String, Object?>;
+        expect((releases['releases']! as List<Object?>).length, equals(2));
       });
 
       test('updates base_url from old bucket to new bucket', () async {
@@ -809,15 +820,19 @@ void main() {
 }
 ''';
         fs.file(jsonPath).writeAsStringSync(releasesJson);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+        fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
         fs.file(archivePath).writeAsStringSync('archive contents');
         final calls = <String, List<ProcessResult>?>{
-          // This process fails because the file does NOT already exist
-          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
           '$gsutilCall -- stat $gsArchivePath': <ProcessResult>[ProcessResult(0, 1, '', '')],
           '$gsutilCall -- rm $gsArchivePath': null,
           '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          '$gsutilCall -- rm $gsJsonPath': null,
-          '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath':
+          '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
               null,
         };
         processManager.addCommands(convertResults(calls));
@@ -841,13 +856,12 @@ void main() {
           platform: platform,
         );
         assert(tempDir.existsSync());
-        await publisher.generateLocalMetadata();
         await publisher.publishArchive();
 
-        final File releaseFile = fs.file(jsonPath);
+        final File releaseFile = fs.file(fs.path.join(tempDir.path, 'upload.json'));
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
-        final jsonData = json.decode(contents) as Map<String, dynamic>;
+        final jsonData = json.decode(contents) as Map<String, Object?>;
         expect(
           jsonData['base_url'],
           'https://storage.googleapis.com/flutter_infra_release/releases',
@@ -945,21 +959,258 @@ void main() {
 }
 ''';
           fs.file(jsonPath).writeAsStringSync(releasesJson);
+          fs.file(fs.path.join(tempDir.path, 'downloaded.json')).createSync(recursive: true);
+          fs.file(fs.path.join(tempDir.path, 'downloaded.json')).writeAsStringSync(releasesJson);
           fs.file(archivePath).writeAsStringSync('archive contents');
           final calls = <String, List<ProcessResult>?>{
-            '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
             '$gsutilCall -- rm $gsArchivePath': null,
             '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-            '$gsutilCall -- rm $gsJsonPath': null,
-            '$gsutilCall -- -h Content-Type:application/json -h Cache-Control:max-age=60 cp $jsonPath $gsJsonPath':
+            '$gsutilCall -- stat $gsJsonPath': <ProcessResult>[
+              ProcessResult(0, 0, 'Generation: 12345', ''),
+            ],
+            '$gsutilCall -- cp $gsJsonPath#12345 ${fs.path.join(tempDir.path, "downloaded.json")}':
+                null,
+            '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDir.path, "upload.json")} $gsJsonPath':
                 null,
           };
           processManager.addCommands(convertResults(calls));
           assert(tempDir.existsSync());
-          await publisher.generateLocalMetadata();
           await publisher.publishArchive(true);
         },
       );
+    });
+
+    group('transactionalUpdate', () {
+      late FakeProcessManager processManager;
+      late FileSystem fs;
+      final gsutilCall = platform.isWindows
+          ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
+          : 'python3 ${path.join("/", "depot_tools", "gsutil.py")}';
+      const gsPath = 'gs://flutter_infra_release/releases/manifest.json';
+      late Directory tempDirectory;
+
+      setUp(() async {
+        fs = MemoryFileSystem.test(
+          style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+        );
+        processManager = FakeProcessManager.list(<FakeCommand>[]);
+        tempDirectory = fs.systemTempDirectory.createTempSync('test_temp.');
+      });
+
+      test('succeeds on first try', () async {
+        final calls = <String, List<ProcessResult>?>{
+          '$gsutilCall -- stat $gsPath': <ProcessResult>[
+            ProcessResult(0, 0, 'Generation: 12345', ''),
+          ],
+          '$gsutilCall -- cp $gsPath#12345 ${fs.path.join(tempDirectory.path, "downloaded.json")}':
+              null,
+          '$gsutilCall -- -h x-goog-if-generation-match:12345 cp ${fs.path.join(tempDirectory.path, "upload.json")} $gsPath':
+              null,
+        };
+        processManager.addCommands(convertResults(calls));
+
+        fs.file(fs.path.join(tempDirectory.path, 'downloaded.json')).createSync(recursive: true);
+        fs
+            .file(fs.path.join(tempDirectory.path, 'downloaded.json'))
+            .writeAsStringSync('{"releases": []}');
+
+        await transactionalUpdate(
+          gsPath: gsPath,
+          fs: fs,
+          tempDirectory: tempDirectory,
+          runGsUtil: (List<String> args) async {
+            final runner = ProcessRunner(
+              processManager: processManager,
+              platform: platform,
+              subprocessOutput: false,
+            );
+            return runner.runProcess(<String>[
+              'python3',
+              if (platform.isWindows)
+                path.join('D:', 'depot_tools', 'gsutil.py')
+              else
+                path.join('/', 'depot_tools', 'gsutil.py'),
+              '--',
+              ...args,
+            ]);
+          },
+          callback: (String contents) async {
+            return '{"releases": [{"version": "1.0.0"}]}';
+          },
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      });
+
+      test('assumes generation 0 if stat fails', () async {
+        final String gsutilScript = platform.isWindows
+            ? path.join('D:', 'depot_tools', 'gsutil.py')
+            : path.join('/', 'depot_tools', 'gsutil.py');
+
+        final commands = <FakeCommand>[
+          FakeCommand(
+            command: <String>['python3', gsutilScript, '--', 'stat', gsPath],
+            exitCode: 1,
+            stderr: 'No such object',
+          ),
+          FakeCommand(
+            command: <String>[
+              'python3',
+              gsutilScript,
+              '--',
+              '-h',
+              'x-goog-if-generation-match:0',
+              'cp',
+              fs.path.join(tempDirectory.path, 'upload.json'),
+              gsPath,
+            ],
+          ),
+        ];
+        processManager.addCommands(commands);
+
+        await transactionalUpdate(
+          gsPath: gsPath,
+          fs: fs,
+          tempDirectory: tempDirectory,
+          runGsUtil: (List<String> args) async {
+            final runner = ProcessRunner(
+              processManager: processManager,
+              platform: platform,
+              subprocessOutput: false,
+            );
+            return runner.runProcess(<String>[
+              'python3',
+              if (platform.isWindows)
+                path.join('D:', 'depot_tools', 'gsutil.py')
+              else
+                path.join('/', 'depot_tools', 'gsutil.py'),
+              '--',
+              ...args,
+            ]);
+          },
+          callback: (String contents) async {
+            expect(contents, equals(''));
+            return '{"releases": [{"version": "1.0.0"}]}';
+          },
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+      });
+
+      test('short-circuits on dryRun', () async {
+        var callbackCalled = false;
+        await transactionalUpdate(
+          gsPath: gsPath,
+          fs: fs,
+          tempDirectory: tempDirectory,
+          dryRun: true,
+          runGsUtil: (List<String> args) async {
+            fail('runGsUtil should not be called');
+          },
+          callback: (String contents) async {
+            callbackCalled = true;
+            expect(contents, equals(''));
+            return '{"releases": [{"version": "1.0.0"}]}';
+          },
+        );
+        expect(callbackCalled, isTrue);
+      });
+
+      test('retries on upload failure', () async {
+        final String gsutilScript = platform.isWindows
+            ? path.join('D:', 'depot_tools', 'gsutil.py')
+            : path.join('/', 'depot_tools', 'gsutil.py');
+
+        final commands = <FakeCommand>[
+          FakeCommand(
+            command: <String>['python3', gsutilScript, '--', 'stat', gsPath],
+            stdout: 'Generation: 12345',
+          ),
+          FakeCommand(
+            command: <String>[
+              'python3',
+              gsutilScript,
+              '--',
+              'cp',
+              '$gsPath#12345',
+              fs.path.join(tempDirectory.path, 'downloaded.json'),
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'python3',
+              gsutilScript,
+              '--',
+              '-h',
+              'x-goog-if-generation-match:12345',
+              'cp',
+              fs.path.join(tempDirectory.path, 'upload.json'),
+              gsPath,
+            ],
+            exitCode: 1,
+            stderr: '412 Precondition Failed',
+          ),
+          FakeCommand(
+            command: <String>['python3', gsutilScript, '--', 'stat', gsPath],
+            stdout: 'Generation: 67890',
+          ),
+          FakeCommand(
+            command: <String>[
+              'python3',
+              gsutilScript,
+              '--',
+              'cp',
+              '$gsPath#67890',
+              fs.path.join(tempDirectory.path, 'downloaded.json'),
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'python3',
+              gsutilScript,
+              '--',
+              '-h',
+              'x-goog-if-generation-match:67890',
+              'cp',
+              fs.path.join(tempDirectory.path, 'upload.json'),
+              gsPath,
+            ],
+          ),
+        ];
+        processManager.addCommands(commands);
+
+        fs.file(fs.path.join(tempDirectory.path, 'downloaded.json')).createSync(recursive: true);
+        fs
+            .file(fs.path.join(tempDirectory.path, 'downloaded.json'))
+            .writeAsStringSync('{"releases": []}');
+
+        var callbackCount = 0;
+        await transactionalUpdate(
+          gsPath: gsPath,
+          fs: fs,
+          tempDirectory: tempDirectory,
+          runGsUtil: (List<String> args) async {
+            final runner = ProcessRunner(
+              processManager: processManager,
+              platform: platform,
+              subprocessOutput: false,
+            );
+            return runner.runProcess(<String>[
+              'python3',
+              if (platform.isWindows)
+                path.join('D:', 'depot_tools', 'gsutil.py')
+              else
+                path.join('/', 'depot_tools', 'gsutil.py'),
+              '--',
+              ...args,
+            ]);
+          },
+          callback: (String contents) async {
+            callbackCount++;
+            return '{"releases": [{"version": "$callbackCount.0.0"}]}';
+          },
+        );
+        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(callbackCount, equals(2));
+      });
     });
   }
 }

@@ -98,8 +98,7 @@ GeometryResult SuperellipseGeometry::GetPositionBuffer(
 
 std::optional<Rect> SuperellipseGeometry::GetCoverage(
     const Matrix& transform) const {
-  return Rect::MakeOriginSize(center_ - Point(radius_, radius_),
-                              Size(radius_ * 2, radius_ * 2));
+  return Rect::MakeCircleBounds(center_, radius_);
 }
 
 bool SuperellipseGeometry::CoversArea(const Matrix& transform,

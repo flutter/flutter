@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class TextFieldUseCase extends UseCase {
-  TextFieldUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  TextFieldUseCase();
 
   @override
   String get name => 'TextField';
 
   @override
   String get route => '/text-field';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();

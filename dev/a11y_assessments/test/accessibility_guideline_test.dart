@@ -12,11 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (final UseCase useCase in useCases) {
     testWidgets('testing accessibility guideline for ${useCase.name}', (WidgetTester tester) async {
-      await tester.pumpWidget(const App());
-
-      // Tap on the switch to show all use-cases, not just the core ones.
-      await tester.tap(find.byTooltip('Show additional use cases'));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(const App(initialTags: <Tag>{}));
 
       final ScrollController controller = tester
           .state<HomePageState>(find.byType(HomePage))
@@ -46,9 +42,9 @@ void main() {
         final FinderBase<SemanticsNode> tappable = tappables.at(i);
         final SemanticsNode node = tappable.evaluate().first;
 
-        // We do not want to tap the back button, as that will pop the page
+        // We do not want to tap the back button or close button, as that will pop the page
         // and disrupt the current test flow.
-        if (node.tooltip == 'Back') {
+        if (node.tooltip == 'Back' || node.label == 'Close') {
           continue;
         }
         tester.semantics.tap(tappable);

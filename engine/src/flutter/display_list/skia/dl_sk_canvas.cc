@@ -5,6 +5,7 @@
 #if !SLIMPELLER
 
 #include "flutter/display_list/skia/dl_sk_canvas.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
@@ -282,9 +283,11 @@ void DlSkCanvasAdapter::DrawImage(const sk_sp<DlImage>& image,
                                   DlImageSampling sampling,
                                   const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = image->skia_image();
-  delegate_->drawImage(sk_image.get(), point.x, point.y, ToSk(sampling),
-                       sk_paint());
+  FML_DCHECK(image);
+  auto skia_image = image->asSkiaImage();
+  FML_DCHECK(skia_image);
+  delegate_->drawImage(skia_image->skia_image().get(), point.x, point.y,
+                       ToSk(sampling), sk_paint());
 }
 
 void DlSkCanvasAdapter::DrawImageRect(const sk_sp<DlImage>& image,
@@ -294,9 +297,12 @@ void DlSkCanvasAdapter::DrawImageRect(const sk_sp<DlImage>& image,
                                       const DlPaint* paint,
                                       DlSrcRectConstraint constraint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = image->skia_image();
-  delegate_->drawImageRect(sk_image.get(), ToSkRect(src), ToSkRect(dst),
-                           ToSk(sampling), sk_paint(), ToSk(constraint));
+  FML_DCHECK(image);
+  auto skia_image = image->asSkiaImage();
+  FML_DCHECK(skia_image);
+  delegate_->drawImageRect(skia_image->skia_image().get(), ToSkRect(src),
+                           ToSkRect(dst), ToSk(sampling), sk_paint(),
+                           ToSk(constraint));
 }
 
 void DlSkCanvasAdapter::DrawImageNine(const sk_sp<DlImage>& image,
@@ -305,9 +311,11 @@ void DlSkCanvasAdapter::DrawImageNine(const sk_sp<DlImage>& image,
                                       DlFilterMode filter,
                                       const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = image->skia_image();
-  delegate_->drawImageNine(sk_image.get(), ToSkIRect(center), ToSkRect(dst),
-                           ToSk(filter), sk_paint());
+  FML_DCHECK(image);
+  auto skia_image = image->asSkiaImage();
+  FML_DCHECK(skia_image);
+  delegate_->drawImageNine(skia_image->skia_image().get(), ToSkIRect(center),
+                           ToSkRect(dst), ToSk(filter), sk_paint());
 }
 
 void DlSkCanvasAdapter::DrawAtlas(const sk_sp<DlImage>& atlas,
@@ -320,13 +328,15 @@ void DlSkCanvasAdapter::DrawAtlas(const sk_sp<DlImage>& atlas,
                                   const DlRect* cullRect,
                                   const DlPaint* paint) {
   SkOptionalPaint sk_paint(paint);
-  sk_sp<SkImage> sk_image = atlas->skia_image();
+  FML_DCHECK(atlas);
+  auto skia_atlas = atlas->asSkiaImage();
+  FML_DCHECK(skia_atlas);
   std::vector<SkColor> sk_colors;
   sk_colors.reserve(count);
   for (int i = 0; i < count; ++i) {
     sk_colors.push_back(colors[i].argb());
   }
-  delegate_->drawAtlas(sk_image.get(), {ToSk(xform), count},
+  delegate_->drawAtlas(skia_atlas->skia_image().get(), {ToSk(xform), count},
                        {ToSkRects(tex), count}, {sk_colors.data(), count},
                        ToSk(mode), ToSk(sampling), ToSkRect(cullRect),
                        sk_paint());

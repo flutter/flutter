@@ -66,12 +66,11 @@ jobs:
         if: steps.prepare_pr_branch.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_BRANCH_NAME: ${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
         run: |
-          PR_HEAD_BRANCH=${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
-
           gh pr create \
             --base master \
-            --head flutteractionsbot:$PR_HEAD_BRANCH \
+            --head flutteractionsbot:$PR_BRANCH_NAME \
             --repo flutter/flutter \
             --title "Sync CHANGELOG.md from stable" \
             --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \

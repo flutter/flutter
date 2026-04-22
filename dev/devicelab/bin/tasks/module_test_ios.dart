@@ -603,9 +603,7 @@ dependencies:
       if (!xcodebuildOutput.contains(
             RegExp('flutter.*--local-engine-src-path=bogus assemble'),
           ) || // Verbose output
-          !xcodebuildOutput.contains(
-            'Unable to detect a Flutter engine build directory in bogus',
-          )) {
+          !xcodebuildOutput.contains('No Flutter engine build directory found at: bogus')) {
         return TaskResult.failure(
           'Host Objective-C app build succeeded though flutter script failed',
         );

@@ -10,6 +10,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/lldb.dart';
 import 'package:test/fake.dart';
 
@@ -42,6 +43,7 @@ void main() {
       deviceId: deviceId,
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
+      mode: BuildMode.debug,
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -127,6 +129,78 @@ Target 0: (Runner) stopped.
       deviceId: deviceId,
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
+      mode: BuildMode.debug,
+    );
+    expect(success, isTrue);
+    expect(lldb.isRunning, isTrue);
+    expect(lldb.appProcessId, appProcessId);
+    expect(expectedInputs, isEmpty);
+    expect(processManager.hasRemainingExpectations, isFalse);
+    expect(logger.errorText, isEmpty);
+  });
+
+  testWithoutContext('attachAndStart returns true on success for profile mode', () async {
+    const deviceId = '123';
+    const appProcessId = 5678;
+
+    final processAttachCompleter = Completer<List<int>>();
+    final processResumedCompleted = Completer<List<int>>();
+
+    final stdoutStream = Stream<List<int>>.fromFutures([
+      processAttachCompleter.future,
+      processResumedCompleted.future,
+    ]);
+
+    final stdinController = StreamController<List<int>>();
+
+    final processCompleter = Completer<void>();
+    final lldbCommand = FakeLLDBCommand(
+      command: const <String>['lldb'],
+      completer: processCompleter,
+      stdin: io.IOSink(stdinController.sink),
+      stdout: stdoutStream,
+      stderr: const Stream.empty(),
+    );
+
+    final logger = BufferLogger.test();
+
+    final processManager = FakeLLDBProcessManager([lldbCommand]);
+    final processUtils = ProcessUtils(processManager: processManager, logger: logger);
+    final lldb = LLDB(logger: logger, processUtils: processUtils);
+
+    const processAttachMatcher = 'device process attach --pid $appProcessId';
+    const processResumedMatcher = 'process continue';
+    final expectedInputs = ['device select $deviceId', processAttachMatcher, processResumedMatcher];
+
+    stdinController.stream.transform<String>(utf8.decoder).transform(const LineSplitter()).listen((
+      String line,
+    ) {
+      expectedInputs.remove(line);
+      if (line == processAttachMatcher) {
+        processAttachCompleter.complete(
+          utf8.encode('''
+Process 568 stopped
+* thread #1, stop reason = signal SIGSTOP
+    frame #0: 0x0000000102c7b240 dyld`_dyld_start
+dyld`_dyld_start:
+->  0x102c7b240 <+0>:  mov    x0, sp
+    0x102c7b244 <+4>:  and    sp, x0, #0xfffffffffffffff0
+    0x102c7b248 <+8>:  mov    x29, #0x0 ; =0
+    0x102c7b24c <+12>: mov    x30, #0x0 ; =0
+Target 0: (Runner) stopped.
+'''),
+        );
+      }
+      if (line == processResumedMatcher) {
+        processResumedCompleted.complete(utf8.encode('Process 568 resuming\n'));
+      }
+    });
+
+    final bool success = await lldb.attachAndStart(
+      deviceId: deviceId,
+      appProcessId: appProcessId,
+      lldbLogForwarder: FakeLLDBLogForwarder(),
+      mode: BuildMode.profile,
     );
     expect(success, isTrue);
     expect(lldb.isRunning, isTrue);
@@ -181,6 +255,7 @@ Target 0: (Runner) stopped.
       deviceId: deviceId,
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
+      mode: BuildMode.debug,
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -231,6 +306,7 @@ Target 0: (Runner) stopped.
       deviceId: deviceId,
       appProcessId: appProcessId,
       lldbLogForwarder: FakeLLDBLogForwarder(),
+      mode: BuildMode.debug,
     );
     expect(success, isFalse);
     expect(lldb.isRunning, isFalse);
@@ -276,6 +352,7 @@ Target 0: (Runner) stopped.
         deviceId: deviceId,
         appProcessId: appProcessId,
         lldbLogForwarder: FakeLLDBLogForwarder(),
+        mode: BuildMode.debug,
       );
       time.elapse(const Duration(minutes: 2));
       time.flushMicrotasks();
@@ -371,6 +448,7 @@ Target 0: (Runner) stopped.
       deviceId: deviceId,
       appProcessId: appProcessId,
       lldbLogForwarder: lldbLogForwarder,
+      mode: BuildMode.debug,
     );
 
     logAfterAttachCompleter.complete(utf8.encode('$ignoreLog\n$expectedForwardedLog\n'));
@@ -422,6 +500,7 @@ Target 0: (Runner) stopped.
         deviceId: deviceId,
         appProcessId: appProcessId,
         lldbLogForwarder: FakeLLDBLogForwarder(),
+        mode: BuildMode.debug,
       ),
     );
 

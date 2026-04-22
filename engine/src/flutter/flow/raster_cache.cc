@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "flutter/common/constants.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer.h"
@@ -110,7 +111,7 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
     draw_checkerboard(&canvas, ToDlRect(context.logical_rect));
   }
 
-  auto image = DlImage::Make(surface->makeImageSnapshot());
+  auto image = DlImageSkia::Make(surface->makeImageSnapshot());
   return std::make_unique<RasterCacheResult>(
       image, context.logical_rect, context.flow_type, std::move(rtree));
 }

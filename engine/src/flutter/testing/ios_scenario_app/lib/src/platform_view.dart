@@ -1583,6 +1583,14 @@ class PlatformViewForTouchIOSScenario extends Scenario with _BasePlatformViewSce
     }
     finishBuilder(builder);
   }
+
+  @override
+  HitTestResponse onHitTest(HitTestRequest request) {
+    const Rect rect1 = .fromLTWH(0, 0, 500, 500);
+    const Rect rect2 = .fromLTWH(5, 5, 500, 500);
+    final bool hasPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
+    return HitTestResponse(hasPlatformView: hasPlatformView);
+  }
 }
 
 /// Scenario for verifying overlapping platform views can accept touch gesture.
@@ -1706,6 +1714,15 @@ class PlatformViewForOverlappingPlatformViewsScenario extends Scenario
         (ByteData? response) {},
       );
     }
+  }
+
+  @override
+  HitTestResponse onHitTest(HitTestRequest request) {
+    // rect1 and rect2 will overlap, but explicitly check them in case we introduce more platform views.
+    const Rect rect1 = .fromLTWH(100, 100, 100, 100);
+    const Rect rect2 = .fromLTWH(0, 0, 300, 300);
+    final bool hasPlatformView = rect1.contains(request.offset) || rect2.contains(request.offset);
+    return HitTestResponse(hasPlatformView: hasPlatformView);
   }
 }
 
@@ -2168,6 +2185,7 @@ void addPlatformView(
   double width = 500,
   double height = 500,
   String viewType = 'scenarios/textPlatformView',
+  String gestureBlockingPolicy = 'fallbackToPluginDefault',
 }) {
   if (scenarioParams['view_type'] is String) {
     viewType = scenarioParams['view_type'] as String;
@@ -2204,7 +2222,7 @@ void addPlatformView(
     valueString,
     ..._encodeString('create'),
     valueMap,
-    if (Platform.isIOS) 3, // 3 entries in map for iOS.
+    if (Platform.isIOS) 4, // 4 entries in map for iOS.
     if (Platform.isAndroid && !usesAndroidHybridComposition)
       7, // 7 entries in map for texture on Android.
     if (Platform.isAndroid && usesAndroidHybridComposition)
@@ -2217,6 +2235,12 @@ void addPlatformView(
     ..._encodeString('viewType'),
     valueString,
     ..._encodeString(viewType),
+    if (Platform.isIOS) ...<int>[
+      valueString,
+      ..._encodeString('gestureBlockingPolicy'),
+      valueString,
+      ..._encodeString(gestureBlockingPolicy),
+    ],
     if (Platform.isAndroid && !usesAndroidHybridComposition) ...<int>[
       valueString,
       ..._encodeString('width'),

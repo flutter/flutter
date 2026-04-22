@@ -22,15 +22,14 @@ class DisplayList;
 
 namespace Skwasm {
 
+unsigned long GetRasterThread();
+
 class TextureSourceWrapper {
  public:
-  TextureSourceWrapper(unsigned long thread_id, SkwasmObject texture_source);
+  TextureSourceWrapper(SkwasmObject texture_source);
   ~TextureSourceWrapper();
 
   SkwasmObject GetTextureSource();
-
- private:
-  unsigned long raster_thread_id_;
 };
 
 class Surface {
@@ -41,7 +40,6 @@ class Surface {
   Surface();
 
   // General getters
-  unsigned long GetThreadId() { return thread_; }
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE GetGlContext() { return gl_context_; }
 
   // Lifecycle
@@ -99,8 +97,6 @@ class Surface {
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE gl_context_ = 0;
   std::unique_ptr<RenderContext> render_context_;
   uint32_t context_lost_callback_id_ = 0;
-
-  unsigned long thread_;
 
   bool is_initialized_ = false;
 };

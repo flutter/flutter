@@ -26,21 +26,24 @@ jobs:
       - name: Configure git
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+          DART_HASH: ${{ inputs.dart_hash }}
         run: |
           git config user.name "flutteractionsbot"
           git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
-          git fetch upstream ${{ github.ref_name }}
+          git fetch upstream $REF_NAME
 
-          BRANCH_NAME="sync-dart-${{ inputs.dart_hash }}"
+          BRANCH_NAME="sync-dart-$DART_HASH"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
-          git checkout -b "$BRANCH_NAME" upstream/${{ github.ref_name }}
+          git checkout -b "$BRANCH_NAME" upstream/$REF_NAME
 
       - name: Download and Decode Dart DEPS
         id: download-deps
+        env:
+          DART_HASH: ${{ inputs.dart_hash }}
         run: |
-          DART_HASH="${{ inputs.dart_hash }}"
           URL="https://dart.googlesource.com/sdk/+/$DART_HASH/DEPS?format=TEXT"
 
           echo "Fetching DEPS from $URL"
@@ -62,8 +65,9 @@ jobs:
 
       - name: Run Update Script
         id: run-script
+        env:
+          DART_HASH: ${{ inputs.dart_hash }}
         run: |
-          DART_HASH="${{ inputs.dart_hash }}"
           DART_DEPS="dart_deps_file"
           FLUTTER_DEPS="DEPS" # Root of the repository
           SCRIPT="engine/src/tools/dart/create_updated_flutter_deps.py"
@@ -83,12 +87,14 @@ jobs:
 
       - name: Check for Changes
         id: git-check
+        env:
+          DART_HASH: ${{ inputs.dart_hash }}
         run: |
           # Check if the root DEPS file has changed
           if git diff --exit-code DEPS; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "## ✅ Dart version already up to date" >> $GITHUB_STEP_SUMMARY
-            echo "The DEPS file is already up to date with Dart hash \`${{ inputs.dart_hash }}\`." >> $GITHUB_STEP_SUMMARY
+            echo "The DEPS file is already up to date with Dart hash \`$DART_HASH\`." >> $GITHUB_STEP_SUMMARY
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
@@ -97,20 +103,22 @@ jobs:
         if: steps.git-check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          DART_HASH: ${{ inputs.dart_hash }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           git add DEPS
-          git commit -m "Update flutter DEPS to dart ${{ inputs.dart_hash }}"
+          git commit -m "Update flutter DEPS to dart $DART_HASH"
           git push origin "$BRANCH_NAME" --force
 
           PR_URL=$(gh pr create \
-            --title "[${{ github.ref_name }}] Update Flutter DEPS to Dart ${{ inputs.dart_hash }}" \
-            --body "This PR updates the transitive dependencies in the engine \`DEPS\` file based on Dart SDK hash \`${{ inputs.dart_hash }}\`." \
+            --title "[$REF_NAME] Update Flutter DEPS to Dart $DART_HASH" \
+            --body "This PR updates the transitive dependencies in the engine \`DEPS\` file based on Dart SDK hash \`$DART_HASH\`." \
             --repo flutter/flutter \
-            --base ${{ github.ref_name }} \
+            --base $REF_NAME \
             --head flutteractionsbot:$BRANCH_NAME)
 
           # Nice big PR Success Summary
           echo "## 🚀 PR Created Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "Updated dart dependencies to \`${{ inputs.dart_hash }}\`." >> $GITHUB_STEP_SUMMARY
+          echo "Updated dart dependencies to \`$DART_HASH\`." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY

@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/logging.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_context.h"
@@ -124,7 +125,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureSkia(
   }
 
   // This image should not escape local use by EmbedderExternalTextureGL
-  return DlImage::Make(std::move(image));
+  return DlImageSkia::Make(std::move(image));
 }
 
 sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(

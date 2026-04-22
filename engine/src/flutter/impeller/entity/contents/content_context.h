@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
 #include "impeller/base/validation.h"
@@ -280,6 +281,23 @@ class ContentContext {
   void ClearCachedRuntimeEffectPipeline(
       const std::string& unique_entrypoint_name) const;
 
+  /// @brief Enable or disable texture caching.
+  void SetTextureCachingEnabled(bool enabled);
+
+  /// @brief Get a cached texture for the given image.
+  std::shared_ptr<Texture> GetCachedTexture(
+      const flutter::DlImage* image) const;
+
+  /// @brief Set a cached texture for the given image.
+  void SetCachedTexture(const flutter::DlImage* image,
+                        const std::shared_ptr<Texture>& texture) const;
+
+  /// @brief Remove a cached texture for the given image.
+  void RemoveCachedTexture(const flutter::DlImage* image) const;
+
+  /// @brief Clear all cached textures.
+  void ClearCachedTextures() const;
+
   /// @brief Retrieve the current host buffer for transient storage of indexes
   ///        used for indexed draws.
   ///
@@ -363,6 +381,10 @@ class ContentContext {
   std::shared_ptr<HostBuffer> indexes_host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
   std::unique_ptr<TextShadowCache> text_shadow_cache_;
+
+  bool is_texture_caching_enabled_ = false;
+  mutable std::unordered_map<const flutter::DlImage*, std::shared_ptr<Texture>>
+      texture_cache_;
 
   ContentContext(const ContentContext&) = delete;
 

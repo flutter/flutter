@@ -10,6 +10,7 @@
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_types.h"
 #include "flutter/fml/trace_event.h"
@@ -229,7 +230,10 @@ void DlSkCanvasDispatcher::drawImage(const sk_sp<DlImage> image,
                                      const DlPoint& point,
                                      DlImageSampling sampling,
                                      bool render_with_attributes) {
-  canvas_->drawImage(image ? image->skia_image() : nullptr, point.x, point.y,
+  FML_DCHECK(image);
+  auto skia_image = image->asSkiaImage();
+  FML_DCHECK(skia_image);
+  canvas_->drawImage(skia_image->skia_image().get(), point.x, point.y,
                      ToSk(sampling), safe_paint(render_with_attributes));
 }
 void DlSkCanvasDispatcher::drawImageRect(const sk_sp<DlImage> image,
@@ -238,7 +242,10 @@ void DlSkCanvasDispatcher::drawImageRect(const sk_sp<DlImage> image,
                                          DlImageSampling sampling,
                                          bool render_with_attributes,
                                          DlSrcRectConstraint constraint) {
-  canvas_->drawImageRect(image ? image->skia_image() : nullptr, ToSkRect(src),
+  FML_DCHECK(image);
+  auto skia_image = image->asSkiaImage();
+  FML_DCHECK(skia_image);
+  canvas_->drawImageRect(skia_image->skia_image().get(), ToSkRect(src),
                          ToSkRect(dst), ToSk(sampling),
                          safe_paint(render_with_attributes), ToSk(constraint));
 }
@@ -247,15 +254,12 @@ void DlSkCanvasDispatcher::drawImageNine(const sk_sp<DlImage> image,
                                          const DlRect& dst,
                                          DlFilterMode filter,
                                          bool render_with_attributes) {
-  if (!image) {
-    return;
-  }
-  auto skia_image = image->skia_image();
-  if (!skia_image) {
-    return;
-  }
-  canvas_->drawImageNine(skia_image.get(), ToSkIRect(center), ToSkRect(dst),
-                         ToSk(filter), safe_paint(render_with_attributes));
+  FML_DCHECK(image);
+  auto skia_image = image->asSkiaImage();
+  FML_DCHECK(skia_image);
+  canvas_->drawImageNine(skia_image->skia_image().get(), ToSkIRect(center),
+                         ToSkRect(dst), ToSk(filter),
+                         safe_paint(render_with_attributes));
 }
 void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                                      const DlRSTransform xform[],
@@ -266,13 +270,9 @@ void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                                      DlImageSampling sampling,
                                      const DlRect* cullRect,
                                      bool render_with_attributes) {
-  if (!atlas) {
-    return;
-  }
-  auto skia_atlas = atlas->skia_image();
-  if (!skia_atlas) {
-    return;
-  }
+  FML_DCHECK(atlas);
+  auto skia_atlas = atlas->asSkiaImage();
+  FML_DCHECK(skia_atlas);
   std::vector<SkColor> sk_colors;
   if (colors != nullptr) {
     sk_colors.reserve(count);
@@ -286,7 +286,7 @@ void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
   } else {
     colorSpan = {sk_colors.data(), count};
   }
-  canvas_->drawAtlas(skia_atlas.get(), {ToSk(xform), count},
+  canvas_->drawAtlas(skia_atlas->skia_image().get(), {ToSk(xform), count},
                      {ToSkRects(tex), count}, colorSpan, ToSk(mode),
                      ToSk(sampling), ToSkRect(cullRect),
                      safe_paint(render_with_attributes));

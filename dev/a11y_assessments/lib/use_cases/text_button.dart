@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class TextButtonUseCase extends UseCase {
-  TextButtonUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  TextButtonUseCase();
 
   @override
   String get name => 'TextButton';
 
   @override
   String get route => '/text-button';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

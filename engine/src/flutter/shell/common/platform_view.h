@@ -183,6 +183,23 @@ class PlatformView {
         std::unique_ptr<PointerDataPacket> packet) = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Requests the delegate to perform framework hit test from the
+    ///             engine.
+    ///             This API must be called from the UI thread.
+    ///             Calling this from the platform thread causes
+    ///             undefined behavior if the UI and platform threads
+    ///             are not merged.
+    /// @param[in]  view_id The identifier of the flutter view that
+    ///                     should be hit tested.
+    /// @param[in]  offset  The position in the view that should be hit tested.
+    ///
+    /// @return     The hit test response.
+    ///
+    virtual HitTestResponse OnPlatformViewHitTest(
+        int64_t view_id,
+        const flutter::PointData offset) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      Notifies the delegate that the platform view has encountered
     ///             an accessibility related action on the specified node. This
     ///             event must be forwarded to the running root isolate hosted
@@ -736,6 +753,17 @@ class PlatformView {
   /// @param[in]  packet  The pointer data packet to dispatch to the framework.
   ///
   void DispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Requests to perform framework hit test from the engine.
+  ///
+  /// @param[in]  view_id The identifier of the flutter view that
+  ///                     should be hit tested.
+  /// @param[in]  offset  The position in the view that should be hit tested.
+  ///
+  /// @return     The hit test response.
+  ///
+  HitTestResponse HitTest(int64_t view_id, const flutter::PointData offset);
 
   //--------------------------------------------------------------------------
   /// @brief      Used by the embedder to specify a texture that it wants the

@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 
@@ -59,7 +60,7 @@ sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(
 
   gl_entries_[id.value_or(0)] = GlEntry{.egl_image = std::move(egl_image),
                                         .texture = std::move(unique_texture)};
-  return DlImage::Make(SkImages::BorrowTextureFrom(
+  return DlImageSkia::Make(SkImages::BorrowTextureFrom(
       context.gr_context, backendTexture, kTopLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr));
 }

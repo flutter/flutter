@@ -107,8 +107,12 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for android_arm64.',
-            'Building native assets for android_arm64 done.',
+            'Running build hooks for android_arm64.',
+            'Running build hooks for android_arm64 done.',
+            if (buildMode == BuildMode.release) ...<String>[
+              'Running link hooks for android_arm64.',
+              'Running link hooks for android_arm64 done.',
+            ],
           ]),
         );
 
@@ -142,7 +146,7 @@ void main() {
       );
       expect(
         (globals.logger as BufferLogger).traceText,
-        isNot(contains('Building native assets for ')),
+        isNot(contains('Running build hooks for ')),
       );
     },
   );

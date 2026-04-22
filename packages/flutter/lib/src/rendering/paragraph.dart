@@ -1510,11 +1510,11 @@ class _SelectableFragment
     final int selectionEnd = _textSelectionEnd!.offset;
     final bool isReversed = selectionStart > selectionEnd;
     final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
-      TextPosition(offset: selectionStart),
+      _textSelectionStart!,
     );
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
-        : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+        : paragraph._getOffsetForPosition(_textSelectionEnd!);
     final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];

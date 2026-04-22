@@ -256,19 +256,32 @@ void main() {
       ProcessManager: () {
         const Platform platform = LocalPlatform();
         return FakeProcessManager.list([
-          if (platform.isMacOS)
+          if (platform.isMacOS) ...[
             for (final binary in <String>['clang', 'ar', 'ld'])
               FakeCommand(
                 command: <Pattern>['xcrun', '--find', binary],
                 exitCode: 1,
                 stderr: 'not found',
               ),
-          if (platform.isLinux)
+            for (final binary in <String>['clang', 'ar', 'ld'])
+              FakeCommand(
+                command: <Pattern>['xcrun', '--find', binary],
+                exitCode: 1,
+                stderr: 'not found',
+              ),
+          ],
+          if (platform.isLinux) ...[
             const FakeCommand(
               command: <Pattern>['which', 'clang++'],
               exitCode: 1,
               stderr: 'not found',
             ),
+            const FakeCommand(
+              command: <Pattern>['which', 'clang++'],
+              exitCode: 1,
+              stderr: 'not found',
+            ),
+          ],
         ]);
       },
     },

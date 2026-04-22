@@ -68,7 +68,7 @@ void main() {
   testUsingContext(
     'no dependency on KernelSnapshot',
     () async {
-      const target = DartBuildForNative();
+      const target = BuildHooks();
       expect(target.dependencies, isNot(isA<KernelSnapshot>()));
     },
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
@@ -78,10 +78,7 @@ void main() {
     'NativeAssets throws error if missing target platform',
     () async {
       iosEnvironment.defines.remove(kTargetPlatform);
-      expect(
-        const DartBuildForNative().build(iosEnvironment),
-        throwsA(isA<MissingDefineException>()),
-      );
+      expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
     },
     overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
   );
@@ -92,10 +89,10 @@ void main() {
     iosEnvironment.defines.remove(kIosArchs);
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-    await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+    await BuildHooks(buildRunner: buildRunner).build(iosEnvironment);
     await const InstallCodeAssets().build(iosEnvironment);
 
-    expect(iosEnvironment.buildDir.childFile(DartBuild.depFilename), exists);
+    expect(iosEnvironment.buildDir.childFile(BuildHooks.depFilename), exists);
     expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
     expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
   });
@@ -112,7 +109,7 @@ void main() {
 
       iosEnvironment.defines.remove(kSdkRoot);
       expect(
-        DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment),
+        BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
         throwsA(isA<MissingDefineException>()),
       );
     },
@@ -133,10 +130,10 @@ void main() {
         writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
         final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner();
-        await DartBuildForNative(buildRunner: buildRunner).build(iosEnvironment);
+        await BuildHooks(buildRunner: buildRunner).build(iosEnvironment);
         await const InstallCodeAssets().build(iosEnvironment);
 
-        expect(iosEnvironment.buildDir.childFile(DartBuild.depFilename), exists);
+        expect(iosEnvironment.buildDir.childFile(BuildHooks.depFilename), exists);
         expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
         expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
       },
@@ -248,22 +245,32 @@ void main() {
       );
 
       final File dartHookResultJsonFile = iosEnvironment.buildDir.childFile(
-        DartBuild.dartHookResultFilename,
+        LinkHooks.resultFilename,
       );
-      final dartBuildForNative = DartBuildForNative(buildRunner: buildRunner);
+      final dartBuildForNative = BuildHooks(buildRunner: buildRunner);
       await dartBuildForNative.build(iosEnvironment);
+      final dartLinkForNative = LinkHooks(buildRunner: buildRunner);
+      await dartLinkForNative.build(iosEnvironment);
       const installCodeAssets = InstallCodeAssets();
       await installCodeAssets.build(iosEnvironment);
 
-      // Verify DartBuildForNative dependencies.
+      // Verify BuildHooks dependencies.
       final List<String> buildInputs = _resolvedInputs(dartBuildForNative, iosEnvironment);
       final List<String> buildOutputs = _resolvedOutputs(dartBuildForNative, iosEnvironment);
       // Re-run if the C source changes.
       expect(buildInputs, contains(iosEnvironment.fileSystem.file('src/foo.c').path));
+      // Re-created if the output JSON is deleted.
+      expect(
+        buildOutputs,
+        contains(iosEnvironment.buildDir.childFile(BuildHooks.resultFilename).path),
+      );
+
+      // Verify LinkHooks dependencies.
+      final List<String> linkOutputs = _resolvedOutputs(dartLinkForNative, iosEnvironment);
       // Re-created if the result JSON is deleted.
-      expect(buildOutputs, contains(dartHookResultJsonFile.path));
+      expect(linkOutputs, contains(dartHookResultJsonFile.path));
       // Re-created if the dylib is deleted.
-      expect(buildOutputs, contains(libFooPath));
+      expect(linkOutputs, contains(libFooPath));
 
       final File nativeAssetsYaml = iosEnvironment.buildDir.childFile(
         InstallCodeAssets.nativeAssetsFilename,
@@ -319,7 +326,7 @@ void main() {
           ),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         );
-        await DartBuildForNative(buildRunner: buildRunner).build(androidEnvironment);
+        await BuildHooks(buildRunner: buildRunner).build(androidEnvironment);
       },
     );
   }

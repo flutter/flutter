@@ -19,7 +19,7 @@ namespace flutter {
 
 namespace {
 
-sk_sp<DlImage> DoMakeRasterSnapshot(
+std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
     const std::shared_ptr<impeller::AiksContext>& context,
@@ -61,15 +61,13 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
       break;
   }
 
-  return impeller::DlImageImpeller::Make(
-      impeller::DisplayListToTexture(display_list, render_target_size, *context,
-                                     /*reset_host_buffer=*/false,
-                                     /*generate_mips=*/true,
-                                     impeller_pixel_format),
-      DlImage::OwningContext::kRaster);
+  return impeller::DisplayListToTexture(
+      display_list, render_target_size, *context,
+      /*reset_host_buffer=*/false,
+      /*generate_mips=*/true, impeller_pixel_format);
 }
 
-sk_sp<DlImage> DoMakeRasterSnapshot(
+std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
     const SnapshotController::Delegate& delegate,
@@ -93,13 +91,13 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
                               pixel_format);
 }
 
-sk_sp<DlImage> DoMakeRasterSnapshot(
+std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     const std::shared_ptr<const fml::SyncSwitch>& sync_switch,
     const std::shared_ptr<impeller::AiksContext>& context,
     SnapshotPixelFormat pixel_format) {
-  sk_sp<DlImage> result;
+  std::shared_ptr<impeller::Texture> result;
   sync_switch->Execute(fml::SyncSwitch::Handlers()
                            .SetIfTrue([&] {
                              // Do nothing.
@@ -114,10 +112,25 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 }
 }  // namespace
 
-void SnapshotControllerImpeller::MakeRasterSnapshot(
+void SnapshotControllerImpeller::MakeSkiaSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    std::function<void(const sk_sp<DlImage>&)> callback,
+    std::function<void(const sk_sp<SkImage>&)> callback,
+    SnapshotPixelFormat pixel_format) {
+  FML_UNREACHABLE();
+}
+
+sk_sp<SkImage> SnapshotControllerImpeller::MakeSkiaSnapshotSync(
+    sk_sp<DisplayList> display_list,
+    DlISize picture_size,
+    SnapshotPixelFormat pixel_format) {
+  FML_UNREACHABLE();
+}
+
+void SnapshotControllerImpeller::MakeImpellerSnapshot(
+    sk_sp<DisplayList> display_list,
+    DlISize picture_size,
+    std::function<void(const std::shared_ptr<impeller::Texture>&)> callback,
     SnapshotPixelFormat pixel_format) {
   std::shared_ptr<const fml::SyncSwitch> sync_switch =
       GetDelegate().GetIsGpuDisabledSyncSwitch();
@@ -145,7 +158,8 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
           }));
 }
 
-sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
+std::shared_ptr<impeller::Texture>
+SnapshotControllerImpeller::MakeImpellerSnapshotSync(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
@@ -153,7 +167,14 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
                               pixel_format);
 }
 
-sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
+sk_sp<SkImage> SnapshotControllerImpeller::MakeSkiaTextureImage(
+    sk_sp<SkImage> image,
+    SnapshotPixelFormat pixel_format) {
+  return nullptr;
+}
+
+std::shared_ptr<impeller::Texture>
+SnapshotControllerImpeller::MakeImpellerTextureImage(
     sk_sp<SkImage> image,
     SnapshotPixelFormat pixel_format) {
   auto aiks_context = GetDelegate().GetAiksContext();
@@ -218,8 +239,7 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
     return nullptr;
   }
 
-  return impeller::DlImageImpeller::Make(texture,
-                                         DlImage::OwningContext::kRaster);
+  return texture;
 }
 
 void SnapshotControllerImpeller::CacheRuntimeStage(

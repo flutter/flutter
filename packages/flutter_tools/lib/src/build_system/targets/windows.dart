@@ -107,7 +107,7 @@ abstract class BundleWindowsAssets extends Target {
 
   @override
   List<Target> get dependencies => <Target>[
-    const DartBuildForNative(),
+    const LinkHooks(),
     const KernelSnapshot(),
     const InstallCodeAssets(),
     UnpackWindows(targetPlatform),
@@ -118,7 +118,7 @@ abstract class BundleWindowsAssets extends Target {
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart',
     ),
-    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ...IconTreeShaker.inputs,
   ];
@@ -144,7 +144,7 @@ abstract class BundleWindowsAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       outputDirectory,

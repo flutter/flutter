@@ -95,6 +95,8 @@ source_set("flutter_windows_source") {
     "host_window.h",
     "host_window_dialog.cc",
     "host_window_dialog.h",
+    "host_window_popup.cc",
+    "host_window_popup.h",
     "host_window_regular.cc",
     "host_window_regular.h",
     "host_window_tooltip.cc",

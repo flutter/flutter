@@ -100,5 +100,28 @@ TEST(UberSDFParametersTest, MakeStrokeOval) {
   EXPECT_EQ(params.stroke, stroke);
 }
 
+TEST(UberSDFParametersTest, MakeRoundedRect) {
+  Rect rect = Rect::MakeXYWH(10, 20, 100, 100);
+  RoundingRadii radii = {
+      .top_left = Size(1.0f, 1.0f),
+      .top_right = Size(2.0f, 2.0f),
+      .bottom_left = Size(3.0f, 3.0f),
+      .bottom_right = Size(4.0f, 4.0f),
+  };
+  auto params = UberSDFParameters::MakeRoundedRect(
+      /*color=*/Color::Red(), /*rect=*/rect, /*radii=*/radii,
+      /*stroke=*/std::nullopt);
+
+  EXPECT_EQ(params.type, UberSDFParameters::Type::kRoundedRect);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, Point(60, 70));
+  EXPECT_EQ(params.size, Point(50, 50));
+  EXPECT_EQ(params.radii.top_left.width, 1.0f);
+  EXPECT_EQ(params.radii.top_right.width, 2.0f);
+  EXPECT_EQ(params.radii.bottom_left.width, 3.0f);
+  EXPECT_EQ(params.radii.bottom_right.width, 4.0f);
+  EXPECT_FALSE(params.stroke.has_value());
+}
+
 }  // namespace testing
 }  // namespace impeller

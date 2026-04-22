@@ -140,9 +140,10 @@ Future<void> main(List<String> rawArguments) async {
       dryRun,
       fs: fs,
     );
-    await publisher.generateLocalMetadata();
     if (parsedArguments['publish'] as bool) {
       await publisher.publishArchive(parsedArguments['force'] as bool);
+    } else {
+      await publisher.generateLocalMetadata();
     }
   } on PreparePackageException catch (e) {
     exitCode = e.exitCode;

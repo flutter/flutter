@@ -181,11 +181,6 @@ Dependency "$dependencyName" in "${pubspecFile.path}" is not a version range.
 Dependency "$dependencyName" in "${pubspecFile.path}" has no lower bound.
 ''');
         }
-        if (constraint.min != constraint.max) {
-          fail('''
-Dependency "$dependencyName" in "${pubspecFile.path}" is not locked at its lower bound.
-''');
-        }
 
         final currentVersion = Version.parse(
           (lockedDependencies[dependencyName]! as YamlMap)['version']! as String,

@@ -190,6 +190,10 @@ ISize Playground::GetWindowSize() const {
   return window_size_;
 }
 
+IRect Playground::GetWindowBounds() const {
+  return IRect::MakeSize(window_size_);
+}
+
 Point Playground::GetContentScale() const {
   return impl_->GetContentScale();
 }

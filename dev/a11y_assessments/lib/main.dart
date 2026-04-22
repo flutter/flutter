@@ -16,7 +16,9 @@ void main() {
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, this.initialTags = const <Tag>{Tag.batch2}});
+
+  final Set<Tag> initialTags;
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +46,22 @@ class App extends StatelessWidget {
     );
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
-      routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
+      routes: <String, WidgetBuilder>{
+        '/': (_) => HomePage(initialTags: initialTags),
+        ...routes,
+      },
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.initialTags});
+
+  final Set<Tag> initialTags;
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -62,7 +70,13 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final ScrollController scrollController = ScrollController();
 
-  bool _showAdditionalUseCases = false;
+  late Set<Tag> _selectedTags;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTags = Set<Tag>.from(widget.initialTags);
+  }
 
   @override
   void dispose() {
@@ -89,24 +103,45 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<UseCase> effectiveUseCases = useCases.where((UseCase useCase) {
-      return _showAdditionalUseCases || useCase.useCaseCategory == UseCaseCategory.core;
+      return _selectedTags.isEmpty || _selectedTags.every((Tag tag) => useCase.tags.contains(tag));
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
         actions: <Widget>[
-          Tooltip(
-            message: 'Show additional use cases',
-            waitDuration: const Duration(milliseconds: 500),
-            child: Switch(
-              value: _showAdditionalUseCases,
-              onChanged: (bool newValue) {
-                setState(() {
-                  _showAdditionalUseCases = newValue;
-                });
-              },
-            ),
+          MenuAnchor(
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              return Tooltip(
+                message: 'Filter by tags',
+                child: IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                ),
+              );
+            },
+            menuChildren: Tag.values.map((Tag tag) {
+              return CheckboxMenuButton(
+                closeOnActivate: false,
+                value: _selectedTags.contains(tag),
+                onChanged: (bool? value) {
+                  setState(() {
+                    if (value ?? false) {
+                      _selectedTags.add(tag);
+                    } else {
+                      _selectedTags.remove(tag);
+                    }
+                  });
+                },
+                child: Tooltip(message: tag.description, child: Text(tag.name)),
+              );
+            }).toList(),
           ),
         ],
       ),
