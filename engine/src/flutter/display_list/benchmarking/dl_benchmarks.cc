@@ -26,10 +26,23 @@ namespace testing {
 
 namespace {
 
+inline void SaveSnapshotIfNecessary(
+    const std::unique_ptr<DlSurfaceProvider>& provider,
+    const std::shared_ptr<DlSurfaceInstance>& surface,
+    benchmark::State& state,
+    const std::string& test_name) {
+#ifdef WRITE_BENCHMARK_SNAPSHOTS
+  auto filename = provider->backend_name() + "-" + test_name + "-" +
+                  std::to_string(state.range(0)) + ".png";
+  surface->SnapshotToFile(filename);
+#endif  // WRITE_BENCHMARK_SNAPSHOTS
+}
+
 class RectBouncer {
  public:
   RectBouncer(DlRect rect, DlPoint bounce_offset, DlISize bounce_limit)
       : rect_(rect),
+        rect_origin_(rect.GetOrigin()),
         bounce_offset_(bounce_offset),
         bounce_limit_(bounce_limit) {}
 
@@ -41,10 +54,10 @@ class RectBouncer {
   void Bounce() {
     rect_ = rect_.Shift(bounce_offset_);
     if (rect_.GetRight() > bounce_limit_.width) {
-      rect_ = rect_.Shift(-bounce_limit_.width, 0);
+      rect_ = rect_.Shift(rect_origin_.x - rect_.GetLeft(), 0);
     }
     if (rect_.GetBottom() > bounce_limit_.height) {
-      rect_ = rect_.Shift(0, -bounce_limit_.height);
+      rect_ = rect_.Shift(0, rect_origin_.y - rect_.GetTop());
     }
   }
 
@@ -54,9 +67,10 @@ class RectBouncer {
 
  private:
   DlRect rect_;
+  const DlPoint rect_origin_;
 
-  DlPoint bounce_offset_;
-  DlSize bounce_limit_;
+  const DlPoint bounce_offset_;
+  const DlSize bounce_limit_;
 };
 
 class DlPathVerbCounter : public DlPathReceiver {
@@ -108,9 +122,9 @@ DlPaint GetPaintForRun(unsigned attributes) {
   return paint;
 }
 
-void AnnotateAttributes(unsigned attributes,
-                        benchmark::State& state,
-                        const DisplayListAttributeFlags flags) {
+void CheckAttributes(unsigned attributes,
+                     benchmark::State& state,
+                     const DisplayListAttributeFlags flags) {
   if (flags.always_stroked() && attributes & kFilledStyle) {
     state.SkipWithError("Cannot fill an operation that is always stroked");
   }
@@ -153,12 +167,14 @@ void BM_DrawLine(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawLineFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawLineFlags);
 
   size_t length = state.range(0);
 
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   state.counters["DrawCallCount"] = kLinesToDraw;
   for (size_t i = 0; i < kLinesToDraw; i++) {
@@ -178,11 +194,7 @@ void BM_DrawLine(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawLine-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawLine");
 }
 
 // Draws a series of square rects of the requested width across
@@ -196,11 +208,13 @@ void BM_DrawRect(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRectFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawRectFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   // As rects have DlScalar dimensions, we want to ensure that we also
   // draw rects with non-integer position and size
@@ -225,11 +239,7 @@ void BM_DrawRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawRect-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawRect");
 }
 
 // Draws a series of ovals of the requested height with aspect ratio 3:2 across
@@ -243,11 +253,13 @@ void BM_DrawOval(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawOvalFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawOvalFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   const DlPoint offset(0.5f, 0.5f);
   DlSize size(length * 1.5f, length);
@@ -270,11 +282,7 @@ void BM_DrawOval(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawOval-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawOval");
 }
 
 // Draws a series of circles of the requested radius across
@@ -288,11 +296,13 @@ void BM_DrawCircle(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawCircleFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawCircleFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlScalar radius = length / 2.0f;
   const DlPoint offset(0.5f, 0.5f);
@@ -315,11 +325,7 @@ void BM_DrawCircle(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawCircle-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawCircle");
 }
 
 // Draws a series of rounded rects of the requested width across
@@ -334,11 +340,13 @@ void BM_DrawRRect(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawRRectFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawRRectFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlRoundingRadii radii;
   // Keep all radii under 8 so that they won't overflow the rrect
@@ -390,11 +398,7 @@ void BM_DrawRRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawRRect-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawRRect");
 }
 
 void BM_DrawSimpleRRect(benchmark::State& state,
@@ -427,12 +431,14 @@ void BM_DrawRSE(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state,
-                     DisplayListOpFlags::kDrawRSuperellipseFlags);
+  CheckAttributes(attributes, state,
+                  DisplayListOpFlags::kDrawRSuperellipseFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlRoundingRadii radii;
   // Keep all radii under 8 so that they won't overflow the rrect
@@ -485,11 +491,7 @@ void BM_DrawRSE(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawRSE-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawRSE");
 }
 
 void BM_DrawSimpleRSE(benchmark::State& state,
@@ -525,11 +527,13 @@ void BM_DrawDRRect(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawDRRectFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawDRRectFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlRoundingRadii radii;
   // Keep all radii under 6 so that they won't underflow on the inner rect
@@ -585,11 +589,7 @@ void BM_DrawDRRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawDRRect-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawDRRect");
 }
 
 void BM_DrawArc(benchmark::State& state,
@@ -599,12 +599,13 @@ void BM_DrawArc(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state,
-                     DisplayListOpFlags::kDrawArcNoCenterFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawArcNoCenterFlags);
 
   size_t length = state.range(0);
   surface_provider->InitializeSurface(length * 2, length * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlScalar starting_angle = 0.0f;
   DlPoint offset(0.5f, 0.5f);
@@ -638,11 +639,7 @@ void BM_DrawArc(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawArc-" +
-                  std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state, "DrawArc");
 }
 
 // Returns a list of DlPoints that represent `n` points equally spaced out
@@ -827,11 +824,13 @@ void BM_DrawPath(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawPathFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawPathFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlPathBuilder path_builder;
 
@@ -864,11 +863,8 @@ void BM_DrawPath(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawPath-" + label +
-                  "-" + std::to_string(state.range(0)) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawArc-" + label + "-");
 }
 
 // Returns a set of vertices that describe a circle that has a
@@ -976,11 +972,13 @@ void BM_DrawVertices(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawVerticesFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawVerticesFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlPoint center = DlPoint(length / 2.0f, length / 2.0f);
 
@@ -1015,12 +1013,9 @@ void BM_DrawVertices(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawVertices-" +
-                  std::to_string(disc_count) + "-" + VertexModeToString(mode) +
-                  ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawVertices-" + std::to_string(disc_count) + "-" +
+                              VertexModeToString(mode));
 }
 
 // Generate `count` test points.
@@ -1080,22 +1075,24 @@ void BM_DrawPoints(benchmark::State& state,
 
   switch (mode) {
     case DlPointMode::kPoints:
-      AnnotateAttributes(attributes, state,
-                         DisplayListOpFlags::kDrawPointsAsPointsFlags);
+      CheckAttributes(attributes, state,
+                      DisplayListOpFlags::kDrawPointsAsPointsFlags);
       break;
     case DlPointMode::kLines:
-      AnnotateAttributes(attributes, state,
-                         DisplayListOpFlags::kDrawPointsAsLinesFlags);
+      CheckAttributes(attributes, state,
+                      DisplayListOpFlags::kDrawPointsAsLinesFlags);
       break;
     case DlPointMode::kPolygon:
-      AnnotateAttributes(attributes, state,
-                         DisplayListOpFlags::kDrawPointsAsPolygonFlags);
+      CheckAttributes(attributes, state,
+                      DisplayListOpFlags::kDrawPointsAsPolygonFlags);
       break;
   }
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   size_t point_count = state.range(0);
   state.SetComplexityN(point_count);
@@ -1115,12 +1112,9 @@ void BM_DrawPoints(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawPoints-" +
-                  PointModeToString(mode) + "-" + std::to_string(point_count) +
-                  ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawPoints-" + PointModeToString(mode) + "-" +
+                              std::to_string(point_count));
 }
 
 sk_sp<SkImage> ImageFromBitmapWithNewID(const SkBitmap& bitmap) {
@@ -1143,16 +1137,16 @@ void BM_DrawImage(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state,
-                     DisplayListOpFlags::kDrawImageWithPaintFlags);
+  CheckAttributes(attributes, state,
+                  DisplayListOpFlags::kDrawImageWithPaintFlags);
 
   size_t bitmap_size = state.range(0);
   surface_provider->InitializeSurface(bitmap_size * 2, bitmap_size * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
-  sk_sp<SkImage> image;
-  std::shared_ptr<DlSurfaceInstance> offscreen_instance;
-  sk_sp<SkSurface> offscreen;
+  sk_sp<DlImage> image;
   SkBitmap bitmap;
 
   if (upload_bitmap) {
@@ -1162,9 +1156,7 @@ void BM_DrawImage(benchmark::State& state,
     bitmap.allocPixels(info, 0);
     bitmap.eraseColor(SK_ColorBLUE);
   } else {
-    offscreen_instance =
-        surface_provider->MakeOffscreenSurface(bitmap_size, bitmap_size);
-    offscreen_instance->GetCanvas()->Clear(DlColor::kRed());
+    image = MakeTestImage(bitmap_size, bitmap_size, DlColor::kRed());
   }
 
   const DlPoint offset(0.5f, 0.5f);
@@ -1173,10 +1165,11 @@ void BM_DrawImage(benchmark::State& state,
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
-    image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
-                          : offscreen->makeImageSnapshot();
-    builder.DrawImage(DlImageSkia::Make(image), bouncer.GetPoint(), options,
-                      &paint);
+    if (upload_bitmap) {
+      auto sk_image = ImageFromBitmapWithNewID(bitmap);
+      image = DlImageSkia::Make(sk_image);
+    }
+    builder.DrawImage(image, bouncer.GetPoint(), options, &paint);
     bouncer.Bounce();
   }
 
@@ -1191,12 +1184,10 @@ void BM_DrawImage(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawImage-" +
-                  (upload_bitmap ? "Upload-" : "Texture-") +
-                  std::to_string(bitmap_size) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  std::string image_type = (upload_bitmap ? "Upload-" : "Texture-");
+  SaveSnapshotIfNecessary(
+      surface_provider, surface, state,
+      "DrawImage-" + image_type + std::to_string(bitmap_size));
 }
 
 std::string ConstraintToString(DlSrcRectConstraint constraint) {
@@ -1224,16 +1215,16 @@ void BM_DrawImageRect(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state,
-                     DisplayListOpFlags::kDrawImageRectWithPaintFlags);
+  CheckAttributes(attributes, state,
+                  DisplayListOpFlags::kDrawImageRectWithPaintFlags);
 
   size_t bitmap_size = state.range(0);
   surface_provider->InitializeSurface(bitmap_size * 2, bitmap_size * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
-  sk_sp<SkImage> image;
-  std::shared_ptr<DlSurfaceInstance> offscreen_instance;
-  sk_sp<SkSurface> offscreen;
+  sk_sp<DlImage> image;
   SkBitmap bitmap;
 
   if (upload_bitmap) {
@@ -1243,9 +1234,7 @@ void BM_DrawImageRect(benchmark::State& state,
     bitmap.allocPixels(info, 0);
     bitmap.eraseColor(SK_ColorBLUE);
   } else {
-    offscreen_instance =
-        surface_provider->MakeOffscreenSurface(bitmap_size, bitmap_size);
-    offscreen_instance->GetCanvas()->Clear(DlColor::kRed());
+    image = MakeTestImage(bitmap_size, bitmap_size, DlColor::kRed());
   }
 
   const DlPoint offset(0.5f, 0.5f);
@@ -1256,10 +1245,12 @@ void BM_DrawImageRect(benchmark::State& state,
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
-    image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
-                          : offscreen->makeImageSnapshot();
-    builder.DrawImageRect(DlImageSkia::Make(image), src, bouncer.GetRect(),
-                          options, &paint, constraint);
+    if (upload_bitmap) {
+      auto sk_image = ImageFromBitmapWithNewID(bitmap);
+      image = DlImageSkia::Make(sk_image);
+    }
+    builder.DrawImageRect(image, src, bouncer.GetRect(), options, &paint,
+                          constraint);
     bouncer.Bounce();
   }
 
@@ -1274,13 +1265,11 @@ void BM_DrawImageRect(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawImageRect-" +
-                  (upload_bitmap ? "Upload-" : "Texture-") +
-                  ConstraintToString(constraint) + "-" +
-                  std::to_string(bitmap_size) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  std::string image_type = (upload_bitmap ? "Upload-" : "Texture-");
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawImageRect-" + image_type +
+                              ConstraintToString(constraint) + "-" +
+                              std::to_string(bitmap_size));
 }
 
 std::string FilterModeToString(const DlFilterMode mode) {
@@ -1308,19 +1297,19 @@ void BM_DrawImageNine(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state,
-                     DisplayListOpFlags::kDrawImageNineWithPaintFlags);
+  CheckAttributes(attributes, state,
+                  DisplayListOpFlags::kDrawImageNineWithPaintFlags);
 
   size_t bitmap_size = state.range(0);
   surface_provider->InitializeSurface(bitmap_size * 2, bitmap_size * 2);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlIRect center = DlIRect::MakeXYWH(bitmap_size / 4, bitmap_size / 4,
                                      bitmap_size / 2, bitmap_size / 2);
 
-  sk_sp<SkImage> image;
-  std::shared_ptr<DlSurfaceInstance> offscreen_instance;
-  sk_sp<SkSurface> offscreen;
+  sk_sp<DlImage> image;
   SkBitmap bitmap;
 
   if (upload_bitmap) {
@@ -1330,9 +1319,7 @@ void BM_DrawImageNine(benchmark::State& state,
     bitmap.allocPixels(info, 0);
     bitmap.eraseColor(SK_ColorBLUE);
   } else {
-    offscreen_instance =
-        surface_provider->MakeOffscreenSurface(bitmap_size, bitmap_size);
-    offscreen_instance->GetCanvas()->Clear(DlColor::kRed());
+    image = MakeTestImage(bitmap_size, bitmap_size, DlColor::kRed());
   }
 
   const DlPoint offset(0.5f, 0.5f);
@@ -1341,10 +1328,11 @@ void BM_DrawImageNine(benchmark::State& state,
 
   state.counters["DrawCallCount"] = kImagesToDraw;
   for (size_t i = 0; i < kImagesToDraw; i++) {
-    image = upload_bitmap ? ImageFromBitmapWithNewID(bitmap)
-                          : offscreen->makeImageSnapshot();
-    builder.DrawImageNine(DlImageSkia::Make(image), center, bouncer.GetRect(),
-                          filter, &paint);
+    if (upload_bitmap) {
+      auto sk_image = ImageFromBitmapWithNewID(bitmap);
+      image = DlImageSkia::Make(sk_image);
+    }
+    builder.DrawImageNine(image, center, bouncer.GetRect(), filter, &paint);
     bouncer.Bounce();
   }
 
@@ -1359,13 +1347,11 @@ void BM_DrawImageNine(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawImageNine-" +
-                  (upload_bitmap ? "Upload-" : "Texture-") +
-                  FilterModeToString(filter) + "-" +
-                  std::to_string(bitmap_size) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  std::string image_type = (upload_bitmap ? "Upload-" : "Texture-");
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawImageNine-" + image_type +
+                              FilterModeToString(filter) + "-" +
+                              std::to_string(bitmap_size));
 }
 
 // Draws a series of glyph runs with 32 glyphs in each run. The number of runs
@@ -1382,11 +1368,13 @@ void BM_DrawTextBlob(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawTextFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawTextFlags);
 
   size_t draw_calls = state.range(0);
   surface_provider->InitializeSurface(kFixedCanvasSize, kFixedCanvasSize);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   state.SetComplexityN(draw_calls);
   state.counters["DrawCallCount_Varies"] = draw_calls;
@@ -1410,11 +1398,8 @@ void BM_DrawTextBlob(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawTextBlob-" +
-                  std::to_string(draw_calls) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawTextBlob-" + std::to_string(draw_calls));
 }
 
 // Draw the shadow for a 10-sided regular polygon where the polygon's
@@ -1434,11 +1419,13 @@ void BM_DrawShadow(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kDrawShadowFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawShadowFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   DlPathBuilder path_builder;
 
@@ -1486,13 +1473,11 @@ void BM_DrawShadow(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-DrawShadow-" +
-                  VerbToString(type) + "-" +
-                  (transparent_occluder ? "Transparent-" : "Opaque-") +
-                  std::to_string(elevation) + "-" + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(
+      surface_provider, surface, state,
+      "DrawShadow-" + VerbToString(type) + "-" +
+          (transparent_occluder ? "Transparent-" : "Opaque-") +
+          std::to_string(elevation));
 }
 
 // Calls saveLayer N times from the root canvas layer, and optionally calls
@@ -1509,11 +1494,13 @@ void BM_SaveLayer(benchmark::State& state,
   DisplayListBuilder builder;
   DlPaint paint = GetPaintForRun(attributes);
 
-  AnnotateAttributes(attributes, state, DisplayListOpFlags::kSaveLayerFlags);
+  CheckAttributes(attributes, state, DisplayListOpFlags::kSaveLayerFlags);
 
   size_t length = kFixedCanvasSize;
   surface_provider->InitializeSurface(length, length);
   auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
 
   size_t save_layer_calls = state.range(0);
 
@@ -1546,12 +1533,9 @@ void BM_SaveLayer(benchmark::State& state,
   }
   state.SetItemsProcessed(items_processed);
 
-#ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = surface_provider->backend_name() + "-SaveLayer-" +
-                  std::to_string(save_depth) + "-" +
-                  std::to_string(save_layer_calls) + ".png";
-  surface->Snapshot(filename);
-#endif  // WRITE_BENCHMARK_SNAPSHOTS
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "SaveLayer-" + std::to_string(save_depth) + "x" +
+                              std::to_string(save_layer_calls));
 }
 
 #ifdef DISPLAY_LIST_BENCHMARK_ALL_OPS

@@ -8,6 +8,7 @@
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/playground/playground_impl.h"
 #include "flutter/impeller/renderer/surface.h"
 #include "flutter/impeller/typographer/typographer_context.h"
@@ -53,7 +54,9 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   std::shared_ptr<impeller::Context> context_;
   std::shared_ptr<impeller::Surface> surface_;
   std::shared_ptr<impeller::RenderTarget> target_holder_;
-  const impeller::RenderTarget* target_;
+  impeller::AiksContext aiks_context_;
+
+  const impeller::RenderTarget& GetRenderTarget() const;
 
   void DoRenderDisplayList(const sk_sp<DisplayList>& display_list);
 

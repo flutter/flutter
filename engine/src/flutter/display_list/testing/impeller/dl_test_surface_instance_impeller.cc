@@ -15,16 +15,27 @@ DlSurfaceInstanceImpeller::DlSurfaceInstanceImpeller(
     std::shared_ptr<impeller::Surface> surface)
     : context_(std::move(context)),
       surface_(std::move(surface)),
-      target_(&surface_->GetRenderTarget()) {}
+      aiks_context_(context_, typographer_context_) {}
 
 DlSurfaceInstanceImpeller::DlSurfaceInstanceImpeller(
     std::shared_ptr<impeller::Context> context,
     std::shared_ptr<impeller::RenderTarget> target)
     : context_(std::move(context)),
       target_holder_(std::move(target)),
-      target_(target_holder_.get()) {}
+      aiks_context_(context_, typographer_context_) {}
 
 DlSurfaceInstanceImpeller::~DlSurfaceInstanceImpeller() = default;
+
+const impeller::RenderTarget& DlSurfaceInstanceImpeller::GetRenderTarget()
+    const {
+  if (surface_) {
+    return surface_->GetRenderTarget();
+  }
+  if (target_holder_) {
+    return *target_holder_;
+  }
+  FML_UNREACHABLE();
+}
 
 void DlSurfaceInstanceImpeller::Clear(const DlColor& color) {
   // Clear whatever is in the builder as it is now irrellevant.
@@ -50,10 +61,9 @@ void DlSurfaceInstanceImpeller::FlushSubmitCpuSync() {
 void DlSurfaceInstanceImpeller::DoRenderDisplayList(
     const sk_sp<DisplayList>& display_list) {
   if (display_list->GetRecordCount() > 0) {
-    impeller::AiksContext aiks_context(context_, typographer_context_);
-    impeller::RenderToTarget(aiks_context.GetContentContext(), *target_,
-                             display_list, display_list->GetBounds(), false,
-                             false);
+    impeller::RenderToTarget(aiks_context_.GetContentContext(),
+                             GetRenderTarget(), display_list,
+                             display_list->GetBounds(), false, false);
   }
 }
 
@@ -62,11 +72,11 @@ bool DlSurfaceInstanceImpeller::SnapshotToFile(std::string& filename) const {
 }
 
 int DlSurfaceInstanceImpeller::width() const {
-  return target_->GetRenderTargetSize().width;
+  return GetRenderTarget().GetRenderTargetSize().width;
 }
 
 int DlSurfaceInstanceImpeller::height() const {
-  return target_->GetRenderTargetSize().height;
+  return GetRenderTarget().GetRenderTargetSize().height;
 }
 
 std::shared_ptr<impeller::TypographerContext>
