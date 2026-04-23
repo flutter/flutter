@@ -362,6 +362,38 @@ class _MacOSUtils extends _PosixUtils {
     required super.currentAbi,
   });
 
+  HostPlatform? _hostPlatform;
+
+  @override
+  HostPlatform get hostPlatform {
+    if (_hostPlatform == null) {
+      String? sysctlPath;
+      if (which('sysctl') == null) {
+        // Fallback to known install locations.
+        for (final path in <String>['/usr/sbin/sysctl', '/sbin/sysctl']) {
+          if (_fileSystem.isFileSync(path)) {
+            sysctlPath = path;
+          }
+        }
+      } else {
+        sysctlPath = 'sysctl';
+      }
+
+      if (sysctlPath == null) {
+        throwToolExit('sysctl not found. Try adding it to your PATH environment variable.');
+      }
+      final RunResult arm64Check = _processUtils.runSync(<String>[sysctlPath, 'hw.optional.arm64']);
+      // On arm64 stdout is "sysctl hw.optional.arm64: 1"
+      // On x86 hw.optional.arm64 is unavailable and exits with 1.
+      if (arm64Check.exitCode == 0 && arm64Check.stdout.trim().endsWith('1')) {
+        _hostPlatform = HostPlatform.darwin_arm64;
+      } else {
+        _hostPlatform = HostPlatform.darwin_x64;
+      }
+    }
+    return _hostPlatform!;
+  }
+
   String? _name;
 
   @override

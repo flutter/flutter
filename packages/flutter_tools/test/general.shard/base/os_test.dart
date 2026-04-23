@@ -147,6 +147,10 @@ void main() {
     });
 
     testWithoutContext('macOS x64', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+      ]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
         currentAbi: Abi.macosX64,
@@ -155,6 +159,13 @@ void main() {
     });
 
     testWithoutContext('macOS ARM64', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(
+          command: <String>['sysctl', 'hw.optional.arm64'],
+          stdout: 'sysctl hw.optional.arm64: 1',
+        ),
+      ]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
         currentAbi: Abi.macosArm64,
@@ -173,6 +184,11 @@ void main() {
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
         const FakeCommand(command: <String>['sw_vers', '-buildVersion'], stdout: 'build'),
         const FakeCommand(command: <String>['uname', '-m'], stdout: 'arm64'),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(
+          command: <String>['sysctl', 'hw.optional.arm64'],
+          stdout: 'sysctl hw.optional.arm64: 1',
+        ),
       ]);
 
       final OperatingSystemUtils utils = createOSUtils(
@@ -191,6 +207,11 @@ void main() {
           command: <String>['uname', '-m'],
           stdout: 'x86_64', // Running on Rosetta
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(
+          command: <String>['sysctl', 'hw.optional.arm64'],
+          stdout: 'sysctl hw.optional.arm64: 1',
+        ),
       ]);
 
       final OperatingSystemUtils utils = createOSUtils(
@@ -206,6 +227,8 @@ void main() {
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
         const FakeCommand(command: <String>['sw_vers', '-buildVersion'], stdout: 'build'),
         const FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64'),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
       ]);
 
       final OperatingSystemUtils utils = createOSUtils(
