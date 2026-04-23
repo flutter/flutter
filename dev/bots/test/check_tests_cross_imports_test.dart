@@ -29,7 +29,7 @@ void main() {
   late Directory testServicesDirectory;
   late Directory testWidgetsDirectory;
 
-  void buildTestFiles({
+  void buildKnownCrossImportTestFiles({
     Set<String> excludes = const <String>{},
     Set<String> extraWidgetsImportingMaterial = const <String>{},
     Set<String> extraWidgetsImportingCupertino = const <String>{},
@@ -113,7 +113,7 @@ void main() {
   });
 
   test('when only all knowns have cross imports', () async {
-    buildTestFiles();
+    buildKnownCrossImportTestFiles();
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
@@ -150,7 +150,7 @@ void main() {
 
       final String excludedSample = knownCrossImports.first;
 
-      buildTestFiles(excludes: <String>{excludedSample});
+      buildKnownCrossImportTestFiles(excludes: <String>{excludedSample});
 
       bool? success;
       final String result = await capture(() async {
@@ -174,7 +174,7 @@ void main() {
       '/',
       Platform.isWindows ? r'\' : '/',
     );
-    buildTestFiles(extraWidgetsImportingMaterial: <String>{extra});
+    buildKnownCrossImportTestFiles(extraWidgetsImportingMaterial: <String>{extra});
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
@@ -199,7 +199,7 @@ void main() {
       '/',
       Platform.isWindows ? r'\' : '/',
     );
-    buildTestFiles();
+    buildKnownCrossImportTestFiles();
     writeImportInFiles(<String>{extra}, inDirectory: testCupertinoDirectory);
     bool? success;
     final String result = await capture(() async {
@@ -225,7 +225,7 @@ void main() {
       '/',
       Platform.isWindows ? r'\' : '/',
     );
-    buildTestFiles(extraWidgetsImportingCupertino: <String>{extra});
+    buildKnownCrossImportTestFiles(extraWidgetsImportingCupertino: <String>{extra});
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
