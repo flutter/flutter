@@ -654,6 +654,10 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
 
     showOverlay();
 
+    if (widget.semanticLabel != null) {
+      SemanticsService.announce(widget.semanticLabel!, Directionality.of(context));
+    }
+
     if (_animationController.isForwardOrCompleted) {
       return;
     }
