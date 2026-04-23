@@ -76,7 +76,6 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     const Rect& rect,
     Scalar degree,
     const RoundingRadii& radii,
-    Scalar corner_angle_start,
     Scalar corner_angle_span,
     Point corner_circle_center,
     std::optional<StrokeParameters> stroke) {
@@ -88,7 +87,6 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
                            .stroke = stroke,
                            .radii = radii,
                            .superellipse_degree = degree,
-                           .corner_angle_start = corner_angle_start,
                            .corner_angle_span = corner_angle_span,
                            .corner_circle_center = corner_circle_center};
 }

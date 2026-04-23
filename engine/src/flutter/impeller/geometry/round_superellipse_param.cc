@@ -180,8 +180,6 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
   Radians circle_max_angle =
       radius == 0 ? Radians(0)
                   : (pointM - circle_center).AngleTo(pointJ - circle_center);
-  Point v = pointM - circle_center;
-  Radians circle_start_angle = Radians(std::atan2(v.y, v.x));
 
   return RoundSuperellipseParam::Octant{
       .offset = center,
@@ -193,7 +191,6 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
       .circle_start = pointJ,
       .circle_center = circle_center,
       .circle_max_angle = circle_max_angle,
-      .circle_start_angle = circle_start_angle,
       .circle_radius = R,
   };
 }

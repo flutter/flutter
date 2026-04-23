@@ -60,7 +60,6 @@ struct UberSDFParameters {
       const Rect& bounds,
       Scalar degree,
       const RoundingRadii& radii,
-      Scalar corner_angle_start,
       Scalar corner_angle_span,
       Point corner_circle_center,
       std::optional<StrokeParameters> stroke);
@@ -88,9 +87,6 @@ struct UberSDFParameters {
 
   /// The degree of a RoundSuperellipse.
   Scalar superellipse_degree;
-
-  /// The angle at which the circular arc starts in a RoundSuperellipse
-  Scalar corner_angle_start;
 
   /// The span of the circular arc in a RoundSuperellipse
   Scalar corner_angle_span;

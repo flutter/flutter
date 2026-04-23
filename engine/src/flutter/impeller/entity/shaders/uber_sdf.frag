@@ -18,7 +18,6 @@ uniform FragInfo {
   float type;
   vec4 radii;
   float superellipse_degree;
-  float corner_angle_start;
   float corner_angle_span;
   vec2 corner_circle_center;
 }
@@ -30,6 +29,7 @@ highp in vec2 v_position;
 
 const float PI = 3.14159265;
 const float TWO_PI = 6.28318531;
+const float PI_OVER_FOUR = 0.78539816;
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -100,7 +100,6 @@ float sdSuperellipse(vec2 p, float n) {
 float distanceFromRoundedSuperellipse(vec2 p,
                                       vec2 ab,
                                       float n,
-                                      float angle_start,
                                       float angle_span,
                                       vec2 circle_center,
                                       float radius) {
@@ -117,8 +116,8 @@ float distanceFromRoundedSuperellipse(vec2 p,
   // Grab the angle offset of the point.
   float theta = atan(p_remap.y, p_remap.x);
 
-  // The angular distance between the point and the start of the circular arc.
-  float d_theta = theta - angle_start;
+  // The angular distance between the point and the 45 degree midline.
+  float d_theta = theta - PI_OVER_FOUR;
   d_theta = mod(d_theta + PI, TWO_PI) - PI;
 
   // If the point is within the span of the corner circle's arc,
@@ -259,8 +258,8 @@ float filledSDF(vec2 p) {
   } else {
     return distanceFromRoundedSuperellipse(
         p, frag_info.size, frag_info.superellipse_degree,
-        frag_info.corner_angle_start, frag_info.corner_angle_span,
-        frag_info.corner_circle_center, frag_info.radii.x);
+        frag_info.corner_angle_span, frag_info.corner_circle_center,
+        frag_info.radii.x);
   }
 }
 
@@ -298,8 +297,8 @@ float strokedSDF(vec2 p) {
   } else {  // Round Superellipse
     float d = distanceFromRoundedSuperellipse(
         p, frag_info.size, frag_info.superellipse_degree,
-        frag_info.corner_angle_start, frag_info.corner_angle_span,
-        frag_info.corner_circle_center, frag_info.radii.x);
+        frag_info.corner_angle_span, frag_info.corner_circle_center,
+        frag_info.radii.x);
     return abs(d) - half_stroke;
   }
 
