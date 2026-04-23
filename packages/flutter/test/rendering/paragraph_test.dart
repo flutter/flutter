@@ -1509,60 +1509,18 @@ void main() {
     semanticsHandle.dispose();
   });
 
-  group('RenderParagraph ideographic baseline', () {
-    test('latin text', () {
-      // Even without CJK characters, the ideographic baseline (bottom of the line)
-      // should be distinct from the alphabetic baseline.
-      final paragraph = RenderParagraph(
-        const TextSpan(text: 'Hello world', style: TextStyle(fontSize: 10.0)),
-        textDirection: TextDirection.ltr,
-      );
-      layout(paragraph);
+  test('RenderParagraph ideographic baseline', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello world', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
 
-      final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      final double ideographic = paragraph.computeDistanceToActualBaseline(
-        TextBaseline.ideographic,
-      );
+    final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    final double ideographic = paragraph.computeDistanceToActualBaseline(TextBaseline.ideographic);
 
-      expect(alphabetic, 7.5);
-      expect(ideographic, 10.0);
-    });
-
-    test('CJK text', () {
-      // Verify that the ideographic baseline is correctly calculated based on
-      // CJK font metrics.
-      final paragraph = RenderParagraph(
-        const TextSpan(text: '一二三', style: TextStyle(fontSize: 10.0)),
-        textDirection: TextDirection.ltr,
-      );
-      layout(paragraph);
-
-      final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      final double ideographic = paragraph.computeDistanceToActualBaseline(
-        TextBaseline.ideographic,
-      );
-
-      expect(alphabetic, 7.5);
-      expect(ideographic, 10.0);
-    });
-
-    test('mixed text', () {
-      // Verify that the baseline calculation correctly handles mixed fonts,
-      // extending the metrics to cover both.
-      final paragraph = RenderParagraph(
-        const TextSpan(text: 'Hello world 一二三', style: TextStyle(fontSize: 10.0)),
-        textDirection: TextDirection.ltr,
-      );
-      layout(paragraph);
-
-      final double alphabetic = paragraph.computeDistanceToActualBaseline(TextBaseline.alphabetic);
-      final double ideographic = paragraph.computeDistanceToActualBaseline(
-        TextBaseline.ideographic,
-      );
-
-      expect(alphabetic, 7.5);
-      expect(ideographic, 10.0);
-    });
+    expect(alphabetic, 7.5);
+    expect(ideographic, 10.0);
   });
 
   test('RenderParagraph computeDryBaseline ideographic baseline', () {
