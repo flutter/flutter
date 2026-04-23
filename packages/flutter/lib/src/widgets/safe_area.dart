@@ -71,6 +71,116 @@ class SafeArea extends StatelessWidget {
     required this.child,
   });
 
+  /// Creates a widget that avoids operating system interfaces only on the top side.
+  const SafeArea.top({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = true,
+       left = false,
+       right = false,
+       bottom = false;
+
+  /// Creates a widget that avoids operating system interfaces only on the bottom side.
+  const SafeArea.bottom({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = false,
+       left = false,
+       right = false,
+       bottom = true;
+
+  /// Creates a widget that avoids operating system interfaces only on the left side.
+  const SafeArea.left({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = false,
+       left = true,
+       right = false,
+       bottom = false;
+
+  /// Creates a widget that avoids operating system interfaces only on the right side.
+  const SafeArea.right({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = false,
+       left = false,
+       right = true,
+       bottom = false;
+
+  /// Creates a widget that avoids operating system interfaces only on the horizontal sides.
+  const SafeArea.horizontal({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = false,
+       left = true,
+       right = true,
+       bottom = false;
+
+  /// Creates a widget that avoids operating system interfaces only on the top and horizontal sides.
+  const SafeArea.topAndHorizontal({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = true,
+       left = true,
+       right = true,
+       bottom = false;
+
+  /// Creates a widget that avoids operating system interfaces only on the bottom and horizontal sides.
+  const SafeArea.bottomAndHorizontal({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = false,
+       left = true,
+       right = true,
+       bottom = true;
+
+  /// Creates a widget that avoids operating system interfaces only on the vertical sides.
+  const SafeArea.vertical({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = true,
+       left = false,
+       right = false,
+       bottom = true;
+
+  /// Creates a widget that avoids operating system interfaces only on the left and vertical sides.
+  const SafeArea.leftAndVertical({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = true,
+       left = true,
+       right = false,
+       bottom = true;
+
+  /// Creates a widget that avoids operating system interfaces only on the right and vertical sides.
+  const SafeArea.rightAndVertical({
+    super.key,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = false,
+    required this.child,
+  }) : top = true,
+       left = false,
+       right = true,
+       bottom = true;
+
   /// Whether to avoid system intrusions on the left.
   final bool left;
 
