@@ -195,11 +195,6 @@ void main() {
     ),
   ];
 
-  final disallowedImportCases = <(String, String)>[
-    ('Material', "import 'package:flutter/material.dart';"),
-    ('Cupertino', "import 'package:flutter/cupertino.dart';"),
-  ];
-
   for (final (
         String libraryName,
         String knownCrossImportsListName,
@@ -231,61 +226,35 @@ void main() {
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
     });
+
+    test('unknown $libraryName cross import of Material', () async {
+      final String extra = 'packages/flutter/$libraryName/foo_test.dart'.replaceAll(
+        '/',
+        Platform.isWindows ? r'\' : '/',
+      );
+
+      buildKnownCrossImportTestFiles();
+      writeImportInFiles(<String>{extra}, inDirectory: testFilesDirectory);
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines =
+          <String>[
+                '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+                '║ The following test in $libraryName has a disallowed import of Material. Refactor it or move it to Material.',
+                '║   $extra',
+                '╚═══════════════════════════════════════════════════════════════════════════════',
+              ]
+              .map((String line) {
+                return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+              })
+              .join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
   }
-
-  test('unknown Widgets cross import of Material', () async {
-    final String extra = 'packages/flutter/test/widgets/foo_test.dart'.replaceAll(
-      '/',
-      Platform.isWindows ? r'\' : '/',
-    );
-    buildKnownCrossImportTestFiles();
-    writeImportInFiles(<String>{extra}, inDirectory: testWidgetsDirectory);
-
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.check();
-    }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ The following test in Widgets has a disallowed import of Material. Refactor it or move it to Material.',
-              '║   $extra',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, isFalse);
-  });
-
-  test('unknown Cupertino cross importing Material', () async {
-    final String extra = 'packages/flutter/test/cupertino/foo_test.dart'.replaceAll(
-      '/',
-      Platform.isWindows ? r'\' : '/',
-    );
-    buildKnownCrossImportTestFiles();
-    writeImportInFiles(<String>{extra}, inDirectory: testCupertinoDirectory);
-
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.check();
-    }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ The following test in Cupertino has a disallowed import of Material. Refactor it or move it to Material.',
-              '║   $extra',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, isFalse);
-  });
 
   test('unknown Widgets cross import of Cupertino', () async {
     final String extra = 'packages/flutter/test/widgets/foo_test.dart'.replaceAll(
