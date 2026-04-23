@@ -149,7 +149,7 @@ void main() {
               .join('\n');
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
-    });
+    }, skip: libraryName == 'test/cupertino'); // [intended]: Cupertino can import itself
   }
 }
 
