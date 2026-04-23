@@ -52,12 +52,7 @@ class TextureBox extends RenderBox {
   int _textureId;
   set textureId(int value) {
     if (value != _textureId) {
-      final int oldTextureId = _textureId;
       _textureId = value;
-      if (attached) {
-        RendererBinding.instance.unregisterTexture(oldTextureId, this);
-        RendererBinding.instance.registerTexture(_textureId, this);
-      }
       markNeedsPaint();
     }
   }
@@ -65,13 +60,19 @@ class TextureBox extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    RendererBinding.instance.registerTexture(_textureId, this);
+    RendererBinding.instance.addTextureFrameAvailableHandler(_handleTextureFrameAvailable);
   }
 
   @override
   void detach() {
-    RendererBinding.instance.unregisterTexture(_textureId, this);
+    RendererBinding.instance.removeTextureFrameAvailableHandler(_handleTextureFrameAvailable);
     super.detach();
+  }
+
+  void _handleTextureFrameAvailable(int textureId) {
+    if (textureId == _textureId) {
+      markNeedsPaint();
+    }
   }
 
   /// When true the texture will not be updated with new frames.
