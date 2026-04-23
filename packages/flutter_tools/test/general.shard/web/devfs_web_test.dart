@@ -1809,6 +1809,9 @@ const config = {
   test(
     'DDC library bundle reloaded sources are relative paths',
     () => testbed.run(() async {
+      // `reloadedSourcesUri` should itself be relative.
+      expect(WebAssetServer.reloadedSourcesUri.host, isEmpty);
+
       // Set up initial compile.
       final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
         ..createSync(recursive: true);
@@ -1817,7 +1820,7 @@ const config = {
       outputFile.parent.childFile('a.lib.js.map').writeAsStringSync('{}');
       outputFile.parent.childFile('a.lib.js.metadata').writeAsStringSync('{}');
 
-      final ResidentCompiler residentCompiler = FakeResidentCompiler()
+      final residentCompiler = FakeResidentCompiler()
         ..output = const CompilerOutput('a.lib.js', 0, <Uri>[]);
 
       const webDevServerConfig = WebDevServerConfig();
@@ -1895,15 +1898,15 @@ const config = {
         shaderCompiler: const FakeShaderCompiler(),
       );
 
-      // Recompile with module metadata.
-      final File source = outputFile.parent.childFile('a.lib.js.sources')
+      // Recompile with module metadata in the top-level.
+      File source = outputFile.parent.childFile('a.lib.js.sources')
         ..writeAsStringSync('void main() {}');
       outputFile.parent.childFile('a.lib.js.map').writeAsStringSync('{}');
-      final File metadata = outputFile.parent.childFile('a.lib.js.metadata')
+      File metadata = outputFile.parent.childFile('a.lib.js.metadata')
         ..writeAsStringSync(
           json.encode(
             ModuleMetadata('a.lib.js', 'closure', 'a.map', 'a.lib.js')
-              ..addLibrary(LibraryMetadata('b', 'dart:b', ['b.dart']))
+              ..addLibrary(LibraryMetadata('lib_a', 'dart:lib_a', ['lib_a.dart']))
               ..toJson(),
           ),
         );
@@ -1930,9 +1933,7 @@ const config = {
         shaderCompiler: const FakeShaderCompiler(),
       );
 
-      // `reloadedSourcesUri` should itself be relative.
-      expect(WebAssetServer.reloadedSourcesUri.host, isEmpty);
-      final Uint8List? reloadedSources = webDevFS.webAssetServer.getFile(
+      Uint8List? reloadedSources = webDevFS.webAssetServer.getFile(
         WebAssetServer.reloadedSourcesUri.path,
       );
       expect(reloadedSources, isNotNull);
@@ -1942,7 +1943,56 @@ const config = {
           // prefix.
           'src': '/a.lib.js',
           'module': 'a.lib.js',
-          'libraries': ['dart:b'],
+          'libraries': ['dart:lib_a'],
+        },
+      ]);
+
+      // Recompile with module metadata in a subdirectory.
+      final Directory subDirectory = outputFile.parent.childDirectory('sub')..createSync();
+      source = subDirectory.childFile('b.lib.js.sources')..writeAsStringSync('void main() {}');
+      subDirectory.childFile('b.lib.js.map').writeAsStringSync('{}');
+      metadata = subDirectory.childFile('b.lib.js.metadata')
+        ..writeAsStringSync(
+          json.encode(
+            ModuleMetadata('b.lib.js', 'closure', 'b.map', 'b.lib.js')
+              ..addLibrary(LibraryMetadata('lib_b', 'dart:lib_b', ['lib_b.dart']))
+              ..toJson(),
+          ),
+        );
+      subDirectory
+          .childFile('b.lib.js.json')
+          .writeAsStringSync(
+            json.encode(<String, Object>{
+              '${subDirectory.basename}/b.lib.js': <String, Object>{
+                'code': <int>[0, source.lengthSync()],
+                'sourcemap': <int>[0, 2],
+                'metadata': <int>[0, metadata.lengthSync()],
+              },
+            }),
+          );
+
+      residentCompiler.output = CompilerOutput('${subDirectory.basename}/b.lib.js', 0, <Uri>[]);
+
+      await webDevFS.update(
+        mainUri: outputFile.uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: '',
+        shaderCompiler: const FakeShaderCompiler(),
+      );
+
+      reloadedSources = webDevFS.webAssetServer.getFile(WebAssetServer.reloadedSourcesUri.path);
+      expect(reloadedSources, isNotNull);
+      expect(json.decode(utf8.decode(reloadedSources!)), [
+        {
+          // The paths within `reloadedSources` should be relative with a root
+          // prefix.
+          'src': '/sub/b.lib.js',
+          'module': 'b.lib.js',
+          'libraries': ['dart:lib_b'],
         },
       ]);
 
