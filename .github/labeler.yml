@@ -240,9 +240,13 @@ team-ios:
     - any-glob-to-any-file:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/ios/framework/**/*
+      - dev/integration_tests/*ios*/**/*
       - packages/flutter_tools/**/ios/*
       - packages/flutter_tools/**/macos/*
       - packages/flutter_tools/**/*xcode*
+      - packages/flutter_tools/**/*darwin*
+      - packages/flutter_tools/**/*swift*
+      - packages/flutter_tools/**/*pod*
       - packages/flutter_tools/**/*ios*
       - packages/flutter_tools/**/*macos*
 
@@ -261,6 +265,10 @@ team-macos:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/macos/**/*
       - packages/flutter_tools/**/macos/*
+      - packages/flutter_tools/**/*xcode*
+      - packages/flutter_tools/**/*darwin*
+      - packages/flutter_tools/**/*swift*
+      - packages/flutter_tools/**/*pod*
       - packages/flutter_tools/**/*macos*
 
 # Keep this synced with CODEOWNERS.
