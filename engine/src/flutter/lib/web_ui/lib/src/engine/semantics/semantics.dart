@@ -327,7 +327,7 @@ class SemanticsNodeUpdate {
     required this.increasedValueAttributes,
     required this.decreasedValue,
     required this.decreasedValueAttributes,
-    this.tooltip,
+    required this.tooltip,
     this.textDirection,
     required this.transform,
     required this.hitTestTransform,
@@ -377,7 +377,7 @@ class SemanticsNodeUpdate {
   final int scrollIndex;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final int? traversalParent;
+  final int traversalParent;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
@@ -425,7 +425,7 @@ class SemanticsNodeUpdate {
   final List<ui.StringAttribute> decreasedValueAttributes;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final String? tooltip;
+  final String tooltip;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.TextDirection? textDirection;
@@ -963,7 +963,7 @@ abstract class SemanticRole {
     // Set up aria-owns relationship for traversal order.
     if (semanticsObject.traversalParent != -1) {
       final SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent!];
+          semanticsObject.owner._semanticsTree[semanticsObject.traversalParent];
       if (parent != null && parent.semanticRole != null) {
         final List<String> children = parent.element.getAttribute('aria-owns')?.split(' ') ?? [];
         children.add(getIdAttribute(semanticsObject.id));
@@ -971,10 +971,9 @@ abstract class SemanticRole {
       }
     }
     // Clean up aria-owns relationship.
-    else if (semanticsObject._previousTraversalParent != null &&
-        semanticsObject._previousTraversalParent != -1) {
+    else if (semanticsObject._previousTraversalParent != -1) {
       final SemanticsObject? parent =
-          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent!];
+          semanticsObject.owner._semanticsTree[semanticsObject._previousTraversalParent];
       if (parent != null) {
         final List<String>? children = parent.element.getAttribute('aria-owns')?.split(' ');
         if (children != null) {
@@ -1692,9 +1691,9 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  int? get traversalParent => _traversalParent;
-  int? _traversalParent;
-  int? _previousTraversalParent;
+  int get traversalParent => _traversalParent;
+  int _traversalParent = -1;
+  int _previousTraversalParent = -1;
 
   static const int _traversalParentIndex = 1 << 29;
 
