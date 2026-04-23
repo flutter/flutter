@@ -108,26 +108,104 @@ void main() {
     expect(success, isTrue);
   });
 
-  // dart format off
-  final fixedCrossImportsTestCases = <(String, String, Set<String>)>[
-    ('test/animation', 'knownAnimationCrossImports', TestsCrossImportChecker.knownAnimationCrossImports),
-    ('test/cupertino', 'knownCupertinoCrossImports', TestsCrossImportChecker.knownCupertinoCrossImports),
-    ('test/dart', 'knownDartCrossImports', TestsCrossImportChecker.knownDartCrossImports),
-    ('test/examples', 'knownExamplesCrossImports', TestsCrossImportChecker.knownExamplesCrossImports),
-    ('test/foundation', 'knownFoundationCrossImports', TestsCrossImportChecker.knownFoundationCrossImports),
-    ('test/gestures', 'knownGesturesCrossImports', TestsCrossImportChecker.knownGesturesCrossImports),
-    ('test/harness', 'knownHarnessCrossImports', TestsCrossImportChecker.knownHarnessCrossImports),
-    ('test/painting', 'knownPaintingCrossImports', TestsCrossImportChecker.knownPaintingCrossImports),
-    ('test/physics', 'knownPhysicsCrossImports', TestsCrossImportChecker.knownPhysicsCrossImports),
-    ('test/rendering', 'knownRenderingCrossImports', TestsCrossImportChecker.knownRenderingCrossImports),
-    ('test/scheduler', 'knownSchedulerCrossImports', TestsCrossImportChecker.knownSchedulerCrossImports),
-    ('test/semantics', 'knownSemanticsCrossImports', TestsCrossImportChecker.knownSemanticsCrossImports),
-    ('test/services', 'knownServicesCrossImports', TestsCrossImportChecker.knownServicesCrossImports),
-    ('test/widgets', 'knownWidgetsCrossImports', TestsCrossImportChecker.knownWidgetsCrossImports),
+  final fixedCrossImportsTestCases = <(String, String, Set<String>, Directory)>[
+    (
+      'test/animation',
+      'knownAnimationCrossImports',
+      TestsCrossImportChecker.knownAnimationCrossImports,
+      testAnimationDirectory,
+    ),
+    (
+      'test/cupertino',
+      'knownCupertinoCrossImports',
+      TestsCrossImportChecker.knownCupertinoCrossImports,
+      testCupertinoDirectory,
+    ),
+    (
+      'test/dart',
+      'knownDartCrossImports',
+      TestsCrossImportChecker.knownDartCrossImports,
+      testDartDirectory,
+    ),
+    (
+      'test/examples',
+      'knownExamplesCrossImports',
+      TestsCrossImportChecker.knownExamplesCrossImports,
+      testExamplesDirectory,
+    ),
+    (
+      'test/foundation',
+      'knownFoundationCrossImports',
+      TestsCrossImportChecker.knownFoundationCrossImports,
+      testFoundationDirectory,
+    ),
+    (
+      'test/gestures',
+      'knownGesturesCrossImports',
+      TestsCrossImportChecker.knownGesturesCrossImports,
+      testGesturesDirectory,
+    ),
+    (
+      'test/harness',
+      'knownHarnessCrossImports',
+      TestsCrossImportChecker.knownHarnessCrossImports,
+      testHarnessDirectory,
+    ),
+    (
+      'test/painting',
+      'knownPaintingCrossImports',
+      TestsCrossImportChecker.knownPaintingCrossImports,
+      testPaintingDirectory,
+    ),
+    (
+      'test/physics',
+      'knownPhysicsCrossImports',
+      TestsCrossImportChecker.knownPhysicsCrossImports,
+      testPhysicsDirectory,
+    ),
+    (
+      'test/rendering',
+      'knownRenderingCrossImports',
+      TestsCrossImportChecker.knownRenderingCrossImports,
+      testRenderingDirectory,
+    ),
+    (
+      'test/scheduler',
+      'knownSchedulerCrossImports',
+      TestsCrossImportChecker.knownSchedulerCrossImports,
+      testSchedulerDirectory,
+    ),
+    (
+      'test/semantics',
+      'knownSemanticsCrossImports',
+      TestsCrossImportChecker.knownSemanticsCrossImports,
+      testSemanticsDirectory,
+    ),
+    (
+      'test/services',
+      'knownServicesCrossImports',
+      TestsCrossImportChecker.knownServicesCrossImports,
+      testServicesDirectory,
+    ),
+    (
+      'test/widgets',
+      'knownWidgetsCrossImports',
+      TestsCrossImportChecker.knownWidgetsCrossImports,
+      testWidgetsDirectory,
+    ),
   ];
-  // dart format on
 
-  for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
+  final disallowedImportCases = <(String, String)>[
+    ('Material', "import 'package:flutter/material.dart';"),
+    ('Cupertino', "import 'package:flutter/cupertino.dart';"),
+  ];
+
+  for (final (
+        String libraryName,
+        String knownCrossImportsListName,
+        Set<String> knownCrossImports,
+        Directory testFilesDirectory,
+      )
       in fixedCrossImportsTestCases) {
     test('when not all $libraryName knowns have cross imports', () async {
       if (knownCrossImports.isEmpty) {
