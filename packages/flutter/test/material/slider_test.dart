@@ -923,9 +923,7 @@ void main() {
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return MediaQuery(
-                  data: MediaQuery.of(
-                    context,
-                  ).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
+                  data: MediaQueryData(textScaler: TextScaler.linear(textScaleFactor)),
                   child: Material(
                     child: Theme(
                       data: Theme.of(context).copyWith(
@@ -968,7 +966,15 @@ void main() {
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..path(color: const Color(0xf55f5f5f))
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-276.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
           ..paragraph(),
       );
 
@@ -983,13 +989,22 @@ void main() {
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..path(color: const Color(0xf55f5f5f))
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-304.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
           ..paragraph(),
       );
 
       await gesture.up();
       await tester.pumpAndSettle();
 
+      // Check continuous
       await tester.pumpWidget(
         buildSlider(
           textScaleFactor: 1.0,
@@ -1004,7 +1019,15 @@ void main() {
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..path(color: const Color(0xf55f5f5f))
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-276.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
           ..paragraph(),
       );
 
@@ -1025,7 +1048,15 @@ void main() {
       expect(
         tester.renderObject(find.byType(Overlay)),
         paints
-          ..path(color: const Color(0xf55f5f5f))
+          ..path(
+            includes: const <Offset>[
+              Offset.zero,
+              Offset(0.0, -8.0),
+              Offset(-276.0, -16.0),
+              Offset(-216.0, -16.0),
+            ],
+            color: const Color(0xf55f5f5f),
+          )
           ..paragraph(),
       );
 
@@ -1049,7 +1080,7 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MediaQuery(
-                data: MediaQuery.of(context).copyWith(boldText: boldText),
+                data: MediaQueryData(boldText: boldText),
                 child: Material(
                   child: Theme(
                     data: Theme.of(context).copyWith(
@@ -2720,9 +2751,7 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return MediaQuery(
-                    data: MediaQuery.of(
-                      context,
-                    ).copyWith(navigationMode: NavigationMode.directional),
+                    data: const MediaQueryData(navigationMode: NavigationMode.directional),
                     child: Column(
                       children: <Widget>[
                         Slider(
