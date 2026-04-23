@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ffi' show Abi;
 
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
@@ -37,7 +36,6 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Analytics analytics,
-    Abi? currentAbi,
   }) {
     return XcodeProjectInterpreter._(
       platform: platform,
@@ -45,7 +43,6 @@ class XcodeProjectInterpreter {
       logger: logger,
       fileSystem: fileSystem,
       analytics: analytics,
-      currentAbi: currentAbi,
     );
   }
 
@@ -57,21 +54,16 @@ class XcodeProjectInterpreter {
     required Analytics analytics,
     Version? version,
     String? build,
-    Abi? currentAbi,
-    OperatingSystemUtils? operatingSystemUtils,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _operatingSystemUtils =
-           operatingSystemUtils ??
-           OperatingSystemUtils(
-             fileSystem: fileSystem,
-             logger: logger,
-             platform: platform,
-             processManager: processManager,
-             currentAbi: currentAbi,
-           ),
+       _operatingSystemUtils = OperatingSystemUtils(
+         fileSystem: fileSystem,
+         logger: logger,
+         platform: platform,
+         processManager: processManager,
+       ),
        _version = version,
        _build = build,
        _versionText = version?.toString(),
@@ -88,8 +80,6 @@ class XcodeProjectInterpreter {
     Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
     String? build = '13C100',
     Analytics? analytics,
-    Abi? currentAbi = Abi.macosX64,
-    OperatingSystemUtils? operatingSystemUtils,
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -103,8 +93,6 @@ class XcodeProjectInterpreter {
       version: version,
       build: build,
       analytics: analytics ?? const NoOpAnalytics(),
-      currentAbi: currentAbi,
-      operatingSystemUtils: operatingSystemUtils ?? _FakeOperatingSystemUtils(),
     );
   }
 
@@ -779,63 +767,4 @@ class XcodeProjectInfo {
   String toString() {
     return 'XcodeProjectInfo($targets, $buildConfigurations, $schemes)';
   }
-}
-
-class _FakeOperatingSystemUtils implements OperatingSystemUtils {
-  @override
-  HostPlatform get hostPlatform => HostPlatform.darwin_x64;
-
-  @override
-  void makeExecutable(File file) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void chmod(FileSystemEntity entity, String mode) {
-    throw UnimplementedError();
-  }
-
-  @override
-  File? which(String execName) {
-    throw UnimplementedError();
-  }
-
-  @override
-  List<File> whichAll(String execName) {
-    throw UnimplementedError();
-  }
-
-  @override
-  File makePipe(String path) {
-    throw UnimplementedError();
-  }
-
-  @override
-  int? getDirectorySize(Directory directory) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void unzip(File file, Directory targetDirectory) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
-    throw UnimplementedError();
-  }
-
-  @override
-  String get name => throw UnimplementedError();
-
-  @override
-  String get pathVarSeparator => throw UnimplementedError();
-
-  @override
-  Future<int> findFreePort({bool ipv6 = false}) => throw UnimplementedError();
 }
