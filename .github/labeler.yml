@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
-# Use git ls-files '<pattern>' to see the list of matching files.
+# Use git ls-files ':(glob)<pattern>' to see the list of matching files.
 
 'a: accessibility':
   - changed-files:
