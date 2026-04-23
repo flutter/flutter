@@ -29,11 +29,7 @@ void main() {
   late Directory testServicesDirectory;
   late Directory testWidgetsDirectory;
 
-  void buildKnownCrossImportTestFiles({
-    Set<String> excludes = const <String>{},
-    Set<String> extraWidgetsImportingMaterial = const <String>{},
-    Set<String> extraWidgetsImportingCupertino = const <String>{},
-  }) {
+  void buildKnownCrossImportTestFiles({Set<String> excludes = const <String>{}}) {
     final knownFiles = <Directory, Set<String>>{
       testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
       testAnimationDirectory: TestsCrossImportChecker.knownAnimationCrossImports,
@@ -59,16 +55,6 @@ void main() {
         }
         writeImport(getFile(filepath, directory));
       }
-    }
-
-    for (final filepath in extraWidgetsImportingMaterial) {
-      writeImport(getFile(filepath, testWidgetsDirectory));
-    }
-    for (final filepath in extraWidgetsImportingCupertino) {
-      writeImport(
-        getFile(filepath, testWidgetsDirectory),
-        "import 'package:flutter/cupertino.dart';",
-      );
     }
   }
 
@@ -174,7 +160,9 @@ void main() {
       '/',
       Platform.isWindows ? r'\' : '/',
     );
-    buildKnownCrossImportTestFiles(extraWidgetsImportingMaterial: <String>{extra});
+    buildKnownCrossImportTestFiles();
+    writeImportInFiles(<String>{extra}, inDirectory: testWidgetsDirectory);
+
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
@@ -201,6 +189,7 @@ void main() {
     );
     buildKnownCrossImportTestFiles();
     writeImportInFiles(<String>{extra}, inDirectory: testCupertinoDirectory);
+
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
@@ -225,7 +214,13 @@ void main() {
       '/',
       Platform.isWindows ? r'\' : '/',
     );
-    buildKnownCrossImportTestFiles(extraWidgetsImportingCupertino: <String>{extra});
+    buildKnownCrossImportTestFiles();
+    writeImportInFiles(
+      <String>{extra},
+      inDirectory: testWidgetsDirectory,
+      importString: "import 'package:flutter/cupertino.dart';",
+    );
+
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
