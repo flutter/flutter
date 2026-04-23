@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 
@@ -57,6 +58,47 @@ void main() {
   tearDownAll(() {
     Cache.enableLocking();
   });
+
+  testUsingContext(
+    'web drive runs without launching Chrome directly',
+    () async {
+      final capturingDriverService = CapturingDriverService();
+      final command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+        flutterDriverFactory: CapturingFlutterDriverFactory(capturingDriverService),
+      );
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('web/index.html').createSync(recursive: true);
+
+      fakeDeviceManager.attachedDevices = <Device>[FakeChromiumDriveDevice()];
+
+      await createTestCommandRunner(command).run(<String>[
+        'drive',
+        '--no-pub',
+        '-d',
+        'chrome',
+        '--browser-name=chrome',
+        '--chrome-binary=/tmp/custom-chrome',
+      ]);
+
+      expect(capturingDriverService.platformArgs, containsPair('no-launch-chrome', true));
+      expect(capturingDriverService.platformArgs, isNot(contains('--no-launch-chrome')));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
 
   testUsingContext(
     'fails if the specified --target is not found',
@@ -955,6 +997,15 @@ class FakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
   }
 }
 
+class CapturingFlutterDriverFactory extends Fake implements FlutterDriverFactory {
+  CapturingFlutterDriverFactory(this.driverService);
+
+  final CapturingDriverService driverService;
+
+  @override
+  DriverService createDriverService(bool web) => driverService;
+}
+
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
 ///
 /// This is to simulate when the test will take a long time, but a signal is
@@ -994,6 +1045,49 @@ class FakeDriverService extends Fake implements DriverService {
   Future<void> stop({String? userIdentifier}) async {
     return onStop?.call();
   }
+}
+
+class CapturingDriverService extends Fake implements DriverService {
+  Map<String, Object>? platformArgs;
+
+  @override
+  Future<void> start(
+    BuildInfo buildInfo,
+    Device device,
+    DebuggingOptions debuggingOptions, {
+    File? applicationBinary,
+    String? route,
+    String? userIdentifier,
+    String? mainPath,
+    Map<String, Object> platformArgs = const <String, Object>{},
+  }) async {
+    this.platformArgs = platformArgs;
+  }
+
+  @override
+  Future<void> reuseApplication(
+    Uri vmServiceUri,
+    Device device,
+    DebuggingOptions debuggingOptions,
+  ) async {}
+
+  @override
+  Future<int> startTest(
+    String testFile,
+    List<String> arguments,
+    PackageConfig packageConfig, {
+    bool? headless,
+    String? chromeBinary,
+    String? browserName,
+    bool? androidEmulator,
+    int? driverPort,
+    List<String>? webBrowserFlags,
+    List<String>? browserDimension,
+    String? profileMemory,
+  }) async => 0;
+
+  @override
+  Future<void> stop({String? userIdentifier}) async {}
 }
 
 class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
@@ -1041,6 +1135,46 @@ class FakeIosDevice extends Fake implements IOSDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+}
+
+class FakeChromiumDriveDevice extends Fake implements ChromiumDevice {
+  @override
+  final String id = 'chrome';
+
+  @override
+  String get name => 'Chrome';
+
+  @override
+  String get displayName => name;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  bool get supportsScreenshot => false;
+
+  @override
+  Category get category => Category.web;
+
+  @override
+  PlatformType get platformType => PlatformType.web;
+
+  @override
+  Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get sdkNameAndVersion async => 'Google Chrome 0.0';
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+
+  @override
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+    return NoOpDeviceLogReader(app?.name);
+  }
+
+  @override
+  bool supportsRuntimeMode(BuildMode buildMode) => true;
 }
 
 class FakeSignals extends Fake implements Signals {
