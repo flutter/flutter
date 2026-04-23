@@ -31,7 +31,6 @@ void main() {
 
   void buildTestFiles({
     Set<String> excludes = const <String>{},
-    Set<String> extraCupertinos = const <String>{},
     Set<String> extraWidgetsImportingMaterial = const <String>{},
     Set<String> extraWidgetsImportingCupertino = const <String>{},
   }) {
@@ -70,9 +69,6 @@ void main() {
         getFile(filepath, testWidgetsDirectory),
         "import 'package:flutter/cupertino.dart';",
       );
-    }
-    for (final filepath in extraCupertinos) {
-      writeImport(getFile(filepath, testCupertinoDirectory));
     }
   }
 
@@ -222,7 +218,8 @@ void main() {
       '/',
       Platform.isWindows ? r'\' : '/',
     );
-    buildTestFiles(extraCupertinos: <String>{extra});
+    buildTestFiles();
+    writeImportInFiles(<String>{extra}, inDirectory: testCupertinoDirectory);
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
