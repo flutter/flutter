@@ -8,6 +8,8 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/animation/tween.dart';
+import 'package:flutter/src/widgets/framework.dart';
 
 import 'animation.dart';
 import 'curves.dart';
@@ -268,8 +270,8 @@ class ProxyAnimation extends Animation<double>
 ///
 ///  * [Curve.flipped] and [FlippedCurve], which provide a similar effect but on
 ///    [Curve]s.
-///  * [CurvedAnimation], which can take separate curves for when the animation
-///    is going forward than for when it is going in reverse.
+///  * [ReversibleCurvedAnimation], which can take separate curves for when the
+///    animation is going forward than for when it is going in reverse.
 class ReverseAnimation extends Animation<double>
     with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
   /// Creates a reverse animation.
@@ -325,67 +327,68 @@ class ReverseAnimation extends Animation<double>
   }
 }
 
-/// An animation that applies a curve to another animation.
+/// An animation that applies different curves to its [parent] animation
+/// depending on whether it's going forwards or backwards.
 ///
-/// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
-/// an animation object, especially if you want different curves when the
-/// animation is going forward vs when it is going backward.
-///
-/// Depending on the given curve, the output of the [CurvedAnimation] could have
-/// a wider range than its input. For example, elastic curves such as
-/// [Curves.elasticIn] will significantly overshoot or undershoot the default
-/// range of 0.0 to 1.0.
-///
-/// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
-///
-/// A [CurvedAnimation] should be disposed when no longer needed to clean up
-/// any listeners that it may have added. Disposing the
-/// parent animation (typically the [AnimationController]) will also clean up
-/// this object. Do not create a [CurvedAnimation] inside a `build` method
-/// because it would leak any added listeners on every rebuild. If [reverseCurve] is
-/// not needed, prefer `parent.drive(CurveTween(curve: curve))` which does not
-/// require separate disposal.
+/// This class has been deprecated for API clarity:
+/// - If you need different forward and backward curves,
+///   this class was renamed to [ReversibleCurvedAnimation].
+///   The constructor's [reverseCurve] is now required, but can still be null.
+/// - If you only use a single curve,
+///   consider switching to [CurveTween] to avoid memory leaks
+///   (see the snippet below).
 ///
 /// {@tool snippet}
 ///
-/// The following code snippet shows how you can apply a curve to a linear
-/// animation produced by an [AnimationController] `controller`.
+/// This code snippet shows how to migrate from [CurvedAnimation] to [CurveTween].
+/// The latter is less verbose and could be made stateless.
 ///
 /// ```dart
-/// final Animation<double> animation = CurvedAnimation(
-///   parent: controller,
-///   curve: Curves.ease,
-/// );
+/// class _MyOldWidgetState extends State<MyWidget> {
+///   late final curvedAnimation = CurvedAnimation(
+///     widget.animationController,
+///     curve: Curves.easeInOut,
+///   );
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return FadeTransition(opacity: curvedAnimation, child: widget.child);
+///   }
+///
+///   @override
+///   void dispose() {
+///     curvedAnimation.dispose();
+///   }
+/// }
+///
+/// class _MyNewWidgetState extends State<MyWidget> {
+///   @override
+///   Widget build(BuildContext context) {
+///     return FadeTransition(
+///       // You don't need to dispose this `drive` animation.
+///       opacity: widget.animationController.drive(
+///         CurveTween(curve: Curves.easeInOut),
+///       ),
+///       child: widget.child,
+///     );
+///   }
+/// }
 /// ```
 /// {@end-tool}
-/// {@tool snippet}
-///
-/// This second code snippet shows how to apply a different curve in the forward
-/// direction than in the reverse direction. This can't be done using a
-/// [CurveTween] (since [Tween]s are not aware of the animation direction when
-/// they are applied).
-///
-/// ```dart
-/// final Animation<double> animation = CurvedAnimation(
-///   parent: controller,
-///   curve: Curves.easeIn,
-///   reverseCurve: Curves.easeOut,
-/// );
-/// ```
-/// {@end-tool}
-///
-/// By default, the [reverseCurve] matches the forward [curve].
-///
-/// See also:
-///
-///  * [CurveTween], for an alternative way of expressing the first sample
-///    above.
-///  * [AnimationController], for examples of creating and disposing of an
-///    [AnimationController].
-///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
-///    [Curve].
+@Deprecated(
+  'Switch to ReversibleCurvedAnimation if you need different forward & backward animations, '
+  'or switch to CurveTween if you only need one curve. '
+  'Using CurveTween where possible can reduce boilerplate and memory consumption. '
+  'This feature was deprecated after v3.44.0-0.2.pre.',
+)
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
+  @Deprecated(
+    'Switch to ReversibleCurvedAnimation if you need different forward & backward animations, '
+    'or switch to CurveTween if you only need one curve. '
+    'Using CurveTween where possible can reduce boilerplate and memory consumption. '
+    'This feature was deprecated after v3.44.0-0.2.pre.',
+  )
   CurvedAnimation({required this.parent, required this.curve, this.reverseCurve}) {
     assert(debugMaybeDispatchCreated('animation', 'CurvedAnimation', this));
     _updateCurveDirection(parent.status);
@@ -478,6 +481,97 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     }
     return '$parent\u27A9$curve/$reverseCurve\u2092\u2099';
   }
+}
+
+/// An animation that applies different curves to its [parent] animation
+/// depending on whether it's going forwards or backwards.
+///
+/// [ReversibleCurvedAnimation] operates by adding listeners to its [parent].
+/// Therefore, you shouldn't re-instantiating it every build, and you should
+/// dipose it (or its [parent]) when you're done.
+///
+/// Depending on the given curve, the output of this animation could have
+/// a wider range than its input. For example, elastic curves such as
+/// [Curves.elasticIn] will significantly overshoot or undershoot the default
+/// range of 0.0 to 1.0.
+///
+/// {@tool snippet}
+///
+/// This code snippet shows how to apply a different curve in the forward
+/// direction than in the reverse direction. This can't be done using a
+/// [CurveTween] (since [Tween]s are not aware of the animation direction when
+/// they are applied).
+///
+/// ```dart
+/// final Animation<double> animation = ReversibleCurvedAnimation(
+///   parent: controller,
+///   curve: Curves.easeIn,
+///   reverseCurve: Curves.easeOut,
+/// );
+/// ```
+/// {@end-tool}
+///
+/// If [reverseCurve] is not specified,
+/// [curve] will be used in both forward and backward directions.
+/// If you don't need [reverseCurve] at all, consider using [CurveTween]
+/// instead (see the snippet below).
+///
+/// {@tool snippet}
+///
+/// This code snippet shows how to migrate from [ReversibleCurvedAnimation] to [CurveTween].
+/// The latter is less verbose and could be made stateless.
+///
+/// ```dart
+/// class _MyOldWidgetState extends State<MyWidget> {
+///   late final curvedAnimation = ReversibleCurvedAnimation(
+///     widget.animationController,
+///     curve: Curves.easeInOut,
+///     reverseCurve: null,
+///   );
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return FadeTransition(opacity: curvedAnimation, child: widget.child);
+///   }
+///
+///   @override
+///   void dispose() {
+///     curvedAnimation.dispose();
+///   }
+/// }
+///
+/// class _MyNewWidgetState extends State<MyWidget> {
+///   @override
+///   Widget build(BuildContext context) {
+///     return FadeTransition(
+///       // You don't need to dispose this `drive` animation.
+///       opacity: widget.animationController.drive(
+///         CurveTween(curve: Curves.easeInOut),
+///       ),
+///       child: widget.child,
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [CurveTween], for a single-curve alternative that doesn't need
+///    disposing.
+///  * [AnimationController], for examples of creating and disposing of an
+///    [AnimationController].
+///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
+///    [Curve].
+// Maintainer note: This extends the old deprecated class to preserve types in
+// old code (e.g. `animation is CurvedAnimation`).
+class ReversibleCurvedAnimation extends CurvedAnimation {
+  /// Creates a curved animation with a forward [curve] and a [reverseCurve].
+  ReversibleCurvedAnimation({
+    required super.parent,
+    required super.curve,
+    required super.reverseCurve,
+  });
 }
 
 enum _TrainHoppingMode { minimize, maximize }
