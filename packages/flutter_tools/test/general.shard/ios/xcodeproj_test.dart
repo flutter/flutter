@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi' show Abi;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -65,7 +64,6 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
-      currentAbi: Abi.macosX64,
     );
   });
 
@@ -232,7 +230,6 @@ void main() {
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
-      currentAbi: Abi.macosArm64,
     );
 
     expect(xcodeProjectInterpreter.xcrunCommand(), <String>['/usr/bin/arch', '-arm64e', 'xcrun']);
@@ -615,7 +612,6 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
-        currentAbi: Abi.macosX64,
       );
 
       expect(
@@ -660,7 +656,6 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
-        currentAbi: Abi.macosX64,
       );
 
       await expectLater(
@@ -705,7 +700,6 @@ void main() {
         platform: platform,
         processManager: fakeProcessManager,
         analytics: const NoOpAnalytics(),
-        currentAbi: Abi.macosX64,
       );
 
       await expectLater(
@@ -1336,7 +1330,6 @@ Information about project "Runner":
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
           processManager: fakeProcessManager,
           version: Version(26, 0, 0),
-          currentAbi: Abi.macosArm64,
         );
         xcode = Xcode.test(
           processManager: fakeProcessManager,
@@ -1727,7 +1720,6 @@ Build settings for action build and target bad_plugin:
           xcodeProjectInterpreter = XcodeProjectInterpreter.test(
             processManager: fakeProcessManager,
             version: Version(16, 0, 0),
-            currentAbi: Abi.macosArm64,
           );
           xcode = Xcode.test(
             processManager: fakeProcessManager,
