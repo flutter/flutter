@@ -189,6 +189,17 @@ static gboolean semantics_is_container(
   return node->child_count > 0 && node->children_in_traversal_order != nullptr;
 }
 
+static gboolean semantics_has_text(const FlAccessibilitySemanticsNode* node) {
+  return (node->label != nullptr && node->label[0] != '\0') ||
+         (node->value != nullptr && node->value[0] != '\0');
+}
+
+static gboolean semantics_should_materialize(
+    const FlAccessibilitySemanticsNode* node) {
+  return node->flags.is_text_field || semantics_is_checkable(node->flags) ||
+         semantics_is_button(node) || semantics_has_text(node);
+}
+
 static const char* semantics_role_description(
     const FlAccessibilitySemanticsNode* node) {
   if (node->flags.is_text_field) {
@@ -282,6 +293,12 @@ static GtkWidget* create_accessibility_child_widget(
   return child;
 }
 
+static void append_accessibility_children(
+    FlView* self,
+    GtkWidget* parent,
+    FlAccessibilitySemanticsStore* store,
+    const FlAccessibilitySemanticsNode* node);
+
 static void fl_view_clear_accessibility_children(FlView* self) {
   if (self->accessibility_children_by_id == nullptr) {
     return;
@@ -325,19 +342,34 @@ static void update_accessibility_child_widget(
   update_accessible_from_semantics(GTK_ACCESSIBLE(child), node);
 }
 
-static GtkWidget* build_accessibility_subtree(
+static void append_accessibility_subtree(
     FlView* self,
+    GtkWidget* parent,
     FlAccessibilitySemanticsStore* store,
     const FlAccessibilitySemanticsNode* node) {
+  if (!semantics_should_materialize(node)) {
+    append_accessibility_children(self, parent, store, node);
+    return;
+  }
+
   GtkWidget* child = create_accessibility_child_widget(node);
   update_accessibility_child_widget(child, node);
   g_hash_table_insert(self->accessibility_children_by_id,
                       GINT_TO_POINTER(node->id), g_object_ref(child));
+  gtk_box_append(GTK_BOX(parent), child);
 
   if (!GTK_IS_BOX(child) || !semantics_is_container(node)) {
-    return child;
+    return;
   }
 
+  append_accessibility_children(self, child, store, node);
+}
+
+static void append_accessibility_children(
+    FlView* self,
+    GtkWidget* parent,
+    FlAccessibilitySemanticsStore* store,
+    const FlAccessibilitySemanticsNode* node) {
   for (size_t i = 0; i < node->child_count; ++i) {
     int32_t child_id = node->children_in_traversal_order[i];
     const FlAccessibilitySemanticsNode* child_node =
@@ -346,11 +378,8 @@ static GtkWidget* build_accessibility_subtree(
       continue;
     }
 
-    GtkWidget* subtree = build_accessibility_subtree(self, store, child_node);
-    gtk_box_append(GTK_BOX(child), subtree);
+    append_accessibility_subtree(self, parent, store, child_node);
   }
-
-  return child;
 }
 
 static void fl_view_update_root_accessible_properties(FlView* self) {
@@ -384,9 +413,16 @@ static void fl_view_update_accessibility_children(FlView* self) {
       continue;
     }
 
-    GtkWidget* child = build_accessibility_subtree(self, store, node);
-    gtk_fixed_put(GTK_FIXED(self->accessibility_host), child,
+    GtkWidget* slot = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_size_request(slot, 0, 0);
+    gtk_widget_set_hexpand(slot, FALSE);
+    gtk_widget_set_vexpand(slot, FALSE);
+    gtk_widget_set_focusable(slot, FALSE);
+    gtk_widget_set_can_target(slot, FALSE);
+    gtk_widget_show(slot);
+    gtk_fixed_put(GTK_FIXED(self->accessibility_host), slot,
                   kAccessibilityProxyOffset, kAccessibilityProxyOffset);
+    append_accessibility_subtree(self, slot, store, node);
   }
 }
 #endif
