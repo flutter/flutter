@@ -20,7 +20,10 @@ bool _isNotoSansHK(NotoFont font) => font.name.startsWith('Noto Sans HK');
 bool _isNotoSansJP(NotoFont font) => font.name.startsWith('Noto Sans JP');
 bool _isNotoSansKR(NotoFont font) => font.name.startsWith('Noto Sans KR');
 
-/// Global static font fallback data.
+/// Manages font fallbacks for the web engine.
+///
+/// This class is responsible for finding alternative fonts when the primary
+/// font(s) do not contain a glyph for a given character.
 class FontFallbackManager {
   factory FontFallbackManager(FallbackFontRegistry registry) =>
       FontFallbackManager._(registry, getFallbackFontList());
