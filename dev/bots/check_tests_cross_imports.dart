@@ -65,7 +65,7 @@ void main(List<String> args) {
   reportSuccessAndExit('No errors were detected with test cross imports.');
 }
 
-/// Checks the tests in the Widgets and Cupertino libraries for cross imports.
+/// Checks the tests in the `flutter/test/**` libraries for cross imports.
 ///
 /// Excludes known tests that contain cross imports, i.e.
 /// [TestsCrossImportChecker.knownWidgetsCrossImports] and
@@ -85,6 +85,7 @@ void main(List<String> args) {
 ///  - Tests that cover interoperability between Material and Cupertino should
 ///  go in Material.
 ///  - The Widgets library and tests should never import Cupertino or Material.
+///  - Libraries that do not have anything to do with Cupertino or Material should never import them.
 class TestsCrossImportChecker {
   TestsCrossImportChecker({
     required this.testsDirectory,
@@ -137,17 +138,28 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/form_test.dart',
   };
 
-  /// These Cupertino tests are known to have cross imports. These cross imports
+  /// These tests are known to have cross imports. These cross imports
   /// should all eventually be resolved, but until they are we allow them, so
   /// that we can catch any new cross imports that are added.
   ///
-  /// See also:
-  ///
-  ///  * [knownWidgetsCrossImports], which is like this list, but for
-  ///    Widgets tests importing Material or Cupertino.
+  /// Each set corresponds to a subdirectory under `flutter/test`,
+  /// for example `knownWidgetsCrossImports` corresponds to `flutter/test/widgets`
+  /// and `knownSchedulerCrossImports` corresponds to `flutter/test/scheduler`.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
+  static final Set<String> knownAnimationCrossImports = <String>{};
   static final Set<String> knownCupertinoCrossImports = <String>{};
+  static final Set<String> knownDartCrossImports = <String>{};
+  static final Set<String> knownExamplesCrossImports = <String>{};
+  static final Set<String> knownFoundationCrossImports = <String>{};
+  static final Set<String> knownGesturesCrossImports = <String>{};
+  static final Set<String> knownHarnessCrossImports = <String>{};
+  static final Set<String> knownPaintingCrossImports = <String>{};
+  static final Set<String> knownPhysicsCrossImports = <String>{};
+  static final Set<String> knownRenderingCrossImports = <String>{};
+  static final Set<String> knownSchedulerCrossImports = <String>{};
+  static final Set<String> knownSemanticsCrossImports = <String>{};
+  static final Set<String> knownServicesCrossImports = <String>{};
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
     knownCupertinoCrossImports,
@@ -177,7 +189,7 @@ class TestsCrossImportChecker {
     }).toList();
   }
 
-  /// Returns the Set of Files that are not in knownPaths.
+  /// Returns the Set of files that are not in knownPaths.
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
       final prefix = RegExp(r'packages[/\\]flutter[/\\]test');
