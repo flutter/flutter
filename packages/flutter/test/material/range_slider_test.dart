@@ -4080,9 +4080,8 @@ void main() {
     final logPainters = <TextPainter>[];
     final shape = LoggingRangeSliderValueIndicatorShape(<InlineSpan>[], logPainters);
 
-    const String longLabelStart =
-        'A very long start label string that exceeds standard screen widths';
-    const String longLabelEnd = 'A very long end label string that exceeds standard screen widths';
+    const longLabelStart = 'A very long start label string that exceeds standard screen widths';
+    const longLabelEnd = 'A very long end label string that exceeds standard screen widths';
 
     await tester.pumpWidget(
       MaterialApp(
