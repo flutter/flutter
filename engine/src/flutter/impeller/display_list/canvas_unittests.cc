@@ -515,19 +515,18 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
           // 1. Blend src onto dst.
           Color blended = dst.Blend(src, blend_mode);
           // 2. Mix with dst using sdf_alpha. Mix by lerping using
-          // pre-multiplied colors. Leave the result as a pre-multiplied color,
-          // because using Unpremultiply() on the result can produce incorrect
-          // values when alpha is close to 0.
-          Color blended_then_sdf_alpha_applied = Color::Lerp(
-              blended.Premultiply(), dst.Premultiply(), 1.0 - sdf_alpha);
+          // pre-multiplied colors.
+          Color blended_then_sdf_alpha_applied =
+              Color::Lerp(blended.Premultiply(), dst.Premultiply(),
+                          1.0 - sdf_alpha)
+                  .Unpremultiply();
 
           // `blend(src * sdf_alpha, dst)`:
           // 1. Apply sdf_alpha to src's alpha.
           Color sdf_alpha_applied = src.WithAlpha(src.alpha * sdf_alpha);
-          // 2. Blend onto dst. Convert result to be pre-multiplied for
-          // comparison with blended_then_sdf_alpha_applied.
+          // 2. Blend onto dst.
           Color sdf_alpha_applied_then_blended =
-              dst.Blend(sdf_alpha_applied, blend_mode).Premultiply();
+              dst.Blend(sdf_alpha_applied, blend_mode);
 
           // Compare results.
           if (blended_then_sdf_alpha_applied !=
