@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 
-import '../../src/package_config.dart';
 import '../test_utils.dart';
 import 'project.dart';
 
@@ -66,16 +65,9 @@ class HotReloadOutsideLibProject extends Project {
   String get entrypointPath => fileSystem.path.join(dir.path, 'integration_test', 'main.dart');
 
   @override
-  Future<void> setUpIn(Directory dir) async {
-    this.dir = dir;
+  Future<void> setUpIn(Directory dir, {bool generateMain = true}) async {
+    await super.setUpIn(dir, generateMain: false);
     writeFile(entrypointPath, main);
-    // Set up the rest like in the super class
-    writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspec);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'index.html'), indexHtml);
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter.js'), '');
-    writeFile(fileSystem.path.join(dir.path, 'web', 'flutter_service_worker.js'), '');
-    writePackageConfigFiles(directory: dir, mainLibName: 'test');
-    await getPackages(dir.path);
   }
 
   void uncommentHotReloadPrint() {
