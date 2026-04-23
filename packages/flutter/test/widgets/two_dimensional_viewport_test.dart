@@ -1498,7 +1498,9 @@ void main() {
       });
     });
 
-    testWidgets('TwoDimensionalScrollable does not crash at zero', (WidgetTester tester) async {
+    testWidgets('TwoDimensionalScrollable does not crash at zero area', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

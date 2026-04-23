@@ -588,7 +588,7 @@ void main() {
     expect(tester.binding.semanticsEnabled, isTrue);
   }, semanticsEnabled: false);
 
-  testWidgets('SemanticsDebugger does not crash at zero', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const TestWidgetsApp(
         home: Center(
