@@ -29,7 +29,7 @@ const String _kClassRule =
 ''';
 const int _kRightClickButton = 2;
 
-typedef _WebSelectionCallBack = void Function(web.HTMLElement, web.MouseEvent);
+typedef _WebSelectionCallBack = void Function(web.HTMLElement, [web.MouseEvent]);
 
 /// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
 @visibleForTesting
@@ -86,16 +86,20 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   static void _register() {
     assert(_registeredViewType == null);
     _registeredViewType = _registerWebSelectionCallback((
-      web.HTMLElement element,
-      web.MouseEvent event,
-    ) {
+      web.HTMLElement element, [
+      web.MouseEvent? event,
+    ]) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
-        // Converts the html right click event to flutter coordinate.
-        final localOffset = Offset(event.offsetX.toDouble(), event.offsetY.toDouble());
-        final Matrix4 transform = client.getTransformTo(null);
-        final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
-        client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
+        // If we were triggered by a right click, select the word
+        if (event != null) {
+          // Converts the html right click event to flutter coordinate.
+          final localOffset = Offset(event.offsetX.toDouble(), event.offsetY.toDouble());
+          final Matrix4 transform = client.getTransformTo(null);
+          final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
+          client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
+        }
+
         // The innerText must contain the text in order to be selected by
         // the browser.
         element.innerText = client.getSelectedContent()?.plainText ?? '';
@@ -134,6 +138,14 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
             return;
           }
           callback(htmlElement, mouseEvent);
+        }.toJS,
+      );
+      // TODO(dantup): Should we be doing this here? When is it unregistered?
+      //  What when there are multiple?
+      web.document.body?.addEventListener(
+        'copy',
+        (web.Event event) {
+          callback(htmlElement);
         }.toJS,
       );
       return htmlElement;

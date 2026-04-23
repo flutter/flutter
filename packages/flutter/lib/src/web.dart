@@ -57,6 +57,7 @@ extension type Document._(JSObject _) implements JSObject {
   external Element createElement(String localName, [JSAny options]);
   external Range createRange();
   external HTMLHeadElement? get head;
+  external HTMLElement? get body;
 }
 
 extension type DOMTokenList._(JSObject _) implements JSObject {

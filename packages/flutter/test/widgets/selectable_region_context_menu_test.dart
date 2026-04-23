@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
+import 'selectable_region_test.dart' show textOffsetToPosition;
 import 'web_platform_view_registry_utils.dart';
 
 extension on web.HTMLCollection {
@@ -166,6 +167,62 @@ void main() {
       element.dispatchEvent(event);
       expect(event.defaultPrevented, isTrue);
     }
+  }, variant: _browserContextMenuEnabledVariants);
+
+  // Ensure that if execCommand('copy') is called, it triggers an update of the
+  // hidden input so that the correct selected text is written to the clipboard.
+  //
+  // Regression test for https://github.com/flutter/flutter/issues/182756
+  testWidgets('copy event triggers update of hidden input', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          children: [
+            SelectableRegion(
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('Some text before'),
+            ),
+            SelectableRegion(
+              focusNode: focusNode,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('Some example text'),
+            ),
+            SelectableRegion(
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('Some text after'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+
+    // Select the text
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Some example text'), matching: find.byType(RichText)),
+    );
+    final Offset exampleWordStart = textOffsetToPosition(paragraph, 'Some '.length);
+    final Offset exampleWordEnd = textOffsetToPosition(paragraph, 'Some example'.length);
+    final TestGesture gesture = await tester.startGesture(exampleWordStart);
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.moveTo(exampleWordEnd);
+    await tester.pump(const Duration(milliseconds: 500));
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Dispatch the copy command on the document.
+    element.ownerDocument!.body!.dispatchEvent(web.Event('copy'));
+    expect(element.innerText, anyOf('example', 'example '));
   }, variant: _browserContextMenuEnabledVariants);
 }
 
