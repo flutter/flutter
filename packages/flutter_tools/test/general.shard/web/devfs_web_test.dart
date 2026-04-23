@@ -1959,13 +1959,11 @@ const config = {
               ..toJson(),
           ),
         );
-      final modulePath =
-          "${subDirectory.basename}${globals.platform.isWindows ? r'\' : '/'}b.lib.js";
       subDirectory
           .childFile('b.lib.js.json')
           .writeAsStringSync(
             json.encode(<String, Object>{
-              modulePath: <String, Object>{
+              '${subDirectory.basename}/b.lib.js': <String, Object>{
                 'code': <int>[0, source.lengthSync()],
                 'sourcemap': <int>[0, 2],
                 'metadata': <int>[0, metadata.lengthSync()],
@@ -1973,7 +1971,11 @@ const config = {
             }),
           );
 
-      residentCompiler.output = CompilerOutput(modulePath, 0, <Uri>[]);
+      residentCompiler.output = CompilerOutput(
+        "${subDirectory.basename}${globals.platform.isWindows ? r'\' : '/'}b.lib.js",
+        0,
+        <Uri>[],
+      );
 
       await webDevFS.update(
         mainUri: outputFile.uri,
