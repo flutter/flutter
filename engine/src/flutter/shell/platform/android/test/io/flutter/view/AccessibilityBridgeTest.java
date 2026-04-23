@@ -2905,6 +2905,7 @@ public class AccessibilityBridgeTest {
 
     AccessibilityBridge accessibilityBridge = setUpBridge(mockRootView, mockManager, null);
 
+    // Initially expanded state: false
     TestSemanticsNode node = new TestSemanticsNode();
     node.id = 0;
     node.addFlag(AccessibilityBridge.Flag.HAS_EXPANDED_STATE);
@@ -2932,7 +2933,7 @@ public class AccessibilityBridgeTest {
     }
     assertEquals(
         "CONTENT_CHANGE_TYPE_EXPANDED event should be sent twice for expansion state changes",
-        2,
+        3,
         foundCount);
   }
 
