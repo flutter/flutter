@@ -264,6 +264,7 @@ class MenuAnchor extends StatefulWidget {
     this.onAnimationStatusChanged,
     required this.menuChildren,
     this.builder,
+    this.semanticLabel,
     this.child,
   });
 
@@ -451,6 +452,11 @@ class MenuAnchor extends StatefulWidget {
   /// If provided, the builder will be called each time the menu is opened or
   /// closed.
   final MenuAnchorChildBuilder? builder;
+
+  /// The semantic label of the dialog used by this menu.
+  ///
+  /// Defaults to null.
+  final String? semanticLabel;
 
   /// The optional child to be passed to the [builder].
   ///
@@ -703,20 +709,23 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
         ignoring: isClosingOrClosed,
         child: ExcludeFocus(
           excluding: isClosingOrClosed,
-          child: _Submenu(
-            fadeAnimation: opacityAnimation,
-            heightAnimation: heightAnimation,
-            layerLink: widget.layerLink,
-            consumeOutsideTaps: widget.consumeOutsideTap,
-            menuScopeNode: _menuScopeNode,
-            menuStyle: widget.style,
-            clipBehavior: widget.clipBehavior,
-            menuChildren: _menuChildren,
-            crossAxisUnconstrained: widget.crossAxisUnconstrained,
-            menuPosition: position,
-            anchor: this,
-            alignmentOffset: widget.alignmentOffset ?? Offset.zero,
-            reservedPadding: widget.reservedPadding ?? const EdgeInsets.all(_kMenuViewPadding),
+          child: Semantics(
+            label: widget.semanticLabel,
+            child: _Submenu(
+              fadeAnimation: opacityAnimation,
+              heightAnimation: heightAnimation,
+              layerLink: widget.layerLink,
+              consumeOutsideTaps: widget.consumeOutsideTap,
+              menuScopeNode: _menuScopeNode,
+              menuStyle: widget.style,
+              clipBehavior: widget.clipBehavior,
+              menuChildren: _menuChildren,
+              crossAxisUnconstrained: widget.crossAxisUnconstrained,
+              menuPosition: position,
+              anchor: this,
+              alignmentOffset: widget.alignmentOffset ?? Offset.zero,
+              reservedPadding: widget.reservedPadding ?? const EdgeInsets.all(_kMenuViewPadding),
+            ),
           ),
         ),
       ),

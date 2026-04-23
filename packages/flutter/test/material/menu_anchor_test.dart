@@ -7010,6 +7010,36 @@ void main() {
     await tester.pump();
     expect(find.text('X'), findsOne);
   });
+
+  testWidgets('MenuAnchor applies semanticLabel to the expanded menu overlay', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final controller = MenuController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: MenuAnchor(
+              controller: controller,
+              semanticLabel: 'Custom Menu Label',
+              menuChildren: const <Widget>[Text('Menu Item')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.bySemanticsLabel('Custom Menu Label'), findsNothing);
+
+    controller.open();
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Custom Menu Label'), findsOneWidget);
+
+    handle.dispose();
+  });
 }
 
 List<Widget> createTestMenus({
