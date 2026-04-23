@@ -10,7 +10,7 @@ import XCTest
 /// A mock `Bundle` subclass.
 ///
 /// By default, lacks the `UILaunchStoryboardName` key in its Info.plist.
-class MockBundle: Bundle {
+final class MockBundle: Bundle {
   var mockInfoDictionary: [String: Any]?
   var mockPaths: [String: String] = [:]
 

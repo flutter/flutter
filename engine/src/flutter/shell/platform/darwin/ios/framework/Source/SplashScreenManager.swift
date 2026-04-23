@@ -9,7 +9,7 @@ import UIKit
 /// Handles loading from storyboards or XIBs based on the `UILaunchStoryboardName` in the app's
 /// Info.plist. Performs an animated fade-out transition when the splash screen is removed.
 @objc(FlutterSplashScreenManager)
-public class SplashScreenManager: NSObject {
+public final class SplashScreenManager: NSObject {
 
   /// The default duration for the splash screen fade-out animation.
   private static let defaultAnimationDuration: TimeInterval = 0.2
@@ -70,7 +70,7 @@ public class SplashScreenManager: NSObject {
   }
 
   /// Loads a view from the initial view controller of the specified storyboard.
-  func splashScreenFromStoryboard(name: String) -> UIView? {
+  private func splashScreenFromStoryboard(name: String) -> UIView? {
     // Check if storyboard exists to prevent exceptions.
     guard bundle.path(forResource: name, ofType: "storyboardc") != nil else { return nil }
 
@@ -80,7 +80,7 @@ public class SplashScreenManager: NSObject {
   }
 
   /// Loads a view from the specified XIB file.
-  func splashScreenFromXib(name: String) -> UIView? {
+  private func splashScreenFromXib(name: String) -> UIView? {
     // Check if nib exists to prevent exceptions.
     guard bundle.path(forResource: name, ofType: "nib") != nil else { return nil }
 
@@ -115,8 +115,7 @@ public class SplashScreenManager: NSObject {
   /// Installs the splash screen view into the specified parent view, if it is not already added.
   ///
   /// The view's frame is set to match the parent view's bounds.
-  @objc(installSplashScreenViewAsSubviewOf:)
-  public func installSplashScreenView(asSubviewOf parentView: UIView) {
+  @objc public func installSplashScreenView(asSubviewOf parentView: UIView) {
     guard let splashScreen = splashScreenView else { return }
 
     splashScreen.frame = parentView.bounds
