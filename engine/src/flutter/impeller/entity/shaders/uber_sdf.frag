@@ -97,13 +97,13 @@ float sdSuperellipse(vec2 p, float n) {
   return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
 }
 
-float distanceFromRoundSuperellipse(vec2 p,
-                                    vec2 ab,
-                                    float n,
-                                    float angle_start,
-                                    float angle_span,
-                                    vec2 circle_center,
-                                    float radius) {
+float distanceFromRoundedSuperellipse(vec2 p,
+                                      vec2 ab,
+                                      float n,
+                                      float angle_start,
+                                      float angle_span,
+                                      vec2 circle_center,
+                                      float radius) {
   p = abs(p);
   // Mirror the point into the 'top' octant (y >= x) to match the
   // parameters passed from the CPU.
@@ -254,7 +254,7 @@ float filledSDF(vec2 p) {
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
-    return distanceFromRoundSuperellipse(
+    return distanceFromRoundedSuperellipse(
         p, frag_info.size, frag_info.superellipse_degree,
         frag_info.corner_angle_start, frag_info.corner_angle_span,
         frag_info.corner_circle_center, frag_info.radii.x);
@@ -293,7 +293,7 @@ float strokedSDF(vec2 p) {
     outer = d - half_stroke;
     inner = d + half_stroke;
   } else {  // Round Superellipse
-    float d = distanceFromRoundSuperellipse(
+    float d = distanceFromRoundedSuperellipse(
         p, frag_info.size, frag_info.superellipse_degree,
         frag_info.corner_angle_start, frag_info.corner_angle_span,
         frag_info.corner_circle_center, frag_info.radii.x);

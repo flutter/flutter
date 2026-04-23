@@ -71,7 +71,7 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
                            .radii = radii};
 }
 
-UberSDFParameters UberSDFParameters::MakeRoundSuperellipse(
+UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     Color color,
     const Rect& rect,
     Scalar degree,

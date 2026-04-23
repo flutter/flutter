@@ -55,7 +55,7 @@ struct UberSDFParameters {
       std::optional<StrokeParameters> stroke);
 
   /// Creates UberSDFParameters for a symmetric round superellipse.
-  static UberSDFParameters MakeRoundSuperellipse(
+  static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
       const Rect& bounds,
       Scalar degree,

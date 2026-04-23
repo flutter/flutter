@@ -59,6 +59,7 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/round_superellipse_param.h"
+#include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/rstransform.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
@@ -1048,16 +1049,20 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
       round_superellipse.GetBounds().IsSquare() &&
       round_superellipse.GetRadii().AreAllCornersSame() &&
       AreCornersCircular(round_superellipse.GetRadii())) {
-    auto rs_param = RoundSuperellipseParam::MakeBoundsRadius(
+    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadius(
         round_superellipse.GetBounds(),
         round_superellipse.GetRadii().bottom_left.height);
 
-    RoundSuperellipseParam::Octant oct = rs_param.top_right.top;
+    RoundSuperellipseParam::Octant octant =
+        round_superellipse_params.top_right.top;
 
-    auto params = UberSDFParameters::MakeRoundSuperellipse(
-        paint.color, round_superellipse.GetBounds(), oct.se_n,
-        round_superellipse.GetRadii(), oct.circle_start_angle.radians,
-        oct.circle_max_angle.radians, oct.circle_center, paint.GetStroke());
+    auto adjusted_radii = RoundingRadii::MakeRadius(octant.circle_radius);
+
+    auto params = UberSDFParameters::MakeRoundedSuperellipse(
+        paint.color, round_superellipse.GetBounds(), octant.se_n,
+        adjusted_radii, octant.circle_start_angle.radians,
+        octant.circle_max_angle.radians, octant.circle_center,
+        paint.GetStroke());
 
     AddRenderSDFEntityToCurrentPass(paint, params);
 
