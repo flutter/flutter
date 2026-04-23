@@ -200,7 +200,6 @@ struct Vector3 {
     };
   }
 
-  std::string ToString() const;
 };
 
 // RHS algebraic operations with arithmetic types.
@@ -316,8 +315,6 @@ struct Vector4 {
   }
 
   constexpr Vector2 xy() const { return Vector2(x, y); }
-
-  std::string ToString() const;
 };
 
 static_assert(sizeof(Vector3) == 3 * sizeof(Scalar));
