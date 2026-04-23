@@ -27,13 +27,10 @@ extension on web.CSSRuleList {
 // TODO(Renzo-Olivares): Remove this when the web context menu
 // for Android and iOS is re-enabled.
 // See: https://github.com/flutter/flutter/issues/177123.
-const TargetPlatformVariant _browserContextMenuEnabledVariants = TargetPlatformVariant(
-  <TargetPlatform>{
-    TargetPlatform.fuchsia,
-    TargetPlatform.linux,
-    TargetPlatform.macOS,
-    TargetPlatform.windows,
-  },
+final TargetPlatformVariant _browserContextMenuEnabledVariants = TargetPlatformVariant(
+  TargetPlatform.values
+      .where((platform) => platform != TargetPlatform.android && platform != TargetPlatform.iOS)
+      .toSet(),
 );
 
 void main() {
