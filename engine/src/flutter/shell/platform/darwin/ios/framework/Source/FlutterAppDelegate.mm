@@ -254,7 +254,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] registrarForPlugin:pluginKey];
   }
-  return [self.launchEngine.engine registrarForPlugin:pluginKey];
+  return [[self.launchEngine acquireEngine] registrarForPlugin:pluginKey];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
@@ -262,7 +262,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] hasPlugin:pluginKey];
   }
-  return [self.launchEngine.engine hasPlugin:pluginKey];
+  return [[self.launchEngine acquireEngine] hasPlugin:pluginKey];
 }
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
@@ -270,7 +270,7 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
   if (flutterRootViewController) {
     return [[flutterRootViewController pluginRegistry] valuePublishedByPlugin:pluginKey];
   }
-  return [self.launchEngine.engine valuePublishedByPlugin:pluginKey];
+  return [[self.launchEngine acquireEngine] valuePublishedByPlugin:pluginKey];
 }
 
 #pragma mark - Selectors handling

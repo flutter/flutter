@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/skwasm/export.h"
 #include "flutter/skwasm/live_objects.h"
 #include "flutter/skwasm/skwasm_support.h"
@@ -78,5 +79,5 @@ SKWASM_EXPORT void animatedImage_decodeNextFrame(SkAnimatedImage* image) {
 SKWASM_EXPORT flutter::DlImage* animatedImage_getCurrentFrame(
     SkAnimatedImage* image) {
   Skwasm::live_image_count++;
-  return flutter::DlImage::Make(image->getCurrentFrame()).release();
+  return flutter::DlImageSkia::Make(image->getCurrentFrame()).release();
 }
