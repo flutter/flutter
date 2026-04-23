@@ -28,7 +28,6 @@ class MockClipboard {
         return <String, bool>{'value': text != null && text.isNotEmpty};
       case 'Clipboard.setData':
         clipboardData = methodCall.arguments as Map<String, dynamic>;
-        break;
     }
     return null;
   }
