@@ -30,10 +30,8 @@ If `gh` is not available, you can use `read_url_content` or a similar method to 
    Extract the `head.sha` field from the JSON response.
 2. **List Check Runs**:
    Make an HTTP request to: `https://api.github.com/repos/flutter/flutter/commits/<PR_SHA>/check-runs`
-   Parse the JSON response (handling pagination if necessary) to identify all checks that have failed (i.e., where `conclusion` is `failure`).
+   Parse the JSON response. **CRITICAL**: You must handle pagination to avoid missing failures! Check the `total_count` field. If it is greater than the number of items in the `check_runs` array (typically capped at 100 or what you set with `per_page`), make additional HTTP requests by appending `?per_page=100&page=<N>` to the URL for each subsequent page until all check runs are fetched. Identify all checks that have failed (i.e., where `conclusion` is `failure`).
 
-Identify all checks that have failed.
-```
 Identify all checks that have failed.
 
 ### 2. Retrieve Failure Logs
