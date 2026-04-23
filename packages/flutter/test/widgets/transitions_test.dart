@@ -213,8 +213,10 @@ void main() {
         value: 1,
         duration: const Duration(seconds: 2),
       );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
       addTearDown(tester.view.reset);
       addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -223,7 +225,7 @@ void main() {
               alignment: Tween<AlignmentGeometry>(
                 begin: Alignment.bottomCenter,
                 end: Alignment.bottomRight,
-              ).animate(CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn)),
+              ).animate(curvedAnimation),
               child: const Placeholder(),
             ),
           ),
@@ -514,14 +516,16 @@ void main() {
         value: 1,
         duration: const Duration(seconds: 2),
       );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
       addTearDown(tester.view.reset);
       addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: SizeTransition(
-              sizeFactor: CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn),
+              sizeFactor: curvedAnimation,
               axis: Axis.horizontal,
               alignment: Alignment.topLeft,
               child: const Placeholder(),
@@ -725,16 +729,15 @@ void main() {
         value: 1,
         duration: const Duration(seconds: 2),
       );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.elasticOut);
       addTearDown(tester.view.reset);
       addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: RotationTransition(
-              turns: CurvedAnimation(parent: controller, curve: Curves.elasticOut),
-              child: const Placeholder(),
-            ),
+            child: RotationTransition(turns: curvedAnimation, child: const Placeholder()),
           ),
         ),
       );
