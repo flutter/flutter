@@ -490,5 +490,59 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
   context.SetTextureCachingEnabled(false);
 }
 
+/// Verifies blend mode compatibility with SDF rendering.
+///
+/// The compatibility condition is:
+/// `mix(blend(src, dst), dst, 1 - sdf_alpha) == blend(src * sdf_alpha, dst)`
+TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
+  std::vector<Color> colors = {
+      Color::Black(),
+      Color::White(),
+      Color::LimeGreen(),
+      Color::CornflowerBlue(),
+      Color::LimeGreen().WithAlpha(0.8),
+      Color::CornflowerBlue().WithAlpha(0.7),
+  };
+
+  for (int i = 0; i <= static_cast<int>(BlendMode::kLastMode); i++) {
+    BlendMode blend_mode = static_cast<BlendMode>(i);
+    bool blend_mode_is_compatible = true;
+
+    for (const auto& src : colors) {
+      for (const auto& dst : colors) {
+        for (Scalar sdf_alpha = 0.0; sdf_alpha < 1.01; sdf_alpha += 0.2) {
+          // `mix(blend(src, dst), dst, 1 - sdf_alpha)`:
+          // 1. Blend src onto dst.
+          Color blended = dst.Blend(src, blend_mode);
+          // 2. Mix with dst using sdf_alpha. Mix by lerping using
+          // pre-multiplied colors. Leave the result as a pre-multiplied color,
+          // because using Unpremultiply() on the result can produce incorrect
+          // values when alpha is close to 0.
+          Color blended_then_sdf_alpha_applied = Color::Lerp(
+              blended.Premultiply(), dst.Premultiply(), 1.0 - sdf_alpha);
+
+          // `blend(src * sdf_alpha, dst)`:
+          // 1. Apply sdf_alpha to src's alpha.
+          Color sdf_alpha_applied = src.WithAlpha(src.alpha * sdf_alpha);
+          // 2. Blend onto dst. Convert result to be pre-multiplied for
+          // comparison with blended_then_sdf_alpha_applied.
+          Color sdf_alpha_applied_then_blended =
+              dst.Blend(sdf_alpha_applied, blend_mode).Premultiply();
+
+          // Compare results.
+          if (blended_then_sdf_alpha_applied !=
+              sdf_alpha_applied_then_blended) {
+            blend_mode_is_compatible = false;
+          }
+        }
+      }
+    }
+
+    Paint paint = {.blend_mode = blend_mode};
+    EXPECT_EQ(blend_mode_is_compatible,
+              Canvas::IsCompatibleWithSDFRendering(paint));
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
