@@ -82,7 +82,14 @@ abstract class CkSurface extends Surface {
   Future<void> get initialized => _initialized.future;
   final Completer<void> _initialized = Completer<void>();
 
-  late Completer<void>? _handledContextLostEvent;
+  // Patched by Aaritya for Sahi trade app (Flutter 3.41.7 fork).
+  // Same fix as skwasm_impl/surface.dart: drop `late` from a field that's
+  // only assigned inside `triggerContextLoss()` (test-only). `onContextLost`
+  // below reads via `?.complete()` but `late` init-checking fires before
+  // the null-guard. Making this a plain nullable field lets the `?.` do
+  // its job. See skwasm_impl/surface.dart for the full explanation.
+  // TODO(aaritya): remove when upstream fix is cherry-picked into 3.41.x.
+  Completer<void>? _handledContextLostEvent;
 
   /// Creates the canvas object and initializes the graphics context.
   Future<void> _initialize() async {

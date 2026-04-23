@@ -101,7 +101,18 @@ class SkwasmSurface implements OffscreenSurface {
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
-  late Completer<void>? _handledContextLostEvent;
+  // Patched by Aaritya for Sahi trade app (Flutter 3.41.7 fork).
+  // Upstream declares this as `late Completer<void>? _handledContextLostEvent`.
+  // In production, this field is only assigned inside `triggerContextLoss()`,
+  // which is only called from tests. When a real `webglcontextlost` event
+  // fires, `onContextLost` below reads this field via `?.complete()` — but
+  // `late` initialization checking runs before the `?.` null-guard, so the
+  // field's never-assigned state throws `LateInitializationError: Field has
+  // not been initialized` and aborts the whole context-loss recovery path.
+  // Dropping `late` makes the field default to null; `?.complete()` becomes
+  // a correct no-op when it hasn't been assigned yet.
+  // TODO(aaritya): remove when upstream fix is cherry-picked into 3.41.x.
+  Completer<void>? _handledContextLostEvent;
 
   /// Handles the context lost event by acquiring a new canvas and recreating the
   /// context.
