@@ -271,6 +271,29 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4? _rootTransform;
 
+  /// Whether this view must be composited on the next frame regardless of
+  /// whether any of its descendant render objects are dirty.
+  ///
+  /// The binding sets this to true when the view is added, after a hot
+  /// reload, and when the app returns from a backgrounded lifecycle state.
+  /// It is cleared after a successful composite in a non-warm-up frame.
+  bool get requiresComposite => _requiresComposite;
+  bool _requiresComposite = false;
+
+  /// Marks this view as requiring a composite on the next frame even if no
+  /// descendant render objects are dirty.
+  void markRequiresComposite() {
+    _requiresComposite = true;
+  }
+
+  /// Clears the [requiresComposite] flag.
+  ///
+  /// Called by the binding once this view has been composited in a
+  /// non-warm-up frame.
+  void clearRequiresComposite() {
+    _requiresComposite = false;
+  }
+
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     assert(hasConfiguration);
     _rootTransform = configuration.toMatrix();

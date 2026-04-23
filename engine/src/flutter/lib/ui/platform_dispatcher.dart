@@ -645,13 +645,13 @@ class PlatformDispatcher {
 
   /// A callback that is invoked when a texture has a new frame available.
   ///
-  /// This is called by the engine when [MarkTextureFrameAvailable] is invoked
-  /// for a texture. The callback receives the texture ID that has a new frame.
+  /// The engine invokes this callback after a platform embedder notifies it
+  /// that a native texture has new content. The mechanism by which embedders
+  /// raise this notification is platform-specific and part of the embedder
+  /// API. The callback receives the ID of the texture that has a new frame.
   ///
-  /// This is used by the framework to mark texture render objects as needing
-  /// paint when their backing texture has new content, without scheduling a
-  /// new frame (since the frame is already scheduled or will be scheduled
-  /// separately by the engine).
+  /// The framework uses this to mark texture render objects as needing paint
+  /// when their backing texture has new content.
   ///
   /// See also:
   ///
