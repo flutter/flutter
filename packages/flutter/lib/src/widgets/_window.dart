@@ -251,10 +251,17 @@ abstract class RegularWindowController extends BaseWindowController {
   /// Creates a [RegularWindowController] that sizes the window to its content.
   ///
   /// {@template flutter.widgets.windowing.sizedToContentConstructor}
-  /// Upon construction, the window is created by the platform and initially
-  /// sized to fit its content. If [resizable] is `true`, the user may resize
-  /// the window after it is initially sized. If [resizable] is `false`, the
-  /// window will always be resized to the current size of its content.
+  /// The window is created by the platform and initially
+  /// sized to fit its content.
+  ///
+  /// The [resizable] property determines how the window behaves after that initial sizing:
+  ///
+  /// * If `false`, the window remains fixed to its content size. If the
+  ///   content changes size, the window will automatically resize to match,
+  ///   subject to [preferredConstraints]. This is the default.
+  /// * If `true`, the user can manually resize the window, subject to
+  ///   [preferredConstraints]. After the initial automatic sizing,
+  ///   the window will no longer track the size of its content.
   ///
   /// The [preferredConstraints] field enforces the minimum and maximum size of
   /// the window. If the user attempts to resize the window beyond these
@@ -263,12 +270,6 @@ abstract class RegularWindowController extends BaseWindowController {
   /// within the resized window, or it might prevent the window from being
   /// resized altogether. These constraints might not be honored by the
   /// platform. If null, the window will be unconstrained.
-  ///
-  /// The [resizable] argument configures whether the window may be resized by
-  /// the user. If `false`, the window will be fixed to its content size within
-  /// its [preferredConstraints]. If `true`, the user will be able to resize
-  /// the window within its [preferredConstraints], but the window will not be
-  /// sized to its contents after its initial sizing.
   /// {@endtemplate}
   ///
   /// To create a window with a specific size instead, use the default
