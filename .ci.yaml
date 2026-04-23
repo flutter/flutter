@@ -5436,6 +5436,7 @@ targets:
       task_name: wide_gamut_macos
     drone_dimensions:
       - gpu=apple
+      - cpu=arm64
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
