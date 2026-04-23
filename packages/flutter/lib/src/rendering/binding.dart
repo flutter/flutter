@@ -22,13 +22,18 @@ import 'debug.dart';
 import 'mouse_tracker.dart';
 import 'object.dart';
 import 'service_extensions.dart';
-import 'texture.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 // Examples can assume:
 // late BuildContext context;
+
+/// Signature for callbacks passed to
+/// [RendererBinding.addTextureFrameAvailableHandler].
+///
+/// Called with the ID of the texture that has a new frame available.
+typedef TextureFrameAvailableHandler = void Function(int textureId);
 
 /// The glue between the render trees and the Flutter engine.
 ///
@@ -68,60 +73,43 @@ mixin RendererBinding
     rootPipelineOwner.attach(_manifold);
   }
 
-  /// Registry mapping texture IDs to their [TextureBox] render objects.
-  ///
-  /// When the engine notifies us of a new frame via
-  /// [handleTextureFrameAvailable], this registry is used to look up the
-  /// corresponding [TextureBox] and mark it as needing paint.
-  ///
-  /// Multiple [TextureBox] may be registered under the same texture ID
-  /// in which case all of them are marked as needing paint.
-  @visibleForTesting
-  final Map<int, Set<TextureBox>> textureRegistry = <int, Set<TextureBox>>{};
+  final List<TextureFrameAvailableHandler> _textureFrameAvailableHandlers =
+      <TextureFrameAvailableHandler>[];
 
-  /// Registers a [TextureBox] so it can be marked dirty when its backing
-  /// texture has a new frame available.
+  /// Registers a [handler] to be notified when any texture has a new frame
+  /// available from the engine.
   ///
-  /// This is called automatically by [TextureBox] when it is attached.
-  void registerTexture(int textureId, TextureBox textureBox) {
-    textureRegistry.putIfAbsent(textureId, () => <TextureBox>{}).add(textureBox);
+  /// The handler receives the ID of the texture that has a new frame and is
+  /// responsible for checking whether that ID matches the texture it cares
+  /// about.
+  void addTextureFrameAvailableHandler(TextureFrameAvailableHandler handler) {
+    _textureFrameAvailableHandlers.add(handler);
   }
 
-  /// Unregisters a [TextureBox] from the texture registry.
-  ///
-  /// This is called automatically by [TextureBox] when it is detached.
-  void unregisterTexture(int textureId, TextureBox textureBox) {
-    final Set<TextureBox>? boxes = textureRegistry[textureId];
-    if (boxes != null) {
-      boxes.remove(textureBox);
-      if (boxes.isEmpty) {
-        textureRegistry.remove(textureId);
-      }
-    }
+  /// Unregisters a handler previously added with
+  /// [addTextureFrameAvailableHandler].
+  void removeTextureFrameAvailableHandler(TextureFrameAvailableHandler handler) {
+    _textureFrameAvailableHandlers.remove(handler);
   }
 
   void _initTextureFrameCallback() {
-    // Register for texture frame availability notifications from the engine.
-    // This callback is invoked when MarkTextureFrameAvailable is called,
-    // allowing the framework to mark the corresponding texture render object
-    // as needing paint even when no other render objects are dirty.
     platformDispatcher.onTextureFrameAvailable = handleTextureFrameAvailable;
   }
 
-  /// Called when the engine notifies that a texture has a new frame available.
+  /// Dispatches a texture-frame-available notification to every registered
+  /// [TextureFrameAvailableHandler].
   ///
-  /// This marks the corresponding [TextureBox] as needing paint.
+  /// This is invoked automatically by the binding when the engine reports a
+  /// new texture frame. It is also exposed so tests can simulate that
+  /// notification without going through the engine.
+  ///
+  /// See [dart:ui.PlatformDispatcher.onTextureFrameAvailable].
+  @protected
   @visibleForTesting
   void handleTextureFrameAvailable(int textureId) {
-    final Set<TextureBox>? boxes = textureRegistry[textureId];
-    if (boxes != null) {
-      for (final TextureBox textureBox in boxes) {
-        if (textureBox.attached) {
-          // Mark the texture as needing paint without scheduling a frame.
-          // The frame is already scheduled by the engine via ScheduleFrame(false).
-          textureBox.markNeedsPaint();
-        }
-      }
+    // Iterate a copy so handlers may add/remove themselves mid-dispatch.
+    for (final handler in List<TextureFrameAvailableHandler>.of(_textureFrameAvailableHandlers)) {
+      handler(textureId);
     }
   }
 
@@ -389,10 +377,6 @@ mixin RendererBinding
   Iterable<RenderView> get renderViews => _viewIdToRenderView.values;
   final Map<Object, RenderView> _viewIdToRenderView = <Object, RenderView>{};
 
-  // Views that have not yet been composited in a non-warm-up frame.
-  // These views are always composited regardless of dirty state.
-  final Set<RenderView> _viewsNeedingCompositing = <RenderView>{};
-
   /// Adds a [RenderView] to this binding.
   ///
   /// The binding will interact with the [RenderView] in the following ways:
@@ -409,8 +393,9 @@ mixin RendererBinding
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
     view.configuration = createViewConfigurationFor(view);
-    // New views must be composited at least once in a non-warm-up frame.
-    _viewsNeedingCompositing.add(view);
+    // Ensure the view composites at least once in a non-warm-up frame after
+    // being added, so its contents appear even if no descendants are dirty.
+    view.markRequiresComposite();
   }
 
   /// Removes a [RenderView] previously added with [addRenderView] from the
@@ -419,7 +404,6 @@ mixin RendererBinding
     final Object viewId = view.flutterView.viewId;
     assert(_viewIdToRenderView[viewId] == view);
     _viewIdToRenderView.remove(viewId);
-    _viewsNeedingCompositing.remove(view);
   }
 
   /// Returns a [ViewConfiguration] configured for the provided [RenderView]
@@ -719,12 +703,14 @@ mixin RendererBinding
       for (final renderView in viewsToComposite) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }
-      // Only mark views as successfully composited if this is not a warm-up
-      // frame. During warm-up frames the rendering surface may not be ready,
-      // so the composite might not produce visible output. Keeping views in
-      // the set ensures they are re-composited on the first real frame.
+      // Only clear [RenderView.requiresComposite] if this is not a warm-up
+      // frame. During warm-up the rendering surface may not be ready, so the
+      // composite might not produce visible output; leaving the flag set
+      // ensures the view is re-composited on the first real frame.
       if (!isWarmUpFrame) {
-        _viewsNeedingCompositing.removeAll(viewsToComposite);
+        for (final renderView in viewsToComposite) {
+          renderView.clearRequiresComposite();
+        }
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
@@ -735,14 +721,14 @@ mixin RendererBinding
   ///
   /// A view needs compositing if:
   ///  - It has been prepared (i.e. [RenderView.prepareInitialFrame] was called).
-  ///  - It is explicitly tracked in [_viewsNeedingCompositing] (e.g. newly added
+  ///  - Its [RenderView.requiresComposite] flag is set (e.g. newly added
   ///    views or views returning from a paused lifecycle state).
   ///  - Its [PipelineOwner] has render objects that need painting.
   bool _needsCompositing(RenderView renderView) {
     if (!renderView.hasInitialFrameBeenPrepared) {
       return false;
     }
-    if (_viewsNeedingCompositing.contains(renderView)) {
+    if (renderView.requiresComposite) {
       return true;
     }
     return renderView.owner?.needsPaint ?? false;
@@ -755,7 +741,9 @@ mixin RendererBinding
     // When transitioning from a state where frames were disabled to one where
     // they are enabled, mark all views for compositing on the next frame.
     if (!framesEnabledBefore && framesEnabled) {
-      _viewsNeedingCompositing.addAll(renderViews);
+      for (final RenderView renderView in renderViews) {
+        renderView.markRequiresComposite();
+      }
     }
   }
 
@@ -774,7 +762,9 @@ mixin RendererBinding
         FlutterTimeline.finishSync();
       }
     }
-    _viewsNeedingCompositing.addAll(renderViews);
+    for (final RenderView renderView in renderViews) {
+      renderView.markRequiresComposite();
+    }
     scheduleWarmUpFrame();
     await endOfFrame;
   }
