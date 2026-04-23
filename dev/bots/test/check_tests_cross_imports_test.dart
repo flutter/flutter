@@ -122,46 +122,52 @@ void main() {
     expect(success, isTrue);
   });
 
-  test('when not all widgets knowns have cross imports', () async {
-    final String excluded = TestsCrossImportChecker.knownWidgetsCrossImports.first;
-    buildTestFiles(excludes: <String>{excluded});
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.check();
-    }, shouldHaveErrors: true);
-    final String lines = <String>[
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ Huzzah! The following tests in Widgets no longer contain cross imports!',
-      '║   $excluded',
-      '║ However, they now need to be removed from the',
-      '║ knownWidgetsCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
-      '╚═══════════════════════════════════════════════════════════════════════════════',
-    ].join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, isFalse);
-  });
+  // dart format off
+  final fixedCrossImportsTestCases = <(String, String, Set<String>)>[
+    ('test/animation', 'knownAnimationCrossImports', TestsCrossImportChecker.knownAnimationCrossImports),
+    ('test/cupertino', 'knownCupertinoCrossImports', TestsCrossImportChecker.knownCupertinoCrossImports),
+    ('test/dart', 'knownDartCrossImports', TestsCrossImportChecker.knownDartCrossImports),
+    ('test/examples', 'knownExamplesCrossImports', TestsCrossImportChecker.knownExamplesCrossImports),
+    ('test/foundation', 'knownFoundationCrossImports', TestsCrossImportChecker.knownFoundationCrossImports),
+    ('test/gestures', 'knownGesturesCrossImports', TestsCrossImportChecker.knownGesturesCrossImports),
+    ('test/harness', 'knownHarnessCrossImports', TestsCrossImportChecker.knownHarnessCrossImports),
+    ('test/painting', 'knownPaintingCrossImports', TestsCrossImportChecker.knownPaintingCrossImports),
+    ('test/physics', 'knownPhysicsCrossImports', TestsCrossImportChecker.knownPhysicsCrossImports),
+    ('test/rendering', 'knownRenderingCrossImports', TestsCrossImportChecker.knownRenderingCrossImports),
+    ('test/scheduler', 'knownSchedulerCrossImports', TestsCrossImportChecker.knownSchedulerCrossImports),
+    ('test/semantics', 'knownSemanticsCrossImports', TestsCrossImportChecker.knownSemanticsCrossImports),
+    ('test/services', 'knownServicesCrossImports', TestsCrossImportChecker.knownServicesCrossImports),
+    ('test/widgets', 'knownWidgetsCrossImports', TestsCrossImportChecker.knownWidgetsCrossImports),
+  ];
+  // dart format on
 
-  test('when not all cupertino knowns have cross imports', () async {
-    if (TestsCrossImportChecker.knownCupertinoCrossImports.isEmpty) {
-      return;
-    }
-    final String excluded = TestsCrossImportChecker.knownCupertinoCrossImports.first;
-    buildTestFiles(excludes: <String>{excluded});
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.check();
-    }, shouldHaveErrors: true);
-    final String lines = <String>[
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ Huzzah! The following tests in Cupertino no longer contain cross imports!',
-      '║   $excluded',
-      '║ However, they now need to be removed from the',
-      '║ knownCupertinoCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
-      '╚═══════════════════════════════════════════════════════════════════════════════',
-    ].join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, isFalse);
-  });
+  for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
+      in fixedCrossImportsTestCases) {
+    test('when not all $libraryName knowns have cross imports', () async {
+      if (knownCrossImports.isEmpty) {
+        return;
+      }
+
+      final String excludedSample = knownCrossImports.first;
+
+      buildTestFiles(excludes: <String>{excludedSample});
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ Huzzah! The following tests in $libraryName no longer contain cross imports!',
+        '║   $excludedSample',
+        '║ However, they now need to be removed from the',
+        '║ $knownCrossImportsListName list in the script /dev/bots/check_tests_cross_imports.dart.',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+  }
 
   test('unknown Widgets cross import of Material', () async {
     final String extra = 'packages/flutter/test/widgets/foo_test.dart'.replaceAll(
@@ -188,31 +194,6 @@ void main() {
     expect(success, isFalse);
   });
 
-  test('unknown Widgets cross import of Cupertino', () async {
-    final String extra = 'packages/flutter/test/widgets/foo_test.dart'.replaceAll(
-      '/',
-      Platform.isWindows ? r'\' : '/',
-    );
-    buildTestFiles(extraWidgetsImportingCupertino: <String>{extra});
-    bool? success;
-    final String result = await capture(() async {
-      success = checker.check();
-    }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ The following test in Widgets has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
-              '║   $extra',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
-    expect(result, equals('$lines\n'));
-    expect(success, isFalse);
-  });
-
   test('unknown Cupertino cross importing Material', () async {
     final String extra = 'packages/flutter/test/cupertino/foo_test.dart'.replaceAll(
       '/',
@@ -228,6 +209,31 @@ void main() {
         <String>[
               '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
               '║ The following test in Cupertino has a disallowed import of Material. Refactor it or move it to Material.',
+              '║   $extra',
+              '╚═══════════════════════════════════════════════════════════════════════════════',
+            ]
+            .map((String line) {
+              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+            })
+            .join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  test('unknown Widgets cross import of Cupertino', () async {
+    final String extra = 'packages/flutter/test/widgets/foo_test.dart'.replaceAll(
+      '/',
+      Platform.isWindows ? r'\' : '/',
+    );
+    buildTestFiles(extraWidgetsImportingCupertino: <String>{extra});
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines =
+        <String>[
+              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+              '║ The following test in Widgets has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
               '║   $extra',
               '╚═══════════════════════════════════════════════════════════════════════════════',
             ]
