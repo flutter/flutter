@@ -184,7 +184,24 @@ class WindowingOwnerMacOS extends WindowingOwner {
   }
 }
 
-mixin _WindowControllerMixin {
+/// Platform specific functionality for all window controllers on macOS.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+abstract interface class WindowControllerMacOS {
+  /// Returns pointer to the underlying NSWindow.
+  ///
+  /// Using this pointer implies the user is aware of any side effects changes may have to Flutter behavior.
+  ///
+  /// The handle is only valid for the lifetime of the window. Once the window
+  /// is destroyed, this handle becomes invalid and must not be used.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  Pointer<Void> get windowHandle;
+}
+
+mixin _WindowControllerMixin implements WindowControllerMacOS {
   void _initController(WindowingOwnerMacOS owner) {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -238,21 +255,22 @@ mixin _WindowControllerMixin {
 
   /// Returns window handle for the current window.
   /// The handle is a pointer to NSWindow instance.
-  Pointer<Void> getWindowHandle() {
+  @override
+  Pointer<Void> get windowHandle {
     _ensureNotDestroyed();
     return WindowingOwnerMacOS.getWindowHandle(rootView);
   }
 
   Size get contentSize {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.getWindowContentSize(getWindowHandle());
+    return _MacOSPlatformInterface.getWindowContentSize(windowHandle);
   }
 
   void destroy() {
     if (_destroyed) {
       return;
     }
-    final Pointer<Void> handle = getWindowHandle();
+    final Pointer<Void> handle = windowHandle;
     _MacOSPlatformInterface.destroyWindow(handle);
   }
 
@@ -317,7 +335,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
     if (positioner != null) {
       _positioner = positioner;
     }
-    _MacOSPlatformInterface.updateWindowPosition(getWindowHandle());
+    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
   }
 
   @override
@@ -363,7 +381,7 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   @override
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   final TooltipWindowControllerDelegate _delegate;
@@ -414,12 +432,12 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
     if (positioner != null) {
       _positioner = positioner;
     }
-    _MacOSPlatformInterface.updateWindowPosition(getWindowHandle());
+    _MacOSPlatformInterface.updateWindowPosition(windowHandle);
   }
 
   @override
   Offset get offsetFromParent {
-    return _MacOSPlatformInterface.getOffsetInParent(getWindowHandle()).toOffset();
+    return _MacOSPlatformInterface.getOffsetInParent(windowHandle).toOffset();
   }
 
   @override
@@ -465,7 +483,7 @@ class PopupWindowControllerMacOS extends PopupWindowController with _WindowContr
   @override
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   final PopupWindowControllerDelegate _delegate;
@@ -537,82 +555,82 @@ class RegularWindowControllerMacOS extends RegularWindowController with _WindowC
   @internal
   void setSize(Size size) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowContentSize(getWindowHandle(), size);
+    _MacOSPlatformInterface.setWindowContentSize(windowHandle, size);
   }
 
   @override
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   @override
   void setTitle(String title) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowTitle(getWindowHandle(), title);
+    _MacOSPlatformInterface.setWindowTitle(windowHandle, title);
     notifyListeners();
   }
 
   @override
   Size get contentSize {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.getWindowContentSize(getWindowHandle());
+    return _MacOSPlatformInterface.getWindowContentSize(windowHandle);
   }
 
   @override
   void activate() {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.activate(getWindowHandle());
+    _MacOSPlatformInterface.activate(windowHandle);
   }
 
   @override
   void setMaximized(bool maximized) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setMaximized(getWindowHandle(), maximized);
+    _MacOSPlatformInterface.setMaximized(windowHandle, maximized);
   }
 
   @override
   bool get isMaximized {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isMaximized(getWindowHandle());
+    return _MacOSPlatformInterface.isMaximized(windowHandle);
   }
 
   @override
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _MacOSPlatformInterface.minimize(getWindowHandle());
+      _MacOSPlatformInterface.minimize(windowHandle);
     } else {
-      _MacOSPlatformInterface.unminimize(getWindowHandle());
+      _MacOSPlatformInterface.unminimize(windowHandle);
     }
   }
 
   @override
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isMinimized(getWindowHandle());
+    return _MacOSPlatformInterface.isMinimized(windowHandle);
   }
 
   @override
   void setFullscreen(bool fullscreen, {Display? display}) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setFullscreen(getWindowHandle(), fullscreen);
+    _MacOSPlatformInterface.setFullscreen(windowHandle, fullscreen);
   }
 
   @override
   bool get isFullscreen {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isFullscreen(getWindowHandle());
+    return _MacOSPlatformInterface.isFullscreen(windowHandle);
   }
 
   final RegularWindowControllerDelegate _delegate;
 
   @override
-  bool get isActivated => _MacOSPlatformInterface.isActivated(getWindowHandle());
+  bool get isActivated => _MacOSPlatformInterface.isActivated(windowHandle);
 
   @override
-  String get title => _MacOSPlatformInterface.getTitle(getWindowHandle());
+  String get title => _MacOSPlatformInterface.getTitle(windowHandle);
 }
 
 /// Implementation of [DialogWindowController] for the macOS platform.
@@ -680,20 +698,20 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   @internal
   void setSize(Size size) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowContentSize(getWindowHandle(), size);
+    _MacOSPlatformInterface.setWindowContentSize(windowHandle, size);
   }
 
   @override
   @internal
   void setConstraints(BoxConstraints constraints) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowConstraints(getWindowHandle(), constraints);
+    _MacOSPlatformInterface.setWindowConstraints(windowHandle, constraints);
   }
 
   @override
   void setTitle(String title) {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.setWindowTitle(getWindowHandle(), title);
+    _MacOSPlatformInterface.setWindowTitle(windowHandle, title);
     notifyListeners();
   }
 
@@ -702,36 +720,36 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   @override
   Size get contentSize {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.getWindowContentSize(getWindowHandle());
+    return _MacOSPlatformInterface.getWindowContentSize(windowHandle);
   }
 
   @override
   void activate() {
     _ensureNotDestroyed();
-    _MacOSPlatformInterface.activate(getWindowHandle());
+    _MacOSPlatformInterface.activate(windowHandle);
   }
 
   @override
   void setMinimized(bool minimized) {
     _ensureNotDestroyed();
     if (minimized) {
-      _MacOSPlatformInterface.minimize(getWindowHandle());
+      _MacOSPlatformInterface.minimize(windowHandle);
     } else {
-      _MacOSPlatformInterface.unminimize(getWindowHandle());
+      _MacOSPlatformInterface.unminimize(windowHandle);
     }
   }
 
   @override
   bool get isMinimized {
     _ensureNotDestroyed();
-    return _MacOSPlatformInterface.isMinimized(getWindowHandle());
+    return _MacOSPlatformInterface.isMinimized(windowHandle);
   }
 
   @override
-  bool get isActivated => _MacOSPlatformInterface.isActivated(getWindowHandle());
+  bool get isActivated => _MacOSPlatformInterface.isActivated(windowHandle);
 
   @override
-  String get title => _MacOSPlatformInterface.getTitle(getWindowHandle());
+  String get title => _MacOSPlatformInterface.getTitle(windowHandle);
 
   @override
   final BaseWindowController? parent;
