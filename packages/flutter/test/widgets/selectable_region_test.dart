@@ -302,8 +302,8 @@ void main() {
         MaterialApp(
           home: SelectableRegion(
             selectionControls: materialTextSelectionControls,
-            child: Scaffold(
-              body: Center(
+            child: Material(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[

@@ -751,6 +751,7 @@ class SemanticsTester {
     int? maxValueLength,
     String? maxValue,
     String? minValue,
+    String? tooltip,
     SemanticsNode? ancestor,
     SemanticsInputType? inputType,
   }) {
@@ -778,6 +779,9 @@ class SemanticsTester {
         return false;
       }
       if (hint != null && node.hint != hint) {
+        return false;
+      }
+      if (tooltip != null && node.tooltip != tooltip) {
         return false;
       }
       if (increasedValue != null && node.increasedValue != increasedValue) {
@@ -1151,6 +1155,7 @@ class _IncludesNodeWith extends Matcher {
     this.label,
     this.value,
     this.hint,
+    this.tooltip,
     this.increasedValue,
     this.decreasedValue,
     this.textDirection,
@@ -1180,6 +1185,7 @@ class _IncludesNodeWith extends Matcher {
              scrollExtentMin != null ||
              maxValueLength != null ||
              currentValueLength != null ||
+             tooltip != null ||
              inputType != null,
          minValue != null || maxValue != null,
        );
@@ -1189,6 +1195,7 @@ class _IncludesNodeWith extends Matcher {
   final String? label;
   final String? value;
   final String? hint;
+  final String? tooltip;
   final String? increasedValue;
   final String? decreasedValue;
   final TextDirection? textDirection;
@@ -1215,6 +1222,7 @@ class _IncludesNodeWith extends Matcher {
           label: label,
           value: value,
           hint: hint,
+          tooltip: tooltip,
           increasedValue: increasedValue,
           decreasedValue: decreasedValue,
           textDirection: textDirection,
@@ -1254,6 +1262,7 @@ class _IncludesNodeWith extends Matcher {
       if (label != null) 'label "$label"',
       if (value != null) 'value "$value"',
       if (hint != null) 'hint "$hint"',
+      if (tooltip != null) 'tooltip "$tooltip"',
       if (textDirection != null) ' (${textDirection!.name})',
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
@@ -1284,6 +1293,7 @@ Matcher includesNodeWith({
   AttributedString? attributedValue,
   String? hint,
   AttributedString? attributedHint,
+  String? tooltip,
   String? increasedValue,
   String? decreasedValue,
   TextDirection? textDirection,
@@ -1307,6 +1317,7 @@ Matcher includesNodeWith({
     attributedValue: attributedValue,
     hint: hint,
     attributedHint: attributedHint,
+    tooltip: tooltip,
     textDirection: textDirection,
     increasedValue: increasedValue,
     decreasedValue: decreasedValue,

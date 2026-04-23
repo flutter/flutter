@@ -23,6 +23,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, HitTestEntry, HitTestResult;
 import 'package:flutter/rendering.dart' show RenderMetaData;
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -2911,6 +2912,8 @@ class ScaffoldState extends State<Scaffold>
     required bool removeBottomPadding,
     bool removeBottomInset = false,
     bool maintainBottomViewPadding = false,
+    FocusOrder? traversalOrder,
+    SemanticsSortKey? semanticsSortKey,
   }) {
     MediaQueryData data = MediaQuery.of(context).removePadding(
       removeLeft: removeLeftPadding,
@@ -2927,12 +2930,14 @@ class ScaffoldState extends State<Scaffold>
     }
 
     if (child != null) {
-      children.add(
-        LayoutId(
-          id: childId,
-          child: MediaQuery(data: data, child: child),
-        ),
-      );
+      Widget wrappedChild = MediaQuery(data: data, child: child);
+      if (traversalOrder != null) {
+        wrappedChild = FocusTraversalOrder(order: traversalOrder, child: wrappedChild);
+      }
+      if (semanticsSortKey != null) {
+        wrappedChild = Semantics(container: true, sortKey: semanticsSortKey, child: wrappedChild);
+      }
+      children.add(LayoutId(id: childId, child: wrappedChild));
     }
   }
 
@@ -3032,6 +3037,8 @@ class ScaffoldState extends State<Scaffold>
       removeBottomPadding:
           widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
       removeBottomInset: _resizeToAvoidBottomInset,
+      traversalOrder: const NumericFocusOrder(5.0),
+      semanticsSortKey: const OrdinalSortKey(5.0),
     );
     if (_showBodyScrim) {
       _addIfNonNull(
@@ -3064,6 +3071,8 @@ class ScaffoldState extends State<Scaffold>
         removeTopPadding: false,
         removeRightPadding: false,
         removeBottomPadding: true,
+        traversalOrder: const NumericFocusOrder(2.0),
+        semanticsSortKey: const OrdinalSortKey(2.0),
       );
     }
 
@@ -3073,7 +3082,10 @@ class ScaffoldState extends State<Scaffold>
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final Widget stack = Stack(
         alignment: Alignment.bottomCenter,
-        children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
+        children: <Widget>[
+          ..._dismissedBottomSheets,
+          if (_currentBottomSheet != null) _currentBottomSheet!._widget,
+        ],
       );
       _addIfNonNull(
         children,
@@ -3083,6 +3095,8 @@ class ScaffoldState extends State<Scaffold>
         removeTopPadding: true,
         removeRightPadding: false,
         removeBottomPadding: _resizeToAvoidBottomInset,
+        traversalOrder: const NumericFocusOrder(6.0),
+        semanticsSortKey: const OrdinalSortKey(6.0),
       );
     }
 
@@ -3104,6 +3118,8 @@ class ScaffoldState extends State<Scaffold>
         removeBottomPadding:
             widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
+        traversalOrder: const NumericFocusOrder(7.0),
+        semanticsSortKey: const OrdinalSortKey(7.0),
       );
     }
 
@@ -3124,6 +3140,8 @@ class ScaffoldState extends State<Scaffold>
         removeRightPadding: false,
         removeBottomPadding: true,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
+        traversalOrder: const NumericFocusOrder(1.0),
+        semanticsSortKey: const OrdinalSortKey(1.0),
       );
     }
 
@@ -3157,6 +3175,8 @@ class ScaffoldState extends State<Scaffold>
         removeRightPadding: false,
         removeBottomPadding: widget.bottomNavigationBar != null,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
+        traversalOrder: const NumericFocusOrder(8.0),
+        semanticsSortKey: const OrdinalSortKey(8.0),
       );
     }
 
@@ -3170,6 +3190,8 @@ class ScaffoldState extends State<Scaffold>
         removeRightPadding: false,
         removeBottomPadding: false,
         maintainBottomViewPadding: !_resizeToAvoidBottomInset,
+        traversalOrder: const NumericFocusOrder(3.0),
+        semanticsSortKey: const OrdinalSortKey(3.0),
       );
     }
 
@@ -3187,6 +3209,8 @@ class ScaffoldState extends State<Scaffold>
       removeTopPadding: true,
       removeRightPadding: true,
       removeBottomPadding: true,
+      traversalOrder: const NumericFocusOrder(4.0),
+      semanticsSortKey: const OrdinalSortKey(4.0),
     );
 
     final Widget? statusBar = switch (themeData.platform) {
@@ -3239,23 +3263,26 @@ class ScaffoldState extends State<Scaffold>
             builder: (BuildContext context) {
               return Actions(
                 actions: <Type, Action<Intent>>{DismissIntent: _DismissDrawerAction(context)},
-                child: CustomMultiChildLayout(
-                  delegate: _ScaffoldLayout(
-                    extendBody: widget.extendBody,
-                    extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-                    minInsets: minInsets,
-                    minViewPadding: minViewPadding,
-                    currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-                    floatingActionButtonMoveAnimation: _floatingActionButtonMoveController,
-                    floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-                    geometryNotifier: _geometryNotifier,
-                    previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-                    textDirection: textDirection,
-                    isSnackBarFloating: isSnackBarFloating,
-                    extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-                    snackBarWidth: snackBarWidth,
+                child: FocusTraversalGroup(
+                  policy: OrderedTraversalPolicy(),
+                  child: CustomMultiChildLayout(
+                    delegate: _ScaffoldLayout(
+                      extendBody: widget.extendBody,
+                      extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                      minInsets: minInsets,
+                      minViewPadding: minViewPadding,
+                      currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                      floatingActionButtonMoveAnimation: _floatingActionButtonMoveController,
+                      floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                      geometryNotifier: _geometryNotifier,
+                      previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                      textDirection: textDirection,
+                      isSnackBarFloating: isSnackBarFloating,
+                      extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                      snackBarWidth: snackBarWidth,
+                    ),
+                    children: children,
                   ),
-                  children: children,
                 ),
               );
             },

@@ -4400,7 +4400,7 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
+            TestSemantics.rootChild(
               id: 1,
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
@@ -4411,34 +4411,44 @@ void main() {
                       id: 3,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        if (kIsWeb)
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isButton,
-                              SemanticsFlag.hasExpandedState,
-                            ],
-                            actions: <SemanticsAction>[SemanticsAction.expand],
-                          )
-                        else
-                          TestSemantics(
-                            id: 5,
-                            inputType: SemanticsInputType.text,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isTextField,
-                              SemanticsFlag.isFocusable,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isReadOnly,
-                              SemanticsFlag.isButton,
-                              SemanticsFlag.hasExpandedState,
-                            ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.focus,
-                              SemanticsAction.expand,
-                            ],
-                            textDirection: TextDirection.ltr,
-                            currentValueLength: 0,
-                          ),
+                        TestSemantics(
+                          id: 4,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 5,
+                              children: <TestSemantics>[
+                                if (kIsWeb)
+                                  TestSemantics(
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.isButton,
+                                      SemanticsFlag.hasExpandedState,
+                                    ],
+                                    actions: <SemanticsAction>[SemanticsAction.expand],
+                                  )
+                                else
+                                  TestSemantics(
+                                    id: 7,
+                                    inputType: SemanticsInputType.text,
+                                    flags: <SemanticsFlag>[
+                                      SemanticsFlag.isTextField,
+                                      SemanticsFlag.isFocusable,
+                                      SemanticsFlag.hasEnabledState,
+                                      SemanticsFlag.isEnabled,
+                                      SemanticsFlag.isReadOnly,
+                                      SemanticsFlag.isButton,
+                                      SemanticsFlag.hasExpandedState,
+                                    ],
+                                    actions: <SemanticsAction>[
+                                      SemanticsAction.focus,
+                                      SemanticsAction.expand,
+                                    ],
+                                    textDirection: TextDirection.ltr,
+                                    currentValueLength: 0,
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ],
