@@ -5155,9 +5155,7 @@ class EditableTextState extends State<EditableText>
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
     // Spell check suggestions toolbars are intended to be shown on non-web
-    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
-    // the web with the HTML renderer due to
-    // https://github.com/flutter/flutter/issues/123560.
+    // platforms.
     if (!spellCheckEnabled ||
         _webContextMenuEnabled ||
         widget.readOnly ||

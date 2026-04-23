@@ -199,8 +199,6 @@ class FlutterConfiguration {
   ///
   /// Using flutter tools option "--web-renderer=canvaskit" would set the value to
   /// true.
-  ///
-  /// Using flutter tools option "--web-renderer=html" would set the value to false.
   static const bool useSkia = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
   // Runtime parameters.

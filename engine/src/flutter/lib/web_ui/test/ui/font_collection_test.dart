@@ -30,7 +30,7 @@ Future<void> testMain() async {
   });
 
   test(
-    'Loading valid font from data succeeds without family name (except in HTML renderer)',
+    'Loading valid font from data succeeds without family name',
     () async {
       final FlutterFontCollection collection = renderer.fontCollection;
       final ByteBuffer ahemData = await httpFetchByteBuffer('/assets/fonts/ahem.ttf');
