@@ -95,9 +95,9 @@ if (use_gtk4) {
 
 source_set("flutter_linux_sources") {
   public = _public_headers + [
-             "fl_accessible_node_gtk4.h",
              "fl_accessibility_bridge_gtk4.h",
              "fl_accessibility_semantics_store.h",
+             "fl_accessible_node_gtk4.h",
              "fl_binary_messenger_private.h",
              "fl_engine_private.h",
              "fl_gtk.h",
@@ -199,8 +199,8 @@ source_set("flutter_linux_sources") {
     ]
   } else {
     sources += [
-      "fl_accessible_node_gtk4.cc",
       "fl_accessibility_bridge_gtk4.cc",
+      "fl_accessible_node_gtk4.cc",
     ]
     if (use_gtk4_native_compositor) {
       public += [ "fl_render_texture_gtk4.h" ]
