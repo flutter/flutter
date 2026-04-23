@@ -39,6 +39,8 @@
 /engine/src/flutter/shell/platform/darwin/macos/**/* @flutter/macos-reviewers
 
 # Shared with iOS and macOS teams - keep this synced with both .github/labeler.yml's team-ios and team-macos sections.
+/dev/integration_tests/*macos*/**/* @flutter/ios-reviewers @flutter/macos-reviewers
+/dev/integration_tests/*darwin*/**/* @flutter/ios-reviewers @flutter/macos-reviewers
 /packages/flutter_tools/**/macos/* @flutter/ios-reviewers @flutter/macos-reviewers
 /packages/flutter_tools/**/*macos* @flutter/ios-reviewers @flutter/macos-reviewers
 /packages/flutter_tools/**/*xcode* @flutter/ios-reviewers @flutter/macos-reviewers

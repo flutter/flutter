@@ -241,6 +241,8 @@ team-ios:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/ios/framework/**/*
       - dev/integration_tests/*ios*/**/*
+      - dev/integration_tests/*macos*/**/*
+      - dev/integration_tests/*darwin*/**/*
       - packages/flutter_tools/**/ios/*
       - packages/flutter_tools/**/macos/*
       - packages/flutter_tools/**/*xcode*
@@ -264,6 +266,8 @@ team-macos:
     - any-glob-to-any-file:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/macos/**/*
+      - dev/integration_tests/*macos*/**/*
+      - dev/integration_tests/*darwin*/**/*
       - packages/flutter_tools/**/macos/*
       - packages/flutter_tools/**/*xcode*
       - packages/flutter_tools/**/*darwin*
