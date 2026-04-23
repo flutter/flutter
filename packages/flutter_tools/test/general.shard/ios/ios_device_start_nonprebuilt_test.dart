@@ -1747,6 +1747,7 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
+    required BuildMode mode,
     required ShutdownHooks shutdownHooks,
   }) async {
     return true;

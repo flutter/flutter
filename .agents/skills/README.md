@@ -26,3 +26,39 @@ We encourage contributors to follow these practices when authoring skills, thoug
 * **Structure and Rules**: Be extremely strict about your style. The more structured and rule-based your instructions are (with a limited number of exceptions), the better. Agents have an exponential reward function for structure.
 * **Read-Only Mode**: When appropriate, tell agents how to access real data strictly in read-only mode to prevent unintended changes.
 * **Dart Scripts**: Scripts should be written in Dart.
+
+## Validating Skills
+
+You can manually run the `dart_skills_lint` tool to validate your skills and fix common issues. Navigate to the `dev/tools` directory and run:
+
+```bash
+dart run dart_skills_lint:cli --skills-directory ../../.agents/skills --check-trailing-whitespace --check-absolute-paths --check-relative-paths
+```
+
+### Helpful Flags for Authors
+
+- `--fix`: Preview fixes for failing lints without modifying files (dry run).
+- `--fix-apply`: Automatically apply fixes for fixable rules (like trailing whitespace).
+- `--check-trailing-whitespace`: Enforce no trailing whitespace (except 2 spaces for line breaks).
+- `--check-absolute-paths`: Ensure links do not use absolute paths.
+- `--check-relative-paths`: Ensure relative links point to existing files.
+
+### Running Automated Tests
+You can also run the automated validation tests from the `dev/tools` directory:
+```bash
+dart test test/validate_skills_test.dart
+```
+
+For example, to check everything and preview fixes, you can run:
+```bash
+dart run dart_skills_lint:cli --fix --check-trailing-whitespace --check-absolute-paths --check-relative-paths --skills-directory ../../.agents/skills
+```
+
+# How to help
+If you are a regular contributor looking for areas where you can author a skill, the following are good places to start:
+
+* When to use a command line tool from the repo, its arguments, and how to interpret its outputs.
+* How to run a particular set of tests.
+* How to run the analyzer or linters that have repo-specific configuration.
+* Productization steps that are required after modifying some area of code.
+* How to debug or differentiate a common class of issues.

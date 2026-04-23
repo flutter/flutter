@@ -7,14 +7,11 @@
 import 'package:flutter/material.dart';
 // ignore: implementation_imports
 import 'package:flutter/src/widgets/_window_positioner.dart';
+
 import 'models.dart';
 
-Future<void> showWindowSettingsDialog(
-  BuildContext context,
-  WindowSettings settings,
-) async {
-  return await showDialog(
-    barrierDismissible: true,
+Future<void> showWindowSettingsDialog(BuildContext context, WindowSettings settings) {
+  return showDialog(
     context: context,
     builder: (BuildContext ctx) {
       return _WindowSettingsEditor(
@@ -37,8 +34,7 @@ class _WindowSettingsEditor extends StatefulWidget {
 
 class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   final TextEditingController _regularWidthController = TextEditingController();
-  final TextEditingController _regularHeightController =
-      TextEditingController();
+  final TextEditingController _regularHeightController = TextEditingController();
   final TextEditingController _dialogWidthController = TextEditingController();
   final TextEditingController _dialogHeightController = TextEditingController();
   final TextEditingController _offsetDxController = TextEditingController();
@@ -59,8 +55,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
   void initState() {
     super.initState();
     _regularWidthController.text = widget.settings.regularSize.width.toString();
-    _regularHeightController.text = widget.settings.regularSize.height
-        .toString();
+    _regularHeightController.text = widget.settings.regularSize.height.toString();
     _regularWidthController.addListener(_updateRegularSize);
     _regularHeightController.addListener(_updateRegularSize);
     _dialogWidthController.addListener(_updateDialogSize);
@@ -81,14 +76,15 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
     return SimpleDialog(
       contentPadding: const EdgeInsets.all(4),
       titlePadding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
       title: const Center(child: Text('Window Settings')),
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.7,
-          height: MediaQuery.of(context).size.height * 0.8,
+          width: size.width * 0.7,
+          height: size.height * 0.8,
           child: Column(
             children: [
               Expanded(
@@ -131,7 +127,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           const SizedBox(height: 20),
           Row(
             children: [
-              Text('Decorations'),
+              const Text('Decorations'),
               const SizedBox(width: 10),
               Switch(
                 value: widget.settings.regularDecorated,
@@ -169,7 +165,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           const SizedBox(height: 20),
           Row(
             children: [
-              Text('Decorations'),
+              const Text('Decorations'),
               const SizedBox(width: 10),
               Switch(
                 value: widget.settings.dialogDecorated,
@@ -193,20 +189,13 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Parent Anchor',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
+          const Text('Parent Anchor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           DropdownButton<WindowPositionerAnchor>(
             isExpanded: true,
             value: _parentAnchor,
             items: [
-              for (WindowPositionerAnchor anchor
-                  in WindowPositionerAnchor.values)
-                DropdownMenuItem(
-                  value: anchor,
-                  child: Text(anchorToString(anchor)),
-                ),
+              for (final WindowPositionerAnchor anchor in WindowPositionerAnchor.values)
+                DropdownMenuItem(value: anchor, child: Text(anchorToString(anchor))),
             ],
             onChanged: (WindowPositionerAnchor? value) {
               if (value != null) {
@@ -217,18 +206,12 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             },
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Child Anchor',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
+          const Text('Child Anchor', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           DropdownButton<WindowPositionerAnchor>(
             isExpanded: true,
             value: _childAnchor,
             items: WindowPositionerAnchor.values.map((anchor) {
-              return DropdownMenuItem(
-                value: anchor,
-                child: Text(anchorToString(anchor)),
-              );
+              return DropdownMenuItem(value: anchor, child: Text(anchorToString(anchor)));
             }).toList(),
             onChanged: (WindowPositionerAnchor? value) {
               if (value != null) {
@@ -239,10 +222,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             },
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Offset',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
+          const Text('Offset', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           Row(
             children: [
               Expanded(
@@ -266,10 +246,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Flip',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
+          const Text('Flip', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           Row(
             children: [
               const SizedBox(
@@ -300,10 +277,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Slide',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
+          const Text('Slide', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           Row(
             children: [
               const SizedBox(
@@ -334,10 +308,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Resize',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          ),
+          const Text('Resize', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
           Row(
             children: [
               const SizedBox(
@@ -383,26 +354,21 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           FilledButton(
             onPressed: () {
               widget.settings.regularSize = Size(
-                double.tryParse(_regularWidthController.text) ??
-                    widget.settings.regularSize.width,
+                double.tryParse(_regularWidthController.text) ?? widget.settings.regularSize.width,
                 double.tryParse(_regularHeightController.text) ??
                     widget.settings.regularSize.height,
               );
               widget.settings.dialogSize = Size(
-                double.tryParse(_dialogWidthController.text) ??
-                    widget.settings.dialogSize.width,
-                double.tryParse(_dialogHeightController.text) ??
-                    widget.settings.dialogSize.height,
+                double.tryParse(_dialogWidthController.text) ?? widget.settings.dialogSize.width,
+                double.tryParse(_dialogHeightController.text) ?? widget.settings.dialogSize.height,
               );
 
               widget.settings.positioner = widget.settings.positioner.copyWith(
                 parentAnchor: _parentAnchor,
                 childAnchor: _childAnchor,
                 offset: Offset(
-                  double.tryParse(_offsetDxController.text) ??
-                      widget.settings.positioner.offset.dx,
-                  double.tryParse(_offsetDyController.text) ??
-                      widget.settings.positioner.offset.dy,
+                  double.tryParse(_offsetDxController.text) ?? widget.settings.positioner.offset.dx,
+                  double.tryParse(_offsetDyController.text) ?? widget.settings.positioner.offset.dy,
                 ),
 
                 constraintAdjustment: WindowPositionerConstraintAdjustment(
@@ -425,19 +391,15 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
 
   void _updateRegularSize() {
     widget.settings.regularSize = Size(
-      double.tryParse(_regularWidthController.text) ??
-          widget.settings.regularSize.width,
-      double.tryParse(_regularHeightController.text) ??
-          widget.settings.regularSize.height,
+      double.tryParse(_regularWidthController.text) ?? widget.settings.regularSize.width,
+      double.tryParse(_regularHeightController.text) ?? widget.settings.regularSize.height,
     );
   }
 
   void _updateDialogSize() {
     widget.settings.dialogSize = Size(
-      double.tryParse(_dialogWidthController.text) ??
-          widget.settings.dialogSize.width,
-      double.tryParse(_dialogHeightController.text) ??
-          widget.settings.dialogSize.height,
+      double.tryParse(_dialogWidthController.text) ?? widget.settings.dialogSize.width,
+      double.tryParse(_dialogHeightController.text) ?? widget.settings.dialogSize.height,
     );
   }
 

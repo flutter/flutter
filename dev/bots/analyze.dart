@@ -2189,49 +2189,50 @@ Stream<File> _allFiles(
   String? extension, {
   required int minimumMatches,
 }) async* {
-  final gitFileNamesSet = <String>{};
-  gitFileNamesSet.addAll(
-    (await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)),
-  );
-
   assert(
     extension == null || !extension.startsWith('.'),
     'Extension argument should not start with a period.',
   );
-  final pending = <FileSystemEntity>{Directory(workingDirectory)};
+
+  final List<File> gitFiles = [
+    for (final File f in await _gitFiles(workingDirectory)) File(path.normalize(f.path)),
+  ];
+
+  final Set<String> dartIgnoreDirectories = gitFiles
+      .where((File f) => path.basename(f.path) == '.dartignore')
+      .map((File f) => path.dirname(f.path))
+      .toSet();
+
+  const skipDirectories = {'.git', '.idea', '.gradle', '.dart_tool', 'build'};
+
   var matches = 0;
-  while (pending.isNotEmpty) {
-    final FileSystemEntity entity = pending.first;
-    pending.remove(entity);
-    if (path.extension(entity.path) == '.tmpl') {
+  for (final file in gitFiles) {
+    if (extension != null && path.extension(file.path) != '.$extension') {
       continue;
     }
-    if (entity is File) {
-      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path))) {
-        continue;
-      }
-      if (_isGeneratedPluginRegistrant(entity)) {
-        continue;
-      }
-      switch (path.basename(entity.path)) {
-        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
-          continue;
-      }
-      if (extension == null || path.extension(entity.path) == '.$extension') {
-        matches += 1;
-        yield entity;
-      }
-    } else if (entity is Directory) {
-      if (File(path.join(entity.path, '.dartignore')).existsSync()) {
-        continue;
-      }
-      switch (path.basename(entity.path)) {
-        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
-          continue;
-      }
-      pending.addAll(entity.listSync());
+    if (dartIgnoreDirectories.any((String d) => path.isWithin(d, file.path))) {
+      continue;
     }
+    final String relativePath = path.relative(file.path, from: workingDirectory);
+    final List<String> components = path.split(relativePath);
+    if (components.any((String c) => skipDirectories.contains(c) || c.endsWith('.tmpl'))) {
+      continue;
+    }
+    if (_isGeneratedPluginRegistrant(file)) {
+      continue;
+    }
+    switch (path.basename(file.path)) {
+      case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
+        continue;
+    }
+    final FileStat stat = file.statSync();
+    if (stat.type != FileSystemEntityType.file) {
+      continue;
+    }
+    matches += 1;
+    yield file;
   }
+
   assert(
     matches >= minimumMatches,
     'Expected to find at least $minimumMatches files with extension ".$extension" in "$workingDirectory", but only found $matches.',
@@ -2572,23 +2573,30 @@ final String _kWindowsRunnerSubPath = path.join('windows', 'runner');
 const String _kProjectNameKey = '{{projectName}}';
 const String _kTmplExt = '.tmpl';
 
-String _getFlutterLicense() {
-  return '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
-      '// Use of this source code is governed by a BSD-style license that can be\n'
-      '// found in the LICENSE file.\n'
-      '\n';
-}
+const String _kFlutterLicense =
+    '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+    '// Use of this source code is governed by a BSD-style license that can be\n'
+    '// found in the LICENSE file.\n'
+    '\n';
 
-String _removeLicenseIfPresent(String fileContents, String license) {
-  if (fileContents.startsWith(license)) {
-    return fileContents.substring(license.length);
+const String _kFlutterLicenseHtml = '''
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+''';
+
+String _removeLicenseIfPresent(String fileContents) {
+  if (fileContents.startsWith(_kFlutterLicense)) {
+    return fileContents.substring(_kFlutterLicense.length);
+  }
+  if (fileContents.contains(_kFlutterLicenseHtml)) {
+    return fileContents.replaceFirst(_kFlutterLicenseHtml, '');
   }
   return fileContents;
 }
 
 Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
   final errors = <String>[];
-  final String license = _getFlutterLicense();
   final String integrationTestsPath = path.join(flutterRoot, _kIntegrationTestsRelativePath);
   final String templatePath = path.join(flutterRoot, _kTemplateRelativePath);
   final Iterable<Directory> subDirs = Directory(
@@ -2620,7 +2628,7 @@ Future<void> verifyIntegrationTestTemplateFiles(String flutterRoot) async {
         ); // Substitute template project name
       }
       String appFileContents = File(appFilePath).readAsLinesSync().join('\n');
-      appFileContents = _removeLicenseIfPresent(appFileContents, license);
+      appFileContents = _removeLicenseIfPresent(appFileContents);
       if (appFileContents != templateFileContents) {
         int indexOfDifference;
         for (
