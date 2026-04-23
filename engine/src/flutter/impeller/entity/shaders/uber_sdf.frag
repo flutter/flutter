@@ -123,6 +123,9 @@ float distanceFromRoundedSuperellipse(vec2 p,
 
   // If the point is within the span of the corner circle's arc,
   // use a circle SDF.
+  // This works because the normals of the circular and superelliptical sections
+  // agree at the transition angle, the total RSE curve is continuous and
+  // the closest point on a continuous curve to a point lies along the normal.
   if (abs(d_theta) < abs(angle_span)) {
     return distanceFromCircle(p - circle_center, radius);
   }
