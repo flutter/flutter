@@ -14,27 +14,20 @@ import 'common.dart';
 
 void main() {
   late TestsCrossImportChecker checker;
-  late Directory testWidgetsDirectory;
   late Directory testCupertinoDirectory;
-
-  // Writes a Material import into the given file.
-  void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
-    file
-      ..createSync(recursive: true)
-      ..writeAsStringSync(importString);
-  }
-
-  File getFile(String filepath, Directory directory) {
-    final String platformFilepath = filepath.replaceAll('/', Platform.isWindows ? r'\' : '/');
-    final int overlapIndex = platformFilepath.lastIndexOf(directory.basename);
-    if (overlapIndex < 0) {
-      throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
-    }
-    final String filename = platformFilepath.substring(
-      overlapIndex + directory.basename.length + 1,
-    );
-    return directory.childFile(filename);
-  }
+  late Directory testAnimationDirectory;
+  late Directory testDartDirectory;
+  late Directory testExamplesDirectory;
+  late Directory testFoundationDirectory;
+  late Directory testGesturesDirectory;
+  late Directory testHarnessDirectory;
+  late Directory testPaintingDirectory;
+  late Directory testPhysicsDirectory;
+  late Directory testRenderingDirectory;
+  late Directory testSchedulerDirectory;
+  late Directory testSemanticsDirectory;
+  late Directory testServicesDirectory;
+  late Directory testWidgetsDirectory;
 
   void buildTestFiles({
     Set<String> excludes = const <String>{},
@@ -43,8 +36,20 @@ void main() {
     Set<String> extraWidgetsImportingCupertino = const <String>{},
   }) {
     final knownFiles = <Directory, Set<String>>{
-      testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
       testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
+      testAnimationDirectory: TestsCrossImportChecker.knownAnimationCrossImports,
+      testDartDirectory: TestsCrossImportChecker.knownDartCrossImports,
+      testExamplesDirectory: TestsCrossImportChecker.knownExamplesCrossImports,
+      testFoundationDirectory: TestsCrossImportChecker.knownFoundationCrossImports,
+      testGesturesDirectory: TestsCrossImportChecker.knownGesturesCrossImports,
+      testHarnessDirectory: TestsCrossImportChecker.knownHarnessCrossImports,
+      testPaintingDirectory: TestsCrossImportChecker.knownPaintingCrossImports,
+      testPhysicsDirectory: TestsCrossImportChecker.knownPhysicsCrossImports,
+      testRenderingDirectory: TestsCrossImportChecker.knownRenderingCrossImports,
+      testSchedulerDirectory: TestsCrossImportChecker.knownSchedulerCrossImports,
+      testSemanticsDirectory: TestsCrossImportChecker.knownSemanticsCrossImports,
+      testServicesDirectory: TestsCrossImportChecker.knownServicesCrossImports,
+      testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
     };
 
     for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
@@ -82,16 +87,30 @@ void main() {
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
 
-    final Directory testsDirectory =
+    final Directory testsDir =
         flutterRoot.childDirectory('packages').childDirectory('flutter').childDirectory('test')
           ..createSync(recursive: true);
-    testWidgetsDirectory = testsDirectory.childDirectory('widgets')..createSync(recursive: true);
-    testsDirectory.childDirectory('material').createSync(recursive: true);
-    testCupertinoDirectory = testsDirectory.childDirectory('cupertino')
-      ..createSync(recursive: true);
+
+    testAnimationDirectory = testsDir.childDirectory('animation')..createSync(recursive: true);
+    testCupertinoDirectory = testsDir.childDirectory('cupertino')..createSync(recursive: true);
+    testDartDirectory = testsDir.childDirectory('dart')..createSync(recursive: true);
+    testExamplesDirectory = testsDir.childDirectory('examples')..createSync(recursive: true);
+    testFoundationDirectory = testsDir.childDirectory('foundation')..createSync(recursive: true);
+    testGesturesDirectory = testsDir.childDirectory('gestures')..createSync(recursive: true);
+    testHarnessDirectory = testsDir.childDirectory('harness')..createSync(recursive: true);
+    // tests/material sits between tests/harness and tests/painting,
+    // but the test does not need a reference to the directory.
+    testsDir.childDirectory('material').createSync(recursive: true);
+    testPaintingDirectory = testsDir.childDirectory('painting')..createSync(recursive: true);
+    testPhysicsDirectory = testsDir.childDirectory('physics')..createSync(recursive: true);
+    testRenderingDirectory = testsDir.childDirectory('rendering')..createSync(recursive: true);
+    testSchedulerDirectory = testsDir.childDirectory('scheduler')..createSync(recursive: true);
+    testSemanticsDirectory = testsDir.childDirectory('semantics')..createSync(recursive: true);
+    testServicesDirectory = testsDir.childDirectory('services')..createSync(recursive: true);
+    testWidgetsDirectory = testsDir.childDirectory('widgets')..createSync(recursive: true);
 
     checker = TestsCrossImportChecker(
-      testsDirectory: testsDirectory,
+      testsDirectory: testsDir,
       flutterRoot: flutterRoot,
       filesystem: fs,
     );
@@ -252,5 +271,37 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
     return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
   } else {
     return buffer.toString();
+  }
+}
+
+File getFile(String filepath, Directory directory) {
+  final String platformFilepath = filepath.replaceAll('/', Platform.isWindows ? r'\' : '/');
+  final int overlapIndex = platformFilepath.lastIndexOf(directory.basename);
+  if (overlapIndex < 0) {
+    throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
+  }
+  final String filename = platformFilepath.substring(overlapIndex + directory.basename.length + 1);
+  return directory.childFile(filename);
+}
+
+/// Writes [importString] into the given file.
+///
+/// The default [importString] is `import 'package:flutter/material.dart';`.
+void writeImport(File file, [String importString = "import 'package:flutter/material.dart';"]) {
+  file
+    ..createSync(recursive: true)
+    ..writeAsStringSync(importString);
+}
+
+/// Writes [importString] into the given [filePaths] in [inDirectory].
+///
+/// The default [importString] is `import 'package:flutter/material.dart';`.
+void writeImportInFiles(
+  Iterable<String> filePaths, {
+  required Directory inDirectory,
+  String importString = "import 'package:flutter/material.dart';",
+}) {
+  for (final filepath in filePaths) {
+    writeImport(getFile(filepath, inDirectory), importString);
   }
 }
