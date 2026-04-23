@@ -14,8 +14,12 @@ import 'common.dart';
 
 void main() {
   late TestsCrossImportChecker checker;
+  late Directory flutterTestDirectory;
 
-  void buildKnownCrossImportTestFiles({Set<String> excludes = const <String>{}}) {
+  void buildKnownCrossImportTestFiles(
+    Map<Directory, Set<String>> knownFiles, {
+    Set<String> excludes = const <String>{},
+  }) {
     for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
         in knownFiles.entries) {
       for (final filepath in files) {
@@ -38,20 +42,22 @@ void main() {
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
 
-    final Directory testsDir =
+    flutterTestDirectory =
         flutterRoot.childDirectory('packages').childDirectory('flutter').childDirectory('test')
           ..createSync(recursive: true);
-    testsDir.childDirectory('material').createSync(recursive: true);
+    flutterTestDirectory.childDirectory('material').createSync(recursive: true);
 
     checker = TestsCrossImportChecker(
-      testsDirectory: testsDir,
+      testsDirectory: flutterTestDirectory,
       flutterRoot: flutterRoot,
       filesystem: fs,
     );
   });
 
   test('when only all knowns have cross imports', () async {
-    buildKnownCrossImportTestFiles();
+    final checkerDirectories = _CrossImportsTestDirectories(flutterTestDirectory);
+
+    buildKnownCrossImportTestFiles(checkerDirectories.knownFiles);
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
