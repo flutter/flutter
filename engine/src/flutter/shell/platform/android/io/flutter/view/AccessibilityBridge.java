@@ -3061,7 +3061,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         inverseTransform = new float[16];
       }
 
-      assert hitTestTransform != null;
       if (hitTestTransform == null) {
         hitTestTransform = new float[16];
         Matrix.setIdentityM(hitTestTransform, 0);
