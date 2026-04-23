@@ -84,7 +84,11 @@ void main() {
     });
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
-      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.easeOut);
+      final curvedAnimation = ReversibleCurvedAnimation(
+        parent: controller,
+        curve: Curves.easeOut,
+        reverseCurve: null,
+      );
       addTearDown(curvedAnimation.dispose);
       final Animation<Decoration> curvedDecorationAnimation = decorationTween.animate(
         curvedAnimation,
