@@ -157,6 +157,9 @@ class WebAssetServer implements AssetReader {
       moduleToLibrary.add(<String, Object>{
         // Use only the path for the module so the app can still find it even if
         // it's in a different domain than the server.
+        // TODO(srujzs): We use a `/` prefix to match the path that DWDS gets
+        // when parsing the parsed URL. It may be cleaner to just remove the `/`
+        // in DWDS rather than add it here.
         'src': '/$relativeModulePath',
         'module': metadata.name,
         'libraries': libraries,
