@@ -234,7 +234,7 @@ Future<void> testMain() async {
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
         await matchGoldenFile('${name}_fragment_shader_sampler.png', region: drawRegion);
-      });
+      }, skip: isWimp);
 
       test('drawVertices with image shader', () async {
         final ui.Image image = await generateImage();
@@ -306,7 +306,7 @@ Future<void> testMain() async {
         expect(pngData, isNotNull);
         expect(pngData!.lengthInBytes, isNonZero);
       });
-    }, skip: isWimp); // See https://github.com/flutter/flutter/issues/175371
+    });
   }
 
   emitImageTests('picture_toImage', () {

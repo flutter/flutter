@@ -125,8 +125,12 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for ${expectedOS}_$expectedArch.',
-              'Building native assets for ${expectedOS}_$expectedArch done.',
+              'Running build hooks for ${expectedOS}_$expectedArch.',
+              'Running build hooks for ${expectedOS}_$expectedArch done.',
+              if (buildMode == BuildMode.release) ...<String>[
+                'Running link hooks for ${expectedOS}_$expectedArch.',
+                'Running link hooks for ${expectedOS}_$expectedArch done.',
+              ],
             ]),
           );
           expect(

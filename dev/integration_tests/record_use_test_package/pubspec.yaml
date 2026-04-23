@@ -14,7 +14,7 @@ dependencies:
   hooks: ^1.0.2
   data_assets: ^0.19.6
   record_use: 0.6.0
-  meta: 1.18.0
+  meta: 1.18.2
 
 dev_dependencies:
   flutter_test:
@@ -23,4 +23,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: eblt6v
+# PUBSPEC CHECKSUM: 4e6oin
