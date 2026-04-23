@@ -17,9 +17,6 @@ import '../base/template.dart';
 import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
-import '../commands/build_linux.dart';
-import '../commands/build_macos.dart';
-import '../commands/build_windows.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
@@ -32,9 +29,12 @@ import 'build_appbundle.dart';
 import 'build_bundle.dart';
 import 'build_ios.dart';
 import 'build_ios_framework.dart';
+import 'build_linux.dart';
+import 'build_macos.dart';
 import 'build_macos_framework.dart';
 import 'build_swift_package.dart';
 import 'build_web.dart';
+import 'build_windows.dart';
 import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
