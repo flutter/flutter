@@ -4378,23 +4378,25 @@ mixin ContainerRenderObjectMixin<
 >
     on RenderObject {
   bool _debugUltimatePreviousSiblingOf(ChildType child, {ChildType? equals}) {
-    var childParentData = child.parentData! as ParentDataType;
+    var currentChild = child;
+    var childParentData = currentChild.parentData! as ParentDataType;
     while (childParentData.previousSibling != null) {
-      assert(childParentData.previousSibling != child);
-      child = childParentData.previousSibling!;
-      childParentData = child.parentData! as ParentDataType;
+      assert(childParentData.previousSibling != currentChild);
+      currentChild = childParentData.previousSibling!;
+      childParentData = currentChild.parentData! as ParentDataType;
     }
-    return child == equals;
+    return currentChild == equals;
   }
 
   bool _debugUltimateNextSiblingOf(ChildType child, {ChildType? equals}) {
-    var childParentData = child.parentData! as ParentDataType;
+    var currentChild = child;
+    var childParentData = currentChild.parentData! as ParentDataType;
     while (childParentData.nextSibling != null) {
-      assert(childParentData.nextSibling != child);
-      child = childParentData.nextSibling!;
-      childParentData = child.parentData! as ParentDataType;
+      assert(childParentData.nextSibling != currentChild);
+      currentChild = childParentData.nextSibling!;
+      childParentData = currentChild.parentData! as ParentDataType;
     }
-    return child == equals;
+    return currentChild == equals;
   }
 
   int _childCount = 0;

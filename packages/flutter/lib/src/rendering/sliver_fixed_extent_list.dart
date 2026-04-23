@@ -74,8 +74,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     int index,
   ) {
     if (itemExtentBuilder == null) {
-      itemExtent = this.itemExtent!;
-      return itemExtent * index;
+      final double effectiveItemExtent = this.itemExtent!;
+      return effectiveItemExtent * index;
     } else {
       var offset = 0.0;
       double? itemExtent;
@@ -112,11 +112,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     double itemExtent,
   ) {
     if (itemExtentBuilder == null) {
-      itemExtent = this.itemExtent!;
-      if (itemExtent > 0.0) {
-        final double actual = scrollOffset / itemExtent;
+      final double effectiveItemExtent = this.itemExtent!;
+      if (effectiveItemExtent > 0.0) {
+        final double actual = scrollOffset / effectiveItemExtent;
         final int round = actual.round();
-        if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
+        if ((actual * effectiveItemExtent - round * effectiveItemExtent).abs() < precisionErrorTolerance) {
           return round;
         }
         return actual.floor();
@@ -145,11 +145,11 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     double itemExtent,
   ) {
     if (itemExtentBuilder == null) {
-      itemExtent = this.itemExtent!;
-      if (itemExtent > 0.0) {
-        final double actual = scrollOffset / itemExtent - 1;
+      final double effectiveItemExtent = this.itemExtent!;
+      if (effectiveItemExtent > 0.0) {
+        final double actual = scrollOffset / effectiveItemExtent - 1;
         final int round = actual.round();
-        if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
+        if ((actual * effectiveItemExtent - round * effectiveItemExtent).abs() < precisionErrorTolerance) {
           return math.max(0, round);
         }
         return math.max(0, actual.ceil());
@@ -222,8 +222,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     double itemExtent,
   ) {
     if (itemExtentBuilder == null) {
-      itemExtent = this.itemExtent!;
-      return childManager.childCount * itemExtent;
+      final double effectiveItemExtent = this.itemExtent!;
+      return childManager.childCount * effectiveItemExtent;
     } else {
       var offset = 0.0;
       double? itemExtent;

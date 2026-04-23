@@ -212,8 +212,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
-    overflowHints ??= <DiagnosticsNode>[];
+  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHintsParam) {
+    final List<DiagnosticsNode> overflowHints = overflowHintsParam ?? <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
       overflowHints.add(
         ErrorDescription(

@@ -1140,13 +1140,14 @@ class ContainerLayer extends Layer {
   }
 
   bool _debugUltimateNextSiblingOf(Layer child, {Layer? equals}) {
-    assert(child.attached == attached);
-    while (child._nextSibling != null) {
-      assert(child._nextSibling != child);
-      child = child._nextSibling!;
-      assert(child.attached == attached);
+    Layer currentChild = child;
+    assert(currentChild.attached == attached);
+    while (currentChild._nextSibling != null) {
+      assert(currentChild._nextSibling != currentChild);
+      currentChild = currentChild._nextSibling!;
+      assert(currentChild.attached == attached);
     }
-    return child == equals;
+    return currentChild == equals;
   }
 
   @override

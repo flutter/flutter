@@ -1549,28 +1549,29 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   bool applyMoveTo(double value) {
+    var effectiveValue = value;
     var done = false;
     if (velocity > 0.0) {
-      if (value < metrics.minRange) {
+      if (effectiveValue < metrics.minRange) {
         return true;
       }
-      if (value > metrics.maxRange) {
-        value = metrics.maxRange;
+      if (effectiveValue > metrics.maxRange) {
+        effectiveValue = metrics.maxRange;
         done = true;
       }
     } else if (velocity < 0.0) {
-      if (value > metrics.maxRange) {
+      if (effectiveValue > metrics.maxRange) {
         return true;
       }
-      if (value < metrics.minRange) {
-        value = metrics.minRange;
+      if (effectiveValue < metrics.minRange) {
+        effectiveValue = metrics.minRange;
         done = true;
       }
     } else {
-      value = clampDouble(value, metrics.minRange, metrics.maxRange);
+      effectiveValue = clampDouble(effectiveValue, metrics.minRange, metrics.maxRange);
       done = true;
     }
-    final bool result = super.applyMoveTo(value + metrics.correctionOffset);
+    final bool result = super.applyMoveTo(effectiveValue + metrics.correctionOffset);
     assert(result); // since we tried to pass an in-range value, it shouldn't ever overflow
     return !done;
   }

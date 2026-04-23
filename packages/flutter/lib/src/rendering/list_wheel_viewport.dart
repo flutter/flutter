@@ -1149,6 +1149,7 @@ class RenderListWheelViewport extends RenderBox
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
+    var targetRect = rect;
     if (descendant != null) {
       // Shows the descendant in the selected/center position.
       final RevealedOffset revealedOffset = getOffsetToReveal(descendant, 0.5, rect: rect);
@@ -1157,9 +1158,9 @@ class RenderListWheelViewport extends RenderBox
       } else {
         offset.animateTo(revealedOffset.offset, duration: duration, curve: curve);
       }
-      rect = revealedOffset.rect;
+      targetRect = revealedOffset.rect;
     }
 
-    super.showOnScreen(rect: rect, duration: duration, curve: curve);
+    super.showOnScreen(rect: targetRect, duration: duration, curve: curve);
   }
 }

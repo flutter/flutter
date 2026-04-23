@@ -1594,7 +1594,8 @@ class RenderEditable extends RenderBox
     );
   }
 
-  TextRange? _getNextWord(int offset) {
+  TextRange? _getNextWord(int offsetParam) {
+    int offset = offsetParam;
     while (true) {
       final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
       if (!range.isValid || range.isCollapsed) {
@@ -3151,6 +3152,9 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
       }
     }
 
+    return false;
+  }
+}
     return false;
   }
 }

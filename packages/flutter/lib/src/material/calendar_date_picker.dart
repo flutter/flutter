@@ -838,14 +838,15 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
+    TraversalDirection effectiveTraversalDirection = traversalDirection;
     if (textDirection == TextDirection.rtl) {
-      if (traversalDirection == TraversalDirection.left) {
-        traversalDirection = TraversalDirection.right;
-      } else if (traversalDirection == TraversalDirection.right) {
-        traversalDirection = TraversalDirection.left;
+      if (effectiveTraversalDirection == TraversalDirection.left) {
+        effectiveTraversalDirection = TraversalDirection.right;
+      } else if (effectiveTraversalDirection == TraversalDirection.right) {
+        effectiveTraversalDirection = TraversalDirection.left;
       }
     }
-    return _directionOffset[traversalDirection]!;
+    return _directionOffset[effectiveTraversalDirection]!;
   }
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {

@@ -600,8 +600,9 @@ class _CarouselViewState extends State<CarouselView> {
 
   Widget _buildCarouselItem(int index) {
     // For infinite scrolling, wrap the index to the actual children range.
+    int effectiveIndex = index;
     if (widget.infinite && widget.children.isNotEmpty) {
-      index = index % widget.children.length;
+      effectiveIndex = effectiveIndex % widget.children.length;
     }
     final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
     final ColorScheme colorScheme = ColorScheme.of(context);
@@ -632,7 +633,7 @@ class _CarouselViewState extends State<CarouselView> {
           return null;
         });
 
-    Widget contents = widget.children[index];
+    Widget contents = widget.children[effectiveIndex];
 
     if (widget.enableSplash) {
       contents = Stack(
@@ -642,14 +643,14 @@ class _CarouselViewState extends State<CarouselView> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => widget.onTap?.call(index),
+              onTap: () => widget.onTap?.call(effectiveIndex),
               overlayColor: effectiveOverlayColor,
             ),
           ),
         ],
       );
     } else if (widget.onTap != null) {
-      contents = GestureDetector(onTap: () => widget.onTap!(index), child: contents);
+      contents = GestureDetector(onTap: () => widget.onTap!(effectiveIndex), child: contents);
     }
 
     return Padding(
@@ -1973,17 +1974,18 @@ class CarouselController extends ScrollController {
     }
 
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
+    int effectiveIndex = index;
     if (_carouselState!.widget.itemBuilder != null) {
       final int? itemCount = _carouselState!.widget.itemCount;
-      index = itemCount != null ? index.clamp(0, itemCount - 1) : 0;
+      effectiveIndex = itemCount != null ? effectiveIndex.clamp(0, itemCount - 1) : 0;
     } else {
-      index = index.clamp(0, _carouselState!.widget.children.length - 1);
+      effectiveIndex = effectiveIndex.clamp(0, _carouselState!.widget.children.length - 1);
     }
 
     await Future.wait<void>(<Future<void>>[
       for (final _CarouselPosition position in positions.cast<_CarouselPosition>())
         position.animateTo(
-          _getTargetOffset(position, index, hasFlexWeights),
+          _getTargetOffset(position, effectiveIndex, hasFlexWeights),
           duration: duration,
           curve: curve,
         ),

@@ -136,8 +136,8 @@ class SawTooth extends Curve {
 
   @override
   double transformInternal(double t) {
-    t *= count;
-    return t - t.truncateToDouble();
+    final double countT = t * count;
+    return countT - countT.truncateToDouble();
   }
 
   @override
@@ -179,11 +179,11 @@ class Interval extends Curve {
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    t = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
-    if (t == 0.0 || t == 1.0) {
-      return t;
+    final double clampedT = clampDouble((t - begin) / (end - begin), 0.0, 1.0);
+    if (clampedT == 0.0 || clampedT == 1.0) {
+      return clampedT;
     }
-    return curve.transform(t);
+    return curve.transform(clampedT);
   }
 
   @override
@@ -1066,36 +1066,36 @@ class CatmullRomCurve extends Curve {
       return false;
     }
 
-    controlPoints = <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)];
-    final Offset startHandle = controlPoints[0] * 2.0 - controlPoints[1];
-    final Offset endHandle = controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
-    controlPoints = <Offset>[startHandle, ...controlPoints, endHandle];
+    final List<Offset> pointsWithEnds = <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)];
+    final Offset startHandle = pointsWithEnds[0] * 2.0 - pointsWithEnds[1];
+    final Offset endHandle = pointsWithEnds.last * 2.0 - pointsWithEnds[pointsWithEnds.length - 2];
+    final List<Offset> effectiveControlPoints = <Offset>[startHandle, ...pointsWithEnds, endHandle];
     double lastX = -double.infinity;
-    for (var i = 0; i < controlPoints.length; ++i) {
+    for (var i = 0; i < effectiveControlPoints.length; ++i) {
       if (i > 1 &&
-          i < controlPoints.length - 2 &&
-          (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
+          i < effectiveControlPoints.length - 2 &&
+          (effectiveControlPoints[i].dx <= 0.0 || effectiveControlPoints[i].dx >= 1.0)) {
         assert(() {
           reasons?.add(
             'Control points must have X values between 0.0 and 1.0, exclusive. '
-            'Point $i has an x value (${controlPoints![i].dx}) which is outside the range.',
+            'Point $i has an x value (${effectiveControlPoints[i].dx}) which is outside the range.',
           );
           return true;
         }());
         return false;
       }
-      if (controlPoints[i].dx <= lastX) {
+      if (effectiveControlPoints[i].dx <= lastX) {
         assert(() {
           reasons?.add(
             'Each X coordinate must be greater than the preceding X coordinate '
             '(i.e. must be monotonically increasing in X). Point $i has an x value of '
-            '${controlPoints![i].dx}, which is not greater than $lastX',
+            '${effectiveControlPoints[i].dx}, which is not greater than $lastX',
           );
           return true;
         }());
         return false;
       }
-      lastX = controlPoints[i].dx;
+      lastX = effectiveControlPoints[i].dx;
     }
 
     var success = true;
@@ -1103,7 +1103,7 @@ class CatmullRomCurve extends Curve {
     // An empirical test to make sure things are single-valued in X.
     lastX = -double.infinity;
     const tolerance = 1e-3;
-    final testSpline = CatmullRomSpline(controlPoints, tension: tension);
+    final testSpline = CatmullRomSpline(effectiveControlPoints, tension: tension);
     final double start = testSpline.findInverse(0.0);
     final double end = testSpline.findInverse(1.0);
     final Iterable<Curve2DSample> samplePoints = testSpline.generateSamples(start: start, end: end);
@@ -1258,8 +1258,8 @@ class _DecelerateCurve extends Curve {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
-    t = 1.0 - t;
-    return 1.0 - t * t;
+    final double relativeT = 1.0 - t;
+    return 1.0 - relativeT * relativeT;
   }
 }
 
@@ -1269,14 +1269,14 @@ double _bounce(double t) {
   if (t < 1.0 / 2.75) {
     return 7.5625 * t * t;
   } else if (t < 2 / 2.75) {
-    t -= 1.5 / 2.75;
-    return 7.5625 * t * t + 0.75;
+    final double localT = t - 1.5 / 2.75;
+    return 7.5625 * localT * localT + 0.75;
   } else if (t < 2.5 / 2.75) {
-    t -= 2.25 / 2.75;
-    return 7.5625 * t * t + 0.9375;
+    final double localT = t - 2.25 / 2.75;
+    return 7.5625 * localT * localT + 0.9375;
   }
-  t -= 2.625 / 2.75;
-  return 7.5625 * t * t + 0.984375;
+  final double localT = t - 2.625 / 2.75;
+  return 7.5625 * localT * localT + 0.984375;
 }
 
 /// An oscillating curve that grows in magnitude.
@@ -1339,8 +1339,8 @@ class ElasticInCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    t = t - 1.0;
-    return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
+    final double localT = t - 1.0;
+    return -math.pow(2.0, 10.0 * localT) * math.sin((localT - s) * (math.pi * 2.0) / period);
   }
 
   @override
@@ -1395,11 +1395,11 @@ class ElasticInOutCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    t = 2.0 * t - 1.0;
-    if (t < 0.0) {
-      return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
+    final double localT = 2.0 * t - 1.0;
+    if (localT < 0.0) {
+      return -0.5 * math.pow(2.0, 10.0 * localT) * math.sin((localT - s) * (math.pi * 2.0) / period);
     } else {
-      return math.pow(2.0, -10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
+      return math.pow(2.0, -10.0 * localT) * math.sin((localT - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
     }
   }
 
