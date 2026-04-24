@@ -767,9 +767,9 @@ class Cache {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
       }
-      if (isLocalEngine && artifact is EngineCachedArtifact) {
+      if (isLocalEngine && (artifact is EngineCachedArtifact || artifact.name == 'engine_stamp')) {
         _logger.printTrace(
-          'Artifact $artifact is an engine artifact and local engine is provided, skipping update.',
+          'Artifact $artifact is an engine artifact or stamp and local engine is provided, skipping update.',
         );
         continue;
       }
