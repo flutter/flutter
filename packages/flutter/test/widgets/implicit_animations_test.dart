@@ -811,8 +811,10 @@ void main() {
       value: 1,
       duration: const Duration(seconds: 2),
     );
+    final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
     addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
+    addTearDown(curvedAnimation.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -821,7 +823,7 @@ void main() {
             position: Tween<Offset>(
               begin: Offset.zero,
               end: const Offset(1.5, 0.0),
-            ).animate(CurvedAnimation(parent: controller, curve: Curves.linear)),
+            ).animate(curvedAnimation),
             child: const Placeholder(),
           ),
         ),
