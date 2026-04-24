@@ -97,7 +97,7 @@ void main() {
     test('unknown $libraryName cross import of Material', () async {
       final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
         '/',
-        Platform.isWindows ? r'\' : '/',
+        Platform.pathSeparator,
       );
       final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
         libraryName,
@@ -119,7 +119,7 @@ void main() {
                 '╚═══════════════════════════════════════════════════════════════════════════════',
               ]
               .map((String line) {
-                return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+                return line.replaceAll('/', Platform.pathSeparator);
               })
               .join('\n');
       expect(result, equals('$lines\n'));
@@ -129,7 +129,7 @@ void main() {
     test('unknown $libraryName cross import of Cupertino', () async {
       final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
         '/',
-        Platform.isWindows ? r'\' : '/',
+        Platform.pathSeparator,
       );
       final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
         libraryName,
@@ -155,7 +155,7 @@ void main() {
                 '╚═══════════════════════════════════════════════════════════════════════════════',
               ]
               .map((String line) {
-                return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
+                return line.replaceAll('/', Platform.pathSeparator);
               })
               .join('\n');
       expect(result, equals('$lines\n'));
@@ -196,12 +196,15 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
 }
 
 File getFile(String filepath, Directory directory) {
-  final String platformFilepath = filepath.replaceAll('/', Platform.isWindows ? r'\' : '/');
-  final int overlapIndex = platformFilepath.lastIndexOf(directory.basename);
+  final String platformFilepath = filepath.replaceAll('/', Platform.pathSeparator);
+  final String searchPattern = directory.basename + Platform.pathSeparator;
+  final int overlapIndex = platformFilepath.lastIndexOf(searchPattern);
+
   if (overlapIndex < 0) {
     throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
   }
-  final String filename = platformFilepath.substring(overlapIndex + directory.basename.length + 1);
+
+  final String filename = platformFilepath.substring(overlapIndex + searchPattern.length);
   return directory.childFile(filename);
 }
 
