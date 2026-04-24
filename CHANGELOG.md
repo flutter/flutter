@@ -33,7 +33,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ## Flutter 3.41 Changes
 
 ### [3.41.8](https://github.com/flutter/flutter/releases/tag/3.41.8)
-- [flutter/185150](https://github.com/flutter/flutter/releases/tag/3.41.8) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
+- [flutter/185150](https://github.com/flutter/flutter/issues/185150) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
 
 ### [3.41.7](https://github.com/flutter/flutter/releases/tag/3.41.7)
 - [flutter/184376](https://github.com/flutter/flutter/issues/184376) When building an iOS or macOS app, the build may fail due to git multi-pack-index error.
