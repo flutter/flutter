@@ -266,6 +266,7 @@ class RegularWindowControllerLinux extends RegularWindowController
       setTitle(title);
     }
     _window.setDecorated(decorated);
+    // Force creation as Flutter will try and render to it immediately.
     _window.realize();
 
     final engine = _FlEngine.current();
@@ -458,6 +459,7 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
       _window.setTransientFor(parentWindow);
       _window.setModal(true);
     }
+    // Force creation as Flutter will try and render to it immediately.
     _window.realize();
 
     _windowMonitor = _FlWindowMonitor(
@@ -636,6 +638,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 
     _window.setTypeHint(_GdkWindowTypeHint.tooltip);
     _window.setDecorated(false);
+    // Force creation as Flutter will try and render to it immediately.
     _window.realize();
 
     _windowMonitor = _FlWindowMonitor(
