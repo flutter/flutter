@@ -54,6 +54,12 @@ void main() {
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
+    fakeProcessManager.addCommand(
+      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+    );
+    fakeProcessManager.addCommand(
+      const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
+    );
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
