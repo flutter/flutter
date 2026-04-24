@@ -6379,13 +6379,14 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// ## Layout and Formatting
 ///
-/// Each [RichText] widget represents a single paragraph. Indentations and
-/// outdentations should be managed by adjusting the layout constraints applied
-/// to the [RichText] widget within the parent hierarchy.
+/// Each [RichText] widget represents a single paragraph. Indentation can
+/// be achieved by wrapping the [RichText] widget in a [Padding] widget.
 ///
-/// Numbering and bullet points are not supported natively and must be added
-/// manually within the [TextSpan] tree (e.g., by prefixing a span with "• "
-/// or "1. ").
+/// Numbering and bullet points are not supported natively. While they can be
+/// added manually within the [TextSpan] tree (e.g., by prefixing a span with
+/// "• " or "1. "), this will not produce a hanging indent if the text wraps.
+/// For proper list formatting, consider using a [Row] with the marker and
+/// the [RichText] as separate children.
 ///
 /// For applications requiring complex formatting or easier management of
 /// structural elements like lists and headers, consider using a package that
