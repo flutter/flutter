@@ -2967,6 +2967,24 @@ targets:
         ["devicelab", "linux"]
       task_name: native_assets_android
 
+  - name: Linux_android_emu android_engine_flags_debug_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_engine_flags_debug_test
+
+  - name: Linux_android_emu android_engine_flags_release_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_engine_flags_release_test
+
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
@@ -3861,7 +3879,6 @@ targets:
   - name: Mac_benchmark complex_layout_scroll_perf_macos_impeller__timeline_summary
     presubmit: false
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4289,7 +4306,6 @@ targets:
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       task_name: platform_view_macos_impeller__start_up
 
@@ -5420,6 +5436,7 @@ targets:
       task_name: wide_gamut_macos
     drone_dimensions:
       - gpu=apple
+      - cpu=arm64
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
@@ -5663,7 +5680,6 @@ targets:
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       task_name: new_gallery_macos_impeller__transition_perf
 

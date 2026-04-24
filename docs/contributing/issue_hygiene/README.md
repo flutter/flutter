@@ -83,6 +83,23 @@ showing the bug). Attach such a file or files to the issue itself.
 For legal reasons, we cannot debug problems that require looking at proprietary
 code or, generally, code that is not publicly available.
 
+### Do not post unfiltered AI output
+
+Comments should add value to the issue. Anyone can easily feed an issue URL
+into an agent, so just posting the results of doing that is generally not
+helpful.
+
+AI tools may be helpful for accomplishing specific tasks, such as
+creating reduced test cases or identifying potential duplicate issues,
+but they should be used as tools for helping you contribute to the issue
+rather than replacements for your contribution. For example, if you use an
+AI to create a reduced test case, make sure that you can actually reproduce
+the issue before posting it.
+
+Keep in mind that longer is not better in issues, and AI output is often
+verbose. If you use AI to write portions of an issue report or comment,
+consider editing the results to focus on the important details.
+
 ### Consider posting issues in English
 
 If you are able to read and write English clearly, consider posting your issue
@@ -352,7 +369,7 @@ An issue should be closed if:
 * it is a [duplicate](../../triage/README.md#duplicates).
 * it makes multiple requests which could be addressed independently. Encourage people to file separate bugs for each independent item.
 * it is describing a _solution_ rather than a _problem_. For example, it has no use cases, and the use cases are not obvious, or might have other solutions.
-* it is not [actionable](../../triage/README.md#what-makes-an-issue-actionable) and does not [have unusual symptoms](../../triage/README.md#unactionable-bugs-with-unusual-symptoms). This covers a wide variety of cases, such as invalid bugs, bugs without steps to reproduce, bugs that have become irrelevant, or bugs that are unclear and which the reporter has not offered more details for. It also includes non-catastrophic bugs that cannot be reproduced by anyone but the original reporter. For this latter case, encourage the reporter to attempt to debug the issue themselves, potentially giving suggestions for places where they could instrument the code to find the issue, and invite them to join the Discord for help; then add the `waiting for customer response` label. The issue will get automatically closed after a few weeks if they don't respond.
+* it is not [actionable](../../triage/README.md#what-makes-an-issue-actionable) and does not [have unusual symptoms](../../triage/README.md#unactionable-bugs-with-unusual-symptoms). This covers a wide variety of cases, such as invalid bugs, bugs without steps to reproduce, bugs that have become irrelevant, or bugs that are unclear and which the reporter has not offered more details for. It also includes non-catastrophic bugs that cannot be reproduced by anyone but the original reporter. For this latter case, encourage the reporter to attempt to debug the issue themselves, potentially giving suggestions for places where they could instrument the code to find the issue, and invite them to join the Discord for help; then add the `waiting for response` label. The issue will get automatically closed after a few weeks if they don't respond.
 * it is a feature request that we are unlikely to ever address, and if we did address it, it would not be part of the core SDK (e.g. it would be in a package). (For example, anything in the [`would be a good package` `P3`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22would+be+a+good+package%22+label%3AP3) list is a good candidate for closing without fixing.)
 * we would not accept a fix even if one were to be offered ([e.g. support for platforms at level of support 4](../../about/Values.md#levels-of-support)).
 * it is an issue regarding internal processes, tooling, or infrastructure (i.e. something that our users are not affected by), that we have no plans to get to (e.g. that would be marked P3). (For example, anything in the [`c: tech-debt` `P3`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22c%3A+tech-debt%22+label%3AP3) list is a good candidate for closing.)

@@ -12,11 +12,13 @@ dependencies:
   #
   # For detailed instructions, refer to:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
-  characters: 1.4.1
-  collection: 1.19.1
+  characters: ^1.4.1
+  collection: ^1.19.1
+  # This is not unpinned currently.
+  # See https://github.com/flutter/flutter/issues/185017
   material_color_utilities: 0.13.0
-  meta: 1.18.0
-  vector_math: 2.2.0
+  meta: ^1.18.2
+  vector_math: ^2.3.0
   sky_engine:
     sdk: flutter
 
@@ -40,4 +42,4 @@ dev_dependencies:
   path: any
   platform: any
 
-# PUBSPEC CHECKSUM: sh56t9
+# PUBSPEC CHECKSUM: eh5lk7

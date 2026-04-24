@@ -41,11 +41,13 @@ jobs:
       (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':'))
     steps:
       - name: Remove Label and Leave Comment
-        run: |
-          gh issue edit ${{ github.event.issue.number }} -R flutter/flutter --remove-label "${{ github.event.label.name }}"
-          gh issue comment ${{ github.event.issue.number }} -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
         env:
           GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue edit $ISSUE_NUMBER -R flutter/flutter --remove-label "$LABEL_NAME"
+          gh issue comment $ISSUE_NUMBER -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
 
   cherrypick_to_release:
     name: cherrypick_to_release
@@ -56,22 +58,26 @@ jobs:
       (github.event.pull_request.merged == true)
     steps:
       - name: Get Release Channel
+        env:
+          LABEL_NAME: ${{ github.event.label.name }}
         run: |
-          echo "CHANNEL=$(echo ${{ github.event.label.name }} | cut -d ':' -f 2 | xargs)" >> $GITHUB_ENV
+          echo "CHANNEL=$(echo $LABEL_NAME | cut -d ':' -f 2 | xargs)" >> $GITHUB_ENV
       - name: Get Release Candidate Branch
         run: |
           RELEASE_BRANCH=$(curl https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version)
           echo "RELEASE_BRANCH=$(echo $RELEASE_BRANCH | tr -d '\n')" >> $GITHUB_ENV
       - name: Get Cherry Pick PR
+        env:
+          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
-          echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$(echo $MERGE_COMMIT_SHA)" >> $GITHUB_ENV
       - name: Checkout Flutter Repo
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
         with:
           repository: flutteractionsbot/flutter
           path: flutter
           ref: master
-          persist-credentials: false
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           # Checkout all history commits on master branch, so that the cp commit is a known object
           fetch-depth: 0
       # use same name when checking out branch, since the marketplace action does a hard reset.
@@ -91,7 +97,7 @@ jobs:
         working-directory: ./flutter
         id: create-pr
         run: |
-          git push https://${{ env.GITHUB_TOKEN }}@github.com/flutteractionsbot/flutter cp-${CHANNEL}-${COMMIT_SHA}
+          git push origin cp-${CHANNEL}-${COMMIT_SHA}
           {
             echo 'PR_URL<<EOF'
             gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base ${RELEASE_BRANCH} --label "cp: review" --repo flutter/flutter --head flutteractionsbot:cp-${CHANNEL}-${COMMIT_SHA}
@@ -102,13 +108,14 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
       - name: Leave Comment on CP success
         if: ${{ steps.create-pr.conclusion == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          ACTOR: ${{ github.actor }}
         run: |
           echo $PR_URL
           NEW_PR_NUMBER="${PR_URL##*/}"
-          SUCCESS_MSG=" @${{ github.actor }} please fill out the PR description above, afterwards the release team will review this request."
+          SUCCESS_MSG=" @$ACTOR please fill out the PR description above, afterwards the release team will review this request."
           gh pr comment $NEW_PR_NUMBER -R flutter/flutter -b "${SUCCESS_MSG}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
       - name: Leave Comment on CP failure
         if: ${{ failure() && steps.attempt-cp.conclusion == 'failure' }}
         run: |
