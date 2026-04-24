@@ -939,6 +939,59 @@ void main() {
     expect(tapped, isTrue);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/183833
+  test('performAction dispatches the correct custom action when multiple descendants have different custom actions', () {
+    var outerActivated = false;
+    var innerActivated = false;
+
+    const outerAction = CustomSemanticsAction(label: 'Outer action');
+    const innerAction = CustomSemanticsAction(label: 'Inner action');
+
+    final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+    addTearDown(owner.dispose);
+
+    // Build: root → merge node → outer node → inner node
+    final root = SemanticsNode.root(owner: owner)
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+
+    final mergeNode = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final outerNode = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final innerNode = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+
+    final innerConfig = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+        innerAction: () => innerActivated = true,
+      };
+    final outerConfig = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+        outerAction: () => outerActivated = true,
+      };
+    final mergeConfig = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true;
+    final rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
+
+    innerNode.updateWith(config: innerConfig, childrenInInversePaintOrder: <SemanticsNode>[]);
+    outerNode.updateWith(config: outerConfig, childrenInInversePaintOrder: <SemanticsNode>[innerNode]);
+    mergeNode.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[outerNode]);
+    root.updateWith(config: rootConfig, childrenInInversePaintOrder: <SemanticsNode>[mergeNode]);
+
+    final int innerActionId = CustomSemanticsAction.getIdentifier(innerAction);
+    final int outerActionId = CustomSemanticsAction.getIdentifier(outerAction);
+
+    // Dispatching the inner action should invoke the inner callback, not the outer.
+    owner.performAction(mergeNode.id, SemanticsAction.customAction, innerActionId);
+    expect(innerActivated, isTrue, reason: 'inner action callback should have been called');
+    expect(outerActivated, isFalse, reason: 'outer action callback should not have been called');
+
+    // Dispatching the outer action should invoke the outer callback, not the inner.
+    owner.performAction(mergeNode.id, SemanticsAction.customAction, outerActionId);
+    expect(outerActivated, isTrue, reason: 'outer action callback should have been called');
+    expect(innerActivated, isTrue, reason: 'inner action callback should still be true from before');
+  });
+
   test('Tags show up in debug properties', () {
     final actionNode = SemanticsNode()..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
 

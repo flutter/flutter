@@ -5037,11 +5037,22 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action, [Object? args]) {
     SemanticsNode? result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
         if (node._canPerformAction(action)) {
+          // For customAction, verify the node handles the *specific* custom
+          // action being requested, not just any custom action.  Without this
+          // check the walk stops at the first descendant that owns any custom
+          // action and the wrong (or no) handler is returned when multiple
+          // descendants each register different custom actions.
+          if (action == SemanticsAction.customAction && args is int) {
+            final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(args);
+            if (customAction != null && !node._customSemanticsActions.containsKey(customAction)) {
+              return true; // continue walk — this node doesn't own this specific action
+            }
+          }
           result = node;
           return false; // found node, abort walk
         }
@@ -5062,7 +5073,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action, args);
     if (handler != null) {
       handler(args);
       return;
