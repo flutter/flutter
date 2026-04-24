@@ -10,9 +10,16 @@ import XCTest
 /// A mock `Bundle` subclass.
 ///
 /// By default, lacks the `UILaunchStoryboardName` key in its Info.plist.
-final class MockBundle: Bundle {
+final class MockBundle: Bundle, @unchecked Sendable {
   var mockInfoDictionary: [String: Any]?
   var mockPaths: [String: String] = [:]
+
+  override init(path: String) {
+    // Use the path of the test bundle to ensure valid Bundle.
+    // See: https://stackoverflow.com/questions/34898283/mocking-nsbundle-in-swift-tdd
+    let testBundle = Bundle(for: MockBundle.self)
+    super.init(path: testBundle.bundlePath)!
+  }
 
   override var infoDictionary: [String: Any]? {
     return mockInfoDictionary
@@ -28,7 +35,7 @@ class SplashScreenManagerTests: XCTestCase {
 
   /// Verifies `loadDefaultSplashScreenView` fails when the `UILaunchStoryboardName` key is missing.
   func testLoadDefaultSplashScreenViewFailsWhenNoPlistKey() {
-    let mockBundle = MockBundle()
+    let mockBundle = MockBundle(path: "")
     let manager = SplashScreenManager(bundle: mockBundle)
 
     XCTAssertFalse(manager.loadDefaultSplashScreenView())
@@ -36,7 +43,7 @@ class SplashScreenManagerTests: XCTestCase {
 
   /// Verifies `loadDefaultSplashScreenView` fails when the storyboard file is not in the bundle.
   func testLoadDefaultSplashScreenViewFailsWhenStoryboardNotFound() {
-    let mockBundle = MockBundle()
+    let mockBundle = MockBundle(path: "")
     mockBundle.mockInfoDictionary = ["UILaunchStoryboardName": "LaunchScreen"]
     let manager = SplashScreenManager(bundle: mockBundle)
 
