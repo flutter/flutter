@@ -101,7 +101,7 @@ class SkwasmSurface implements OffscreenSurface {
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
-  Completer<void>? _handledContextLostEvent;
+  late Completer<void>? _handledContextLostEvent;
 
   /// Handles the context lost event by acquiring a new canvas and recreating the
   /// context.
