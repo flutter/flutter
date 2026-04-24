@@ -1094,4 +1094,32 @@ void main() {
     imageStream.maybeDispose();
     expect(mockCodec.disposed, true);
   });
+
+  testWidgets('ImageInfo.isCloneOf returns false when scales differ', (WidgetTester tester) async {
+    final Image image = image20x10.clone();
+    addTearDown(image.dispose);
+
+    final imageInfo1 = ImageInfo(image: image.clone());
+    addTearDown(imageInfo1.dispose);
+    final imageInfo2 = ImageInfo(image: image.clone(), scale: 2.0);
+    addTearDown(imageInfo2.dispose);
+
+    // These should NOT be considered clones because their scales differ
+    expect(imageInfo1.isCloneOf(imageInfo2), isFalse);
+  });
+
+  testWidgets('ImageInfo.isCloneOf returns true when all properties match', (
+    WidgetTester tester,
+  ) async {
+    final Image image = image20x10.clone();
+    addTearDown(image.dispose);
+
+    final imageInfo1 = ImageInfo(image: image.clone(), scale: 2.0);
+    addTearDown(imageInfo1.dispose);
+    final imageInfo2 = ImageInfo(image: image.clone(), scale: 2.0);
+    addTearDown(imageInfo2.dispose);
+
+    // These should be considered clones because all properties match
+    expect(imageInfo1.isCloneOf(imageInfo2), isTrue);
+  });
 }
