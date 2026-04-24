@@ -172,8 +172,8 @@ void BM_SyncOverhead(benchmark::State& state, BackendType backend_type) {
   }
 }
 
-// Render an empty DisplayList to check the overhead of the RenderDisplayList
-// method.
+// Render an empty DisplayList to check the overhead of just calling the
+// DlSurfaceInstance::RenderDisplayList method even with no work to do.
 void BM_EmptyDisplayList(benchmark::State& state, BackendType backend_type) {
   auto surface_provider = DlSurfaceProvider::Create(backend_type);
 
@@ -185,6 +185,29 @@ void BM_EmptyDisplayList(benchmark::State& state, BackendType backend_type) {
   surface->FlushSubmitCpuSync();
 
   DisplayListBuilder builder;
+  auto display_list = builder.Build();
+
+  // We only want to time the surface Sync.
+  for ([[maybe_unused]] auto _ : state) {
+    surface->RenderDisplayList(display_list);
+    surface->FlushSubmitCpuSync();
+  }
+}
+
+// Render a DisplayList with a single tiny 1x1 rect to check the overhead of
+// processing a DisplayList with minimal non-empty contents.
+void BM_SingleOpDisplayList(benchmark::State& state, BackendType backend_type) {
+  auto surface_provider = DlSurfaceProvider::Create(backend_type);
+
+  size_t length = state.range(0);
+
+  surface_provider->InitializeSurface(length, length);
+  auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
+
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), DlPaint());
   auto display_list = builder.Build();
 
   // We only want to time the surface Sync.
@@ -1619,6 +1642,14 @@ constexpr int kAAStroke10Primitive =
       ->UseRealTime()                                                        \
       ->Unit(benchmark::kNanosecond);
 
+#define BENCHMARK_PRIMITIVE_SINGLE_OP_DISPLAY_LIST_OVERHEAD(BACKEND)         \
+  BENCHMARK_CAPTURE(BM_SingleOpDisplayList, BACKEND,                         \
+                    BackendType::k##BACKEND)                                 \
+      ->RangeMultiplier(4)                                                   \
+      ->Range(16, 1024)                                                      \
+      ->UseRealTime()                                                        \
+      ->Unit(benchmark::kNanosecond);
+
 #define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
   BENCHMARK_CAPTURE(BM_Draw##TYPE, ATTRIBUTES/BACKEND,                       \
                     BackendType::k##BACKEND,                                 \
@@ -1640,6 +1671,7 @@ constexpr int kAAStroke10Primitive =
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
   BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                                 \
   BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)                   \
+  BENCHMARK_PRIMITIVE_SINGLE_OP_DISPLAY_LIST_OVERHEAD(BACKEND)               \
   DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Rect)                              \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Oval)                              \
