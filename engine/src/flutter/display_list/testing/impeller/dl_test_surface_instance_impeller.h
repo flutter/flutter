@@ -56,7 +56,9 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   std::shared_ptr<impeller::RenderTarget> target_holder_;
   impeller::AiksContext aiks_context_;
 
-  const impeller::RenderTarget& GetRenderTarget() const;
+  inline const impeller::RenderTarget& GetRenderTarget() const;
+
+  inline void Flush();
 
   void DoRenderDisplayList(const sk_sp<DisplayList>& display_list);
 

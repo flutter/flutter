@@ -26,8 +26,8 @@ DlSurfaceInstanceImpeller::DlSurfaceInstanceImpeller(
 
 DlSurfaceInstanceImpeller::~DlSurfaceInstanceImpeller() = default;
 
-const impeller::RenderTarget& DlSurfaceInstanceImpeller::GetRenderTarget()
-    const {
+inline const impeller::RenderTarget&
+DlSurfaceInstanceImpeller::GetRenderTarget() const {
   if (surface_) {
     return surface_->GetRenderTarget();
   }
@@ -38,8 +38,10 @@ const impeller::RenderTarget& DlSurfaceInstanceImpeller::GetRenderTarget()
 }
 
 void DlSurfaceInstanceImpeller::Clear(const DlColor& color) {
-  // Clear whatever is in the builder as it is now irrelevant.
-  (void)builder_.Build();
+  if (!builder_.IsEmpty()) {
+    // Clear whatever is in the builder as it is now irrelevant.
+    (void)builder_.Build();
+  }
   builder_.Clear(color);
   DoRenderDisplayList(builder_.Build());
 }
@@ -50,25 +52,33 @@ DlCanvas* DlSurfaceInstanceImpeller::GetCanvas() {
 
 void DlSurfaceInstanceImpeller::RenderDisplayList(
     const sk_sp<DisplayList>& display_list) {
-  DoRenderDisplayList(builder_.Build());
+  Flush();
   DoRenderDisplayList(display_list);
 }
 
 void DlSurfaceInstanceImpeller::FlushSubmitCpuSync() {
-  DoRenderDisplayList(builder_.Build());
+  Flush();
+  if (!context_->FinishQueue()) {
+    FML_LOG(ERROR) << "Impeller backend did not implement FinishQueue";
+    FML_UNREACHABLE();
+  }
+}
+
+inline void DlSurfaceInstanceImpeller::Flush() {
+  if (!builder_.IsEmpty()) {
+    // Render anything accumulated previously by making calls on GetCanvas().
+    DoRenderDisplayList(builder_.Build());
+  }
 }
 
 void DlSurfaceInstanceImpeller::DoRenderDisplayList(
     const sk_sp<DisplayList>& display_list) {
-  if (display_list->GetRecordCount() > 0) {
-    impeller::RenderToTarget(aiks_context_.GetContentContext(),
-                             GetRenderTarget(), display_list,
-                             display_list->GetBounds(), false, false);
-    if (!context_->FinishQueue()) {
-      FML_LOG(ERROR) << "Impeller backend did not implement FinishQueue";
-      FML_UNREACHABLE();
-    }
-  }
+  // RenderToTarget requires us to pass in a cull_rect, but we don't want
+  // benchmarks to do extra overhead for culling, so we make a large enough
+  // cull rect that the dispatcher decides to do a regular sequential dispatch.
+  DlRect cull_rect = display_list->GetBounds().Expand(1.0f);
+  impeller::RenderToTarget(aiks_context_.GetContentContext(), GetRenderTarget(),
+                           display_list, cull_rect, false, false);
 }
 
 bool DlSurfaceInstanceImpeller::SnapshotToFile(std::string& filename) const {

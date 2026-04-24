@@ -154,6 +154,46 @@ constexpr size_t kFixedCanvasSize = 1024;
 
 }  // namespace
 
+// Perform just a surface sync on each iteration to determine how much
+// overhead the "Flush and Sync" operation costs.
+void BM_SyncOverhead(benchmark::State& state, BackendType backend_type) {
+  auto surface_provider = DlSurfaceProvider::Create(backend_type);
+
+  size_t length = state.range(0);
+
+  surface_provider->InitializeSurface(length, length);
+  auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
+
+  // We only want to time the surface Sync.
+  for ([[maybe_unused]] auto _ : state) {
+    surface->FlushSubmitCpuSync();
+  }
+}
+
+// Render an empty DisplayList to check the overhead of the RenderDisplayList
+// method.
+void BM_EmptyDisplayList(benchmark::State& state, BackendType backend_type) {
+  auto surface_provider = DlSurfaceProvider::Create(backend_type);
+
+  size_t length = state.range(0);
+
+  surface_provider->InitializeSurface(length, length);
+  auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
+
+  DisplayListBuilder builder;
+  auto display_list = builder.Build();
+
+  // We only want to time the surface Sync.
+  for ([[maybe_unused]] auto _ : state) {
+    surface->RenderDisplayList(display_list);
+    surface->FlushSubmitCpuSync();
+  }
+}
+
 // Draw a series of diagonal lines across a square canvas of width/height of
 // the length requested. The lines will start from the top left corner to the
 // bottom right corner, and move from left to right (at the top) and from right
@@ -1565,6 +1605,20 @@ constexpr int kAAHairlinePrimitive =
 constexpr int kAAStroke10Primitive =
     kAntiAliasing | kStrokedStyle | kWideStroke10;
 
+#define BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                           \
+  BENCHMARK_CAPTURE(BM_SyncOverhead, BACKEND, BackendType::k##BACKEND)       \
+      ->RangeMultiplier(4)                                                   \
+      ->Range(16, 1024)                                                      \
+      ->UseRealTime()                                                        \
+      ->Unit(benchmark::kNanosecond);
+
+#define BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)             \
+  BENCHMARK_CAPTURE(BM_EmptyDisplayList, BACKEND, BackendType::k##BACKEND)   \
+      ->RangeMultiplier(4)                                                   \
+      ->Range(16, 1024)                                                      \
+      ->UseRealTime()                                                        \
+      ->Unit(benchmark::kNanosecond);
+
 #define DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, ATTRIBUTES)                 \
   BENCHMARK_CAPTURE(BM_Draw##TYPE, ATTRIBUTES/BACKEND,                       \
                     BackendType::k##BACKEND,                                 \
@@ -1584,6 +1638,8 @@ constexpr int kAAStroke10Primitive =
   DRAW_BENCHMARK_PRIMITIVES(BACKEND, TYPE, AAStroke10)                       \
 
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
+  BENCHMARK_PRIMITIVE_SYNC_OVERHEAD(BACKEND)                                 \
+  BENCHMARK_PRIMITIVE_EMPTY_DISPLAY_LIST_OVERHEAD(BACKEND)                   \
   DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                                    \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Rect)                              \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, Oval)                              \
