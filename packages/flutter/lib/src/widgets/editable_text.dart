@@ -125,7 +125,7 @@ int _graphemeIndexToCodeUnitOffset(String text, int graphemeIndex) {
     return 0;
   }
   var offset = 0;
-  final characters = text.characters.toList();
+  final List<String> characters = text.characters.toList();
   for (var i = 0; i < characters.length; i++) {
     if (i == graphemeIndex) {
       return offset;
