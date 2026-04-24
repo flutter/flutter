@@ -992,6 +992,59 @@ void main() {
     expect(innerActivated, isTrue, reason: 'inner action callback should still be true from before');
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/183833
+  // Covers the case where the merge root itself owns a custom action that is
+  // different from the one being dispatched.  The outer guard must not stop
+  // the search prematurely just because the root has *some* custom action.
+  test('performAction walks into descendants when merge root has a different custom action', () {
+    var rootActivated = false;
+    var childActivated = false;
+
+    const rootAction = CustomSemanticsAction(label: 'Root action');
+    const childAction = CustomSemanticsAction(label: 'Child action');
+
+    final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+    addTearDown(owner.dispose);
+
+    // Build: root → merge node (has rootAction) → child node (has childAction)
+    final root = SemanticsNode.root(owner: owner)
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+
+    final mergeNode = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final childNode = SemanticsNode()..rect = const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+
+    final childConfig = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+        childAction: () => childActivated = true,
+      };
+    final mergeConfig = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true
+      ..customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
+        rootAction: () => rootActivated = true,
+      };
+    final rootConfig = SemanticsConfiguration()..isSemanticBoundary = true;
+
+    childNode.updateWith(config: childConfig, childrenInInversePaintOrder: <SemanticsNode>[]);
+    mergeNode.updateWith(config: mergeConfig, childrenInInversePaintOrder: <SemanticsNode>[childNode]);
+    root.updateWith(config: rootConfig, childrenInInversePaintOrder: <SemanticsNode>[mergeNode]);
+
+    final int rootActionId = CustomSemanticsAction.getIdentifier(rootAction);
+    final int childActionId = CustomSemanticsAction.getIdentifier(childAction);
+
+    // Dispatching childAction must reach the child even though the merge root
+    // itself also has a custom action (rootAction).
+    owner.performAction(mergeNode.id, SemanticsAction.customAction, childActionId);
+    expect(childActivated, isTrue, reason: 'child action callback should have been called');
+    expect(rootActivated, isFalse, reason: 'root action callback should not have been called');
+
+    // Dispatching rootAction must stay on the merge root node.
+    owner.performAction(mergeNode.id, SemanticsAction.customAction, rootActionId);
+    expect(rootActivated, isTrue, reason: 'root action callback should have been called');
+    expect(childActivated, isTrue, reason: 'child action callback should still be true from before');
+  });
+
   test('Tags show up in debug properties', () {
     final actionNode = SemanticsNode()..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
 

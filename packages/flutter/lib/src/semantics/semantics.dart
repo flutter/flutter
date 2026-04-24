@@ -5039,20 +5039,32 @@ class SemanticsOwner extends ChangeNotifier {
 
   SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action, [Object? args]) {
     SemanticsNode? result = _nodes[id];
-    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
+
+    // For SemanticsAction.customAction the requested action ID is carried in
+    // args.  Resolve it once here so both the outer guard and the descendant
+    // walk can check the *specific* action rather than any custom action.
+    final CustomSemanticsAction? requestedCustomAction =
+        (action == SemanticsAction.customAction && args is int)
+            ? CustomSemanticsAction.getAction(args)
+            : null;
+
+    // Returns true only when [node] can handle the specific action being
+    // requested.  For customAction, _canPerformAction alone is insufficient
+    // because it returns true for any node that owns *any* custom action —
+    // we must also confirm the node owns the particular requested action.
+    bool nodeHandlesAction(SemanticsNode node) {
+      if (!node._canPerformAction(action)) {
+        return false;
+      }
+      if (requestedCustomAction != null) {
+        return node._customSemanticsActions.containsKey(requestedCustomAction);
+      }
+      return true;
+    }
+
+    if (result != null && result.isPartOfNodeMerging && !nodeHandlesAction(result)) {
       result._visitDescendants((SemanticsNode node) {
-        if (node._canPerformAction(action)) {
-          // For customAction, verify the node handles the *specific* custom
-          // action being requested, not just any custom action.  Without this
-          // check the walk stops at the first descendant that owns any custom
-          // action and the wrong (or no) handler is returned when multiple
-          // descendants each register different custom actions.
-          if (action == SemanticsAction.customAction && args is int) {
-            final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(args);
-            if (customAction != null && !node._customSemanticsActions.containsKey(customAction)) {
-              return true; // continue walk — this node doesn't own this specific action
-            }
-          }
+        if (nodeHandlesAction(node)) {
           result = node;
           return false; // found node, abort walk
         }
