@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DatePickerUseCase extends UseCase {
-  DatePickerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  DatePickerUseCase();
 
   @override
   String get name => 'DatePicker';
 
   @override
   String get route => '/date-picker';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const _MainWidget();

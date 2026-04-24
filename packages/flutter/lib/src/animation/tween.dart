@@ -530,6 +530,9 @@ class ConstantTween<T> extends Tween<T> {
 /// This class differs from [CurvedAnimation] in that [CurvedAnimation] applies
 /// a curve to an existing [Animation] object whereas [CurveTween] can be
 /// chained with another [Tween] prior to receiving the underlying [Animation].
+/// Unlike [CurvedAnimation], a [CurveTween] does not add listeners or hold
+/// state, so it does not need to be disposed.
+///
 /// ([CurvedAnimation] also has the additional ability of having different
 /// curves when the animation is going forward vs when it is going backward,
 /// which can be useful in some scenarios.)

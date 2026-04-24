@@ -7,13 +7,16 @@ import 'package:flutter/material.dart';
 import 'use_cases.dart';
 
 class TabBarViewUseCase extends UseCase {
-  TabBarViewUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  TabBarViewUseCase();
 
   @override
   String get name => 'TabBarView';
 
   @override
   String get route => '/tab-bar-view';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const TabBarViewExample();

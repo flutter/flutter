@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/display_list/dl_image_impeller.h"
-
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
 namespace impeller {
@@ -14,8 +14,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
   if (!texture) {
     return nullptr;
   }
-  return sk_sp<DlImageImpeller>(
-      new DlImageImpeller(std::move(texture), owning_context));
+  return sk_make_sp<DlImageImpellerTexture>(std::move(texture), owning_context);
 }
 
 sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
@@ -52,50 +51,65 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
   return impeller::DlImageImpeller::Make(snapshot->texture);
 }
 
-DlImageImpeller::DlImageImpeller(std::shared_ptr<Texture> texture,
-                                 OwningContext owning_context)
+std::shared_ptr<Texture> DlImageImpeller::GetCachedTexture(
+    const ContentContext& renderer) const {
+  auto texture = renderer.GetCachedTexture(this);
+  if (texture) {
+    return texture;
+  }
+  texture = GetImpellerTexture(renderer.GetContext());
+  renderer.SetCachedTexture(this, texture);
+  return texture;
+}
+
+DlImageImpellerTexture::DlImageImpellerTexture(std::shared_ptr<Texture> texture,
+                                               OwningContext owning_context)
     : texture_(std::move(texture)), owning_context_(owning_context) {}
 
 // |DlImage|
-DlImageImpeller::~DlImageImpeller() = default;
+DlImageImpellerTexture::~DlImageImpellerTexture() = default;
 
 // |DlImage|
-sk_sp<SkImage> DlImageImpeller::skia_image() const {
-  return nullptr;
-};
-
-// |DlImage|
-std::shared_ptr<impeller::Texture> DlImageImpeller::impeller_texture() const {
+std::shared_ptr<impeller::Texture> DlImageImpellerTexture::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   return texture_;
 }
 
 // |DlImage|
-bool DlImageImpeller::isOpaque() const {
+flutter::DlColorSpace DlImageImpellerTexture::GetColorSpace() const {
+  if (!texture_) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  switch (texture_->GetTextureDescriptor().format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+    case impeller::PixelFormat::kR16G16B16A16Float:
+      return flutter::DlColorSpace::kExtendedSRGB;
+    default:
+      return flutter::DlColorSpace::kSRGB;
+  }
+}
+
+// |DlImage|
+bool DlImageImpellerTexture::isOpaque() const {
   // Impeller doesn't currently implement opaque alpha types.
   return false;
 }
 
 // |DlImage|
-bool DlImageImpeller::isTextureBacked() const {
-  // Impeller textures are always ... textures :/
-  return true;
-}
-
-// |DlImage|
-bool DlImageImpeller::isUIThreadSafe() const {
+bool DlImageImpellerTexture::isUIThreadSafe() const {
   // Impeller textures are always thread-safe
   return true;
 }
 
 // |DlImage|
-flutter::DlISize DlImageImpeller::GetSize() const {
+flutter::DlISize DlImageImpellerTexture::GetSize() const {
   // texture |GetSize()| returns a 64-bit size, but we need a 32-bit size,
   // so we need to convert to DlISize (the 32-bit variant) either way.
   return texture_ ? flutter::DlISize(texture_->GetSize()) : flutter::DlISize();
 }
 
 // |DlImage|
-size_t DlImageImpeller::GetApproximateByteSize() const {
+size_t DlImageImpellerTexture::GetApproximateByteSize() const {
   auto size = sizeof(*this);
   if (texture_) {
     size += texture_->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
