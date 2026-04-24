@@ -305,8 +305,13 @@ vec2 filledSDF(vec2 p) {
     sdf = distanceFromRect(p, frag_info.size);
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
-  } else {  // Rounded Rect
+  } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+  } else {
+    sdf = distanceFromRoundedSuperellipse(
+        p, frag_info.size, frag_info.superellipse_degree,
+        frag_info.corner_angle_span, frag_info.corner_circle_center,
+        frag_info.radii.x);
   }
   return vec2(sdf, pixelSize(sdf));
 }
