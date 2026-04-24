@@ -277,20 +277,20 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The binding sets this to true when the view is added, after a hot
   /// reload, and when the app returns from a backgrounded lifecycle state.
   /// It is cleared after a successful composite in a non-warm-up frame.
-  bool get requiresComposite => _requiresCompositing;
+  bool get requiresCompositing => _requiresCompositing;
   bool _requiresCompositing = false;
 
   /// Marks this view as requiring a composite on the next frame even if no
   /// descendant render objects are dirty.
-  void markRequiresComposite() {
+  void markRequiresCompositing() {
     _requiresCompositing = true;
   }
 
-  /// Clears the [requiresComposite] flag.
+  /// Clears the [requiresCompositing] flag.
   ///
   /// Called by the binding once this view has been composited in a
   /// non-warm-up frame.
-  void clearRequiresComposite() {
+  void clearRequiresCompositing() {
     _requiresCompositing = false;
   }
 
