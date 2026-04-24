@@ -6379,14 +6379,13 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// ## Layout and Formatting
 ///
-/// Each [RichText] widget represents a single paragraph.
+/// Each [RichText] widget represents a single paragraph. Indentations and
+/// outdentations should be managed by adjusting the layout constraints applied
+/// to the [RichText] widget within the parent hierarchy.
 ///
-/// To create indentations or outdentations, wrap the [RichText] widget in a
-/// [Padding] widget and adjust the horizontal padding values accordingly.
-///
-/// Common text features such as numbered lists or bullet points are not
-/// supported automatically and must be added manually within the [TextSpan]
-/// tree (e.g., by prefixing a span with "• " or "1. ").
+/// Numbering and bullet points are not supported natively and must be added
+/// manually within the [TextSpan] tree (e.g., by prefixing a span with "• "
+/// or "1. ").
 ///
 /// For applications requiring complex formatting or easier management of
 /// structural elements like lists and headers, consider using a package that
@@ -6451,7 +6450,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///    [DefaultTextStyle] to a single string.
 ///  * [Text.rich], a const text widget that provides similar functionality
 ///    as [RichText]. [Text.rich] will inherit [TextStyle] from [DefaultTextStyle].
-///  * [SelectableRegion], widget that provides an overview of the selection system.
+///  * [SelectableRegion], a widget that provides an overview of the selection system.
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
