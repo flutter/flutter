@@ -244,7 +244,7 @@ void main() {
       expect(await cache.isUpToDate(), isTrue);
     });
 
-    testWithoutContext('should update cached artifacts which are not up to date', () async {
+    testUsingContext('should update cached artifacts which are not up to date', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -327,7 +327,7 @@ void main() {
       },
     );
 
-    testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
+    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup(
         'storage.googleapis.com',
       )).first;
