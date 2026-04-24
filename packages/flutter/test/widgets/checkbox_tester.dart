@@ -55,6 +55,13 @@ class TestCheckbox extends StatelessWidget {
     }
   }
 
+  // Matches the reported size of Material's Checkbox with the default
+  // MaterialTapTargetSize.padded (kMinInteractiveDimension = 48.0). The 18×18
+  // visible box is centered in the 48×48 tap target, which is what pre-
+  // migration goldens and inline WidgetSpan layouts were calibrated against.
+  static const double _tapTargetSize = 48.0;
+  static const double _boxSize = 18.0;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -65,12 +72,18 @@ class TestCheckbox extends StatelessWidget {
         mixed: tristate && value == null,
         enabled: _enabled,
         child: SizedBox(
-          width: 18.0,
-          height: 18.0,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(),
-              color: value ?? false ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+          width: _tapTargetSize,
+          height: _tapTargetSize,
+          child: Center(
+            child: SizedBox(
+              width: _boxSize,
+              height: _boxSize,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  color: value ?? false ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                ),
+              ),
             ),
           ),
         ),
