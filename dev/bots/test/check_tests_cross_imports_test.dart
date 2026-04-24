@@ -90,7 +90,7 @@ void main() {
     });
 
     test('unknown $libraryName cross import of Material', () async {
-      final String extra = 'packages/flutter/$libraryName/foo_test.dart'.replaceAll(
+      final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
         '/',
         Platform.isWindows ? r'\' : '/',
       );
@@ -106,7 +106,7 @@ void main() {
       final String lines =
           <String>[
                 '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-                '║ The following test in $libraryName has a disallowed import of Material. Refactor it or move it to Material.',
+                '║ The following test in packages/$libraryName has a disallowed import of Material. Refactor it or move it to Material.',
                 '║   $extra',
                 '╚═══════════════════════════════════════════════════════════════════════════════',
               ]
@@ -119,7 +119,7 @@ void main() {
     });
 
     test('unknown $libraryName cross import of Cupertino', () async {
-      final String extra = 'packages/flutter/$libraryName/foo_test.dart'.replaceAll(
+      final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
         '/',
         Platform.isWindows ? r'\' : '/',
       );
@@ -139,7 +139,7 @@ void main() {
       final String lines =
           <String>[
                 '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-                '║ The following test in $libraryName has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+                '║ The following test in packages/$libraryName has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
                 '║   $extra',
                 '╚═══════════════════════════════════════════════════════════════════════════════',
               ]
@@ -149,7 +149,7 @@ void main() {
               .join('\n');
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
-    }, skip: libraryName == 'test/cupertino'); // [intended]: Cupertino can import itself
+    }, skip: libraryName == 'flutter/test/cupertino'); // [intended]: Cupertino can import itself
   }
 }
 
@@ -297,20 +297,20 @@ class _CrossImportsTestDirectories {
 
   Directory testFilesDirectoryFor(String libraryName) {
     return switch (libraryName) {
-      'test/animation' => testAnimationDirectory,
-      'test/cupertino' => testCupertinoDirectory,
-      'test/dart' => testDartDirectory,
-      'test/examples' => testExamplesDirectory,
-      'test/foundation' => testFoundationDirectory,
-      'test/gestures' => testGesturesDirectory,
-      'test/harness' => testHarnessDirectory,
-      'test/painting' => testPaintingDirectory,
-      'test/physics' => testPhysicsDirectory,
-      'test/rendering' => testRenderingDirectory,
-      'test/scheduler' => testSchedulerDirectory,
-      'test/semantics' => testSemanticsDirectory,
-      'test/services' => testServicesDirectory,
-      'test/widgets' => testWidgetsDirectory,
+      'flutter/test/animation' => testAnimationDirectory,
+      'flutter/test/cupertino' => testCupertinoDirectory,
+      'flutter/test/dart' => testDartDirectory,
+      'flutter/test/examples' => testExamplesDirectory,
+      'flutter/test/foundation' => testFoundationDirectory,
+      'flutter/test/gestures' => testGesturesDirectory,
+      'flutter/test/harness' => testHarnessDirectory,
+      'flutter/test/painting' => testPaintingDirectory,
+      'flutter/test/physics' => testPhysicsDirectory,
+      'flutter/test/rendering' => testRenderingDirectory,
+      'flutter/test/scheduler' => testSchedulerDirectory,
+      'flutter/test/semantics' => testSemanticsDirectory,
+      'flutter/test/services' => testServicesDirectory,
+      'flutter/test/widgets' => testWidgetsDirectory,
       _ => throw ArgumentError('Unknown library name: $libraryName'),
     };
   }
@@ -324,19 +324,19 @@ class _CrossImportsTestDirectories {
 // - the actual known cross imports list for that library
 // dart format off
 final crossImportsTestCases = <(String, String, Set<String>)>[
-  ('test/animation', 'knownAnimationCrossImports', TestsCrossImportChecker.knownAnimationCrossImports),
-  ('test/cupertino', 'knownCupertinoCrossImports', TestsCrossImportChecker.knownCupertinoCrossImports),
-  ('test/dart', 'knownDartCrossImports', TestsCrossImportChecker.knownDartCrossImports),
-  ('test/examples', 'knownExamplesCrossImports', TestsCrossImportChecker.knownExamplesCrossImports),
-  ('test/foundation', 'knownFoundationCrossImports', TestsCrossImportChecker.knownFoundationCrossImports),
-  ('test/gestures', 'knownGesturesCrossImports', TestsCrossImportChecker.knownGesturesCrossImports),
-  ('test/harness', 'knownHarnessCrossImports', TestsCrossImportChecker.knownHarnessCrossImports),
-  ('test/painting', 'knownPaintingCrossImports', TestsCrossImportChecker.knownPaintingCrossImports),
-  ('test/physics', 'knownPhysicsCrossImports', TestsCrossImportChecker.knownPhysicsCrossImports),
-  ('test/rendering', 'knownRenderingCrossImports', TestsCrossImportChecker.knownRenderingCrossImports),
-  ('test/scheduler', 'knownSchedulerCrossImports', TestsCrossImportChecker.knownSchedulerCrossImports),
-  ('test/semantics', 'knownSemanticsCrossImports', TestsCrossImportChecker.knownSemanticsCrossImports),
-  ('test/services', 'knownServicesCrossImports', TestsCrossImportChecker.knownServicesCrossImports),
-  ('test/widgets', 'knownWidgetsCrossImports', TestsCrossImportChecker.knownWidgetsCrossImports),
+  ('flutter/test/animation', 'knownAnimationCrossImports', TestsCrossImportChecker.knownAnimationCrossImports),
+  ('flutter/test/cupertino', 'knownCupertinoCrossImports', TestsCrossImportChecker.knownCupertinoCrossImports),
+  ('flutter/test/dart', 'knownDartCrossImports', TestsCrossImportChecker.knownDartCrossImports),
+  ('flutter/test/examples', 'knownExamplesCrossImports', TestsCrossImportChecker.knownExamplesCrossImports),
+  ('flutter/test/foundation', 'knownFoundationCrossImports', TestsCrossImportChecker.knownFoundationCrossImports),
+  ('flutter/test/gestures', 'knownGesturesCrossImports', TestsCrossImportChecker.knownGesturesCrossImports),
+  ('flutter/test/harness', 'knownHarnessCrossImports', TestsCrossImportChecker.knownHarnessCrossImports),
+  ('flutter/test/painting', 'knownPaintingCrossImports', TestsCrossImportChecker.knownPaintingCrossImports),
+  ('flutter/test/physics', 'knownPhysicsCrossImports', TestsCrossImportChecker.knownPhysicsCrossImports),
+  ('flutter/test/rendering', 'knownRenderingCrossImports', TestsCrossImportChecker.knownRenderingCrossImports),
+  ('flutter/test/scheduler', 'knownSchedulerCrossImports', TestsCrossImportChecker.knownSchedulerCrossImports),
+  ('flutter/test/semantics', 'knownSemanticsCrossImports', TestsCrossImportChecker.knownSemanticsCrossImports),
+  ('flutter/test/services', 'knownServicesCrossImports', TestsCrossImportChecker.knownServicesCrossImports),
+  ('flutter/test/widgets', 'knownWidgetsCrossImports', TestsCrossImportChecker.knownWidgetsCrossImports),
 ];
 // dart format on
