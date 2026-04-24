@@ -291,7 +291,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   }
 
   bool _isSchemeMigrated(SchemeInfo schemeInfo) {
-    if (schemeInfo.schemeContent.contains('Run Prepare Flutter Framework Script')) {
+    if (schemeInfo.schemeContent.contains('xcode_backend.sh') ||
+        schemeInfo.schemeContent.contains('macos_assemble.sh')) {
       return true;
     }
     return false;
@@ -313,36 +314,52 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     //     BlueprintName = "Runner"
     //     ReferencedContainer = "container:Runner.xcodeproj">
     // </BuildableReference>
-    final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
-    final int index = schemeLines.indexWhere(
-      (String line) => line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifier"'),
-    );
-    if (index == -1 || index + 3 >= schemeLines.length) {
+    final XmlDocument document;
+    try {
+      document = XmlDocument.parse(schemeContent);
+    } on XmlException catch (exception) {
+      throw Exception('Failed to parse ${schemeFile.basename}: Invalid xml: $exception');
+    }
+
+    final Iterable<XmlElement> buildableReferences = document.findAllElements('BuildableReference');
+    XmlElement? targetReference;
+    for (final ref in buildableReferences) {
+      if (ref.getAttribute('BlueprintIdentifier') == _runnerNativeTargetIdentifier) {
+        targetReference = ref;
+        break;
+      }
+    }
+    if (targetReference == null) {
       throw Exception(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
         'for ${_xcodeProject.hostAppProjectName}.',
       );
     }
 
-    final String buildableName = schemeLines[index + 1].trim();
-    if (!buildableName.contains('BuildableName')) {
+    final String? buildableNameAttr = targetReference.getAttribute('BuildableName');
+    if (buildableNameAttr == null) {
       throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildableName.');
     }
+    final buildableName = 'BuildableName = "$buildableNameAttr"';
 
-    final String blueprintName = schemeLines[index + 2].trim();
-    if (!blueprintName.contains('BlueprintName')) {
+    final String? blueprintNameAttr = targetReference.getAttribute('BlueprintName');
+    if (blueprintNameAttr == null) {
       throw Exception('Failed to parse ${schemeFile.basename}: Could not find BlueprintName.');
     }
+    final blueprintName = 'BlueprintName = "$blueprintNameAttr"';
 
-    final String referencedContainer = schemeLines[index + 3].trim();
-    if (!referencedContainer.contains('ReferencedContainer')) {
+    final String? referencedContainerAttr = targetReference.getAttribute('ReferencedContainer');
+    if (referencedContainerAttr == null) {
       throw Exception(
         'Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.',
       );
     }
+    final referencedContainer = 'ReferencedContainer = "$referencedContainerAttr"';
 
     schemeInfo.backupSchemeFile = schemeFile.parent.childFile('${schemeFile.basename}.backup');
     schemeFile.copySync(schemeInfo.backupSchemeFile!.path);
+
+    final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
 
     final String scriptText;
     if (_platform == FlutterDarwinPlatform.ios) {
@@ -366,7 +383,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                      BlueprintIdentifier = "$_runnerNativeTargetIdentifier"
                      $buildableName
                      $blueprintName
-                     $referencedContainer
+                     $referencedContainer>
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>

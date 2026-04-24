@@ -510,6 +510,42 @@ void main() {
       expect(shortcutTriggered, isTrue);
     });
 
+    testWidgets('textStyle defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.textStyle, isNull);
+    });
+
+    testWidgets('custom textStyle is passed to WidgetsApp', (WidgetTester tester) async {
+      const customStyle = TextStyle(fontSize: 24.0, color: Color(0xFFFF0000));
+
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder(), textStyle: customStyle));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.textStyle, customStyle);
+    });
+
+    testWidgets('textStyle wraps tree in DefaultTextStyle', (WidgetTester tester) async {
+      const customStyle = TextStyle(fontSize: 32.0, color: Color(0xFF00FF00));
+      late TextStyle resolvedStyle;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          textStyle: customStyle,
+          home: Builder(
+            builder: (BuildContext context) {
+              resolvedStyle = DefaultTextStyle.of(context).style;
+              return const Placeholder();
+            },
+          ),
+        ),
+      );
+
+      expect(resolvedStyle.fontSize, 32.0);
+      expect(resolvedStyle.color, const Color(0xFF00FF00));
+    });
+
     testWidgets('actions defaults to null', (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 

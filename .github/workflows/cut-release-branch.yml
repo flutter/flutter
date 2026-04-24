@@ -22,13 +22,14 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.FLUTTER_READ_ORG }}
+          ACTOR: ${{ github.actor }}
         run: |
           # Use the GitHub CLI to check team membership
           # Returns 204 if member, 404 if not
-          if gh api orgs/flutter/teams/flutter-release-eng/memberships/${{ github.actor }} --silent; then
+          if gh api orgs/flutter/teams/flutter-release-eng/memberships/$ACTOR --silent; then
             echo "is_member=true" >> $GITHUB_OUTPUT
           else
-            echo "::error::User ${{ github.actor }} is not a member of flutter-release-eng."
+            echo "::error::User $ACTOR is not a member of flutter-release-eng."
             exit 1
           fi
 
@@ -40,8 +41,10 @@ jobs:
 
     steps:
       - name: Validate Version Format
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
             echo "Error: Version must be in 'X.Y' format (e.g., 3.10)."
             exit 1
           fi
@@ -50,15 +53,18 @@ jobs:
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           ref: ${{ inputs.commit_hash }}
+          token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Set Environment Variables
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          echo "BRANCH_NAME=flutter-${{ inputs.version }}-candidate.0" >> $GITHUB_ENV
+          echo "BRANCH_NAME=flutter-$VERSION-candidate.0" >> $GITHUB_ENV
 
       - name: Check if branch already exists
         run: |
-          if git ls-remote --exit-code --heads origin ${{ env.BRANCH_NAME }}; then
-            echo "Error: Branch ${{ env.BRANCH_NAME }} already exists on remote."
+          if git ls-remote --exit-code --heads origin $BRANCH_NAME; then
+            echo "Error: Branch $BRANCH_NAME already exists on remote."
             exit 1
           fi
 
@@ -70,19 +76,19 @@ jobs:
       - name: Create Branch and Version File
         run: |
           # Create and switch to the new branch locally
-          git checkout -b ${{ env.BRANCH_NAME }}
+          git checkout -b $BRANCH_NAME
 
           # Create the version file
           mkdir -p bin/internal/
-          echo -n "${{ env.BRANCH_NAME }}" > bin/internal/release-candidate-branch.version
+          echo -n "$BRANCH_NAME" > bin/internal/release-candidate-branch.version
 
           # Commit the change
           git add bin/internal/release-candidate-branch.version
-          git commit -m "Initialize release branch ${{ env.BRANCH_NAME }}"
+          git commit -m "Initialize release branch $BRANCH_NAME"
 
       - name: Push new branch
         run: |
-          git push origin ${{ env.BRANCH_NAME }}
-          echo "## Release Branch \`${{ env.BRANCH_NAME }}\` Cut Successfully" >> $GITHUB_STEP_SUMMARY
+          git push origin $BRANCH_NAME
+          echo "## Release Branch \`$BRANCH_NAME\` Cut Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **View Branch** https://github.com/$GITHUB_REPOSITORY/tree/${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **View Branch** https://github.com/$GITHUB_REPOSITORY/tree/$BRANCH_NAME" >> $GITHUB_STEP_SUMMARY

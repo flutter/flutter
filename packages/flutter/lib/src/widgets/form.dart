@@ -408,12 +408,23 @@ class FormState extends State<Form> {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.sendAnnouncement(
-              view,
-              errorMessage,
-              directionality,
-              assertiveness: Assertiveness.assertive,
-            );
+            try {
+              await SemanticsService.sendAnnouncement(
+                view,
+                errorMessage,
+                directionality,
+                assertiveness: Assertiveness.assertive,
+              );
+            } catch (exception, stack) {
+              FlutterError.reportError(
+                FlutterErrorDetails(
+                  exception: exception,
+                  stack: stack,
+                  library: 'widgets library',
+                  context: ErrorDescription('while sending semantics announcement'),
+                ),
+              );
+            }
           }),
         );
       } else {
@@ -422,7 +433,16 @@ class FormState extends State<Form> {
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,
-        );
+        ).catchError((Object exception, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'widgets library',
+              context: ErrorDescription('while sending semantics announcement'),
+            ),
+          );
+        });
       }
     }
 

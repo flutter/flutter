@@ -166,11 +166,11 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_arm64:
@@ -183,12 +183,12 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_benchmark:
@@ -203,12 +203,12 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_x64:
@@ -221,12 +221,12 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_build_test:
@@ -240,12 +240,12 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_mokey:
@@ -256,7 +256,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: x86
       device_type: "mokey"
 
@@ -267,7 +267,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: arm64
       device_type: "mokey"
 
@@ -282,11 +282,11 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_x64_ios:
@@ -300,12 +300,12 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: x86
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_arm64_ios:
@@ -319,12 +319,12 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: arm64
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   windows:
@@ -1717,19 +1717,6 @@ targets:
       - engine/**
       - DEPS
 
-  - name: linux_android_emu_unstable android_engine_vulkan_tests
-    recipe: flutter/flutter_drone
-    bringup: true
-    timeout: 60
-    properties:
-      shard: android_engine_vulkan_tests
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
-        ]
-
   - name: Linux_android_emu_vulkan_stable android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -2980,6 +2967,24 @@ targets:
         ["devicelab", "linux"]
       task_name: native_assets_android
 
+  - name: Linux_android_emu android_engine_flags_debug_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_engine_flags_debug_test
+
+  - name: Linux_android_emu android_engine_flags_release_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_engine_flags_release_test
+
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
@@ -3673,7 +3678,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac_x64 build_tests_1_4
+  - name: Mac_x64 build_tests_1_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3687,11 +3692,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "1_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_2_4
+  - name: Mac_x64 build_tests_2_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3705,11 +3710,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "2_4"
+      subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_3_4
+  - name: Mac_x64 build_tests_3_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3723,11 +3728,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "3_4"
+      subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_4_4
+  - name: Mac_x64 build_tests_4_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3741,31 +3746,13 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "4_4"
+      subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_1_4
+  - name: Mac_x64 build_tests_5_5
     recipe: flutter/flutter_drone
-    timeout: 60
-    # Flake rate of >2.5% in presubmit
-    presubmit: false # https://github.com/flutter/flutter/issues/150642
-    properties:
-      add_recipes_cq: "true"
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
-        ]
-      shard: build_tests
-      subshard: "1_4"
-      tags: >
-        ["framework", "hostonly", "shard", "mac"]
-
-  - name: Mac_arm64 build_tests_2_4
-    recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3777,11 +3764,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "2_4"
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_3_4
+  - name: Mac_arm64 build_tests_1_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3794,11 +3781,11 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "3_4"
+      subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_arm64 build_tests_4_4
+  - name: Mac_arm64 build_tests_2_5
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -3811,7 +3798,58 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "4_4"
+      subshard: "2_5"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_3_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: build_tests
+      subshard: "3_5"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_4_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: build_tests
+      subshard: "4_5"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_arm64 build_tests_5_5
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: build_tests
+      subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
@@ -3841,7 +3879,6 @@ targets:
   - name: Mac_benchmark complex_layout_scroll_perf_macos_impeller__timeline_summary
     presubmit: false
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4269,7 +4306,6 @@ targets:
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       task_name: platform_view_macos_impeller__start_up
 
@@ -5400,6 +5436,7 @@ targets:
       task_name: wide_gamut_macos
     drone_dimensions:
       - gpu=apple
+      - cpu=arm64
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
@@ -5440,10 +5477,10 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_debug_workflow
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a5295f"
+          "sdk_version": "17c52"
         }
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
@@ -5482,7 +5519,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-18","os=Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7", "cpu=x86"]
+        ["device_os=iOS-18","os=Mac-15.7", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -5643,7 +5680,6 @@ targets:
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
-    bringup: true
     properties:
       task_name: new_gallery_macos_impeller__transition_perf
 
@@ -6336,7 +6372,6 @@ targets:
   - name: Windows tool_integration_tests_1_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6363,7 +6398,6 @@ targets:
   - name: Windows tool_integration_tests_2_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6390,7 +6424,6 @@ targets:
   - name: Windows tool_integration_tests_3_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6417,7 +6450,6 @@ targets:
   - name: Windows tool_integration_tests_4_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6444,7 +6476,6 @@ targets:
   - name: Windows tool_integration_tests_5_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6471,7 +6502,6 @@ targets:
   - name: Windows tool_integration_tests_6_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6498,7 +6528,6 @@ targets:
   - name: Windows tool_integration_tests_7_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6525,7 +6554,6 @@ targets:
   - name: Windows tool_integration_tests_8_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6552,7 +6580,6 @@ targets:
   - name: Windows tool_integration_tests_9_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -6579,7 +6606,6 @@ targets:
   - name: Windows tool_integration_tests_10_10
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-

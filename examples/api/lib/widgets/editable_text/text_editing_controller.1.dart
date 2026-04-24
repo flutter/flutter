@@ -48,8 +48,8 @@ class _TextEditingControllerExampleState
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(16.0),
+        alignment: .center,
+        padding: const .all(16.0),
         child: TextField(
           controller: _controller,
           autofocus: true,
