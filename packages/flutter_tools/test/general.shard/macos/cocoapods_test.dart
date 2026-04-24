@@ -1278,6 +1278,8 @@ end''');
       );
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',

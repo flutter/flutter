@@ -43,6 +43,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
       ]);
       final xcode = Xcode.test(
         processManager: processManager,
@@ -88,6 +90,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
@@ -128,7 +132,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
-
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(
           command: <String>['xcrun', 'clang'],
           exitCode: 1,
@@ -158,6 +163,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
@@ -186,6 +193,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
@@ -214,6 +223,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
@@ -248,6 +259,8 @@ void main() {
             command: <String>['/usr/bin/xcode-select', '--print-path'],
             stdout: '/Library/Developer/CommandLineTools',
           ),
+          const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+          const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
           const FakeCommand(command: <String>['xcrun', 'clang']),
           const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
           const FakeCommand(
@@ -283,6 +296,8 @@ void main() {
           command: <String>['/usr/bin/xcode-select', '--print-path'],
           stdout: '/Library/Developer/CommandLineTools',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(command: <String>['xcrun', 'clang']),
         const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         const FakeCommand(
