@@ -558,16 +558,17 @@ class TextSelectionOverlay {
       startHandleType = TextSelectionHandleType.collapsed;
       endHandleType = TextSelectionHandleType.collapsed;
     } else {
+      assert(endpoints.length == 2);
       final TextDirection textDirection = renderObject.textDirection;
       // UIKit keeps selection handles aligned with the field direction.
-      final bool useTextDirectionForSelectionHandles = defaultTargetPlatform == TargetPlatform.iOS;
-      final TextDirection startHandleDirection = useTextDirectionForSelectionHandles
+      final bool preferRenderObjectDirectionForSelectionHandles =
+          defaultTargetPlatform == TargetPlatform.iOS;
+      final TextDirection startHandleDirection = preferRenderObjectDirectionForSelectionHandles
           ? textDirection
           : endpoints.first.direction ?? textDirection;
-      final TextSelectionPoint? endPoint = endpoints.length > 1 ? endpoints.last : null;
-      final TextDirection endHandleDirection = useTextDirectionForSelectionHandles
+      final TextDirection endHandleDirection = preferRenderObjectDirectionForSelectionHandles
           ? textDirection
-          : (endPoint?.direction ?? endpoints.first.direction) ?? textDirection;
+          : endpoints.last.direction ?? textDirection;
 
       startHandleType = switch (startHandleDirection) {
         TextDirection.ltr => TextSelectionHandleType.left,

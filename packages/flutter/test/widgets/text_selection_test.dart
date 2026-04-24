@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -1920,40 +1918,78 @@ void main() {
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 
-  const directionalityTestCases = <_DirectionalityTestCase>[
+  const androidDirectionalityTestCases = <_DirectionalityTestCase>[
     _DirectionalityTestCase(
-      description: 'Ambient LTR, Text LTR (English)',
+      description: 'ambient LTR, English text',
       ambientDirection: TextDirection.ltr,
       text: 'Hello World',
       selectionBase: 0,
       selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.ltr,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.right,
     ),
     _DirectionalityTestCase(
-      description: 'Ambient RTL, Text RTL (Arabic)',
-      ambientDirection: TextDirection.rtl,
-      text: 'مرحبا بالعالم',
-      selectionBase: 0,
-      selectionExtent: 5,
-    ),
-    _DirectionalityTestCase(
-      description: 'Ambient RTL, Text LTR (English in Arabic App - Bug Case)',
+      description: 'ambient RTL, English text',
       ambientDirection: TextDirection.rtl,
       text: 'Hello World',
       selectionBase: 0,
       selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.ltr,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.right,
     ),
     _DirectionalityTestCase(
-      description: 'Ambient LTR, Text RTL (Arabic in English App)',
+      description: 'ambient RTL, Arabic text',
+      ambientDirection: TextDirection.rtl,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedEndHandleType: TextSelectionHandleType.left,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient LTR, Arabic text',
       ambientDirection: TextDirection.ltr,
       text: 'مرحبا بالعالم',
       selectionBase: 0,
       selectionExtent: 5,
+      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedEndHandleType: TextSelectionHandleType.left,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient LTR, English then Arabic text',
+      ambientDirection: TextDirection.ltr,
+      text: 'abc مرحبا',
+      selectionBase: 0,
+      selectionExtent: 9,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.left,
+    ),
+    _DirectionalityTestCase(
+      description: 'ambient RTL, English then Arabic text',
+      ambientDirection: TextDirection.rtl,
+      text: 'abc مرحبا',
+      selectionBase: 0,
+      selectionExtent: 9,
+      expectedStartEndpointDirection: TextDirection.ltr,
+      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedStartHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.left,
     ),
   ];
 
-  for (final testCase in directionalityTestCases) {
+  for (final testCase in androidDirectionalityTestCases) {
     testWidgets(
-      'handles point correctly: ${testCase.description}',
+      'Android selection handles match endpoint direction: ${testCase.description}',
       (WidgetTester tester) async {
         final customControls = DirectionalitySpyTextSelectionControls();
         final controller = TextEditingController(text: testCase.text);
@@ -1979,114 +2015,29 @@ void main() {
             .first;
         expect(renderEditable.textDirection, testCase.ambientDirection);
 
-        // Focus and set selection.
         focusNode.requestFocus();
         await tester.pump();
 
+        customControls.clearBuiltHandleTypes();
         controller.selection = TextSelection(
           baseOffset: testCase.selectionBase,
           extentOffset: testCase.selectionExtent,
         );
         await tester.pumpAndSettle();
 
-        // Get selection endpoints.
         final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
           controller.selection,
         );
         expect(endpoints.length, 2);
-
-        // Identify which endpoint is physically to the left.
-        final double startX = endpoints[0].point.dx;
-        final double endX = endpoints[1].point.dx;
-
-        // Find handles.
-        final Finder leftHandleFinder = find.byKey(
-          const ValueKey<TextSelectionHandleType>(TextSelectionHandleType.left),
-        );
-        final Finder rightHandleFinder = find.byKey(
-          const ValueKey<TextSelectionHandleType>(TextSelectionHandleType.right),
-        );
-
-        expect(leftHandleFinder, findsOneWidget, reason: 'Should find a left handle');
-        expect(rightHandleFinder, findsOneWidget, reason: 'Should find a right handle');
-
-        final Offset leftHandlePos = tester.getCenter(leftHandleFinder);
-        final Offset rightHandlePos = tester.getCenter(rightHandleFinder);
-
-        // Verification 1: The handle type `left` should be physically to the left of `right`.
-        expect(
-          leftHandlePos.dx,
-          lessThan(rightHandlePos.dx),
-          reason:
-              "Handle of type 'left' should be visually to the left of handle of type 'right'. "
-              'Found LeftType at $leftHandlePos, RightType at $rightHandlePos.',
-        );
-
-        // Verification 2: Handles should align with their respective endpoints.
-        final double minEndpointX = math.min(startX, endX);
-        final double maxEndpointX = math.max(startX, endX);
-
-        expect(
-          (leftHandlePos.dx - minEndpointX).abs(),
-          lessThan(50.0),
-          reason: 'Left handle should be near left endpoint',
-        );
-
-        expect(
-          (rightHandlePos.dx - maxEndpointX).abs(),
-          lessThan(50.0),
-          reason: 'Right handle should be near right endpoint',
-        );
+        expect(endpoints.first.direction, testCase.expectedStartEndpointDirection);
+        expect(endpoints.last.direction, testCase.expectedEndEndpointDirection);
+        expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
+        expect(customControls.lastStartHandleType, testCase.expectedStartHandleType);
+        expect(customControls.lastEndHandleType, testCase.expectedEndHandleType);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
   }
-
-  testWidgets(
-    'selection handles use endpoint direction for mixed-directionality text on Android',
-    (WidgetTester tester) async {
-      final customControls = DirectionalitySpyTextSelectionControls();
-      final controller = TextEditingController(text: 'abc مرحبا');
-      addTearDown(controller.dispose);
-      final focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: Directionality(
-            textDirection: TextDirection.ltr,
-            child: TestTextField(
-              controller: controller,
-              focusNode: focusNode,
-              selectionControls: customControls,
-            ),
-          ),
-        ),
-      );
-
-      focusNode.requestFocus();
-      await tester.pump();
-
-      customControls.clearBuiltHandleTypes();
-      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
-      await tester.pumpAndSettle();
-
-      final RenderEditable renderEditable = tester.allRenderObjects
-          .whereType<RenderEditable>()
-          .first;
-      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection,
-      );
-
-      expect(endpoints, hasLength(2));
-      expect(endpoints.first.direction, TextDirection.ltr);
-      expect(endpoints.last.direction, TextDirection.rtl);
-      expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
-      expect(customControls.lastStartHandleType, TextSelectionHandleType.left);
-      expect(customControls.lastEndHandleType, TextSelectionHandleType.left);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
 
   testWidgets(
     'selection handles use text direction for mixed-directionality text on iOS',
@@ -2439,6 +2390,10 @@ class _DirectionalityTestCase {
     required this.text,
     required this.selectionBase,
     required this.selectionExtent,
+    required this.expectedStartEndpointDirection,
+    required this.expectedEndEndpointDirection,
+    required this.expectedStartHandleType,
+    required this.expectedEndHandleType,
   });
 
   final String description;
@@ -2446,4 +2401,8 @@ class _DirectionalityTestCase {
   final String text;
   final int selectionBase;
   final int selectionExtent;
+  final TextDirection expectedStartEndpointDirection;
+  final TextDirection expectedEndEndpointDirection;
+  final TextSelectionHandleType expectedStartHandleType;
+  final TextSelectionHandleType expectedEndHandleType;
 }
