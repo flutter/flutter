@@ -1837,6 +1837,7 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
     var printing = false;
 
     return (String line) {
+      print('syslog: $line');
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
           addToLinesController(decodeSyslog(line), IOSDeviceLogSource.idevicesyslog);
