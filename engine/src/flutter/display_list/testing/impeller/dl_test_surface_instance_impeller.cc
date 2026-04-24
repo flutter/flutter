@@ -39,8 +39,10 @@ DlSurfaceInstanceImpeller::GetRenderTarget() const {
 
 void DlSurfaceInstanceImpeller::Clear(const DlColor& color) {
   if (!builder_.IsEmpty()) {
-    // Clear whatever is in the builder as it is now irrelevant.
-    (void)builder_.Build();
+    // Use the Build method to clear whatever is in the builder as it is
+    // now irrelevant and ignore the returned DisplayList as it would be
+    // useless to try to render it before a surface clear.
+    std::ignore = builder_.Build();
   }
   builder_.Clear(color);
   DoRenderDisplayList(builder_.Build());

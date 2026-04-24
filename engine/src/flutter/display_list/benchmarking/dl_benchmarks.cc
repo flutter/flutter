@@ -32,7 +32,7 @@ inline void SaveSnapshotIfNecessary(
     benchmark::State& state,
     const std::string& test_name) {
 #ifdef WRITE_BENCHMARK_SNAPSHOTS
-  auto filename = provider->backend_name() + "-" + test_name + "-" +
+  auto filename = provider->GetBackendName() + "-" + test_name + "-" +
                   std::to_string(state.range(0)) + ".png";
   surface->SnapshotToFile(filename);
 #endif  // WRITE_BENCHMARK_SNAPSHOTS
@@ -122,7 +122,7 @@ DlPaint GetPaintForRun(unsigned attributes) {
   return paint;
 }
 
-void CheckAttributes(unsigned attributes,
+void CheckAttributes(uint32_t attributes,
                      benchmark::State& state,
                      const DisplayListAttributeFlags flags) {
   if (flags.always_stroked() && attributes & kFilledStyle) {
