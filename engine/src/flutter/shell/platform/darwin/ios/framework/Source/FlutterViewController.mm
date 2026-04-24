@@ -74,6 +74,8 @@ typedef struct MouseState {
 @property(nonatomic, strong) FlutterView* flutterView;
 @property(nonatomic, strong) void (^flutterViewRenderedCallback)(void);
 
+@property(nonatomic, strong) FlutterSplashScreenManager* splashScreenManager;
+
 @property(nonatomic, assign) UIInterfaceOrientationMask orientationPreferences;
 @property(nonatomic, assign) UIStatusBarStyle statusBarStyle;
 @property(nonatomic, assign) BOOL initialized;
@@ -166,11 +168,19 @@ typedef struct MouseState {
 @implementation FlutterViewController {
   flutter::ViewportMetrics _viewportMetrics;
   MouseState _mouseState;
+  FlutterSplashScreenManager* _splashScreenManager;
 }
 
 // Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
+
+- (FlutterSplashScreenManager*)splashScreenManager {
+  if (!_splashScreenManager) {
+    _splashScreenManager = [[FlutterSplashScreenManager alloc] init];
+  }
+  return _splashScreenManager;
+}
 
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
@@ -332,7 +342,7 @@ typedef struct MouseState {
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
-  [self loadDefaultSplashScreenView];
+  [self.splashScreenManager loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
 }
 
@@ -567,21 +577,20 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Managing launch views
 
 - (void)installSplashScreenViewIfNecessary {
-  // Show the launch screen view again on top of the FlutterView if available.
-  // This launch screen view will be removed once the first Flutter frame is rendered.
+  // The splash screen is automatically loaded during initialization (if configured), but should
+  // only be shown during the cold start of the application when we're the root view controller.
+  //
+  // If we are being presented modally or pushed onto a navigation controller later,
+  // remove the splash screen immediately to avoid a jarring visual transition.
   if (self.splashScreenView && (self.isBeingPresented || self.isMovingToParentViewController)) {
+    // Explicitly remove from superview to bypass the fade-out animation.
     [self.splashScreenView removeFromSuperview];
     self.splashScreenView = nil;
     return;
   }
 
-  // Use the property getter to initialize the default value.
-  UIView* splashScreenView = self.splashScreenView;
-  if (splashScreenView == nil) {
-    return;
-  }
-  splashScreenView.frame = self.view.bounds;
-  [self.view addSubview:splashScreenView];
+  // Cold start. Install the splash screen. It will removed in onFirstFrameRendered.
+  [self.splashScreenManager installSplashScreenViewAsSubviewOf:self.view];
 }
 
 + (BOOL)automaticallyNotifiesObserversOfDisplayingFlutterUI {
@@ -609,27 +618,10 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   }
 }
 
-- (void)removeSplashScreenWithCompletion:(dispatch_block_t _Nullable)onComplete {
-  NSAssert(self.splashScreenView, @"The splash screen view must not be nil");
-  UIView* splashScreen = self.splashScreenView;
-  // setSplashScreenView calls this method. Assign directly to ivar to avoid an infinite loop.
-  _splashScreenView = nil;
-  [UIView animateWithDuration:0.2
-      animations:^{
-        splashScreen.alpha = 0;
-      }
-      completion:^(BOOL finished) {
-        [splashScreen removeFromSuperview];
-        if (onComplete) {
-          onComplete();
-        }
-      }];
-}
-
 - (void)onFirstFrameRendered {
   if (self.splashScreenView) {
     __weak FlutterViewController* weakSelf = self;
-    [self removeSplashScreenWithCompletion:^{
+    [self.splashScreenManager removeSplashScreenWithCompletion:^{
       [weakSelf callViewRenderedCallback];
     }];
   } else {
@@ -656,66 +648,15 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (BOOL)loadDefaultSplashScreenView {
-  NSString* launchscreenName =
-      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
-  if (launchscreenName == nil) {
-    return NO;
-  }
-  UIView* splashView = [self splashScreenFromStoryboard:launchscreenName];
-  if (!splashView) {
-    splashView = [self splashScreenFromXib:launchscreenName];
-  }
-  if (!splashView) {
-    return NO;
-  }
-  self.splashScreenView = splashView;
-  return YES;
+  return [self.splashScreenManager loadDefaultSplashScreenView];
 }
 
-- (UIView*)splashScreenFromStoryboard:(NSString*)name {
-  UIStoryboard* storyboard = nil;
-  @try {
-    storyboard = [UIStoryboard storyboardWithName:name bundle:nil];
-  } @catch (NSException* exception) {
-    return nil;
-  }
-  if (storyboard) {
-    UIViewController* splashScreenViewController = [storyboard instantiateInitialViewController];
-    return splashScreenViewController.view;
-  }
-  return nil;
-}
-
-- (UIView*)splashScreenFromXib:(NSString*)name {
-  NSArray* objects = nil;
-  @try {
-    objects = [[NSBundle mainBundle] loadNibNamed:name owner:self options:nil];
-  } @catch (NSException* exception) {
-    return nil;
-  }
-  if ([objects count] != 0) {
-    UIView* view = [objects objectAtIndex:0];
-    return view;
-  }
-  return nil;
+- (UIView*)splashScreenView {
+  return self.splashScreenManager.splashScreenView;
 }
 
 - (void)setSplashScreenView:(UIView*)view {
-  if (view == _splashScreenView) {
-    return;
-  }
-
-  // Special case: user wants to remove the splash screen view.
-  if (!view) {
-    if (_splashScreenView) {
-      [self removeSplashScreenWithCompletion:nil];
-    }
-    return;
-  }
-
-  _splashScreenView = view;
-  _splashScreenView.autoresizingMask =
-      UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  self.splashScreenManager.splashScreenView = view;
 }
 
 - (void)setFlutterViewDidRenderCallback:(void (^)(void))callback {

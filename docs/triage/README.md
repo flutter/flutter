@@ -285,8 +285,8 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 ### iOS and macOS platform team (`team-ios` and `team-macos`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cteam-macos+label%3AP0+sort%3Aupdated-asc+)
-- [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc+)
-- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc)
+- [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+response%22+sort%3Aupdated-asc+)
+- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+response%22+sort%3Aupdated-asc)
 - [Apple news](https://developer.apple.com/news) - check for updates that might affect us.
 - [hackers-ios channel on Discord](https://discord.com/channels/608014603317936148/846507953959862273)
 - [hackers-desktop channel on Discord](https://discord.com/channels/608014603317936148/608020180177780791)
@@ -308,8 +308,9 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 ### Text Input team (`team-text-input`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22a%3A%20text%20input%22%2C%22f%3A%20selection%22%2Cteam-text-input%2Cfyi-text-input%20sort%3Aupdated-asc%20label%3AP0)
-- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input)
+- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input+-label%3A%22waiting+for+response%22)
   - Make sure that any PR that still needs review by a platform team has the appropriate `team-<platform>` label(s) on it, so that it shows up in the regular platform team triages. Once reviewed, the platform team can add the `triaged-<platform>` label to remove the PR from their triage queue.
+  - When finishing a PR review (and no other platform team review is needed), add the `waiting for response` label on it, so that it is filtered out of the `team-text-input` PR triage queue.
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20response%22)
 
 ### Flutter Tool team (`team-tool`)
