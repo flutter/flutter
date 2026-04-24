@@ -17,8 +17,12 @@ void main() {
   late _CrossImportsTestDirectories checkerDirectories;
 
   void buildKnownCrossImportTestFiles({Set<String> excludes = const <String>{}}) {
+    final Map<Directory, Set<String>> knownFiles = checkerDirectories.getKnownFiles(
+      checker.testsDirectory,
+    );
+
     for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
-        in checkerDirectories.knownFiles.entries) {
+        in knownFiles.entries) {
       for (final filepath in files) {
         if (excludes.contains(filepath)) {
           continue;
@@ -39,17 +43,18 @@ void main() {
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
 
-    final Directory testDir =
+    final Directory testsDirectory =
         flutterRoot.childDirectory('packages').childDirectory('flutter').childDirectory('test')
           ..createSync(recursive: true);
-    testDir.childDirectory('material').createSync(recursive: true);
+    testsDirectory.childDirectory('material').createSync(recursive: true);
 
     checker = TestsCrossImportChecker(
-      testsDirectory: testDir,
+      testsDirectory: testsDirectory,
       flutterRoot: flutterRoot,
       filesystem: fs,
     );
-    checkerDirectories = _CrossImportsTestDirectories(testDir)..createTestDirectories();
+    checkerDirectories = _CrossImportsTestDirectories(testsDirectory)
+      ..createTestDirectories(testsDirectory);
   });
 
   test('when only all knowns have cross imports', () async {
@@ -94,7 +99,10 @@ void main() {
         '/',
         Platform.isWindows ? r'\' : '/',
       );
-      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(libraryName);
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        checker.testsDirectory,
+      );
 
       buildKnownCrossImportTestFiles();
       writeImportInFiles(<String>{extra}, inDirectory: testFilesDirectory);
@@ -123,7 +131,10 @@ void main() {
         '/',
         Platform.isWindows ? r'\' : '/',
       );
-      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(libraryName);
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        checker.testsDirectory,
+      );
 
       buildKnownCrossImportTestFiles();
       writeImportInFiles(
@@ -219,22 +230,22 @@ void writeImportInFiles(
 // A utility that keeps track of the directories under test,
 // to avoid having to late initialize them individually in `setUp()`.
 class _CrossImportsTestDirectories {
-  factory _CrossImportsTestDirectories(Directory testsDir) {
+  factory _CrossImportsTestDirectories(Directory testsDirectory) {
     return _CrossImportsTestDirectories._(
-      testAnimationDirectory: testsDir.childDirectory('animation'),
-      testCupertinoDirectory: testsDir.childDirectory('cupertino'),
-      testDartDirectory: testsDir.childDirectory('dart'),
-      testExamplesDirectory: testsDir.childDirectory('examples'),
-      testFoundationDirectory: testsDir.childDirectory('foundation'),
-      testGesturesDirectory: testsDir.childDirectory('gestures'),
-      testHarnessDirectory: testsDir.childDirectory('harness'),
-      testPaintingDirectory: testsDir.childDirectory('painting'),
-      testPhysicsDirectory: testsDir.childDirectory('physics'),
-      testRenderingDirectory: testsDir.childDirectory('rendering'),
-      testSchedulerDirectory: testsDir.childDirectory('scheduler'),
-      testSemanticsDirectory: testsDir.childDirectory('semantics'),
-      testServicesDirectory: testsDir.childDirectory('services'),
-      testWidgetsDirectory: testsDir.childDirectory('widgets'),
+      testAnimationDirectory: testsDirectory.childDirectory('animation'),
+      testCupertinoDirectory: testsDirectory.childDirectory('cupertino'),
+      testDartDirectory: testsDirectory.childDirectory('dart'),
+      testExamplesDirectory: testsDirectory.childDirectory('examples'),
+      testFoundationDirectory: testsDirectory.childDirectory('foundation'),
+      testGesturesDirectory: testsDirectory.childDirectory('gestures'),
+      testHarnessDirectory: testsDirectory.childDirectory('harness'),
+      testPaintingDirectory: testsDirectory.childDirectory('painting'),
+      testPhysicsDirectory: testsDirectory.childDirectory('physics'),
+      testRenderingDirectory: testsDirectory.childDirectory('rendering'),
+      testSchedulerDirectory: testsDirectory.childDirectory('scheduler'),
+      testSemanticsDirectory: testsDirectory.childDirectory('semantics'),
+      testServicesDirectory: testsDirectory.childDirectory('services'),
+      testWidgetsDirectory: testsDirectory.childDirectory('widgets'),
     );
   }
 
@@ -271,32 +282,44 @@ class _CrossImportsTestDirectories {
   final Directory testWidgetsDirectory;
 
   /// A mapping of the `flutter/test/xyz` directories,
-  /// to their corresponding known imports list in `check_tests_cross_imports.dart`.
-  Map<Directory, Set<String>> get knownFiles => <Directory, Set<String>>{
-    testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
-    testAnimationDirectory: TestsCrossImportChecker.knownAnimationCrossImports,
-    testDartDirectory: TestsCrossImportChecker.knownDartCrossImports,
-    testExamplesDirectory: TestsCrossImportChecker.knownExamplesCrossImports,
-    testFoundationDirectory: TestsCrossImportChecker.knownFoundationCrossImports,
-    testGesturesDirectory: TestsCrossImportChecker.knownGesturesCrossImports,
-    testHarnessDirectory: TestsCrossImportChecker.knownHarnessCrossImports,
-    testPaintingDirectory: TestsCrossImportChecker.knownPaintingCrossImports,
-    testPhysicsDirectory: TestsCrossImportChecker.knownPhysicsCrossImports,
-    testRenderingDirectory: TestsCrossImportChecker.knownRenderingCrossImports,
-    testSchedulerDirectory: TestsCrossImportChecker.knownSchedulerCrossImports,
-    testSemanticsDirectory: TestsCrossImportChecker.knownSemanticsCrossImports,
-    testServicesDirectory: TestsCrossImportChecker.knownServicesCrossImports,
-    testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
-  };
+  /// to their corresponding known imports list in `check_tests_cross_imports.dart`,
+  /// including `flutter/test` itself.
+  Map<Directory, Set<String>> getKnownFiles(Directory flutterTestDirectory) {
+    return <Directory, Set<String>>{
+      flutterTestDirectory: TestsCrossImportChecker.knownFlutterSlashTestCrossImports,
+      testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
+      testAnimationDirectory: TestsCrossImportChecker.knownAnimationCrossImports,
+      testDartDirectory: TestsCrossImportChecker.knownDartCrossImports,
+      testExamplesDirectory: TestsCrossImportChecker.knownExamplesCrossImports,
+      testFoundationDirectory: TestsCrossImportChecker.knownFoundationCrossImports,
+      testGesturesDirectory: TestsCrossImportChecker.knownGesturesCrossImports,
+      testHarnessDirectory: TestsCrossImportChecker.knownHarnessCrossImports,
+      testPaintingDirectory: TestsCrossImportChecker.knownPaintingCrossImports,
+      testPhysicsDirectory: TestsCrossImportChecker.knownPhysicsCrossImports,
+      testRenderingDirectory: TestsCrossImportChecker.knownRenderingCrossImports,
+      testSchedulerDirectory: TestsCrossImportChecker.knownSchedulerCrossImports,
+      testSemanticsDirectory: TestsCrossImportChecker.knownSemanticsCrossImports,
+      testServicesDirectory: TestsCrossImportChecker.knownServicesCrossImports,
+      testWidgetsDirectory: TestsCrossImportChecker.knownWidgetsCrossImports,
+    };
+  }
 
-  void createTestDirectories() {
+  void createTestDirectories(Directory flutterTestDirectory) {
+    final Map<Directory, Set<String>> knownFiles = getKnownFiles(flutterTestDirectory);
+
     for (final Directory directory in knownFiles.keys) {
+      // The `flutter/test` directory is created in `setUp()`.
+      if (directory == flutterTestDirectory) {
+        continue;
+      }
+
       directory.createSync(recursive: true);
     }
   }
 
-  Directory testFilesDirectoryFor(String libraryName) {
+  Directory testFilesDirectoryFor(String libraryName, Directory flutterTestDirectory) {
     return switch (libraryName) {
+      'flutter/test' => flutterTestDirectory,
       'flutter/test/animation' => testAnimationDirectory,
       'flutter/test/cupertino' => testCupertinoDirectory,
       'flutter/test/dart' => testDartDirectory,
@@ -319,11 +342,12 @@ class _CrossImportsTestDirectories {
 // A mapping of test cases for the cross imports checker.
 //
 // Each entry contains:
-// - a shortened directory name of the test folder for the library, without the `flutter/` prefix
+// - a shortened directory name of the test folder for the library
 // - the name of the known cross imports list variable in `check_tests_cross_imports.dart` for that library
 // - the actual known cross imports list for that library
 // dart format off
 final crossImportsTestCases = <(String, String, Set<String>)>[
+  ('flutter/test', 'knownFlutterSlashTestCrossImports', TestsCrossImportChecker.knownFlutterSlashTestCrossImports),
   ('flutter/test/animation', 'knownAnimationCrossImports', TestsCrossImportChecker.knownAnimationCrossImports),
   ('flutter/test/cupertino', 'knownCupertinoCrossImports', TestsCrossImportChecker.knownCupertinoCrossImports),
   ('flutter/test/dart', 'knownDartCrossImports', TestsCrossImportChecker.knownDartCrossImports),

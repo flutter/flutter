@@ -161,6 +161,17 @@ class TestsCrossImportChecker {
   static final Set<String> knownSemanticsCrossImports = <String>{};
   static final Set<String> knownServicesCrossImports = <String>{};
 
+  /// These tests are known to have cross imports. These cross imports
+  /// should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  ///
+  /// This set corresponds to violations in `packages/flutter/test` itself,
+  /// for the lists for the subdirectories of `packages/flutter/test`,
+  /// see [knownWidgetsCrossImports] and related lists.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/177028.
+  static final Set<String> knownFlutterSlashTestCrossImports = <String>{};
+
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
     knownCupertinoCrossImports,
   );
