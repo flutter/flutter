@@ -54,12 +54,6 @@ void main() {
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
-    fakeProcessManager.addCommand(
-      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-    );
-    fakeProcessManager.addCommand(
-      const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
-    );
     platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem.test();
     fileSystem.file(xcodebuild).createSync(recursive: true);
@@ -105,6 +99,8 @@ void main() {
 
   testWithoutContext('xcodebuild versionText returns formatted version text', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+      FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode 8.3.3\nBuild version 8E3004b',
@@ -1421,6 +1417,8 @@ Information about project "Runner":
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
+            const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+            const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '1'),
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
