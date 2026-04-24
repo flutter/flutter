@@ -449,7 +449,7 @@ void main() {
             projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
               ..createSync(recursive: true);
         buildDir
-            .childFile('dart_build_result.json')
+            .childFile('link_hooks_result.json')
             .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
 
         final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -535,7 +535,7 @@ void main() {
             projectDir.childDirectory('.dart_tool').childDirectory('flutter_build')
               ..createSync(recursive: true);
         buildDir
-            .childFile('dart_build_result.json')
+            .childFile('link_hooks_result.json')
             .writeAsStringSync('{"codeAssets": [], "dataAssets": [], "dependencies": []}');
 
         final CommandRunner<void> runner = createTestCommandRunner(command);

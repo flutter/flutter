@@ -14,10 +14,10 @@ and who adds them.
 | `autosubmit` | Merge a pull request when the tree becomes green. | X | | Merge on a validated pull request. |
 | `revert` | Label used to initiate a revert request on a closed and merged PR. | X | | Revert a particular change that has been merged. |
 | `revert of` | Tracking label for the revert request generated from the closed and merged original pull request. | | X | To track the new pull request that reverts a previous change. |
-| `warning: land on red to fix tree breakage` | Override the tree-status check and land even when tree is closed. | X | | To submit a potential fix for the current tree-status |
+| `emergency` | Override the tree-status check and land even when the tree is closed. | X | | To submit a potential fix for the current tree-status. |
 
-Note: that `warning: land on red to fix tree breakage` cannot be used on its own
-and should be used in conjunction with the `autosubmit` label.
+Note that `emergency` cannot be used on its own and should be used in
+conjunction with the `autosubmit` label.
 
 ### Usage Examples
 
@@ -39,7 +39,7 @@ sure validations pass and have the correct number of reviews.
 This path should only be done in the event you have a change that will
 contribute a fix to the status of the tree.
 
-**Labels to use:** [ `autosubmit`, `warning: land on red to fix tree breakage` ]
+**Labels to use:** [ `autosubmit`, `emergency` ]
 
 **Validations:**
 
@@ -49,8 +49,7 @@ contribute a fix to the status of the tree.
 * ignores the results of the tree status check.
 
 Warning: if you are not merging a fix for the tree you should not use the
-`warning: land on red to fix tree breakage` label. You will need to wait for the
-tree to open again.
+`emergency` label. You will need to wait for the tree to open again.
 
 #### Reverting a change from the tree
 

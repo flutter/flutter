@@ -110,6 +110,7 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
+      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
     );
   }
 

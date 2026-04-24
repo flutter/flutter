@@ -59,7 +59,7 @@ class _ListViewExampleState extends State<ListViewExample> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             TextButton(
               onPressed: () => _reverse(),
