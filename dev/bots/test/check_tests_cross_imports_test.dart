@@ -69,30 +69,30 @@ void main() {
 
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
       in crossImportsTestCases) {
-    test('when not all $libraryName knowns have cross imports', () async {
-      if (knownCrossImports.isEmpty) {
-        return;
-      }
+    test(
+      'when not all $libraryName knowns have cross imports',
+      () async {
+        final String excludedSample = knownCrossImports.first;
 
-      final String excludedSample = knownCrossImports.first;
+        buildKnownCrossImportTestFiles(excludes: <String>{excludedSample});
 
-      buildKnownCrossImportTestFiles(excludes: <String>{excludedSample});
-
-      bool? success;
-      final String result = await capture(() async {
-        success = checker.check();
-      }, shouldHaveErrors: true);
-      final String lines = <String>[
-        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ Huzzah! The following tests in $libraryName no longer contain cross imports!',
-        '║   $excludedSample',
-        '║ However, they now need to be removed from the',
-        '║ $knownCrossImportsListName list in the script /dev/bots/check_tests_cross_imports.dart.',
-        '╚═══════════════════════════════════════════════════════════════════════════════',
-      ].join('\n');
-      expect(result, equals('$lines\n'));
-      expect(success, isFalse);
-    });
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.check();
+        }, shouldHaveErrors: true);
+        final String lines = <String>[
+          '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+          '║ Huzzah! The following tests in $libraryName no longer contain cross imports!',
+          '║   $excludedSample',
+          '║ However, they now need to be removed from the',
+          '║ $knownCrossImportsListName list in the script /dev/bots/check_tests_cross_imports.dart.',
+          '╚═══════════════════════════════════════════════════════════════════════════════',
+        ].join('\n');
+        expect(result, equals('$lines\n'));
+        expect(success, isFalse);
+      },
+      skip: knownCrossImports.isEmpty,
+    ); // [intended]: No message is needed when there are no known cross imports.
 
     test('unknown $libraryName cross import of Material', () async {
       final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
