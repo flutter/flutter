@@ -241,6 +241,18 @@ class Context {
   /// rendering a 2D workload.
   [[nodiscard]] virtual bool FlushCommandBuffers();
 
+  /// @brief Wait until all previously submitted command buffers are
+  ///        processed and displayed by the GPU.
+  ///
+  /// Outstanding unflushed command buffers are not committed, submitted,
+  /// or enqueued by this method and such buffers should have already been
+  /// flushed before this method is called. The method will only wait for
+  /// work to be done that has already been submitted to the GPU.
+  ///
+  /// This method is optional and only needs to be implemented if the
+  /// context is expected to be used in benchmark situations where the
+  /// timing of when the GPU is finished is germaine. Test implementations
+  /// can safely implement this method as `return false;`
   [[nodiscard]] virtual bool FinishQueue() = 0;
 
   virtual bool AddTrackingFence(const std::shared_ptr<Texture>& texture) const;

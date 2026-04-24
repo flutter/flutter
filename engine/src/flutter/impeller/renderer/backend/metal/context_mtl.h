@@ -149,6 +149,7 @@ class ContextMTL final : public Context,
   // visible for testing.
   void FlushTasksAwaitingGPU();
 
+  // |Context|
   [[nodiscard]] bool FinishQueue() override;
 
  private:
