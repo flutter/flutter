@@ -99,7 +99,7 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
             canRequestFocus: false,
             child: TextFieldTapRegion(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: <Widget>[
                   for (final String key in <String>['A', 'B', 'C'])
                     ElevatedButton(
@@ -117,7 +117,7 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
 }
 
 class MyTextInputControl with TextInputControl {
-  TextEditingValue _editingState = TextEditingValue.empty;
+  TextEditingValue _editingState = .empty;
   final ValueNotifier<bool> _visible = ValueNotifier<bool>(false);
 
   /// The input control's visibility state for updating the visual presentation.

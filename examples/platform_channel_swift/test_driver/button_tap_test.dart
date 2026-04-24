@@ -14,7 +14,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      driver.close();
+      await driver.close();
     });
 
     test('tap on the button, verify result', () async {

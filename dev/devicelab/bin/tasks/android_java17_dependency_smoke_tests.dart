@@ -17,16 +17,14 @@ import 'package:flutter_devicelab/framework/framework.dart';
 // (*) - support range defined in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts.
 List<VersionTuple> versionTuples = <VersionTuple>[
   // Minimum supported
-  VersionTuple(agpVersion: '8.1.1', gradleVersion: '8.3', kotlinVersion: '1.8.10'),
+  VersionTuple(agpVersion: '8.6.0', gradleVersion: '8.7', kotlinVersion: '2.0.0'),
   // Template
-  VersionTuple(agpVersion: '8.9.1', gradleVersion: '8.12', kotlinVersion: '2.1.0'),
-  // Max known
-  VersionTuple(agpVersion: '8.13.0', gradleVersion: '9.1.0', kotlinVersion: '2.2.0'),
-  /* Others */
-  VersionTuple(agpVersion: '8.4.0', gradleVersion: '8.6', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.6.0', gradleVersion: '8.7', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '2.1.0'),
   VersionTuple(agpVersion: '8.11.1', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
+  // Max known
+  VersionTuple(agpVersion: '8.13.0', gradleVersion: '9.1.0', kotlinVersion: '2.2.20'),
+  /* Others */
+  VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '2.1.0'),
+  VersionTuple(agpVersion: '8.9.0', gradleVersion: '8.11.1', kotlinVersion: '2.2.0'),
 ]; // Max length is 7 entries until this test is split See https://github.com/flutter/flutter/issues/167495.
 
 Future<void> main() async {

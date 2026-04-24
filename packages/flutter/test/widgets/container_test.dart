@@ -7,17 +7,27 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const kGreen = Color(0xFF00FF00);
+  const kSemiTransparentBlue = Color(0x7F0000FF);
+  const kYellow = Color(0xFFFFFF00);
+  const kBlue = Color(0xFF0000FF);
+  const kCyan = Color(0xFF00FFFF);
+  const kBlack = Color(0xFF000000);
+  const kCustomYellowHalfOpacity = Color(0x80FFEB3B);
+  const kCustomRed = Color(0xFFF44336);
+  const kCustomBlue = Color(0xFF2196F3);
+
   group('Container control tests:', () {
     final container = Container(
       alignment: Alignment.bottomRight,
       padding: const EdgeInsets.all(7.0),
       // uses color, not decoration:
-      color: const Color(0xFF00FF00),
-      foregroundDecoration: const BoxDecoration(color: Color(0x7F0000FF)),
+      color: kGreen,
+      foregroundDecoration: const BoxDecoration(color: kSemiTransparentBlue),
       width: 53.0,
       height: 76.0,
       constraints: const BoxConstraints(
@@ -32,7 +42,7 @@ void main() {
         height: 33.0,
         child: DecoratedBox(
           // uses decoration, not color:
-          decoration: BoxDecoration(color: Color(0xFFFFFF00)),
+          decoration: BoxDecoration(color: kYellow),
         ),
       ),
     );
@@ -46,9 +56,9 @@ void main() {
       expect(
         box,
         paints
-          ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0xFF00FF00))
-          ..rect(rect: const Rect.fromLTWH(26.0, 43.0, 25.0, 33.0), color: const Color(0xFFFFFF00))
-          ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: const Color(0x7F0000FF)),
+          ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: kGreen)
+          ..rect(rect: const Rect.fromLTWH(26.0, 43.0, 25.0, 33.0), color: kYellow)
+          ..rect(rect: const Rect.fromLTWH(5.0, 5.0, 53.0, 78.0), color: kSemiTransparentBlue),
       );
     });
 
@@ -87,7 +97,7 @@ void main() {
             '     │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
             '     │ size: Size(53.0, 78.0)\n'
             '     │ decoration: BoxDecoration:\n'
-            '     │   color: ${const Color(0x7f0000ff)}\n'
+            '     │   color: $kSemiTransparentBlue\n'
             '     │ configuration: ImageConfiguration(bundle: PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform: android)\n'
             '     │\n'
             '     └─child: _RenderColoredBox#00000\n'
@@ -121,7 +131,7 @@ void main() {
             '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
             '                 size: Size(25.0, 33.0)\n'
             '                 decoration: BoxDecoration:\n'
-            '                   color: ${const Color(0xffffff00)}\n'
+            '                   color: $kYellow\n'
             '                 configuration: ImageConfiguration(bundle: PlatformAssetBundle#00000(), devicePixelRatio: 3.0, platform: android)\n',
           ),
         );
@@ -167,7 +177,7 @@ void main() {
             '     │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
             '     │ size: Size(53.0, 78.0)\n'
             '     │ decoration: BoxDecoration:\n'
-            '     │   color: ${const Color(0x7f0000ff)}\n'
+            '     │   color: $kSemiTransparentBlue\n'
             '     │ configuration: ImageConfiguration(bundle: '
             'PlatformAssetBundle#fe53b(), devicePixelRatio: 3.0, platform: '
             'android)\n'
@@ -223,7 +233,7 @@ void main() {
             '                 constraints: BoxConstraints(w=25.0, h=33.0)\n'
             '                 size: Size(25.0, 33.0)\n'
             '                 decoration: BoxDecoration:\n'
-            '                   color: ${const Color(0xffffff00)}\n'
+            '                   color: $kYellow\n'
             '                 configuration: ImageConfiguration(bundle: '
             'PlatformAssetBundle#fe53b(), devicePixelRatio: 3.0, platform: '
             'android)\n',
@@ -275,7 +285,7 @@ void main() {
             '     │ semantics node: null\n'
             '     │ size: Size(53.0, 78.0)\n'
             '     │ decoration: BoxDecoration:\n'
-            '     │   color: ${const Color(0x7f0000ff)}\n'
+            '     │   color: $kSemiTransparentBlue\n'
             '     │   image: null\n'
             '     │   border: null\n'
             '     │   borderRadius: null\n'
@@ -348,7 +358,7 @@ void main() {
             '                 semantics node: null\n'
             '                 size: Size(25.0, 33.0)\n'
             '                 decoration: BoxDecoration:\n'
-            '                   color: ${const Color(0xffffff00)}\n'
+            '                   color: $kYellow\n'
             '                   image: null\n'
             '                   border: null\n'
             '                   borderRadius: null\n'
@@ -414,7 +424,7 @@ void main() {
             '     │ isSemanticBoundary: false\n'
             '     │ size: Size(53.0, 78.0)\n'
             '     │ decoration: BoxDecoration:\n'
-            '     │   color: ${const Color(0x7f0000ff)}\n'
+            '     │   color: $kSemiTransparentBlue\n'
             '     │   image: null\n'
             '     │   border: null\n'
             '     │   borderRadius: null\n'
@@ -503,7 +513,7 @@ void main() {
             '                 isSemanticBoundary: false\n'
             '                 size: Size(25.0, 33.0)\n'
             '                 decoration: BoxDecoration:\n'
-            '                   color: ${const Color(0xffffff00)}\n'
+            '                   color: $kYellow\n'
             '                   image: null\n'
             '                   border: null\n'
             '                   borderRadius: null\n'
@@ -536,10 +546,10 @@ void main() {
           'After painting it, the canvas save count was 2. Every call to '
           'save() or saveLayer() must be matched by a call to restore().\n'
           '   The decoration was:\n'
-          '     BoxDecoration(color: ${const Color(0xffffff00)})\n'
+          '     BoxDecoration(color: $kYellow)\n'
           '   The painter was:\n'
           '     BoxPainter for BoxDecoration(color: '
-          '${const Color(0xffffff00)})\n',
+          '$kYellow)\n',
         );
       });
     });
@@ -565,7 +575,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(width: 100.0, height: 100.0, color: const Color(0xFF0000FF)),
+              child: Container(width: 100.0, height: 100.0, color: kBlue),
             ),
             Positioned(
               top: 100.0,
@@ -576,7 +586,7 @@ void main() {
                 key: key,
                 transform: Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                 transformAlignment: Alignment.centerRight,
-                child: Container(color: const Color(0xFF00FFFF)),
+                child: Container(color: kCyan),
               ),
             ),
           ],
@@ -623,7 +633,7 @@ void main() {
   });
 
   testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
-    Future<void> test(Decoration decoration) async {
+    Future<void> test(Decoration decoration, [String? name]) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -634,7 +644,7 @@ void main() {
                 child: Container(
                   clipBehavior: Clip.hardEdge,
                   decoration: decoration,
-                  child: ColoredBox(color: Colors.yellow.withOpacity(0.5)),
+                  child: const ColoredBox(color: kCustomYellowHalfOpacity),
                 ),
               ),
             ),
@@ -643,12 +653,12 @@ void main() {
       );
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('container_test.getClipPath.${decoration.runtimeType}.png'),
+        matchesGoldenFile('container_test.getClipPath.${name ?? decoration.runtimeType}.png'),
       );
     }
 
     await test(const BoxDecoration());
-    await test(const UnderlineTabIndicator());
+    await test(const _TestDecoration(), 'UnderlineTabIndicator');
     await test(const ShapeDecoration(shape: StadiumBorder()));
     await test(const FlutterLogoDecoration());
   });
@@ -660,7 +670,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(decoration: const BoxDecoration(color: Colors.black)),
+        child: Container(decoration: const BoxDecoration(color: kBlack)),
       ),
     );
 
@@ -673,7 +683,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(foregroundDecoration: const BoxDecoration(color: Colors.black)),
+        child: Container(foregroundDecoration: const BoxDecoration(color: kBlack)),
       ),
     );
 
@@ -686,7 +696,7 @@ void main() {
         onTap: () {
           tapped = true;
         },
-        child: Container(color: Colors.black),
+        child: Container(color: kBlack),
       ),
     );
 
@@ -761,8 +771,8 @@ void main() {
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(30)),
-        color: Colors.red,
-        boxShadow: <BoxShadow>[BoxShadow(color: Colors.blue, spreadRadius: 10, blurRadius: 20.0)],
+        color: kCustomRed,
+        boxShadow: <BoxShadow>[BoxShadow(color: kCustomBlue, spreadRadius: 10, blurRadius: 20.0)],
       ),
       child: const SizedBox(width: 50, height: 50),
     );
@@ -821,4 +831,49 @@ class _MockCanvas extends Fake implements Canvas {
 
   @override
   void drawRect(Rect rect, Paint paint) {}
+}
+
+/// A simple [Decoration] for testing [Container]'s clip path behavior.
+///
+/// It draws a rounded rectangle clip path, providing a unique [runtimeType] to
+/// avoid golden file name collisions with [ShapeDecoration].
+class _TestDecoration extends Decoration {
+  const _TestDecoration();
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) => _TestDecorationPainter();
+
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    const borderSideWidth = 2.0;
+    final indicator = Rect.fromLTWH(
+      rect.left,
+      rect.bottom - borderSideWidth,
+      rect.width,
+      borderSideWidth,
+    );
+    return Path()..addRect(indicator);
+  }
+}
+
+class _TestDecorationPainter extends BoxPainter {
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    assert(configuration.size != null);
+    final Rect rect = offset & configuration.size!;
+    const borderSideWidth = 2.0;
+    const color = Color(0xFFFFFFFF);
+    final paint = Paint()
+      ..color = color
+      ..strokeCap = StrokeCap.square
+      ..strokeWidth = borderSideWidth
+      ..style = PaintingStyle.stroke;
+    final Rect indicator = Rect.fromLTWH(
+      rect.left,
+      rect.bottom - borderSideWidth,
+      rect.width,
+      borderSideWidth,
+    ).deflate(borderSideWidth / 2.0);
+    canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
+  }
 }
