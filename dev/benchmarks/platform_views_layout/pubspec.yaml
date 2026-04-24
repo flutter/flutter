@@ -32,5 +32,5 @@ flutter:
   config:
     # This project uses "google_mobile_ads", which is not compatible with Swift Package Manager.
     # Disable it until https://github.com/googleads/googleads-mobile-flutter/issues/1239 is resolved.
-    enable-swift-package-manager: false
+    enable-swift-package-manager: true
 # PUBSPEC CHECKSUM: a4ttir
