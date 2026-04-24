@@ -64,11 +64,9 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
     impeller::RenderToTarget(aiks_context_.GetContentContext(),
                              GetRenderTarget(), display_list,
                              display_list->GetBounds(), false, false);
-    auto idle_waiter = context_->GetIdleWaiter();
-    if (idle_waiter) {
-      // This is only non-null for Vulkan contexts, which aren't yet
-      // supported yet, but checking it for future potential...
-      idle_waiter->WaitIdle();
+    if (!context_->FinishQueue()) {
+      FML_LOG(ERROR) << "Impeller backend did not implement FinishQueue";
+      FML_UNREACHABLE();
     }
   }
 }

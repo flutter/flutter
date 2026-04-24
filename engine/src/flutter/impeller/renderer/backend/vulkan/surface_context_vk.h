@@ -114,6 +114,8 @@ class SurfaceContextVK : public Context,
 
   bool FlushCommandBuffers() override;
 
+  bool FinishQueue() override;
+
  private:
   std::shared_ptr<ContextVK> parent_;
   std::shared_ptr<SwapchainVK> swapchain_;
