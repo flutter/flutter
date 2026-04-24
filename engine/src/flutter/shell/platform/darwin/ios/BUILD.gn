@@ -57,6 +57,7 @@ source_set("InternalFlutterSwift") {
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
     "framework/Source/LaunchEngine.swift",
+    "framework/Source/SplashScreenManager.swift",
     "framework/Source/UIPressProxy.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
@@ -222,6 +223,7 @@ if (enable_ios_unittests) {
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/LaunchEngineTest.swift",
+      "framework/Source/SplashScreenManagerTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [ ":flutter_framework_source" ]
