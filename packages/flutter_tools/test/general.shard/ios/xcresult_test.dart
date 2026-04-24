@@ -29,7 +29,7 @@ void main() {
     final List<String> command;
     if (useNewCommand) {
       command = <String>[
-        ...xcode.xcrunCommand(),
+        'xcrun',
         'xcresulttool',
         'get',
         'build-results',
@@ -40,7 +40,7 @@ void main() {
       ];
     } else {
       command = <String>[
-        ...xcode.xcrunCommand(),
+        'xcrun',
         'xcresulttool',
         'get',
         '--path',
@@ -77,6 +77,8 @@ void main() {
       ),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
+      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+      const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
       setUpFakeXCResultCommand(
         stdout: resultJson,
         tempResultPath: _tempResultPath,
