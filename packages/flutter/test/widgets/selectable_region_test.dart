@@ -6731,6 +6731,83 @@ void main() {
     expect(paragraph.selections, isNotEmpty);
     expect(paragraph.selections.first, const TextSelection(baseOffset: 0, extentOffset: 12));
   });
+
+  testWidgets(
+    'context menu is positioned within overlay bounds and hittable when Overlay is not fullscreen',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/139744.
+      var menuButtonPressed = false;
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 400,
+            height: 300,
+            child: TestWidgetsApp(
+              home: SelectableRegion(
+                selectionControls: testTextSelectionHandleControls,
+                contextMenuBuilder:
+                    (BuildContext context, SelectableRegionState selectableRegionState) {
+                      final TextSelectionToolbarAnchors anchors =
+                          selectableRegionState.contextMenuAnchors;
+                      return CustomSingleChildLayout(
+                        delegate: TextSelectionToolbarLayoutDelegate(
+                          anchorAbove: anchors.primaryAnchor,
+                          anchorBelow: anchors.secondaryAnchor == null
+                              ? anchors.primaryAnchor
+                              : anchors.secondaryAnchor!,
+                        ),
+                        child: Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              menuButtonPressed = true;
+                            },
+                            child: const Text('Menu Button 1'),
+                          ),
+                        ),
+                      );
+                    },
+                child: const Text('Hello World'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Long press to select a word and show the context menu.
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Hello World'), matching: find.byType(RichText)),
+      );
+      await tester.longPressAt(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+
+      // The context menu should be visible.
+      expect(find.text('Menu Button 1'), findsOneWidget);
+
+      // Get the overlay's screen bounds.
+      final overlayRenderBox =
+          Overlay.of(
+                tester.element(find.byType(SelectableRegion)),
+                rootOverlay: true,
+              ).context.findRenderObject()!
+              as RenderBox;
+      final Rect overlayRect = overlayRenderBox.localToGlobal(Offset.zero) & overlayRenderBox.size;
+
+      // The context menu should be rendered within the overlay's screen bounds.
+      final Offset menuTopLeft = tester.getTopLeft(find.text('Menu Button 1'));
+      expect(overlayRect.contains(menuTopLeft), isTrue);
+
+      // The context menu button should be hittable (hit test must pass through
+      // the overlay's _RenderTheater to reach the toolbar).
+      await tester.tap(find.text('Menu Button 1'));
+      await tester.pump();
+      expect(menuButtonPressed, isTrue);
+    },
+    skip: kIsWeb, // [intended] On web, the browser handles context menus natively.
+  );
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {

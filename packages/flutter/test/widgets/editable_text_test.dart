@@ -15441,6 +15441,84 @@ void main() {
   );
 
   testWidgets(
+    'context menu is positioned within overlay bounds and hittable when Overlay is not fullscreen',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/139744.
+      var menuButtonPressed = false;
+      controller.text = 'Hello World';
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 400,
+            height: 300,
+            child: TestWidgetsApp(
+              home: EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(color: Color(0xFF000000)), // black.
+                cursorColor: const Color(0xFF0000FF), // blue.
+                backgroundCursorColor: const Color(0xFF808080), // grey.
+                selectionControls: testTextSelectionHandleControls,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  final TextSelectionToolbarAnchors anchors = editableTextState.contextMenuAnchors;
+                  return CustomSingleChildLayout(
+                    delegate: TextSelectionToolbarLayoutDelegate(
+                      anchorAbove: anchors.primaryAnchor,
+                      anchorBelow: anchors.secondaryAnchor == null
+                          ? anchors.primaryAnchor
+                          : anchors.secondaryAnchor!,
+                    ),
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          menuButtonPressed = true;
+                        },
+                        child: const Text('Menu Button 1'),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Long press to select a word and show the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      // The context menu should be visible.
+      expect(find.text('Menu Button 1'), findsOneWidget);
+
+      // Get the overlay's screen bounds.
+      final overlayRenderBox =
+          Overlay.of(
+                tester.element(find.byType(EditableText)),
+                rootOverlay: true,
+              ).context.findRenderObject()!
+              as RenderBox;
+      final Rect overlayRect = overlayRenderBox.localToGlobal(Offset.zero) & overlayRenderBox.size;
+
+      // The context menu should be rendered within the overlay's screen bounds.
+      final Offset menuTopLeft = tester.getTopLeft(find.text('Menu Button 1'));
+      expect(overlayRect.contains(menuTopLeft), isTrue);
+
+      // The context menu button should be hittable.
+      await tester.tap(find.text('Menu Button 1'));
+      await tester.pump();
+      expect(menuButtonPressed, isTrue);
+    },
+    skip: kIsWeb, // [intended] On web, the browser handles context menus natively.
+  );
+
+  testWidgets(
     'contextMenuBuilder can be updated to display a new menu',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/142077.
