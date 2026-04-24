@@ -1278,8 +1278,6 @@ end''');
       );
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
@@ -1288,6 +1286,8 @@ end''');
           stderr:
               'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
         ),
+        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
       ]);
 
       // Capture Usage.test() events.
