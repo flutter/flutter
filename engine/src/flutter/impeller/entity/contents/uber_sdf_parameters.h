@@ -53,6 +53,22 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
+  /// Creates UberSDFParameters for a symmetric round superellipse.
+  static UberSDFParameters MakeRoundedSuperellipse(
+      Color color,
+      const Rect& bounds,
+      Scalar degree_top,
+      const RoundingRadii& radii_top,
+      Scalar corner_angle_span_top,
+      Point corner_circle_center_top,
+      Scalar degree_right,
+      const RoundingRadii& radii_right,
+      Scalar corner_angle_span_right,
+      Point corner_circle_center_right,
+      Scalar superellipse_c,
+      Point superellipse_scale,
+      std::optional<StrokeParameters> stroke);
+
   /// The type of shape to render.
   Type type;
 
@@ -70,9 +86,35 @@ struct UberSDFParameters {
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
 
-  /// The corner radii for a rounded rectangle.
-  /// Only used if type is kRoundedRect.
+  /// The corner radii for the top octants of a RoundSuperellipse.
   RoundingRadii radii;
+
+  /// The corner radii for the right octants of a RoundSuperellipse.
+  RoundingRadii radii_right;
+
+  /// The degree of the top octant of a RoundSuperellipse.
+  Scalar superellipse_degree_top;
+
+  /// The span of the top circular arc in a RoundSuperellipse.
+  Scalar corner_angle_span_top;
+
+  /// The center of the top circular arc in a RoundSuperellipse.
+  Point corner_circle_center_top;
+
+  /// The degree of the right octant of a RoundSuperellipse.
+  Scalar superellipse_degree_right;
+
+  /// The span of the right circular arc in a RoundSuperellipse.
+  Scalar corner_angle_span_right;
+
+  /// The center of the right circular arc in a RoundSuperellipse.
+  Point corner_circle_center_right;
+
+  /// The offset of the octants in a RoundSuperellipse.
+  Scalar superellipse_c;
+
+  /// The scale of the superellipse.
+  Point superellipse_scale;
 };
 
 }  // namespace impeller
