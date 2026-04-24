@@ -103,6 +103,8 @@ class IMobileDevice {
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID, bool isWirelesslyConnected) {
+    final RunResult result = _processUtils.runSync(['file', _idevicesyslogPath]);
+    print('VICTORIA DEBUG: \nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     return _processUtils.start(<String>[
       _idevicesyslogPath,
       '-u',
