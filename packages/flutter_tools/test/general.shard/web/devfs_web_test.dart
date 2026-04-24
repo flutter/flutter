@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:dwds/dwds.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -1014,6 +1015,437 @@ void main() {
   );
 
   test(
+    'Updates shader assets during incremental update',
+    () => testbed.run(() async {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.writeAsStringSync('main() {}');
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
+
+      final webDevFS = WebDevFS(
+        packagesFilePath: '.dart_tool/package_config.json',
+        urlTunneller: null,
+        useSseForDebugProxy: false,
+        useSseForDebugBackend: false,
+        useSseForInjectedClient: false,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(),
+        entrypoint: globals.fs.file('lib/main.dart').uri,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nativeNullAssertions: true,
+        ddcModuleSystem: false,
+        canaryFeatures: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
+        fileSystem: globals.fs,
+        logger: logger,
+        platform: linux,
+        webCrossOriginIsolation: false,
+        testMode: true,
+      );
+
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.flutterJs.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+
+      await webDevFS.create();
+      webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+
+      // Setup assets
+      final Directory assetDir = globals.fs.directory(getAssetBuildDirectory())
+        ..createSync(recursive: true);
+      final File shaderFile = globals.fs.file(globals.fs.path.join(assetDir.path, 'my_shader.frag'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('shader_source');
+
+      final assetBundle = FakeAssetBundle();
+      assetBundle.entries['my_shader.frag'] = AssetBundleEntry(
+        DevFSFileContent(shaderFile),
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
+
+      // First update (initial upload)
+      await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        bundleFirstUpload: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(),
+      );
+
+      // Modify shader
+      final modifiedContent = DevFSByteContent(utf8.encode('shader_source_modified'));
+      assetBundle.entries['my_shader.frag'] = AssetBundleEntry(
+        modifiedContent,
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
+
+      // Second update (incremental)
+      await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: assetBundle,
+      );
+
+      // Verify shader was recompiled and written
+      final File destinationFile = globals.fs.file(
+        globals.fs.path.join(assetDir.path, 'my_shader.frag'),
+      );
+      expect(destinationFile.existsSync(), isTrue);
+      expect(destinationFile.readAsStringSync(), equals('compiled_shader'));
+      expect(webDevFS.shaderPathsToEvict, contains('my_shader.frag'));
+
+      await webDevFS.destroy();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
+
+  test(
+    'Updates regular assets during incremental update',
+    () => testbed.run(() async {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.writeAsStringSync('main() {}');
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
+
+      final webDevFS = WebDevFS(
+        packagesFilePath: '.dart_tool/package_config.json',
+        urlTunneller: null,
+        useSseForDebugProxy: false,
+        useSseForDebugBackend: false,
+        useSseForInjectedClient: false,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(),
+        entrypoint: globals.fs.file('lib/main.dart').uri,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nativeNullAssertions: true,
+        ddcModuleSystem: false,
+        canaryFeatures: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
+        fileSystem: globals.fs,
+        logger: logger,
+        platform: linux,
+        webCrossOriginIsolation: false,
+        testMode: true,
+      );
+
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.flutterJs.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+
+      await webDevFS.create();
+      webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+
+      // Setup assets
+      final Directory sourceDir = globals.fs.directory('source_assets')
+        ..createSync(recursive: true);
+      final File imageFile = globals.fs.file(globals.fs.path.join(sourceDir.path, 'my_image.png'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(kTransparentImage);
+
+      final assetBundle = FakeAssetBundle();
+      assetBundle.entries['my_image.png'] = AssetBundleEntry(
+        DevFSFileContent(imageFile),
+        kind: AssetKind.regular,
+        transformers: const [],
+      );
+
+      // First update (initial upload)
+      await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        bundleFirstUpload: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(),
+      );
+
+      // Modify asset
+      final modifiedContent = DevFSByteContent(<int>[1, 2, 3, 4]);
+      assetBundle.entries['my_image.png'] = AssetBundleEntry(
+        modifiedContent,
+        kind: AssetKind.regular,
+        transformers: const [],
+      );
+
+      // Second update (incremental)
+      await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: assetBundle,
+      );
+
+      // Verify asset was written
+      final File destinationFile = globals.fs.file(
+        globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
+      );
+      expect(destinationFile.existsSync(), isTrue);
+      expect(destinationFile.readAsBytesSync(), equals(<int>[1, 2, 3, 4]));
+
+      await webDevFS.destroy();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
+
+  test(
+    'Writes assets during initial upload',
+    () => testbed.run(() async {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.writeAsStringSync('main() {}');
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
+
+      final webDevFS = WebDevFS(
+        packagesFilePath: '.dart_tool/package_config.json',
+        urlTunneller: null,
+        useSseForDebugProxy: false,
+        useSseForDebugBackend: false,
+        useSseForInjectedClient: false,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(),
+        entrypoint: globals.fs.file('lib/main.dart').uri,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nativeNullAssertions: true,
+        ddcModuleSystem: false,
+        canaryFeatures: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
+        fileSystem: globals.fs,
+        logger: logger,
+        platform: linux,
+        webCrossOriginIsolation: false,
+        testMode: true,
+      );
+
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.flutterJs.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+
+      await webDevFS.create();
+      webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+
+      // Setup assets
+      final Directory sourceDir = globals.fs.directory('source_assets')
+        ..createSync(recursive: true);
+      final File shaderFile =
+          globals.fs.file(globals.fs.path.join(sourceDir.path, 'my_shader.frag'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('shader_source');
+      final File imageFile = globals.fs.file(globals.fs.path.join(sourceDir.path, 'my_image.png'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(kTransparentImage);
+
+      final assetBundle = FakeAssetBundle();
+      assetBundle.entries['my_shader.frag'] = AssetBundleEntry(
+        DevFSFileContent(shaderFile),
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
+      assetBundle.entries['my_image.png'] = AssetBundleEntry(
+        DevFSFileContent(imageFile),
+        kind: AssetKind.regular,
+        transformers: const [],
+      );
+
+      // First update (initial upload)
+      await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        bundleFirstUpload: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: assetBundle,
+      );
+
+      // Verify assets were written
+      final File destinationShader = globals.fs.file(
+        globals.fs.path.join(getAssetBuildDirectory(), 'my_shader.frag'),
+      );
+      final File destinationImage = globals.fs.file(
+        globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
+      );
+      expect(destinationShader.existsSync(), isTrue);
+      expect(destinationShader.readAsStringSync(), equals('compiled_shader'));
+      expect(destinationImage.existsSync(), isTrue);
+      expect(destinationImage.readAsBytesSync(), equals(kTransparentImage));
+
+      await webDevFS.destroy();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
+
+  test(
+    'Gracefully handles shader compilation failure',
+    () => testbed.run(() async {
+      final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+        ..createSync(recursive: true);
+      outputFile.writeAsStringSync('main() {}');
+      outputFile.parent.childFile('a.sources').writeAsStringSync('');
+      outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+      outputFile.parent.childFile('a.metadata').writeAsStringSync('{}');
+
+      final residentCompiler = FakeResidentCompiler()
+        ..output = const CompilerOutput('a', 0, <Uri>[]);
+
+      final webDevFS = WebDevFS(
+        packagesFilePath: '.dart_tool/package_config.json',
+        urlTunneller: null,
+        useSseForDebugProxy: false,
+        useSseForDebugBackend: false,
+        useSseForInjectedClient: false,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(),
+        entrypoint: globals.fs.file('lib/main.dart').uri,
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nativeNullAssertions: true,
+        ddcModuleSystem: false,
+        canaryFeatures: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
+        fileSystem: globals.fs,
+        logger: logger,
+        platform: linux,
+        webCrossOriginIsolation: false,
+        testMode: true,
+      );
+
+      webDevFS.requireJS.createSync(recursive: true);
+      webDevFS.flutterJs.createSync(recursive: true);
+      webDevFS.stackTraceMapper.createSync(recursive: true);
+
+      await webDevFS.create();
+      webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+
+      // Setup assets
+      final Directory sourceDir = globals.fs.directory('source_assets')
+        ..createSync(recursive: true);
+      final File shaderFile =
+          globals.fs.file(globals.fs.path.join(sourceDir.path, 'my_shader.frag'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('shader_source');
+
+      final assetBundle = FakeAssetBundle();
+      assetBundle.entries['my_shader.frag'] = AssetBundleEntry(
+        DevFSFileContent(shaderFile),
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
+
+      // First update (initial upload)
+      await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        bundleFirstUpload: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(),
+        bundle: assetBundle,
+      );
+
+      // Modify shader
+      final modifiedContent = DevFSByteContent(utf8.encode('shader_source_modified'));
+      assetBundle.entries['my_shader.frag'] = AssetBundleEntry(
+        modifiedContent,
+        kind: AssetKind.shader,
+        transformers: const [],
+      );
+
+      // Second update (incremental) with failing compiler
+      final UpdateFSReport report = await webDevFS.update(
+        mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
+        generator: residentCompiler,
+        trackWidgetCreation: true,
+        invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
+        pathToReload: '',
+        dillOutputPath: 'out.dill',
+        shaderCompiler: const FakeShaderCompiler(returnNull: true),
+        bundle: assetBundle,
+      );
+
+      expect(report.success, isFalse);
+
+      // Verify shader was NOT overwritten
+      final File destinationFile = globals.fs.file(
+        globals.fs.path.join(getAssetBuildDirectory(), 'my_shader.frag'),
+      );
+      expect(destinationFile.existsSync(), isTrue);
+      expect(
+        destinationFile.readAsStringSync(),
+        equals('compiled_shader'),
+      ); // Still compiled_shader
+      expect(webDevFS.shaderPathsToEvict, isNot(contains('my_shader.frag')));
+
+      await webDevFS.destroy();
+    }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
+
+  test(
     'Can start web server with specified assets in sound null safety mode',
     () => testbed.run(() async {
       final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
@@ -2002,15 +2434,25 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {
-  const FakeShaderCompiler();
+  const FakeShaderCompiler({this.returnNull = false});
+
+  final bool returnNull;
 
   @override
   void configureCompiler(TargetPlatform? platform) {}
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
-    throw UnimplementedError();
+  Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
+    if (returnNull) {
+      return null;
+    }
+    return DevFSStringContent('compiled_shader');
   }
+}
+
+class FakeAssetBundle extends Fake implements AssetBundle {
+  @override
+  final Map<String, AssetBundleEntry> entries = <String, AssetBundleEntry>{};
 }
 
 class FakeDwds extends Fake implements Dwds {

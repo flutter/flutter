@@ -24,8 +24,6 @@ import 'compile.dart';
 import 'convert.dart' show base64, utf8;
 import 'vmservice.dart';
 
-const _kFontManifest = 'FontManifest.json';
-
 class DevFSConfig {
   /// Should DevFS assume that symlink targets are stable?
   bool cacheSymlinks = false;
@@ -589,7 +587,6 @@ class DevFS {
 
     // Update modified files
     final dirtyEntries = <Uri, DevFSContent>{};
-    final pendingAssetBuilds = <Future<void>>[];
     var assetBuildFailed = false;
     var syncedBytes = 0;
     if (resetCompiler) {
@@ -626,88 +623,26 @@ class DevFS {
       // await null to give time for telling the compiler to compile.
       await null;
 
-      // The tool writes the assets into the AssetBundle working dir so that they
-      // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory(_config, _fileSystem);
-      final String assetBuildDirPrefix = _asUriPath(assetDirectory);
-      bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
-        // If the content is backed by a real file, isModified will file stat and return true if
-        // it was modified since the last time this was called.
-        if (!entry.content.isModified || bundleFirstUpload) {
-          return;
-        }
-        // Modified shaders must be recompiled per-target platform.
-        final Uri deviceUri = _fileSystem.path.toUri(
-          _fileSystem.path.join(assetDirectory, archivePath),
-        );
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        }
-        // If the font manifest is updated, mark this as true so the hot runner
-        // can invoke a service extension to force the engine to reload fonts.
-        if (archivePath == _kFontManifest) {
-          didUpdateFontManifest = true;
-        }
-        final AssetKind? kind = bundle.entries[archivePath]?.kind;
-        switch (kind) {
-          case AssetKind.shader:
-            final Future<DevFSContent?> pending = (() async {
-              DevFSContent content = entry.content;
-              if (entry.transformers.isNotEmpty) {
-                final DevFSContent? transformed = await _assetTransformer.retransformAsset(
-                  inputAssetKey: archivePath,
-                  inputAssetContent: content,
-                  transformerEntries: entry.transformers,
-                  workingDirectory: rootDirectory.path,
-                );
-                if (transformed == null) {
-                  return null;
-                }
-                content = transformed;
-              }
-              return shaderCompiler.recompileShader(content);
-            })();
-            pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
-              if (content == null) {
-                assetBuildFailed = true;
-                return;
-              }
-              dirtyEntries[deviceUri] = content;
-              syncedBytes += content.size;
-              if (!bundleFirstUpload) {
-                shaderPathsToEvict.add(archivePath);
-              }
-            });
-          case AssetKind.regular:
-          case AssetKind.font:
-          case null:
-            final Future<DevFSContent?> pending = (() async {
-              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
-                return entry.content;
-              }
-              return _assetTransformer.retransformAsset(
-                inputAssetKey: archivePath,
-                inputAssetContent: entry.content,
-                transformerEntries: entry.transformers,
-                workingDirectory: rootDirectory.path,
-              );
-            })();
-
-            pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
-              if (content == null) {
-                assetBuildFailed = true;
-                return;
-              }
-              dirtyEntries[deviceUri] = content;
-              syncedBytes += content.size;
-              if (!bundleFirstUpload) {
-                assetPathsToEvict.add(archivePath);
-              }
-            });
-        }
-      });
+      final int bundleSyncedBytes = await updateBundle(
+        bundle: bundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: assetDirectory,
+        assetTransformer: _assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        rootDirectoryPath: rootDirectory.path,
+        assetPathsToEvict: assetPathsToEvict,
+        shaderPathsToEvict: shaderPathsToEvict,
+        bundleFirstUpload: bundleFirstUpload,
+        onFontManifestUpdated: () => didUpdateFontManifest = true,
+      );
+      if (bundleSyncedBytes < 0) {
+        assetBuildFailed = true;
+      } else {
+        syncedBytes += bundleSyncedBytes;
+      }
 
       // Mark processing of bundle done for testability of starting the compile
       // before processing bundle.
@@ -737,7 +672,6 @@ class DevFS {
     _logger.printTrace('Updating files.');
     final Stopwatch transferTimer = _stopwatchFactory.createStopwatch('transfer')..start();
 
-    await Future.wait(pendingAssetBuilds);
     if (assetBuildFailed) {
       return UpdateFSReport();
     }
@@ -755,6 +689,114 @@ class DevFS {
       compileDuration: compileTimer.elapsed,
       transferDuration: transferTimer.elapsed,
     );
+  }
+
+  /// Process and sync [bundle] assets to [dirtyEntries].
+  ///
+  /// Returns the total number of bytes processed, or -1 if an asset build failed.
+  static Future<int> updateBundle({
+    required AssetBundle bundle,
+    required Map<Uri, DevFSContent> dirtyEntries,
+    required String assetDirectory,
+    required DevelopmentAssetTransformer assetTransformer,
+    required DevelopmentShaderCompiler shaderCompiler,
+    required FileSystem fileSystem,
+    required Logger logger,
+    required String rootDirectoryPath,
+    required Set<String> assetPathsToEvict,
+    required Set<String> shaderPathsToEvict,
+    required bool bundleFirstUpload,
+    void Function()? onFontManifestUpdated,
+  }) async {
+    final String assetBuildDirPrefix = '${fileSystem.path.toUri(assetDirectory).path}/';
+    final List<Future<void>> pendingAssetBuilds = <Future<void>>[];
+    int syncedBytes = 0;
+    bool assetBuildFailed = false;
+
+    bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
+      // If the content is backed by a real file, isModified will file stat and return true if
+      // it was modified since the last time this was called.
+      if (!entry.content.isModified && !bundleFirstUpload) {
+        return;
+      }
+      // Modified shaders must be recompiled per-target platform.
+      final Uri deviceUri = fileSystem.path.toUri(
+        fileSystem.path.join(assetDirectory, archivePath),
+      );
+      if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+      }
+      // If the font manifest is updated, mark this as true so the hot runner
+      // can invoke a service extension to force the engine to reload fonts.
+      if (archivePath == kFontManifestJson) {
+        onFontManifestUpdated?.call();
+      }
+      final AssetKind? kind = entry.kind;
+      switch (kind) {
+        case AssetKind.shader:
+          final Future<DevFSContent?> pending = (() async {
+            DevFSContent content = entry.content;
+            if (entry.transformers.isNotEmpty) {
+              final DevFSContent? transformed = await assetTransformer.retransformAsset(
+                inputAssetKey: archivePath,
+                inputAssetContent: content,
+                transformerEntries: entry.transformers,
+                workingDirectory: rootDirectoryPath,
+              );
+              if (transformed == null) {
+                return null;
+              }
+              content = transformed;
+            }
+            return shaderCompiler.recompileShader(content);
+          })();
+          pendingAssetBuilds.add(pending);
+          pending.then((DevFSContent? content) {
+            if (content == null) {
+              assetBuildFailed = true;
+              return;
+            }
+            dirtyEntries[deviceUri] = content;
+            syncedBytes += content.size;
+            if (!bundleFirstUpload) {
+              shaderPathsToEvict.add(archivePath);
+            }
+          });
+        case AssetKind.regular:
+        case AssetKind.font:
+        case null:
+          final Future<DevFSContent?> pending = (() async {
+            if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+              return entry.content;
+            }
+            return assetTransformer.retransformAsset(
+              inputAssetKey: archivePath,
+              inputAssetContent: entry.content,
+              transformerEntries: entry.transformers,
+              workingDirectory: rootDirectoryPath,
+            );
+          })();
+
+          pendingAssetBuilds.add(pending);
+          pending.then((DevFSContent? content) {
+            if (content == null) {
+              assetBuildFailed = true;
+              return;
+            }
+            dirtyEntries[deviceUri] = content;
+            syncedBytes += content.size;
+            if (!bundleFirstUpload) {
+              assetPathsToEvict.add(archivePath);
+            }
+          });
+      }
+    });
+
+    await Future.wait(pendingAssetBuilds);
+    if (assetBuildFailed) {
+      return -1;
+    }
+    return syncedBytes;
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.

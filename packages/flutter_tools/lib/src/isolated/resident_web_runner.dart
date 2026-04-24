@@ -289,6 +289,8 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
             : null;
 
+        flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
+
         flutterDevice!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,

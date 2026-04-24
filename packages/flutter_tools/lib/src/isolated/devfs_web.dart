@@ -18,11 +18,10 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
-import '../bundle_builder.dart';
 import '../compile.dart';
 import '../devfs.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
@@ -92,6 +91,16 @@ class WebDevFS implements DevFS {
     if (ddcModuleSystem) {
       assert(canaryFeatures);
     }
+    _assetTransformer = DevelopmentAssetTransformer(
+      transformer: AssetTransformer(
+        processManager: globals.processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        buildMode: buildInfo.mode,
+      ),
+      fileSystem: fileSystem,
+      logger: logger,
+    );
   }
 
   final Uri entrypoint;
@@ -109,6 +118,7 @@ class WebDevFS implements DevFS {
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nativeNullAssertions;
+  late final DevelopmentAssetTransformer _assetTransformer;
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
@@ -134,6 +144,8 @@ class WebDevFS implements DevFS {
 
   @override
   bool didUpdateFontManifest = false;
+
+  final Set<String> _shaderPathsToEvict = <String>{};
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -279,6 +291,7 @@ class WebDevFS implements DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
+    _shaderPathsToEvict.clear();
     lastPackageConfig = packageConfig;
     final File mainFile = fileSystem.file(mainUri);
     final String outputDirectoryPath = mainFile.parent.path;
@@ -336,20 +349,47 @@ class WebDevFS implements DevFS {
                 loaderRootDirectory: baseUri.toString(),
               ),
       );
-      // TODO(zanderso): refactor the asset code in this and the regular devfs to
-      // be shared.
-      if (bundle != null) {
-        await writeBundle(
-          fileSystem.directory(getAssetBuildDirectory()),
-          bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
-          fileSystem: fileSystem,
-          artifacts: globals.artifacts!,
-          logger: logger,
-          projectDir: rootDirectory,
-          buildMode: buildInfo.mode,
+    }
+    var syncedBytes = 0;
+    if (bundle != null) {
+      final String assetDirectory = fileSystem.path.absolute(getAssetBuildDirectory());
+      final Directory assetDir = fileSystem.directory(assetDirectory);
+
+      if (bundleFirstUpload && assetDir.existsSync()) {
+        try {
+          assetDir.deleteSync(recursive: true);
+        } on FileSystemException catch (err) {
+          logger.printWarning(
+            'Failed to clean up asset directory ${assetDir.path}: $err\n'
+            'To clean build artifacts, use the command "flutter clean".',
+          );
+        }
+      }
+      assetDir.createSync(recursive: true);
+
+      final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
+      final int bundleSyncedBytes = await DevFS.updateBundle(
+        bundle: bundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: assetDirectory,
+        assetTransformer: _assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        logger: logger,
+        rootDirectoryPath: rootDirectory.path,
+        assetPathsToEvict: <String>{}, // Web doesn't evict regular assets
+        shaderPathsToEvict: _shaderPathsToEvict,
+        bundleFirstUpload: bundleFirstUpload,
+        onFontManifestUpdated: () => didUpdateFontManifest = true,
+      );
+      if (bundleSyncedBytes < 0) {
+        return UpdateFSReport();
+      }
+      syncedBytes += bundleSyncedBytes;
+      if (dirtyEntries.isNotEmpty) {
+        await LocalDevFSWriter(fileSystem: fileSystem).write(
+          dirtyEntries,
+          fileSystem.path.toUri(assetDirectory),
         );
       }
     }
@@ -415,7 +455,7 @@ class WebDevFS implements DevFS {
     }
     return UpdateFSReport(
       success: true,
-      syncedBytes: codeFile.lengthSync(),
+      syncedBytes: codeFile.lengthSync() + syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
     );
   }
@@ -476,5 +516,5 @@ class WebDevFS implements DevFS {
   }
 
   @override
-  Set<String> get shaderPathsToEvict => <String>{};
+  Set<String> get shaderPathsToEvict => _shaderPathsToEvict;
 }
