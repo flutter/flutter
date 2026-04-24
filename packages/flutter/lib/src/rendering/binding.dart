@@ -725,7 +725,7 @@ mixin RendererBinding
   ///    views or views returning from a paused lifecycle state).
   ///  - Its [PipelineOwner] has render objects that need painting.
   bool _needsCompositing(RenderView renderView) {
-    if (!renderView.hasInitialFrameBeenPrepared) {
+    if (!renderView.hasPreparedInitialFrame) {
       return false;
     }
     if (renderView.requiresComposite) {
