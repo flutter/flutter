@@ -2989,8 +2989,9 @@ class Navigator extends StatefulWidget {
     String initialRouteName,
   ) {
     final result = <Route<dynamic>?>[];
-    if (initialRouteName.startsWith('/') && initialRouteName.length > 1) {
-      initialRouteName = initialRouteName.substring(1); // strip leading '/'
+    String parsedRouteName = initialRouteName;
+    if (parsedRouteName.startsWith('/') && parsedRouteName.length > 1) {
+      parsedRouteName = parsedRouteName.substring(1); // strip leading '/'
       assert(Navigator.defaultRouteName == '/');
       List<String>? debugRouteNames;
       assert(() {
@@ -3004,8 +3005,8 @@ class Navigator extends StatefulWidget {
           allowNull: true,
         ),
       );
-      final List<String> routeParts = initialRouteName.split('/');
-      if (initialRouteName.isNotEmpty) {
+      final List<String> routeParts = parsedRouteName.split('/');
+      if (parsedRouteName.isNotEmpty) {
         var routeName = '';
         for (final part in routeParts) {
           routeName += '/$part';
@@ -3022,7 +3023,7 @@ class Navigator extends StatefulWidget {
             FlutterErrorDetails(
               exception:
                   'Could not navigate to initial route.\n'
-                  'The requested route name was: "/$initialRouteName"\n'
+                  'The requested route name was: "/$parsedRouteName"\n'
                   'There was no corresponding route in the app, and therefore the initial route specified will be '
                   'ignored and "${Navigator.defaultRouteName}" will be used instead.',
             ),
@@ -3034,11 +3035,11 @@ class Navigator extends StatefulWidget {
         }
         result.clear();
       }
-    } else if (initialRouteName != Navigator.defaultRouteName) {
+    } else if (parsedRouteName != Navigator.defaultRouteName) {
       // If initialRouteName wasn't '/', then we try to get it with allowNull:true, so that if that fails,
       // we fall back to '/' (without allowNull:true, see below).
       result.add(
-        navigator._routeNamed<dynamic>(initialRouteName, arguments: null, allowNull: true),
+        navigator._routeNamed<dynamic>(parsedRouteName, arguments: null, allowNull: true),
       );
     }
     // Null route might be a result of gap in initialRouteName
@@ -4639,22 +4640,24 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   _RouteEntry? _getRouteBefore(int index, _RouteEntryPredicate predicate) {
-    index = _getIndexBefore(index, predicate);
-    return index >= 0 ? _history[index] : null;
+    final int effectiveIndex = _getIndexBefore(index, predicate);
+    return effectiveIndex >= 0 ? _history[effectiveIndex] : null;
   }
 
   int _getIndexBefore(int index, _RouteEntryPredicate predicate) {
-    while (index >= 0 && !predicate(_history[index])) {
-      index -= 1;
+    int effectiveIndex = index;
+    while (effectiveIndex >= 0 && !predicate(_history[effectiveIndex])) {
+      effectiveIndex -= 1;
     }
-    return index;
+    return effectiveIndex;
   }
 
   _RouteEntry? _getRouteAfter(int index, _RouteEntryPredicate predicate) {
-    while (index < _history.length && !predicate(_history[index])) {
-      index += 1;
+    int effectiveIndex = index;
+    while (effectiveIndex < _history.length && !predicate(_history[effectiveIndex])) {
+      effectiveIndex += 1;
     }
-    return index < _history.length ? _history[index] : null;
+    return effectiveIndex < _history.length ? _history[effectiveIndex] : null;
   }
 
   Route<T?>? _routeNamed<T>(String name, {required Object? arguments, bool allowNull = false}) {

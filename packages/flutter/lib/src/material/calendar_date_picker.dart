@@ -298,20 +298,20 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
 
     final int daysInMonth = widget.calendarDelegate.getDaysInMonth(value.year, value.month);
     final int preferredDay = math.min(_selectedDate?.day ?? 1, daysInMonth);
-    value = widget.calendarDelegate.getDay(value.year, value.month, preferredDay);
+    DateTime newDate = widget.calendarDelegate.getDay(value.year, value.month, preferredDay);
 
-    if (value.isBefore(widget.firstDate)) {
-      value = widget.firstDate;
-    } else if (value.isAfter(widget.lastDate)) {
-      value = widget.lastDate;
+    if (newDate.isBefore(widget.firstDate)) {
+      newDate = widget.firstDate;
+    } else if (newDate.isAfter(widget.lastDate)) {
+      newDate = widget.lastDate;
     }
 
     setState(() {
       _mode = DatePickerMode.day;
-      _handleMonthChanged(value);
+      _handleMonthChanged(newDate);
 
-      if (_isSelectable(value)) {
-        _selectedDate = value;
+      if (_isSelectable(newDate)) {
+        _selectedDate = newDate;
         widget.onDateChanged(_selectedDate!);
       }
     });

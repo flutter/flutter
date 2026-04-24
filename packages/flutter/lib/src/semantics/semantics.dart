@@ -3690,63 +3690,63 @@ class SemanticsNode with DiagnosticableTreeMixin {
     required SemanticsConfiguration? config,
     List<SemanticsNode>? childrenInInversePaintOrder,
   }) {
-    config ??= _kEmptyConfig;
-    if (_isDifferentFromCurrentSemanticAnnotation(config)) {
+    final SemanticsConfiguration effectiveConfig = config ?? _kEmptyConfig;
+    if (_isDifferentFromCurrentSemanticAnnotation(effectiveConfig)) {
       _markDirty();
     }
 
     assert(
-      config.platformViewId == null ||
+      effectiveConfig.platformViewId == null ||
           childrenInInversePaintOrder == null ||
           childrenInInversePaintOrder.isEmpty,
       'SemanticsNodes with children must not specify a platformViewId.',
     );
 
     final mergeAllDescendantsIntoThisNodeValueChanged =
-        _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+        _mergeAllDescendantsIntoThisNode != effectiveConfig.isMergingSemanticsOfDescendants;
 
-    _identifier = config.identifier;
-    _traversalParentIdentifier = config.traversalParentIdentifier;
-    _traversalChildIdentifier = config.traversalChildIdentifier;
-    _attributedLabel = config.attributedLabel;
-    _attributedValue = config.attributedValue;
-    _attributedIncreasedValue = config.attributedIncreasedValue;
-    _attributedDecreasedValue = config.attributedDecreasedValue;
-    _attributedHint = config.attributedHint;
-    _tooltip = config.tooltip;
-    _hintOverrides = config.hintOverrides;
-    _flags = config._flags;
-    _textDirection = config.textDirection;
-    _sortKey = config.sortKey;
-    _actions = Map<SemanticsAction, SemanticsActionHandler>.of(config._actions);
+    _identifier = effectiveConfig.identifier;
+    _traversalParentIdentifier = effectiveConfig.traversalParentIdentifier;
+    _traversalChildIdentifier = effectiveConfig.traversalChildIdentifier;
+    _attributedLabel = effectiveConfig.attributedLabel;
+    _attributedValue = effectiveConfig.attributedValue;
+    _attributedIncreasedValue = effectiveConfig.attributedIncreasedValue;
+    _attributedDecreasedValue = effectiveConfig.attributedDecreasedValue;
+    _attributedHint = effectiveConfig.attributedHint;
+    _tooltip = effectiveConfig.tooltip;
+    _hintOverrides = effectiveConfig.hintOverrides;
+    _flags = effectiveConfig._flags;
+    _textDirection = effectiveConfig.textDirection;
+    _sortKey = effectiveConfig.sortKey;
+    _actions = Map<SemanticsAction, SemanticsActionHandler>.of(effectiveConfig._actions);
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.of(
-      config._customSemanticsActions,
+      effectiveConfig._customSemanticsActions,
     );
-    _actionsAsBits = config._actionsAsBits;
-    _textSelection = config._textSelection;
-    _isMultiline = config.isMultiline;
-    _scrollPosition = config._scrollPosition;
-    _scrollExtentMax = config._scrollExtentMax;
-    _scrollExtentMin = config._scrollExtentMin;
-    _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
-    _scrollChildCount = config.scrollChildCount;
-    _scrollIndex = config.scrollIndex;
-    indexInParent = config.indexInParent;
-    _platformViewId = config._platformViewId;
-    _maxValueLength = config._maxValueLength;
-    _currentValueLength = config._currentValueLength;
-    _areUserActionsBlocked = config.isBlockingUserActions;
-    _headingLevel = config._headingLevel;
-    _linkUrl = config._linkUrl;
-    _role = config._role;
-    _controlsNodes = config._controlsNodes;
-    _validationResult = config._validationResult;
-    _hitTestBehavior = config._hitTestBehavior;
-    _inputType = config._inputType;
-    _locale = config.locale;
+    _actionsAsBits = effectiveConfig._actionsAsBits;
+    _textSelection = effectiveConfig._textSelection;
+    _isMultiline = effectiveConfig.isMultiline;
+    _scrollPosition = effectiveConfig._scrollPosition;
+    _scrollExtentMax = effectiveConfig._scrollExtentMax;
+    _scrollExtentMin = effectiveConfig._scrollExtentMin;
+    _mergeAllDescendantsIntoThisNode = effectiveConfig.isMergingSemanticsOfDescendants;
+    _scrollChildCount = effectiveConfig.scrollChildCount;
+    _scrollIndex = effectiveConfig.scrollIndex;
+    indexInParent = effectiveConfig.indexInParent;
+    _platformViewId = effectiveConfig._platformViewId;
+    _maxValueLength = effectiveConfig._maxValueLength;
+    _currentValueLength = effectiveConfig._currentValueLength;
+    _areUserActionsBlocked = effectiveConfig.isBlockingUserActions;
+    _headingLevel = effectiveConfig._headingLevel;
+    _linkUrl = effectiveConfig._linkUrl;
+    _role = effectiveConfig._role;
+    _controlsNodes = effectiveConfig._controlsNodes;
+    _validationResult = effectiveConfig._validationResult;
+    _hitTestBehavior = effectiveConfig._hitTestBehavior;
+    _inputType = effectiveConfig._inputType;
+    _locale = effectiveConfig.locale;
 
-    _minValue = config.minValue;
-    _maxValue = config.maxValue;
+    _minValue = effectiveConfig.minValue;
+    _maxValue = effectiveConfig.maxValue;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -5079,14 +5079,15 @@ class SemanticsOwner extends ChangeNotifier {
     Offset position,
     SemanticsAction action,
   ) {
+    Offset effectivePosition = position;
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
         return null;
       }
-      position = MatrixUtils.transformPoint(inverse, position);
+      effectivePosition = MatrixUtils.transformPoint(inverse, effectivePosition);
     }
-    if (!node.rect.contains(position)) {
+    if (!node.rect.contains(effectivePosition)) {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
@@ -5107,7 +5108,7 @@ class SemanticsOwner extends ChangeNotifier {
       for (final SemanticsNode child in node._children!.reversed) {
         final SemanticsActionHandler? handler = _getSemanticsActionHandlerForPosition(
           child,
-          position,
+          effectivePosition,
           action,
         );
         if (handler != null) {
@@ -6926,19 +6927,20 @@ AttributedString _concatAttributedString({
   if (otherAttributedString.string.isEmpty) {
     return thisAttributedString;
   }
+  AttributedString effectiveOtherAttributedString = otherAttributedString;
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
     final AttributedString directionEmbedding = switch (otherTextDirection) {
       TextDirection.rtl => AttributedString(Unicode.RLE),
       TextDirection.ltr => AttributedString(Unicode.LRE),
     };
-    otherAttributedString =
-        directionEmbedding + otherAttributedString + AttributedString(Unicode.PDF);
+    effectiveOtherAttributedString =
+        directionEmbedding + effectiveOtherAttributedString + AttributedString(Unicode.PDF);
   }
   if (thisAttributedString.string.isEmpty) {
-    return otherAttributedString;
+    return effectiveOtherAttributedString;
   }
 
-  return thisAttributedString + AttributedString('\n') + otherAttributedString;
+  return thisAttributedString + AttributedString('\n') + effectiveOtherAttributedString;
 }
 
 /// Base class for all sort keys for [SemanticsProperties.sortKey] accessibility

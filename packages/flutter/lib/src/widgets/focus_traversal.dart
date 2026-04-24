@@ -30,9 +30,10 @@ import 'scrollable.dart';
 // which is O(1).
 BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
   BuildContext? target;
+  int remainingCount = count;
   context.visitAncestorElements((Element ancestor) {
-    count--;
-    if (count == 0) {
+    remainingCount--;
+    if (remainingCount == 0) {
       target = ancestor;
       return false;
     }
@@ -2099,14 +2100,15 @@ class FocusTraversalGroup extends StatefulWidget {
   }
 
   static _FocusTraversalGroupNode? _getGroupNode(FocusNode node) {
-    while (node.parent != null) {
-      if (node.context == null) {
+    FocusNode effectiveNode = node;
+    while (effectiveNode.parent != null) {
+      if (effectiveNode.context == null) {
         return null;
       }
-      if (node is _FocusTraversalGroupNode) {
-        return node;
+      if (effectiveNode is _FocusTraversalGroupNode) {
+        return effectiveNode;
       }
-      node = node.parent!;
+      effectiveNode = effectiveNode.parent!;
     }
     return null;
   }

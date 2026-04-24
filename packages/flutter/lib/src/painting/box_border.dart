@@ -161,54 +161,57 @@ abstract class BoxBorder extends ShapeBorder {
     if ((a is BorderDirectional?) && (b is BorderDirectional?)) {
       return BorderDirectional.lerp(a, b, t);
     }
-    if (b is Border && a is BorderDirectional) {
-      (a, b) = (b, a);
-      t = 1.0 - t;
+    var effectiveA = a;
+    var effectiveB = b;
+    var effectiveT = t;
+    if (effectiveB is Border && effectiveA is BorderDirectional) {
+      (effectiveA, effectiveB) = (effectiveB, effectiveA);
+      effectiveT = 1.0 - effectiveT;
       // fall through to next case
     }
-    if (a is Border && b is BorderDirectional) {
-      if (b.start == BorderSide.none && b.end == BorderSide.none) {
+    if (effectiveA is Border && effectiveB is BorderDirectional) {
+      if (effectiveB.start == BorderSide.none && effectiveB.end == BorderSide.none) {
         // The fact that b is a BorderDirectional really doesn't matter, it turns out.
         return Border(
-          top: BorderSide.lerp(a.top, b.top, t),
-          right: BorderSide.lerp(a.right, BorderSide.none, t),
-          bottom: BorderSide.lerp(a.bottom, b.bottom, t),
-          left: BorderSide.lerp(a.left, BorderSide.none, t),
+          top: BorderSide.lerp(effectiveA.top, effectiveB.top, effectiveT),
+          right: BorderSide.lerp(effectiveA.right, BorderSide.none, effectiveT),
+          bottom: BorderSide.lerp(effectiveA.bottom, effectiveB.bottom, effectiveT),
+          left: BorderSide.lerp(effectiveA.left, BorderSide.none, effectiveT),
         );
       }
-      if (a.left == BorderSide.none && a.right == BorderSide.none) {
+      if (effectiveA.left == BorderSide.none && effectiveA.right == BorderSide.none) {
         // The fact that a is a Border really doesn't matter, it turns out.
         return BorderDirectional(
-          top: BorderSide.lerp(a.top, b.top, t),
-          start: BorderSide.lerp(BorderSide.none, b.start, t),
-          end: BorderSide.lerp(BorderSide.none, b.end, t),
-          bottom: BorderSide.lerp(a.bottom, b.bottom, t),
+          top: BorderSide.lerp(effectiveA.top, effectiveB.top, effectiveT),
+          start: BorderSide.lerp(BorderSide.none, effectiveB.start, effectiveT),
+          end: BorderSide.lerp(BorderSide.none, effectiveB.end, effectiveT),
+          bottom: BorderSide.lerp(effectiveA.bottom, effectiveB.bottom, effectiveT),
         );
       }
       // Since we have to swap a visual border for a directional one,
       // we speed up the horizontal sides' transitions and switch from
       // one mode to the other at t=0.5.
-      if (t < 0.5) {
+      if (effectiveT < 0.5) {
         return Border(
-          top: BorderSide.lerp(a.top, b.top, t),
-          right: BorderSide.lerp(a.right, BorderSide.none, t * 2.0),
-          bottom: BorderSide.lerp(a.bottom, b.bottom, t),
-          left: BorderSide.lerp(a.left, BorderSide.none, t * 2.0),
+          top: BorderSide.lerp(effectiveA.top, effectiveB.top, effectiveT),
+          right: BorderSide.lerp(effectiveA.right, BorderSide.none, effectiveT * 2.0),
+          bottom: BorderSide.lerp(effectiveA.bottom, effectiveB.bottom, effectiveT),
+          left: BorderSide.lerp(effectiveA.left, BorderSide.none, effectiveT * 2.0),
         );
       }
       return BorderDirectional(
-        top: BorderSide.lerp(a.top, b.top, t),
-        start: BorderSide.lerp(BorderSide.none, b.start, (t - 0.5) * 2.0),
-        end: BorderSide.lerp(BorderSide.none, b.end, (t - 0.5) * 2.0),
-        bottom: BorderSide.lerp(a.bottom, b.bottom, t),
+        top: BorderSide.lerp(effectiveA.top, effectiveB.top, effectiveT),
+        start: BorderSide.lerp(BorderSide.none, effectiveB.start, (effectiveT - 0.5) * 2.0),
+        end: BorderSide.lerp(BorderSide.none, effectiveB.end, (effectiveT - 0.5) * 2.0),
+        bottom: BorderSide.lerp(effectiveA.bottom, effectiveB.bottom, effectiveT),
       );
     }
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('BoxBorder.lerp can only interpolate Border and BorderDirectional classes.'),
       ErrorDescription(
-        'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
-        '  $a\n'
-        '  $b\n'
+        'BoxBorder.lerp() was called with two objects of type ${effectiveA.runtimeType} and ${effectiveB.runtimeType}:\n'
+        '  $effectiveA\n'
+        '  $effectiveB\n'
         'However, only Border and BorderDirectional classes are supported by this method.',
       ),
       ErrorHint(

@@ -2850,10 +2850,10 @@ final class BuildScope {
     if (!_dirtyElementsNeedsResorting!) {
       return index + 1;
     }
-    index += 1;
+    int effectiveIndex = index + 1;
     _dirtyElements.sort(Element._sort);
     _dirtyElementsNeedsResorting = false;
-    while (index > 0 && _dirtyElements[index - 1].dirty) {
+    while (effectiveIndex > 0 && _dirtyElements[effectiveIndex - 1].dirty) {
       // It is possible for previously dirty but inactive widgets to move right in the list.
       // We therefore have to move the index left in the list to account for this.
       // We don't know how many could have moved. However, we do know that the only possible
@@ -2861,16 +2861,16 @@ final class BuildScope {
       // now moved to be to the right of the right-most cleaned node, and we do know that
       // all the clean nodes were to the left of the index. So we move the index left
       // until just after the right-most clean node.
-      index -= 1;
+      effectiveIndex -= 1;
     }
     assert(() {
-      for (int i = index - 1; i >= 0; i -= 1) {
+      for (int i = effectiveIndex - 1; i >= 0; i -= 1) {
         final Element element = _dirtyElements[i];
         assert(!element.dirty || element._lifecycleState != _ElementLifecycle.active);
       }
       return true;
     }());
-    return index;
+    return effectiveIndex;
   }
 }
 

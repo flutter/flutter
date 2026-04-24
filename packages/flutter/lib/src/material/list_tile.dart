@@ -785,10 +785,10 @@ class ListTile extends StatelessWidget {
     Color? color,
   }) {
     assert(color != null || context != null);
-    tiles = tiles.toList();
+    final List<Widget> tilesList = tiles.toList();
 
-    if (tiles.isEmpty || tiles.length == 1) {
-      return tiles;
+    if (tilesList.isEmpty || tilesList.length == 1) {
+      return tilesList;
     }
 
     Widget wrapTile(Widget tile) {
@@ -801,7 +801,7 @@ class ListTile extends StatelessWidget {
       );
     }
 
-    return <Widget>[...tiles.take(tiles.length - 1).map(wrapTile), tiles.last];
+    return <Widget>[...tilesList.take(tilesList.length - 1).map(wrapTile), tilesList.last];
   }
 
   bool _isDenseLayout(ThemeData theme, ListTileThemeData tileTheme) {

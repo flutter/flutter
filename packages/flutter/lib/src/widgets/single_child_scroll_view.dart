@@ -612,16 +612,16 @@ class _RenderSingleChildViewport extends RenderBox
   }) {
     // One dimensional viewport has only one axis, override if it was
     // provided/may be mismatched.
-    axis = this.axis;
+    final Axis effectiveAxis = this.axis;
 
-    rect ??= target.paintBounds;
+    final Rect effectiveRect = rect ?? target.paintBounds;
     if (target is! RenderBox) {
-      return RevealedOffset(offset: offset.pixels, rect: rect);
+      return RevealedOffset(offset: offset.pixels, rect: effectiveRect);
     }
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(child);
-    final Rect bounds = MatrixUtils.transformRect(transform, rect);
+    final Rect bounds = MatrixUtils.transformRect(transform, effectiveRect);
     final Size contentSize = child!.size;
 
     final (

@@ -732,7 +732,8 @@ class RenderEditable extends RenderBox
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    if (nextSelection.isValid) {
+    TextSelection effectiveNextSelection = nextSelection;
+    if (effectiveNextSelection.isValid) {
       // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
       // This is due to the render editable and editable text handle pointer
@@ -742,13 +743,13 @@ class RenderEditable extends RenderBox
       //
       // If this happens, we need to make sure the new selection is still valid.
       final int textLength = textSelectionDelegate.textEditingValue.text.length;
-      nextSelection = nextSelection.copyWith(
-        baseOffset: math.min(nextSelection.baseOffset, textLength),
-        extentOffset: math.min(nextSelection.extentOffset, textLength),
+      effectiveNextSelection = effectiveNextSelection.copyWith(
+        baseOffset: math.min(effectiveNextSelection.baseOffset, textLength),
+        extentOffset: math.min(effectiveNextSelection.extentOffset, textLength),
       );
     }
     _setTextEditingValue(
-      textSelectionDelegate.textEditingValue.copyWith(selection: nextSelection),
+      textSelectionDelegate.textEditingValue.copyWith(selection: effectiveNextSelection),
       cause,
     );
   }
@@ -1609,15 +1610,16 @@ class RenderEditable extends RenderBox
   }
 
   TextRange? _getPreviousWord(int offset) {
-    while (offset >= 0) {
-      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
+    int currentOffset = offset;
+    while (currentOffset >= 0) {
+      final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: currentOffset));
       if (!range.isValid || range.isCollapsed) {
         return null;
       }
       if (!_onlyWhitespace(range)) {
         return range;
       }
-      offset = range.start - 1;
+      currentOffset = range.start - 1;
     }
     return null;
   }

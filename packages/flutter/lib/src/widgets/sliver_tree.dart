@@ -622,11 +622,11 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
     List<TreeSliverNode<T>>? nodes,
     TreeSliverNode<T>? parent,
   }) {
+    List<TreeSliverNode<T>> effectiveNodes = nodes ?? widget.tree;
     if (nodes == null) {
       _activeNodes.clear();
-      nodes = widget.tree;
     }
-    for (final TreeSliverNode<T> node in nodes) {
+    for (final TreeSliverNode<T> node in effectiveNodes) {
       node._depth = depth;
       node._parent = parent;
       _activeNodes.add(node);

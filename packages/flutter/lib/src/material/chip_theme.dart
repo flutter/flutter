@@ -238,8 +238,9 @@ class ChipThemeData with Diagnosticable {
       'Only one of primaryColor or brightness may be specified',
     );
 
+    var effectiveBrightness = brightness;
     if (primaryColor != null) {
-      brightness = ThemeData.estimateBrightnessForColor(primaryColor);
+      effectiveBrightness = ThemeData.estimateBrightnessForColor(primaryColor);
     }
 
     // These are Material Design defaults, and are used to derive
@@ -251,16 +252,16 @@ class ChipThemeData with Diagnosticable {
     const textLabelAlpha = 0xde; // 87%
     const EdgeInsetsGeometry padding = EdgeInsets.all(4.0);
 
-    primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
-    final Color backgroundColor = primaryColor.withAlpha(backgroundAlpha);
-    final Color deleteIconColor = primaryColor.withAlpha(deleteIconAlpha);
-    final Color disabledColor = primaryColor.withAlpha(disabledAlpha);
-    final Color selectedColor = primaryColor.withAlpha(selectAlpha);
+    final Color effectivePrimaryColor = primaryColor ?? (effectiveBrightness == Brightness.light ? Colors.black : Colors.white);
+    final Color backgroundColor = effectivePrimaryColor.withAlpha(backgroundAlpha);
+    final Color deleteIconColor = effectivePrimaryColor.withAlpha(deleteIconAlpha);
+    final Color disabledColor = effectivePrimaryColor.withAlpha(disabledAlpha);
+    final Color selectedColor = effectivePrimaryColor.withAlpha(selectAlpha);
     final Color secondarySelectedColor = secondaryColor.withAlpha(selectAlpha);
     final TextStyle secondaryLabelStyle = labelStyle.copyWith(
       color: secondaryColor.withAlpha(textLabelAlpha),
     );
-    labelStyle = labelStyle.copyWith(color: primaryColor.withAlpha(textLabelAlpha));
+    final TextStyle effectiveLabelStyle = labelStyle.copyWith(color: effectivePrimaryColor.withAlpha(textLabelAlpha));
 
     return ChipThemeData(
       backgroundColor: backgroundColor,
@@ -272,9 +273,9 @@ class ChipThemeData with Diagnosticable {
       selectedShadowColor: Colors.black,
       showCheckmark: true,
       padding: padding,
-      labelStyle: labelStyle,
+      labelStyle: effectiveLabelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
-      brightness: brightness,
+      brightness: effectiveBrightness,
       elevation: 0.0,
       pressElevation: 8.0,
       iconTheme: const IconThemeData(size: 18.0),
@@ -565,16 +566,18 @@ class ChipThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    if (a is WidgetStateBorderSide) {
-      a = a.resolve(const <WidgetState>{});
+    BorderSide? effectiveA = a;
+    BorderSide? effectiveB = b;
+    if (effectiveA is WidgetStateBorderSide) {
+      effectiveA = effectiveA.resolve(const <WidgetState>{});
     }
-    if (b is WidgetStateBorderSide) {
-      b = b.resolve(const <WidgetState>{});
+    if (effectiveB is WidgetStateBorderSide) {
+      effectiveB = effectiveB.resolve(const <WidgetState>{});
     }
-    a ??= BorderSide(width: 0, color: b!.color.withAlpha(0));
-    b ??= BorderSide(width: 0, color: a.color.withAlpha(0));
+    effectiveA ??= BorderSide(width: 0, color: effectiveB!.color.withAlpha(0));
+    effectiveB ??= BorderSide(width: 0, color: effectiveA.color.withAlpha(0));
 
-    return BorderSide.lerp(a, b, t);
+    return BorderSide.lerp(effectiveA, effectiveB, t);
   }
 
   @override

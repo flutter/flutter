@@ -377,9 +377,10 @@ class Scrollable extends StatefulWidget {
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
   static ScrollableState? maybeOf(BuildContext context, {Axis? axis}) {
+    BuildContext currentContext = context;
     // This is the context that will need to establish the dependency.
-    final originalContext = context;
-    InheritedElement? element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+    final originalContext = currentContext;
+    InheritedElement? element = currentContext.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
     while (element != null) {
       final ScrollableState scrollable = (element.widget as _ScrollableScope).scrollable;
       if (axis == null || axisDirectionToAxis(scrollable.axisDirection) == axis) {
@@ -387,8 +388,8 @@ class Scrollable extends StatefulWidget {
         originalContext.dependOnInheritedElement(element);
         return scrollable;
       }
-      context = scrollable.context;
-      element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+      currentContext = scrollable.context;
+      element = currentContext.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
     }
     return null;
   }
@@ -471,13 +472,14 @@ class Scrollable extends StatefulWidget {
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context, {Axis? axis}) {
-    _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
+    BuildContext currentContext = context;
+    _ScrollableScope? widget = currentContext.getInheritedWidgetOfExactType<_ScrollableScope>();
     while (widget != null) {
       if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
-        return widget.position.recommendDeferredLoading(context);
+        return widget.position.recommendDeferredLoading(currentContext);
       }
-      context = widget.scrollable.context;
-      widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
+      currentContext = widget.scrollable.context;
+      widget = currentContext.getInheritedWidgetOfExactType<_ScrollableScope>();
     }
     return false;
   }
@@ -495,6 +497,7 @@ class Scrollable extends StatefulWidget {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
+    BuildContext currentContext = context;
     final futures = <Future<void>>[];
 
     // The targetRenderObject is used to record the first target renderObject.
@@ -505,11 +508,11 @@ class Scrollable extends StatefulWidget {
     //
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
-    ScrollableState? scrollable = Scrollable.maybeOf(context);
+    ScrollableState? scrollable = Scrollable.maybeOf(currentContext);
     while (scrollable != null) {
       final List<Future<void>> newFutures;
       (newFutures, scrollable) = scrollable._performEnsureVisible(
-        context.findRenderObject()!,
+        currentContext.findRenderObject()!,
         alignment: alignment,
         duration: duration,
         curve: curve,
@@ -518,9 +521,9 @@ class Scrollable extends StatefulWidget {
       );
       futures.addAll(newFutures);
 
-      targetRenderObject ??= context.findRenderObject();
-      context = scrollable.context;
-      scrollable = Scrollable.maybeOf(context);
+      targetRenderObject ??= currentContext.findRenderObject();
+      currentContext = scrollable.context;
+      scrollable = Scrollable.maybeOf(currentContext);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
@@ -1267,28 +1270,29 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     }
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
-    if (event.type == SelectionEventType.endEdgeUpdate) {
-      _currentDragEndRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
+    var effectiveEvent = event;
+    if (effectiveEvent.type == SelectionEventType.endEdgeUpdate) {
+      _currentDragEndRelatedToOrigin = _inferPositionRelatedToOrigin(effectiveEvent.globalPosition);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(
         -deltaToOrigin.dx,
         -deltaToOrigin.dy,
       );
-      event = SelectionEdgeUpdateEvent.forEnd(
+      effectiveEvent = SelectionEdgeUpdateEvent.forEnd(
         globalPosition: endOffset,
-        granularity: event.granularity,
+        granularity: effectiveEvent.granularity,
       );
     } else {
-      _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
+      _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(effectiveEvent.globalPosition);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(
         -deltaToOrigin.dx,
         -deltaToOrigin.dy,
       );
-      event = SelectionEdgeUpdateEvent.forStart(
+      effectiveEvent = SelectionEdgeUpdateEvent.forStart(
         globalPosition: startOffset,
-        granularity: event.granularity,
+        granularity: effectiveEvent.granularity,
       );
     }
-    final SelectionResult result = super.handleSelectionEdgeUpdate(event);
+    final SelectionResult result = super.handleSelectionEdgeUpdate(effectiveEvent);
 
     // Result may be pending if one of the selectable child is also a scrollable.
     // In that case, the parent scrollable needs to wait for the child to finish

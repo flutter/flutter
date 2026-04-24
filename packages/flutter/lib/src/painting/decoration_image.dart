@@ -541,6 +541,7 @@ void paintImage({
   bool isAntiAlias = false,
   BlendMode blendMode = BlendMode.srcOver,
 }) {
+  var effectiveRepeat = effectiveRepeat;
   assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
@@ -574,10 +575,10 @@ void paintImage({
     );
   }
 
-  if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
-    // There's no need to repeat the image because we're exactly filling the
+  if (effectiveRepeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
+    // There's no need to effectiveRepeat the image because we're exactly filling the
     // output rect with the image.
-    repeat = ImageRepeat.noRepeat;
+    effectiveRepeat = ImageRepeat.noRepeat;
   }
   final paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null) {
@@ -701,11 +702,11 @@ void paintImage({
     }
   }
 
-  final bool needSave = centerSlice != null || repeat != ImageRepeat.noRepeat || flipHorizontally;
+  final bool needSave = centerSlice != null || effectiveRepeat != ImageRepeat.noRepeat || flipHorizontally;
   if (needSave) {
     canvas.save();
   }
-  if (repeat != ImageRepeat.noRepeat) {
+  if (effectiveRepeat != ImageRepeat.noRepeat) {
     canvas.clipRect(rect);
   }
   if (flipHorizontally) {
@@ -716,16 +717,16 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = alignment.inscribe(sourceSize, Offset.zero & inputSize);
-    if (repeat == ImageRepeat.noRepeat) {
+    if (effectiveRepeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat)) {
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, effectiveRepeat)) {
         canvas.drawImageRect(image, sourceRect, tileRect, paint);
       }
     }
   } else {
     canvas.scale(1 / scale);
-    if (repeat == ImageRepeat.noRepeat) {
+    if (effectiveRepeat == ImageRepeat.noRepeat) {
       canvas.drawImageNine(
         image,
         _scaleRect(centerSlice, scale),
@@ -733,7 +734,7 @@ void paintImage({
         paint,
       );
     } else {
-      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat)) {
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, effectiveRepeat)) {
         canvas.drawImageNine(
           image,
           _scaleRect(centerSlice, scale),
@@ -752,7 +753,7 @@ void paintImage({
   }
 }
 
-Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
+Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat effectiveRepeat) {
   var startX = 0;
   var startY = 0;
   var stopX = 0;
@@ -760,12 +761,12 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   final double strideX = fundamentalRect.width;
   final double strideY = fundamentalRect.height;
 
-  if (repeat == ImageRepeat.repeat || repeat == ImageRepeat.repeatX) {
+  if (effectiveRepeat == ImageRepeat.effectiveRepeat || effectiveRepeat == ImageRepeat.repeatX) {
     startX = ((outputRect.left - fundamentalRect.left) / strideX).floor();
     stopX = ((outputRect.right - fundamentalRect.right) / strideX).ceil();
   }
 
-  if (repeat == ImageRepeat.repeat || repeat == ImageRepeat.repeatY) {
+  if (effectiveRepeat == ImageRepeat.effectiveRepeat || effectiveRepeat == ImageRepeat.repeatY) {
     startY = ((outputRect.top - fundamentalRect.top) / strideY).floor();
     stopY = ((outputRect.bottom - fundamentalRect.bottom) / strideY).ceil();
   }
@@ -804,7 +805,7 @@ class _BlendedDecorationImage implements DecorationImage {
   @override
   Rect? get centerSlice => b?.centerSlice ?? a!.centerSlice;
   @override
-  ImageRepeat get repeat => b?.repeat ?? a!.repeat;
+  ImageRepeat get effectiveRepeat => b?.effectiveRepeat ?? a!.effectiveRepeat;
   @override
   bool get matchTextDirection => b?.matchTextDirection ?? a!.matchTextDirection;
   @override

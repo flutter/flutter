@@ -961,11 +961,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   Future<void> moveTo(double to, {Duration? duration, Curve? curve, bool? clamp = true}) {
     assert(clamp != null);
 
+    double effectiveTo = to;
     if (clamp!) {
-      to = clampDouble(to, minScrollExtent, maxScrollExtent);
+      effectiveTo = clampDouble(effectiveTo, minScrollExtent, maxScrollExtent);
     }
 
-    return super.moveTo(to, duration: duration, curve: curve);
+    return super.moveTo(effectiveTo, duration: duration, curve: curve);
   }
 
   @override

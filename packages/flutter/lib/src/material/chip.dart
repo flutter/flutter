@@ -1999,14 +1999,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final double right = sizes.overall.width;
 
     Offset centerLayout(Size boxSize, double x) {
+      double layoutX = x;
       assert(sizes.content >= boxSize.height);
       switch (textDirection) {
         case TextDirection.rtl:
-          x -= boxSize.width;
+          layoutX -= boxSize.width;
         case TextDirection.ltr:
           break;
       }
-      return Offset(x, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
+      return Offset(layoutX, (sizes.content - boxSize.height + sizes.densityAdjustment.dy) / 2.0);
     }
 
     // These are the offsets to the upper left corners of the boxes (including

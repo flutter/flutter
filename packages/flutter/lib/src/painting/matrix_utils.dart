@@ -512,8 +512,8 @@ abstract final class MatrixUtils {
     if (isIdentity(transform)) {
       return rect;
     }
-    transform = Matrix4.copy(transform)..invert();
-    return transformRect(transform, rect);
+    final effectiveTransform = Matrix4.copy(transform)..invert();
+    return transformRect(effectiveTransform, rect);
   }
 
   /// Create a transformation matrix which mimics the effects of tangentially

@@ -739,15 +739,16 @@ class BouncingScrollPhysics extends ScrollPhysics {
   static double _applyFriction(double extentOutside, double absDelta, double gamma) {
     assert(absDelta > 0);
     var total = 0.0;
+    double effectiveAbsDelta = absDelta;
     if (extentOutside > 0) {
       final double deltaToLimit = extentOutside / gamma;
-      if (absDelta < deltaToLimit) {
-        return absDelta * gamma;
+      if (effectiveAbsDelta < deltaToLimit) {
+        return effectiveAbsDelta * gamma;
       }
       total += extentOutside;
-      absDelta -= deltaToLimit;
+      effectiveAbsDelta -= deltaToLimit;
     }
-    return total + absDelta;
+    return total + effectiveAbsDelta;
   }
 
   @override

@@ -1187,12 +1187,14 @@ extension _Utf8Pointer on Pointer<_Utf8> {
   String toDartString({int? length}) {
     _ensureNotNullptr('toDartString');
     final Pointer<Uint8> codeUnits = cast<Uint8>();
+    final int effectiveLength;
     if (length != null) {
       RangeError.checkNotNegative(length, 'length');
+      effectiveLength = length;
     } else {
-      length = _length(codeUnits);
+      effectiveLength = _length(codeUnits);
     }
-    return utf8.decode(codeUnits.asTypedList(length));
+    return utf8.decode(codeUnits.asTypedList(effectiveLength));
   }
 
   static int _length(Pointer<Uint8> codeUnits) {

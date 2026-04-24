@@ -64,12 +64,12 @@ class LinearBorderEdge {
       return a;
     }
 
-    a ??= LinearBorderEdge(alignment: b!.alignment, size: 0);
-    b ??= LinearBorderEdge(alignment: a.alignment, size: 0);
+    final LinearBorderEdge effectiveA = a ?? LinearBorderEdge(alignment: b!.alignment, size: 0);
+    final LinearBorderEdge effectiveB = b ?? LinearBorderEdge(alignment: effectiveA.alignment, size: 0);
 
     return LinearBorderEdge(
-      size: lerpDouble(a.size, b.size, t)!,
-      alignment: lerpDouble(a.alignment, b.alignment, t)!,
+      size: lerpDouble(effectiveA.size, effectiveB.size, t)!,
+      alignment: lerpDouble(effectiveA.alignment, effectiveB.alignment, t)!,
     );
   }
 

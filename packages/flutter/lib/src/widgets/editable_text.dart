@@ -3586,27 +3586,28 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    if (_checkNeedsAdjustAffinity(value)) {
-      value = value.copyWith(
-        selection: value.selection.copyWith(affinity: _value.selection.affinity),
+    TextEditingValue effectiveValue = value;
+    if (_checkNeedsAdjustAffinity(effectiveValue)) {
+      effectiveValue = effectiveValue.copyWith(
+        selection: effectiveValue.selection.copyWith(affinity: _value.selection.affinity),
       );
     }
 
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
-      value = _value.copyWith(selection: value.selection);
+      effectiveValue = _value.copyWith(selection: effectiveValue.selection);
     }
-    _lastKnownRemoteTextEditingValue = value;
+    _lastKnownRemoteTextEditingValue = effectiveValue;
 
-    if (value == _value) {
+    if (effectiveValue == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
       // Track at https://github.com/flutter/flutter/issues/65811
       return;
     }
 
-    if (value.text == _value.text && value.composing == _value.composing) {
+    if (effectiveValue.text == _value.text && effectiveValue.composing == _value.composing) {
       // `selection` is the only change.
       SelectionChangedCause cause;
       if (_textInputConnection?.scribbleInProgress ?? false) {
@@ -3617,9 +3618,9 @@ class EditableTextState extends State<EditableText>
       } else {
         cause = SelectionChangedCause.keyboard;
       }
-      _handleSelectionChanged(value.selection, cause);
+      _handleSelectionChanged(effectiveValue.selection, cause);
     } else {
-      if (value.text != _value.text) {
+      if (effectiveValue.text != _value.text) {
         // Hide the toolbar if the text was changed, but only hide the toolbar
         // overlay; the selection handle's visibility will be handled
         // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
@@ -3631,11 +3632,11 @@ class EditableTextState extends State<EditableText>
           _hasInputConnection &&
           widget.obscureText &&
           WidgetsBinding.instance.platformDispatcher.brieflyShowPassword &&
-          value.text.length == _value.text.length + 1;
+          effectiveValue.text.length == _value.text.length + 1;
 
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
       _obscureLatestCharIndex = revealObscuredInput ? _value.selection.baseOffset : null;
-      _formatAndSetValue(value, SelectionChangedCause.keyboard);
+      _formatAndSetValue(effectiveValue, SelectionChangedCause.keyboard);
     }
 
     if (_showBlinkingCursor && _cursorTimer != null) {
