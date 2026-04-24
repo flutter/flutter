@@ -9,7 +9,7 @@
 /// @docImport 'gesture_detector.dart';
 library;
 
-import 'dart:ui' as ui show SemanticsAction, SemanticsActionEvent;
+import 'dart:ui' as ui show Rect, SemanticsAction, SemanticsActionEvent;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -218,14 +218,14 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
   // detect taps delivered via the accessibility / semantics channel, not just
   // the pointer event channel.
   //
-  // When a semantics action arrives, we find the tapped semantics node,
-  // compute its center in global coordinates, and run a hit test at that
-  // position. We need the hit test because TapRegion tracks regions as render
-  // objects, not semantics nodes, so the only way to determine which
-  // RenderTapRegion was hit is to query the render tree. The hit test result
-  // is then passed to _classifyRegions, which reuses the same inside/outside
-  // logic as pointer events without going through handleEvent and its
-  // pointer-specific side effects.
+  // When a semantics action arrives, we ask SemanticsBinding for the tapped
+  // semantics node's global rect and run a hit test at its center. We need the
+  // hit test because TapRegion tracks regions as render objects, not semantics
+  // nodes, so the only way to determine which RenderTapRegion was hit is to
+  // query the render tree. The hit test result is then passed to
+  // _classifyRegions, which reuses the same inside/outside logic as pointer
+  // events without going through handleEvent and its pointer-specific side
+  // effects.
   //
   // TODO(flutter-zl): consumeOutsideTaps cannot currently stop semantics
   // action propagation. SemanticsBinding listeners have no mechanism to
@@ -240,26 +240,14 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       return;
     }
 
-    final SemanticsOwner? semanticsOwner = owner?.semanticsOwner;
-    if (semanticsOwner == null) {
+    final ui.Rect? globalRect = SemanticsBinding.instance.semanticsNodeGlobalRect(
+      event.viewId,
+      event.nodeId,
+    );
+    if (globalRect == null) {
       return;
     }
-    final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
-    if (root == null) {
-      return;
-    }
-    final SemanticsNode? tappedNode = _findSemanticsNodeById(root, event.nodeId);
-    if (tappedNode == null) {
-      return;
-    }
-
-    final FlutterView? view = GestureBinding.instance.platformDispatcher.views
-        .where((FlutterView v) => v.viewId == event.viewId)
-        .firstOrNull;
-    if (view == null) {
-      return;
-    }
-    final Offset globalCenter = _semanticsNodeGlobalCenter(tappedNode, view.devicePixelRatio);
+    final Offset globalCenter = globalRect.center;
     final Offset localPosition = globalToLocal(globalCenter);
 
     final hitResult = BoxHitTestResult();
@@ -280,25 +268,6 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       assert(_tapRegionDebug('Calling onTapInside for $region (from semantics action)'));
       region.onTapInside?.call(syntheticEvent);
     }
-  }
-
-  // Computes the logical-pixel center of a [SemanticsNode] by accumulating
-  // transforms up the semantics parent chain, then dividing by the device
-  // pixel ratio (since semantics transforms are in physical pixels).
-  Offset _semanticsNodeGlobalCenter(SemanticsNode node, double devicePixelRatio) {
-    final Offset localCenter = node.rect.center;
-    var transform = Matrix4.identity();
-    SemanticsNode? current = node;
-    while (current != null) {
-      if (current.transform != null) {
-        transform = current.transform! * transform as Matrix4;
-      }
-      current = current.parent;
-    }
-    final Offset physicalCenter = MatrixUtils.transformPoint(transform, localCenter);
-    // The semantics tree operates in physical pixels, but the render tree
-    // uses logical pixels. Divide by the device pixel ratio to convert.
-    return physicalCenter / devicePixelRatio;
   }
 
   @override
@@ -429,20 +398,6 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
           .add(event.pointer, _DummyTapRecognizer())
           .resolve(GestureDisposition.accepted);
     }
-  }
-
-  // Searches the semantics tree rooted at [node] for a node with the given
-  // [id], returning it if found or null otherwise.
-  static SemanticsNode? _findSemanticsNodeById(SemanticsNode node, int id) {
-    if (node.id == id) {
-      return node;
-    }
-    SemanticsNode? result;
-    node.visitChildren((SemanticsNode child) {
-      result = _findSemanticsNodeById(child, id);
-      return result == null;
-    });
-    return result;
   }
 
   // Returns the registered regions that are in the hit path.

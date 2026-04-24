@@ -4839,6 +4839,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the semantics tree is empty, returns null.
   SemanticsNode? get rootSemanticsNode => _nodes[0];
 
+  /// Returns the [SemanticsNode] with the given [id], if any.
+  SemanticsNode? getSemanticsNode(int id) => _nodes[id];
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));

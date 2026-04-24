@@ -10,7 +10,7 @@
 library;
 
 import 'dart:async';
-import 'dart:ui' as ui show PictureRecorder, SceneBuilder, SemanticsUpdate;
+import 'dart:ui' as ui show PictureRecorder, Rect, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -482,6 +482,42 @@ mixin RendererBinding
       action.nodeId,
       action.type,
       action.arguments,
+    );
+  }
+
+  @override
+  ui.Rect? semanticsNodeGlobalRect(int viewId, int nodeId) {
+    final RenderView? renderView = _viewIdToRenderView[viewId];
+    if (renderView == null) {
+      return null;
+    }
+
+    final SemanticsOwner? semanticsOwner = renderView.owner?.semanticsOwner;
+    if (semanticsOwner == null) {
+      return null;
+    }
+
+    final SemanticsNode? node = semanticsOwner.getSemanticsNode(nodeId);
+    if (node == null) {
+      return null;
+    }
+
+    var transform = Matrix4.identity();
+    SemanticsNode? current = node;
+    while (current != null) {
+      if (current.transform != null) {
+        transform = current.transform! * transform as Matrix4;
+      }
+      current = current.parent;
+    }
+
+    final ui.Rect physicalRect = MatrixUtils.transformRect(transform, node.rect);
+    final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
+    return ui.Rect.fromLTRB(
+      physicalRect.left / devicePixelRatio,
+      physicalRect.top / devicePixelRatio,
+      physicalRect.right / devicePixelRatio,
+      physicalRect.bottom / devicePixelRatio,
     );
   }
 
