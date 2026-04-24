@@ -395,7 +395,7 @@ mixin RendererBinding
     view.configuration = createViewConfigurationFor(view);
     // Ensure the view composites at least once in a non-warm-up frame after
     // being added, so its contents appear even if no descendants are dirty.
-    view.markRequiresComposite();
+    view.markRequiresCompositing();
   }
 
   /// Removes a [RenderView] previously added with [addRenderView] from the
@@ -703,13 +703,13 @@ mixin RendererBinding
       for (final renderView in viewsToComposite) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }
-      // Only clear [RenderView.requiresComposite] if this is not a warm-up
+      // Only clear [RenderView.requiresCompositing] if this is not a warm-up
       // frame. During warm-up the rendering surface may not be ready, so the
       // composite might not produce visible output; leaving the flag set
       // ensures the view is re-composited on the first real frame.
       if (!isWarmUpFrame) {
         for (final renderView in viewsToComposite) {
-          renderView.clearRequiresComposite();
+          renderView.clearRequiresCompositing();
         }
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
@@ -721,14 +721,14 @@ mixin RendererBinding
   ///
   /// A view needs compositing if:
   ///  - It has been prepared (i.e. [RenderView.prepareInitialFrame] was called).
-  ///  - Its [RenderView.requiresComposite] flag is set (e.g. newly added
+  ///  - Its [RenderView.requiresCompositing] flag is set (e.g. newly added
   ///    views or views returning from a paused lifecycle state).
   ///  - Its [PipelineOwner] has render objects that need painting.
   bool _needsCompositing(RenderView renderView) {
     if (!renderView.hasPreparedInitialFrame) {
       return false;
     }
-    if (renderView.requiresComposite) {
+    if (renderView.requiresCompositing) {
       return true;
     }
     return renderView.owner?.needsPaint ?? false;
@@ -742,7 +742,7 @@ mixin RendererBinding
     // they are enabled, mark all views for compositing on the next frame.
     if (!framesEnabledBefore && framesEnabled) {
       for (final RenderView renderView in renderViews) {
-        renderView.markRequiresComposite();
+        renderView.markRequiresCompositing();
       }
     }
   }
@@ -763,7 +763,7 @@ mixin RendererBinding
       }
     }
     for (final RenderView renderView in renderViews) {
-      renderView.markRequiresComposite();
+      renderView.markRequiresCompositing();
     }
     scheduleWarmUpFrame();
     await endOfFrame;
