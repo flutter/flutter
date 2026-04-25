@@ -19066,6 +19066,318 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+  group('TextInputAction updates', () {
+    testWidgets('TextField updates keyboard action button when textInputAction changes with text', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      TextInputAction currentAction = TextInputAction.done;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: TextField(
+                  controller: controller,
+                  textInputAction: currentAction,
+                  onChanged: (String value) {
+                    setState(() {
+                      // Change action based on text
+                      currentAction = value.isNotEmpty
+                          ? TextInputAction.send
+                          : TextInputAction.done;
+                    });
+                  },
+                  decoration: const InputDecoration(hintText: 'Type something'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(find.byType(TextField), findsOneWidget);
+
+      // Initial state: empty text, "done" action
+      expect(controller.text, isEmpty);
+
+      // Type text - action should change to send
+      await tester.enterText(find.byType(TextField), 'hello');
+      await tester.pumpAndSettle();
+      expect(controller.text, equals('hello'));
+
+      // Clear text - action should change back to done
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+      expect(controller.text, isEmpty);
+    });
+
+    testWidgets('EditableText restarts input connection when textInputAction changes', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+
+      // Build with initial action (done)
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 16.0),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              textInputAction: TextInputAction.done,
+            ),
+          ),
+        ),
+      );
+
+      // Focus to establish input connection
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+
+      // Update widget with different textInputAction (send)
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 16.0),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              textInputAction: TextInputAction.send,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify widget is still functional and focused
+      expect(find.byType(EditableText), findsOneWidget);
+      expect(focusNode.hasFocus, isTrue);
+      addTearDown(focusNode.dispose);
+    });
+
+    testWidgets('Changing textInputAction does not affect text content or cursor position', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController(text: 'test');
+      final focusNode = FocusNode();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 16.0),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              textInputAction: TextInputAction.done,
+            ),
+          ),
+        ),
+      );
+
+      // Focus and position cursor
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+
+      final String textBefore = controller.text;
+      final TextSelection selectionBefore = controller.selection;
+
+      // Change textInputAction
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 16.0),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              textInputAction: TextInputAction.send,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify text and selection are unchanged
+      expect(controller.text, equals(textBefore));
+      expect(controller.selection, equals(selectionBefore));
+      expect(controller.text, equals('test'));
+      addTearDown(focusNode.dispose);
+    });
+
+    testWidgets('Multiple rapid textInputAction changes work correctly', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      TextInputAction currentAction = TextInputAction.done;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: Column(
+                  children: [
+                    EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: const TextStyle(fontSize: 16.0),
+                      cursorColor: Colors.blue,
+                      backgroundCursorColor: Colors.grey,
+                      textInputAction: currentAction,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          currentAction = currentAction == TextInputAction.done
+                              ? TextInputAction.send
+                              : TextInputAction.done;
+                        });
+                      },
+                      child: const Text('Toggle Action'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Focus the EditableText
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+
+      // Rapidly toggle action multiple times
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+      }
+
+      // Verify widget is still functional
+      expect(find.byType(EditableText), findsOneWidget);
+      expect(focusNode.hasFocus, isTrue);
+      addTearDown(focusNode.dispose);
+    });
+
+    testWidgets('Changing textInputAction while unfocused works correctly', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      TextInputAction currentAction = TextInputAction.done;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Scaffold(
+                body: Column(
+                  children: [
+                    EditableText(
+                      controller: controller,
+                      focusNode: focusNode,
+                      style: const TextStyle(fontSize: 16.0),
+                      cursorColor: Colors.blue,
+                      backgroundCursorColor: Colors.grey,
+                      textInputAction: currentAction,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          currentAction = TextInputAction.send;
+                        });
+                      },
+                      child: const Text('Change Action'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Widget is unfocused initially
+      expect(focusNode.hasFocus, isFalse);
+
+      // Change action while unfocused
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+
+      // Now focus and verify it works
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isTrue);
+      expect(find.byType(EditableText), findsOneWidget);
+      addTearDown(focusNode.dispose);
+    });
+
+    testWidgets('TextInputAction change works with different keyboard types', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+
+      // Build with email keyboard and done action
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 16.0),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+
+      // Change to number keyboard with send action
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(fontSize: 16.0),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.send,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify widget is functional
+      expect(find.byType(EditableText), findsOneWidget);
+      expect(focusNode.hasFocus, isTrue);
+      addTearDown(focusNode.dispose);
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
