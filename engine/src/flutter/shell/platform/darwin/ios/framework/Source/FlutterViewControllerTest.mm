@@ -121,7 +121,7 @@ using namespace flutter::testing;
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData;
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner;
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
 - (void)attachView;
 @end
@@ -138,9 +138,10 @@ using namespace flutter::testing;
   _didCallNotifyLowMemory = YES;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner {
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  return fml::MessageLoop::GetCurrent().GetTaskRunner();
+  return [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:fml::MessageLoop::GetCurrent().GetTaskRunner()];
 }
 
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint {
@@ -626,7 +627,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   // Post a task to UI thread to block the thread.
   const int delayTime = 1;
-  [engine uiTaskRunner]->PostTask([] { sleep(delayTime); });
+  [[engine uiTaskRunner] postTask:^{
+    sleep(delayTime);
+  }];
   XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
 
   id mockCADisplayLink = OCMClassMock([CADisplayLink class]);
