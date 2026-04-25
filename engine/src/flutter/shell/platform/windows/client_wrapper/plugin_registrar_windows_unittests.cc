@@ -109,7 +109,7 @@ TEST(PluginRegistrarWindowsTest, GetViewById) {
   EXPECT_EQ(registrar.GetViewById(456).get(), nullptr);
 }
 
-TEST(PluginRegistrarWindowsTest, GetGetGraphicsAdapter) {
+TEST(PluginRegistrarWindowsTest, GetGraphicsAdapter) {
   auto windows_api = std::make_unique<TestWindowsApi>();
   EXPECT_CALL(*windows_api, PluginRegistrarGetView)
       .WillRepeatedly(Return(nullptr));
