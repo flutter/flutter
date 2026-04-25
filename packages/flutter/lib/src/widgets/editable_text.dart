@@ -3565,13 +3565,21 @@ class EditableTextState extends State<EditableText>
 
     if (_hasInputConnection) {
       final obscureTextChanged = oldWidget.obscureText != widget.obscureText;
-      if (obscureTextChanged || oldWidget.keyboardType != widget.keyboardType) {
+      final keyboardTypeChanged = oldWidget.keyboardType != widget.keyboardType;
+      final textInputActionChanged = oldWidget.textInputAction != widget.textInputAction;
+
+      if (obscureTextChanged || keyboardTypeChanged || textInputActionChanged) {
         if (obscureTextChanged) {
-          // When obscureText is toggled, we should reset its state to prevent the last character from being visible between state changes.
           _obscureShowCharTicksPending = 0;
           _obscureLatestCharIndex = null;
         }
-        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+
+        // If textInputAction changed, restart the connection to force IME refresh
+        if (textInputActionChanged) {
+          _scheduleRestartConnection();
+        } else {
+          _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+        }
       }
     }
 
@@ -5404,6 +5412,10 @@ class EditableTextState extends State<EditableText>
 
   @override
   TextInputConfiguration get textInputConfiguration {
+    print(
+      '[DEBUG_TEXTINPUT_ACTION] textInputConfiguration - inputAction: ${widget.textInputAction}',
+    );
+
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
     final AutofillConfiguration autofillConfiguration = autofillHints != null
         ? AutofillConfiguration(
