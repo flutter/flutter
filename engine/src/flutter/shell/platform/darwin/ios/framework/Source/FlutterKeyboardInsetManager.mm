@@ -4,8 +4,8 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
@@ -20,7 +20,7 @@
 @property(nonatomic, weak) id<FlutterKeyboardInsetManagerDelegate> delegate;
 @property(nonatomic, assign, readwrite) CGFloat targetViewInsetBottom;
 @property(nonatomic, assign) CGFloat originalViewInsetBottom;
-@property(nonatomic, strong) VSyncClient* keyboardAnimationVSyncClient;
+@property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
 @property(nonatomic, assign) NSTimeInterval keyboardAnimationStartTime;
 @property(nonatomic, strong) UIView* keyboardAnimationView;
@@ -283,7 +283,7 @@
   [self setUpKeyboardAnimationVsyncClient:^(NSTimeInterval targetTime) {
     [weakSelf handleKeyboardAnimationCallbackWithTargetTime:targetTime];
   }];
-  VSyncClient* currentVsyncClient = _keyboardAnimationVSyncClient;
+  FlutterVSyncClient* currentVsyncClient = _keyboardAnimationVSyncClient;
 
   [UIView animateWithDuration:duration
       animations:^{
@@ -403,7 +403,8 @@
 
   id<FlutterKeyboardInsetManagerDelegate> delegate = self.delegate;
   _keyboardAnimationVSyncClient =
-      [[VSyncClient alloc] initWithTaskRunner:delegate.engine.uiTaskRunner callback:uiCallback];
+      [[FlutterVSyncClient alloc] initWithTaskRunner:delegate.engine.uiTaskRunner
+                                            callback:uiCallback];
   _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
   [_keyboardAnimationVSyncClient await];
 }
