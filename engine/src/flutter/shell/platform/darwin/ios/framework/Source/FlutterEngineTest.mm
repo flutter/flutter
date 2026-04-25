@@ -15,6 +15,7 @@
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
@@ -91,9 +92,21 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(engine);
 
   // Ensure getters don't deref _shell when it's null, and instead return nullptr.
-  XCTAssertEqual(engine.platformTaskRunner.get(), nullptr);
-  XCTAssertEqual(engine.uiTaskRunner.get(), nullptr);
-  XCTAssertEqual(engine.rasterTaskRunner.get(), nullptr);
+  XCTAssertNil(engine.platformTaskRunner);
+  XCTAssertNil(engine.uiTaskRunner);
+  XCTAssertNil(engine.rasterTaskRunner);
+}
+
+- (void)testTaskRunnerPropertyStability {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  XCTAssertNotNil(engine.platformTaskRunner);
+  XCTAssertEqual(engine.platformTaskRunner, engine.platformTaskRunner);
+  XCTAssertNotNil(engine.uiTaskRunner);
+  XCTAssertEqual(engine.uiTaskRunner, engine.uiTaskRunner);
+  XCTAssertNotNil(engine.rasterTaskRunner);
+  XCTAssertEqual(engine.rasterTaskRunner, engine.rasterTaskRunner);
 }
 
 - (void)testInfoPlist {

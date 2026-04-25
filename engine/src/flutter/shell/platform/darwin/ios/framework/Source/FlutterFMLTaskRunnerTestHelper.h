@@ -20,6 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (FlutterFMLTaskRunner*)makeCurrentThreadTaskRunner;
 
 /**
+ * Returns a FlutterFMLTaskRunner running on a new background thread with the given label.
+ */
++ (FlutterFMLTaskRunner*)makeTaskRunnerWithLabel:(NSString*)label;
+
+/**
  * Returns a FlutterFMLTaskRunners object where all runners point to the same task runner.
  */
 + (FlutterFMLTaskRunners*)makeTaskRunnersWithLabel:(NSString*)label

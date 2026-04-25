@@ -393,18 +393,18 @@
 
   // Make sure the new viewport metrics get sent after the begin frame event has processed.
   FlutterKeyboardAnimationCallback animationCallback = [keyboardAnimationCallback copy];
-  auto uiCallback = [animationCallback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    fml::TimeDelta frameInterval = recorder->GetVsyncTargetTime() - recorder->GetVsyncStartTime();
-    fml::TimePoint targetTime = recorder->GetVsyncTargetTime() + frameInterval;
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-      animationCallback(targetTime.ToEpochDelta().ToSeconds());
-    });
-  };
 
   id<FlutterKeyboardInsetManagerDelegate> delegate = self.delegate;
+  auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    CFTimeInterval frameInterval = targetTime - startTime;
+    CFTimeInterval projectedTargetTime = targetTime + frameInterval;
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+      animationCallback(projectedTargetTime);
+    });
+  };
   _keyboardAnimationVSyncClient =
       [[FlutterVSyncClient alloc] initWithTaskRunner:delegate.engine.uiTaskRunner
-                                            callback:uiCallback];
+                                            callback:vsyncCallback];
   _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
   [_keyboardAnimationVSyncClient await];
 }
