@@ -13,6 +13,7 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
@@ -23,7 +24,7 @@
 
 namespace flutter {
 
-class DlDeferredImageGPUSkia final : public DlImage {
+class DlDeferredImageGPUSkia final : public DlImageSkia {
  public:
   static sk_sp<DlDeferredImageGPUSkia> Make(
       const SkImageInfo& image_info,
@@ -42,7 +43,7 @@ class DlDeferredImageGPUSkia final : public DlImage {
   // |DlImage|
   ~DlDeferredImageGPUSkia() override;
 
-  // |DlImage|
+  // |DlImageSkia|
   // This method is only safe to call from the raster thread.
   // Callers must not hold long term references to this image and
   // only use it for the immediate painting operation. It must be
@@ -50,13 +51,7 @@ class DlDeferredImageGPUSkia final : public DlImage {
   sk_sp<SkImage> skia_image() const override;
 
   // |DlImage|
-  std::shared_ptr<impeller::Texture> impeller_texture() const override;
-
-  // |DlImage|
   bool isOpaque() const override;
-
-  // |DlImage|
-  bool isTextureBacked() const override;
 
   // |DlImage|
   bool isUIThreadSafe() const override;
@@ -96,7 +91,6 @@ class DlDeferredImageGPUSkia final : public DlImage {
 
     const SkImageInfo image_info() const { return image_info_; }
     const GrBackendTexture& texture() const { return texture_; }
-    bool isTextureBacked() const;
     std::optional<std::string> get_error();
     sk_sp<SkImage> CreateSkiaImage() const;
     void Unregister();

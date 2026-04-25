@@ -30,6 +30,7 @@
                 "fuchsia.device.NameProvider",  // For fdio uname()
                 "fuchsia.feedback.CrashReporter",
                 "fuchsia.intl.PropertyProvider",  // For dartVM timezone support
+                "fuchsia.kernel.VmexResource",  // Also used in AOT for FFI callback thunks.
                 "fuchsia.net.name.Lookup",  // For fdio sockets
                 "fuchsia.posix.socket.Provider",  // For fdio sockets
             ],

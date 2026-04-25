@@ -27,8 +27,6 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
-import '../test/test_wrapper.dart';
-
 import '../vmservice.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
@@ -38,6 +36,7 @@ import 'test_config.dart';
 import 'test_device.dart';
 import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
+import 'test_wrapper.dart';
 import 'watcher.dart';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
@@ -525,7 +524,7 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final Uri goldensBaseUri = Uri.parse(testPath);
+    final goldensBaseUri = Uri.file(testPath, windows: globals.platform.isWindows);
     final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);

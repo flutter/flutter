@@ -77,7 +77,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
     return FocusTraversalOrder(
       order: order,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         child: OutlinedButton(
           focusNode: focusNode,
           autofocus: widget.autofocus,
@@ -118,13 +118,13 @@ class FocusTraversalGroupExample extends StatelessWidget {
       child: FocusTraversalGroup(
         policy: OrderedTraversalPolicy(),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             // A group that is ordered with a numerical order, from left to right.
             FocusTraversalGroup(
               policy: OrderedTraversalPolicy(),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: List<Widget>.generate(3, (int index) {
                   return OrderedButton<num>(
                     name: 'num: $index',
@@ -138,7 +138,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
             FocusTraversalGroup(
               policy: OrderedTraversalPolicy(),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: List<Widget>.generate(3, (int index) {
                   // Order as "C" "B", "A".
                   final String order = String.fromCharCode(
@@ -160,7 +160,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
               // numeric order set on them instead of the widget order.
               policy: WidgetOrderTraversalPolicy(),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: .center,
                 children: List<Widget>.generate(3, (int index) {
                   return OrderedButton<num>(
                     name: 'ignored num: ${3 - index}',

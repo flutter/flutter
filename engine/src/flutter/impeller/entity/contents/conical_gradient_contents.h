@@ -16,9 +16,11 @@ namespace impeller {
 
 class ConicalGradientContents final : public ColorSourceContents {
  public:
-  ConicalGradientContents();
+  explicit ConicalGradientContents(const Geometry* geometry);
 
   ~ConicalGradientContents() override;
+
+  const Geometry* GetGeometry() const override;
 
   // |Contents|
   bool Render(const ContentContext& renderer,
@@ -56,6 +58,7 @@ class ConicalGradientContents final : public ColorSourceContents {
                      const Entity& entity,
                      RenderPass& pass) const;
 
+  const Geometry* geometry_ = nullptr;
   Point center_;
   Scalar radius_ = 0.0f;
   std::vector<Color> colors_;

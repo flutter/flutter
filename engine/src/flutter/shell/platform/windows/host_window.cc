@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/host_window_dialog.h"
+#include "flutter/shell/platform/windows/host_window_popup.h"
 #include "flutter/shell/platform/windows/host_window_regular.h"
 #include "flutter/shell/platform/windows/host_window_tooltip.h"
 
@@ -230,12 +231,22 @@ std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const WindowConstraints& preferred_constraints,
-    bool is_sized_to_content,
     GetWindowPositionCallback get_position_callback,
     HWND parent) {
   return std::unique_ptr<HostWindowTooltip>(new HostWindowTooltip(
       window_manager, engine, FromWindowConstraints(preferred_constraints),
-      is_sized_to_content, get_position_callback, parent));
+      get_position_callback, parent));
+}
+
+std::unique_ptr<HostWindow> HostWindow::CreatePopupWindow(
+    WindowManager* window_manager,
+    FlutterWindowsEngine* engine,
+    const WindowConstraints& preferred_constraints,
+    GetWindowPositionCallback get_position_callback,
+    HWND parent) {
+  return std::unique_ptr<HostWindowPopup>(new HostWindowPopup(
+      window_manager, engine, FromWindowConstraints(preferred_constraints),
+      get_position_callback, parent));
 }
 
 HostWindow::HostWindow(WindowManager* window_manager,
@@ -311,12 +322,16 @@ void HostWindow::InitializeFlutterView(
 
   SetChildContent(view_controller_->view()->GetWindowHandle(), window_handle_);
 
-  // TODO(loicsharma): Hide the window until the first frame is rendered.
-  // Single window apps use the engine's next frame callback to show the
-  // window. This doesn't work for multi window apps as the engine cannot have
-  // multiple next frame callbacks. If multiple windows are created, only the
-  // last one will be shown.
-  ShowWindow(window_handle_, params.nCmdShow);
+  // Defer showing the window until the first frame is rendered so the user
+  // doesn't see a blank window. Each view has its own first-frame callback,
+  // so this works correctly for multi-window apps.
+  view_controller_->view()->SetFirstFrameCallback(
+      [hwnd = window_handle_, cmd_show = params.nCmdShow]() {
+        if (::IsWindow(hwnd)) {
+          ShowWindow(hwnd, cmd_show);
+        }
+      });
+  archetype_ = params.archetype;
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }
@@ -844,6 +859,7 @@ void HostWindow::DisableRecursively() {
 
 void HostWindow::UpdateModalStateLayer() {
   auto children = GetOwnedWindows();
+
   if (children.empty()) {
     // Leaf window in the active path, enable it.
     EnableWindow(window_handle_, true);

@@ -65,7 +65,7 @@ class MobileAsymmetricView extends StatelessWidget {
       // to the index of the list of columns.
 
       return List<SizedBox>.generate(_listItemCount(products.length), (int index) {
-        double width = _cardToScreenWidthRatio * MediaQuery.of(context).size.width;
+        double width = _cardToScreenWidthRatio * MediaQuery.widthOf(context);
         Widget column;
         if (index.isEven) {
           /// Even cases
@@ -91,7 +91,7 @@ class MobileAsymmetricView extends StatelessWidget {
       return <SizedBox>[
         for (final Product product in products)
           SizedBox(
-            width: _cardToScreenWidthRatio * MediaQuery.of(context).size.width,
+            width: _cardToScreenWidthRatio * MediaQuery.widthOf(context),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: OneProductCardColumn(product: product, reverse: false),
@@ -166,7 +166,7 @@ class DesktopAsymmetricView extends StatelessWidget {
     final num minimumBoundaryWidth = 84 * paddingScaleFactor;
     final double columnWidth = 186 * imageScaleFactor;
     final double columnGapWidth = 24 * imageScaleFactor;
-    final double windowWidth = MediaQuery.of(context).size.width;
+    final double windowWidth = MediaQuery.widthOf(context);
 
     final int idealColumnCount = max(
       1,

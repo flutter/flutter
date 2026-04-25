@@ -38,6 +38,7 @@ class TestTextField extends StatefulWidget {
     this.showCursor,
     this.style,
     this.controller,
+    this.onSubmitted,
   });
 
   final Iterable<String>? autofillHints;
@@ -54,6 +55,7 @@ class TestTextField extends StatefulWidget {
   final bool? showCursor;
   final TextStyle? style;
   final TextEditingController? controller;
+  final ValueChanged<String>? onSubmitted;
 
   @override
   State<TestTextField> createState() => _TestTextFieldState();
@@ -97,26 +99,31 @@ class _TestTextFieldState extends State<TestTextField>
 
   @override
   Widget build(BuildContext context) {
-    return _selectionGestureDetectorBuilder.buildGestureDetector(
-      behavior: HitTestBehavior.translucent,
-      child: EditableText(
-        key: editableTextKey,
-        autofillHints: widget.autofillHints,
-        autofocus: widget.autofocus,
-        backgroundCursorColor: _red, // required by editable text.
-        contextMenuBuilder: widget.contextMenuBuilder,
-        cursorColor: widget.cursorColor ?? _red, // required by editable text.
-        cursorOpacityAnimates: widget.cursorOpacityAnimates,
-        focusNode: _effectiveFocusNode, // required by editable text.
-        groupId: widget.groupId,
-        maxLines: widget.maxLines,
-        onChanged: widget.onChanged,
-        readOnly: widget.readOnly,
-        rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
-        selectionControls: widget.selectionControls ?? testTextSelectionHandleControls,
-        showCursor: widget.showCursor,
-        style: widget.style ?? const TextStyle(), // required by editable text.
-        controller: _effectiveController, // required by editable text.
+    return Semantics(
+      enabled: true,
+      onTap: widget.readOnly ? null : () => _effectiveFocusNode.requestFocus(),
+      child: _selectionGestureDetectorBuilder.buildGestureDetector(
+        behavior: HitTestBehavior.translucent,
+        child: EditableText(
+          key: editableTextKey,
+          autofillHints: widget.autofillHints,
+          autofocus: widget.autofocus,
+          backgroundCursorColor: _red, // required by editable text.
+          contextMenuBuilder: widget.contextMenuBuilder,
+          cursorColor: widget.cursorColor ?? _red, // required by editable text.
+          cursorOpacityAnimates: widget.cursorOpacityAnimates,
+          focusNode: _effectiveFocusNode, // required by editable text.
+          groupId: widget.groupId,
+          maxLines: widget.maxLines,
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          readOnly: widget.readOnly,
+          rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
+          selectionControls: widget.selectionControls ?? testTextSelectionHandleControls,
+          showCursor: widget.showCursor,
+          style: widget.style ?? const TextStyle(), // required by editable text.
+          controller: _effectiveController, // required by editable text.
+        ),
       ),
     );
   }

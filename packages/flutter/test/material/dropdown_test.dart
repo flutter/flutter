@@ -27,6 +27,7 @@ import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+
 void onChanged<T>(T _) {}
 
 final Type dropdownButtonType = DropdownButton<String>(
@@ -1440,6 +1441,62 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Dropdown button Semantics expanded state should update when menu opens and closes', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/183432
+    const key = Key('test');
+    await tester.pumpWidget(buildFrame(buttonKey: key, onChanged: onChanged));
+
+    // Before opening: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(DropdownButton<String>)),
+      matchesSemantics(
+        isButton: true,
+        hasExpandedState: true,
+        label: 'two',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle();
+
+    // While the menu is open, BlockSemantics in ModalBarrier blocks the
+    // button's semantics node (making tester.getSemantics return a stale node).
+    // Verify the Semantics widget's expanded property directly instead.
+    final Semantics expandedSemantics = tester.widget<Semantics>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Semantics && widget.properties.expanded != null,
+        ),
+      ),
+    );
+    expect(expandedSemantics.properties.expanded, isTrue);
+
+    // Close the menu by selecting an item.
+    await tester.tap(find.text('one').last);
+    await tester.pumpAndSettle();
+
+    // After closing: should have expanded state but not be expanded.
+    expect(
+      tester.getSemantics(find.byType(DropdownButton<String>)),
+      matchesSemantics(
+        isButton: true,
+        hasExpandedState: true,
+        label: 'two',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+        isFocused: true,
+      ),
+    );
+  });
+
   testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     const key = Key('test');
@@ -2597,7 +2654,7 @@ void main() {
     final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
+      paints..rrect(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
     );
 
     // Focus color from Decoration.
@@ -2613,7 +2670,7 @@ void main() {
 
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ffff)),
+      paints..rrect(style: PaintingStyle.fill, color: const Color(0xff00ffff)),
     );
 
     // Focus color from focusColor property.
@@ -2630,7 +2687,7 @@ void main() {
 
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
+      paints..rrect(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
     );
   });
 
@@ -2658,7 +2715,7 @@ void main() {
     ).colorScheme.surfaceContainerHighest;
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: defaultBorderColor),
+      paints..rrect(style: PaintingStyle.fill, color: defaultBorderColor),
     );
 
     // Replace focusNode and request focus.
@@ -2670,7 +2727,7 @@ void main() {
     await tester.pump(); // Wait for requestFocus to take effect.
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
+      paints..rrect(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
     );
 
     // Replace focusNode and request focus.
@@ -2683,7 +2740,7 @@ void main() {
     await tester.pump(); // Wait for unfocus to take effect.
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(style: PaintingStyle.fill, color: defaultBorderColor),
+      paints..rrect(style: PaintingStyle.fill, color: defaultBorderColor),
     );
   });
 
@@ -2773,7 +2830,7 @@ void main() {
     final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(
+      paints..rrect(
         style: PaintingStyle.fill,
         color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
       ),
@@ -2791,7 +2848,7 @@ void main() {
     );
     expect(
       findInputDecoratorBorderPainter(),
-      paints..path(
+      paints..rrect(
         style: PaintingStyle.fill,
         color: Color.alphaBlend(hoverColor, theme.colorScheme.surfaceContainerHighest),
       ),
@@ -4149,7 +4206,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: DropdownButton<String>(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: const BorderRadius.all(Radius.circular(radius)),
               value: 'One',
               items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
                 String value,
@@ -4254,7 +4311,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: DropdownButtonFormField<String>(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: const BorderRadius.all(Radius.circular(radius)),
               initialValue: 'One',
               items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
                 String value,
@@ -4610,7 +4667,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: DropdownButtonFormField<String>(
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: const BorderRadius.all(Radius.circular(radius)),
               initialValue: 'One',
               items: <String>['One', 'Two', 'Three', 'Four'].map<DropdownMenuItem<String>>((
                 String value,
@@ -4628,7 +4685,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-    expect(renderClip.borderRadius, BorderRadius.circular(radius));
+    expect(renderClip.borderRadius, const BorderRadius.all(Radius.circular(radius)));
   });
 
   testWidgets('Size of DropdownButton with padding', (WidgetTester tester) async {
@@ -4882,4 +4939,56 @@ void main() {
     ).style;
     expect(labelStyle.color, labelColor);
   });
+
+  testWidgets('DropdownButton selectedItemBuilder length must match items length', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/92773
+    final List<DropdownMenuItem<String>> items = <String>['a', 'b']
+        .map<DropdownMenuItem<String>>(
+          (String value) => DropdownMenuItem<String>(value: value, child: Text(value)),
+        )
+        .toList();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: DropdownButtonFormField<String>(
+                onChanged: (_) {},
+                items: items,
+                selectedItemBuilder: (BuildContext context) {
+                  return <Widget>[const Text('a')];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      (tester.takeException() as AssertionError).message,
+      'The selectedItemBuilder must return a list of widgets with the same length as the items list.\n'
+      'Currently, selectedItemBuilder returns a list of length 1, but items has length 2.',
+    );
+  });
+
+  testWidgets(
+    'DropdownButtonFormField asserts when both errorBuilder and decoration.errorText are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => DropdownButtonFormField<String>(
+          items: const <DropdownMenuItem<String>>[],
+          onChanged: (String? value) {},
+          decoration: const InputDecoration(errorText: 'Decoration error'),
+          errorBuilder: (BuildContext context, String errorText) {
+            return Text(errorText);
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
 }

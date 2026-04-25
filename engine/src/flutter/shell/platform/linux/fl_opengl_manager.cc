@@ -16,11 +16,14 @@ struct _FlOpenGLManager {
   // Display being rendered to.
   EGLDisplay display;
 
-  // Context used by Flutter to render.
+  // Context used by the Flutter engine for rendering.
   EGLContext render_context;
 
-  // Context used by Flutter to share resources.
+  // Context used by the Flutter engine to share resources.
   EGLContext resource_context;
+
+  // Context used by platform thread.
+  EGLContext platform_context;
 };
 
 G_DEFINE_TYPE(FlOpenGLManager, fl_opengl_manager, G_TYPE_OBJECT)
@@ -30,6 +33,7 @@ static void fl_opengl_manager_dispose(GObject* object) {
 
   eglDestroyContext(self->display, self->render_context);
   eglDestroyContext(self->display, self->resource_context);
+  eglDestroyContext(self->display, self->platform_context);
   eglTerminate(self->display);
 
   G_OBJECT_CLASS(fl_opengl_manager_parent_class)->dispose(object);
@@ -65,10 +69,24 @@ static void fl_opengl_manager_init(FlOpenGLManager* self) {
   eglChooseConfig(self->display, config_attributes, &config, 1, &num_config);
 
   const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+
   self->render_context = eglCreateContext(self->display, config, EGL_NO_CONTEXT,
                                           context_attributes);
+  if (self->render_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL context for rendering");
+  }
+
   self->resource_context = eglCreateContext(
       self->display, config, self->render_context, context_attributes);
+  if (self->resource_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL context for resource sharing");
+  }
+
+  self->platform_context = eglCreateContext(
+      self->display, config, self->render_context, context_attributes);
+  if (self->platform_context == EGL_NO_CONTEXT) {
+    g_warning("Failed to create EGL context for platform thread");
+  }
 }
 
 FlOpenGLManager* fl_opengl_manager_new() {
@@ -85,6 +103,11 @@ gboolean fl_opengl_manager_make_current(FlOpenGLManager* self) {
 gboolean fl_opengl_manager_make_resource_current(FlOpenGLManager* self) {
   return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                         self->resource_context) == EGL_TRUE;
+}
+
+gboolean fl_opengl_manager_make_platform_current(FlOpenGLManager* self) {
+  return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        self->platform_context) == EGL_TRUE;
 }
 
 gboolean fl_opengl_manager_clear_current(FlOpenGLManager* self) {

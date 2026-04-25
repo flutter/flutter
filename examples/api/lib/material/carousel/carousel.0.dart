@@ -21,7 +21,7 @@ class CarouselExampleApp extends StatelessWidget {
           title: const Text('Flutter TV'),
           actions: const <Widget>[
             Padding(
-              padding: EdgeInsetsDirectional.only(end: 16.0),
+              padding: .directional(end: 16.0),
               child: CircleAvatar(child: Icon(Icons.account_circle)),
             ),
           ],
@@ -67,7 +67,7 @@ class _CarouselExampleState extends State<CarouselExample> {
         ),
         const SizedBox(height: 20),
         const Padding(
-          padding: EdgeInsetsDirectional.only(top: 8.0, start: 8.0),
+          padding: .directional(top: 8.0, start: 8.0),
           child: Text('Multi-browse layout'),
         ),
         ConstrainedBox(
@@ -95,13 +95,13 @@ class _CarouselExampleState extends State<CarouselExample> {
                 color: info.backgroundColor,
                 child: Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: .center,
                     children: <Widget>[
                       Icon(info.icon, color: info.color, size: 32.0),
                       Text(
                         info.label,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.clip,
+                        style: const TextStyle(fontWeight: .bold),
+                        overflow: .clip,
                         softWrap: false,
                       ),
                     ],
@@ -113,7 +113,7 @@ class _CarouselExampleState extends State<CarouselExample> {
         ),
         const SizedBox(height: 20),
         const Padding(
-          padding: EdgeInsetsDirectional.only(top: 8.0, start: 8.0),
+          padding: .directional(top: 8.0, start: 8.0),
           child: Text('Uncontained layout'),
         ),
         ConstrainedBox(
@@ -140,14 +140,14 @@ class HeroLayoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final double width = MediaQuery.sizeOf(context).width;
     return Stack(
-      alignment: AlignmentDirectional.bottomStart,
+      alignment: .bottomStart,
       children: <Widget>[
         ClipRect(
           child: OverflowBox(
             maxWidth: width * 7 / 8,
             minWidth: width * 7 / 8,
             child: Image(
-              fit: BoxFit.cover,
+              fit: .cover,
               image: NetworkImage(
                 'https://flutter.github.io/assets-for-api-docs/assets/material/${imageInfo.url}',
               ),
@@ -155,14 +155,14 @@ class HeroLayoutCard extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(18.0),
+          padding: const .all(18.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: .start,
+            mainAxisSize: .min,
             children: <Widget>[
               Text(
                 imageInfo.title,
-                overflow: TextOverflow.clip,
+                overflow: .clip,
                 softWrap: false,
                 style: Theme.of(
                   context,
@@ -171,7 +171,7 @@ class HeroLayoutCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 imageInfo.subtitle,
-                overflow: TextOverflow.clip,
+                overflow: .clip,
                 softWrap: false,
                 style: Theme.of(
                   context,
@@ -205,7 +205,7 @@ class UncontainedLayoutCard extends StatelessWidget {
         child: Text(
           label,
           style: const TextStyle(color: Colors.white, fontSize: 20),
-          overflow: TextOverflow.clip,
+          overflow: .clip,
           softWrap: false,
         ),
       ),

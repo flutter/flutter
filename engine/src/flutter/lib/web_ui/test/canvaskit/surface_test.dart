@@ -139,6 +139,17 @@ void testMain() {
       final SkSurface? skSurface2 = surface.skSurface;
       expect(skSurface1, same(skSurface2));
     });
+
+    test('CkSurface dispose is idempotent', () async {
+      CkSurface.debugForceGLFailure = true;
+      final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+      await surface.initialized;
+
+      // Check that it is safe to call dispose multiple times on the same
+      // surface.
+      surface.dispose();
+      surface.dispose();
+    });
   });
 }
 

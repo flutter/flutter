@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -39,6 +40,18 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       logger: testLogger,
       osUtils: FakeOperatingSystemUtils(),
+      config: FakeConfig(),
+      platform: FakePlatform(),
+      fileSystemUtils: FakeFileSystemUtils(),
+      terminal: FakeTerminal(),
+      plistParser: FakePlistParser(),
+      processUtils: FakeProcessUtils(),
+      processManager: FakeProcessManager.any(),
+      templateRenderer: FakeTemplateRenderer(),
+      xcode: FakeXcode(),
+      artifacts: FakeArtifacts(),
+      cache: FakeCache(),
+      flutterVersion: FakeFlutterVersion(),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
@@ -86,6 +99,18 @@ void main() {
           fileSystem: fs,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         try {
           await createTestCommandRunner(
@@ -107,6 +132,18 @@ void main() {
           fileSystem: fs,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
         try {
@@ -127,6 +164,18 @@ void main() {
           fileSystem: fs,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
         await expectLater(
@@ -151,6 +200,18 @@ void main() {
           fileSystem: fs,
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
+          templateRenderer: FakeTemplateRenderer(),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         );
         testLogger.printError('Error: Danger Will Robinson!');
         await expectLater(
@@ -195,6 +256,18 @@ class FakeBuildCommand extends BuildCommand {
     required Logger logger,
     required super.androidSdk,
     bool verboseHelp = false,
+    required super.config,
+    required super.platform,
+    required super.fileSystemUtils,
+    required super.terminal,
+    required super.plistParser,
+    required super.processUtils,
+    required super.processManager,
+    required super.templateRenderer,
+    required super.xcode,
+    required super.artifacts,
+    required super.cache,
+    required super.flutterVersion,
   }) : super(logger: logger) {
     addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
   }

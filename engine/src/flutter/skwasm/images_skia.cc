@@ -9,6 +9,7 @@
 #include <emscripten/html5_webgl.h>
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -118,7 +119,7 @@ sk_sp<flutter::DlImage> MakeImageFromPicture(flutter::DisplayList* display_list,
   flutter::DlSkCanvasDispatcher dispatcher(canvas);
   dispatcher.drawDisplayList(sk_ref_sp(display_list), 1.0f);
 
-  return flutter::DlImage::Make(SkImages::DeferredFromPicture(
+  return flutter::DlImageSkia::Make(SkImages::DeferredFromPicture(
       recorder.finishRecordingAsPicture(), {width, height}, nullptr, nullptr,
       SkImages::BitDepth::kU8, SkColorSpace::MakeSRGB()));
 }
@@ -127,7 +128,7 @@ sk_sp<flutter::DlImage> MakeImageFromTexture(SkwasmObject texture_source,
                                              int width,
                                              int height,
                                              Skwasm::Surface* surface) {
-  return flutter::DlImage::Make(SkImages::DeferredFromTextureGenerator(
+  return flutter::DlImageSkia::Make(SkImages::DeferredFromTextureGenerator(
       std::unique_ptr<TextureSourceImageGenerator>(
           new TextureSourceImageGenerator(
               SkImageInfo::Make(width, height,
@@ -141,7 +142,7 @@ sk_sp<flutter::DlImage> MakeImageFromPixels(SkData* data,
                                             int height,
                                             Skwasm::PixelFormat pixel_format,
                                             size_t row_byte_count) {
-  return flutter::DlImage::Make(SkImages::RasterFromData(
+  return flutter::DlImageSkia::Make(SkImages::RasterFromData(
       SkImageInfo::Make(width, height, ColorTypeForPixelFormat(pixel_format),
                         AlphaTypeForPixelFormat(pixel_format),
                         SkColorSpace::MakeSRGB()),

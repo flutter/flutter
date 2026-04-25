@@ -154,6 +154,32 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue(bridge->observations[0].action == flutter::SemanticsAction::kShowOnScreen);
 }
 
+- (void)testFlutterScrollableSemanticsObjectIsNotAccessibilityElementWhenVoiceOverIsRunning {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.flags.hasImplicitScrolling = true;
+
+  node.actions = flutter::kHorizontalScrollSemanticsActions |
+                 static_cast<int32_t>(flutter::SemanticsAction::kCustomAction);
+
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node.scrollExtentMax = 100.0;
+  node.scrollPosition = 0.0;
+
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [scrollable setSemanticsNode:&node];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+
+  UIScrollView* scrollView = [scrollable nativeAccessibility];
+
+  XCTAssertFalse(scrollView.isAccessibilityElement);
+}
+
 - (void)testAccessibilityScrollToVisibleWithChild {
   fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
       new flutter::testing::MockAccessibilityBridge());

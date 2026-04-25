@@ -8,8 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
 import 'checkbox_tester.dart';
-import 'slider_tester.dart';
+import 'editable_text_tester.dart';
 import 'widgets_app_tester.dart';
+
+const Color _green = Color(0xFF4CAF50);
+const Color _amber = Color(0xFFFFC107);
 
 void main() {
   testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
@@ -52,8 +55,8 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger draw persistent color based on structure', (
-    WidgetTester tester,
-  ) async {
+      WidgetTester tester,
+      ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -241,9 +244,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SemanticsDebugger(
           child: ListView(
-            children: <Widget>[
-              Container(key: childKey, height: 5000.0, color: const Color(0xFF4CAF50)),
-            ],
+            children: <Widget>[Container(key: childKey, height: 5000.0, color: _green)],
           ),
         ),
       ),
@@ -315,24 +316,22 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger slider', (WidgetTester tester) async {
-    var value = 0.75;
+    var value = 0.5;
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SemanticsDebugger(
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: MediaQuery(
-                data: MediaQueryData.fromView(tester.view),
-                child: Center(
-                  child: TestSlider(
-                    value: value,
-                    onChanged: (double newValue) {
-                      value = newValue;
-                    },
-                  ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: MediaQueryData.fromView(tester.view),
+              child: Center(
+                child: _TestSlider(
+                  value: value,
+                  onChanged: (double newValue) {
+                    value = newValue;
+                  },
                 ),
               ),
             ),
@@ -347,12 +346,12 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(
-      find.byType(TestSlider),
+      find.byType(_TestSlider),
       const Offset(-100.0, 0.0),
       2000.0,
       warnIfMissed: false,
     ); // hitting the debugger
-    expect(value, equals(0.65));
+    expect(value, equals(0.4));
   });
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
@@ -466,7 +465,7 @@ void main() {
 
   testWidgets(
     'SemanticsDebugger ignores duplicated label and tooltip for Android',
-    (WidgetTester tester) async {
+        (WidgetTester tester) async {
       final Key child = UniqueKey();
       final Key debugger = UniqueKey();
       final isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
@@ -492,9 +491,34 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
+    final textField = UniqueKey();
+    final debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SemanticsDebugger(
+          key: debugger,
+          child: TestTextField(key: textField),
+        ),
+      ),
+    );
+
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(
+      debuggerKey: debugger,
+      tester: tester,
+    );
+    final RenderObject renderTextfield = tester.renderObject(find.byKey(textField));
+
+    final message =
+    // ignore: avoid_dynamic_calls
+    semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics) as String;
+    expect(message, contains('textfield'));
+  });
+
   testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
     final debugger = UniqueKey();
-    const labelStyle = TextStyle(color: Color(0xFFFFC107));
+    const labelStyle = TextStyle(color: _amber);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -557,19 +581,40 @@ String _getMessageShownInSemanticsDebugger({
   );
   // ignore: avoid_dynamic_calls
   return semanticsDebuggerPainter.getMessage(
-        tester.renderObject(find.byKey(widgetKey)).debugSemantics,
-      )
-      as String;
+    tester.renderObject(find.byKey(widgetKey)).debugSemantics,
+  )
+  as String;
+}
+
+/// A minimal slider widget for testing SemanticsDebugger interactions without
+/// depending on the Material library.
+class _TestSlider extends StatelessWidget {
+  const _TestSlider({required this.value, required this.onChanged});
+
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      value: '${(value * 100).round()}%',
+      increasedValue: '${((value + 0.1).clamp(0.0, 1.0) * 100).round()}%',
+      decreasedValue: '${((value - 0.1).clamp(0.0, 1.0) * 100).round()}%',
+      onIncrease: () => onChanged((value + 0.1).clamp(0.0, 1.0)),
+      onDecrease: () => onChanged((value - 0.1).clamp(0.0, 1.0)),
+      child: const SizedBox(width: 200, height: 36),
+    );
+  }
 }
 
 dynamic _getSemanticsDebuggerPainter({required Key debuggerKey, required WidgetTester tester}) {
   final customPaint =
-      tester
-              .widgetList(
-                find.descendant(of: find.byKey(debuggerKey), matching: find.byType(CustomPaint)),
-              )
-              .first
-          as CustomPaint;
+  tester
+      .widgetList(
+    find.descendant(of: find.byKey(debuggerKey), matching: find.byType(CustomPaint)),
+  )
+      .first
+  as CustomPaint;
   final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
   expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
   return semanticsDebuggerPainter;
