@@ -4,8 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'button_tester.dart';
+import 'widgets_app_tester.dart';
+
+const Color _green = Color(0xFF00FF00);
+const Color _red = Color(0xFFFF0000);
 
 class ExpandingBox extends StatefulWidget {
   const ExpandingBox({super.key, required this.collapsedSize, required this.expandedSize});
@@ -38,10 +44,10 @@ class _ExpandingBoxState extends State<ExpandingBox>
     super.build(context);
     return Container(
       height: _height,
-      color: Colors.green,
+      color: _green,
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: TextButton(onPressed: toggleSize, child: const Text('Collapse')),
+        child: TestButton(onPressed: toggleSize, child: const Text('Collapse')),
       ),
     );
   }
@@ -53,11 +59,11 @@ class _ExpandingBoxState extends State<ExpandingBox>
 void main() {
   testWidgets('shrink listview', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-              : Container(height: 300, color: Colors.red),
+              : Container(height: 300, color: _red),
           itemCount: 2,
         ),
       ),
@@ -68,7 +74,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 0.0);
-    await tester.tap(find.byType(TextButton));
+    await tester.tap(find.byType(TestButton));
     await tester.pump();
 
     final TestGesture drag1 = await tester.startGesture(const Offset(10.0, 500.0));
@@ -91,7 +97,7 @@ void main() {
     expect(position.pixels, moreOrLessEquals(900.0));
 
     await tester.pump();
-    await tester.tap(find.byType(TextButton));
+    await tester.tap(find.byType(TestButton));
     await tester.pump();
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
@@ -100,11 +106,11 @@ void main() {
 
   testWidgets('shrink listview while dragging', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView.builder(
           itemBuilder: (BuildContext context, int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-              : Container(height: 300, color: Colors.red),
+              : Container(height: 300, color: _red),
           itemCount: 2,
         ),
       ),
@@ -115,7 +121,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
     expect(position.pixels, 0.0);
-    await tester.tap(find.byType(TextButton));
+    await tester.tap(find.byType(TestButton));
     await tester.pump(); // start button animation
     await tester.pump(const Duration(seconds: 1)); // finish button animation
     expect(position.minScrollExtent, 0.0);
@@ -163,7 +169,7 @@ void main() {
 
   testWidgets('shrink listview while ballistic', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: GestureDetector(
           onTap: () {
             assert(false);
@@ -172,7 +178,7 @@ void main() {
             physics: const RangeMaintainingScrollPhysics(parent: BouncingScrollPhysics()),
             itemBuilder: (BuildContext context, int index) => index == 0
                 ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
-                : Container(height: 300, color: Colors.red),
+                : Container(height: 300, color: _red),
             itemCount: 2,
           ),
         ),
@@ -232,14 +238,14 @@ void main() {
 
   testWidgets('expanding page views', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()),
+      const Padding(padding: EdgeInsets.only(right: 200.0), child: _PageViewDemo()),
     );
     await tester.tap(find.text('bike'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    final Rect bike1 = tester.getRect(find.byIcon(Icons.directions_bike));
-    await tester.pumpWidget(const Padding(padding: EdgeInsets.zero, child: TabBarDemo()));
-    final Rect bike2 = tester.getRect(find.byIcon(Icons.directions_bike));
+    final Rect bike1 = tester.getRect(find.text('bike-icon'));
+    await tester.pumpWidget(const Padding(padding: EdgeInsets.zero, child: _PageViewDemo()));
+    final Rect bike2 = tester.getRect(find.text('bike-icon'));
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
 
@@ -361,33 +367,54 @@ void main() {
   });
 }
 
-class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({super.key});
+class _PageViewDemo extends StatefulWidget {
+  const _PageViewDemo();
+
+  @override
+  State<_PageViewDemo> createState() => _PageViewDemoState();
+}
+
+class _PageViewDemoState extends State<_PageViewDemo> {
+  final PageController _controller = PageController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _goToPage(int page) {
+    _controller.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: <Widget>[
-                Tab(text: 'car'),
-                Tab(text: 'transit'),
-                Tab(text: 'bike'),
-              ],
-            ),
-            title: const Text('Tabs Demo'),
-          ),
-          body: const TabBarView(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Column(
+        children: <Widget>[
+          Row(
             children: <Widget>[
-              Icon(Icons.directions_car),
-              Icon(Icons.directions_transit),
-              Icon(Icons.directions_bike),
+              GestureDetector(onTap: () => _goToPage(0), child: const Text('car')),
+              GestureDetector(onTap: () => _goToPage(1), child: const Text('transit')),
+              GestureDetector(onTap: () => _goToPage(2), child: const Text('bike')),
             ],
           ),
-        ),
+          Expanded(
+            child: PageView(
+              controller: _controller,
+              children: const <Widget>[
+                Center(child: Text('car-icon')),
+                Center(child: Text('transit-icon')),
+                Center(child: Text('bike-icon')),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

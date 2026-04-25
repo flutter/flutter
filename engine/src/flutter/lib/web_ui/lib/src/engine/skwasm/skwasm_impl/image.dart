@@ -17,7 +17,10 @@ class SkwasmImage implements ui.Image, StackTraceDebugger {
       this,
       'SkImage',
       onDispose: (ImageHandle h) => imageDispose(h),
-      onDisposed: (SkwasmImage image) => ui.Image.onDispose?.call(image),
+      onDisposed: (SkwasmImage image) {
+        ui.Image.onDispose?.call(image);
+        DownscaledImageCache.instance.disposeForBox(image.box);
+      },
     );
     _init();
     ui.Image.onCreate?.call(this);
