@@ -306,8 +306,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// For a given pointer ID, returns the buttons associated with it.
   ///
-  /// The pointer ID is expected to be a valid one i.e. an event was received
-  /// with that pointer ID.
+  /// The pointer ID is expected to be valid, meaning an event related to it
+  /// has been received.
   @protected
   int getButtonsForPointer(int pointer) {
     assert(_pointerToEventData.containsKey(pointer));
