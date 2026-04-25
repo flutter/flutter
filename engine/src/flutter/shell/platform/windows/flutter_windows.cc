@@ -330,6 +330,12 @@ void FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
       ->UnregisterTopLevelWindowProcDelegate(delegate);
 }
 
+IDXGIAdapter* FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  return FlutterDesktopEngineGetGraphicsAdapter(
+      HandleForEngine(registrar->engine));
+}
+
 UINT FlutterDesktopGetDpiForHWND(HWND hwnd) {
   return flutter::GetDpiForHWND(hwnd);
 }

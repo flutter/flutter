@@ -331,6 +331,10 @@ FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate);
 
+// Returns the DXGI adapter used for rendering or nullptr in case of error.
+FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar);
+
 // ========== Freestanding Utilities ==========
 
 // Gets the DPI for a given |hwnd|, depending on the supported APIs per
