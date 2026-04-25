@@ -4,10 +4,31 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'checkbox_tester.dart';
+
 void main() {
+  Widget buildRawRadio<T>({required T value, required FocusNode focusNode}) {
+    return Builder(
+      builder: (BuildContext context) {
+        return RawRadio<T>(
+          value: value,
+          mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+          toggleable: false,
+          focusNode: focusNode,
+          autofocus: false,
+          enabled: true,
+          groupRegistry: RadioGroup.maybeOf<T>(context),
+          builder: (BuildContext context, ToggleableStateMixin state) {
+            return const SizedBox.square(dimension: 1);
+          },
+        );
+      },
+    );
+  }
+
   group('tab', () {
     testWidgets('failure case, empty', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -266,19 +287,22 @@ void main() {
     testWidgets('success case, radio group can have checkbox children', (
       WidgetTester tester,
     ) async {
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
-        Material(
-          child: Material(
-            child: RadioGroup<int>(
-              groupValue: 0,
-              onChanged: (int? value) {},
-              child: Column(
-                children: <Widget>[
-                  Checkbox(value: false, onChanged: (bool? value) {}),
-                  const Radio<int>(value: 0),
-                  const Radio<int>(value: 1),
-                ],
-              ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RadioGroup<int>(
+            groupValue: 0,
+            onChanged: (int? value) {},
+            child: Column(
+              children: <Widget>[
+                TestCheckbox(value: false, onChanged: (bool? value) {}),
+                buildRawRadio<int>(value: 0, focusNode: node0),
+                buildRawRadio<int>(value: 1, focusNode: node1),
+              ],
             ),
           ),
         ),
@@ -287,23 +311,28 @@ void main() {
     });
 
     testWidgets('success case, radio group can nest', (WidgetTester tester) async {
+      final stringNode = FocusNode();
+      addTearDown(stringNode.dispose);
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
-        Material(
-          child: Material(
-            child: RadioGroup<int>(
-              groupValue: 0,
-              onChanged: (int? value) {},
-              child: Column(
-                children: <Widget>[
-                  RadioGroup<String>(
-                    groupValue: 'string',
-                    onChanged: (String? value) {},
-                    child: const Radio<String>(value: 'string'),
-                  ),
-                  const Radio<int>(value: 0),
-                  const Radio<int>(value: 1),
-                ],
-              ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: RadioGroup<int>(
+            groupValue: 0,
+            onChanged: (int? value) {},
+            child: Column(
+              children: <Widget>[
+                RadioGroup<String>(
+                  groupValue: 'string',
+                  onChanged: (String? value) {},
+                  child: buildRawRadio<String>(value: 'string', focusNode: stringNode),
+                ),
+                buildRawRadio<int>(value: 0, focusNode: node0),
+                buildRawRadio<int>(value: 1, focusNode: node1),
+              ],
             ),
           ),
         ),
