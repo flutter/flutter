@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -243,7 +244,7 @@ void main() {
       expect(await cache.isUpToDate(), isTrue);
     });
 
-    testWithoutContext('should update cached artifacts which are not up to date', () async {
+    testUsingContext('should update cached artifacts which are not up to date', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -258,6 +259,47 @@ void main() {
       expect(artifact1.didUpdate, false);
       expect(artifact2.didUpdate, true);
     });
+
+    testUsingContext(
+      'should skip EngineCachedArtifacts when local engine is provided',
+      () async {
+        final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+        final fileSystem = MemoryFileSystem.test();
+        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+        final artifact2 = FakeEngineCachedArtifact(cache)..upToDate = false;
+
+        final cacheWithArtifacts = Cache.test(
+          fileSystem: fileSystem,
+          artifacts: <CachedArtifact>[artifact1, artifact2],
+          processManager: FakeProcessManager.any(),
+        );
+
+        await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+        expect(artifact1.didUpdate, true);
+        expect(artifact2.didUpdate, false);
+      },
+      overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()},
+    );
+
+    testUsingContext(
+      'should skip engine_stamp artifact when local engine is provided',
+      () async {
+        final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+        final fileSystem = MemoryFileSystem.test();
+        final artifact2 = FakeEngineStampArtifact()..upToDate = false;
+
+        final cacheWithArtifacts = Cache.test(
+          fileSystem: fileSystem,
+          artifacts: <CachedArtifact>[artifact1, artifact2],
+          processManager: FakeProcessManager.any(),
+        );
+
+        await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+        expect(artifact1.didUpdate, true);
+        expect(artifact2.didUpdate, false);
+      },
+      overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()},
+    );
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
@@ -285,7 +327,7 @@ void main() {
       },
     );
 
-    testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
+    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup(
         'storage.googleapis.com',
       )).first;
@@ -1763,6 +1805,9 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   Exception? updateException;
 
   @override
+  String get name => 'fake';
+
+  @override
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
 
   @override
@@ -1795,6 +1840,73 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
   @override
   String stampName = 'ios-usb';
+}
+
+class FakeLocalEngineArtifacts extends Fake implements Artifacts {
+  @override
+  LocalEngineInfo get localEngineInfo => const LocalEngineInfo(
+    targetOutPath: 'out/android_debug_unopt',
+    hostOutPath: 'out/host_debug_unopt',
+  );
+
+  @override
+  bool get usesLocalArtifacts => true;
+}
+
+class FakeEngineCachedArtifact extends EngineCachedArtifact {
+  FakeEngineCachedArtifact(Cache cache)
+    : super('fake_engine', cache, DevelopmentArtifact.universal);
+
+  bool didUpdate = false;
+  bool upToDate = false;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
+
+  @override
+  List<List<String>> getBinaryDirs() => <List<String>>[];
+
+  @override
+  List<String> getLicenseDirs() => <String>[];
+
+  @override
+  List<String> getPackageDirs() => <String>[];
+}
+
+class FakeEngineStampArtifact extends Fake implements CachedArtifact {
+  bool upToDate = false;
+  bool didUpdate = false;
+
+  @override
+  String get name => 'engine_stamp';
+
+  @override
+  DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
 }
 
 class FakeSecondaryCache extends Fake implements Cache {
