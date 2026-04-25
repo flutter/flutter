@@ -7,14 +7,16 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/shell/common/vsync_waiter.h"
 
 @interface FlutterVSyncClient ()
 
-- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
-                          callback:(flutter::VsyncWaiter::Callback)callback;
+- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
+                             callback:(flutter::VsyncWaiter::Callback)callback;
 
 @end
 
