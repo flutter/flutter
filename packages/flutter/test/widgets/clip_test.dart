@@ -929,4 +929,20 @@ void main() {
     );
     expect(tester.getSize(find.byType(ClipRect)), Size.zero);
   });
+
+  testWidgets('ClipRRect does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    addTearDown(tester.view.reset);
+    addTearDown(clip.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ClipRRect(borderRadius: BorderRadius.circular(8), child: const Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ClipRRect)), Size.zero);
+  });
 }
