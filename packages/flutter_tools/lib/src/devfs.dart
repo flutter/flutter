@@ -734,61 +734,61 @@ class DevFS {
       final AssetKind? kind = entry.kind;
       switch (kind) {
         case AssetKind.shader:
-          final Future<DevFSContent?> pending = (() async {
-            DevFSContent content = entry.content;
-            if (entry.transformers.isNotEmpty) {
-              final DevFSContent? transformed = await assetTransformer.retransformAsset(
-                inputAssetKey: archivePath,
-                inputAssetContent: content,
-                transformerEntries: entry.transformers,
-                workingDirectory: rootDirectoryPath,
-              );
-              if (transformed == null) {
-                return null;
+          pendingAssetBuilds.add(
+            Future<void>(() async {
+              DevFSContent content = entry.content;
+              if (entry.transformers.isNotEmpty) {
+                final DevFSContent? transformed = await assetTransformer.retransformAsset(
+                  inputAssetKey: archivePath,
+                  inputAssetContent: content,
+                  transformerEntries: entry.transformers,
+                  workingDirectory: rootDirectoryPath,
+                );
+                if (transformed == null) {
+                  assetBuildFailed = true;
+                  return;
+                }
+                content = transformed;
               }
-              content = transformed;
-            }
-            return shaderCompiler.recompileShader(content);
-          })();
-          pendingAssetBuilds.add(pending);
-          pending.then((DevFSContent? content) {
-            if (content == null) {
-              assetBuildFailed = true;
-              return;
-            }
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
-            if (!bundleFirstUpload) {
-              shaderPathsToEvict.add(archivePath);
-            }
-          });
+              final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
+              if (compiled == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = compiled;
+              syncedBytes += compiled.size;
+              if (!bundleFirstUpload) {
+                shaderPathsToEvict.add(archivePath);
+              }
+            }),
+          );
         case AssetKind.regular:
         case AssetKind.font:
         case null:
-          final Future<DevFSContent?> pending = (() async {
-            if (entry.transformers.isEmpty || kind != AssetKind.regular) {
-              return entry.content;
-            }
-            return assetTransformer.retransformAsset(
-              inputAssetKey: archivePath,
-              inputAssetContent: entry.content,
-              transformerEntries: entry.transformers,
-              workingDirectory: rootDirectoryPath,
-            );
-          })();
-
-          pendingAssetBuilds.add(pending);
-          pending.then((DevFSContent? content) {
-            if (content == null) {
-              assetBuildFailed = true;
-              return;
-            }
-            dirtyEntries[deviceUri] = content;
-            syncedBytes += content.size;
-            if (!bundleFirstUpload) {
-              assetPathsToEvict.add(archivePath);
-            }
-          });
+          pendingAssetBuilds.add(
+            Future<void>(() async {
+              DevFSContent? content;
+              if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+                content = entry.content;
+              } else {
+                content = await assetTransformer.retransformAsset(
+                  inputAssetKey: archivePath,
+                  inputAssetContent: entry.content,
+                  transformerEntries: entry.transformers,
+                  workingDirectory: rootDirectoryPath,
+                );
+              }
+              if (content == null) {
+                assetBuildFailed = true;
+                return;
+              }
+              dirtyEntries[deviceUri] = content;
+              syncedBytes += content.size;
+              if (!bundleFirstUpload) {
+                assetPathsToEvict.add(archivePath);
+              }
+            }),
+          );
       }
     });
 

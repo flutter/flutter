@@ -387,10 +387,9 @@ class WebDevFS implements DevFS {
       }
       syncedBytes += bundleSyncedBytes;
       if (dirtyEntries.isNotEmpty) {
-        await LocalDevFSWriter(fileSystem: fileSystem).write(
-          dirtyEntries,
-          fileSystem.path.toUri(assetDirectory),
-        );
+        await LocalDevFSWriter(
+          fileSystem: fileSystem,
+        ).write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');

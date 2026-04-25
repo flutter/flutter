@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/tools/asset_transformer.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -939,7 +940,72 @@ void main() {
         '\n',
       );
     });
+
+    testWithoutContext(
+      'DevFS.updateBundle ensures all side effects are completed before returning (regression test for race condition)',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
+        final assetBundle = FakeBundle();
+        assetBundle.entries['shader.frag'] = AssetBundleEntry(
+          DevFSStringContent('source'),
+          kind: AssetKind.shader,
+          transformers: const [],
+        );
+
+        final shaderCompleter = Completer<DevFSContent>();
+        final shaderCompiler = DelayedFakeShaderCompiler(shaderCompleter.future);
+
+        final DevelopmentAssetTransformer assetTransformer = DevelopmentAssetTransformer(
+          fileSystem: fileSystem,
+          transformer: AssetTransformer(
+            processManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            dartBinaryPath: 'dart',
+            buildMode: BuildMode.debug,
+          ),
+          logger: BufferLogger.test(),
+        );
+
+        final Future<int> updateFuture = DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: true,
+        );
+
+        // Complete the shader compilation.
+        shaderCompleter.complete(DevFSStringContent('compiled'));
+
+        // Wait for updateBundle to return.
+        await updateFuture;
+
+        // Verify side effects are visible immediately.
+        // In the broken code, this could fail if updateBundle returned before the .then callback finished.
+        expect(dirtyEntries, hasLength(1));
+        expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
+      },
+    );
   });
+}
+
+class DelayedFakeShaderCompiler implements DevelopmentShaderCompiler {
+  DelayedFakeShaderCompiler(this.future);
+
+  final Future<DevFSContent> future;
+
+  @override
+  void configureCompiler(TargetPlatform? platform) {}
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) => future;
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
