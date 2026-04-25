@@ -28,7 +28,11 @@ void main() {
     expect(kAlwaysCompleteAnimation, hasOneLineDescription);
     expect(kAlwaysDismissedAnimation, hasOneLineDescription);
     expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
-    var curvedAnimation = CurvedAnimation(parent: kAlwaysDismissedAnimation, curve: Curves.ease);
+    var curvedAnimation = ReversibleCurvedAnimation(
+      parent: kAlwaysDismissedAnimation,
+      curve: Curves.ease,
+      reverseCurve: null,
+    );
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation, hasOneLineDescription);
@@ -39,7 +43,7 @@ void main() {
     controller
       ..value = 0.5
       ..reverse();
-    curvedAnimation = CurvedAnimation(
+    curvedAnimation = ReversibleCurvedAnimation(
       parent: controller,
       curve: Curves.ease,
       reverseCurve: Curves.elasticOut,
@@ -248,9 +252,13 @@ void main() {
     expect(log, isEmpty);
   });
 
-  test('CurvedAnimation with bogus curve', () {
+  test('ReversibleCurvedAnimation with bogus curve', () {
     final controller = AnimationController(vsync: const TestVSync());
-    final curved = CurvedAnimation(parent: controller, curve: const BogusCurve());
+    final curved = ReversibleCurvedAnimation(
+      parent: controller,
+      curve: const BogusCurve(),
+      reverseCurve: null,
+    );
     FlutterError? error;
     try {
       curved.value;
@@ -274,13 +282,13 @@ FlutterError
     );
   });
 
-  test('CurvedAnimation running with different forward and reverse durations.', () {
+  test('ReversibleCurvedAnimation running with different forward and reverse durations.', () {
     final controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
     );
-    final curved = CurvedAnimation(
+    final curved = ReversibleCurvedAnimation(
       parent: controller,
       curve: Curves.linear,
       reverseCurve: Curves.linear,
@@ -323,7 +331,7 @@ FlutterError
     expect(curved.value, moreOrLessEquals(0.0));
   });
 
-  test('CurvedAnimation stops listening to parent when disposed.', () async {
+  test('ReversibleCurvedAnimation stops listening to parent when disposed.', () async {
     const forwardCurve = Interval(0.0, 0.5);
     const reverseCurve = Interval(0.5, 1.0);
 
@@ -332,7 +340,7 @@ FlutterError
       reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final curved = CurvedAnimation(
+    final curved = ReversibleCurvedAnimation(
       parent: controller,
       curve: forwardCurve,
       reverseCurve: reverseCurve,
@@ -371,7 +379,11 @@ FlutterError
       vsync: const TestVSync(),
     );
     final reversed = ReverseAnimation(
-      CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear),
+      ReversibleCurvedAnimation(
+        parent: controller,
+        curve: Curves.linear,
+        reverseCurve: Curves.linear,
+      ),
     );
 
     controller.forward();
@@ -498,17 +510,18 @@ FlutterError
     expect(animation.value, 10.0);
   });
 
-  test('$CurvedAnimation dispatches memory events', () async {
+  test('$ReversibleCurvedAnimation dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
-        () => CurvedAnimation(
+        () => ReversibleCurvedAnimation(
           parent: AnimationController(
             duration: const Duration(milliseconds: 100),
             vsync: const TestVSync(),
           ),
           curve: Curves.linear,
+          reverseCurve: null,
         ).dispose(),
-        CurvedAnimation,
+        ReversibleCurvedAnimation,
       ),
       areCreateAndDispose,
     );

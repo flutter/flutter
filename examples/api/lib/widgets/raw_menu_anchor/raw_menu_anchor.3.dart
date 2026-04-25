@@ -128,7 +128,7 @@ class Menu extends StatefulWidget {
 class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   final MenuController menuController = MenuController();
   late final AnimationController animationController;
-  late final CurvedAnimation animation;
+  late final Animation<double> animation;
   bool get isSubmenu => MenuController.maybeOf(context) != null;
   AnimationStatus get animationStatus => animationController.status;
 
@@ -147,16 +147,14 @@ class MenuState extends State<Menu> with SingleTickerProviderStateMixin {
           }
         });
 
-    animation = CurvedAnimation(
-      parent: animationController,
-      curve: Curves.easeOutQuart,
+    animation = animationController.drive(
+      CurveTween(curve: Curves.easeOutQuart),
     );
   }
 
   @override
   void dispose() {
     animationController.dispose();
-    animation.dispose();
     super.dispose();
   }
 

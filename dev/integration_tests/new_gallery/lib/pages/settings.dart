@@ -55,9 +55,8 @@ class _SettingsPageState extends State<SettingsPage> {
     // When closing settings, also shrink expanded setting.
     widget.animationController.addStatusListener(_closeSettingId);
 
-    _staggerSettingsItemsAnimation = CurvedAnimation(
-      parent: widget.animationController,
-      curve: const Interval(0.4, 1.0, curve: Curves.ease),
+    _staggerSettingsItemsAnimation = widget.animationController.drive(
+      CurveTween(curve: const Interval(0.4, 1.0, curve: Curves.ease)),
     );
   }
 

@@ -53,8 +53,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// animation has a value of 1.0. When the control is changing from inactive
   /// to active (or vice versa), [value] is the target value and this animation
   /// gradually updates from 0.0 to 1.0 (or vice versa).
-  CurvedAnimation get position => _position;
-  late CurvedAnimation _position;
+  ReversibleCurvedAnimation get position => _position;
+  late ReversibleCurvedAnimation _position;
 
   /// Used by subclasses to control the radial reaction animation.
   ///
@@ -73,8 +73,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
-  CurvedAnimation get reaction => _reaction;
-  late CurvedAnimation _reaction;
+  Animation<double> get reaction => _reaction;
+  late Animation<double> _reaction;
 
   /// Controls the radial reaction's opacity animation for hover changes.
   ///
@@ -84,8 +84,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
-  CurvedAnimation get reactionHoverFade => _reactionHoverFade;
-  late CurvedAnimation _reactionHoverFade;
+  Animation<double> get reactionHoverFade => _reactionHoverFade;
+  late Animation<double> _reactionHoverFade;
   late AnimationController _reactionHoverFadeController;
 
   /// Controls the radial reaction's opacity animation for focus changes.
@@ -95,8 +95,8 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   ///
   /// To paint the actual radial reaction, [ToggleablePainter.paintRadialReaction]
   /// may be used.
-  CurvedAnimation get reactionFocusFade => _reactionFocusFade;
-  late CurvedAnimation _reactionFocusFade;
+  Animation<double> get reactionFocusFade => _reactionFocusFade;
+  late Animation<double> _reactionFocusFade;
   late AnimationController _reactionFocusFadeController;
 
   /// The amount of time a circular ink response should take to expand to its
@@ -154,30 +154,28 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       value: value == false ? 0.0 : 1.0,
       vsync: this,
     );
-    _position = CurvedAnimation(
+    _position = ReversibleCurvedAnimation(
       parent: _positionController,
       curve: Curves.easeIn,
       reverseCurve: Curves.easeOut,
     );
     _reactionController = AnimationController(duration: _reactionAnimationDuration, vsync: this);
-    _reaction = CurvedAnimation(parent: _reactionController, curve: Curves.fastOutSlowIn);
+    _reaction = _reactionController.drive(CurveTween(curve: Curves.fastOutSlowIn));
     _reactionHoverFadeController = AnimationController(
       duration: _kReactionFadeDuration,
       value: _hovering || _focused ? 1.0 : 0.0,
       vsync: this,
     );
-    _reactionHoverFade = CurvedAnimation(
-      parent: _reactionHoverFadeController,
-      curve: Curves.fastOutSlowIn,
+    _reactionHoverFade = _reactionHoverFadeController.drive(
+      CurveTween(curve: Curves.fastOutSlowIn),
     );
     _reactionFocusFadeController = AnimationController(
       duration: _kReactionFadeDuration,
       value: _hovering || _focused ? 1.0 : 0.0,
       vsync: this,
     );
-    _reactionFocusFade = CurvedAnimation(
-      parent: _reactionFocusFadeController,
-      curve: Curves.fastOutSlowIn,
+    _reactionFocusFade = _reactionFocusFadeController.drive(
+      CurveTween(curve: Curves.fastOutSlowIn),
     );
   }
 
@@ -207,14 +205,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 
   @override
   void dispose() {
-    _positionController.dispose();
     _position.dispose();
+    _positionController.dispose();
     _reactionController.dispose();
-    _reaction.dispose();
     _reactionHoverFadeController.dispose();
-    _reactionHoverFade.dispose();
     _reactionFocusFadeController.dispose();
-    _reactionFocusFade.dispose();
     super.dispose();
   }
 

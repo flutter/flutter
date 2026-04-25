@@ -32,10 +32,6 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample>
     duration: const Duration(seconds: 3),
     vsync: this,
   )..repeat();
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.fastOutSlowIn,
-  );
 
   @override
   void dispose() {
@@ -47,7 +43,7 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SizeTransition(
-        sizeFactor: _animation,
+        sizeFactor: _controller.drive(CurveTween(curve: Curves.fastOutSlowIn)),
         axis: .horizontal,
         alignment: .topLeft,
         child: const Center(child: FlutterLogo(size: 200.0)),

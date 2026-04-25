@@ -562,16 +562,17 @@ class _AnimatedCategoryItem extends StatelessWidget {
     required double startDelayFraction,
     required this.controller,
     required this.child,
-  }) : topPaddingAnimation = Tween<double>(begin: 60.0, end: 0.0).animate(
-         CurvedAnimation(
-           parent: controller,
-           curve: Interval(
-             0.000 + startDelayFraction,
-             0.400 + startDelayFraction,
-             curve: Curves.ease,
-           ),
-         ),
-       );
+  }) : topPaddingAnimation = Tween<double>(begin: 60.0, end: 0.0)
+           .chain(
+             CurveTween(
+               curve: Interval(
+                 0.000 + startDelayFraction,
+                 0.400 + startDelayFraction,
+                 curve: Curves.ease,
+               ),
+             ),
+           )
+           .animate(controller);
 
   final Widget child;
   final AnimationController controller;
@@ -595,12 +596,9 @@ class _AnimatedCategoryItem extends StatelessWidget {
 /// Animates the carousel to come in from the right.
 class _AnimatedCarousel extends StatelessWidget {
   _AnimatedCarousel({required this.child, required this.controller})
-    : startPositionAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: const Interval(0.200, 0.800, curve: Curves.ease),
-        ),
-      );
+    : startPositionAnimation = Tween<double>(begin: 1.0, end: 0.0)
+          .chain(CurveTween(curve: const Interval(0.200, 0.800, curve: Curves.ease)))
+          .animate(controller);
 
   final Widget child;
   final AnimationController controller;
@@ -637,12 +635,9 @@ class _AnimatedCarousel extends StatelessWidget {
 /// Animates a carousel card to come in from the right.
 class _AnimatedCarouselCard extends StatelessWidget {
   _AnimatedCarouselCard({required this.child, required this.controller})
-    : startPaddingAnimation = Tween<double>(begin: _horizontalPadding, end: 0.0).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: const Interval(0.900, 1.000, curve: Curves.ease),
-        ),
-      );
+    : startPaddingAnimation = Tween<double>(begin: _horizontalPadding, end: 0.0)
+          .chain(CurveTween(curve: const Interval(0.900, 1.000, curve: Curves.ease)))
+          .animate(controller);
 
   final Widget child;
   final AnimationController controller;

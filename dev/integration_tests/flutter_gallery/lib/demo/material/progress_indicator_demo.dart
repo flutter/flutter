@@ -30,7 +30,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo>
     )..forward();
 
     _animation =
-        CurvedAnimation(
+        ReversibleCurvedAnimation(
           parent: _controller,
           curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
           reverseCurve: Curves.fastOutSlowIn,

@@ -54,25 +54,22 @@ class _PositionedTransitionExampleState
             PositionedTransition(
               rect:
                   RelativeRectTween(
-                    begin: RelativeRect.fromSize(
-                      const Rect.fromLTWH(0, 0, smallLogo, smallLogo),
-                      biggest,
-                    ),
-                    end: RelativeRect.fromSize(
-                      Rect.fromLTWH(
-                        biggest.width - bigLogo,
-                        biggest.height - bigLogo,
-                        bigLogo,
-                        bigLogo,
-                      ),
-                      biggest,
-                    ),
-                  ).animate(
-                    CurvedAnimation(
-                      parent: _controller,
-                      curve: Curves.elasticInOut,
-                    ),
-                  ),
+                        begin: RelativeRect.fromSize(
+                          const Rect.fromLTWH(0, 0, smallLogo, smallLogo),
+                          biggest,
+                        ),
+                        end: RelativeRect.fromSize(
+                          Rect.fromLTWH(
+                            biggest.width - bigLogo,
+                            biggest.height - bigLogo,
+                            bigLogo,
+                            bigLogo,
+                          ),
+                          biggest,
+                        ),
+                      )
+                      .chain(CurveTween(curve: Curves.elasticInOut))
+                      .animate(_controller),
               child: const Padding(padding: .all(8), child: FlutterLogo()),
             ),
           ],

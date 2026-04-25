@@ -124,13 +124,13 @@ class RepeatingAnimationBuilder<T extends Object> extends StatefulWidget {
 class _RepeatingAnimationBuilderState<T extends Object> extends State<RepeatingAnimationBuilder<T>>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final CurvedAnimation _curvedAnimation;
+  late final Animation<double> _curvedAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(duration: widget.duration, vsync: this);
-    _curvedAnimation = CurvedAnimation(parent: _controller, curve: widget.curve);
+    _curvedAnimation = _controller.drive(CurveTween(curve: widget.curve));
 
     if (!widget.paused) {
       _controller.repeat(reverse: widget.repeatMode == RepeatMode.reverse);
@@ -146,7 +146,7 @@ class _RepeatingAnimationBuilderState<T extends Object> extends State<RepeatingA
     }
 
     if (widget.curve != oldWidget.curve) {
-      _curvedAnimation.curve = widget.curve;
+      _curvedAnimation = _controller.drive(CurveTween(curve: widget.curve));
     }
 
     if (widget.paused) {
@@ -169,7 +169,6 @@ class _RepeatingAnimationBuilderState<T extends Object> extends State<RepeatingA
 
   @override
   void dispose() {
-    _curvedAnimation.dispose();
     _controller.dispose();
     super.dispose();
   }

@@ -104,10 +104,9 @@ class _BackdropTitle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = CurvedAnimation(
-      parent: listenable as Animation<double>,
+    final Animation<double> animation = CurveTween(
       curve: const Interval(0.0, 0.78),
-    );
+    ).animate(listenable as Animation<double>);
 
     return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.titleLarge!,
@@ -143,10 +142,7 @@ class _BackdropTitle extends AnimatedWidget {
           Stack(
             children: <Widget>[
               Opacity(
-                opacity: CurvedAnimation(
-                  parent: ReverseAnimation(animation),
-                  curve: const Interval(0.5, 1.0),
-                ).value,
+                opacity: const Interval(0.5, 1.0).transform(1 - animation.value),
                 child: FractionalTranslation(
                   translation: Tween<Offset>(
                     begin: Offset.zero,
@@ -156,7 +152,7 @@ class _BackdropTitle extends AnimatedWidget {
                 ),
               ),
               Opacity(
-                opacity: CurvedAnimation(parent: animation, curve: const Interval(0.5, 1.0)).value,
+                opacity: const Interval(0.5, 1.0).transform(animation.value),
                 child: FractionalTranslation(
                   translation: Tween<Offset>(
                     begin: const Offset(-0.25, 0.0),
@@ -243,7 +239,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       secondCurve = _kDecelerateCurve;
       firstWeight = _kPeakVelocityTime;
       secondWeight = 1.0 - _kPeakVelocityTime;
-      animation = CurvedAnimation(parent: _controller!.view, curve: const Interval(0.0, 0.78));
+      animation = CurveTween(curve: const Interval(0.0, 0.78)).animate(_controller!);
     } else {
       // These values are only used when the controller runs from t=1.0 to t=0.0
       firstCurve = _kDecelerateCurve.flipped;

@@ -144,12 +144,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
   Animation<double> _getWidthAnimation(double screenWidth) {
     if (_controller.status == AnimationStatus.forward) {
       // Opening animation
-      return Tween<double>(begin: _width, end: screenWidth).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0, 0.3, curve: Curves.fastOutSlowIn),
-        ),
-      );
+      return Tween<double>(begin: _width, end: screenWidth)
+          .chain(CurveTween(curve: const Interval(0, 0.3, curve: Curves.fastOutSlowIn)))
+          .animate(_controller);
     } else {
       // Closing animation
       return _getEmphasizedEasingAnimation(
@@ -157,7 +154,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
         peak: _getPeakPoint(begin: _width, end: screenWidth),
         end: screenWidth,
         isForward: false,
-        parent: CurvedAnimation(parent: _controller.view, curve: const Interval(0, 0.87)),
+        parent: CurveTween(curve: const Interval(0, 0.87)).animate(_controller),
       );
     }
   }
@@ -175,14 +172,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
       );
     } else {
       // Closing animation
-      return Tween<double>(begin: _height, end: screenHeight).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0.434, 1), // not used
-          // only the reverseCurve will be used
-          reverseCurve: Interval(0.434, 1, curve: Curves.fastOutSlowIn.flipped),
-        ),
-      );
+      return Tween<double>(begin: _height, end: screenHeight)
+          .chain(CurveTween(curve: Interval(0.434, 1, curve: Curves.fastOutSlowIn.flipped)))
+          .animate(_controller);
     }
   }
 
@@ -202,14 +194,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
       );
     } else {
       // Closing animation
-      return Tween<double>(begin: collapsedGapHeight, end: expandedGapHeight).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0.434, 1), // not used
-          // only the reverseCurve will be used
-          reverseCurve: Interval(0.434, 1, curve: Curves.fastOutSlowIn.flipped),
-        ),
-      );
+      return Tween<double>(begin: collapsedGapHeight, end: expandedGapHeight)
+          .chain(CurveTween(curve: Interval(0.434, 1, curve: Curves.fastOutSlowIn.flipped)))
+          .animate(_controller);
     }
   }
 
@@ -220,12 +207,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
     final double cornerRadius = isDesktop ? _desktopCornerRadius : _mobileCornerRadius;
 
     if (_controller.status == AnimationStatus.forward) {
-      return Tween<double>(begin: cornerRadius, end: 0).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0, 0.3, curve: Curves.fastOutSlowIn),
-        ),
-      );
+      return Tween<double>(begin: cornerRadius, end: 0)
+          .chain(CurveTween(curve: const Interval(0, 0.3, curve: Curves.fastOutSlowIn)))
+          .animate(_controller);
     } else {
       return _getEmphasizedEasingAnimation(
         begin: cornerRadius,
@@ -244,12 +228,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
     final double cornerRadius = isDesktop ? _desktopCornerRadius : 0.0;
 
     if (_controller.status == AnimationStatus.forward) {
-      return Tween<double>(begin: cornerRadius, end: 0).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0, 0.3, curve: Curves.fastOutSlowIn),
-        ),
-      );
+      return Tween<double>(begin: cornerRadius, end: 0)
+          .chain(CurveTween(curve: const Interval(0, 0.3, curve: Curves.fastOutSlowIn)))
+          .animate(_controller);
     } else {
       return _getEmphasizedEasingAnimation(
         begin: cornerRadius,
@@ -262,23 +243,23 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> {
   }
 
   Animation<double> _getThumbnailOpacityAnimation() {
-    return Tween<double>(begin: 1, end: 0).animate(
-      CurvedAnimation(
-        parent: _controller.view,
-        curve: _controller.status == AnimationStatus.forward
-            ? const Interval(0, 0.3)
-            : const Interval(0.532, 0.766),
-      ),
-    );
+    return Tween<double>(begin: 1, end: 0)
+        .chain(
+          CurveTween(
+            curve: _controller.status == AnimationStatus.forward
+                ? const Interval(0, 0.3)
+                : const Interval(0.532, 0.766),
+          ),
+        )
+        .animate(_controller);
   }
 
   Animation<double> _getCartOpacityAnimation() {
-    return CurvedAnimation(
-      parent: _controller.view,
+    return CurveTween(
       curve: _controller.status == AnimationStatus.forward
           ? const Interval(0.3, 0.6)
           : const Interval(0.766, 1),
-    );
+    ).animate(_controller);
   }
 
   // Returns the correct width of the ExpandingBottomSheet based on the number of
@@ -562,17 +543,12 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   }
 
   Widget _buildThumbnail(BuildContext context, int index, Animation<double> animation) {
-    final Animation<double> thumbnailSize = Tween<double>(begin: 0.8, end: 1).animate(
-      CurvedAnimation(
-        curve: const Interval(0.33, 1, curve: Curves.easeIn),
-        parent: animation,
-      ),
-    );
+    final Animation<double> thumbnailSize = Tween<double>(
+      begin: 0.8,
+      end: 1,
+    ).chain(CurveTween(curve: const Interval(0.33, 1, curve: Curves.easeIn))).animate(animation);
 
-    final Animation<double> opacity = CurvedAnimation(
-      curve: const Interval(0.33, 1),
-      parent: animation,
-    );
+    final Animation<double> opacity = CurveTween(curve: const Interval(0.33, 1)).animate(animation);
 
     return ProductThumbnail(thumbnailSize, opacity, _productWithId(_list[index]));
   }

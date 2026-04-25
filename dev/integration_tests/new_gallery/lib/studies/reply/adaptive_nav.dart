@@ -443,23 +443,10 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 250),
     );
 
-    _drawerCurve = CurvedAnimation(
-      parent: _drawerController,
-      curve: Easing.legacy,
-      reverseCurve: Easing.legacy.flipped,
-    );
-
-    _dropArrowCurve = CurvedAnimation(
-      parent: _dropArrowController,
-      curve: Easing.legacy,
-      reverseCurve: Easing.legacy.flipped,
-    );
-
-    _bottomAppBarCurve = CurvedAnimation(
-      parent: _bottomAppBarController,
-      curve: Easing.legacy,
-      reverseCurve: Easing.legacy.flipped,
-    );
+    final curveTween = CurveTween(curve: Easing.legacy);
+    _drawerCurve = curveTween.animate(_drawerController);
+    _dropArrowCurve = curveTween.animate(_dropArrowController);
+    _bottomAppBarCurve = curveTween.animate(_bottomAppBarController);
   }
 
   @override

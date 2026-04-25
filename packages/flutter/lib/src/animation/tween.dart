@@ -527,13 +527,13 @@ class ConstantTween<T> extends Tween<T> {
 
 /// Transforms the value of the given animation by the given curve.
 ///
-/// This class differs from [CurvedAnimation] in that [CurvedAnimation] applies
+/// This class differs from [ReversibleCurvedAnimation] in that [ReversibleCurvedAnimation] applies
 /// a curve to an existing [Animation] object whereas [CurveTween] can be
 /// chained with another [Tween] prior to receiving the underlying [Animation].
-/// Unlike [CurvedAnimation], a [CurveTween] does not add listeners or hold
+/// Unlike [ReversibleCurvedAnimation], a [CurveTween] does not add listeners or hold
 /// state, so it does not need to be disposed.
 ///
-/// ([CurvedAnimation] also has the additional ability of having different
+/// ([ReversibleCurvedAnimation] also has the additional ability of having different
 /// curves when the animation is going forward vs when it is going backward,
 /// which can be useful in some scenarios.)
 ///
@@ -551,7 +551,7 @@ class ConstantTween<T> extends Tween<T> {
 ///
 /// See also:
 ///
-///  * [CurvedAnimation], for an alternative way of expressing the sample above.
+///  * [ReversibleCurvedAnimation], for an alternative way of expressing the sample above.
 ///  * [AnimationController], for examples of creating and disposing of an
 ///    [AnimationController].
 class CurveTween extends Animatable<double> {

@@ -77,7 +77,7 @@
 /// an [Animatable] (see below) changes the range of animation values to a
 /// different range or type (for example to animate [Color]s or [Rect]s).
 /// Furthermore, a [Curve] can be applied to the animation by wrapping it in a
-/// [CurvedAnimation]. Instead of linearly increasing the animation value, a
+/// [ReversibleCurvedAnimation]. Instead of linearly increasing the animation value, a
 /// curved animation changes its value according to the provided curve. The
 /// framework ships with many built-in curves (see [Curves]). As an example,
 /// [Curves.easeOutCubic] increases the animation value quickly at the beginning

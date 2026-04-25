@@ -197,8 +197,8 @@ class _OpenUpwardsPageTransition extends StatefulWidget {
 }
 
 class _OpenUpwardsPageTransitionState extends State<_OpenUpwardsPageTransition> {
-  late CurvedAnimation _primaryAnimation;
-  late CurvedAnimation _secondaryTranslationCurvedAnimation;
+  late ReversibleCurvedAnimation _primaryAnimation;
+  late ReversibleCurvedAnimation _secondaryTranslationCurvedAnimation;
 
   @override
   void initState() {
@@ -217,12 +217,12 @@ class _OpenUpwardsPageTransitionState extends State<_OpenUpwardsPageTransition> 
   }
 
   void _setAnimations() {
-    _primaryAnimation = CurvedAnimation(
+    _primaryAnimation = ReversibleCurvedAnimation(
       parent: widget.animation,
       curve: _OpenUpwardsPageTransition._transitionCurve,
       reverseCurve: _OpenUpwardsPageTransition._transitionCurve.flipped,
     );
-    _secondaryTranslationCurvedAnimation = CurvedAnimation(
+    _secondaryTranslationCurvedAnimation = ReversibleCurvedAnimation(
       parent: widget.secondaryAnimation,
       curve: _OpenUpwardsPageTransition._transitionCurve,
       reverseCurve: _OpenUpwardsPageTransition._transitionCurve.flipped,

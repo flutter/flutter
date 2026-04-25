@@ -609,7 +609,9 @@ void main() {
     await tapTest2and3(tester, widgetFinder, mockOnEndFunction);
   });
 
-  testWidgets('Ensure CurvedAnimations are disposed on widget change', (WidgetTester tester) async {
+  testWidgets('Ensure ReversibleCurvedAnimations are disposed on widget change', (
+    WidgetTester tester,
+  ) async {
     final key = GlobalKey<ImplicitlyAnimatedWidgetState<AnimatedOpacity>>();
     final curve = ValueNotifier<Curve>(const Interval(0.0, 0.5));
     addTearDown(curve.dispose);
@@ -634,7 +636,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final firstCurvedAnimation = firstAnimation as CurvedAnimation;
+    final firstCurvedAnimation = firstAnimation as ReversibleCurvedAnimation;
 
     expect(firstCurvedAnimation.isDisposed, isFalse);
 
@@ -647,7 +649,7 @@ void main() {
       fail('animation was null!');
     }
 
-    final secondCurvedAnimation = secondAnimation as CurvedAnimation;
+    final secondCurvedAnimation = secondAnimation as ReversibleCurvedAnimation;
 
     expect(firstState, equals(secondState));
     expect(firstAnimation, isNot(equals(secondAnimation)));

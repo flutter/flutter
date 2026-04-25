@@ -12,15 +12,6 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.RotationTransitionExampleApp());
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RotationTransition &&
-            widget.turns is CurvedAnimation &&
-            (widget.turns as CurvedAnimation).curve == Curves.elasticOut,
-      ),
-      findsOneWidget,
-    );
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(Padding), findsAtLeast(1));
     expect(
@@ -31,33 +22,21 @@ void main() {
       findsOneWidget,
     );
 
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RotationTransition &&
-            widget.turns is CurvedAnimation &&
-            widget.turns.value == 0.0 &&
-            widget.turns.status == AnimationStatus.forward,
-      ),
-      findsOneWidget,
+    expect(find.byType(RotationTransition), findsOneWidget);
+    final transition = tester.widget<RotationTransition>(
+      find.byType(RotationTransition),
     );
+    expect(transition.turns.status, AnimationStatus.forward);
+    expect(transition.turns.value, 0.0);
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 3));
     await tester.pump();
 
+    expect(transition.turns.status, AnimationStatus.reverse);
     expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RotationTransition &&
-            widget.turns is CurvedAnimation &&
-            (widget.turns as CurvedAnimation).parent is AnimationController &&
-            ((widget.turns as CurvedAnimation).parent as AnimationController)
-                    .value ==
-                0.5 &&
-            widget.turns.status == AnimationStatus.reverse,
-      ),
-      findsOneWidget,
+      transition.turns.value,
+      moreOrLessEquals(Curves.elasticOut.transform(0.5)),
     );
   });
 }

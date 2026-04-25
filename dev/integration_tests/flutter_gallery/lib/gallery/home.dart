@@ -363,7 +363,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
         children: <Widget>[
           home,
           FadeTransition(
-            opacity: CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+            opacity: CurveTween(curve: Curves.easeInOut).animate(_controller),
             child: const Banner(message: 'PREVIEW', location: BannerLocation.topEnd),
           ),
         ],

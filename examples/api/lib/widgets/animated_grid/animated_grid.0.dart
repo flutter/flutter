@@ -220,9 +220,8 @@ class CardItem extends StatelessWidget {
     return Padding(
       padding: const .all(2.0),
       child: ScaleTransition(
-        scale: CurvedAnimation(
-          parent: animation,
-          curve: removing ? Curves.easeInOut : Curves.bounceOut,
+        scale: animation.drive(
+          CurveTween(curve: removing ? Curves.easeInOut : Curves.bounceOut),
         ),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,

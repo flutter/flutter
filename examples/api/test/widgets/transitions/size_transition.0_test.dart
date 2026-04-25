@@ -19,10 +19,14 @@ void main() {
       ),
       findsOneWidget,
     );
+
     expect(find.byType(SizeTransition), findsOneWidget);
+    final transition = tester.widget<SizeTransition>(
+      find.byType(SizeTransition),
+    );
 
     expect(
-      tester.widget(find.byType(SizeTransition)),
+      transition,
       isA<SizeTransition>()
           .having(
             (SizeTransition transition) => transition.axis,
@@ -33,26 +37,16 @@ void main() {
             (SizeTransition transition) => transition.alignment,
             'alignment',
             Alignment.topLeft,
-          )
-          .having(
-            (SizeTransition transition) => transition.sizeFactor,
-            'factor',
-            isA<CurvedAnimation>()
-                .having(
-                  (CurvedAnimation animation) => animation.curve,
-                  'curve',
-                  Curves.fastOutSlowIn,
-                )
-                .having(
-                  (CurvedAnimation animation) => animation.parent,
-                  'paren',
-                  isA<AnimationController>().having(
-                    (AnimationController controller) => controller.duration,
-                    'duration',
-                    const Duration(seconds: 3),
-                  ),
-                ),
           ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3) ~/ 2);
+    await tester.pump();
+
+    expect(
+      transition.sizeFactor.value,
+      moreOrLessEquals(Curves.fastOutSlowIn.transform(0.5)),
     );
   });
 }

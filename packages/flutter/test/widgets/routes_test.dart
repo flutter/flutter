@@ -2870,7 +2870,8 @@ class TestPageRouteBuilder extends PageRouteBuilder<void> {
 
   @override
   Animation<double> createAnimation() {
-    return CurvedAnimation(parent: super.createAnimation(), curve: Curves.easeOutExpo);
+    final Animation<double> parent = super.createAnimation();
+    return CurveTween(curve: Curves.easeOutExpo).animate(parent);
   }
 }
 

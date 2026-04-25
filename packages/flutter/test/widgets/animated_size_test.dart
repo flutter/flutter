@@ -453,7 +453,7 @@ void main() {
       );
     });
 
-    testWidgets('disposes animation and controller', (WidgetTester tester) async {
+    testWidgets('disposes controller', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -467,8 +467,6 @@ void main() {
 
       await tester.pumpWidget(const Center());
 
-      expect(box.debugAnimation, isNotNull);
-      expect(box.debugAnimation!.isDisposed, isTrue);
       expect(box.debugController, isNotNull);
       expect(
         () => box.debugController!.dispose(),

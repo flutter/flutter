@@ -19,14 +19,19 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    final transition = tester.widget<ScaleTransition>(
+      find.byType(ScaleTransition),
+    );
+    expect(transition.scale.value, 0.0);
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
     expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is ScaleTransition &&
-            widget.scale is CurvedAnimation &&
-            (widget.scale as CurvedAnimation).curve == Curves.fastOutSlowIn,
-      ),
-      findsOneWidget,
+      transition.scale.value,
+      moreOrLessEquals(Curves.fastOutSlowIn.transform(0.5)),
     );
   });
 

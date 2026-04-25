@@ -548,11 +548,10 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     )..addStatusListener(_handleStatusChanged);
   }
 
-  CurvedAnimation? _backingOverlayAnimation;
-  CurvedAnimation get _overlayAnimation {
-    return _backingOverlayAnimation ??= CurvedAnimation(
-      parent: _controller,
-      curve: widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!,
+  Animation<double>? _backingOverlayAnimation;
+  Animation<double> get _overlayAnimation {
+    return _backingOverlayAnimation ??= _controller.drive(
+      CurveTween(curve: widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!),
     );
   }
 
@@ -850,7 +849,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     _tapRecognizer?.dispose();
     _timer?.cancel();
     _backingController?.dispose();
-    _backingOverlayAnimation?.dispose();
     super.dispose();
   }
 

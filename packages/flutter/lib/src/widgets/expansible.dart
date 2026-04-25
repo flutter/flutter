@@ -361,7 +361,7 @@ class Expansible extends StatefulWidget {
 
 class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late CurvedAnimation _heightFactor;
+  late ReversibleCurvedAnimation _heightFactor;
 
   Duration get _duration {
     return widget.animationStyle?.duration ?? widget.duration;
@@ -388,7 +388,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       widget.controller.collapse();
     }
     final heightFactorTween = Tween<double>(begin: 0.0, end: 1.0);
-    _heightFactor = CurvedAnimation(
+    _heightFactor = ReversibleCurvedAnimation(
       parent: _animationController.drive(heightFactorTween),
       curve: _curve,
       reverseCurve: _reverseCurve,

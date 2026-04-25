@@ -108,7 +108,7 @@ class Point {
 
 class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProviderStateMixin {
   late AnimationController controller;
-  late CurvedAnimation curve;
+  late ReversibleCurvedAnimation curve;
   bool isPlaying = false;
   List<List<Point>> pointList = <List<Point>>[<Point>[], <Point>[], <Point>[], <Point>[]];
   bool isReversed = false;
@@ -299,7 +299,9 @@ class AnimatedBezierState extends State<AnimatedBezier> with SingleTickerProvide
     // This code uses a manual listener for historical reasons and will remain
     // in order to preserve compatibility with the history of measurements for
     // this benchmark.
-    curve = CurvedAnimation(parent: controller, curve: Curves.linear)
+    // We could also switch to CurveTween for efficiency but haven't done so
+    // for the same reason.
+    curve = ReversibleCurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: null)
       ..addListener(() {
         setState(() {});
       })

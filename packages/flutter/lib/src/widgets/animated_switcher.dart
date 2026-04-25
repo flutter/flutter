@@ -29,7 +29,7 @@ class _ChildEntry {
   final AnimationController controller;
 
   // The (curved) animation being used to drive the transition.
-  final CurvedAnimation animation;
+  final ReversibleCurvedAnimation animation;
 
   // The currently built transition for this child.
   Widget transition;
@@ -314,7 +314,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       reverseDuration: widget.reverseDuration,
       vsync: this,
     );
-    final animation = CurvedAnimation(
+    final animation = ReversibleCurvedAnimation(
       parent: controller,
       curve: widget.switchInCurve,
       reverseCurve: widget.switchOutCurve,
@@ -337,7 +337,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     required Widget child,
     required AnimatedSwitcherTransitionBuilder builder,
     required AnimationController controller,
-    required CurvedAnimation animation,
+    required ReversibleCurvedAnimation animation,
   }) {
     final entry = _ChildEntry(
       widgetChild: child,

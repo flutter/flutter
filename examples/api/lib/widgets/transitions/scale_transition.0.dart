@@ -32,10 +32,6 @@ class _ScaleTransitionExampleState extends State<ScaleTransitionExample>
     duration: const Duration(seconds: 2),
     vsync: this,
   )..repeat(reverse: true);
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.fastOutSlowIn,
-  );
 
   @override
   void dispose() {
@@ -48,7 +44,7 @@ class _ScaleTransitionExampleState extends State<ScaleTransitionExample>
     return Scaffold(
       body: Center(
         child: ScaleTransition(
-          scale: _animation,
+          scale: _controller.drive(CurveTween(curve: Curves.fastOutSlowIn)),
           child: const Padding(
             padding: .all(8.0),
             child: FlutterLogo(size: 150.0),

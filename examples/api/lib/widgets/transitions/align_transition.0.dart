@@ -37,7 +37,7 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample>
   late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
     begin: Alignment.bottomLeft,
     end: Alignment.center,
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
+  ).chain(CurveTween(curve: Curves.decelerate)).animate(_controller);
 
   @override
   void dispose() {

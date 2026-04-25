@@ -1361,7 +1361,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ScrollController? _cachedController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
-  late CurvedAnimation _fadeoutOpacityAnimation;
+  late Animation<double> _fadeoutOpacityAnimation;
   final GlobalKey _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
@@ -1416,10 +1416,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     super.initState();
     _fadeoutAnimationController = AnimationController(vsync: this, duration: widget.fadeDuration)
       ..addStatusListener(_validateInteractions);
-    _fadeoutOpacityAnimation = CurvedAnimation(
-      parent: _fadeoutAnimationController,
+    _fadeoutOpacityAnimation = CurveTween(
       curve: Curves.fastOutSlowIn,
-    );
+    ).animate(_fadeoutAnimationController);
     scrollbarPainter = ScrollbarPainter(
       color: widget.thumbColor ?? const Color(0x66BCBCBC),
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
@@ -2217,7 +2216,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
     scrollbarPainter.dispose();
-    _fadeoutOpacityAnimation.dispose();
     super.dispose();
   }
 

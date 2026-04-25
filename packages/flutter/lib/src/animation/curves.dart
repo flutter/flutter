@@ -98,7 +98,7 @@ abstract class Curve extends ParametricCurve<double> {
 
   /// Returns a new curve that is the reversed inversion of this one.
   ///
-  /// This is often useful with [CurvedAnimation.reverseCurve].
+  /// This is often useful with [ReversibleCurvedAnimation.reverseCurve].
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in.mp4}
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_flipped.mp4}
@@ -107,7 +107,7 @@ abstract class Curve extends ParametricCurve<double> {
   ///
   ///  * [FlippedCurve], the class that is used to implement this getter.
   ///  * [ReverseAnimation], which reverses an [Animation] rather than a [Curve].
-  ///  * [CurvedAnimation], which can take a separate curve and reverse curve.
+  ///  * [ReversibleCurvedAnimation], which can take a separate curve and reverse curve.
   Curve get flipped => FlippedCurve(this);
 }
 
@@ -1217,7 +1217,7 @@ class CatmullRomCurve extends Curve {
 ///
 /// This is the class used to implement the [flipped] getter on curves.
 ///
-/// This is often useful with [CurvedAnimation.reverseCurve].
+/// This is often useful with [ReversibleCurvedAnimation.reverseCurve].
 ///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_flipped.mp4}
@@ -1226,7 +1226,7 @@ class CatmullRomCurve extends Curve {
 ///
 ///  * [Curve.flipped], which provides the [FlippedCurve] of a [Curve].
 ///  * [ReverseAnimation], which reverses an [Animation] rather than a [Curve].
-///  * [CurvedAnimation], which can take a separate curve and reverse curve.
+///  * [ReversibleCurvedAnimation], which can take a separate curve and reverse curve.
 class FlippedCurve extends Curve {
   /// Creates a flipped curve.
   const FlippedCurve(this.curve);

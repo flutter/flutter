@@ -45,10 +45,6 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
     duration: widget.duration,
     vsync: this,
   )..repeat(reverse: true);
-  late final CurvedAnimation _animation = CurvedAnimation(
-    parent: _controller,
-    curve: widget.curve,
-  );
 
   @override
   void didUpdateWidget(FadeTransitionExample oldWidget) {
@@ -59,15 +55,10 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
         ..duration = widget.duration
         ..repeat(reverse: true);
     }
-
-    if (oldWidget.curve != widget.curve) {
-      _animation.curve = widget.curve;
-    }
   }
 
   @override
   void dispose() {
-    _animation.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -77,7 +68,7 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
     return ColoredBox(
       color: Colors.white,
       child: FadeTransition(
-        opacity: _animation,
+        opacity: _controller.drive(CurveTween(curve: widget.curve)),
         child: const Padding(padding: .all(8), child: FlutterLogo()),
       ),
     );

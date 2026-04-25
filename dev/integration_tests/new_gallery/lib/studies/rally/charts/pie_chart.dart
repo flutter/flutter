@@ -73,13 +73,10 @@ class _RallyPieChartState extends State<RallyPieChart> with SingleTickerProvider
   void initState() {
     super.initState();
     controller = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
-    animation = CurvedAnimation(
-      parent: TweenSequence<double>(<TweenSequenceItem<double>>[
-        TweenSequenceItem<double>(tween: Tween<double>(begin: 0, end: 0), weight: 1),
-        TweenSequenceItem<double>(tween: Tween<double>(begin: 0, end: 1), weight: 1.5),
-      ]).animate(controller),
-      curve: Curves.decelerate,
-    );
+    animation = TweenSequence<double>(<TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(tween: Tween<double>(begin: 0, end: 0), weight: 1),
+      TweenSequenceItem<double>(tween: Tween<double>(begin: 0, end: 1), weight: 1.5),
+    ]).chain(CurveTween(curve: Curves.decelerate)).animate(controller);
     controller.forward();
   }
 

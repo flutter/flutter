@@ -26,6 +26,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
 
   static const List<String> _drawerContents = <String>['A', 'B', 'C', 'D', 'E'];
 
+  static final Animatable<double> _drawerContentsTween = Tween<double>(
+    begin: 1.0,
+    end: 0.0,
+  ).chain(CurveTween(curve: Curves.fastOutSlowIn));
   static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
     begin: const Offset(0.0, -1.0),
     end: Offset.zero,
@@ -40,10 +44,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-    _drawerContentsOpacity = CurvedAnimation(
-      parent: ReverseAnimation(_controller),
-      curve: Curves.fastOutSlowIn,
-    );
+    _drawerContentsOpacity = _controller.drive(_drawerContentsTween);
     _drawerDetailsPosition = _controller.drive(_drawerDetailsTween);
   }
 

@@ -35,10 +35,10 @@ class _SlideTransitionExampleState extends State<SlideTransitionExample>
     duration: const Duration(seconds: 2),
     vsync: this,
   )..repeat(reverse: true);
-  late final Animation<Offset> _offsetAnimation = Tween<Offset>(
-    begin: Offset.zero,
+  final _positionTween = Tween<Offset>(
+    begin: .zero,
     end: const Offset(1.5, 0.0),
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticIn));
+  );
 
   @override
   void dispose() {
@@ -49,7 +49,9 @@ class _SlideTransitionExampleState extends State<SlideTransitionExample>
   @override
   Widget build(BuildContext context) {
     return SlideTransition(
-      position: _offsetAnimation,
+      position: _positionTween
+          .chain(CurveTween(curve: Curves.elasticIn))
+          .animate(_controller),
       child: const Padding(padding: .all(8.0), child: FlutterLogo(size: 150.0)),
     );
   }

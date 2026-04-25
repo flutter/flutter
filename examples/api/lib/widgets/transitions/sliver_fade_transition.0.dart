@@ -37,15 +37,11 @@ class _SliverFadeTransitionExampleState
     duration: const Duration(milliseconds: 1000),
     vsync: this,
   );
-  late final Animation<double> animation = CurvedAnimation(
-    parent: controller,
-    curve: Curves.easeIn,
-  );
 
   @override
   void initState() {
     super.initState();
-    animation.addStatusListener((AnimationStatus status) {
+    controller.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.completed) {
         controller.reverse();
       } else if (status == AnimationStatus.dismissed) {
@@ -66,7 +62,7 @@ class _SliverFadeTransitionExampleState
     return CustomScrollView(
       slivers: <Widget>[
         SliverFadeTransition(
-          opacity: animation,
+          opacity: controller.drive(CurveTween(curve: Curves.easeIn)),
           sliver: SliverFixedExtentList.builder(
             itemExtent: 100.0,
             itemCount: 5,

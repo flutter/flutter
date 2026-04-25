@@ -170,7 +170,7 @@ typedef DelegatedTransitionBuilder =
 /// left, and in left-to-right text, positive x offsets move towards the right.
 ///
 /// Here's an illustration of the [SlideTransition] widget, with its [position]
-/// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -330,7 +330,7 @@ class MatrixTransition extends AnimatedWidget {
 /// Animates the scale of a transformed widget.
 ///
 /// Here's an illustration of the [ScaleTransition] widget, with it's [scale]
-/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -373,7 +373,7 @@ class ScaleTransition extends MatrixTransition {
 /// Animates the rotation of a widget.
 ///
 /// Here's an illustration of the [RotationTransition] widget, with it's [turns]
-/// animated by a [CurvedAnimation] set to [Curves.elasticOut]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.elasticOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/rotation_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -422,7 +422,7 @@ class RotationTransition extends MatrixTransition {
 /// nothing.
 ///
 /// Here's an illustration of the [SizeTransition] widget, with it's [sizeFactor]
-/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/size_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -551,7 +551,7 @@ class SizeTransition extends AnimatedWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=rLwWVbv3xDQ}
 ///
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
-/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.fastOutSlowIn]:
 ///
 /// {@tool dartpad}
 /// The following code implements the [FadeTransition] using
@@ -649,7 +649,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 /// {@end-tool}
 ///
 /// Here's an illustration of the [FadeTransition] widget, the [RenderBox]
-/// equivalent widget, with it's [opacity] animated by a [CurvedAnimation] set
+/// equivalent widget, with it's [opacity] animated by a [ReversibleCurvedAnimation] set
 /// to [Curves.fastOutSlowIn]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
@@ -760,7 +760,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 /// Only works if it's the child of a [Stack].
 ///
 /// Here's an illustration of the [PositionedTransition] widget, with it's [rect]
-/// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/positioned_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -813,7 +813,7 @@ class PositionedTransition extends AnimatedWidget {
 /// Only works if it's the child of a [Stack].
 ///
 /// Here's an illustration of the [RelativePositionedTransition] widget, with it's [rect]
-/// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
+/// animated by a [ReversibleCurvedAnimation] set to [Curves.elasticInOut]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/relative_positioned_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -884,7 +884,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 /// of its [Decoration].
 ///
 /// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
-/// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
+/// [decoration] animated by a [ReversibleCurvedAnimation] set to [Curves.decelerate]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/decorated_box_transition.mp4}
 ///
 /// {@tool dartpad}
@@ -936,7 +936,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
 /// Animated version of an [Align] that animates its [Align.alignment] property.
 ///
 /// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
-/// [DecoratedBoxTransition.decoration] animated by a [CurvedAnimation] set to
+/// [DecoratedBoxTransition.decoration] animated by a [ReversibleCurvedAnimation] set to
 /// [Curves.decelerate]:
 ///
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}

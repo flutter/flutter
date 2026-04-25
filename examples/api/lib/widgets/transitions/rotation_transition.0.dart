@@ -33,10 +33,6 @@ class _RotationTransitionExampleState extends State<RotationTransitionExample>
     duration: const Duration(seconds: 2),
     vsync: this,
   )..repeat(reverse: true);
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.elasticOut,
-  );
 
   @override
   void dispose() {
@@ -49,7 +45,7 @@ class _RotationTransitionExampleState extends State<RotationTransitionExample>
     return Scaffold(
       body: Center(
         child: RotationTransition(
-          turns: _animation,
+          turns: _controller.drive(CurveTween(curve: Curves.elasticOut)),
           child: const Padding(
             padding: .all(8.0),
             child: FlutterLogo(size: 150.0),

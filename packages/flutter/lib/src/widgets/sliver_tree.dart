@@ -593,7 +593,7 @@ class TreeSliver<T> extends StatefulWidget {
 // Used in _SliverTreeState for code simplicity.
 typedef _AnimationRecord = ({
   AnimationController controller,
-  CurvedAnimation animation,
+  Animation<double> animation,
   UniqueKey key,
 });
 
@@ -693,7 +693,6 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
   void dispose() {
     _treeController!._state = null;
     for (final _AnimationRecord record in _currentAnimationForParent.values) {
-      record.animation.dispose();
       record.controller.dispose();
     }
     super.dispose();
@@ -860,10 +859,6 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
-      if (_currentAnimationForParent[node] != null) {
-        // Dispose of the old animation if this node was already animating.
-        _currentAnimationForParent[node]!.animation.dispose();
-      }
 
       // If animation is disabled or the duration is zero, we skip the animation
       // and immediately update the active nodes. This prevents the app from freezing
@@ -887,7 +882,6 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
               switch (status) {
                 case AnimationStatus.dismissed:
                 case AnimationStatus.completed:
-                  _currentAnimationForParent[node]!.animation.dispose();
                   _currentAnimationForParent[node]!.controller.dispose();
                   _currentAnimationForParent.remove(node);
                   _updateActiveAnimations();
@@ -916,9 +910,8 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
         case AnimationStatus.completed:
       }
 
-      final newAnimation = CurvedAnimation(
-        parent: controller,
-        curve: widget.toggleAnimationStyle?.curve ?? TreeSliver.defaultAnimationCurve,
+      final Animation<double> newAnimation = controller.drive(
+        CurveTween(curve: widget.toggleAnimationStyle?.curve ?? TreeSliver.defaultAnimationCurve),
       );
       _currentAnimationForParent[node] = (
         controller: controller,

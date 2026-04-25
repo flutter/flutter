@@ -203,14 +203,11 @@ class BackdropTitle extends AnimatedWidget {
       child: Stack(
         children: <Widget>[
           Opacity(
-            opacity: CurvedAnimation(
-              parent: ReverseAnimation(animation),
-              curve: const Interval(0.5, 1.0),
-            ).value,
+            opacity: const Interval(0.5, 1.0).transform(1 - animation.value),
             child: const Text('Select a Category'),
           ),
           Opacity(
-            opacity: CurvedAnimation(parent: animation, curve: const Interval(0.5, 1.0)).value,
+            opacity: const Interval(0.5, 1.0).transform(animation.value),
             child: const Text('Asset Viewer'),
           ),
         ],

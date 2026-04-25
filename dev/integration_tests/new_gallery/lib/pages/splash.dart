@@ -87,7 +87,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     return RelativeRectTween(
       begin: RelativeRect.fill,
       end: RelativeRect.fromLTRB(0, height, 0, 0),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    ).chain(CurveTween(curve: Curves.easeInOut)).animate(_controller);
   }
 
   @override

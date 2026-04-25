@@ -84,7 +84,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     Clip clipBehavior = Clip.hardEdge,
     VoidCallback? onEnd,
   }) : _vsync = vsync,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _onEnd = onEnd {
     _controller =
         AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
           ..addListener(() {
@@ -92,8 +93,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
               markNeedsLayout();
             }
           });
-    _animation = CurvedAnimation(parent: _controller, curve: curve);
-    _onEnd = onEnd;
+    this.curve = curve;
   }
 
   /// When asserts are enabled, returns the animation controller that is used
@@ -113,24 +113,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     return controller;
   }
 
-  /// When asserts are enabled, returns the animation that drives the resizing.
-  ///
-  /// Otherwise, returns null.
-  ///
-  /// This getter is intended for use in framework unit tests. Applications must
-  /// not depend on its value.
-  @visibleForTesting
-  CurvedAnimation? get debugAnimation {
-    CurvedAnimation? animation;
-    assert(() {
-      animation = _animation;
-      return true;
-    }());
-    return animation;
-  }
-
   late final AnimationController _controller;
-  late final CurvedAnimation _animation;
+  late Animation<double> _animation;
 
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
@@ -162,12 +146,14 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   /// The curve of the animation.
-  Curve get curve => _animation.curve;
+  Curve get curve => _curve!;
+  Curve? _curve;
   set curve(Curve value) {
-    if (value == _animation.curve) {
+    if (value == _curve) {
       return;
     }
-    _animation.curve = value;
+    _curve = value;
+    _animation = CurveTween(curve: curve).animate(_controller);
   }
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -424,7 +410,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void dispose() {
     _clipRectLayer.layer = null;
     _controller.dispose();
-    _animation.dispose();
     super.dispose();
   }
 }

@@ -154,16 +154,12 @@ class _VerticalPageTransition extends StatelessWidget {
     required Animation<double> primaryRouteAnimation,
     required this.secondaryRouteAnimation,
     required this.child,
-  }) : _primaryPositionAnimation = CurvedAnimation(
-         parent: primaryRouteAnimation,
-         curve: _curve,
-         reverseCurve: _curve,
-       ).drive(_kBottomUpTween),
-       _secondaryPositionAnimation = CurvedAnimation(
-         parent: secondaryRouteAnimation,
-         curve: _curve,
-         reverseCurve: _curve,
-       ).drive(_kTopDownTween);
+  }) : _primaryPositionAnimation = _kBottomUpTween
+           .chain(CurveTween(curve: _curve))
+           .animate(primaryRouteAnimation),
+       _secondaryPositionAnimation = _kTopDownTween
+           .chain(CurveTween(curve: _curve))
+           .animate(secondaryRouteAnimation);
 
   final Animation<Offset> _primaryPositionAnimation;
 

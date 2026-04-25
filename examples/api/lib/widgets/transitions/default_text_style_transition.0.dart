@@ -31,8 +31,7 @@ class _DefaultTextStyleTransitionExampleState
     extends State<DefaultTextStyleTransitionExample>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  late TextStyleTween _styleTween;
-  late CurvedAnimation _curvedAnimation;
+  late Animation<TextStyle> _animation;
 
   @override
   void initState() {
@@ -41,7 +40,7 @@ class _DefaultTextStyleTransitionExampleState
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
-    _styleTween = TextStyleTween(
+    final styleTween = TextStyleTween(
       begin: const TextStyle(
         fontSize: 50,
         color: Colors.blue,
@@ -49,10 +48,9 @@ class _DefaultTextStyleTransitionExampleState
       ),
       end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: .w100),
     );
-    _curvedAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.elasticInOut,
-    );
+    _animation = styleTween
+        .chain(CurveTween(curve: Curves.elasticInOut))
+        .animate(_controller);
   }
 
   @override
@@ -65,7 +63,7 @@ class _DefaultTextStyleTransitionExampleState
   Widget build(BuildContext context) {
     return Center(
       child: DefaultTextStyleTransition(
-        style: _styleTween.animate(_curvedAnimation),
+        style: _animation,
         child: const Text('Flutter'),
       ),
     );

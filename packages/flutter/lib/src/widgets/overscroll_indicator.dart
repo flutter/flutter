@@ -332,7 +332,7 @@ class _GlowController extends ChangeNotifier {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     _glowController = AnimationController(vsync: vsync)..addStatusListener(_changePhase);
-    _decelerator = CurvedAnimation(parent: _glowController, curve: Curves.decelerate)
+    _decelerator = _glowController.drive(CurveTween(curve: Curves.decelerate))
       ..addListener(notifyListeners);
     _glowOpacity = _decelerator.drive(_glowOpacityTween);
     _glowSize = _decelerator.drive(_glowSizeTween);
@@ -347,7 +347,7 @@ class _GlowController extends ChangeNotifier {
   double _paintOffsetScrollPixels = 0.0;
 
   // animation values
-  late final CurvedAnimation _decelerator;
+  late final Animation<double> _decelerator;
   final Tween<double> _glowOpacityTween = Tween<double>(begin: 0.0, end: 0.0);
   late final Animation<double> _glowOpacity;
   final Tween<double> _glowSizeTween = Tween<double>(begin: 0.0, end: 0.0);
@@ -403,7 +403,6 @@ class _GlowController extends ChangeNotifier {
   @override
   void dispose() {
     _glowController.dispose();
-    _decelerator.dispose();
     _displacementTicker.dispose();
     _pullRecedeTimer?.cancel();
     super.dispose();

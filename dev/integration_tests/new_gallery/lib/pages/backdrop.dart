@@ -77,31 +77,25 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
 
   Animation<RelativeRect> _slideDownSettingsPageAnimation(BoxConstraints constraints) {
     return RelativeRectTween(
-      begin: RelativeRect.fromLTRB(0, -constraints.maxHeight, 0, 0),
-      end: RelativeRect.fill,
-    ).animate(
-      CurvedAnimation(
-        parent: _settingsPanelController,
-        curve: const Interval(0.0, 0.4, curve: Curves.ease),
-      ),
-    );
+          begin: RelativeRect.fromLTRB(0, -constraints.maxHeight, 0, 0),
+          end: RelativeRect.fill,
+        )
+        .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.ease)))
+        .animate(_settingsPanelController);
   }
 
   Animation<RelativeRect> _slideDownHomePageAnimation(BoxConstraints constraints) {
     return RelativeRectTween(
-      begin: RelativeRect.fill,
-      end: RelativeRect.fromLTRB(
-        0,
-        constraints.biggest.height - galleryHeaderHeight,
-        0,
-        -galleryHeaderHeight,
-      ),
-    ).animate(
-      CurvedAnimation(
-        parent: _settingsPanelController,
-        curve: const Interval(0.0, 0.4, curve: Curves.ease),
-      ),
-    );
+          begin: RelativeRect.fill,
+          end: RelativeRect.fromLTRB(
+            0,
+            constraints.biggest.height - galleryHeaderHeight,
+            0,
+            -galleryHeaderHeight,
+          ),
+        )
+        .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.ease)))
+        .animate(_settingsPanelController);
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
@@ -176,10 +170,7 @@ class _BackdropState extends State<Backdrop> with TickerProviderStateMixin {
                 alignment: Directionality.of(context) == TextDirection.ltr
                     ? Alignment.topRight
                     : Alignment.topLeft,
-                scale: CurvedAnimation(
-                  parent: _settingsPanelController,
-                  curve: Curves.fastOutSlowIn,
-                ),
+                scale: _settingsPanelController.drive(CurveTween(curve: Curves.fastOutSlowIn)),
                 child: Align(
                   alignment: AlignmentDirectional.topEnd,
                   child: Material(

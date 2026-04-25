@@ -468,7 +468,7 @@ class _HeroFlightManifest {
 
   Object get tag => fromHero.widget.tag;
 
-  CurvedAnimation? _animation;
+  ReversibleCurvedAnimation? _animation;
 
   Animation<double> get animation {
     final Curve curve, reverseCurve;
@@ -484,7 +484,7 @@ class _HeroFlightManifest {
         reverseCurve = fromHero.widget.reverseCurve ?? curve.flipped;
     }
 
-    return _animation ??= CurvedAnimation(
+    return _animation ??= ReversibleCurvedAnimation(
       parent: parent,
       curve: curve,
       reverseCurve: isDiverted ? null : reverseCurve,

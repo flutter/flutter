@@ -105,14 +105,14 @@ typedef ValueListenableTransformer<T> = T Function(T);
 /// (which is itself an [Animation<double>])
 /// created by a [State] that implements [TickerProvider].
 /// Further animations might be derived from that animation
-/// by using e.g. [Tween] or [CurvedAnimation].
+/// by using e.g. [Tween] or [ReversibleCurvedAnimation].
 /// The animations might be used to configure an [AnimatedWidget]
 /// (using one of its many subclasses like [FadeTransition]),
 /// or their values might be used directly.
 ///
 /// For example, the [AnimationController] may represent
 /// the abstract progress of the animation from 0.0 to 1.0;
-/// then a [CurvedAnimation] might apply an easing curve;
+/// then a [ReversibleCurvedAnimation] might apply an easing curve;
 /// and a [SizeTween] and [ColorTween] might each be applied to that
 /// to produce an [Animation<Size>] and an [Animation<Color>] that control
 /// a widget shrinking and changing color as the animation proceeds.
@@ -257,7 +257,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   /// This method is only valid for `Animation<double>` instances (i.e. when `T`
   /// is `double`). This means, for instance, that it can be called on
-  /// [AnimationController] objects, as well as [CurvedAnimation]s,
+  /// [AnimationController] objects, as well as [ReversibleCurvedAnimation]s,
   /// [ProxyAnimation]s, [ReverseAnimation]s, [TrainHoppingAnimation]s, etc.
   ///
   /// It returns an [Animation] specialized to the same type, `U`, as the
@@ -336,7 +336,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   ///  * [Animatable.animate], which does the same thing.
   ///  * [AnimationController], which is usually used to drive animations.
-  ///  * [CurvedAnimation], an alternative to [CurveTween] for applying easing
+  ///  * [ReversibleCurvedAnimation], an alternative to [CurveTween] for applying easing
   ///    curves, which supports distinct curves in the forward direction and the
   ///    reverse direction.
   ///  * [Animatable.fromCallback], which allows creating an [Animatable] from an

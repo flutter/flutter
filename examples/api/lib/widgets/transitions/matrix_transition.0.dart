@@ -32,7 +32,6 @@ class MatrixTransitionExample extends StatefulWidget {
 class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -41,7 +40,6 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat();
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.linear);
   }
 
   @override
@@ -55,7 +53,7 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
     return Scaffold(
       body: Center(
         child: MatrixTransition(
-          animation: _animation,
+          animation: _controller.drive(CurveTween(curve: Curves.linear)),
           child: const Padding(
             padding: .all(8.0),
             child: FlutterLogo(size: 150.0),

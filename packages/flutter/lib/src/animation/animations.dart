@@ -340,7 +340,7 @@ class ReverseAnimation extends Animation<double>
 ///
 /// {@tool snippet}
 ///
-/// This code snippet shows how to migrate from [CurvedAnimation] to [CurveTween].
+/// This code snippet shows how to migrate from [ReversibleCurvedAnimation] to [CurveTween].
 /// The latter is less verbose and could be made stateless.
 ///
 /// ```dart
@@ -406,10 +406,10 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// If the parent animation changes direction without first reaching the
   /// [AnimationStatus.completed] or [AnimationStatus.dismissed] status, the
-  /// [CurvedAnimation] stays on the same curve (albeit in the opposite
+  /// [ReversibleCurvedAnimation] stays on the same curve (albeit in the opposite
   /// direction) to avoid visual discontinuities.
   ///
-  /// Because [CurvedAnimation] may add listeners to its parent, it must be
+  /// Because [ReversibleCurvedAnimation] may add listeners to its parent, it must be
   /// created once (for example in [State.initState]) and disposed in
   /// [State.dispose]. Do not recreate it on every build as it would leak any
   /// added listeners on every rebuild. If [reverseCurve] is not needed, prefer

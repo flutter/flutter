@@ -65,10 +65,13 @@ class _FollowCurve2DState extends State<FollowCurve2D>
   void initState() {
     super.initState();
     controller = AnimationController(duration: widget.duration, vsync: this);
-    animation = CurvedAnimation(parent: controller, curve: widget.curve);
+    animation = controller.drive(CurveTween(curve: widget.curve));
     // Have the controller repeat indefinitely. If you want it to "bounce" back
     // and forth, set the reverse parameter to true.
     controller.repeat();
+    // This is just for demo purposes. It's more efficient to use one of
+    // Flutter's transition widgets like [AlignTransition] rather than calling
+    // [setState] repeatedly.
     controller.addListener(() => setState(() {}));
   }
 

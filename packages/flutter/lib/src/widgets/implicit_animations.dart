@@ -367,7 +367,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
 
   /// The animation driving this widget's implicit animations.
   Animation<double> get animation => _animation;
-  late CurvedAnimation _animation = _createCurve();
+  late Animation<double> _animation = _createCurve();
 
   @protected
   @override
@@ -387,7 +387,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve) {
-      _animation.dispose();
       _animation = _createCurve();
     }
     controller.duration = widget.duration;
@@ -406,14 +405,13 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     }
   }
 
-  CurvedAnimation _createCurve() {
-    return CurvedAnimation(parent: controller, curve: widget.curve);
+  Animation<double> _createCurve() {
+    return CurveTween(curve: widget.curve).animate(controller);
   }
 
   @protected
   @override
   void dispose() {
-    _animation.dispose();
     controller.dispose();
     super.dispose();
   }

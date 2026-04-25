@@ -124,12 +124,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   Animation<double> _getWidthAnimation(double screenWidth) {
     if (_controller.status == AnimationStatus.forward) {
       // Opening animation
-      return Tween<double>(begin: _width, end: screenWidth).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0.0, 0.3, curve: Curves.fastOutSlowIn),
-        ),
-      );
+      return Tween<double>(begin: _width, end: screenWidth)
+          .chain(CurveTween(curve: const Interval(0.0, 0.3, curve: Curves.fastOutSlowIn)))
+          .animate(_controller);
     } else {
       // Closing animation
       return _getEmphasizedEasingAnimation(
@@ -137,7 +134,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
         peak: _getPeakPoint(begin: _width, end: screenWidth),
         end: screenWidth,
         isForward: false,
-        parent: CurvedAnimation(parent: _controller.view, curve: const Interval(0.0, 0.87)),
+        parent: CurveTween(curve: const Interval(0.0, 0.87)).animate(_controller),
       );
     }
   }
@@ -145,7 +142,6 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   Animation<double> _getHeightAnimation(double screenHeight) {
     if (_controller.status == AnimationStatus.forward) {
       // Opening animation
-
       return _getEmphasizedEasingAnimation(
         begin: _kCartHeight,
         peak: _kCartHeight + (screenHeight - _kCartHeight) * _kPeakVelocityProgress,
@@ -155,26 +151,18 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       );
     } else {
       // Closing animation
-      return Tween<double>(begin: _kCartHeight, end: screenHeight).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0.434, 1.0), // not used
-          // only the reverseCurve will be used
-          reverseCurve: Interval(0.434, 1.0, curve: Curves.fastOutSlowIn.flipped),
-        ),
-      );
+      return Tween<double>(begin: _kCartHeight, end: screenHeight)
+          .chain(CurveTween(curve: Interval(0.434, 1.0, curve: Curves.fastOutSlowIn.flipped)))
+          .animate(_controller);
     }
   }
 
   // Animation of the cut corner. It's cut when closed and not cut when open.
   Animation<double> _getShapeAnimation() {
     if (_controller.status == AnimationStatus.forward) {
-      return Tween<double>(begin: _kCornerRadius, end: 0.0).animate(
-        CurvedAnimation(
-          parent: _controller.view,
-          curve: const Interval(0.0, 0.3, curve: Curves.fastOutSlowIn),
-        ),
-      );
+      return Tween<double>(begin: _kCornerRadius, end: 0.0)
+          .chain(CurveTween(curve: const Interval(0.0, 0.3, curve: Curves.fastOutSlowIn)))
+          .animate(_controller);
     } else {
       return _getEmphasizedEasingAnimation(
         begin: _kCornerRadius,
@@ -187,23 +175,23 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   }
 
   Animation<double> _getThumbnailOpacityAnimation() {
-    return Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller.view,
-        curve: _controller.status == AnimationStatus.forward
-            ? const Interval(0.0, 0.3)
-            : const Interval(0.532, 0.766),
-      ),
-    );
+    return Tween<double>(begin: 1.0, end: 0.0)
+        .chain(
+          CurveTween(
+            curve: _controller.status == AnimationStatus.forward
+                ? const Interval(0.0, 0.3)
+                : const Interval(0.532, 0.766),
+          ),
+        )
+        .animate(_controller);
   }
 
   Animation<double> _getCartOpacityAnimation() {
-    return CurvedAnimation(
-      parent: _controller.view,
+    return CurveTween(
       curve: _controller.status == AnimationStatus.forward
           ? const Interval(0.3, 0.6)
           : const Interval(0.766, 1.0),
-    );
+    ).animate(_controller);
   }
 
   // Returns the correct width of the ExpandingBottomSheet based on the number of
@@ -405,17 +393,14 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   }
 
   Widget _buildThumbnail(BuildContext context, int index, Animation<double> animation) {
-    final Animation<double> thumbnailSize = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        curve: const Interval(0.33, 1.0, curve: Curves.easeIn),
-        parent: animation,
-      ),
-    );
+    final Animation<double> thumbnailSize = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).chain(CurveTween(curve: const Interval(0.33, 1.0, curve: Curves.easeIn))).animate(animation);
 
-    final Animation<double> opacity = CurvedAnimation(
+    final Animation<double> opacity = CurveTween(
       curve: const Interval(0.33, 1.0),
-      parent: animation,
-    );
+    ).animate(animation);
 
     return ProductThumbnail(thumbnailSize, opacity, _productWithId(_list[index]));
   }
