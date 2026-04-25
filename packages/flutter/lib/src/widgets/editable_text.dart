@@ -3570,6 +3570,7 @@ class EditableTextState extends State<EditableText>
 
       if (obscureTextChanged || keyboardTypeChanged || textInputActionChanged) {
         if (obscureTextChanged) {
+          // When obscureText is toggled, we should reset its state to prevent the last character from being visible between state changes.
           _obscureShowCharTicksPending = 0;
           _obscureLatestCharIndex = null;
         }
