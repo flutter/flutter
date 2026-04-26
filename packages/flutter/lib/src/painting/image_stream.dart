@@ -220,8 +220,8 @@ class ImageStreamListener {
   /// If an image stream has no listeners that handled the error when the error
   /// was first encountered, then the error is reported using
   /// [FlutterError.reportError], with the [FlutterErrorDetails.silent] flag set
-  /// to true. However, if a listener with [reportErrors] set to false has been
-  /// registered on the completer, the error is not reported.
+  /// to true. This report is suppressed if a listener whose [reportErrors] is false has ever been
+  /// registered on the completer.
   final ImageErrorListener? onError;
 
   /// Whether to report errors to [FlutterError.onError] after this listener
@@ -783,9 +783,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// If no error listeners (listeners with an [ImageStreamListener.onError]
   /// specified) are attached, or if the handlers all rethrow the exception
   /// verbatim (with `throw exception`), a [FlutterError] will be reported using
-  /// [FlutterError.reportError]. However, if a listener with
-  /// [ImageStreamListener.reportErrors] set to false has been registered on
-  /// this completer, the error is not reported.
+  /// [FlutterError.reportError]. This report is suppressed if 
+  /// [ImageStreamListener] whose [ImageStreamListener.reportErrors] is false has ever been registered on
+  /// this completer.
   ///
   /// The `context` should be a string describing where the error was caught, in
   /// a form that will make sense in English when following the word "thrown",
