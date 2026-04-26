@@ -111,7 +111,6 @@ public class ProcessTextPlugin
 
     for (ResolveInfo info : infos) {
       final String id = info.activityInfo.name;
-      final String label = info.loadLabel(packageManager).toString();
       resolveInfosById.put(id, info);
     }
   }

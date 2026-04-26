@@ -17,6 +17,8 @@ void main(List<String> args) async {
       return;
     }
 
+    output.dependencies.add(translationAsset.asDataAsset.file);
+
     final Recordings? recordings = await input.recordings;
     if (recordings == null) {
       // Record use not enabled, return full translations file.

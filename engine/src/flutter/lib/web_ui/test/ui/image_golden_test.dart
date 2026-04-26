@@ -234,7 +234,7 @@ Future<void> testMain() async {
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
         await matchGoldenFile('${name}_fragment_shader_sampler.png', region: drawRegion);
-      });
+      }, skip: isWimp);
 
       test('drawVertices with image shader', () async {
         final ui.Image image = await generateImage();
@@ -306,7 +306,7 @@ Future<void> testMain() async {
         expect(pngData, isNotNull);
         expect(pngData!.lengthInBytes, isNonZero);
       });
-    }, skip: isWimp); // See https://github.com/flutter/flutter/issues/175371
+    });
   }
 
   emitImageTests('picture_toImage', () {
@@ -553,4 +553,43 @@ Future<void> testMain() async {
       return info.image;
     });
   }
+
+  test('drawImageRect_downscale_text', () async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 200, 200));
+
+    final paint = ui.Paint()
+      ..color = const ui.Color(0xFF00FF00)
+      ..strokeWidth = 1.0;
+    for (double i = 0; i < 200; i += 20) {
+      canvas.drawLine(ui.Offset(i, 0), ui.Offset(i, 200), paint);
+      canvas.drawLine(ui.Offset(0, i), ui.Offset(200, i), paint);
+    }
+
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: 30));
+    builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF000000)));
+    builder.addText('Flutter Web');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 200));
+    canvas.drawParagraph(paragraph, const ui.Offset(10, 80));
+
+    final ui.Image image = recorder.endRecording().toImageSync(200, 200);
+
+    final recorder2 = ui.PictureRecorder();
+    final canvas2 = ui.Canvas(recorder2, const ui.Rect.fromLTWH(0, 0, 100, 100));
+
+    canvas2.drawImageRect(
+      image,
+      const ui.Rect.fromLTWH(0, 0, 200, 200),
+      const ui.Rect.fromLTWH(10, 10, 50, 50),
+      ui.Paint()..filterQuality = ui.FilterQuality.medium,
+    );
+
+    await drawPictureUsingCurrentRenderer(recorder2.endRecording());
+
+    await matchGoldenFile(
+      'canvas_drawImageRect_downscale_text.png',
+      region: const ui.Rect.fromLTWH(0, 0, 100, 100),
+    );
+  });
 }

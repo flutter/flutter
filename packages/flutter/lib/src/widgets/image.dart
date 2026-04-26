@@ -346,10 +346,6 @@ class Image extends StatefulWidget {
   /// To show an image from the network or from an asset bundle, consider using
   /// [Image.network] and [Image.asset] respectively.
   ///
-  /// The `scale` argument specifies the linear scale factor for drawing this
-  /// image at its intended size and applies to both the width and the height.
-  /// {@macro flutter.painting.imageInfo.scale}
-  ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which

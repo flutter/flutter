@@ -502,4 +502,20 @@ void TextInputPlugin::EnterPressed(TextInputModel* model) {
   channel_->InvokeMethod(kPerformActionMethod, std::move(args));
 }
 
+void TextInputPlugin::OnViewRemoved(FlutterViewId view_id) {
+  if (view_id == kImplicitViewId || view_id_ != view_id) {
+    return;
+  }
+
+  // If composing, commit and end composing. Skip sending state updates and
+  // IME reset since the view is being removed.
+  if (active_model_ != nullptr && active_model_->composing()) {
+    active_model_->CommitComposing();
+    active_model_->EndComposing();
+  }
+
+  active_model_ = nullptr;
+  view_id_ = 0;
+}
+
 }  // namespace flutter

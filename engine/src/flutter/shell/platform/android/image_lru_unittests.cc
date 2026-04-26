@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/shell/platform/android/image_lru.h"
 #include "gtest/gtest.h"
 
@@ -9,7 +10,7 @@ namespace flutter {
 namespace testing {
 
 TEST(ImageLRU, CanStoreSingleImage) {
-  auto image = DlImage::Make(nullptr);
+  auto image = DlImageSkia::Make(nullptr);
   ImageLRU image_lru;
 
   EXPECT_EQ(image_lru.FindImage(1), nullptr);
@@ -20,7 +21,7 @@ TEST(ImageLRU, CanStoreSingleImage) {
 }
 
 TEST(ImageLRU, EvictsLRU) {
-  auto image = DlImage::Make(nullptr);
+  auto image = DlImageSkia::Make(nullptr);
   ImageLRU image_lru;
 
   // Fill up the cache, nothing is removed
@@ -38,7 +39,7 @@ TEST(ImageLRU, EvictsLRU) {
 }
 
 TEST(ImageLRU, CanClear) {
-  auto image = DlImage::Make(nullptr);
+  auto image = DlImageSkia::Make(nullptr);
   ImageLRU image_lru;
 
   // Fill up the cache, nothing is removed
