@@ -509,6 +509,32 @@ object FlutterPluginUtils {
     @JvmName("getCompileSdkFromProject")
     internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
 
+    private fun logLowMinSdkWarning(
+        projectMinSdkVersion: Int,
+        flutterMinSdkVersion: Int,
+        logger: Logger,
+        projectDirectory: File
+    ) {
+        val buildGradleFile =
+            getBuildGradleFileFromProjectDir(
+                projectDirectory,
+                logger
+            )
+        logger.warn(
+            """
+            WARNING: Your project's Android minSdk ($projectMinSdkVersion) is lower than Flutter's minimum supported minSdk ($flutterMinSdkVersion).
+            This can cause runtime crashes on devices below Android API $flutterMinSdkVersion.
+            Update your app's minSdk in ${buildGradleFile.path}:
+
+                android {
+                    defaultConfig {
+                        minSdk = $flutterMinSdkVersion
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
     /**
      * Returns:
      *  The default platforms if the `target-platform` property is not set.
@@ -773,6 +799,25 @@ object FlutterPluginUtils {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /** Prints a warning if the app's minSdk is lower than Flutter's minimum supported minSdk. */
+    @JvmStatic
+    @JvmName("detectLowMinSdkVersion")
+    internal fun detectLowMinSdkVersion(project: Project) {
+        project.afterEvaluate {
+            val flutterMinSdkVersion: Int = getFlutterExtensionOrNull(project)?.minSdkVersion ?: return@afterEvaluate
+            val projectMinSdkVersion: Int = getLegacyAndroidExtension(project).defaultConfig.minSdkVersion?.apiLevel ?: return@afterEvaluate
+
+            if (projectMinSdkVersion < flutterMinSdkVersion) {
+                logLowMinSdkWarning(
+                    projectMinSdkVersion = projectMinSdkVersion,
+                    flutterMinSdkVersion = flutterMinSdkVersion,
+                    logger = project.logger,
+                    projectDirectory = project.projectDir
+                )
             }
         }
     }
