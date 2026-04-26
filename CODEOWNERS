@@ -4,7 +4,7 @@
 # These names are just suggestions. It is fine to have your changes
 # reviewed by someone else.
 #
-# Use git ls-files '<pattern>' without a / prefix to see the list of matching files.
+# Use git ls-files ':(glob)<pattern>' without a / prefix to see the list of matching files.
 
 /engine/src/build/config/ios/** @vashworth
 /packages/flutter_tools/templates/module/ios/ @vashworth
@@ -30,8 +30,8 @@
 # iOS team - keep this synced with .github/labeler.yml's team-ios section.
 /engine/src/flutter/shell/platform/darwin/common/ @flutter/ios-reviewers
 /engine/src/flutter/shell/platform/darwin/ios/framework/ @flutter/ios-reviewers
+/dev/integration_tests/*ios*/**/* @flutter/ios-reviewers
 /packages/flutter_tools/**/ios/* @flutter/ios-reviewers
-/packages/flutter_tools/**/*xcode* @flutter/ios-reviewers
 /packages/flutter_tools/**/*ios* @flutter/ios-reviewers
 
 # macOS team - keep this synced with .github/labeler.yml's team-macos section.
@@ -39,8 +39,14 @@
 /engine/src/flutter/shell/platform/darwin/macos/**/* @flutter/macos-reviewers
 
 # Shared with iOS and macOS teams - keep this synced with both .github/labeler.yml's team-ios and team-macos sections.
-/packages/flutter_tools/**/macos/* @flutter/macos-reviewers @flutter/ios-reviewers
+/dev/integration_tests/*macos*/**/* @flutter/ios-reviewers @flutter/macos-reviewers
+/dev/integration_tests/*darwin*/**/* @flutter/ios-reviewers @flutter/macos-reviewers
+/packages/flutter_tools/**/macos/* @flutter/ios-reviewers @flutter/macos-reviewers
 /packages/flutter_tools/**/*macos* @flutter/ios-reviewers @flutter/macos-reviewers
+/packages/flutter_tools/**/*xcode* @flutter/ios-reviewers @flutter/macos-reviewers
+/packages/flutter_tools/**/*darwin* @flutter/ios-reviewers @flutter/macos-reviewers
+/packages/flutter_tools/**/*swift* @flutter/ios-reviewers @flutter/macos-reviewers
+/packages/flutter_tools/**/*pod* @flutter/ios-reviewers @flutter/macos-reviewers
 
 # Linux team - keep this synced with .github/labeler.yml's team-linux section.
 /engine/src/flutter/shell/platform/linux/**/* @flutter/linux-reviewers

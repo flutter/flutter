@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
 import 'widgets_app_tester.dart';
 
@@ -16,12 +17,13 @@ void main() {
     final key1 = UniqueKey();
 
     await tester.pumpWidget(
-      Material(
+      Directionality(
+        textDirection: TextDirection.ltr,
         child: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              Radio<int>(key: key0, value: 0),
-              Radio<int>(key: key1, value: 1),
+              _TestRadio<int>(key: key0, value: 0),
+              _TestRadio<int>(key: key1, value: 1),
             ],
           ),
         ),
@@ -64,12 +66,13 @@ void main() {
     final key1 = UniqueKey();
 
     await tester.pumpWidget(
-      Material(
+      Directionality(
+        textDirection: TextDirection.ltr,
         child: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
-              Radio<int>(key: key0, value: 0, enabled: false),
-              Radio<int>(key: key1, value: 1),
+              _TestRadio<int>(key: key0, value: 0, enabled: false),
+              _TestRadio<int>(key: key1, value: 1),
             ],
           ),
         ),
@@ -99,16 +102,19 @@ void main() {
 
   testWidgets('Radio group will not merge up', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
+      Directionality(
+        textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
           child: Column(
             children: <Widget>[
-              Checkbox(value: true, onChanged: (bool? value) {}),
+              TestCheckbox(value: true, onChanged: (bool? value) {}),
               const TestRadioGroup<int>(
-                child: Column(children: <Widget>[Radio<int>(value: 0), Radio<int>(value: 1)]),
+                child: Column(
+                  children: <Widget>[_TestRadio<int>(value: 0), _TestRadio<int>(value: 1)],
+                ),
               ),
-              Checkbox(value: true, onChanged: (bool? value) {}),
+              TestCheckbox(value: true, onChanged: (bool? value) {}),
             ],
           ),
         ),
@@ -125,16 +131,14 @@ void main() {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TestRadioGroup<int>(
-            child: Column(
-              children: <Widget>[
-                Radio<int>(key: key0, focusNode: focusNode, value: 0),
-                Radio<int>(key: key1, value: 1),
-                Radio<int>(key: key2, value: 2),
-              ],
-            ),
+      TestWidgetsApp(
+        home: TestRadioGroup<int>(
+          child: Column(
+            children: <Widget>[
+              _TestRadio<int>(key: key0, focusNode: focusNode, value: 0),
+              _TestRadio<int>(key: key1, value: 1),
+              _TestRadio<int>(key: key2, value: 2),
+            ],
           ),
         ),
       ),
@@ -181,16 +185,14 @@ void main() {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TestRadioGroup<int>(
-            child: Column(
-              children: <Widget>[
-                Radio<int>(key: key0, focusNode: focusNode, value: 0),
-                Radio<int>(key: key1, enabled: false, value: 1),
-                Radio<int>(key: key2, value: 2),
-              ],
-            ),
+      TestWidgetsApp(
+        home: TestRadioGroup<int>(
+          child: Column(
+            children: <Widget>[
+              _TestRadio<int>(key: key0, focusNode: focusNode, value: 0),
+              _TestRadio<int>(key: key1, enabled: false, value: 1),
+              _TestRadio<int>(key: key2, value: 2),
+            ],
           ),
         ),
       ),
@@ -242,23 +244,21 @@ void main() {
     final textFieldAfter = FocusNode();
     addTearDown(textFieldAfter.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              TestTextField(focusNode: textFieldBefore),
-              TestRadioGroup<int>(
-                child: Column(
-                  children: <Widget>[
-                    Radio<int>(key: key0, focusNode: radio0, value: 0),
-                    Radio<int>(key: key1, focusNode: radio1, value: 1),
-                    Radio<int>(key: key2, value: 2),
-                  ],
-                ),
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            TestTextField(focusNode: textFieldBefore),
+            TestRadioGroup<int>(
+              child: Column(
+                children: <Widget>[
+                  _TestRadio<int>(key: key0, focusNode: radio0, value: 0),
+                  _TestRadio<int>(key: key1, focusNode: radio1, value: 1),
+                  _TestRadio<int>(key: key2, value: 2),
+                ],
               ),
-              TestTextField(focusNode: textFieldAfter),
-            ],
-          ),
+            ),
+            TestTextField(focusNode: textFieldAfter),
+          ],
         ),
       ),
     );
@@ -307,17 +307,15 @@ void main() {
   testWidgets('Radio group throws on multiple selection', (WidgetTester tester) async {
     final key1 = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TestRadioGroup<int>(
-            child: Column(
-              children: <Widget>[
-                const Radio<int>(value: 0),
-                Radio<int>(key: key1, value: 1),
-                const Radio<int>(value: 1),
-                const Radio<int>(value: 2),
-              ],
-            ),
+      TestWidgetsApp(
+        home: TestRadioGroup<int>(
+          child: Column(
+            children: <Widget>[
+              const _TestRadio<int>(value: 0),
+              _TestRadio<int>(key: key1, value: 1),
+              const _TestRadio<int>(value: 1),
+              const _TestRadio<int>(value: 2),
+            ],
           ),
         ),
       ),
@@ -343,20 +341,18 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: RadioGroup<int>(
-            onChanged: (_) {},
-            groupValue: 4,
-            child: const Column(
-              children: <Widget>[
-                Radio<int>(value: 0),
-                Radio<int>(value: 1),
-                Radio<int>(value: 2),
-                Radio<int>(value: 3),
-                Radio<int>(value: 4),
-              ],
-            ),
+      TestWidgetsApp(
+        home: RadioGroup<int>(
+          onChanged: (_) {},
+          groupValue: 4,
+          child: const Column(
+            children: <Widget>[
+              _TestRadio<int>(value: 0),
+              _TestRadio<int>(value: 1),
+              _TestRadio<int>(value: 2),
+              _TestRadio<int>(value: 3),
+              _TestRadio<int>(value: 4),
+            ],
           ),
         ),
       ),
@@ -365,19 +361,17 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: RadioGroup<int>(
-            onChanged: (_) {},
-            groupValue: 4,
-            child: const Column(
-              children: <Widget>[
-                Radio<int>(value: 1),
-                Radio<int>(value: 2),
-                Radio<int>(value: 3),
-                Radio<int>(value: 4),
-              ],
-            ),
+      TestWidgetsApp(
+        home: RadioGroup<int>(
+          onChanged: (_) {},
+          groupValue: 4,
+          child: const Column(
+            children: <Widget>[
+              _TestRadio<int>(value: 1),
+              _TestRadio<int>(value: 2),
+              _TestRadio<int>(value: 3),
+              _TestRadio<int>(value: 4),
+            ],
           ),
         ),
       ),
@@ -405,19 +399,17 @@ void main() {
     addTearDown(textFieldFocusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Shortcuts(
-            shortcuts: shortcuts,
-            child: TestRadioGroup<int>(
-              child: Column(
-                children: <Widget>[
-                  Radio<int>(focusNode: firstRadioFocusNode, value: 0),
-                  const RadioListTile<int>(value: 1),
-                  const Radio<int>(value: 2),
-                  TestTextField(focusNode: textFieldFocusNode),
-                ],
-              ),
+      TestWidgetsApp(
+        home: Shortcuts(
+          shortcuts: shortcuts,
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                _TestRadio<int>(focusNode: firstRadioFocusNode, value: 0),
+                const _TestRadio<int>(value: 1),
+                const _TestRadio<int>(value: 2),
+                TestTextField(focusNode: textFieldFocusNode),
+              ],
             ),
           ),
         ),
@@ -569,6 +561,60 @@ class TestRadioGroupState<T> extends State<TestRadioGroup<T>> {
       },
       groupValue: groupValue,
       child: widget.child,
+    );
+  }
+}
+
+/// A minimal radio button for widget tests that registers with a [RadioGroup]
+/// ancestor, avoiding a dependency on the Material library.
+class _TestRadio<T> extends StatefulWidget {
+  const _TestRadio({super.key, required this.value, this.focusNode, this.enabled});
+
+  final T value;
+  final FocusNode? focusNode;
+  final bool? enabled;
+
+  @override
+  State<_TestRadio<T>> createState() => _TestRadioState<T>();
+}
+
+class _TestRadioState<T> extends State<_TestRadio<T>> {
+  FocusNode? _internalFocusNode;
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+
+  @override
+  void dispose() {
+    _internalFocusNode?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool enabled = widget.enabled ?? true;
+    return RawRadio<T>(
+      value: widget.value,
+      mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
+      toggleable: false,
+      focusNode: _effectiveFocusNode,
+      autofocus: false,
+      groupRegistry: enabled ? RadioGroup.maybeOf<T>(context) : null,
+      enabled: enabled,
+      builder: (BuildContext context, ToggleableStateMixin state) {
+        return SizedBox(
+          width: 18,
+          height: 18,
+          child: Center(
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: state.value ?? false ? const Color(0xFF000000) : const Color(0x00000000),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/testing/dl_test_surface_metal.h"
+#include "flutter/display_list/testing/skia/dl_test_surface_provider_skia_metal.h"
+
+#include "flutter/display_list/testing/skia/dl_test_surface_instance_skia.h"
 #include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
@@ -12,23 +14,27 @@
 namespace flutter {
 namespace testing {
 
-class DlMetalSurfaceInstance : public DlSurfaceInstance {
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateSkiaMetal() {
+  return std::make_unique<DlSurfaceProviderSkiaMetal>(false);
+}
+
+class DlMetalSurfaceInstance : public DlSurfaceInstanceSkiaBase {
  public:
   explicit DlMetalSurfaceInstance(std::unique_ptr<TestMetalSurface> metal_surface)
-      : metal_surface_(std::move(metal_surface)),
-        adapter_(metal_surface_->GetSurface()->getCanvas()) {}
+      : DlSurfaceInstanceSkiaBase(), metal_surface_(std::move(metal_surface)) {}
   ~DlMetalSurfaceInstance() = default;
 
-  sk_sp<SkSurface> sk_surface() const override { return metal_surface_->GetSurface(); }
-  DlCanvas* GetCanvas() override { return &adapter_; }
+ protected:
+  sk_sp<SkSurface> GetSurface() const override { return metal_surface_->GetSurface(); }
 
  private:
   std::unique_ptr<TestMetalSurface> metal_surface_;
-  DlSkCanvasAdapter adapter_;
 };
 
-bool DlMetalSurfaceProvider::InitializeSurface(size_t width, size_t height, PixelFormat format) {
-  if (format != kN32PremulPixelFormat) {
+bool DlSurfaceProviderSkiaMetal::InitializeSurface(size_t width,
+                                                   size_t height,
+                                                   PixelFormat format) {
+  if (format != kN32Premul) {
     return false;
   }
   metal_context_ = std::make_unique<TestMetalContext>();
@@ -36,14 +42,14 @@ bool DlMetalSurfaceProvider::InitializeSurface(size_t width, size_t height, Pixe
   return true;
 }
 
-std::shared_ptr<DlSurfaceInstance> DlMetalSurfaceProvider::GetPrimarySurface() const {
+std::shared_ptr<DlSurfaceInstance> DlSurfaceProviderSkiaMetal::GetPrimarySurface() const {
   if (!metal_surface_) {
     return nullptr;
   }
   return metal_surface_;
 }
 
-std::shared_ptr<DlSurfaceInstance> DlMetalSurfaceProvider::MakeOffscreenSurface(
+std::shared_ptr<DlSurfaceInstance> DlSurfaceProviderSkiaMetal::MakeOffscreenSurface(
     size_t width,
     size_t height,
     PixelFormat format) const {
@@ -73,25 +79,26 @@ class DlMetalPixelData : public DlPixelData {
   const uint32_t ints_per_row_;
 };
 
-sk_sp<DlPixelData> DlMetalSurfaceProvider::ImpellerSnapshot(const sk_sp<DisplayList>& list,
-                                                            int width,
-                                                            int height) const {
+sk_sp<DlPixelData> DlSurfaceProviderSkiaMetal::ImpellerSnapshot(const sk_sp<DisplayList>& list,
+                                                                int width,
+                                                                int height) const {
   auto texture = DisplayListToTexture(list, {width, height}, *aiks_context_);
   return sk_make_sp<DlMetalPixelData>(snapshotter_->MakeScreenshot(*aiks_context_, texture));
 }
 
-sk_sp<DlImage> DlMetalSurfaceProvider::MakeImpellerImage(const sk_sp<DisplayList>& list,
-                                                         int width,
-                                                         int height) const {
+sk_sp<DlImage> DlSurfaceProviderSkiaMetal::MakeImpellerImage(const sk_sp<DisplayList>& list,
+                                                             int width,
+                                                             int height) const {
   InitScreenShotter();
   return impeller::DlImageImpeller::Make(
       DisplayListToTexture(list, {width, height}, *aiks_context_));
 }
 
-void DlMetalSurfaceProvider::InitScreenShotter() const {
+void DlSurfaceProviderSkiaMetal::InitScreenShotter() const {
   if (!snapshotter_) {
     impeller::PlaygroundSwitches switches;
     switches.enable_wide_gamut = false;
+    switches.flags.use_sdfs = use_sdfs_;
     snapshotter_.reset(new MetalScreenshotter(switches));
     auto typographer = impeller::TypographerContextSkia::Make();
     aiks_context_.reset(
