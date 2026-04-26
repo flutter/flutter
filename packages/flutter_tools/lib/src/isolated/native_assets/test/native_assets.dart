@@ -82,6 +82,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       appBuildDirectory: null,
     ),
     buildDataAssets: true,
+    recordedUsesFile: null,
   );
 
   // Then "install" the code assets so they can be used at runtime.

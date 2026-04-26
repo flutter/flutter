@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
-import '../widgets/navigator_utils.dart';
 import '../widgets/widget_inspector_test_utils.dart';
+import 'navigator_utils.dart';
 
 late List<int> selectedTabs;
 

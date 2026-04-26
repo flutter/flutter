@@ -1114,84 +1114,6 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     return SelectionResult.end;
   }
 
-  /// Initializes the selection of the selectable children.
-  ///
-  /// The goal is to find the selectable child that contains the selection edge.
-  /// Returns [SelectionResult.end] if the selection edge ends on any of the
-  /// children. Otherwise, it returns [SelectionResult.previous] if the selection
-  /// does not reach any of its children. Returns [SelectionResult.next]
-  /// if the selection reaches the end of its children.
-  ///
-  /// Ideally, this method should only be called twice at the beginning of the
-  /// drag selection, once for start edge update event, once for end edge update
-  /// event.
-  SelectionResult _initSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
-    assert(
-      (isEnd && currentSelectionEndIndex == -1) || (!isEnd && currentSelectionStartIndex == -1),
-    );
-    SelectionResult? finalResult;
-    // Begin the search for the selection edge at the opposite edge if it exists.
-    final hasOppositeEdge = isEnd
-        ? currentSelectionStartIndex != -1
-        : currentSelectionEndIndex != -1;
-    int newIndex = switch ((isEnd, hasOppositeEdge)) {
-      (true, true) => currentSelectionStartIndex,
-      (true, false) => 0,
-      (false, true) => currentSelectionEndIndex,
-      (false, false) => 0,
-    };
-    bool? forward;
-    late SelectionResult currentSelectableResult;
-    // This loop sends the selection event to one of the following to determine
-    // the direction of the search.
-    //  - The opposite edge index if it exists.
-    //  - Index 0 if the opposite edge index does not exist.
-    //
-    // If the result is `SelectionResult.next`, this loop look backward.
-    // Otherwise, it looks forward.
-    //
-    // The terminate condition are:
-    // 1. the selectable returns end, pending, none.
-    // 2. the selectable returns previous when looking forward.
-    // 2. the selectable returns next when looking backward.
-    while (newIndex < selectables.length && newIndex >= 0 && finalResult == null) {
-      currentSelectableResult = dispatchSelectionEventToChild(selectables[newIndex], event);
-      switch (currentSelectableResult) {
-        case SelectionResult.end:
-        case SelectionResult.pending:
-        case SelectionResult.none:
-          finalResult = currentSelectableResult;
-        case SelectionResult.next:
-          if (forward == false) {
-            newIndex += 1;
-            finalResult = SelectionResult.end;
-          } else if (newIndex == selectables.length - 1) {
-            finalResult = currentSelectableResult;
-          } else {
-            forward = true;
-            newIndex += 1;
-          }
-        case SelectionResult.previous:
-          if (forward ?? false) {
-            newIndex -= 1;
-            finalResult = SelectionResult.end;
-          } else if (newIndex == 0) {
-            finalResult = currentSelectableResult;
-          } else {
-            forward = false;
-            newIndex -= 1;
-          }
-      }
-    }
-    if (isEnd) {
-      currentSelectionEndIndex = newIndex;
-    } else {
-      currentSelectionStartIndex = newIndex;
-    }
-    _flushInactiveSelections();
-    return finalResult!;
-  }
-
   SelectionResult _adjustSelection(SelectionEdgeUpdateEvent event, {required bool isEnd}) {
     assert(() {
       if (isEnd) {
@@ -1456,12 +1378,12 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       final int skipIndex = currentSelectionStartIndex == -1
           ? currentSelectionEndIndex
           : currentSelectionStartIndex;
-      selectables
-          .where((Selectable target) => target != selectables[skipIndex])
-          .forEach(
-            (Selectable target) =>
-                dispatchSelectionEventToChild(target, const ClearSelectionEvent()),
-          );
+      for (var i = 0; i < selectables.length; i++) {
+        if (i == skipIndex) {
+          continue;
+        }
+        dispatchSelectionEventToChild(selectables[i], const ClearSelectionEvent());
+      }
       return;
     }
     final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
@@ -1485,11 +1407,11 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     );
     if (event.type == SelectionEventType.endEdgeUpdate) {
       return currentSelectionEndIndex == -1
-          ? _initSelection(event, isEnd: true)
+          ? super.handleSelectionEdgeUpdate(event)
           : _adjustSelection(event, isEnd: true);
     }
     return currentSelectionStartIndex == -1
-        ? _initSelection(event, isEnd: false)
+        ? super.handleSelectionEdgeUpdate(event)
         : _adjustSelection(event, isEnd: false);
   }
 }

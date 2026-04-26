@@ -22,7 +22,7 @@ class SegmentedControlApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: SegmentedControlExample(),
     );
   }
@@ -37,7 +37,7 @@ class SegmentedControlExample extends StatefulWidget {
 }
 
 class _SegmentedControlExampleState extends State<SegmentedControlExample> {
-  Sky _selectedSegment = Sky.midnight;
+  Sky _selectedSegment = .midnight;
   bool _isMomentary = false;
 
   @override
@@ -62,21 +62,21 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           },
           children: const <Sky, Widget>{
             Sky.midnight: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: .symmetric(horizontal: 20),
               child: Text(
                 'Midnight',
                 style: TextStyle(color: CupertinoColors.white),
               ),
             ),
             Sky.viridian: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: .symmetric(horizontal: 20),
               child: Text(
                 'Viridian',
                 style: TextStyle(color: CupertinoColors.white),
               ),
             ),
             Sky.cerulean: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: .symmetric(horizontal: 20),
               child: Text(
                 'Cerulean',
                 style: TextStyle(color: CupertinoColors.white),
@@ -87,7 +87,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: <Widget>[
             Text(
               'Selected Segment: ${_selectedSegment.name}',
@@ -95,7 +95,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 const Text(
                   'Momentary mode: ',

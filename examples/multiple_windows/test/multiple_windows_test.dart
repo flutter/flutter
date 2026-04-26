@@ -5,14 +5,15 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 import 'package:flutter/material.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter_test/flutter_test.dart';
+
 // ignore: avoid_relative_lib_imports
 import '../lib/main.dart' as multiple_windows;
-import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 
 void main() {
   if (!isWindowingEnabled) {
-    const String windowingDisabledErrorMessage = '''
+    const windowingDisabledErrorMessage = '''
 Skipping multiple_windows_test.dart because Windowing APIs are not enabled.
 
 Windowing APIs are currently experimental. Do not use windowing APIs in
@@ -34,17 +35,14 @@ See: https://github.com/flutter/flutter/issues/30701.
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    expect(
-      find.widgetWithText(AppBar, 'Multi Window Reference App'),
-      findsOneWidget,
-    );
+    expect(find.widgetWithText(AppBar, 'Multi Window Reference App'), findsOneWidget);
   });
 
   testWidgets('Can create a regular window', (WidgetTester tester) async {
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Regular');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Regular');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();
@@ -56,7 +54,7 @@ See: https://github.com/flutter/flutter/issues/30701.
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Modeless Dialog');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Modeless Dialog');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();
@@ -64,13 +62,11 @@ See: https://github.com/flutter/flutter/issues/30701.
     expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
   });
 
-  testWidgets('Can create a modal dialog of the main window', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Can create a modal dialog of the main window', (WidgetTester tester) async {
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Modal Dialog');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Modal Dialog');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();
@@ -78,21 +74,16 @@ See: https://github.com/flutter/flutter/issues/30701.
     expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
   });
 
-  testWidgets('Can create a modal dialog of a regular window', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Can create a modal dialog of a regular window', (WidgetTester tester) async {
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Regular');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Regular');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();
 
-    final createModalButton = find.widgetWithText(
-      ElevatedButton,
-      'Create Modal Dialog',
-    );
+    final Finder createModalButton = find.widgetWithText(ElevatedButton, 'Create Modal Dialog');
     expect(createModalButton, findsOneWidget);
     await tester.tap(createModalButton);
     await tester.pump();
@@ -100,26 +91,21 @@ See: https://github.com/flutter/flutter/issues/30701.
     expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
   });
 
-  testWidgets('Can close a modal dialog of a regular window', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Can close a modal dialog of a regular window', (WidgetTester tester) async {
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Regular');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Regular');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();
 
-    final createModalButton = find.widgetWithText(
-      ElevatedButton,
-      'Create Modal Dialog',
-    );
+    final Finder createModalButton = find.widgetWithText(ElevatedButton, 'Create Modal Dialog');
     expect(createModalButton, findsOneWidget);
     await tester.tap(createModalButton);
     await tester.pump();
 
-    final closeModalButton = find.widgetWithText(ElevatedButton, 'Close');
+    final Finder closeModalButton = find.widgetWithText(ElevatedButton, 'Close');
     expect(closeModalButton, findsOneWidget);
     await tester.tap(closeModalButton);
     await tester.pump();
@@ -131,7 +117,7 @@ See: https://github.com/flutter/flutter/issues/30701.
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Show Tooltip');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Show Tooltip');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();
@@ -143,7 +129,7 @@ See: https://github.com/flutter/flutter/issues/30701.
     multiple_windows.main();
     await tester.pump(); // triggers a frame
 
-    final toTap = find.widgetWithText(OutlinedButton, 'Show Popup');
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Show Popup');
     expect(toTap, findsOneWidget);
     await tester.tap(toTap);
     await tester.pump();

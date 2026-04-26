@@ -786,6 +786,11 @@ FlutterWindow::HandleMessage(UINT const message,
       if (keyboard_manager_->HandleMessage(message, wparam, lparam)) {
         return 0;
       }
+      // Prevent default proc for WM_SYSKEYUP which unfocuses the window
+      // and sends WM_MOUSELEAVE.
+      if (message == WM_SYSKEYUP) {
+        return 0;
+      }
       break;
   }
 

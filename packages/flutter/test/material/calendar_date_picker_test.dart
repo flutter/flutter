@@ -1732,6 +1732,63 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets(
+      'CalendarDatePicker reports error when SemanticsService.sendAnnouncement fails during navigation',
+      (WidgetTester tester) async {
+        final errors = <FlutterErrorDetails>[];
+        final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          if (details.exception is TestFailure) {
+            originalOnError?.call(details);
+            return;
+          }
+          errors.add(details);
+        };
+        addTearDown(() {
+          FlutterError.onError = originalOnError;
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+            SystemChannels.accessibility.name,
+            null,
+          );
+        });
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          (ByteData? message) async {
+            const codec = StandardMessageCodec();
+            final Object? decoded = codec.decodeMessage(message);
+            if (decoded is Map && decoded['type'] == 'announce') {
+              final data = ByteData(1);
+              data.setUint8(0, 255); // Invalid type byte
+              return data;
+            }
+            return null; // Success for other events
+          },
+        );
+
+        final initialDate = DateTime(2016, DateTime.january, 15);
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(supportsAnnounce: true),
+            child: calendarDatePicker(initialDate: initialDate),
+          ),
+        );
+
+        await tester.tap(nextMonthIcon);
+        await tester.pump();
+
+        expect(errors, isNotEmpty);
+        final bool hasAnnouncementError = errors.any(
+          (e) =>
+              e.exception.toString().contains('FormatException') &&
+              e.context.toString().contains('while sending semantics announcement'),
+        );
+        expect(hasAnnouncementError, isTrue);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
+    testWidgets(
       'Month navigation announcement on Android',
       (WidgetTester tester) async {
         final SemanticsHandle semantics = tester.ensureSemantics();
