@@ -265,9 +265,13 @@ FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
     FlutterDesktopViewRef view);
 
-// Returns the DXGI adapter used for rendering or nullptr in case of error.
-FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopEngineGetGraphicsAdapter(
-    FlutterDesktopEngineRef engine);
+// Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+// was successfully retrieved, or false if an error occured.
+// The caller must provide a valid pointer to an IDXGIAdapter* and is
+// responsible for releasing the adapter.
+FLUTTER_EXPORT bool FlutterDesktopEngineGetGraphicsAdapter(
+    FlutterDesktopEngineRef engine,
+    IDXGIAdapter** adapter_out);
 
 // Called to pass an external window message to the engine for lifecycle
 // state updates. Non-Flutter windows must call this method in their WndProc
