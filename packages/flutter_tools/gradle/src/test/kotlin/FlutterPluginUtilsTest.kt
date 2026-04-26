@@ -766,6 +766,71 @@ class FlutterPluginUtilsTest {
         assertThrows<IllegalArgumentException> { projectActionSlot.captured.execute(project) }
     }
 
+    @Test
+    fun `detectLowMinSdkVersion logs no warning when project minSdk is compatible`() {
+        val project = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        val flutterExtension = mockk<FlutterExtension>()
+        val projectActionSlot = slot<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
+        every { flutterExtension.minSdkVersion } returns 24
+        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig.minSdkVersion!!.apiLevel } returns 24
+        every { project.logger } returns mockLogger
+
+        FlutterPluginUtils.detectLowMinSdkVersion(project)
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+        verify { mockLogger wasNot called }
+    }
+
+    @Test
+    fun `detectLowMinSdkVersion logs warning when project minSdk is lower than Flutter minSdk`(
+        @TempDir tempDir: Path
+    ) {
+        val buildGradleFile =
+            tempDir
+                .resolve("app")
+                .createDirectory()
+                .resolve("build.gradle")
+                .toFile()
+        buildGradleFile.createNewFile()
+        val projectDir = tempDir.resolve("app").toFile()
+
+        val project = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        val flutterExtension = mockk<FlutterExtension>()
+        val projectActionSlot = slot<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
+        every { flutterExtension.minSdkVersion } returns 24
+        every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig.minSdkVersion!!.apiLevel } returns 21
+        every { project.logger } returns mockLogger
+        every { project.projectDir } returns projectDir
+        every { mockLogger.warn(any()) } returns Unit
+
+        FlutterPluginUtils.detectLowMinSdkVersion(project)
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+        verify {
+            mockLogger.warn(
+                """
+                WARNING: Your project's Android minSdk (21) is lower than Flutter's minimum supported minSdk (24).
+                This can cause runtime crashes on devices below Android API 24.
+                Update your app's minSdk in ${buildGradleFile.path}:
+
+                    android {
+                        defaultConfig {
+                            minSdk = 24
+                        }
+                    }
+                """.trimIndent()
+            )
+        }
+    }
+
     enum class DslType { GROOVY, KOTLIN }
 
     @Nested

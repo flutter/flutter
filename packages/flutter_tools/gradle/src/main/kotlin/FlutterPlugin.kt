@@ -396,6 +396,7 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo,
                 getPluginHandler(projectToAddTasksTo).getPluginList()
             )
+            FlutterPluginUtils.detectLowMinSdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
                 projectToAddTasksTo
             )
@@ -478,6 +479,7 @@ class FlutterPlugin : Plugin<Project> {
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
         )
+        FlutterPluginUtils.detectLowMinSdkVersion(projectToAddTasksTo)
         FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
             projectToAddTasksTo
         )
