@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
-# Use git ls-files '<pattern>' to see the list of matching files.
+# Use git ls-files ':(glob)<pattern>' to see the list of matching files.
 
 'a: accessibility':
   - changed-files:
@@ -240,9 +240,15 @@ team-ios:
     - any-glob-to-any-file:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/ios/framework/**/*
+      - dev/integration_tests/*ios*/**/*
+      - dev/integration_tests/*macos*/**/*
+      - dev/integration_tests/*darwin*/**/*
       - packages/flutter_tools/**/ios/*
       - packages/flutter_tools/**/macos/*
       - packages/flutter_tools/**/*xcode*
+      - packages/flutter_tools/**/*darwin*
+      - packages/flutter_tools/**/*swift*
+      - packages/flutter_tools/**/*pod*
       - packages/flutter_tools/**/*ios*
       - packages/flutter_tools/**/*macos*
 
@@ -260,7 +266,13 @@ team-macos:
     - any-glob-to-any-file:
       - engine/src/flutter/shell/platform/darwin/common/**/*
       - engine/src/flutter/shell/platform/darwin/macos/**/*
+      - dev/integration_tests/*macos*/**/*
+      - dev/integration_tests/*darwin*/**/*
       - packages/flutter_tools/**/macos/*
+      - packages/flutter_tools/**/*xcode*
+      - packages/flutter_tools/**/*darwin*
+      - packages/flutter_tools/**/*swift*
+      - packages/flutter_tools/**/*pod*
       - packages/flutter_tools/**/*macos*
 
 # Keep this synced with CODEOWNERS.
