@@ -964,4 +964,18 @@ void main() {
     );
     expect(tester.getSize(find.byType(ClipRSuperellipse)), Size.zero);
   });
+
+  testWidgets('ClipOval does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    addTearDown(tester.view.reset);
+    addTearDown(clip.dispose);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: ClipOval(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(ClipOval)), Size.zero);
+  });
 }
