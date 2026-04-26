@@ -802,7 +802,6 @@ class ResizeImageKey {
     this._width,
     this._height,
     this._allowUpscaling,
-    this._devicePixelRatio,
   );
 
   final Object _providerCacheKey;
@@ -810,7 +809,6 @@ class ResizeImageKey {
   final int? _width;
   final int? _height;
   final bool _allowUpscaling;
-  final double _devicePixelRatio;
 
   @override
   bool operator ==(Object other) {
@@ -822,13 +820,11 @@ class ResizeImageKey {
         other._policy == _policy &&
         other._width == _width &&
         other._height == _height &&
-        other._allowUpscaling == _allowUpscaling &&
-        other._devicePixelRatio == _devicePixelRatio;
+        other._allowUpscaling == _allowUpscaling;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(_providerCacheKey, _policy, _width, _height, _allowUpscaling, _devicePixelRatio);
+  int get hashCode => Object.hash(_providerCacheKey, _policy, _width, _height, _allowUpscaling);
 }
 
 /// Configures the behavior for [ResizeImage].
@@ -1237,8 +1233,8 @@ enum ResizeImagePolicy {
 /// These values also set the image's width & height in logical pixels
 /// if it is unconstrained.
 ///
-/// If [useLogicalPixels] is true, [width] and [height] are multiplied by
-/// the device's pixel ratio at decode time.
+/// [width] and [height] are specified in logical pixels and multiplied by
+/// [ImageConfiguration.devicePixelRatio] at decode time.
 ///
 /// {@tool snippet}
 /// This example shows how to size the image to half of the screen's width.
@@ -1272,7 +1268,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     this.height,
     this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
-    this.useLogicalPixels = false,
   }) : assert(width != null || height != null);
 
   /// The [ImageProvider] that this class wraps.
@@ -1281,11 +1276,17 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// The width the image should decode to and cache.
   ///
   /// At least one of this and [height] must be non-null.
+  ///
+  /// This value is in logical pixels and is multiplied by
+  /// [ImageConfiguration.devicePixelRatio] at decode time.
   final int? width;
 
   /// The height the image should decode to and cache.
   ///
   /// At least one of this and [width] must be non-null.
+  ///
+  /// This value is in logical pixels and is multiplied by
+  /// [ImageConfiguration.devicePixelRatio] at decode time.
   final int? height;
 
   /// The policy that determines how [width] and [height] are interpreted.
@@ -1302,31 +1303,18 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// to use an appropriate [Image.fit].
   final bool allowUpscaling;
 
-  /// Whether to treat [width] and [height] as logical pixels.
-  ///
-  /// When true, [width] and [height] are multiplied by
-  /// [ImageConfiguration.devicePixelRatio] at decode time.
-  final bool useLogicalPixels;
-
   /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
   /// `cacheHeight` are not both null.
   ///
   /// When `cacheWidth` and `cacheHeight` are both null, this will return the
-  /// `provider` directly. If `useLogicalPixels` is true, the dimensions are
-  /// multiplied by the device's pixel ratio at decode time.
+  /// `provider` directly.
   static ImageProvider<Object> resizeIfNeeded(
     int? cacheWidth,
     int? cacheHeight,
-    ImageProvider<Object> provider, {
-    bool useLogicalPixels = false,
-  }) {
+    ImageProvider<Object> provider,
+  ) {
     if (cacheWidth != null || cacheHeight != null) {
-      return ResizeImage(
-        provider,
-        width: cacheWidth,
-        height: cacheHeight,
-        useLogicalPixels: useLogicalPixels,
-      );
+      return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
     }
     return provider;
   }
@@ -1337,9 +1325,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     'This feature was deprecated after v3.7.0-1.4.pre.',
   )
   ImageStreamCompleter loadBuffer(ResizeImageKey key, DecoderBufferCallback decode) {
-    final double devicePixelRatio = useLogicalPixels ? key._devicePixelRatio : 1.0;
-    final int? effectiveWidth = width != null ? (width! * devicePixelRatio).ceil() : null;
-    final int? effectiveHeight = height != null ? (height! * devicePixelRatio).ceil() : null;
+    final int? effectiveWidth = key._width;
+    final int? effectiveHeight = key._height;
 
     Future<ui.Codec> decodeResize(
       ui.ImmutableBuffer buffer, {
@@ -1373,9 +1360,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   ImageStreamCompleter loadImage(ResizeImageKey key, ImageDecoderCallback decode) {
-    final double devicePixelRatio = useLogicalPixels ? key._devicePixelRatio : 1.0;
-    final int? effectiveWidth = width != null ? (width! * devicePixelRatio).ceil() : null;
-    final int? effectiveHeight = height != null ? (height! * devicePixelRatio).ceil() : null;
+    final int? effectiveWidth = key._width;
+    final int? effectiveHeight = key._height;
 
     Future<ui.Codec> decodeResize(
       ui.ImmutableBuffer buffer, {
@@ -1468,9 +1454,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   Future<ResizeImageKey> obtainKey(ImageConfiguration configuration) {
-    final double devicePixelRatio = useLogicalPixels
-        ? (configuration.devicePixelRatio ?? 1.0)
-        : 1.0;
+    final double devicePixelRatio = configuration.devicePixelRatio ?? 1.0;
+    final int? effectiveWidth = width != null ? (width! * devicePixelRatio).ceil() : null;
+    final int? effectiveHeight = height != null ? (height! * devicePixelRatio).ceil() : null;
     Completer<ResizeImageKey>? completer;
     // If the imageProvider.obtainKey future is synchronous, then we will be able to fill in result with
     // a value before completer is initialized below.
@@ -1480,12 +1466,12 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
         // This future has completed synchronously (completer was never assigned),
         // so we can directly create the synchronous result to return.
         result = SynchronousFuture<ResizeImageKey>(
-          ResizeImageKey._(key, policy, width, height, allowUpscaling, devicePixelRatio),
+          ResizeImageKey._(key, policy, effectiveWidth, effectiveHeight, allowUpscaling),
         );
       } else {
         // This future did not synchronously complete.
         completer.complete(
-          ResizeImageKey._(key, policy, width, height, allowUpscaling, devicePixelRatio),
+          ResizeImageKey._(key, policy, effectiveWidth, effectiveHeight, allowUpscaling),
         );
       }
     });
@@ -1511,13 +1497,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
         width == other.width &&
         height == other.height &&
         policy == other.policy &&
-        allowUpscaling == other.allowUpscaling &&
-        useLogicalPixels == other.useLogicalPixels;
+        allowUpscaling == other.allowUpscaling;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(imageProvider, width, height, policy, allowUpscaling, useLogicalPixels);
+  int get hashCode => Object.hash(imageProvider, width, height, policy, allowUpscaling);
 }
 
 /// The strategy for [Image.network] and [NetworkImage] to decide whether to
