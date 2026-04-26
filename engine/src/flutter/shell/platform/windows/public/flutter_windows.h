@@ -261,6 +261,7 @@ FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
 FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // Returns the DXGI adapter used for rendering or nullptr in case of error.
+// The caller must release the adapter.
 // DEPRECATED: Use |FlutterDesktopEngineGetGraphicsAdapter| instead.
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
     FlutterDesktopViewRef view);
