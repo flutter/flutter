@@ -505,14 +505,11 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     assert(!_animationController.isDismissed || !widget.controller.isExpanded);
     final bool closed = !widget.controller.isExpanded && _animationController.isDismissed;
     final bool shouldRemoveBody = closed && !widget.maintainState;
+
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final String semanticsHint = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS =>
-        widget.controller.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
-      _ => widget.controller.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
-    };
+    final String semanticsHint = widget.controller.isExpanded
+        ? localizations.collapsedHint
+        : localizations.expandedHint;
 
     final Widget result = Offstage(
       offstage: closed,
@@ -538,10 +535,23 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return Semantics(
-        label: stateHint,
+        label: semanticsHint,
         liveRegion: true,
         accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
-        child: semanticsChild,
+        expanded: widget.controller.isExpanded,
+        onExpand: widget.controller.isExpanded ? null : widget.controller.expand,
+        onCollapse: !widget.controller.isExpanded ? null : widget.controller.collapse,
+        child: AnimatedBuilder(
+          animation: _animationController.view,
+          builder: (BuildContext context, Widget? child) {
+            final Widget header = widget.headerBuilder(context, _animationController);
+            final Widget body = ClipRect(
+              child: Align(heightFactor: _heightFactor.value, child: child),
+            );
+            return widget.expansibleBuilder(context, header, body, _animationController);
+          },
+          child: shouldRemoveBody ? null : result,
+        ),
       );
     }
 

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'widgets_app_tester.dart';
@@ -538,13 +540,65 @@ void main() {
     expect(find.text('Body'), findsOneWidget);
   });
 
-  group('Expansible Semantics Test', () {
+  group('Expansible semantics and announcements', () {
+    testWidgets('Expansible exposes expanded/collapsed semantics state', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      final ExpansibleController controller = ExpansibleController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Expansible(
+            controller: controller,
+            animationStyle: AnimationStyle.noAnimation,
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+            headerBuilder: (BuildContext context, Animation<double> animation) {
+              return GestureDetector(onTap: controller.toggle, child: const Text('Header'));
+            },
+          ),
+        ),
+      );
+
+      SemanticsData data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+      expect(data.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
+      expect(data.hasFlag(SemanticsFlag.isExpanded), isFalse);
+      expect(data.hasAction(SemanticsAction.expand), isTrue);
+      expect(data.hasAction(SemanticsAction.collapse), isFalse);
+
+      await tester.tap(find.text('Header'));
+      await tester.pump();
+
+      data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+      expect(data.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
+      expect(data.hasFlag(SemanticsFlag.isExpanded), isTrue);
+      expect(data.hasAction(SemanticsAction.expand), isFalse);
+      expect(data.hasAction(SemanticsAction.collapse), isTrue);
+
+      await tester.tap(find.text('Header'));
+      await tester.pump();
+
+      data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+      expect(data.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
+      expect(data.hasFlag(SemanticsFlag.isExpanded), isFalse);
+      expect(data.hasAction(SemanticsAction.expand), isTrue);
+      expect(data.hasAction(SemanticsAction.collapse), isFalse);
+
+      handle.dispose();
+    });
+
     testWidgets(
-      'Expansible uses Live Region on Android',
+      'Expansible uses live region on Android',
       (WidgetTester tester) async {
-        final controller = ExpansibleController();
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        final ExpansibleController controller = ExpansibleController();
         addTearDown(controller.dispose);
-        const localizations = DefaultWidgetsLocalizations();
+
+        const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
         await tester.pumpWidget(
           TestWidgetsApp(
             home: Expansible(
@@ -552,40 +606,47 @@ void main() {
               animationStyle: AnimationStyle.noAnimation,
               bodyBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text('Body'),
-              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
+              headerBuilder: (BuildContext context, Animation<double> animation) {
+                return GestureDetector(onTap: controller.toggle, child: const Text('Header'));
+              },
             ),
           ),
         );
 
-        // Find the semantics node for the Expansible widget
-        SemanticsNode semanticsNode = tester.getSemantics(find.byType(Expansible));
+        SemanticsData data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+        expect(data.label, localizations.expandedHint);
+        expect(data.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
+        expect(data.hasFlag(SemanticsFlag.isExpanded), isFalse);
 
-        // Default closed state
-        expect(semanticsNode.label, localizations.expandedHint);
-
-        // Expanded state test
         await tester.tap(find.text('Header'));
         await tester.pump();
-        semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.label, localizations.collapsedHint);
 
-        // Collapsed state test
+        data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+        expect(data.label, localizations.collapsedHint);
+        expect(data.hasFlag(SemanticsFlag.isExpanded), isTrue);
+
         await tester.tap(find.text('Header'));
         await tester.pump();
-        semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.label, localizations.expandedHint);
+
+        data = tester.getSemantics(find.byType(Expansible)).getSemanticsData();
+        expect(data.label, localizations.expandedHint);
+        expect(data.hasFlag(SemanticsFlag.isExpanded), isFalse);
+
+        handle.dispose();
       },
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
 
     testWidgets(
-      'Expansible uses expanded semantics on non iOS/macOS',
+      'Expansible sends semantics announcements on non-Android',
       (WidgetTester tester) async {
-        final controller = ExpansibleController();
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        final ExpansibleController controller = ExpansibleController();
         addTearDown(controller.dispose);
+
+        const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
         await tester.pumpWidget(
           TestWidgetsApp(
             home: Expansible(
@@ -593,77 +654,160 @@ void main() {
               animationStyle: AnimationStyle.noAnimation,
               bodyBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text('Body'),
-              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
+              headerBuilder: (BuildContext context, Animation<double> animation) {
+                return GestureDetector(onTap: controller.toggle, child: const Text('Header'));
+              },
             ),
           ),
         );
 
-        // Initially collapsed.
-        SemanticsNode semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
+        expect(tester.takeAnnouncements(), isEmpty);
 
-        // Expanded state test
         await tester.tap(find.text('Header'));
         await tester.pump();
-        semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isTrue);
 
-        // Collapsed state test
-        await tester.tap(find.text('Header'));
-        await tester.pump();
-        semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
-    );
-
-    testWidgets(
-      'Expansible uses expanded semantics on iOS/macOS',
-      (WidgetTester tester) async {
-        final controller = ExpansibleController();
-        addTearDown(controller.dispose);
-        await tester.pumpWidget(
-          TestWidgetsApp(
-            home: Expansible(
-              controller: controller,
-              animationStyle: AnimationStyle.noAnimation,
-              bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                  const Text('Body'),
-              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-                onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                child: const Text('Header'),
-              ),
-            ),
-          ),
+        expect(
+          tester.takeAnnouncements().first,
+          isAccessibilityAnnouncement(localizations.collapsedHint),
         );
 
-        // Initially collapsed.
-        SemanticsNode semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
-
-        // Expanded state test
         await tester.tap(find.text('Header'));
         await tester.pump();
-        semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isTrue);
 
-        // Collapsed state test
-        await tester.tap(find.text('Header'));
-        await tester.pump();
-        semanticsNode = tester.getSemantics(find.byType(Expansible));
-        expect(semanticsNode.hasFlag(SemanticsFlag.isExpanded), isFalse);
+        expect(
+          tester.takeAnnouncements().first,
+          isAccessibilityAnnouncement(localizations.expandedHint),
+        );
+
+        handle.dispose();
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.iOS,
         TargetPlatform.macOS,
+        TargetPlatform.windows,
+        TargetPlatform.linux,
+        TargetPlatform.fuchsia,
       }),
     );
+
+    testWidgets(
+      'Expansible delays semantics announcements on iOS',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        final ExpansibleController controller = ExpansibleController();
+        addTearDown(controller.dispose);
+
+        const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Expansible(
+              controller: controller,
+              animationStyle: AnimationStyle.noAnimation,
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+              headerBuilder: (BuildContext context, Animation<double> animation) {
+                return GestureDetector(onTap: controller.toggle, child: const Text('Header'));
+              },
+            ),
+          ),
+        );
+
+        expect(tester.takeAnnouncements(), isEmpty);
+
+        await tester.tap(find.text('Header'));
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(
+          tester.takeAnnouncements().first,
+          isAccessibilityAnnouncement(localizations.collapsedHint),
+        );
+
+        await tester.tap(find.text('Header'));
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(
+          tester.takeAnnouncements().first,
+          isAccessibilityAnnouncement(localizations.expandedHint),
+        );
+
+        handle.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets('Expansible reports error when SemanticsService.sendAnnouncement fails', (
+      WidgetTester tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      try {
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+        final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          final String contextStr = details.context?.toString() ?? '';
+          if (contextStr.contains('while sending expansible semantics announcement')) {
+            errors.add(details);
+            return;
+          }
+          originalOnError?.call(details);
+        };
+
+        addTearDown(() {
+          FlutterError.onError = originalOnError;
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+            SystemChannels.accessibility.name,
+            null,
+          );
+        });
+
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          (ByteData? message) async {
+            const StandardMessageCodec codec = StandardMessageCodec();
+            final Object? decoded = codec.decodeMessage(message);
+            if (decoded is Map && decoded['type'] == 'announce') {
+              final ByteData data = ByteData(1);
+              data.setUint8(0, 255);
+              return data;
+            }
+            return null;
+          },
+        );
+
+        final ExpansibleController controller = ExpansibleController();
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Expansible(
+              controller: controller,
+              animationStyle: AnimationStyle.noAnimation,
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+              headerBuilder: (BuildContext context, Animation<double> animation) {
+                return GestureDetector(onTap: controller.toggle, child: const Text('Header'));
+              },
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Header'));
+        await tester.pump();
+
+        expect(errors, isNotEmpty);
+        final bool hasAnnouncementError = errors.any(
+          (FlutterErrorDetails e) =>
+              e.exception.toString().contains('FormatException') &&
+              e.context.toString().contains('while sending expansible semantics announcement'),
+        );
+        expect(hasAnnouncementError, isTrue);
+
+        handle.dispose();
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    });
   });
 }
