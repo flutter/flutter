@@ -809,7 +809,7 @@ object FlutterPluginUtils {
     internal fun detectLowMinSdkVersion(project: Project) {
         project.afterEvaluate {
             val flutterMinSdkVersion: Int = getFlutterExtensionOrNull(project)?.minSdkVersion ?: return@afterEvaluate
-            val projectMinSdkVersion: Int = getLegacyAndroidExtension(project).defaultConfig.minSdkVersion?.apiLevel ?: return@afterEvaluate
+            val projectMinSdkVersion: Int = getLegacyAndroidExtension(project).defaultConfig.minSdkVersion?.apiLevel ?: 1
 
             if (projectMinSdkVersion < flutterMinSdkVersion) {
                 logLowMinSdkWarning(
