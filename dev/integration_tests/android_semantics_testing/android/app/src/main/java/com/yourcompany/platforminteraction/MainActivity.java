@@ -72,9 +72,40 @@ public class MainActivity extends FlutterActivity {
             @SuppressWarnings("unchecked")
             String message = (String) data.get("message");
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+
+            if (clipboard.hasPrimaryClip()) {
+                ClipData currentClip = clipboard.getPrimaryClip();
+                if (currentClip != null && currentClip.getItemCount() > 0) {
+                    CharSequence text = currentClip.getItemAt(0).getText();
+                    if (text != null && text.toString().equals(message)) {
+                        // The clipboard already has the expected value, no need to set it.
+                        result.success(null);
+                        return;
+                    }
+                }
+            }
+
+            // To avoid race conditions during integration tests, wait until the system has
+            // completed the clipboard update before returning success to the test runner.
+            ClipboardManager.OnPrimaryClipChangedListener listener = new ClipboardManager.OnPrimaryClipChangedListener() {
+                @Override
+                public void onPrimaryClipChanged() {
+                    ClipData currentClip = clipboard.getPrimaryClip();
+                    if (currentClip != null && currentClip.getItemCount() > 0) {
+                        CharSequence text = currentClip.getItemAt(0).getText();
+                        // Verify if the clipboard has the correct value before returning success to the test runner.
+                        if (text != null && text.toString().equals(message)) {
+                            clipboard.removePrimaryClipChangedListener(this);
+                            result.success(null);
+                            return;
+                        }
+                    }
+                }
+            };
+
+            clipboard.addPrimaryClipChangedListener(listener);
             ClipData clip = ClipData.newPlainText("message", message);
             clipboard.setPrimaryClip(clip);
-            result.success(null);
             return;
         }
         result.notImplemented();

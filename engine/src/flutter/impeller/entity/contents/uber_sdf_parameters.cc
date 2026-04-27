@@ -4,8 +4,6 @@
 
 #include "impeller/entity/contents/uber_sdf_parameters.h"
 
-#include "impeller/geometry/constants.h"
-
 namespace impeller {
 
 UberSDFParameters UberSDFParameters::MakeRect(
@@ -36,9 +34,7 @@ UberSDFParameters UberSDFParameters::MakeOval(
     Color color,
     const Rect& bounds,
     std::optional<StrokeParameters> stroke) {
-  // Size here refers to the extent of the oval along each axis from the center
-  Point size = Point(bounds.GetSize() * 0.5);
-
+  Point size = Point(bounds.GetSize() * 0.5f);
   return UberSDFParameters{.type = Type::kOval,
                            .color = color,
                            .center = bounds.GetCenter(),

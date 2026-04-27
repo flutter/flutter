@@ -257,6 +257,7 @@ class PlatformViewsService {
   static Future<UiKitViewController> initUiKitView({
     required int id,
     required String viewType,
+    UiKitViewGestureBlockingPolicy gestureBlockingPolicy = .fallbackToPluginDefault,
     required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
@@ -264,9 +265,20 @@ class PlatformViewsService {
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
+    final String gestureBlockingPolicyValue = switch (gestureBlockingPolicy) {
+      UiKitViewGestureBlockingPolicy.eager => 'eager',
+      UiKitViewGestureBlockingPolicy.waitUntilTouchesEnded => 'waitUntilTouchesEnded',
+      UiKitViewGestureBlockingPolicy.fallbackToPluginDefault => 'fallbackToPluginDefault',
+      UiKitViewGestureBlockingPolicy.doNotBlockGesture => 'doNotBlockGesture',
+    };
+
     // TODO(amirh): pass layoutDirection once the system channel supports it.
     // https://github.com/flutter/flutter/issues/133682
-    final args = <String, dynamic>{'id': id, 'viewType': viewType};
+    final args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+      'gestureBlockingPolicy': gestureBlockingPolicyValue,
+    };
     if (creationParams != null) {
       final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
       args['params'] = Uint8List.view(paramsByteData.buffer, 0, paramsByteData.lengthInBytes);
@@ -1583,6 +1595,68 @@ abstract class DarwinPlatformViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     PlatformViewsService._instance._focusCallbacks.remove(id);
   }
+}
+
+/// How touch event callbacks and gesture recognizers of a platform view are blocked.
+///
+/// This replaces the engine's `FlutterPlatformViewGestureRecognizersBlockingPolicy` enum in `FlutterPlugin.h`.
+///
+/// In iOS, a gesture recognizer (`UIGestureRecognizer`) is an object that decouples the logic for
+/// recognizing a sequence of touches (like a tap, pinch, or swipe) and acting on that recognition.
+///
+/// When a Flutter app embeds an iOS platform view (like a `WKWebView`), both the Flutter framework
+/// and the native iOS view receive touch events. To prevent both systems from simultaneously reacting
+/// to the same touch (e.g., a scroll gesture scrolling both a Flutter `ListView` and a native
+/// `UIScrollView`), Flutter needs a mechanism to "block" the native view's gesture recognizers when
+/// it determines that the Flutter framework should handle the gesture.
+///
+/// Flutter uses two mechanisms to achieve this:
+/// 1. **Synchronous Blocking (Hit Testing):** During the initial touch (`UIResponder.touchesBegan`),
+///    Flutter performs a synchronous hit test. If the touch lands on a Flutter widget that is
+///    visually on top of the platform view, Flutter immediately blocks the native view from
+///    receiving the touch.
+/// 2. **Asynchronous Blocking (Gesture Arena):** If the touch lands directly on the platform view,
+///    both Flutter and the native view begin tracking the gesture. Flutter's gesture arena resolves
+///    which system wins. If Flutter wins (e.g., the user is scrolling a Flutter `ListView` that
+///    contains the platform view), Flutter asynchronously cancels the native view's gesture recognizers.
+///
+/// The default policy ([fallbackToPluginDefault], which typically resolves to [eager]) works for most
+/// use cases. However, some native views (either from Apple or 3rd party) may have bugs where
+/// their internal gesture recognizers get stuck in a stale state if they are aggressively canceled by
+/// Flutter's asynchronous blocking. In these specific cases, you might need to change the policy to
+/// [doNotBlockGesture] or [waitUntilTouchesEnded] to work around the native view's bugs.
+///
+/// For more details, see: https://flutter.dev/go/ios-platform-view-touch-gesture-blocking.
+enum UiKitViewGestureBlockingPolicy {
+  /// Flutter blocks all the UIGestureRecognizers on the platform view as soon as it
+  /// decides they should be blocked.
+  ///
+  /// This policy employs a dual blocking strategy: synchronous blocking via hitTest results and
+  /// asynchronous blocking managed through the framework’s gesture arena.
+  /// With this policy, only the `touchesBegan` method for all the UIGestureRecognizers is guaranteed
+  /// to be called.
+  eager,
+
+  /// Flutter blocks all the UIGestureRecognizers on the platform view only after touchesEnded was invoked.
+  ///
+  /// This results in the platform view's UIGestureRecognizers seeing the entire touch sequence,
+  /// but never recognizing the gesture (and never invoking actions).
+  /// Using this policy may cause the platform view to incorrectly receive touch events
+  /// that should have been blocked.
+  waitUntilTouchesEnded,
+
+  /// Causes iOS engine to block all the UIGestureRecognizers on the platform view if it deems
+  /// the hittest shouldn't be handled by the Flutter framework.
+  ///
+  /// Unlike [eager], this policy does not rely on Flutter's gesture arena. This is a workaround
+  /// to address a few bugs related to platform view's gesture recognizers being stuck in a stale state.
+  /// See: https://github.com/flutter/flutter/issues/175099.
+  /// Using this policy may cause the platform view to incorrectly recognize a gesture that should
+  /// have been blocked.
+  doNotBlockGesture,
+
+  /// Fallback to use the policy set by the `registerViewFactory` engine API in FlutterPlugin.h.
+  fallbackToPluginDefault,
 }
 
 /// Controller for an iOS platform view.

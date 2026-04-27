@@ -6,6 +6,7 @@
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/dl_text_skia.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
@@ -64,7 +65,7 @@ sk_sp<DlImage> MakeTestImage(int w, int h, int checker_size) {
                       cellp);
     }
   }
-  return DlImage::Make(surface->makeImageSnapshot());
+  return DlImageSkia::Make(surface->makeImageSnapshot());
 }
 
 sk_sp<DlImage> MakeTestImage(int w, int h, DlColor color) {
@@ -78,7 +79,7 @@ sk_sp<DlImage> MakeTestImage(int w, int h, DlColor color) {
   }
   SkCanvas* canvas = surface->getCanvas();
   canvas->drawColor(color.argb());
-  return DlImage::Make(surface->makeImageSnapshot());
+  return DlImageSkia::Make(surface->makeImageSnapshot());
 }
 
 // ---------------
@@ -837,7 +838,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 24, 1,
             [](DlOpReceiver& r) {
-              auto dl_image = DlImage::Make(kTestSkImage);
+              auto dl_image = DlImageSkia::Make(kTestSkImage);
               r.drawImage(dl_image, {10, 10}, kNearestSampling, false);
             }},
        }},
@@ -893,7 +894,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 56, 1,
             [](DlOpReceiver& r) {
-              auto dl_image = DlImage::Make(kTestSkImage);
+              auto dl_image = DlImageSkia::Make(kTestSkImage);
               r.drawImageRect(dl_image, DlRect::MakeLTRB(10, 10, 15, 15),
                               DlRect::MakeLTRB(10, 10, 80, 80),
                               kNearestSampling, false,
@@ -940,7 +941,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48, 9,
             [](DlOpReceiver& r) {
-              auto dl_image = DlImage::Make(kTestSkImage);
+              auto dl_image = DlImageSkia::Make(kTestSkImage);
               r.drawImageNine(dl_image, DlIRect::MakeLTRB(10, 10, 15, 15),
                               DlRect::MakeLTRB(10, 10, 80, 80),
                               DlFilterMode::kNearest, false);
@@ -1060,7 +1061,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 48 + 32 + 8, 1,
             [](DlOpReceiver& r) {
-              auto dl_image = DlImage::Make(kTestSkImage);
+              auto dl_image = DlImageSkia::Make(kTestSkImage);
               static DlRSTransform xforms[] = {
                   DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(0)),
                   DlRSTransform::Make({0.0f, 0.0f}, 1.0f, DlDegrees(90)),
