@@ -209,9 +209,13 @@ void main() {
     );
 
     expect(result.length, equals(2));
-    
-    final KernelAssetPath pathA = result.keys.firstWhere((k) => (k as KernelAssetAbsolutePath).uri.path == 'foo.framework/foo');
-    final KernelAssetPath pathB = result.keys.firstWhere((k) => (k as KernelAssetAbsolutePath).uri.path == 'foo1.framework/foo1');
+
+    final KernelAssetPath pathA = result.keys.firstWhere(
+      (k) => (k as KernelAssetAbsolutePath).uri.path == 'foo.framework/foo',
+    );
+    final KernelAssetPath pathB = result.keys.firstWhere(
+      (k) => (k as KernelAssetAbsolutePath).uri.path == 'foo1.framework/foo1',
+    );
 
     expect(result[pathA]!.length, equals(2));
     expect(result[pathA]!.contains(assetA1), isTrue);
