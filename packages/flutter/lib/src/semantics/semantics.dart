@@ -5037,13 +5037,6 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
 
-    // print maps with key-value pairs
-    print('_traversalParentNodes: ${_traversalParentNodes.map((k, v) => MapEntry(k, v.id))}');
-    print(
-      '_traversalChildNodes: ${_traversalChildNodes.map((k, v) => MapEntry(k, v.map((e) => e.id)))}',
-    );
-
-    print('updatedVisitedNodes: ${updatedVisitedNodes.map((e) => e.id).toList()}');
     for (final node in updatedVisitedNodes) {
       assert(
         node.parent?._dirty != true || node._isTraversalParent,
@@ -5068,7 +5061,6 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if ((node._dirty || needUpdateTraversalParent || needUpdateTraversalChild) && node.attached) {
-        print('node to update: ${node.id}');
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
