@@ -19069,6 +19069,8 @@ void main() {
   group('TextInputAction updates', () {
     testWidgets('EditableText updates textInputAction when text changes', (WidgetTester tester) async {
       final controller = TextEditingController();
+      addTearDown(controller.dispose);
+
       TextInputAction currentAction = TextInputAction.done;
 
       await tester.pumpWidget(
@@ -19078,6 +19080,10 @@ void main() {
               return EditableText(
                 controller: controller,
                 textInputAction: currentAction,
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
                 onChanged: (String value) {
                   setState(() {
                     currentAction = value.isNotEmpty
@@ -19090,43 +19096,22 @@ void main() {
           ),
         ),
       );
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Scaffold(
-                body: TextField(
-                  controller: controller,
-                  textInputAction: currentAction,
-                  onChanged: (String value) {
-                    setState(() {
-                      currentAction = value.isNotEmpty
-                          ? TextInputAction.send
-                          : TextInputAction.done;
-                    });
-                  },
-                  decoration: const InputDecoration(hintText: 'Type something'),
-                ),
-              );
-            },
-          ),
-        ),
-      );
 
       // Initial: empty, "done"
       expect(controller.text, isEmpty);
-      expect(currentAction, equals(TextInputAction.done));
+      expect(tester.testTextInput.configuration['inputAction'], equals(TextInputAction.done.toString()));
 
       // Type text: action changes to "send"
       await tester.enterText(find.byType(EditableText), 'hello');
       await tester.pumpAndSettle();
       expect(controller.text, equals('hello'));
-      expect(currentAction, equals(TextInputAction.send));
+      expect(tester.testTextInput.configuration['inputAction'], equals(TextInputAction.send.toString()));
 
       // Clear text: action changes back to "done"
       await tester.enterText(find.byType(EditableText), '');
       await tester.pumpAndSettle();
       expect(controller.text, isEmpty);
-      expect(currentAction, equals(TextInputAction.done));
+      expect(tester.testTextInput.configuration['inputAction'], equals(TextInputAction.done.toString()));
     });
   });
 }
