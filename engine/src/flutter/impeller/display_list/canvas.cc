@@ -58,7 +58,10 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
+#include "impeller/geometry/round_superellipse_param.h"
+#include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/rstransform.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -1038,6 +1041,32 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value() &&
+      // TODO(https://github.com/flutter/flutter/issues/185421): SDF
+      // RoundSuperellipse (RSE) only works for square-like RSEs with circular
+      // corners.
+      round_superellipse.GetBounds().IsSquare() &&
+      round_superellipse.GetRadii().AreAllCornersSame() &&
+      AreCornersCircular(round_superellipse.GetRadii())) {
+    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadius(
+        round_superellipse.GetBounds(),
+        round_superellipse.GetRadii().bottom_left.height);
+
+    RoundSuperellipseParam::Octant octant =
+        round_superellipse_params.top_right.top;
+
+    auto adjusted_radii = RoundingRadii::MakeRadius(octant.circle_radius);
+
+    auto params = UberSDFParameters::MakeRoundedSuperellipse(
+        paint.color, round_superellipse.GetBounds(), octant.se_n,
+        adjusted_radii, octant.circle_max_angle.radians, octant.circle_center,
+        paint.GetStroke());
+
+    AddRenderSDFEntityToCurrentPass(paint, params);
+
+    return;
+  }
   if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
                                    round_superellipse.GetRadii());
