@@ -4,7 +4,7 @@
 
 package com.flutter.gradle
 
-import org.gradle.internal.impldep.org.junit.Assert.assertThrows
+import org.junit.Assert.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertFalse

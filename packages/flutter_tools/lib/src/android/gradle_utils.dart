@@ -33,22 +33,22 @@ import 'android_sdk.dart';
 //  * Gradle warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * Gradle test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://gradle.org/releases
-const templateDefaultGradleVersion = '8.14';
+const templateDefaultGradleVersion = '9.1.0';
 
 // When bumping, also update:
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '8.11.1';
-const templateAndroidGradlePluginVersionForModule = '8.11.1';
+const templateAndroidGradlePluginVersion = '9.0.0';
+const templateAndroidGradlePluginVersionForModule = '9.0.0';
 
 // When bumping, also update:
 //  * KGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 //  * KGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * KGP jvm constant in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.2.20';
+const templateKotlinGradlePluginVersion = '2.3.20';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
@@ -81,29 +81,29 @@ const oneMajorVersionHigherJavaVersion = '26';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '9.1.0';
+const maxKnownAndSupportedGradleVersion = '9.3.0';
 
 // Update this with new KGP versions come out including minor versions.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedKgpVersion = '2.3.10';
+const maxKnownAndSupportedKgpVersion = '2.3.20';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const maxKnownAndSupportedAgpVersion = '9.0';
+const maxKnownAndSupportedAgpVersion = '9.1';
 
 // Update this when new versions of AGP with Kotlin support come out.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAgpVersionWithFullKotlinSupport = '8.13.0';
+const maxKnownAgpVersionWithFullKotlinSupport = '9.0.0';
 
 // Update this when new versions of AGP come out.
-const maxKnownAgpVersion = '9.0';
+const maxKnownAgpVersion = '9.1';
 
 // Supported here means tooling is aware of this versions
 // Java <-> AGP compatibility and does not imply broader flutter support.

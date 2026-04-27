@@ -73,7 +73,7 @@ class FlutterPluginTest {
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
-        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
+        val mockCommonExtension = io.mockk.mockkClass(CommonExtension::class, relaxed = true)
         val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
         val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
 
@@ -162,7 +162,7 @@ class FlutterPluginTest {
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
         every { project.extensions.findByType(FlutterExtension::class.java) } returns flutterExtension
         val mockBaseExtension = mockk<BaseExtension>(relaxed = true)
-        val mockCommonExtension = mockk<CommonExtension<*, *, *, *, *, *>>(relaxed = true)
+        val mockCommonExtension = io.mockk.mockkClass(CommonExtension::class, relaxed = true)
         val mockDebugBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
         val mockReleaseBuildType = mockk<com.android.build.api.dsl.ApplicationBuildType>(relaxed = true)
 
