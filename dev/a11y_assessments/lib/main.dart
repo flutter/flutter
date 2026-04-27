@@ -112,18 +112,16 @@ class HomePageState extends State<HomePage> {
         actions: <Widget>[
           MenuAnchor(
             builder: (BuildContext context, MenuController controller, Widget? child) {
-              return Tooltip(
-                message: 'Filter by tags',
-                child: IconButton(
-                  icon: const Icon(Icons.filter_list),
-                  onPressed: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                ),
+              return IconButton(
+                tooltip: 'Filter by tags',
+                icon: const Icon(Icons.filter_list),
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
               );
             },
             menuChildren: Tag.values.map((Tag tag) {
