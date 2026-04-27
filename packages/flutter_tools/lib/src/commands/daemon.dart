@@ -65,9 +65,9 @@ class DaemonCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  // The daemon serves IDE/tooling requests over a long-lived RPC channel; it
-  // does not perform a build itself, so platform tooling regen on startup is
-  // unnecessary.
+  /// The daemon serves IDE/tooling requests over a long-lived RPC channel; it
+  /// does not perform a build itself, so platform tooling regen on startup is
+  /// unnecessary.
   @override
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 

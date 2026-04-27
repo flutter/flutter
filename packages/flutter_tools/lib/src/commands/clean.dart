@@ -45,9 +45,9 @@ class CleanCommand extends FlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
-  // `flutter clean` deletes the very directories that platform tooling regen
-  // would write into. Skip regen during verify; running it would do work
-  // immediately discarded by the clean.
+  /// `flutter clean` deletes the very directories that platform tooling regen
+  /// would write into. Skip regen during verify; running it would do work
+  /// immediately discarded by the clean.
   @override
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
