@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_SOFTWARE_H_
-#define FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_SOFTWARE_H_
+#ifndef FLUTTER_DISPLAY_LIST_TESTING_SKIA_DL_TEST_SURFACE_SOFTWARE_H_
+#define FLUTTER_DISPLAY_LIST_TESTING_SKIA_DL_TEST_SURFACE_SOFTWARE_H_
 
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 
@@ -25,9 +25,11 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
       size_t width,
       size_t height,
       PixelFormat format) const override;
-  const std::string backend_name() const override { return "Software"; }
-  BackendType backend_type() const override { return kSoftwareBackend; }
-  bool supports(PixelFormat format) const override { return true; }
+  const std::string GetBackendName() const override { return "SkiaSoftware"; }
+  BackendType GetBackendType() const override {
+    return BackendType::kSkiaSoftware;
+  }
+  bool SupportsPixelFormat(PixelFormat format) const override { return true; }
 
  private:
   std::shared_ptr<DlSurfaceInstance> primary_;
@@ -36,4 +38,4 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_TESTING_DL_TEST_SURFACE_SOFTWARE_H_
+#endif  // FLUTTER_DISPLAY_LIST_TESTING_SKIA_DL_TEST_SURFACE_SOFTWARE_H_
