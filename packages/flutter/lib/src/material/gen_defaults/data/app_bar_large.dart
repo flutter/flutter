@@ -1,4 +1,8 @@
-// Version: 34.1.0
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Version: 34.1.9
 
 class TokenAppBarLarge {
   /// md.comp.app-bar.large.title.font
@@ -19,5 +23,3 @@ class TokenAppBarLarge {
   /// md.comp.app-bar.large.container.height
   static const double containerHeight = 152.00;
 }
-
-// force formatter modified branch scratch hack

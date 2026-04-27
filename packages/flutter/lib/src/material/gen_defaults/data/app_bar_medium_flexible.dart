@@ -1,9 +1,10 @@
-// Version: 34.1.0
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Version: 34.1.9
 
 class TokenAppBarMediumFlexible {
-  /// md.comp.app-bar.medium-flexible.container.height
-  static const double containerHeight = 112.00;
-
   /// md.comp.app-bar.medium-flexible.title.font
   static const double titleFontFontSize = 28.00;
 
@@ -18,6 +19,9 @@ class TokenAppBarMediumFlexible {
 
   /// md.comp.app-bar.medium-flexible.title.font
   static const String titleFontFontFamily = 'Roboto';
+
+  /// md.comp.app-bar.medium-flexible.container.height
+  static const double containerHeight = 112.00;
 
   /// md.comp.app-bar.medium-flexible.with-subtitle.container.height
   static const double withSubtitleContainerHeight = 136.00;
@@ -37,5 +41,3 @@ class TokenAppBarMediumFlexible {
   /// md.comp.app-bar.medium-flexible.subtitle.font
   static const String subtitleFontFontFamily = 'Roboto';
 }
-
-// force formatter modified branch scratch hack

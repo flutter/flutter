@@ -1,4 +1,8 @@
-// Version: 34.1.0
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Version: 34.1.9
 
 class TokenAppBarMedium {
   /// md.comp.app-bar.medium.container.height
@@ -19,5 +23,3 @@ class TokenAppBarMedium {
   /// md.comp.app-bar.medium.title.font
   static const String titleFontFontFamily = 'Roboto';
 }
-
-// force formatter modified branch scratch hack
