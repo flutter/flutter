@@ -8,12 +8,11 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/animation/tween.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
+import 'tween.dart';
 
 export 'dart:ui' show VoidCallback;
 
@@ -346,7 +345,7 @@ class ReverseAnimation extends Animation<double>
 /// ```dart
 /// class _MyOldWidgetState extends State<MyWidget> {
 ///   late final curvedAnimation = CurvedAnimation(
-///     widget.animationController,
+///     parent: widget.animationController,
 ///     curve: Curves.easeInOut,
 ///   );
 ///
@@ -487,8 +486,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 /// depending on whether it's going forwards or backwards.
 ///
 /// [ReversibleCurvedAnimation] operates by adding listeners to its [parent].
-/// Therefore, you shouldn't re-instantiating it every build, and you should
-/// dipose it (or its [parent]) when you're done.
+/// Therefore, you shouldn't re-instantiate it every build, and you should
+/// [dispose] it (or its [parent]) when you're done.
 ///
 /// Depending on the given curve, the output of this animation could have
 /// a wider range than its input. For example, elastic curves such as
@@ -511,7 +510,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 /// ```
 /// {@end-tool}
 ///
-/// If [reverseCurve] is not specified,
+/// If [reverseCurve] is null,
 /// [curve] will be used in both forward and backward directions.
 /// If you don't need [reverseCurve] at all, consider using [CurveTween]
 /// instead (see the snippet below).
@@ -524,7 +523,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 /// ```dart
 /// class _MyOldWidgetState extends State<MyWidget> {
 ///   late final curvedAnimation = ReversibleCurvedAnimation(
-///     widget.animationController,
+///     parent: widget.animationController,
 ///     curve: Curves.easeInOut,
 ///     reverseCurve: null,
 ///   );
