@@ -71,7 +71,11 @@ abstract class ProjectMigrator {
 
     if (migrationRequired) {
       logger.printStatus('Upgrading $basename');
-      file.writeAsStringSync(projectContentsWithMigratedContents);
+      try {
+        file.writeAsStringSync(projectContentsWithMigratedContents);
+      } on FileSystemException catch (e) {
+        logger.printError('Failed to process/migrate the $basename during migration: $e');
+      }
     }
   }
 }
