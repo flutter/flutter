@@ -4998,7 +4998,8 @@ class SemanticsOwner extends ChangeNotifier {
             'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
           );
           _traversalParentNodes[node.traversalParentIdentifier!] = node;
-        } else if (isTraversalChild) {
+        }
+        if (isTraversalChild) {
           _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
           _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
         }
