@@ -1506,15 +1506,24 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
     if (!event.globalPosition.isFinite) {
-      // A parent delegate forwards Offset.infinite from
-      // _inferPositionRelatedToOrigin to signal that the drag has moved past
-      // the bottom-right of its scrollable. Anchor the drag target just past
-      // this scrollable's own bottom-right corner so EdgeDraggingAutoScroller
-      // scrolls toward maxScrollExtent without NaN propagating through the
-      // matrix transform inside _scroll.
+      // A parent delegate may forward a non-finite globalPosition from
+      // _inferPositionRelatedToOrigin to signal the drag has moved past the
+      // boundary of its scrollable: positive infinity for past the
+      // bottom-right, negative infinity for past the top-left. Anchor the
+      // drag target just past this scrollable's own boundary on the matching
+      // side so EdgeDraggingAutoScroller scrolls toward the corresponding
+      // scroll extent without NaN propagating through the matrix transform
+      // inside _scroll. Per-axis sign detection covers diagonal mixes; a NaN
+      // component (e.g. from infinity * 0 in the matrix transform) defaults
+      // to the bottom-right side because NaN comparisons return false.
       final box = state.context.findRenderObject()! as RenderBox;
+      const double overDrag = EdgeDraggingAutoScroller.maxOverDragDistance;
+      final Offset localCenter = Offset(
+        event.globalPosition.dx < 0 ? -overDrag : box.size.width + overDrag,
+        event.globalPosition.dy < 0 ? -overDrag : box.size.height + overDrag,
+      );
       return Rect.fromCenter(
-        center: box.localToGlobal(box.size.bottomRight(Offset.zero) + const Offset(20, 20)),
+        center: box.localToGlobal(localCenter),
         width: _kDefaultDragTargetSize,
         height: _kDefaultDragTargetSize,
       );

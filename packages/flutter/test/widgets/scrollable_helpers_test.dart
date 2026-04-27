@@ -705,4 +705,97 @@ void main() {
     scroller.stopAutoScroll();
     await tester.pumpAndSettle();
   });
+
+  group('EdgeDraggingAutoScroller.maxOverDragDistance', () {
+    testWidgets('caps the per-step overdrag toward maxScrollExtent for a target past the bottom-right', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            height: 300,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 50,
+              itemExtent: 30,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final ScrollableState scrollableState = tester.state(find.byType(Scrollable));
+      final RenderBox box = scrollableState.context.findRenderObject()! as RenderBox;
+      final scroller = EdgeDraggingAutoScroller(scrollableState, velocityScalar: 30.0);
+      // Place a zero-size drag target far past the scrollable's bottom-right.
+      // The scroller should cap the per-step overdrag at maxOverDragDistance
+      // and scroll toward maxScrollExtent.
+      final Offset pastBottomRight = box.localToGlobal(
+        box.size.bottomRight(Offset.zero) + const Offset(1000, 1000),
+      );
+      scroller.startAutoScrollIfNecessary(Rect.fromCenter(center: pastBottomRight, width: 0, height: 0));
+      // Drive the auto-scroll animation. Each step animates over
+      // 1000ms / velocityScalar = ~33ms; pump twice to complete one full step.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 35));
+      scroller.stopAutoScroll();
+      await tester.pump();
+
+      expect(controller.offset, greaterThan(0.0));
+      expect(controller.offset, lessThanOrEqualTo(EdgeDraggingAutoScroller.maxOverDragDistance));
+    });
+
+    testWidgets('caps the per-step overdrag toward minScrollExtent for a target past the top-left', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            height: 300,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 50,
+              itemExtent: 30,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Pre-scroll so the controller has room to move toward minScrollExtent.
+      controller.jumpTo(500);
+      await tester.pumpAndSettle();
+      final double startOffset = controller.offset;
+      expect(startOffset, 500);
+
+      final ScrollableState scrollableState = tester.state(find.byType(Scrollable));
+      final RenderBox box = scrollableState.context.findRenderObject()! as RenderBox;
+      final scroller = EdgeDraggingAutoScroller(scrollableState, velocityScalar: 30.0);
+      // Place a zero-size drag target far before the scrollable's top-left.
+      // The scroller should cap the per-step overdrag at maxOverDragDistance
+      // and scroll toward minScrollExtent.
+      final Offset pastTopLeft = box.localToGlobal(const Offset(-1000, -1000));
+      scroller.startAutoScrollIfNecessary(Rect.fromCenter(center: pastTopLeft, width: 0, height: 0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 35));
+      scroller.stopAutoScroll();
+      await tester.pump();
+
+      expect(controller.offset, lessThan(startOffset));
+      expect(
+        startOffset - controller.offset,
+        lessThanOrEqualTo(EdgeDraggingAutoScroller.maxOverDragDistance),
+      );
+    });
+  });
 }

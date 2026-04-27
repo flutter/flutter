@@ -179,6 +179,14 @@ class EdgeDraggingAutoScroller {
   /// {@endtemplate}
   final double velocityScalar;
 
+  /// The maximum number of pixels the [scrollable] is moved by a single
+  /// auto-scroll step.
+  ///
+  /// Caps how aggressively the scroll position is advanced when the drag
+  /// target is far past the viewport edge, so a single step never overshoots
+  /// by more than this distance regardless of how far the drag has gone.
+  static const double maxOverDragDistance = 20.0;
+
   late Rect _dragTargetRelatedToScrollOrigin;
 
   /// Whether the auto scroll is in progress.
@@ -244,7 +252,6 @@ class EdgeDraggingAutoScroller {
     );
     _scrolling = true;
     double? newOffset;
-    const overDragMax = 20.0;
 
     final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
     final Offset viewportOrigin = globalRect.topLeft.translate(deltaToOrigin.dx, deltaToOrigin.dy);
@@ -264,14 +271,14 @@ class EdgeDraggingAutoScroller {
       case AxisDirection.left:
         if (proxyEnd > viewportEnd &&
             scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
+          final double overDrag = math.min(proxyEnd - viewportEnd, maxOverDragDistance);
           newOffset = math.max(
             scrollable.position.minScrollExtent,
             scrollable.position.pixels - overDrag,
           );
         } else if (proxyStart < viewportStart &&
             scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          final double overDrag = math.min(viewportStart - proxyStart, maxOverDragDistance);
           newOffset = math.min(
             scrollable.position.maxScrollExtent,
             scrollable.position.pixels + overDrag,
@@ -281,14 +288,14 @@ class EdgeDraggingAutoScroller {
       case AxisDirection.down:
         if (proxyStart < viewportStart &&
             scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
+          final double overDrag = math.min(viewportStart - proxyStart, maxOverDragDistance);
           newOffset = math.max(
             scrollable.position.minScrollExtent,
             scrollable.position.pixels - overDrag,
           );
         } else if (proxyEnd > viewportEnd &&
             scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
+          final double overDrag = math.min(proxyEnd - viewportEnd, maxOverDragDistance);
           newOffset = math.min(
             scrollable.position.maxScrollExtent,
             scrollable.position.pixels + overDrag,
