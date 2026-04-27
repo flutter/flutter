@@ -112,7 +112,9 @@ class StubFlutterWindowsApi {
       FlutterDesktopWindowProcCallback delegate) {}
 
   // Called for FlutterDesktopPluginRegistrarGetGraphicsAdapter.
-  virtual IDXGIAdapter* PluginRegistrarGetGraphicsAdapter() { return nullptr; }
+  virtual bool PluginRegistrarGetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    return false;
+  }
 
   // Called for FlutterDesktopEngineProcessExternalWindowMessage.
   virtual bool EngineProcessExternalWindowMessage(

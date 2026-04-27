@@ -331,9 +331,13 @@ FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate);
 
-// Returns the DXGI adapter used for rendering or nullptr in case of error.
-FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopPluginRegistrarGetGraphicsAdapter(
-    FlutterDesktopPluginRegistrarRef registrar);
+// Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+// was successfully retrieved, or false if an error occured.
+// The caller must provide a valid pointer to an IDXGIAdapter* and is
+// responsible for releasing the adapter.
+FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out);
 
 // ========== Freestanding Utilities ==========
 

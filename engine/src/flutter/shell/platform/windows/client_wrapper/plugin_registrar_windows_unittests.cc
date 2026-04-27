@@ -46,8 +46,9 @@ class TestWindowsApi : public testing::StubFlutterWindowsApi {
 
   void* last_registered_user_data() { return last_registered_user_data_; }
 
-  IDXGIAdapter* PluginRegistrarGetGraphicsAdapter() override {
-    return reinterpret_cast<IDXGIAdapter*>(10);
+  bool PluginRegistrarGetGraphicsAdapter(IDXGIAdapter** adapter_out) override {
+    *adapter_out = reinterpret_cast<IDXGIAdapter*>(10);
+    return true;
   }
 
  private:
@@ -117,8 +118,9 @@ TEST(PluginRegistrarWindowsTest, GetGraphicsAdapter) {
   auto test_api = static_cast<TestWindowsApi*>(scoped_api_stub.stub());
   PluginRegistrarWindows registrar(
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
-  EXPECT_EQ(registrar.GetGraphicsAdapter(),
-            reinterpret_cast<IDXGIAdapter*>(10));
+  IDXGIAdapter* adapter = nullptr;
+  EXPECT_TRUE(registrar.GetGraphicsAdapter(&adapter));
+  EXPECT_EQ(adapter, reinterpret_cast<IDXGIAdapter*>(10));
 }
 
 // Tests that the registrar runs plugin destructors before its own teardown.
