@@ -32,54 +32,91 @@ Future<TaskResult> run() async {
     await testWithNewIOSSimulator('TestSDFsSim', (String deviceId) async {
       simulatorDeviceId = deviceId;
 
-      // Modify Info.plist to enable SDFS
-      final String xmlStr = plistFile.readAsStringSync();
-      final xmlDoc = XmlDocument.parse(xmlStr);
-      final XmlElement dictNode = xmlDoc.findAllElements('dict').first;
-
-      dictNode.children.add(
-        XmlElement(XmlName('key'), <XmlAttribute>[], <XmlNode>[
-          XmlText('FLTEnableSDFs'),
-        ], /*isSelfClosing=*/ false),
-      );
-      dictNode.children.add(XmlElement(XmlName('true')));
-
-      plistFile.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
-
       await inDirectory(appDir, () async {
         await flutter('packages', options: <String>['get']);
 
-        final Process process = await startFlutter(
+        // Step 1: Test without flag
+        final Process process1 = await startFlutter(
           'run',
           options: <String>['--enable-impeller', '-d', deviceId],
         );
 
-        final completer = Completer<void>();
-        var sawSdfsMessage = false;
+        final completer1 = Completer<void>();
+        var sawMetalMessage = false;
 
-        final StreamSubscription<String> subscription = process.stdout
+        final StreamSubscription<String> subscription1 = process1.stdout
             .transform(utf8.decoder)
             .transform(const LineSplitter())
             .listen((String line) {
-              print('[STDOUT]: $line');
-              if (line.contains('Using the Impeller rendering backend (MetalSDF).')) {
-                sawSdfsMessage = true;
-                if (!completer.isCompleted) {
-                  completer.complete();
+              print('[STDOUT 1]: $line');
+              if (line.contains('Using the Impeller rendering backend (Metal).')) {
+                sawMetalMessage = true;
+                if (!completer1.isCompleted) {
+                  completer1.complete();
                 }
               }
             });
 
-        // Wait for the message or timeout
         await Future.any(<Future<void>>[
-          completer.future,
+          completer1.future,
           Future<void>.delayed(const Duration(minutes: 2)),
         ]);
 
-        // Stop the app
-        process.stdin.writeln('q');
-        await process.exitCode;
-        await subscription.cancel();
+        process1.stdin.writeln('q');
+        await process1.exitCode;
+        await subscription1.cancel();
+
+        if (!sawMetalMessage) {
+          res = TaskResult.failure(
+            'Did not see "Using the Impeller rendering backend (Metal)." in output',
+          );
+          return; // Exit early if first step fails
+        }
+
+        // Step 2: Modify Info.plist to enable SDFS
+        final String xmlStr = plistFile.readAsStringSync();
+        final xmlDoc = XmlDocument.parse(xmlStr);
+        final XmlElement dictNode = xmlDoc.findAllElements('dict').first;
+
+        dictNode.children.add(
+          XmlElement(XmlName('key'), <XmlAttribute>[], <XmlNode>[
+            XmlText('FLTEnableSDFs'),
+          ], /*isSelfClosing=*/ false),
+        );
+        dictNode.children.add(XmlElement(XmlName('true')));
+
+        plistFile.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
+
+        // Run again with flag
+        final Process process2 = await startFlutter(
+          'run',
+          options: <String>['--enable-impeller', '-d', deviceId],
+        );
+
+        final completer2 = Completer<void>();
+        var sawSdfsMessage = false;
+
+        final StreamSubscription<String> subscription2 = process2.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .listen((String line) {
+              print('[STDOUT 2]: $line');
+              if (line.contains('Using the Impeller rendering backend (MetalSDF).')) {
+                sawSdfsMessage = true;
+                if (!completer2.isCompleted) {
+                  completer2.complete();
+                }
+              }
+            });
+
+        await Future.any(<Future<void>>[
+          completer2.future,
+          Future<void>.delayed(const Duration(minutes: 2)),
+        ]);
+
+        process2.stdin.writeln('q');
+        await process2.exitCode;
+        await subscription2.cancel();
 
         if (!sawSdfsMessage) {
           res = TaskResult.failure(
