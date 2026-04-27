@@ -22,15 +22,19 @@ abstract class GenerateEngineFlagsManifestTask : DefaultTask() {
     fun generate() {
         val outputFile = manifestOutputFile.get().asFile
         val cleanedShellArgs =
-            shellArgs
-                .get()
-                .replace(
-                    "&",
-                    "&amp;"
-                ).replace("\"", "&quot;")
-                .replace("'", "&apos;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
+            buildString {
+                for (char in shellArgs.get()) {
+                    when (char) {
+                        '&' -> append("&amp;")
+                        '"' -> append("&quot;")
+                        '\'' -> append("&apos;")
+                        '<' -> append("&lt;")
+                        '>' -> append("&gt;")
+                        else -> append(char)
+                    }
+                }
+            }
+
         val content =
             """
             <?xml version="1.0" encoding="utf-8"?>
