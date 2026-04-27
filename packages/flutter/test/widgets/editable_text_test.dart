@@ -19072,6 +19072,24 @@ void main() {
       TextInputAction currentAction = TextInputAction.done;
 
       await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return EditableText(
+                controller: controller,
+                textInputAction: currentAction,
+                onChanged: (String value) {
+                  setState(() {
+                    currentAction = value.isNotEmpty
+                        ? TextInputAction.send
+                        : TextInputAction.done;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      );
         MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
