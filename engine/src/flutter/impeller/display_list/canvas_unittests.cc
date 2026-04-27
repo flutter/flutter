@@ -496,6 +496,7 @@ TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
 /// `mix(blend(src, dst), dst, 1 - sdf_alpha) == blend(src * sdf_alpha, dst)`
 TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
   std::vector<Color> colors = {
+      Color::BlackTransparent(),
       Color::Black(),
       Color::White(),
       Color::LimeGreen(),
@@ -539,7 +540,8 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
 
     Paint paint = {.blend_mode = blend_mode};
     EXPECT_EQ(blend_mode_is_compatible,
-              Canvas::IsCompatibleWithSDFRendering(paint));
+              Canvas::IsCompatibleWithSDFRendering(paint))
+        << "Failure for BlendMode: " << BlendModeToString(blend_mode);
   }
 }
 
