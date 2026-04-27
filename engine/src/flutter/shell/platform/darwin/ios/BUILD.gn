@@ -97,6 +97,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterHeadlessDartRunner.mm",
     "framework/Source/FlutterKeyPrimaryResponder.h",
     "framework/Source/FlutterKeySecondaryResponder.h",
+    "framework/Source/FlutterKeyboardInsetManager.h",
+    "framework/Source/FlutterKeyboardInsetManager.mm",
     "framework/Source/FlutterKeyboardManager.h",
     "framework/Source/FlutterKeyboardManager.mm",
     "framework/Source/FlutterMetalLayer.h",

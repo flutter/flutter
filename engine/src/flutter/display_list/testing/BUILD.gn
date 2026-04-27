@@ -58,17 +58,17 @@ config("surface_provider_config") {
   if (surface_provider_include_metal) {
     defines += [ "ENABLE_METAL_BENCHMARKS" ]
   }
-
-  # Don't snapshot test results on mobile platforms
-  if (is_android || is_ios) {
-    defines += [ "BENCHMARKS_NO_SNAPSHOT" ]
-  }
 }
 
 source_set("display_list_surface_provider") {
   testonly = true
 
-  sources = [ "dl_test_surface_provider.cc" ]
+  sources = [
+    "dl_test_surface_provider.cc",
+    "dl_test_surface_provider.h",
+    "skia/dl_test_surface_instance_skia.cc",
+    "skia/dl_test_surface_instance_skia.h",
+  ]
 
   deps = [
     "//flutter/common/graphics",
@@ -77,6 +77,20 @@ source_set("display_list_surface_provider") {
 
   if (is_mac) {
     deps += [ "//flutter/impeller/golden_tests:metal_screenshot" ]
+  }
+
+  if (impeller_supports_rendering) {
+    sources += [
+      "impeller/dl_test_surface_instance_impeller.cc",
+      "impeller/dl_test_surface_instance_impeller.h",
+      "impeller/dl_test_surface_provider_impeller.cc",
+      "impeller/dl_test_surface_provider_impeller.h",
+    ]
+
+    deps += [
+      "//flutter/impeller/display_list",
+      "//flutter/impeller/playground",
+    ]
   }
 
   public_configs = [ ":surface_provider_config" ]
@@ -91,9 +105,9 @@ source_set("display_list_surface_provider") {
 
   if (surface_provider_include_software) {
     sources += [
-      "dl_test_surface_provider_software.cc",
-      "dl_test_surface_software.cc",
-      "dl_test_surface_software.h",
+      "skia/dl_test_surface_provider_skia_software.cc",
+      "skia/dl_test_surface_software.cc",
+      "skia/dl_test_surface_software.h",
     ]
   }
 
@@ -108,13 +122,16 @@ source_set("display_list_surface_provider") {
 
   if (surface_provider_include_metal) {
     sources += [
-      "dl_test_surface_metal.h",
-      "dl_test_surface_metal.mm",
-      "dl_test_surface_provider_metal.mm",
+      "skia/dl_test_surface_provider_skia_metal.h",
+      "skia/dl_test_surface_provider_skia_metal.mm",
     ]
-    deps += [
-      "//flutter/impeller/display_list",
-      "//flutter/testing:metal",
-    ]
+    if (impeller_supports_rendering) {
+      sources += [
+        "impeller/dl_test_surface_provider_impeller_metal.cc",
+        "impeller/dl_test_surface_provider_impeller_metal.h",
+      ]
+      deps += [ "//flutter/impeller/display_list" ]
+    }
+    deps += [ "//flutter/testing:metal" ]
   }
 }
