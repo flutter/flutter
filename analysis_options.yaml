@@ -267,4 +267,6 @@ linter:
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - use_truncating_division
     - valid_regexps
+    # TODO(kallentu): Remove this lint once the Dart SDK in Flutter is on version 3.13.
+    - var_with_no_type_annotation
     - void_checks
