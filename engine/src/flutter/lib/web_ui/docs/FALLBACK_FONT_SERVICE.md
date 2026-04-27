@@ -37,6 +37,8 @@ This is the "brain" of the fix. If a font fails to download, the service doesn't
 *   **Transient Errors:** If the network blips, it waits 1 second and tries again (up to 3 times).
 *   **Permanent Failures:** If a font is simply not there (a 404 error) or fails all retries, the service marks that font as "Permanently Unavailable."
 *   **Self-Healing:** The service then immediately re-evaluates the missing characters. Because it knows which fonts are broken, it will automatically look for the "next best" font to cover those characters. If no other fonts exist, it marks those characters as "Unsupported" and stops trying. This is what finally breaks the infinite loop.
+*   **Global Kill Switch:** To protect against systemic misconfigurations (e.g., a broken `fontFallbackBaseUrl`), the service tracks total permanent failures. If 10 fonts fail permanently and zero have succeeded, the service declares itself "broken" and stops all future attempts for the session.
+*   **Per-Component Cap:** To prevent a single character from triggering hundreds of requests (e.g., a common character covered by many fonts), the service limits the number of candidate fonts it will attempt for any single Unicode component to 5. If all 5 fail, the component is marked as unsupported.
 
 ### 4. The Feedback Loop
 The service only talks back to the Flutter framework when it actually succeeds. When a font is successfully downloaded and registered, the service tells the framework: *"I have new fonts; please redraw the screen."* If a font fails and no replacement can be found, the service stays silent. The user will see a placeholder (like an empty box), but the app will remain stable and the network will go quiet.

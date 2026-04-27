@@ -35,6 +35,15 @@ class FallbackFontService {
   /// Fonts that have been successfully downloaded and registered.
   final Set<NotoFont> _registeredFonts = <NotoFont>{};
 
+  /// Tracks how many fonts have failed for each component.
+  final Map<FallbackFontComponent, int> _failedFontsPerComponent = <FallbackFontComponent, int>{};
+
+  /// The total number of fonts that have failed permanently across all requests.
+  int _totalPermanentFailures = 0;
+
+  /// Whether the service has been disabled due to too many global failures.
+  bool _isBroken = false;
+
   /// Timer used for debouncing the processing loop.
   Timer? _processTimer;
 
@@ -49,6 +58,14 @@ class FallbackFontService {
 
   /// The delay between retries.
   static const Duration _retryDelay = Duration(seconds: 1);
+
+  /// The maximum number of global permanent failures allowed before the service
+  /// is disabled (if no fonts have been successfully registered).
+  static const int _maxGlobalFailuresBeforeBroken = 10;
+
+  /// The maximum number of candidate fonts we will attempt to download for any
+  /// single [FallbackFontComponent] before marking it as unsupported.
+  static const int _maxFontsPerComponent = 5;
 
   /// Adds a list of missing code points to be processed.
   void addMissingCodePoints(List<int> codePoints) {
@@ -169,9 +186,16 @@ class FallbackFontService {
 
       // 3. Permanent Failure: Have all fonts for this component failed already?
       // If all candidate fonts for a character are dead, we stop trying to avoid infinite loops.
+      //
+      // We also stop if the service has been declared "broken" due to too many
+      // global failures, or if this specific component has exhausted its
+      // allowed attempt budget.
       final bool isUnavailable = unavailableCache.putIfAbsent(
         component,
-        () => component.fonts.every((NotoFont f) => _permanentlyUnavailableFonts.contains(f)),
+        () =>
+            _isBroken ||
+            component.fonts.every((NotoFont f) => _permanentlyUnavailableFonts.contains(f)) ||
+            (_failedFontsPerComponent[component] ?? 0) >= _maxFontsPerComponent,
       );
       if (isUnavailable) {
         newlyUnsupported.add(cp);
@@ -459,6 +483,10 @@ class FallbackFontService {
   /// 4. **Notification**: On successful registration, the service notifies the
   ///    framework to trigger a UI relayout.
   Future<void> _downloadAndRegisterFontWithRetries(NotoFont font) async {
+    if (_isBroken) {
+      return;
+    }
+
     var attempts = 0;
     final String baseUrl = configuration.fontFallbackBaseUrl;
 
@@ -529,6 +557,27 @@ class FallbackFontService {
     // If all retries failed, stop trying this font forever.
     printWarning('Font ${font.name} at $url is permanently unavailable.');
     _permanentlyUnavailableFonts.add(font);
+
+    // Track failures for the global kill switch and per-component cap.
+    _totalPermanentFailures++;
+    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+    // Note: This is slightly inefficient as we repeat the search, but it keeps
+    // the download task's signature simple.
+    // We check all components to see which one was supposed to be covered by this font.
+    for (final FallbackFontComponent component in manager.fontComponents) {
+      if (component.fonts.contains(font)) {
+        _failedFontsPerComponent[component] = (_failedFontsPerComponent[component] ?? 0) + 1;
+      }
+    }
+
+    if (_registeredFonts.isEmpty && _totalPermanentFailures >= _maxGlobalFailuresBeforeBroken) {
+      printWarning(
+        'Font fallback service has reached the maximum number of global failures '
+        'without a single success. This may indicate a problem with the '
+        'fontFallbackBaseUrl (currently "$baseUrl"). Disabling service for this session.',
+      );
+      _isBroken = true;
+    }
   }
 
   /// Determines if an HTTP [status] code should be treated as a permanent error.
@@ -581,6 +630,9 @@ class FallbackFontService {
     _pendingFonts.clear();
     _permanentlyUnavailableFonts.clear();
     _registeredFonts.clear();
+    _failedFontsPerComponent.clear();
+    _totalPermanentFailures = 0;
+    _isBroken = false;
     _processTimer?.cancel();
     _processTimer = null;
     _notifyTimer?.cancel();

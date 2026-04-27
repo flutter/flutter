@@ -240,5 +240,67 @@ void testMain() {
       expect(requestedUrls.last, startsWith('https://example.com/'));
       expect(requestedUrls.last, isNot(contains('fonts')));
     });
+
+    test('global kill switch disables service after enough failures with no success', () async {
+      var callCount = 0;
+      mockHttpFetchResponseFactory = (String url) async {
+        callCount++;
+        return MockHttpFetchResponse(url: url, status: 404);
+      };
+
+      // We need enough missing codepoints to trigger at least 10 unique font requests.
+      // 0x4E00 (CJK), 0x0627 (Arabic), 0x05D0 (Hebrew), 0x0905 (Devanagari),
+      // 0x03B1 (Greek), 0x0410 (Cyrillic), 0x0E01 (Thai), 0x1200 (Ethiopic),
+      // 0x10A0 (Georgian), 0x0531 (Armenian), 0x13A0 (Cherokee)
+      final missing = <int>[
+        0x4E00,
+        0x0627,
+        0x05D0,
+        0x0905,
+        0x03B1,
+        0x0410,
+        0x0E01,
+        0x1200,
+        0x10A0,
+        0x0531,
+        0x13A0,
+      ];
+
+      FallbackFontService.instance.addMissingCodePoints(missing);
+      await FallbackFontService.instance.waitForIdle();
+
+      // It should have stopped once it hit the threshold.
+      // Since downloads are in parallel, it might have started a few more
+      // than exactly 10, but it should definitely be in that ballpark.
+      expect(callCount, greaterThanOrEqualTo(10));
+      expect(callCount, lessThan(20));
+
+      // Subsequent requests should fail immediately.
+      callCount = 0;
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x1100]); // Hangul Jamo
+      await FallbackFontService.instance.waitForIdle();
+      expect(callCount, 0);
+    });
+
+    test('per-component cap stops attempts after 5 failures for a single component', () async {
+      var callCount = 0;
+      mockHttpFetchResponseFactory = (String url) async {
+        callCount++;
+        return MockHttpFetchResponse(url: url, status: 404);
+      };
+
+      // CJK Unified Ideograph (0x4E00) is covered by many fonts (SC, TC, HK, JP, KR, etc).
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00]);
+      await FallbackFontService.instance.waitForIdle();
+
+      // It should have stopped after trying 5 fonts for this component.
+      expect(callCount, 5);
+
+      // The service should NOT be broken yet (global limit is 10).
+      callCount = 0;
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x0627]); // Arabic
+      await FallbackFontService.instance.waitForIdle();
+      expect(callCount, greaterThan(0));
+    });
   });
 }
