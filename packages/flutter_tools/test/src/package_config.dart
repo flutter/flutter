@@ -32,6 +32,18 @@ File writePackageConfigFiles({
   List<String> devDependencies = const <String>[],
   List<String>? dependencies,
 }) {
+  // Ensure the project's pubspec.yaml advertises the same package name as
+  // the package_config/package_graph we're about to write. Without this,
+  // tools that read the manifest (e.g. plugin discovery via
+  // `regeneratePlatformSpecificTooling`) see an empty appName and fail to
+  // look up its dependencies in the graph. Don't overwrite a non-empty
+  // pubspec — callers that want a richer manifest set it themselves.
+  final File pubspec = directory.childFile('pubspec.yaml');
+  if (!pubspec.existsSync() || pubspec.readAsStringSync().trim().isEmpty) {
+    pubspec
+      ..createSync(recursive: true)
+      ..writeAsStringSync('name: $mainLibName\n');
+  }
   directory.childDirectory('.dart_tool').childFile('package_graph.json')
     ..createSync(recursive: true)
     ..writeAsStringSync(

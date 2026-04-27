@@ -107,6 +107,11 @@ class ConfigCommand extends FlutterCommand {
   @override
   Future<String?> get usagePath async => null;
 
+  // `flutter config` reads/writes user-level settings; it does not act on a
+  // project's build artifacts, so platform tooling regen has no purpose here.
+  @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<String> rest = argResults!.rest;

@@ -2004,15 +2004,23 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Runs [FlutterProject.regeneratePlatformSpecificTooling] for [project] with appropriate configuration.
   ///
-  /// This method should only be called when [shouldRunPub] is `true`:
-  /// ```dart
-  /// if (shouldRunPub) {
-  ///   await regeneratePlatformSpecificTooling(project);
-  /// }
-  /// ```
+  /// Runs whenever the project has resolved pub state on disk, regardless of
+  /// whether `pub get` ran for this invocation. The previous gate on
+  /// [shouldRunPub] caused `flutter build apk --no-pub` to leave a stale
+  /// (debug-mode) `GeneratedPluginRegistrant` on disk after a prior `pub get`,
+  /// breaking release builds when `dev_dependencies` declared platform
+  /// plugins (e.g. `integration_test`).
+  ///
+  /// "Resolved pub state" means both `.dart_tool/package_config.json` and
+  /// `.dart_tool/package_graph.json` exist — these are written together by
+  /// `pub get`, and both are required by plugin discovery. If either is
+  /// missing the method is a no-op: in production this case never arises
+  /// for a build (the user must `pub get` first); in tests it lets fakes
+  /// that don't materialize pub state opt out implicitly.
   ///
   /// See also:
   ///
+  /// - <https://github.com/flutter/flutter/issues/163774>.
   /// - <https://github.com/flutter/flutter/issues/162649>.
   @protected
   @nonVirtual
@@ -2020,7 +2028,9 @@ abstract class FlutterCommand extends Command<void> {
     FlutterProject project, {
     required bool releaseMode,
   }) async {
-    if (!shouldRunPub) {
+    final File packageConfig = project.packageConfig;
+    if (!packageConfig.existsSync() ||
+        !packageConfig.parent.childFile('package_graph.json').existsSync()) {
       return;
     }
     await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);

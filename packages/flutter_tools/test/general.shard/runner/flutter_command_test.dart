@@ -23,12 +23,15 @@ import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_plugins.dart' show PubspecCache;
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/package_graph.dart' show PackageGraph;
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart' show PackageConfig;
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1608,6 +1611,60 @@ Use the "flutter config" command to enable feature flags.''',
         },
       );
     });
+
+    // Regression tests for https://github.com/flutter/flutter/issues/163774.
+    //
+    // `regeneratePlatformSpecificToolingIfApplicable` must regenerate
+    // platform tooling for the current build mode regardless of whether
+    // `pub get` ran in this invocation. The previous gate on `shouldRunPub`
+    // caused `flutter build apk --no-pub` to leave a stale (debug-mode)
+    // registrant on disk, breaking release Java compiles when
+    // `integration_test` was a dev_dependency (see #169336).
+    //
+    // The gate is replaced with an existence check on the resolved package
+    // config: if there is no `.dart_tool/package_config.json` there is
+    // nothing to regenerate from, and the method no-ops.
+    group('regeneratePlatformSpecificToolingIfApplicable (#163774)', () {
+      test('regenerates tooling with releaseMode=true even when shouldRunPub is false', () async {
+        final command = _RegenExposingNoPubCommand();
+        expect(command.shouldRunPub, isFalse);
+
+        final project = _RecordingFlutterProject(pubStateExists: true);
+        await command.exposedRegen(project, releaseMode: true);
+
+        expect(
+          project.regenCalls,
+          equals(<bool>[true]),
+          reason:
+              'regeneratePlatformSpecificTooling must be called with the requested releaseMode '
+              'even when shouldRunPub is false. See https://github.com/flutter/flutter/issues/163774.',
+        );
+      });
+
+      test('regenerates tooling with releaseMode=false when shouldRunPub is false', () async {
+        final command = _RegenExposingNoPubCommand();
+        final project = _RecordingFlutterProject(pubStateExists: true);
+
+        await command.exposedRegen(project, releaseMode: false);
+
+        expect(project.regenCalls, equals(<bool>[false]));
+      });
+
+      test('does nothing when the project has no resolved pub state', () async {
+        final command = _RegenExposingNoPubCommand();
+        final project = _RecordingFlutterProject(pubStateExists: false);
+
+        await command.exposedRegen(project, releaseMode: true);
+
+        expect(
+          project.regenCalls,
+          isEmpty,
+          reason:
+              'When .dart_tool/package_config.json does not exist there is no resolved plugin '
+              'set to regenerate from; the method should no-op rather than throwing.',
+        );
+      });
+    });
   });
 }
 
@@ -1811,4 +1868,93 @@ class FakeFeatureFlags implements FeatureFlags {
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Records calls to [regeneratePlatformSpecificTooling] and presents a
+/// configurable `.dart_tool` state for assertion in regression tests.
+///
+/// Used by the test for https://github.com/flutter/flutter/issues/163774
+/// to verify that platform-specific tooling regen runs when resolved pub
+/// state (`.dart_tool/package_config.json` and `package_graph.json`)
+/// exists — even when `shouldRunPub` is `false` — and is skipped when it
+/// does not.
+class _RecordingFlutterProject extends Fake implements FlutterProject {
+  _RecordingFlutterProject({required bool pubStateExists})
+    : packageConfig = _StubPackageConfig(pubStateExists: pubStateExists);
+
+  final List<bool> regenCalls = <bool>[];
+
+  @override
+  final File packageConfig;
+
+  @override
+  Future<void> regeneratePlatformSpecificTooling({
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
+  }) async {
+    regenCalls.add(releaseMode);
+  }
+}
+
+/// Stub `package_config.json` [File] whose [existsSync] tracks the
+/// configured `pubStateExists` flag, and whose [parent] surfaces a stub
+/// `.dart_tool` directory that returns a similarly-configured stub for
+/// `package_graph.json`.
+class _StubPackageConfig extends Fake implements File {
+  _StubPackageConfig({required this.pubStateExists});
+  final bool pubStateExists;
+
+  @override
+  bool existsSync() => pubStateExists;
+
+  @override
+  Directory get parent => _StubDartToolDir(pubStateExists: pubStateExists);
+}
+
+class _StubDartToolDir extends Fake implements Directory {
+  _StubDartToolDir({required this.pubStateExists});
+  final bool pubStateExists;
+
+  @override
+  File childFile(String basename) {
+    expect(basename, 'package_graph.json');
+    return _StubPackageGraph(exists: pubStateExists);
+  }
+}
+
+class _StubPackageGraph extends Fake implements File {
+  _StubPackageGraph({required bool exists}) : _exists = exists;
+  final bool _exists;
+
+  @override
+  bool existsSync() => _exists;
+}
+
+/// A [FlutterCommand] that overrides `shouldRunPub` to simulate the
+/// `--no-pub` state, and exposes the protected
+/// `regeneratePlatformSpecificToolingIfApplicable` method for direct
+/// invocation in tests.
+///
+/// Mirrors the pattern of `_TestRunCommandThatOnlyValidates` in this file.
+class _RegenExposingNoPubCommand extends FlutterCommand {
+  @override
+  String get description =>
+      'exposes regeneratePlatformSpecificToolingIfApplicable, simulating --no-pub';
+
+  @override
+  String get name => 'regen-exposing-no-pub';
+
+  @override
+  bool get shouldRunPub => false;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
+
+  /// Test-only accessor for the protected method under test.
+  Future<void> exposedRegen(FlutterProject project, {required bool releaseMode}) {
+    return regeneratePlatformSpecificToolingIfApplicable(project, releaseMode: releaseMode);
+  }
 }

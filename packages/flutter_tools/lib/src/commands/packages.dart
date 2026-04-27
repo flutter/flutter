@@ -387,18 +387,14 @@ class PackagesGetCommand extends FlutterCommand {
           }
         }
 
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+        // `flutter packages get` is neither a debug nor a release build; pick
+        // debug-mode tooling. Safe because every build path regenerates
+        // platform tooling for the active build mode, including
+        // `flutter build --no-pub` (see #163774).
         //
-        // `flutter packages get` inherently is neither a debug or release build,
-        // and since a future build (`flutter build apk`) will regenerate tooling
-        // anyway, we assume this is fine.
-        //
-        // It won't be if they do `flutter build --no-pub`, though.
-        const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
-        // We need to regenerate the platform specific tooling for both the
-        // project itself and example (if present).
+        // Regenerate for the project itself and the example app (if present).
         await project.regeneratePlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          releaseMode: false,
           pubspecCache: pubspecCache,
           packageGraph: graph,
           packageConfig: packageConfig,
@@ -410,7 +406,7 @@ class PackagesGetCommand extends FlutterCommand {
           // double post-processing.
           if (!graph.roots.contains(exampleProject.manifest.appName)) {
             await exampleProject.regeneratePlatformSpecificTooling(
-              releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+              releaseMode: false,
               pubspecCache: pubspecCache,
               packageGraph: graph,
               packageConfig: packageConfig,
