@@ -4,11 +4,11 @@
 
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 
-#include "flutter/display_list/testing/dl_test_surface_software.h"
+#include "flutter/display_list/testing/skia/dl_test_surface_software.h"
 
 namespace flutter::testing {
 
-std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateSoftware() {
+std::unique_ptr<DlSurfaceProvider> DlSurfaceProvider::CreateSkiaSoftware() {
   return std::make_unique<DlSoftwareSurfaceProvider>();
 }
 

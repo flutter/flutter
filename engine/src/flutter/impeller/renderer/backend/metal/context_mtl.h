@@ -149,6 +149,9 @@ class ContextMTL final : public Context,
   // visible for testing.
   void FlushTasksAwaitingGPU();
 
+  // |Context|
+  [[nodiscard]] bool FinishQueue() override;
+
  private:
   class SyncSwitchObserver : public fml::SyncSwitch::Observer {
    public:

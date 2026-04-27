@@ -109,10 +109,15 @@ class SurfaceContextVK : public Context,
 
   const std::shared_ptr<ContextVK>& GetParent() const;
 
+  // |Context|
   bool EnqueueCommandBuffer(
       std::shared_ptr<CommandBuffer> command_buffer) override;
 
+  // |Context|
   bool FlushCommandBuffers() override;
+
+  // |Context|
+  bool FinishQueue() override;
 
  private:
   std::shared_ptr<ContextVK> parent_;

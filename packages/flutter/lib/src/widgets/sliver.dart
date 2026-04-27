@@ -7,6 +7,7 @@
 /// @docImport 'animated_scroll_view.dart';
 /// @docImport 'container.dart';
 /// @docImport 'implicit_animations.dart';
+/// @docImport 'indexed_stack.dart';
 /// @docImport 'scroll_view.dart';
 /// @docImport 'sliver_fill.dart';
 /// @docImport 'sliver_persistent_header.dart';
@@ -14,7 +15,6 @@
 /// @docImport 'text.dart';
 /// @docImport 'two_dimensional_viewport.dart';
 /// @docImport 'viewport.dart';
-/// @docImport 'visibility.dart';
 library;
 
 import 'dart:collection' show HashMap, SplayTreeMap;

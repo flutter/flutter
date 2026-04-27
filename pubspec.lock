@@ -442,6 +442,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  google_cloud:
+    dependency: transitive
+    description:
+      name: google_cloud
+      sha256: fbcde933b2d8600c3cdb2328f8f4c47628ec29a39e9cef85dee535c7868993c4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -462,10 +470,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_mobile_ads
-      sha256: e2d18992d30b2be77cb6976b931112fc3c4612feffb5eb7a8b036bd7a64934da
+      sha256: "50549f6c945d7a445d53c04f34d025b1a1723fbd02719de9e67de432e2597f40"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "8.0.0"
   googleapis:
     dependency: "direct main"
     description:
@@ -478,10 +486,10 @@ packages:
     dependency: "direct main"
     description:
       name: googleapis_auth
-      sha256: b81fe352cc4a330b3710d2b7ad258d9bcef6f909bb759b306bf42973a7d046db
+      sha256: "661738b763d3e524de69df53bf4e03943e4e01e98265cebcc6684871b06a5379"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.3.0"
   graphs:
     dependency: transitive
     description:
@@ -494,18 +502,18 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: e79ed1e8e1929bc6ecb6ec85f0cb519c887aa5b423705ded0d0f2d9226def388
+      sha256: "025f060e86d2d4c3c47b56e33caf7f93bf9283340f26d23424ebcfccf34f621e"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.3"
   hooks_runner:
     dependency: transitive
     description:
       name: hooks_runner
-      sha256: "132d5ae53e6f1e313f5877ff9664ed8a333e8f4807de0717a00d8a6f1f37ddaa"
+      sha256: "248aaf6d687806959888be1bc0ab66bcf616c4f476e97cfc1b02cd97b8e06dd4"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   html:
     dependency: "direct main"
     description:
@@ -662,10 +670,10 @@ packages:
     dependency: "direct main"
     description:
       name: meta
-      sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
+      sha256: df0c643f44ad098eb37988027a8e2b2b5a031fd3977f06bbfd3a76637e8df739
       url: "https://pub.dev"
     source: hosted
-    version: "1.18.0"
+    version: "1.18.2"
   metrics_center:
     dependency: "direct main"
     description:
@@ -1187,10 +1195,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_math
-      sha256: d530bd74fea330e6e364cda7a85019c434070188383e1cd8d9777ee586914c5b
+      sha256: "47a1b32ee755c3fcffa33db52a7258c137f97bdb2209a1075be847809fac4ccf"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.3.0"
   video_player:
     dependency: "direct main"
     description:
@@ -1235,10 +1243,10 @@ packages:
     dependency: "direct main"
     description:
       name: vm_service
-      sha256: "45caa6c5917fa127b5dbcfbd1fa60b14e583afdc08bfc96dda38886ca252eb60"
+      sha256: "046d3928e16fa4dc46e8350415661755ab759d9fc97fc21b5ab295f71e4f0499"
       url: "https://pub.dev"
     source: hosted
-    version: "15.0.2"
+    version: "15.1.0"
   vm_service_interface:
     dependency: transitive
     description:
@@ -1307,18 +1315,18 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter
-      sha256: ec81f57aa1611f8ebecf1d2259da4ef052281cb5ad624131c93546c79ccc7736
+      sha256: a3da219916aba44947d3a5478b1927876a09781174b5a2b67fa5be0555154bf9
       url: "https://pub.dev"
     source: hosted
-    version: "4.9.0"
+    version: "4.13.1"
   webview_flutter_android:
     dependency: "direct main"
     description:
       name: webview_flutter_android
-      sha256: "47a8da40d02befda5b151a26dba71f47df471cddd91dfdb7802d0a87c5442558"
+      sha256: f560f57d0f529c1dcdaf4edc3a3217b099560622f9f4a10b6bdbb566553c61ea
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.9"
+    version: "4.11.0"
   webview_flutter_platform_interface:
     dependency: "direct main"
     description:
@@ -1331,10 +1339,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: d7219cfabc6f5fc2032e0fa980ec36d71f308a35a823395af1abc34d9a2ede83
+      sha256: e15d8828e014291324a4d0cf6e272090167f4fa5673ffcf8fe446f4a4cd35861
       url: "https://pub.dev"
     source: hosted
-    version: "3.24.2"
+    version: "3.24.3"
   xdg_directories:
     dependency: "direct main"
     description:
