@@ -311,7 +311,7 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[2]!.label, 'child updated');
 
     handle.dispose();
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 
   testWidgets('Semantics update sends grafted traversal children with traversal parents', (
     WidgetTester tester,
@@ -359,7 +359,7 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[2]!.label, 'child');
 
     handle.dispose();
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // [intended] the web traversal order by using ARIA-OWNS.
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
