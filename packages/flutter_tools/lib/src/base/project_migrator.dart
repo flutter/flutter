@@ -37,45 +37,45 @@ abstract class ProjectMigrator {
   /// Calls [migrateLine] per line, then [migrateFileContents]
   /// including the line migrations.
   void processFileLines(File file) {
-    final List<String> lines = file.readAsLinesSync();
-
-    final newProjectContents = StringBuffer();
     final String basename = file.basename;
+    try {
+      final List<String> lines = file.readAsLinesSync();
 
-    for (final line in lines) {
-      final String? newProjectLine = migrateLine(line);
-      if (newProjectLine == null) {
-        logger.printTrace('Migrating $basename, removing:');
-        logger.printTrace('    $line');
-        _migrationRequired = true;
-        continue;
+      final newProjectContents = StringBuffer();
+
+      for (final line in lines) {
+        final String? newProjectLine = migrateLine(line);
+        if (newProjectLine == null) {
+          logger.printTrace('Migrating $basename, removing:');
+          logger.printTrace('    $line');
+          _migrationRequired = true;
+          continue;
+        }
+        if (newProjectLine != line) {
+          logger.printTrace('Migrating $basename, replacing:');
+          logger.printTrace('    $line');
+          logger.printTrace('with:');
+          logger.printTrace('    $newProjectLine');
+          _migrationRequired = true;
+        }
+        newProjectContents.writeln(newProjectLine);
       }
-      if (newProjectLine != line) {
-        logger.printTrace('Migrating $basename, replacing:');
-        logger.printTrace('    $line');
-        logger.printTrace('with:');
-        logger.printTrace('    $newProjectLine');
+
+      final projectContentsWithMigratedLines = newProjectContents.toString();
+      final String projectContentsWithMigratedContents = migrateFileContents(
+        projectContentsWithMigratedLines,
+      );
+      if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
+        logger.printTrace('Migrating $basename contents');
         _migrationRequired = true;
       }
-      newProjectContents.writeln(newProjectLine);
-    }
 
-    final projectContentsWithMigratedLines = newProjectContents.toString();
-    final String projectContentsWithMigratedContents = migrateFileContents(
-      projectContentsWithMigratedLines,
-    );
-    if (projectContentsWithMigratedLines != projectContentsWithMigratedContents) {
-      logger.printTrace('Migrating $basename contents');
-      _migrationRequired = true;
-    }
-
-    if (migrationRequired) {
-      logger.printStatus('Upgrading $basename');
-      try {
+      if (migrationRequired) {
+        logger.printStatus('Upgrading $basename');
         file.writeAsStringSync(projectContentsWithMigratedContents);
-      } on FileSystemException catch (e) {
-        logger.printError('Failed to process/migrate the $basename during migration: $e');
       }
+    } on FileSystemException catch (e) {
+      logger.printError('Failed to process/migrate the $basename during migration: $e');
     }
   }
 }
