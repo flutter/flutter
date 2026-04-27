@@ -468,10 +468,7 @@ void main() {
       ),
     );
 
-    expect(
-      tester.getSemantics(find.byType(CupertinoSlider)),
-      matchesSemantics(isSlider: true),
-    );
+    expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(isSlider: true));
 
     handle.dispose();
   });
