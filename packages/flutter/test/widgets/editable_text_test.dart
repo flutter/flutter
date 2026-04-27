@@ -19067,7 +19067,7 @@ void main() {
     skip: kIsWeb,
   );
   group('TextInputAction updates', () {
-    testWidgets('TextField updates textInputAction when text changes', (WidgetTester tester) async {
+    testWidgets('EditableText updates textInputAction when text changes', (WidgetTester tester) async {
       final controller = TextEditingController();
       TextInputAction currentAction = TextInputAction.done;
 
