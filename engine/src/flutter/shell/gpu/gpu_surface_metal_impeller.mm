@@ -65,10 +65,19 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISiz
   }
 
   if (!render_to_surface_) {
+#ifdef IMPELLER_DEBUG
+    impeller::ContextMTL::Cast(*aiks_context_->GetContext()).GetCaptureManager()->StartCapture();
+#endif  // IMPELLER_DEBUG
     return std::make_unique<SurfaceFrame>(
         nullptr, SurfaceFrame::FramebufferInfo(),
         [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
-        [](const SurfaceFrame& surface_frame) { return true; }, frame_size);
+        [context = aiks_context_->GetContext()](const SurfaceFrame& surface_frame) {
+#ifdef IMPELLER_DEBUG
+          impeller::ContextMTL::Cast(*context).GetCaptureManager()->FinishCapture();
+#endif  // IMPELLER_DEBUG
+          return true;
+        },
+        frame_size);
   }
 
   switch (render_target_type_) {
