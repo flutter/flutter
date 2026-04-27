@@ -99,7 +99,7 @@ dependencies:
   petitparser: 7.0.2
   platform: 3.1.6
   shelf_packages_handler: 3.0.2
-  shelf_proxy: 1.0.4
+  shelf_proxy: 1.0.5
   source_map_stack_trace: 2.1.2
   source_maps: 0.10.13
   source_span: 1.10.2
@@ -128,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: es3nk9
+# PUBSPEC CHECKSUM: 2bcedf
